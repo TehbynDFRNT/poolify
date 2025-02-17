@@ -1,6 +1,6 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Menu, Construction, Truck, Shovel, Crane } from "lucide-react";
+import { Menu, Construction, Truck, Shovel } from "lucide-react";
 import { Link } from "react-router-dom";
 import {
   Breadcrumb,
@@ -91,7 +91,7 @@ const ConstructionCosts = () => {
                 <p className="text-sm text-gray-500 mt-1">Manage crane hire costs for pool installations</p>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
-                <Crane className="h-6 w-6 text-gray-600" />
+                <Construction className="h-6 w-6 text-gray-600" />
               </div>
             </div>
           </Link>
