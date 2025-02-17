@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AddComponentForm } from "@/components/filtration/AddComponentForm";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -224,6 +224,15 @@ const FiltrationSystems = () => {
           </Table>
         </CardContent>
       </Card>
+
+      {/* Add Component Form Dialog */}
+      {componentTypes && (
+        <AddComponentForm
+          open={showAddForm}
+          onOpenChange={setShowAddForm}
+          componentTypes={componentTypes}
+        />
+      )}
     </div>
   );
 };
