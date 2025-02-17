@@ -17,7 +17,10 @@ interface PavingPricesTableProps {
 export const PavingPricesTable = ({ prices }: PavingPricesTableProps) => {
   const calculateTotal = (categoryIndex: 1 | 2 | 3 | 4) => {
     const key = `category_${categoryIndex}_price` as keyof PavingPrice;
-    return prices.reduce((sum, price) => sum + price[key], 0);
+    return prices.reduce((sum, price) => {
+      const value = price[key];
+      return typeof value === 'number' ? sum + value : sum;
+    }, 0);
   };
 
   return (
