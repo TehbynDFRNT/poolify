@@ -87,8 +87,8 @@ const ConstructionCosts = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Crane Costs</h3>
-                <p className="text-sm text-gray-500 mt-1">Manage crane hire costs for pool installations</p>
+                <h3 className="text-lg font-medium text-gray-900">Crane & Traffic Control</h3>
+                <p className="text-sm text-gray-500 mt-1">Manage crane hire and traffic control costs</p>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <Construction className="h-6 w-6 text-gray-600" />
