@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import {
   Dialog,
   DialogContent,
@@ -113,48 +114,57 @@ const Excavation = () => {
   }
 
   return (
-    <div className="space-y-8">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Excavation Dig Types</CardTitle>
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                onClick={() => setEditingDigType(null)}
-                className="flex items-center gap-2"
-              >
-                <Plus className="h-4 w-4" />
-                Add Dig Type
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DigTypeForm 
-                onSubmit={handleSubmit}
-                editingDigType={editingDigType}
-              />
-            </DialogContent>
-          </Dialog>
-        </CardHeader>
-        <CardContent>
-          <DigTypesTable 
-            digTypes={digTypes ?? []}
-            onEdit={handleEdit}
-          />
-        </CardContent>
-      </Card>
+    <DashboardLayout>
+      <div className="max-w-5xl mx-auto py-8 px-4 space-y-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Excavation Costs</h1>
+          <p className="text-lg text-gray-500">
+            Manage excavation dig types and associated costs
+          </p>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Pool Excavation Types</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PoolExcavationTable 
-            pools={poolDigTypes ?? []}
-            digTypes={digTypes ?? []}
-          />
-        </CardContent>
-      </Card>
-    </div>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Excavation Dig Types</CardTitle>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  onClick={() => setEditingDigType(null)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add Dig Type
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DigTypeForm 
+                  onSubmit={handleSubmit}
+                  editingDigType={editingDigType}
+                />
+              </DialogContent>
+            </Dialog>
+          </CardHeader>
+          <CardContent>
+            <DigTypesTable 
+              digTypes={digTypes ?? []}
+              onEdit={handleEdit}
+            />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Pool Excavation Types</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <PoolExcavationTable 
+              pools={poolDigTypes ?? []}
+              digTypes={digTypes ?? []}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </DashboardLayout>
   );
 };
 
