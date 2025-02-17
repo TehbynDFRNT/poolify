@@ -41,6 +41,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -66,6 +72,7 @@ type PoolFormValues = z.infer<typeof poolSchema>;
 const PoolSpecifications = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingPool, setEditingPool] = useState<any>(null);
+  const [expandedGroups, setExpandedGroups] = useState<string[]>(["basic-info", "dimensions", "volume-info", "pricing"]);
   const queryClient = useQueryClient();
 
   const form = useForm({
@@ -260,6 +267,40 @@ const PoolSpecifications = () => {
     }).format(value);
   };
 
+  const columnGroups = [
+    {
+      id: "basic-info",
+      title: "Basic Information",
+      columns: ["Actions", "Name", "Dig Level", "Pool Size"],
+    },
+    {
+      id: "dimensions",
+      title: "Dimensions",
+      columns: ["Length", "Width", "Shallow End", "Deep End"],
+    },
+    {
+      id: "volume-info",
+      title: "Volume Information",
+      columns: ["Waterline L/M", "Water Volume (L)", "Salt Volume Bags", "Salt Volume Fixed", "Weight (KG)", "Minerals Initial/Topup"],
+    },
+    {
+      id: "pricing",
+      title: "Pricing",
+      columns: ["Buy Price (ex GST)", "Buy Price (inc GST)"],
+    },
+  ];
+
+  const isColumnVisible = (column: string) => {
+    const group = columnGroups.find(g => g.columns.includes(column));
+    return group ? expandedGroups.includes(group.id) : true;
+  };
+
+  const getVisibleColumns = () => {
+    return columnGroups
+      .filter(group => expandedGroups.includes(group.id))
+      .flatMap(group => group.columns);
+  };
+
   if (poolsLoading || poolTypesLoading) {
     return <div>Loading...</div>;
   }
@@ -407,74 +448,94 @@ const PoolSpecifications = () => {
           </Dialog>
         </CardHeader>
         <CardContent>
-          <div className="relative">
-            <ScrollArea className="h-[800px] overflow-x-auto">
-              <div className="min-w-[1800px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Actions</TableHead>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Dig Level</TableHead>
-                      <TableHead>Pool Size</TableHead>
-                      <TableHead>Length</TableHead>
-                      <TableHead>Width</TableHead>
-                      <TableHead>Shallow End</TableHead>
-                      <TableHead>Deep End</TableHead>
-                      <TableHead>Waterline L/M</TableHead>
-                      <TableHead>Water Volume (L)</TableHead>
-                      <TableHead>Salt Volume Bags</TableHead>
-                      <TableHead>Salt Volume Fixed</TableHead>
-                      <TableHead>Weight (KG)</TableHead>
-                      <TableHead>Minerals Initial/Topup</TableHead>
-                      <TableHead>Buy Price (ex GST)</TableHead>
-                      <TableHead>Buy Price (inc GST)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pools?.map((pool) => (
-                      <TableRow key={pool.id}>
-                        <TableCell>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleEdit(pool)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleDelete(pool.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                        <TableCell>{pool.name}</TableCell>
-                        <TableCell>{pool.dig_level}</TableCell>
-                        <TableCell>{pool.pool_type?.name}</TableCell>
-                        <TableCell>{pool.length}m</TableCell>
-                        <TableCell>{pool.width}m</TableCell>
-                        <TableCell>{pool.depth_shallow}m</TableCell>
-                        <TableCell>{pool.depth_deep}m</TableCell>
-                        <TableCell>{pool.waterline_l_m}</TableCell>
-                        <TableCell>{pool.volume_liters}</TableCell>
-                        <TableCell>{pool.salt_volume_bags}</TableCell>
-                        <TableCell>{pool.salt_volume_bags_fixed}</TableCell>
-                        <TableCell>{pool.weight_kg}</TableCell>
-                        <TableCell>
-                          {pool.minerals_kg_initial}/{pool.minerals_kg_topup}
-                        </TableCell>
-                        <TableCell>{formatCurrency(pool.buy_price_ex_gst)}</TableCell>
-                        <TableCell>{formatCurrency(pool.buy_price_inc_gst)}</TableCell>
+          <div className="space-y-4">
+            <Accordion
+              type="multiple"
+              value={expandedGroups}
+              onValueChange={setExpandedGroups}
+              className="w-full"
+            >
+              {columnGroups.map((group) => (
+                <AccordionItem key={group.id} value={group.id}>
+                  <AccordionTrigger className="px-4">
+                    {group.title}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="px-4 py-2 text-sm text-muted-foreground">
+                      Showing {group.columns.length} columns
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+            <div className="relative">
+              <ScrollArea className="h-[800px] overflow-x-auto">
+                <div className="min-w-[1800px]">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        {columnGroups.flatMap(group => 
+                          group.columns.map(column => 
+                            isColumnVisible(column) ? (
+                              <TableHead key={column}>{column}</TableHead>
+                            ) : null
+                          )
+                        )}
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </ScrollArea>
+                    </TableHeader>
+                    <TableBody>
+                      {pools?.map((pool) => (
+                        <TableRow key={pool.id}>
+                          {isColumnVisible("Actions") && (
+                            <TableCell>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleEdit(pool)}
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleDelete(pool.id)}
+                                >
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          )}
+                          {isColumnVisible("Name") && <TableCell>{pool.name}</TableCell>}
+                          {isColumnVisible("Dig Level") && <TableCell>{pool.dig_level}</TableCell>}
+                          {isColumnVisible("Pool Size") && <TableCell>{pool.pool_type?.name}</TableCell>}
+                          {isColumnVisible("Length") && <TableCell>{pool.length}m</TableCell>}
+                          {isColumnVisible("Width") && <TableCell>{pool.width}m</TableCell>}
+                          {isColumnVisible("Shallow End") && <TableCell>{pool.depth_shallow}m</TableCell>}
+                          {isColumnVisible("Deep End") && <TableCell>{pool.depth_deep}m</TableCell>}
+                          {isColumnVisible("Waterline L/M") && <TableCell>{pool.waterline_l_m}</TableCell>}
+                          {isColumnVisible("Water Volume (L)") && <TableCell>{pool.volume_liters}</TableCell>}
+                          {isColumnVisible("Salt Volume Bags") && <TableCell>{pool.salt_volume_bags}</TableCell>}
+                          {isColumnVisible("Salt Volume Fixed") && <TableCell>{pool.salt_volume_bags_fixed}</TableCell>}
+                          {isColumnVisible("Weight (KG)") && <TableCell>{pool.weight_kg}</TableCell>}
+                          {isColumnVisible("Minerals Initial/Topup") && (
+                            <TableCell>
+                              {pool.minerals_kg_initial}/{pool.minerals_kg_topup}
+                            </TableCell>
+                          )}
+                          {isColumnVisible("Buy Price (ex GST)") && (
+                            <TableCell>{formatCurrency(pool.buy_price_ex_gst)}</TableCell>
+                          )}
+                          {isColumnVisible("Buy Price (inc GST)") && (
+                            <TableCell>{formatCurrency(pool.buy_price_inc_gst)}</TableCell>
+                          )}
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+              </ScrollArea>
+            </div>
           </div>
         </CardContent>
       </Card>
