@@ -9,7 +9,11 @@ interface SheetData {
   data: any[][];
 }
 
-export const FileUpload = () => {
+interface FileUploadProps {
+  onSheetData: (data: any[][]) => void;
+}
+
+export const FileUpload = ({ onSheetData }: FileUploadProps) => {
   const [isDragging, setIsDragging] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
