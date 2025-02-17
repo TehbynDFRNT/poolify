@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -27,6 +26,8 @@ import type { TrafficControlCost } from "@/types/traffic-control-cost";
 import { Button } from "@/components/ui/button";
 import { AddCraneCostForm } from "./components/AddCraneCostForm";
 import { AddTrafficControlCostForm } from "./components/AddTrafficControlCostForm";
+
+type TableNames = "crane_costs" | "traffic_control_costs";
 
 const CraneCosts = () => {
   const queryClient = useQueryClient();
@@ -72,7 +73,7 @@ const CraneCosts = () => {
     setEditingPrice(cost.price.toString());
   };
 
-  const handleSave = async (cost: CraneCost | TrafficControlCost, table: string) => {
+  const handleSave = async (cost: CraneCost | TrafficControlCost, table: TableNames) => {
     try {
       const newPrice = parseFloat(editingPrice);
       if (isNaN(newPrice)) {
@@ -88,7 +89,7 @@ const CraneCosts = () => {
       if (error) throw error;
 
       toast.success("Price updated successfully");
-      queryClient.invalidateQueries({ queryKey: [table] });
+      queryClient.invalidateQueries({ queryKey: [table === "crane_costs" ? "crane-costs" : "traffic-control-costs"] });
     } catch (error) {
       toast.error("Failed to update price");
       console.error("Error updating price:", error);
