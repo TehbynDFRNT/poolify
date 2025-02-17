@@ -40,15 +40,6 @@ const PoolSpecifications = () => {
   return (
     <div className="container mx-auto py-8 space-y-8">
       <Card>
-        <CardHeader>
-          <CardTitle>Pool Range Order</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PoolRangeManager />
-        </CardContent>
-      </Card>
-
-      <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Pool Specifications</CardTitle>
           <Button onClick={() => setShowForm(!showForm)}>
