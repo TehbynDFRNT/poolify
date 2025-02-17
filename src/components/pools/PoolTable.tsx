@@ -34,6 +34,10 @@ interface EditingCell {
   field: keyof Pool;
 }
 
+const isStringField = (field: keyof Pool): boolean => {
+  return ["name", "range"].includes(field as string);
+};
+
 const PoolTable = ({ pools }: PoolTableProps) => {
   const queryClient = useQueryClient();
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
@@ -79,7 +83,7 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     }
 
     let parsedValue: string | number | null = value;
-    if (editingCell.field === "name" || editingCell.field === "range") {
+    if (isStringField(editingCell.field)) {
       parsedValue = value;
     } else {
       parsedValue = value === "" ? null : Number(value);
@@ -139,7 +143,7 @@ const PoolTable = ({ pools }: PoolTableProps) => {
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={() => handleCellBlur(pool)}
           onKeyDown={(e) => handleKeyDown(e, pool)}
-          type={field === "name" || field === "range" ? "text" : "number"}
+          type={isStringField(field) ? "text" : "number"}
           step={field === "length" || field === "width" || field === "depth_shallow" || field === "depth_deep" ? "0.01" : undefined}
         />
       );
