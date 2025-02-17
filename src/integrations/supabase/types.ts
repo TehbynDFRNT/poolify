@@ -247,6 +247,7 @@ export type Database = {
           minerals_kg_topup: number | null
           name: string
           pool_type_id: string | null
+          range: string
           salt_volume_bags: number | null
           salt_volume_bags_fixed: number | null
           volume_liters: number | null
@@ -267,6 +268,7 @@ export type Database = {
           minerals_kg_topup?: number | null
           name?: string
           pool_type_id?: string | null
+          range?: string
           salt_volume_bags?: number | null
           salt_volume_bags_fixed?: number | null
           volume_liters?: number | null
@@ -287,6 +289,7 @@ export type Database = {
           minerals_kg_topup?: number | null
           name?: string
           pool_type_id?: string | null
+          range?: string
           salt_volume_bags?: number | null
           salt_volume_bags_fixed?: number | null
           volume_liters?: number | null

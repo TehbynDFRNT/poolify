@@ -56,7 +56,7 @@ const PoolSpecifications = () => {
         .order("range")
         .order("name");
       if (error) throw error;
-      return data as Pool[];
+      return (data || []) as Pool[];
     },
   });
 
