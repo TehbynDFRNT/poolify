@@ -78,12 +78,12 @@ const FiltrationSystems = () => {
           name,
           display_order,
           created_at,
-          light:light_id(name, model_number, price),
-          pump:pump_id(name, model_number, price),
-          sanitiser:sanitiser_id(name, model_number, price),
-          standard_filter:standard_filter_id(name, model_number, price),
-          media_filter:media_filter_id(name, model_number, price),
-          handover_kit:handover_kit_id(name, model_number, price)
+          light:filtration_components!light_id(name, model_number, price),
+          pump:filtration_components!pump_id(name, model_number, price),
+          sanitiser:filtration_components!sanitiser_id(name, model_number, price),
+          standard_filter:filtration_components!standard_filter_id(name, model_number, price),
+          media_filter:filtration_components!media_filter_id(name, model_number, price),
+          handover_kit:filtration_components!handover_kit_id(name, model_number, price)
         `)
         .order("display_order");
 
