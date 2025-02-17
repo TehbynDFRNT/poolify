@@ -63,6 +63,30 @@ export type Database = {
         }
         Relationships: []
       }
+      crane_costs: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       excavation_dig_types: {
         Row: {
           created_at: string

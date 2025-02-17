@@ -10,6 +10,7 @@ import PoolSpecifications from "@/pages/PoolSpecifications";
 import Excavation from "@/pages/ConstructionCosts/Excavation";
 import PavingRetaining from "@/pages/ConstructionCosts/PavingRetaining";
 import BobcatCosts from "@/pages/ConstructionCosts/BobcatCosts";
+import CraneCosts from "@/pages/ConstructionCosts/CraneCosts";
 import NotFound from "@/pages/NotFound";
 import "@/App.css";
 
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
   {
     path: "/bobcat-costs",
     element: <BobcatCosts />,
+  },
+  {
+    path: "/crane-costs",
+    element: <CraneCosts />,
   },
   {
     path: "*",
