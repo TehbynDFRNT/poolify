@@ -6,6 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,12 +24,14 @@ import { formatCurrency } from "@/utils/format";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Pool, NewPool } from "@/types/pool";
+import { POOL_RANGES } from "@/types/pool";
 
 const PoolSpecifications = () => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [newPool, setNewPool] = useState<NewPool>({
     name: "",
+    range: "",
     length: 0,
     width: 0,
     depth_shallow: 0,
@@ -44,6 +53,7 @@ const PoolSpecifications = () => {
       const { data, error } = await supabase
         .from("pool_specifications")
         .select("*")
+        .order("range")
         .order("name");
       if (error) throw error;
       return data as Pool[];
@@ -63,6 +73,7 @@ const PoolSpecifications = () => {
       setShowForm(false);
       setNewPool({
         name: "",
+        range: "",
         length: 0,
         width: 0,
         depth_shallow: 0,
@@ -102,6 +113,21 @@ const PoolSpecifications = () => {
         <CardContent>
           {showForm && (
             <form onSubmit={handleSubmit} className="grid grid-cols-4 gap-4 mb-8">
+              <Select
+                value={newPool.range}
+                onValueChange={(value) => setNewPool({ ...newPool, range: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Range" />
+                </SelectTrigger>
+                <SelectContent>
+                  {POOL_RANGES.map((range) => (
+                    <SelectItem key={range} value={range}>
+                      {range}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <Input
                 placeholder="Name"
                 value={newPool.name}
@@ -200,6 +226,7 @@ const PoolSpecifications = () => {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>Range</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Length</TableHead>
                   <TableHead>Width</TableHead>
@@ -218,6 +245,7 @@ const PoolSpecifications = () => {
               <TableBody>
                 {pools?.map((pool) => (
                   <TableRow key={pool.id}>
+                    <TableCell>{pool.range}</TableCell>
                     <TableCell>{pool.name}</TableCell>
                     <TableCell>{pool.length}m</TableCell>
                     <TableCell>{pool.width}m</TableCell>

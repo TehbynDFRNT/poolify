@@ -3,6 +3,7 @@ import { z } from "zod";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  range: z.string().min(1, "Range is required"),
   length: z.coerce.number().min(0, "Length must be positive"),
   width: z.coerce.number().min(0, "Width must be positive"),
   depth_shallow: z.coerce.number().min(0, "Shallow depth must be positive"),
@@ -24,6 +25,7 @@ export interface Pool {
   id: string;
   created_at: string;
   name: string;
+  range: string;
   length: number;
   width: number;
   depth_shallow: number;
@@ -40,3 +42,13 @@ export interface Pool {
 }
 
 export type NewPool = Omit<Pool, 'id' | 'created_at'>;
+
+export const POOL_RANGES = [
+  'Piazza',
+  'Latin',
+  'Contemporary',
+  'Vogue',
+  'Villa',
+  'Entertainer',
+  'Round Pools'
+] as const;
