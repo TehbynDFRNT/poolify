@@ -37,10 +37,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
   };
 
   const handleCellClick = (id: string, category: 1 | 2 | 3 | 4) => {
-    const price = prices.find(p => p.id === id);
-    if (price?.name === 'Wastage Allowance') {
-      setEditingCell({ id, category });
-    }
+    setEditingCell({ id, category });
   };
 
   const handlePriceChange = async (id: string, category: 1 | 2 | 3 | 4, value: string) => {
@@ -75,9 +72,8 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
     const key = `category_${category}_price` as keyof PavingPrice;
     const value = price[key];
     const isEditing = editingCell?.id === price.id && editingCell?.category === category;
-    const isWastageAllowance = price.name === 'Wastage Allowance';
 
-    if (isEditing && isWastageAllowance) {
+    if (isEditing) {
       return (
         <Input
           type="number"
@@ -96,7 +92,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
 
     return (
       <div
-        className={isWastageAllowance ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}
+        className="cursor-pointer hover:bg-gray-100 p-1 rounded"
         onClick={() => handleCellClick(price.id, category)}
       >
         {formatCurrency(typeof value === 'number' ? value : 0)}
