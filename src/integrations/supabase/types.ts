@@ -13,6 +13,7 @@ export type Database = {
         Row: {
           created_at: string
           day_code: string
+          display_order: number
           id: string
           price: number
           size_category: string
@@ -20,6 +21,7 @@ export type Database = {
         Insert: {
           created_at?: string
           day_code: string
+          display_order: number
           id?: string
           price: number
           size_category: string
@@ -27,6 +29,7 @@ export type Database = {
         Update: {
           created_at?: string
           day_code?: string
+          display_order?: number
           id?: string
           price?: number
           size_category?: string
