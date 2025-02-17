@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -36,12 +36,14 @@ export function PoolRangeManager() {
       if (error) throw error;
       return data as PoolRange[];
     },
-    onSuccess: (data) => {
-      if (!localRanges.length) {
-        setLocalRanges(data);
-      }
-    },
   });
+
+  // Use useEffect instead of onSuccess
+  useEffect(() => {
+    if (poolRanges && !localRanges.length) {
+      setLocalRanges(poolRanges);
+    }
+  }, [poolRanges]);
 
   const updateOrderMutation = useMutation({
     mutationFn: async ({ id, newOrder }: { id: string; newOrder: number }) => {
