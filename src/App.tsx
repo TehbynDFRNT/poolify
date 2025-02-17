@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "@/pages/Index";
 import ConstructionCosts from "@/pages/ConstructionCosts";
 import PoolSpecifications from "@/pages/PoolSpecifications";
+import FiltrationSystems from "@/pages/FiltrationSystems";
 import Excavation from "@/pages/ConstructionCosts/Excavation";
 import PavingRetaining from "@/pages/ConstructionCosts/PavingRetaining";
 import BobcatCosts from "@/pages/ConstructionCosts/BobcatCosts";
@@ -28,6 +29,10 @@ const router = createBrowserRouter([
   {
     path: "/pool-specifications",
     element: <PoolSpecifications />,
+  },
+  {
+    path: "/filtration-systems",
+    element: <FiltrationSystems />,
   },
   {
     path: "/excavation",
