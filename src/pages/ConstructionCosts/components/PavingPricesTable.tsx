@@ -7,20 +7,105 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import type { PavingPrice } from "@/types/paving-price";
 
 interface PavingPricesTableProps {
   prices: PavingPrice[];
 }
 
-export const PavingPricesTable = ({ prices }: PavingPricesTableProps) => {
+export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTableProps) => {
+  const [prices, setPrices] = useState(initialPrices);
+  const [editingCell, setEditingCell] = useState<{
+    id: string;
+    category: 1 | 2 | 3 | 4;
+  } | null>(null);
+
+  useEffect(() => {
+    setPrices(initialPrices);
+  }, [initialPrices]);
+
   const calculateTotal = (categoryIndex: 1 | 2 | 3 | 4) => {
     const key = `category_${categoryIndex}_price` as keyof PavingPrice;
     return prices.reduce((sum, price) => {
       const value = price[key];
       return typeof value === 'number' ? sum + value : sum;
     }, 0);
+  };
+
+  const handleCellClick = (id: string, category: 1 | 2 | 3 | 4) => {
+    const price = prices.find(p => p.name === 'Wastage Allowance');
+    if (price && price.id === id) {
+      setEditingCell({ id, category });
+    }
+  };
+
+  const handlePriceChange = async (id: string, category: 1 | 2 | 3 | 4, value: string) => {
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return;
+
+    const key = `category_${category}_price`;
+    
+    // Update local state
+    setPrices(currentPrices =>
+      currentPrices.map(price =>
+        price.id === id
+          ? { ...price, [key]: numericValue }
+          : price
+      )
+    );
+
+    // Update database
+    const { error } = await supabase
+      .from('paving_prices')
+      .update({ [key]: numericValue })
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating price:', error);
+    }
+
+    setEditingCell(null);
+  };
+
+  const handleBlur = () => {
+    setEditingCell(null);
+  };
+
+  const renderCell = (price: PavingPrice, category: 1 | 2 | 3 | 4) => {
+    const key = `category_${category}_price` as keyof PavingPrice;
+    const value = price[key];
+    const isEditing = editingCell?.id === price.id && editingCell?.category === category;
+    const isWastageAllowance = price.name === 'Wastage Allowance';
+
+    if (isEditing && isWastageAllowance) {
+      return (
+        <Input
+          type="number"
+          defaultValue={value?.toString()}
+          className="w-24"
+          autoFocus
+          onBlur={(e) => handlePriceChange(price.id, category, e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handlePriceChange(price.id, category, (e.target as HTMLInputElement).value);
+            }
+          }}
+        />
+      );
+    }
+
+    return (
+      <div
+        className={isWastageAllowance ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}
+        onClick={() => isWastageAllowance && handleCellClick(price.id, category)}
+      >
+        {formatCurrency(typeof value === 'number' ? value : 0)}
+      </div>
+    );
   };
 
   return (
@@ -38,10 +123,10 @@ export const PavingPricesTable = ({ prices }: PavingPricesTableProps) => {
         {prices.map((price) => (
           <TableRow key={price.id}>
             <TableCell className="font-medium">{price.name}</TableCell>
-            <TableCell className="text-right">{formatCurrency(price.category_1_price)}</TableCell>
-            <TableCell className="text-right">{formatCurrency(price.category_2_price)}</TableCell>
-            <TableCell className="text-right">{formatCurrency(price.category_3_price)}</TableCell>
-            <TableCell className="text-right">{formatCurrency(price.category_4_price)}</TableCell>
+            <TableCell className="text-right">{renderCell(price, 1)}</TableCell>
+            <TableCell className="text-right">{renderCell(price, 2)}</TableCell>
+            <TableCell className="text-right">{renderCell(price, 3)}</TableCell>
+            <TableCell className="text-right">{renderCell(price, 4)}</TableCell>
           </TableRow>
         ))}
         <TableRow className="border-t-2">
