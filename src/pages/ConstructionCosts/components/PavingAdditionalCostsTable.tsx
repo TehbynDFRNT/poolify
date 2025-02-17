@@ -21,7 +21,9 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
   const [costs, setCosts] = useState(initialCosts);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const handleCellClick = (id: string) => {
+  const handleCellClick = (id: string, name: string) => {
+    // Don't allow editing of Dust
+    if (name === 'Dust') return;
     setEditingId(id);
   };
 
@@ -53,8 +55,9 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
 
   const renderAmount = (cost: PavingAdditionalCost) => {
     const isEditing = editingId === cost.id;
+    const isDust = cost.name === 'Dust';
 
-    if (isEditing) {
+    if (isEditing && !isDust) {
       return (
         <Input
           type="number"
@@ -73,8 +76,8 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
 
     return (
       <div
-        className="cursor-pointer hover:bg-gray-100 p-1 rounded"
-        onClick={() => handleCellClick(cost.id)}
+        className={`p-1 rounded ${!isDust ? 'cursor-pointer hover:bg-gray-100' : ''}`}
+        onClick={() => handleCellClick(cost.id, cost.name)}
       >
         {formatCurrency(cost.amount)}
       </div>
