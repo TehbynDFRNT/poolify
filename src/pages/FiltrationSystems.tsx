@@ -23,6 +23,16 @@ import {
 import { formatCurrency } from "@/utils/format";
 import type { FiltrationComponent, FiltrationComponentType, FiltrationPackage } from "@/types/filtration";
 
+// Define the type for package with its relations
+type PackageWithComponents = Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'standard_filter_id' | 'media_filter_id' | 'handover_kit_id'> & {
+  light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  standard_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  media_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+};
+
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -64,7 +74,10 @@ const FiltrationSystems = () => {
       const { data, error } = await supabase
         .from("filtration_packages")
         .select(`
-          *,
+          id,
+          name,
+          display_order,
+          created_at,
           light:light_id(name, model_number, price),
           pump:pump_id(name, model_number, price),
           sanitiser:sanitiser_id(name, model_number, price),
@@ -75,18 +88,11 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data as (FiltrationPackage & {
-        light: FiltrationComponent;
-        pump: FiltrationComponent;
-        sanitiser: FiltrationComponent;
-        standard_filter: FiltrationComponent;
-        media_filter: FiltrationComponent;
-        handover_kit: FiltrationComponent;
-      })[];
+      return data as PackageWithComponents[];
     },
   });
 
-  const calculateTotalPrice = (pkg: typeof packages[0], useMediaFilter: boolean = false) => {
+  const calculateTotalPrice = (pkg: PackageWithComponents | undefined, useMediaFilter: boolean = false) => {
     if (!pkg) return 0;
     return (
       (pkg.light?.price || 0) +
