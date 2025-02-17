@@ -5,6 +5,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/DashboardLayout";
+import { Link } from "react-router-dom";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import {
   Dialog,
   DialogContent,
@@ -113,6 +121,26 @@ const Excavation = () => {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto py-8 px-4">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/construction-costs">
+                Construction Costs
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/excavation">
+                Excavation
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-gray-700">Dig Types</h2>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

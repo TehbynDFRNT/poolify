@@ -1,11 +1,33 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Menu } from "lucide-react";
+import { Link } from "react-router-dom";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const ConstructionCosts = () => {
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto p-6">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink as={Link} to="/construction-costs">
+                Construction Costs
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Construction Costs</h1>
@@ -15,8 +37,8 @@ const ConstructionCosts = () => {
         </div>
 
         <div className="grid gap-6">
-          <a 
-            href="/excavation" 
+          <Link 
+            to="/excavation" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
@@ -40,7 +62,7 @@ const ConstructionCosts = () => {
                 </svg>
               </div>
             </div>
-          </a>
+          </Link>
         </div>
       </div>
     </DashboardLayout>
