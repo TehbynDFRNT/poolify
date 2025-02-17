@@ -68,6 +68,22 @@ const FiltrationSystems = () => {
     },
   });
 
+  // Add a new query specifically for handover kits
+  const { data: handoverKits } = useQuery({
+    queryKey: ["handover-kits"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("filtration_components")
+        .select("*")
+        .eq("type_id", componentTypes?.find(t => t.name === "Handover Kit")?.id)
+        .order("name");
+
+      if (error) throw error;
+      return data as FiltrationComponent[];
+    },
+    enabled: !!componentTypes,
+  });
+
   const { data: packages } = useQuery({
     queryKey: ["filtration-packages"],
     queryFn: async () => {
@@ -130,7 +146,7 @@ const FiltrationSystems = () => {
               onChange={(e) => setSelectedTypeId(e.target.value || null)}
             >
               <option value="">All Components</option>
-              {componentTypes?.map((type) => (
+              {componentTypes?.filter(type => type.name !== "Handover Kit").map((type) => (
                 <option key={type.id} value={type.id}>
                   {type.name}
                 </option>
@@ -155,7 +171,9 @@ const FiltrationSystems = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {components?.map((component) => (
+              {components?.filter(component => 
+                componentTypes?.find(t => t.id === component.type_id)?.name !== "Handover Kit"
+              ).map((component) => (
                 <TableRow key={component.id}>
                   <TableCell className="font-medium">{component.model_number}</TableCell>
                   <TableCell>{component.name}</TableCell>
@@ -170,6 +188,41 @@ const FiltrationSystems = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     {formatCurrency(component.price)}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Handover Kits Section */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Handover Kits</CardTitle>
+          <Button onClick={() => setShowAddForm(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Handover Kit
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Model Number</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead className="text-right">Price</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {handoverKits?.map((kit) => (
+                <TableRow key={kit.id}>
+                  <TableCell className="font-medium">{kit.model_number}</TableCell>
+                  <TableCell>{kit.name}</TableCell>
+                  <TableCell>{kit.description || '-'}</TableCell>
+                  <TableCell className="text-right">
+                    {formatCurrency(kit.price)}
                   </TableCell>
                 </TableRow>
               ))}
