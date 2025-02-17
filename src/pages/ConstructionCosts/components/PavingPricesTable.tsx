@@ -100,6 +100,14 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
     );
   };
 
+  // Sort prices in the desired order: Paver, Wastage, Margin
+  const sortedPrices = [...prices].sort((a, b) => {
+    const order = { Paver: 1, Wastage: 2, Margin: 3 };
+    const aOrder = order[a.name as keyof typeof order] || 4;
+    const bOrder = order[b.name as keyof typeof order] || 4;
+    return aOrder - bOrder;
+  });
+
   return (
     <Table>
       <TableHeader>
@@ -112,7 +120,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
         </TableRow>
       </TableHeader>
       <TableBody>
-        {prices.map((price) => (
+        {sortedPrices.map((price) => (
           <TableRow key={price.id}>
             <TableCell className="font-medium text-left">{price.name}</TableCell>
             <TableCell className="text-right">{renderCell(price, 1)}</TableCell>
