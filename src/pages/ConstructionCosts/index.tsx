@@ -68,9 +68,9 @@ const ConstructionCosts = () => {
           
           <DataSection
             icon={<Truck className="h-6 w-6 text-primary" />}
-            title="Materials"
-            description="Configure construction materials and pricing"
-            isActive={false}
+            title="Bobcat Costs"
+            description="View and manage bobcat rental costs"
+            onClick={() => navigate('/bobcat-costs')}
           />
           
           <DataSection
