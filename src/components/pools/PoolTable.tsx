@@ -79,7 +79,9 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     }
 
     let parsedValue: string | number | null = value;
-    if (editingCell.field !== "name" && editingCell.field !== "range") {
+    if (editingCell.field === "name" || editingCell.field === "range") {
+      parsedValue = value;
+    } else {
       parsedValue = value === "" ? null : Number(value);
       if (typeof parsedValue === "number" && isNaN(parsedValue)) {
         toast.error("Please enter a valid number");
