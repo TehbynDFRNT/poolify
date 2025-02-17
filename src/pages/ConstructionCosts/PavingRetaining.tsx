@@ -1,6 +1,8 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -8,8 +10,26 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Construction } from "lucide-react";
+import { PavingPricesTable } from "./components/PavingPricesTable";
+import type { PavingPrice } from "@/types/paving-price";
 
 const PavingRetaining = () => {
+  const { data: pavingPrices, isLoading } = useQuery({
+    queryKey: ["paving-prices"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("paving_prices")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        throw error;
+      }
+
+      return data as PavingPrice[];
+    },
+  });
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto py-8 px-4">
@@ -41,11 +61,15 @@ const PavingRetaining = () => {
           <Construction className="h-6 w-6 text-gray-500" />
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-            <h2 className="text-lg font-medium text-gray-900 mb-4">Coming Soon</h2>
-            <p className="text-gray-500">Paving and retaining wall management features will be available soon.</p>
-          </div>
+        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Paving Prices</h2>
+          {isLoading ? (
+            <p className="text-gray-500">Loading prices...</p>
+          ) : pavingPrices ? (
+            <PavingPricesTable prices={pavingPrices} />
+          ) : (
+            <p className="text-gray-500">No paving prices found.</p>
+          )}
         </div>
       </div>
     </DashboardLayout>

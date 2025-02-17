@@ -99,6 +99,36 @@ export type Database = {
         }
         Relationships: []
       }
+      paving_prices: {
+        Row: {
+          category_1_price: number
+          category_2_price: number
+          category_3_price: number
+          category_4_price: number
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          category_1_price: number
+          category_2_price: number
+          category_3_price: number
+          category_4_price: number
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          category_1_price?: number
+          category_2_price?: number
+          category_3_price?: number
+          category_4_price?: number
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       pool_excavation_types: {
         Row: {
           created_at: string
