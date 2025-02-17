@@ -1,8 +1,91 @@
 
-import { Navigate } from "react-router-dom";
+import { DashboardLayout } from "@/components/DashboardLayout";
+import { Shovel, Truck, Hammer, Ruler, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+const DataSection = ({ 
+  icon: Icon, 
+  title, 
+  description, 
+  isActive = true, 
+  onClick 
+}: { 
+  icon: any, 
+  title: string, 
+  description: string,
+  isActive?: boolean,
+  onClick?: () => void 
+}) => (
+  <div 
+    className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 ${
+      isActive ? "hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed"
+    }`}
+    onClick={isActive ? onClick : undefined}
+  >
+    <div className="flex items-start space-x-4">
+      <div className="p-2 bg-primary/10 rounded-lg">
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold mb-1">{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
+      </div>
+      {isActive && <Plus className="h-5 w-5 text-primary" />}
+    </div>
+  </div>
+);
 
 const ConstructionCosts = () => {
-  return <Navigate to="/excavation" replace />;
+  const navigate = useNavigate();
+
+  return (
+    <DashboardLayout>
+      <div className="max-w-5xl mx-auto animate-fadeIn">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Construction Costs</h1>
+          <p className="text-gray-600">
+            Manage and organize your pool construction costs
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          <DataSection
+            icon={Shovel}
+            title="Excavation"
+            description="Manage excavation costs and dig types"
+            onClick={() => navigate('/excavation')}
+          />
+          
+          <DataSection
+            icon={Truck}
+            title="Materials"
+            description="Configure construction materials and pricing"
+            isActive={false}
+          />
+          
+          <DataSection
+            icon={Hammer}
+            title="Labor"
+            description="Set up labor costs and time estimates"
+            isActive={false}
+          />
+          
+          <DataSection
+            icon={Ruler}
+            title="Measurements"
+            description="Define measurement costs and calculations"
+            isActive={false}
+          />
+        </div>
+
+        <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-sm text-gray-600 text-center">
+            Select a category above to manage its costs and specifications
+          </p>
+        </div>
+      </div>
+    </DashboardLayout>
+  );
 };
 
 export default ConstructionCosts;
