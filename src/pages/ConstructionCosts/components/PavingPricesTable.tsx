@@ -100,15 +100,6 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
     );
   };
 
-  const renderTotal = (category: 1 | 2 | 3 | 4) => {
-    const total = calculateTotal(category);
-    return (
-      <div className="font-bold">
-        {formatCurrency(total)}
-      </div>
-    );
-  };
-
   return (
     <Table>
       <TableHeader>
@@ -132,10 +123,10 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
         ))}
         <TableRow className="border-t-2">
           <TableCell className="font-bold">Total</TableCell>
-          <TableCell className="text-right">{renderTotal(1)}</TableCell>
-          <TableCell className="text-right">{renderTotal(2)}</TableCell>
-          <TableCell className="text-right">{renderTotal(3)}</TableCell>
-          <TableCell className="text-right">{renderTotal(4)}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(1))}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(2))}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(3))}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(4))}</TableCell>
         </TableRow>
       </TableBody>
     </Table>
