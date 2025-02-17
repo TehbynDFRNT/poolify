@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -408,71 +407,75 @@ const PoolSpecifications = () => {
           </Dialog>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[800px]">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Actions</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Dig Level</TableHead>
-                  <TableHead>Pool Size</TableHead>
-                  <TableHead>Length</TableHead>
-                  <TableHead>Width</TableHead>
-                  <TableHead>Shallow End</TableHead>
-                  <TableHead>Deep End</TableHead>
-                  <TableHead>Waterline L/M</TableHead>
-                  <TableHead>Water Volume (L)</TableHead>
-                  <TableHead>Salt Volume Bags</TableHead>
-                  <TableHead>Salt Volume Fixed</TableHead>
-                  <TableHead>Weight (KG)</TableHead>
-                  <TableHead>Minerals Initial/Topup</TableHead>
-                  <TableHead>Buy Price (ex GST)</TableHead>
-                  <TableHead>Buy Price (inc GST)</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pools?.map((pool) => (
-                  <TableRow key={pool.id}>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEdit(pool)}
-                        >
-                          <Pencil className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDelete(pool.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>{pool.name}</TableCell>
-                    <TableCell>{pool.dig_level}</TableCell>
-                    <TableCell>{pool.pool_type?.name}</TableCell>
-                    <TableCell>{pool.length}m</TableCell>
-                    <TableCell>{pool.width}m</TableCell>
-                    <TableCell>{pool.depth_shallow}m</TableCell>
-                    <TableCell>{pool.depth_deep}m</TableCell>
-                    <TableCell>{pool.waterline_l_m}</TableCell>
-                    <TableCell>{pool.volume_liters}</TableCell>
-                    <TableCell>{pool.salt_volume_bags}</TableCell>
-                    <TableCell>{pool.salt_volume_bags_fixed}</TableCell>
-                    <TableCell>{pool.weight_kg}</TableCell>
-                    <TableCell>
-                      {pool.minerals_kg_initial}/{pool.minerals_kg_topup}
-                    </TableCell>
-                    <TableCell>{formatCurrency(pool.buy_price_ex_gst)}</TableCell>
-                    <TableCell>{formatCurrency(pool.buy_price_inc_gst)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
+          <div className="relative">
+            <ScrollArea className="h-[800px] overflow-x-auto">
+              <div className="min-w-[1800px]">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Actions</TableHead>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Dig Level</TableHead>
+                      <TableHead>Pool Size</TableHead>
+                      <TableHead>Length</TableHead>
+                      <TableHead>Width</TableHead>
+                      <TableHead>Shallow End</TableHead>
+                      <TableHead>Deep End</TableHead>
+                      <TableHead>Waterline L/M</TableHead>
+                      <TableHead>Water Volume (L)</TableHead>
+                      <TableHead>Salt Volume Bags</TableHead>
+                      <TableHead>Salt Volume Fixed</TableHead>
+                      <TableHead>Weight (KG)</TableHead>
+                      <TableHead>Minerals Initial/Topup</TableHead>
+                      <TableHead>Buy Price (ex GST)</TableHead>
+                      <TableHead>Buy Price (inc GST)</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pools?.map((pool) => (
+                      <TableRow key={pool.id}>
+                        <TableCell>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEdit(pool)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleDelete(pool.id)}
+                            >
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                        <TableCell>{pool.name}</TableCell>
+                        <TableCell>{pool.dig_level}</TableCell>
+                        <TableCell>{pool.pool_type?.name}</TableCell>
+                        <TableCell>{pool.length}m</TableCell>
+                        <TableCell>{pool.width}m</TableCell>
+                        <TableCell>{pool.depth_shallow}m</TableCell>
+                        <TableCell>{pool.depth_deep}m</TableCell>
+                        <TableCell>{pool.waterline_l_m}</TableCell>
+                        <TableCell>{pool.volume_liters}</TableCell>
+                        <TableCell>{pool.salt_volume_bags}</TableCell>
+                        <TableCell>{pool.salt_volume_bags_fixed}</TableCell>
+                        <TableCell>{pool.weight_kg}</TableCell>
+                        <TableCell>
+                          {pool.minerals_kg_initial}/{pool.minerals_kg_topup}
+                        </TableCell>
+                        <TableCell>{formatCurrency(pool.buy_price_ex_gst)}</TableCell>
+                        <TableCell>{formatCurrency(pool.buy_price_inc_gst)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </ScrollArea>
+          </div>
         </CardContent>
       </Card>
     </div>
