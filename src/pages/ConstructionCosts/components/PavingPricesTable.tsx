@@ -104,7 +104,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>Item</TableHead>
+          <TableHead className="text-left">Item</TableHead>
           <TableHead className="text-right">Category 1</TableHead>
           <TableHead className="text-right">Category 2</TableHead>
           <TableHead className="text-right">Category 3</TableHead>
@@ -114,7 +114,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
       <TableBody>
         {prices.map((price) => (
           <TableRow key={price.id}>
-            <TableCell className="font-medium">{price.name}</TableCell>
+            <TableCell className="font-medium text-left">{price.name}</TableCell>
             <TableCell className="text-right">{renderCell(price, 1)}</TableCell>
             <TableCell className="text-right">{renderCell(price, 2)}</TableCell>
             <TableCell className="text-right">{renderCell(price, 3)}</TableCell>
@@ -122,7 +122,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
           </TableRow>
         ))}
         <TableRow className="border-t-2">
-          <TableCell className="font-bold">Total</TableCell>
+          <TableCell className="font-bold text-left">Total</TableCell>
           <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(1))}</TableCell>
           <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(2))}</TableCell>
           <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(3))}</TableCell>
