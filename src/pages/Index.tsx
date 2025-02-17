@@ -1,16 +1,21 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Database, Filter, Construction, Droplets, Calculator, PlusCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
-const DataSection = ({ icon: Icon, title, description, isActive = true }: { 
+const DataSection = ({ icon: Icon, title, description, isActive = true, onClick }: { 
   icon: any, 
   title: string, 
   description: string,
-  isActive?: boolean 
+  isActive?: boolean,
+  onClick?: () => void 
 }) => (
-  <div className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 ${
-    isActive ? "hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed"
-  }`}>
+  <div 
+    className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 ${
+      isActive ? "hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed"
+    }`}
+    onClick={isActive ? onClick : undefined}
+  >
     <div className="flex items-start space-x-4">
       <div className="p-2 bg-primary/10 rounded-lg">
         <Icon className="h-6 w-6 text-primary" />
@@ -25,6 +30,8 @@ const DataSection = ({ icon: Icon, title, description, isActive = true }: {
 );
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto animate-fadeIn">
@@ -40,6 +47,7 @@ const Index = () => {
             icon={Database}
             title="Pool Specifications"
             description="Manage pool types, sizes, and basic specifications"
+            onClick={() => navigate('/pool-specifications')}
           />
           
           <DataSection
