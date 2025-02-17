@@ -82,9 +82,9 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
   };
 
   // Find concrete cost and dust cost
-  const concreteCost = costs.find(cost => cost.name === 'Concrete Cost')?.amount || 0;
+  const concreteCost = costs.find(cost => cost.name === 'Concrete Cost');
   const dustCost = costs.find(cost => cost.name === 'Dust')?.amount || 0;
-  const concreteTotal = concreteCost + dustCost;
+  const concreteTotal = (concreteCost?.amount || 0) + dustCost;
 
   return (
     <div className="mt-8">
@@ -101,7 +101,9 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
         <TableBody>
           <TableRow>
             <TableCell className="font-medium">Concrete Cost</TableCell>
-            <TableCell className="text-right">{formatCurrency(concreteCost)}</TableCell>
+            <TableCell className="text-right">
+              {concreteCost ? renderAmount(concreteCost) : formatCurrency(0)}
+            </TableCell>
             <TableCell className="text-right">{formatCurrency(dustCost)}</TableCell>
             <TableCell className="text-right font-medium">{formatCurrency(concreteTotal)}</TableCell>
           </TableRow>
