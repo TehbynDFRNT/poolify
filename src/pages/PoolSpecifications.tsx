@@ -16,12 +16,24 @@ const PoolSpecifications = () => {
   const { data: pools } = useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: ranges } = await supabase
+        .from("pool_ranges")
+        .select("name")
+        .order("display_order");
+
+      const { data: poolsData, error } = await supabase
         .from("pool_specifications")
-        .select("*")
-        .order("range");
+        .select("*");
+
       if (error) throw error;
-      return (data || []) as Pool[];
+
+      // Sort pools based on range order
+      const rangeOrder = ranges?.map(r => r.name) || [];
+      return (poolsData || []).sort((a, b) => {
+        const aIndex = rangeOrder.indexOf(a.range);
+        const bIndex = rangeOrder.indexOf(b.range);
+        return aIndex - bIndex;
+      }) as Pool[];
     },
   });
 
