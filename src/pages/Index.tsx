@@ -1,47 +1,76 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { FileUpload } from "@/components/FileUpload";
-import { ChevronRight } from "lucide-react";
+import { Database, Filter, Construction, Droplets, Calculator, PlusCircle } from "lucide-react";
+
+const DataSection = ({ icon: Icon, title, description, isActive = true }: { 
+  icon: any, 
+  title: string, 
+  description: string,
+  isActive?: boolean 
+}) => (
+  <div className={`bg-white rounded-xl p-6 shadow-sm border transition-all duration-200 ${
+    isActive ? "hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed"
+  }`}>
+    <div className="flex items-start space-x-4">
+      <div className="p-2 bg-primary/10 rounded-lg">
+        <Icon className="h-6 w-6 text-primary" />
+      </div>
+      <div className="flex-1">
+        <h3 className="text-lg font-semibold mb-1">{title}</h3>
+        <p className="text-sm text-gray-600">{description}</p>
+      </div>
+      {isActive && <PlusCircle className="h-5 w-5 text-primary" />}
+    </div>
+  </div>
+);
 
 const Index = () => {
   return (
     <DashboardLayout>
-      <div className="max-w-4xl mx-auto animate-fadeIn">
+      <div className="max-w-5xl mx-auto animate-fadeIn">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome to Poolify</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Management</h1>
           <p className="text-gray-600">
-            Start by importing your data or creating a new proposal
+            Manage and organize your pool construction and pricing data
           </p>
         </div>
 
-        <div className="grid gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border">
-            <div className="mb-6">
-              <span className="px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                Step 1
-              </span>
-              <h2 className="text-xl font-semibold mt-2 mb-1">Import Your Data</h2>
-              <p className="text-gray-600 text-sm">
-                Upload your existing spreadsheets to get started
-              </p>
-            </div>
-            <FileUpload />
-          </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <DataSection
+            icon={Database}
+            title="Pool Specifications"
+            description="Manage pool types, sizes, and basic specifications"
+          />
+          
+          <DataSection
+            icon={Filter}
+            title="Filtration Systems"
+            description="Configure filtration options and equipment specifications"
+          />
+          
+          <DataSection
+            icon={Construction}
+            title="Construction Costs"
+            description="Manage construction materials and associated costs"
+          />
+          
+          <DataSection
+            icon={Droplets}
+            title="Water Features"
+            description="Configure additional water features and accessories"
+          />
+          
+          <DataSection
+            icon={Calculator}
+            title="Pricing Models"
+            description="Set up pricing calculations and formulas"
+          />
+        </div>
 
-          <div className="bg-white rounded-xl p-6 shadow-sm border opacity-50 cursor-not-allowed">
-            <div className="flex items-center justify-between">
-              <div>
-                <span className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-full">
-                  Step 2
-                </span>
-                <h2 className="text-xl font-semibold mt-2 mb-1">Create Your First Proposal</h2>
-                <p className="text-gray-600 text-sm">
-                  Start building professional pool proposals
-                </p>
-              </div>
-              <ChevronRight className="h-6 w-6 text-gray-400" />
-            </div>
-          </div>
+        <div className="mt-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <p className="text-sm text-gray-600 text-center">
+            Select a category above to manage its data structure and content
+          </p>
         </div>
       </div>
     </DashboardLayout>
