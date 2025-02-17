@@ -120,6 +120,153 @@ export type Database = {
         }
         Relationships: []
       }
+      filtration_component_types: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      filtration_components: {
+        Row: {
+          created_at: string
+          description: string | null
+          flow_rate: number | null
+          id: string
+          model_number: string
+          name: string
+          power_consumption: number | null
+          price: number
+          type_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          flow_rate?: number | null
+          id?: string
+          model_number: string
+          name: string
+          power_consumption?: number | null
+          price: number
+          type_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          flow_rate?: number | null
+          id?: string
+          model_number?: string
+          name?: string
+          power_consumption?: number | null
+          price?: number
+          type_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "filtration_components_type_id_fkey"
+            columns: ["type_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_component_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      filtration_packages: {
+        Row: {
+          created_at: string
+          display_order: number
+          handover_kit_id: string | null
+          id: string
+          light_id: string | null
+          media_filter_id: string | null
+          name: string
+          pump_id: string | null
+          sanitiser_id: string | null
+          standard_filter_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          handover_kit_id?: string | null
+          id?: string
+          light_id?: string | null
+          media_filter_id?: string | null
+          name: string
+          pump_id?: string | null
+          sanitiser_id?: string | null
+          standard_filter_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          handover_kit_id?: string | null
+          id?: string
+          light_id?: string | null
+          media_filter_id?: string | null
+          name?: string
+          pump_id?: string | null
+          sanitiser_id?: string | null
+          standard_filter_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "filtration_packages_handover_kit_id_fkey"
+            columns: ["handover_kit_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "filtration_packages_light_id_fkey"
+            columns: ["light_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "filtration_packages_media_filter_id_fkey"
+            columns: ["media_filter_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "filtration_packages_pump_id_fkey"
+            columns: ["pump_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "filtration_packages_sanitiser_id_fkey"
+            columns: ["sanitiser_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "filtration_packages_standard_filter_id_fkey"
+            columns: ["standard_filter_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       filtration_systems: {
         Row: {
           created_at: string
