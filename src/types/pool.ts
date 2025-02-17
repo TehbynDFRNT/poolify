@@ -3,8 +3,6 @@ import { z } from "zod";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  dig_level: z.string().min(1, "Dig level is required"),
-  pool_type_id: z.string().min(1, "Pool type is required"),
   length: z.coerce.number().min(0, "Length must be positive"),
   width: z.coerce.number().min(0, "Width must be positive"),
   depth_shallow: z.coerce.number().min(0, "Shallow depth must be positive"),
@@ -22,16 +20,23 @@ export const poolSchema = z.object({
 
 export type PoolFormValues = z.infer<typeof poolSchema>;
 
-export interface Pool extends PoolFormValues {
+export interface Pool {
   id: string;
   created_at: string;
-  pool_type?: {
-    id: string;
-    name: string;
-  };
+  name: string;
+  length: number;
+  width: number;
+  depth_shallow: number;
+  depth_deep: number;
+  waterline_l_m: number | null;
+  volume_liters: number | null;
+  salt_volume_bags: number | null;
+  salt_volume_bags_fixed: number | null;
+  weight_kg: number | null;
+  minerals_kg_initial: number | null;
+  minerals_kg_topup: number | null;
+  buy_price_ex_gst: number | null;
+  buy_price_inc_gst: number | null;
 }
 
-export interface PoolType {
-  id: string;
-  name: string;
-}
+export type NewPool = Omit<Pool, 'id' | 'created_at'>;

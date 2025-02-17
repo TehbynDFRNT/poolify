@@ -16,26 +16,26 @@ import {
 import { formatCurrency } from "@/utils/format";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import type { Pool } from "@/types/pool";
+import type { Pool, NewPool } from "@/types/pool";
 
 const PoolSpecifications = () => {
   const queryClient = useQueryClient();
   const [showForm, setShowForm] = useState(false);
-  const [newPool, setNewPool] = useState<Partial<Pool>>({
+  const [newPool, setNewPool] = useState<NewPool>({
     name: "",
     length: 0,
     width: 0,
     depth_shallow: 0,
     depth_deep: 0,
-    waterline_l_m: 0,
-    volume_liters: 0,
-    salt_volume_bags: 0,
-    salt_volume_bags_fixed: 0,
-    weight_kg: 0,
-    minerals_kg_initial: 0,
-    minerals_kg_topup: 0,
-    buy_price_ex_gst: 0,
-    buy_price_inc_gst: 0,
+    waterline_l_m: null,
+    volume_liters: null,
+    salt_volume_bags: null,
+    salt_volume_bags_fixed: null,
+    weight_kg: null,
+    minerals_kg_initial: null,
+    minerals_kg_topup: null,
+    buy_price_ex_gst: null,
+    buy_price_inc_gst: null,
   });
 
   const { data: pools } = useQuery({
@@ -51,10 +51,10 @@ const PoolSpecifications = () => {
   });
 
   const addPoolMutation = useMutation({
-    mutationFn: async (pool: Partial<Pool>) => {
+    mutationFn: async (pool: NewPool) => {
       const { error } = await supabase
         .from("pool_specifications")
-        .insert([pool]);
+        .insert(pool);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -67,15 +67,15 @@ const PoolSpecifications = () => {
         width: 0,
         depth_shallow: 0,
         depth_deep: 0,
-        waterline_l_m: 0,
-        volume_liters: 0,
-        salt_volume_bags: 0,
-        salt_volume_bags_fixed: 0,
-        weight_kg: 0,
-        minerals_kg_initial: 0,
-        minerals_kg_topup: 0,
-        buy_price_ex_gst: 0,
-        buy_price_inc_gst: 0,
+        waterline_l_m: null,
+        volume_liters: null,
+        salt_volume_bags: null,
+        salt_volume_bags_fixed: null,
+        weight_kg: null,
+        minerals_kg_initial: null,
+        minerals_kg_topup: null,
+        buy_price_ex_gst: null,
+        buy_price_inc_gst: null,
       });
     },
     onError: (error) => {
