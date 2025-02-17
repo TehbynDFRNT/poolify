@@ -72,6 +72,13 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     setEditValue(String(pool[field] || ""));
   };
 
+  const handleRangeChange = (pool: Pool, value: string) => {
+    updatePoolMutation.mutate({
+      id: pool.id,
+      range: value,
+    });
+  };
+
   const handleCellBlur = (pool: Pool) => {
     if (!editingCell) return;
 
@@ -116,13 +123,10 @@ const PoolTable = ({ pools }: PoolTableProps) => {
       if (field === "range") {
         return (
           <Select
-            value={editValue}
-            onValueChange={(value) => {
-              setEditValue(value);
-              updatePoolMutation.mutate({ id: pool.id, [field]: value });
-            }}
+            defaultValue={pool.range}
+            onValueChange={(value) => handleRangeChange(pool, value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-[200px]">
               <SelectValue placeholder="Select Range" />
             </SelectTrigger>
             <SelectContent>
