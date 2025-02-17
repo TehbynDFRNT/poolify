@@ -5,10 +5,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { Link } from "react-router-dom";
 import type { Pool } from "@/types/pool";
 import AddPoolForm from "@/components/pools/AddPoolForm";
 import PoolTable from "@/components/pools/PoolTable";
 import { PoolRangeManager } from "@/components/pools/PoolRangeManager";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const PoolSpecifications = () => {
   const [showForm, setShowForm] = useState(false);
@@ -39,6 +46,20 @@ const PoolSpecifications = () => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <Link to="/" className="transition-colors hover:text-foreground">
+              Home
+            </Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            Pool Specifications
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
       <Card>
         <CardHeader>
           <CardTitle>Pool Range Order</CardTitle>
