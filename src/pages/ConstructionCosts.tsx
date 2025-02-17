@@ -22,42 +22,43 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Pencil, Plus } from "lucide-react";
-import type { DigType } from "@/types/dig-type";
-import type { PoolDigType } from "@/types/pool-dig-type";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
+import type { PoolExcavationType } from "@/types/pool-excavation-type";
+import { formatCurrency } from "@/utils/format";
 
 const ConstructionCosts = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingDigType, setEditingDigType] = useState<DigType | null>(null);
+  const [editingDigType, setEditingDigType] = useState<ExcavationDigType | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: digTypes, isLoading: isLoadingDigTypes } = useQuery({
-    queryKey: ["dig-types"],
+    queryKey: ["excavation-dig-types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("dig_types")
+        .from("excavation_dig_types")
         .select("*")
         .order("name");
       
       if (error) throw error;
-      return data as DigType[];
+      return data as ExcavationDigType[];
     },
   });
 
   const { data: poolDigTypes, isLoading: isLoadingPools } = useQuery({
-    queryKey: ["pool-dig-types"],
+    queryKey: ["pool-excavation-types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("pool_dig_types")
+        .from("pool_excavation_types")
         .select(`
           *,
-          dig_type:dig_types(name)
+          dig_type:excavation_dig_types(name)
         `)
         .order("range")
         .order("name");
       
       if (error) throw error;
-      return data as PoolDigType[];
+      return data as PoolExcavationType[];
     },
   });
 
@@ -78,7 +79,7 @@ const ConstructionCosts = () => {
     try {
       if (editingDigType) {
         const { error } = await supabase
-          .from("dig_types")
+          .from("excavation_dig_types")
           .update(digTypeData)
           .eq("id", editingDigType.id);
         
@@ -89,7 +90,7 @@ const ConstructionCosts = () => {
         });
       } else {
         const { error } = await supabase
-          .from("dig_types")
+          .from("excavation_dig_types")
           .insert([digTypeData]);
         
         if (error) throw error;
@@ -99,7 +100,7 @@ const ConstructionCosts = () => {
         });
       }
       
-      queryClient.invalidateQueries({ queryKey: ["dig-types"] });
+      queryClient.invalidateQueries({ queryKey: ["excavation-dig-types"] });
       setIsDialogOpen(false);
       setEditingDigType(null);
       form.reset();
@@ -112,28 +113,13 @@ const ConstructionCosts = () => {
     }
   };
 
-  const calculateTotalCost = (digType: DigType) => {
+  const calculateTotalCost = (digType: ExcavationDigType) => {
     const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
     const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-    const totalCost = truckCost + excavationCost;
-    
-    // Log the breakdown of calculations
-    console.log(`Calculation breakdown for ${digType.name}:`);
-    console.log(`Truck Cost: ${digType.truck_count} trucks × $${digType.truck_hourly_rate}/hr × ${digType.truck_hours}hrs = $${truckCost}`);
-    console.log(`Excavation Cost: $${digType.excavation_hourly_rate}/hr × ${digType.excavation_hours}hrs = $${excavationCost}`);
-    console.log(`Total Cost: $${totalCost}`);
-    
-    return totalCost;
+    return truckCost + excavationCost;
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD',
-    }).format(amount);
-  };
-
-  const handleEdit = (digType: DigType) => {
+  const handleEdit = (digType: ExcavationDigType) => {
     setEditingDigType(digType);
     setIsDialogOpen(true);
   };
@@ -149,7 +135,7 @@ const ConstructionCosts = () => {
     }
     acc[pool.range].push(pool);
     return acc;
-  }, {} as Record<string, PoolDigType[]>);
+  }, {} as Record<string, PoolExcavationType[]>);
 
   return (
     <div className="container mx-auto py-8 space-y-8">
@@ -307,7 +293,7 @@ const ConstructionCosts = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Pool Dig Types</CardTitle>
+          <CardTitle>Pool Excavation Types</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
