@@ -36,7 +36,7 @@ export type Database = {
         }
         Relationships: []
       }
-      dig_types: {
+      excavation_dig_types: {
         Row: {
           created_at: string
           excavation_hourly_rate: number
@@ -99,7 +99,7 @@ export type Database = {
         }
         Relationships: []
       }
-      pool_dig_types: {
+      pool_excavation_types: {
         Row: {
           created_at: string
           dig_type_id: string
@@ -123,10 +123,10 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "pool_dig_types_dig_type_id_fkey"
+            foreignKeyName: "pool_excavation_types_dig_type_id_fkey"
             columns: ["dig_type_id"]
             isOneToOne: false
-            referencedRelation: "dig_types"
+            referencedRelation: "excavation_dig_types"
             referencedColumns: ["id"]
           },
         ]
