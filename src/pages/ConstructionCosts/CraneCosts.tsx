@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -17,7 +16,7 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Crane } from "lucide-react";
+import { Construction } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
@@ -107,7 +106,7 @@ const CraneCosts = () => {
             <h1 className="text-2xl font-semibold text-gray-900">Crane Costs</h1>
             <p className="text-gray-500 mt-1">Manage crane hire costs for pool installations</p>
           </div>
-          <Crane className="h-6 w-6 text-gray-500" />
+          <Construction className="h-6 w-6 text-gray-500" />
         </div>
 
         <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
