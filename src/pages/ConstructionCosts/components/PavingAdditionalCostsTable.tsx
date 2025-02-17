@@ -21,9 +21,7 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
   const [costs, setCosts] = useState(initialCosts);
   const [editingId, setEditingId] = useState<string | null>(null);
 
-  const handleCellClick = (id: string, name: string) => {
-    // Don't allow editing of Dust
-    if (name === 'Dust') return;
+  const handleCellClick = (id: string) => {
     setEditingId(id);
   };
 
@@ -55,9 +53,8 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
 
   const renderAmount = (cost: PavingAdditionalCost) => {
     const isEditing = editingId === cost.id;
-    const isDust = cost.name === 'Dust';
 
-    if (isEditing && !isDust) {
+    if (isEditing) {
       return (
         <Input
           type="number"
@@ -76,8 +73,8 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
 
     return (
       <div
-        className={`p-1 rounded ${!isDust ? 'cursor-pointer hover:bg-gray-100' : ''}`}
-        onClick={() => handleCellClick(cost.id, cost.name)}
+        className="cursor-pointer hover:bg-gray-100 p-1 rounded"
+        onClick={() => handleCellClick(cost.id)}
       >
         {formatCurrency(cost.amount)}
       </div>
@@ -116,7 +113,11 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
               <TableCell className="text-right">
                 {concreteCost ? renderAmount(concreteCost) : formatCurrency(0)}
               </TableCell>
-              <TableCell className="text-right">{formatCurrency(dustCost)}</TableCell>
+              <TableCell className="text-right cursor-pointer hover:bg-gray-100">
+                {costs.find(cost => cost.name === 'Dust') ? 
+                  renderAmount(costs.find(cost => cost.name === 'Dust')!) 
+                  : formatCurrency(0)}
+              </TableCell>
               <TableCell className="text-right font-medium">{formatCurrency(concreteTotal)}</TableCell>
             </TableRow>
             {otherCosts.map((cost) => (
