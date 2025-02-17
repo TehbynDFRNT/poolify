@@ -29,7 +29,7 @@ const BobcatCosts = () => {
         .from("bobcat_costs")
         .select("*")
         .order("size_category")
-        .order("day_number");
+        .order("day_code");
 
       if (error) {
         throw error;
@@ -90,14 +90,14 @@ const BobcatCosts = () => {
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Day</TableHead>
+                        <TableHead>Day Code</TableHead>
                         <TableHead className="text-right">Price</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {costs.map((cost) => (
                         <TableRow key={cost.id}>
-                          <TableCell>Day {cost.day_number}</TableCell>
+                          <TableCell>{cost.day_code}</TableCell>
                           <TableCell className="text-right">{formatCurrency(cost.price)}</TableCell>
                         </TableRow>
                       ))}

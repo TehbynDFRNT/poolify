@@ -2,7 +2,7 @@
 export interface BobcatCost {
   id: string;
   size_category: string;
-  day_number: number;
+  day_code: string;
   price: number;
   created_at: string;
 }

@@ -12,21 +12,21 @@ export type Database = {
       bobcat_costs: {
         Row: {
           created_at: string
-          day_number: number
+          day_code: string
           id: string
           price: number
           size_category: string
         }
         Insert: {
           created_at?: string
-          day_number: number
+          day_code: string
           id?: string
           price: number
           size_category: string
         }
         Update: {
           created_at?: string
-          day_number?: number
+          day_code?: string
           id?: string
           price?: number
           size_category?: string
