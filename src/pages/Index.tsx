@@ -60,6 +60,7 @@ const Index = () => {
             icon={Construction}
             title="Construction Costs"
             description="Manage construction materials and associated costs"
+            onClick={() => navigate('/construction-costs')}
           />
           
           <DataSection
