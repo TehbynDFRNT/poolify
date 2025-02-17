@@ -2,6 +2,11 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Database, Filter, Construction, Droplets, Calculator, PlusCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+} from "@/components/ui/breadcrumb";
 
 const DataSection = ({ icon: Icon, title, description, isActive = true, onClick }: { 
   icon: any, 
@@ -35,6 +40,14 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="max-w-5xl mx-auto animate-fadeIn">
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              Dashboard
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Data Management</h1>
           <p className="text-gray-600">
