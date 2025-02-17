@@ -101,7 +101,7 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Item</TableHead>
+              <TableHead className="text-left">Item</TableHead>
               <TableHead className="text-right">Base Cost</TableHead>
               <TableHead className="text-right">Dust</TableHead>
               <TableHead className="text-right">Total</TableHead>
@@ -109,7 +109,7 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="font-medium">Concrete Cost</TableCell>
+              <TableCell className="font-medium text-left">Concrete Cost</TableCell>
               <TableCell className="text-right">
                 {concreteCost ? renderAmount(concreteCost) : formatCurrency(0)}
               </TableCell>
@@ -118,7 +118,7 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
             </TableRow>
             {otherCosts.map((cost) => (
               <TableRow key={cost.id}>
-                <TableCell className="font-medium">{cost.name}</TableCell>
+                <TableCell className="font-medium text-left">{cost.name}</TableCell>
                 <TableCell className="text-right">{renderAmount(cost)}</TableCell>
                 <TableCell className="text-right">-</TableCell>
                 <TableCell className="text-right">{formatCurrency(cost.amount)}</TableCell>
@@ -134,13 +134,13 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Item</TableHead>
+                <TableHead className="text-left">Item</TableHead>
                 <TableHead className="text-right">Cost</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               <TableRow>
-                <TableCell className="font-medium">{concretePump.name}</TableCell>
+                <TableCell className="font-medium text-left">{concretePump.name}</TableCell>
                 <TableCell className="text-right">{renderAmount(concretePump)}</TableCell>
               </TableRow>
             </TableBody>
