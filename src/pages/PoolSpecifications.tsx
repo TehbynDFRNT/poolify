@@ -3,96 +3,239 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { formatCurrency } from "@/utils/format";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { FileUpload } from "@/components/FileUpload";
 import type { Pool } from "@/types/pool";
-
-interface PoolInsert {
-  name: string;
-  dig_level: string | null;
-  pool_type_id: string | null;
-  length: number;
-  width: number;
-  depth_shallow: number;
-  depth_deep: number;
-  waterline_l_m: number | null;
-  volume_liters: number | null;
-  salt_volume_bags: number | null;
-  salt_volume_bags_fixed: number | null;
-  weight_kg: number | null;
-  minerals_kg_initial: number | null;
-  minerals_kg_topup: number | null;
-  buy_price_ex_gst: number | null;
-  buy_price_inc_gst: number | null;
-}
 
 const PoolSpecifications = () => {
   const queryClient = useQueryClient();
+  const [showForm, setShowForm] = useState(false);
+  const [newPool, setNewPool] = useState<Partial<Pool>>({
+    name: "",
+    length: 0,
+    width: 0,
+    depth_shallow: 0,
+    depth_deep: 0,
+    waterline_l_m: 0,
+    volume_liters: 0,
+    salt_volume_bags: 0,
+    salt_volume_bags_fixed: 0,
+    weight_kg: 0,
+    minerals_kg_initial: 0,
+    minerals_kg_topup: 0,
+    buy_price_ex_gst: 0,
+    buy_price_inc_gst: 0,
+  });
 
-  const importMutation = useMutation({
-    mutationFn: async (pools: PoolInsert[]) => {
+  const { data: pools } = useQuery({
+    queryKey: ["pool-specifications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_specifications")
+        .select("*")
+        .order("name");
+      if (error) throw error;
+      return data as Pool[];
+    },
+  });
+
+  const addPoolMutation = useMutation({
+    mutationFn: async (pool: Partial<Pool>) => {
       const { error } = await supabase
         .from("pool_specifications")
-        .insert(pools);
+        .insert([pool]);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
-      toast.success("Pool specifications imported successfully");
+      toast.success("Pool specification added successfully");
+      setShowForm(false);
+      setNewPool({
+        name: "",
+        length: 0,
+        width: 0,
+        depth_shallow: 0,
+        depth_deep: 0,
+        waterline_l_m: 0,
+        volume_liters: 0,
+        salt_volume_bags: 0,
+        salt_volume_bags_fixed: 0,
+        weight_kg: 0,
+        minerals_kg_initial: 0,
+        minerals_kg_topup: 0,
+        buy_price_ex_gst: 0,
+        buy_price_inc_gst: 0,
+      });
     },
     onError: (error) => {
-      toast.error("Failed to import pool specifications");
+      toast.error("Failed to add pool specification");
       console.error(error);
     },
   });
 
-  const handleImport = (data: any[][]) => {
-    try {
-      // Skip header row and map Excel data to pool specifications
-      const pools: PoolInsert[] = data.slice(1).map((row, index) => {
-        const length = Number(row[3]);
-        const width = Number(row[4]);
-        const depth_shallow = Number(row[5]);
-        const depth_deep = Number(row[6]);
-
-        if (isNaN(length) || isNaN(width) || isNaN(depth_shallow) || isNaN(depth_deep)) {
-          throw new Error(`Row ${index + 2}: Length, width, and depths must be valid numbers`);
-        }
-
-        return {
-          name: row[0] || 'Unnamed Pool',
-          dig_level: row[1] || null,
-          pool_type_id: row[2] || null,
-          length,
-          width,
-          depth_shallow,
-          depth_deep,
-          waterline_l_m: row[7] ? Number(row[7]) : null,
-          volume_liters: row[8] ? Number(row[8]) : null,
-          salt_volume_bags: row[9] ? Number(row[9]) : null,
-          salt_volume_bags_fixed: row[10] ? Number(row[10]) : null,
-          weight_kg: row[11] ? Number(row[11]) : null,
-          minerals_kg_initial: row[12] ? Number(row[12]) : null,
-          minerals_kg_topup: row[13] ? Number(row[13]) : null,
-          buy_price_ex_gst: row[14] ? Number(row[14]) : null,
-          buy_price_inc_gst: row[15] ? Number(row[15]) : null,
-        };
-      });
-
-      importMutation.mutate(pools);
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to process data");
-    }
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    addPoolMutation.mutate(newPool);
   };
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 space-y-8">
       <Card>
-        <CardHeader>
-          <CardTitle>Import Pool Specifications</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Pool Specifications</CardTitle>
+          <Button onClick={() => setShowForm(!showForm)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Pool
+          </Button>
         </CardHeader>
         <CardContent>
-          <FileUpload onSheetData={handleImport} />
+          {showForm && (
+            <form onSubmit={handleSubmit} className="grid grid-cols-4 gap-4 mb-8">
+              <Input
+                placeholder="Name"
+                value={newPool.name}
+                onChange={(e) => setNewPool({ ...newPool, name: e.target.value })}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Length (m)"
+                value={newPool.length}
+                onChange={(e) => setNewPool({ ...newPool, length: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Width (m)"
+                value={newPool.width}
+                onChange={(e) => setNewPool({ ...newPool, width: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Shallow End (m)"
+                value={newPool.depth_shallow}
+                onChange={(e) => setNewPool({ ...newPool, depth_shallow: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Deep End (m)"
+                value={newPool.depth_deep}
+                onChange={(e) => setNewPool({ ...newPool, depth_deep: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                step="0.1"
+                placeholder="Waterline L/M"
+                value={newPool.waterline_l_m || ""}
+                onChange={(e) => setNewPool({ ...newPool, waterline_l_m: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                placeholder="Water Volume (L)"
+                value={newPool.volume_liters || ""}
+                onChange={(e) => setNewPool({ ...newPool, volume_liters: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                placeholder="Salt Volume Bags"
+                value={newPool.salt_volume_bags || ""}
+                onChange={(e) => setNewPool({ ...newPool, salt_volume_bags: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                placeholder="Salt Volume Fixed"
+                value={newPool.salt_volume_bags_fixed || ""}
+                onChange={(e) => setNewPool({ ...newPool, salt_volume_bags_fixed: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                placeholder="Weight (KG)"
+                value={newPool.weight_kg || ""}
+                onChange={(e) => setNewPool({ ...newPool, weight_kg: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                placeholder="Minerals Initial"
+                value={newPool.minerals_kg_initial || ""}
+                onChange={(e) => setNewPool({ ...newPool, minerals_kg_initial: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                placeholder="Minerals Topup"
+                value={newPool.minerals_kg_topup || ""}
+                onChange={(e) => setNewPool({ ...newPool, minerals_kg_topup: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Buy Price (ex GST)"
+                value={newPool.buy_price_ex_gst || ""}
+                onChange={(e) => setNewPool({ ...newPool, buy_price_ex_gst: Number(e.target.value) })}
+              />
+              <Input
+                type="number"
+                step="0.01"
+                placeholder="Buy Price (inc GST)"
+                value={newPool.buy_price_inc_gst || ""}
+                onChange={(e) => setNewPool({ ...newPool, buy_price_inc_gst: Number(e.target.value) })}
+              />
+              <Button type="submit" className="col-span-4">Add Pool</Button>
+            </form>
+          )}
+          
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Length</TableHead>
+                  <TableHead>Width</TableHead>
+                  <TableHead>Shallow End</TableHead>
+                  <TableHead>Deep End</TableHead>
+                  <TableHead>Waterline L/M</TableHead>
+                  <TableHead>Water Volume (L)</TableHead>
+                  <TableHead>Salt Bags</TableHead>
+                  <TableHead>Salt Fixed</TableHead>
+                  <TableHead>Weight (KG)</TableHead>
+                  <TableHead>Minerals Initial/Topup</TableHead>
+                  <TableHead>Buy Price (ex GST)</TableHead>
+                  <TableHead>Buy Price (inc GST)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pools?.map((pool) => (
+                  <TableRow key={pool.id}>
+                    <TableCell>{pool.name}</TableCell>
+                    <TableCell>{pool.length}m</TableCell>
+                    <TableCell>{pool.width}m</TableCell>
+                    <TableCell>{pool.depth_shallow}m</TableCell>
+                    <TableCell>{pool.depth_deep}m</TableCell>
+                    <TableCell>{pool.waterline_l_m}</TableCell>
+                    <TableCell>{pool.volume_liters}</TableCell>
+                    <TableCell>{pool.salt_volume_bags}</TableCell>
+                    <TableCell>{pool.salt_volume_bags_fixed}</TableCell>
+                    <TableCell>{pool.weight_kg}</TableCell>
+                    <TableCell>{pool.minerals_kg_initial}/{pool.minerals_kg_topup}</TableCell>
+                    <TableCell>{formatCurrency(pool.buy_price_ex_gst || 0)}</TableCell>
+                    <TableCell>{formatCurrency(pool.buy_price_inc_gst || 0)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
       </Card>
     </div>
