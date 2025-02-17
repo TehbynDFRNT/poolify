@@ -99,6 +99,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_dig_types: {
+        Row: {
+          created_at: string
+          dig_type_id: string
+          id: string
+          name: string
+          range: string
+        }
+        Insert: {
+          created_at?: string
+          dig_type_id: string
+          id?: string
+          name: string
+          range: string
+        }
+        Update: {
+          created_at?: string
+          dig_type_id?: string
+          id?: string
+          name?: string
+          range?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_dig_types_dig_type_id_fkey"
+            columns: ["dig_type_id"]
+            isOneToOne: false
+            referencedRelation: "dig_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_specifications: {
         Row: {
           buy_price_ex_gst: number | null

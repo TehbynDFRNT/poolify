@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Pencil, Plus } from "lucide-react";
 import type { DigType } from "@/types/dig-type";
+import type { PoolDigType } from "@/types/pool-dig-type";
 
 const ConstructionCosts = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -29,7 +31,7 @@ const ConstructionCosts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: digTypes, isLoading } = useQuery({
+  const { data: digTypes, isLoading: isLoadingDigTypes } = useQuery({
     queryKey: ["dig-types"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,6 +41,23 @@ const ConstructionCosts = () => {
       
       if (error) throw error;
       return data as DigType[];
+    },
+  });
+
+  const { data: poolDigTypes, isLoading: isLoadingPools } = useQuery({
+    queryKey: ["pool-dig-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_dig_types")
+        .select(`
+          *,
+          dig_type:dig_types(name)
+        `)
+        .order("range")
+        .order("name");
+      
+      if (error) throw error;
+      return data as PoolDigType[];
     },
   });
 
@@ -119,15 +138,24 @@ const ConstructionCosts = () => {
     setIsDialogOpen(true);
   };
 
-  if (isLoading) {
+  if (isLoadingDigTypes || isLoadingPools) {
     return <div>Loading...</div>;
   }
 
+  // Group pools by range
+  const poolsByRange = poolDigTypes?.reduce((acc, pool) => {
+    if (!acc[pool.range]) {
+      acc[pool.range] = [];
+    }
+    acc[pool.range].push(pool);
+    return acc;
+  }, {} as Record<string, PoolDigType[]>);
+
   return (
-    <div className="container mx-auto py-8">
+    <div className="container mx-auto py-8 space-y-8">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Construction Costs</CardTitle>
+          <CardTitle>Dig Types</CardTitle>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
               <Button 
@@ -274,6 +302,44 @@ const ConstructionCosts = () => {
               ))}
             </TableBody>
           </Table>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Dig Types</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-8">
+            {poolsByRange && Object.entries(poolsByRange).map(([range, pools]) => (
+              <div key={range} className="space-y-4">
+                <h3 className="text-lg font-semibold">{range}</h3>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Pool Name</TableHead>
+                      <TableHead>Dig Type</TableHead>
+                      <TableHead>Total Cost</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pools.map((pool) => {
+                      const digType = digTypes?.find(dt => dt.id === pool.dig_type_id);
+                      return (
+                        <TableRow key={pool.id}>
+                          <TableCell>{pool.name}</TableCell>
+                          <TableCell>{pool.dig_type?.name}</TableCell>
+                          <TableCell className="font-semibold">
+                            {digType ? formatCurrency(calculateTotalCost(digType)) : 'N/A'}
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>
