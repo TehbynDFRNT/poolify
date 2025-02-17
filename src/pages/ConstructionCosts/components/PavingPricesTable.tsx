@@ -15,6 +15,11 @@ interface PavingPricesTableProps {
 }
 
 export const PavingPricesTable = ({ prices }: PavingPricesTableProps) => {
+  const calculateTotal = (categoryIndex: 1 | 2 | 3 | 4) => {
+    const key = `category_${categoryIndex}_price` as keyof PavingPrice;
+    return prices.reduce((sum, price) => sum + price[key], 0);
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -36,6 +41,13 @@ export const PavingPricesTable = ({ prices }: PavingPricesTableProps) => {
             <TableCell className="text-right">{formatCurrency(price.category_4_price)}</TableCell>
           </TableRow>
         ))}
+        <TableRow className="border-t-2">
+          <TableCell className="font-bold">Total</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(1))}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(2))}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(3))}</TableCell>
+          <TableCell className="text-right font-bold">{formatCurrency(calculateTotal(4))}</TableCell>
+        </TableRow>
       </TableBody>
     </Table>
   );
