@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import PoolSpecifications from "./pages/PoolSpecifications";
 import ConstructionCosts from "./pages/ConstructionCosts";
 import Excavation from "./pages/ConstructionCosts/Excavation";
+import PavingRetaining from "./pages/ConstructionCosts/PavingRetaining";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/pool-specifications" element={<PoolSpecifications />} />
           <Route path="/construction-costs" element={<ConstructionCosts />} />
           <Route path="/excavation" element={<Excavation />} />
+          <Route path="/paving-retaining" element={<PavingRetaining />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
