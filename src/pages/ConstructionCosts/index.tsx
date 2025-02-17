@@ -15,7 +15,7 @@ const ConstructionCosts = () => {
           <Excavation />
         </TabsContent>
         {/* Add more tab content sections here */}
-      </TabsContent>
+      </Tabs>
     </div>
   );
 };
