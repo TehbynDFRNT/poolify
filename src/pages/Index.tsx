@@ -67,6 +67,7 @@ const Index = () => {
             icon={Filter}
             title="Filtration Systems"
             description="Configure filtration options and equipment specifications"
+            onClick={() => navigate('/filtration-systems')}
           />
           
           <DataSection
