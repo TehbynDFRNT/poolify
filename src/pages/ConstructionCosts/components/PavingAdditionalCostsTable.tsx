@@ -3,6 +3,8 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
@@ -79,15 +81,36 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
     );
   };
 
+  // Find concrete cost and dust cost
+  const concreteCost = costs.find(cost => cost.name === 'Concrete Cost')?.amount || 0;
+  const dustCost = costs.find(cost => cost.name === 'Dust')?.amount || 0;
+  const concreteTotal = concreteCost + dustCost;
+
   return (
     <div className="mt-8">
       <h2 className="text-lg font-medium text-gray-900 mb-4">Additional Costs</h2>
       <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Item</TableHead>
+            <TableHead className="text-right">Base Cost</TableHead>
+            <TableHead className="text-right">Dust</TableHead>
+            <TableHead className="text-right">Total</TableHead>
+          </TableRow>
+        </TableHeader>
         <TableBody>
-          {costs.map((cost) => (
+          <TableRow>
+            <TableCell className="font-medium">Concrete Cost</TableCell>
+            <TableCell className="text-right">{formatCurrency(concreteCost)}</TableCell>
+            <TableCell className="text-right">{formatCurrency(dustCost)}</TableCell>
+            <TableCell className="text-right font-medium">{formatCurrency(concreteTotal)}</TableCell>
+          </TableRow>
+          {costs.filter(cost => !['Concrete Cost', 'Dust'].includes(cost.name)).map((cost) => (
             <TableRow key={cost.id}>
               <TableCell className="font-medium">{cost.name}</TableCell>
               <TableCell className="text-right">{renderAmount(cost)}</TableCell>
+              <TableCell className="text-right">-</TableCell>
+              <TableCell className="text-right">{formatCurrency(cost.amount)}</TableCell>
             </TableRow>
           ))}
         </TableBody>
