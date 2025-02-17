@@ -62,6 +62,8 @@ const poolSchema = z.object({
   buy_price_inc_gst: z.coerce.number().nullable(),
 });
 
+type PoolFormValues = z.infer<typeof poolSchema>;
+
 const PoolSpecifications = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingPool, setEditingPool] = useState<any>(null);
@@ -117,10 +119,30 @@ const PoolSpecifications = () => {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof poolSchema>) => {
+    mutationFn: async (values: PoolFormValues) => {
+      // Ensure all required fields are present
+      const poolData = {
+        name: values.name,
+        dig_level: values.dig_level,
+        pool_type_id: values.pool_type_id,
+        length: values.length,
+        width: values.width,
+        depth_shallow: values.depth_shallow,
+        depth_deep: values.depth_deep,
+        waterline_l_m: values.waterline_l_m,
+        volume_liters: values.volume_liters,
+        salt_volume_bags: values.salt_volume_bags,
+        salt_volume_bags_fixed: values.salt_volume_bags_fixed,
+        weight_kg: values.weight_kg,
+        minerals_kg_initial: values.minerals_kg_initial,
+        minerals_kg_topup: values.minerals_kg_topup,
+        buy_price_ex_gst: values.buy_price_ex_gst,
+        buy_price_inc_gst: values.buy_price_inc_gst,
+      };
+
       const { error } = await supabase
         .from("pool_specifications")
-        .insert([values]);
+        .insert([poolData]);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -136,10 +158,30 @@ const PoolSpecifications = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (values: z.infer<typeof poolSchema>) => {
+    mutationFn: async (values: PoolFormValues) => {
+      // Ensure all required fields are present
+      const poolData = {
+        name: values.name,
+        dig_level: values.dig_level,
+        pool_type_id: values.pool_type_id,
+        length: values.length,
+        width: values.width,
+        depth_shallow: values.depth_shallow,
+        depth_deep: values.depth_deep,
+        waterline_l_m: values.waterline_l_m,
+        volume_liters: values.volume_liters,
+        salt_volume_bags: values.salt_volume_bags,
+        salt_volume_bags_fixed: values.salt_volume_bags_fixed,
+        weight_kg: values.weight_kg,
+        minerals_kg_initial: values.minerals_kg_initial,
+        minerals_kg_topup: values.minerals_kg_topup,
+        buy_price_ex_gst: values.buy_price_ex_gst,
+        buy_price_inc_gst: values.buy_price_inc_gst,
+      };
+
       const { error } = await supabase
         .from("pool_specifications")
-        .update(values)
+        .update(poolData)
         .eq("id", editingPool.id);
       if (error) throw error;
     },
