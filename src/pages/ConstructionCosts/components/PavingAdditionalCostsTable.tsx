@@ -86,37 +86,67 @@ export const PavingAdditionalCostsTable = ({ costs: initialCosts }: PavingAdditi
   const dustCost = costs.find(cost => cost.name === 'Dust')?.amount || 0;
   const concreteTotal = (concreteCost?.amount || 0) + dustCost;
 
+  // Separate other costs excluding Concrete Cost, Dust, and Concrete Pump
+  const otherCosts = costs.filter(cost => 
+    !['Concrete Cost', 'Dust', 'Concrete Pump'].includes(cost.name)
+  );
+
+  // Find concrete pump cost separately
+  const concretePump = costs.find(cost => cost.name === 'Concrete Pump');
+
   return (
-    <div className="mt-8">
-      <h2 className="text-lg font-medium text-gray-900 mb-4">Additional Costs</h2>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Item</TableHead>
-            <TableHead className="text-right">Base Cost</TableHead>
-            <TableHead className="text-right">Dust</TableHead>
-            <TableHead className="text-right">Total</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          <TableRow>
-            <TableCell className="font-medium">Concrete Cost</TableCell>
-            <TableCell className="text-right">
-              {concreteCost ? renderAmount(concreteCost) : formatCurrency(0)}
-            </TableCell>
-            <TableCell className="text-right">{formatCurrency(dustCost)}</TableCell>
-            <TableCell className="text-right font-medium">{formatCurrency(concreteTotal)}</TableCell>
-          </TableRow>
-          {costs.filter(cost => !['Concrete Cost', 'Dust'].includes(cost.name)).map((cost) => (
-            <TableRow key={cost.id}>
-              <TableCell className="font-medium">{cost.name}</TableCell>
-              <TableCell className="text-right">{renderAmount(cost)}</TableCell>
-              <TableCell className="text-right">-</TableCell>
-              <TableCell className="text-right">{formatCurrency(cost.amount)}</TableCell>
+    <div className="space-y-8">
+      <div>
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Additional Costs</h2>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead className="text-right">Base Cost</TableHead>
+              <TableHead className="text-right">Dust</TableHead>
+              <TableHead className="text-right">Total</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            <TableRow>
+              <TableCell className="font-medium">Concrete Cost</TableCell>
+              <TableCell className="text-right">
+                {concreteCost ? renderAmount(concreteCost) : formatCurrency(0)}
+              </TableCell>
+              <TableCell className="text-right">{formatCurrency(dustCost)}</TableCell>
+              <TableCell className="text-right font-medium">{formatCurrency(concreteTotal)}</TableCell>
+            </TableRow>
+            {otherCosts.map((cost) => (
+              <TableRow key={cost.id}>
+                <TableCell className="font-medium">{cost.name}</TableCell>
+                <TableCell className="text-right">{renderAmount(cost)}</TableCell>
+                <TableCell className="text-right">-</TableCell>
+                <TableCell className="text-right">{formatCurrency(cost.amount)}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+
+      {concretePump && (
+        <div>
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Concrete Pump</h2>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Item</TableHead>
+                <TableHead className="text-right">Cost</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">{concretePump.name}</TableCell>
+                <TableCell className="text-right">{renderAmount(concretePump)}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 };
