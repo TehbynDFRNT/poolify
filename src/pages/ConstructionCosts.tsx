@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -97,7 +96,15 @@ const ConstructionCosts = () => {
   const calculateTotalCost = (digType: DigType) => {
     const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
     const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-    return truckCost + excavationCost;
+    const totalCost = truckCost + excavationCost;
+    
+    // Log the breakdown of calculations
+    console.log(`Calculation breakdown for ${digType.name}:`);
+    console.log(`Truck Cost: ${digType.truck_count} trucks × $${digType.truck_hourly_rate}/hr × ${digType.truck_hours}hrs = $${truckCost}`);
+    console.log(`Excavation Cost: $${digType.excavation_hourly_rate}/hr × ${digType.excavation_hours}hrs = $${excavationCost}`);
+    console.log(`Total Cost: $${totalCost}`);
+    
+    return totalCost;
   };
 
   const formatCurrency = (amount: number) => {
