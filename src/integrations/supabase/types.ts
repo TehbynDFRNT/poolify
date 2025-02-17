@@ -68,33 +68,63 @@ export type Database = {
       }
       pool_specifications: {
         Row: {
+          buy_price_ex_gst: number | null
+          buy_price_inc_gst: number | null
           created_at: string
           depth_deep: number
           depth_shallow: number
+          dig_level: string | null
           id: string
           length: number
+          minerals_kg_initial: number | null
+          minerals_kg_topup: number | null
+          name: string
           pool_type_id: string | null
+          salt_volume_bags: number | null
+          salt_volume_bags_fixed: number | null
           volume_liters: number | null
+          waterline_l_m: number | null
+          weight_kg: number | null
           width: number
         }
         Insert: {
+          buy_price_ex_gst?: number | null
+          buy_price_inc_gst?: number | null
           created_at?: string
           depth_deep: number
           depth_shallow: number
+          dig_level?: string | null
           id?: string
           length: number
+          minerals_kg_initial?: number | null
+          minerals_kg_topup?: number | null
+          name?: string
           pool_type_id?: string | null
+          salt_volume_bags?: number | null
+          salt_volume_bags_fixed?: number | null
           volume_liters?: number | null
+          waterline_l_m?: number | null
+          weight_kg?: number | null
           width: number
         }
         Update: {
+          buy_price_ex_gst?: number | null
+          buy_price_inc_gst?: number | null
           created_at?: string
           depth_deep?: number
           depth_shallow?: number
+          dig_level?: string | null
           id?: string
           length?: number
+          minerals_kg_initial?: number | null
+          minerals_kg_topup?: number | null
+          name?: string
           pool_type_id?: string | null
+          salt_volume_bags?: number | null
+          salt_volume_bags_fixed?: number | null
           volume_liters?: number | null
+          waterline_l_m?: number | null
+          weight_kg?: number | null
           width?: number
         }
         Relationships: [
