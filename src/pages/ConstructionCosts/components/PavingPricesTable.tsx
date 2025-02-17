@@ -37,8 +37,8 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
   };
 
   const handleCellClick = (id: string, category: 1 | 2 | 3 | 4) => {
-    const price = prices.find(p => p.name === 'Wastage Allowance');
-    if (price && price.id === id) {
+    const price = prices.find(p => p.id === id);
+    if (price?.name === 'Wastage Allowance') {
       setEditingCell({ id, category });
     }
   };
@@ -71,10 +71,6 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
     setEditingCell(null);
   };
 
-  const handleBlur = () => {
-    setEditingCell(null);
-  };
-
   const renderCell = (price: PavingPrice, category: 1 | 2 | 3 | 4) => {
     const key = `category_${category}_price` as keyof PavingPrice;
     const value = price[key];
@@ -101,7 +97,7 @@ export const PavingPricesTable = ({ prices: initialPrices }: PavingPricesTablePr
     return (
       <div
         className={isWastageAllowance ? "cursor-pointer hover:bg-gray-100 p-1 rounded" : ""}
-        onClick={() => isWastageAllowance && handleCellClick(price.id, category)}
+        onClick={() => handleCellClick(price.id, category)}
       >
         {formatCurrency(typeof value === 'number' ? value : 0)}
       </div>
