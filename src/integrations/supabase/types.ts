@@ -355,6 +355,30 @@ export type Database = {
         }
         Relationships: []
       }
+      traffic_control_costs: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       water_features: {
         Row: {
           created_at: string

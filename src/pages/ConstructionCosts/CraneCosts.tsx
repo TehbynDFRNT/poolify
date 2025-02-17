@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,16 +23,19 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { CraneCost } from "@/types/crane-cost";
+import type { TrafficControlCost } from "@/types/traffic-control-cost";
 import { Button } from "@/components/ui/button";
 import { AddCraneCostForm } from "./components/AddCraneCostForm";
+import { AddTrafficControlCostForm } from "./components/AddTrafficControlCostForm";
 
 const CraneCosts = () => {
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingPrice, setEditingPrice] = useState<string>("");
-  const [isAddingNew, setIsAddingNew] = useState(false);
+  const [isAddingNewCrane, setIsAddingNewCrane] = useState(false);
+  const [isAddingNewTraffic, setIsAddingNewTraffic] = useState(false);
 
-  const { data: costs, isLoading } = useQuery({
+  const { data: craneCosts, isLoading: isLoadingCrane } = useQuery({
     queryKey: ["crane-costs"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,12 +51,28 @@ const CraneCosts = () => {
     },
   });
 
-  const startEditing = (cost: CraneCost) => {
+  const { data: trafficCosts, isLoading: isLoadingTraffic } = useQuery({
+    queryKey: ["traffic-control-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("traffic_control_costs")
+        .select("*")
+        .order("display_order");
+
+      if (error) {
+        throw error;
+      }
+
+      return data as TrafficControlCost[];
+    },
+  });
+
+  const startEditing = (cost: CraneCost | TrafficControlCost) => {
     setEditingId(cost.id);
     setEditingPrice(cost.price.toString());
   };
 
-  const handleSave = async (cost: CraneCost) => {
+  const handleSave = async (cost: CraneCost | TrafficControlCost, table: string) => {
     try {
       const newPrice = parseFloat(editingPrice);
       if (isNaN(newPrice)) {
@@ -61,14 +81,14 @@ const CraneCosts = () => {
       }
 
       const { error } = await supabase
-        .from("crane_costs")
+        .from(table)
         .update({ price: newPrice })
         .eq("id", cost.id);
 
       if (error) throw error;
 
       toast.success("Price updated successfully");
-      queryClient.invalidateQueries({ queryKey: ["crane-costs"] });
+      queryClient.invalidateQueries({ queryKey: [table] });
     } catch (error) {
       toast.error("Failed to update price");
       console.error("Error updating price:", error);
@@ -95,7 +115,7 @@ const CraneCosts = () => {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <Link to="/crane-costs" className="transition-colors hover:text-foreground">
-                Crane Costs
+                Crane & Traffic Control Costs
               </Link>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -103,89 +123,172 @@ const CraneCosts = () => {
 
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Crane Costs</h1>
-            <p className="text-gray-500 mt-1">Manage crane hire costs for pool installations</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Crane & Traffic Control Costs</h1>
+            <p className="text-gray-500 mt-1">Manage crane hire and traffic control costs for pool installations</p>
           </div>
           <Construction className="h-6 w-6 text-gray-500" />
         </div>
 
-        <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-lg font-medium text-gray-900">Crane Hire Costs</h2>
-            <Button
-              variant="outline"
-              onClick={() => setIsAddingNew(!isAddingNew)}
-            >
-              {isAddingNew ? "Cancel" : "Add New Crane Cost"}
-            </Button>
-          </div>
-
-          {isAddingNew && (
-            <div className="mb-6 p-4 border rounded-lg bg-gray-50">
-              <AddCraneCostForm onSuccess={() => setIsAddingNew(false)} />
+        <div className="space-y-8">
+          {/* Crane Costs Section */}
+          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-medium text-gray-900">Crane Hire Costs</h2>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddingNewCrane(!isAddingNewCrane)}
+              >
+                {isAddingNewCrane ? "Cancel" : "Add New Crane Cost"}
+              </Button>
             </div>
-          )}
 
-          {isLoading ? (
-            <p className="text-gray-500">Loading costs...</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="w-[100px]"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {costs?.map((cost) => (
-                  <TableRow key={cost.id}>
-                    <TableCell>{cost.name}</TableCell>
-                    <TableCell className="text-right">
-                      {editingId === cost.id ? (
-                        <Input
-                          type="number"
-                          value={editingPrice}
-                          onChange={(e) => setEditingPrice(e.target.value)}
-                          className="w-32 ml-auto"
-                          step="0.01"
-                        />
-                      ) : (
-                        formatCurrency(cost.price)
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {editingId === cost.id ? (
-                        <div className="flex justify-end gap-2">
+            {isAddingNewCrane && (
+              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <AddCraneCostForm onSuccess={() => setIsAddingNewCrane(false)} />
+              </div>
+            )}
+
+            {isLoadingCrane ? (
+              <p className="text-gray-500">Loading costs...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="w-[100px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {craneCosts?.map((cost) => (
+                    <TableRow key={cost.id}>
+                      <TableCell>{cost.name}</TableCell>
+                      <TableCell className="text-right">
+                        {editingId === cost.id ? (
+                          <Input
+                            type="number"
+                            value={editingPrice}
+                            onChange={(e) => setEditingPrice(e.target.value)}
+                            className="w-32 ml-auto"
+                            step="0.01"
+                          />
+                        ) : (
+                          formatCurrency(cost.price)
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {editingId === cost.id ? (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingId(null)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(cost, "crane_costs")}
+                            >
+                              Save
+                            </Button>
+                          </div>
+                        ) : (
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setEditingId(null)}
+                            onClick={() => startEditing(cost)}
                           >
-                            Cancel
+                            Edit
                           </Button>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+
+          {/* Traffic Control Costs Section */}
+          <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg font-medium text-gray-900">Traffic Control Costs</h2>
+              <Button
+                variant="outline"
+                onClick={() => setIsAddingNewTraffic(!isAddingNewTraffic)}
+              >
+                {isAddingNewTraffic ? "Cancel" : "Add New Traffic Control Cost"}
+              </Button>
+            </div>
+
+            {isAddingNewTraffic && (
+              <div className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <AddTrafficControlCostForm onSuccess={() => setIsAddingNewTraffic(false)} />
+              </div>
+            )}
+
+            {isLoadingTraffic ? (
+              <p className="text-gray-500">Loading costs...</p>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Level</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead className="w-[100px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {trafficCosts?.map((cost) => (
+                    <TableRow key={cost.id}>
+                      <TableCell>{cost.name}</TableCell>
+                      <TableCell className="text-right">
+                        {editingId === cost.id ? (
+                          <Input
+                            type="number"
+                            value={editingPrice}
+                            onChange={(e) => setEditingPrice(e.target.value)}
+                            className="w-32 ml-auto"
+                            step="0.01"
+                          />
+                        ) : (
+                          formatCurrency(cost.price)
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {editingId === cost.id ? (
+                          <div className="flex justify-end gap-2">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setEditingId(null)}
+                            >
+                              Cancel
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleSave(cost, "traffic_control_costs")}
+                            >
+                              Save
+                            </Button>
+                          </div>
+                        ) : (
                           <Button
                             size="sm"
-                            onClick={() => handleSave(cost)}
+                            variant="outline"
+                            onClick={() => startEditing(cost)}
                           >
-                            Save
+                            Edit
                           </Button>
-                        </div>
-                      ) : (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => startEditing(cost)}
-                        >
-                          Edit
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
         </div>
       </div>
     </DashboardLayout>
