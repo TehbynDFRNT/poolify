@@ -233,6 +233,27 @@ export type Database = {
           },
         ]
       }
+      pool_ranges: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       pool_specifications: {
         Row: {
           buy_price_ex_gst: number | null
@@ -304,6 +325,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pool_types"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_specifications_range_fkey"
+            columns: ["range"]
+            isOneToOne: false
+            referencedRelation: "pool_ranges"
+            referencedColumns: ["name"]
           },
         ]
       }

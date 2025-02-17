@@ -8,6 +8,7 @@ import { Plus } from "lucide-react";
 import type { Pool } from "@/types/pool";
 import AddPoolForm from "@/components/pools/AddPoolForm";
 import PoolTable from "@/components/pools/PoolTable";
+import { PoolRangeManager } from "@/components/pools/PoolRangeManager";
 
 const PoolSpecifications = () => {
   const [showForm, setShowForm] = useState(false);
@@ -18,8 +19,7 @@ const PoolSpecifications = () => {
       const { data, error } = await supabase
         .from("pool_specifications")
         .select("*")
-        .order("range")
-        .order("name");
+        .order("range");
       if (error) throw error;
       return (data || []) as Pool[];
     },
@@ -27,6 +27,15 @@ const PoolSpecifications = () => {
 
   return (
     <div className="container mx-auto py-8 space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Range Order</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PoolRangeManager />
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Pool Specifications</CardTitle>

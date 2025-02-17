@@ -43,6 +43,7 @@ export interface Pool {
 
 export type NewPool = Omit<Pool, 'id' | 'created_at'>;
 
+// Note: POOL_RANGES is now managed in the database
 export const POOL_RANGES = [
   'Piazza',
   'Latin',
