@@ -9,7 +9,182 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      construction_materials: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price_per_unit: number
+          unit: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price_per_unit: number
+          unit: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price_per_unit?: number
+          unit?: string
+        }
+        Relationships: []
+      }
+      filtration_systems: {
+        Row: {
+          created_at: string
+          description: string | null
+          flow_rate: number | null
+          id: string
+          name: string
+          power_consumption: number | null
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          flow_rate?: number | null
+          id?: string
+          name: string
+          power_consumption?: number | null
+          price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          flow_rate?: number | null
+          id?: string
+          name?: string
+          power_consumption?: number | null
+          price?: number
+        }
+        Relationships: []
+      }
+      pool_specifications: {
+        Row: {
+          created_at: string
+          depth_deep: number
+          depth_shallow: number
+          id: string
+          length: number
+          pool_type_id: string | null
+          volume_liters: number | null
+          width: number
+        }
+        Insert: {
+          created_at?: string
+          depth_deep: number
+          depth_shallow: number
+          id?: string
+          length: number
+          pool_type_id?: string | null
+          volume_liters?: number | null
+          width: number
+        }
+        Update: {
+          created_at?: string
+          depth_deep?: number
+          depth_shallow?: number
+          id?: string
+          length?: number
+          pool_type_id?: string | null
+          volume_liters?: number | null
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_specifications_pool_type_id_fkey"
+            columns: ["pool_type_id"]
+            isOneToOne: false
+            referencedRelation: "pool_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      pricing_models: {
+        Row: {
+          base_price: number
+          created_at: string
+          description: string | null
+          id: string
+          labor_cost_percentage: number | null
+          materials_markup_percentage: number | null
+          name: string
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          labor_cost_percentage?: number | null
+          materials_markup_percentage?: number | null
+          name: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          labor_cost_percentage?: number | null
+          materials_markup_percentage?: number | null
+          name?: string
+        }
+        Relationships: []
+      }
+      water_features: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          power_requirement: number | null
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          power_requirement?: number | null
+          price: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          power_requirement?: number | null
+          price?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
