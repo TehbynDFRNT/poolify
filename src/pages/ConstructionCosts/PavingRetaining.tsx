@@ -11,10 +11,12 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Construction } from "lucide-react";
 import { PavingPricesTable } from "./components/PavingPricesTable";
+import { PavingAdditionalCostsTable } from "./components/PavingAdditionalCostsTable";
 import type { PavingPrice } from "@/types/paving-price";
+import type { PavingAdditionalCost } from "@/types/paving-additional-cost";
 
 const PavingRetaining = () => {
-  const { data: pavingPrices, isLoading } = useQuery({
+  const { data: pavingPrices, isLoading: isPricesLoading } = useQuery({
     queryKey: ["paving-prices"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -29,6 +31,24 @@ const PavingRetaining = () => {
       return data as PavingPrice[];
     },
   });
+
+  const { data: additionalCosts, isLoading: isCostsLoading } = useQuery({
+    queryKey: ["paving-additional-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("paving_additional_costs")
+        .select("*")
+        .order("name");
+
+      if (error) {
+        throw error;
+      }
+
+      return data as PavingAdditionalCost[];
+    },
+  });
+
+  const isLoading = isPricesLoading || isCostsLoading;
 
   return (
     <DashboardLayout>
@@ -65,10 +85,11 @@ const PavingRetaining = () => {
           <h2 className="text-lg font-medium text-gray-900 mb-4">Paving Prices</h2>
           {isLoading ? (
             <p className="text-gray-500">Loading prices...</p>
-          ) : pavingPrices ? (
-            <PavingPricesTable prices={pavingPrices} />
           ) : (
-            <p className="text-gray-500">No paving prices found.</p>
+            <>
+              {pavingPrices && <PavingPricesTable prices={pavingPrices} />}
+              {additionalCosts && <PavingAdditionalCostsTable costs={additionalCosts} />}
+            </>
           )}
         </div>
       </div>

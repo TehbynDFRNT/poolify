@@ -99,6 +99,27 @@ export type Database = {
         }
         Relationships: []
       }
+      paving_additional_costs: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       paving_prices: {
         Row: {
           category_1_price: number
