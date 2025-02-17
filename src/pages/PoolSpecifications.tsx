@@ -1,10 +1,10 @@
+
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
@@ -18,84 +18,19 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-
-const poolSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  dig_level: z.string().min(1, "Dig level is required"),
-  pool_type_id: z.string().min(1, "Pool type is required"),
-  length: z.coerce.number().min(0, "Length must be positive"),
-  width: z.coerce.number().min(0, "Width must be positive"),
-  depth_shallow: z.coerce.number().min(0, "Shallow depth must be positive"),
-  depth_deep: z.coerce.number().min(0, "Deep depth must be positive"),
-  waterline_l_m: z.coerce.number().nullable(),
-  volume_liters: z.coerce.number().nullable(),
-  salt_volume_bags: z.coerce.number().nullable(),
-  salt_volume_bags_fixed: z.coerce.number().nullable(),
-  weight_kg: z.coerce.number().nullable(),
-  minerals_kg_initial: z.coerce.number().nullable(),
-  minerals_kg_topup: z.coerce.number().nullable(),
-  buy_price_ex_gst: z.coerce.number().nullable(),
-  buy_price_inc_gst: z.coerce.number().nullable(),
-});
-
-type PoolFormValues = z.infer<typeof poolSchema>;
+import { PoolForm } from "@/components/pools/PoolForm";
+import { PoolTableRow } from "@/components/pools/PoolTable";
+import { PoolColumnGroups, columnGroups } from "@/components/pools/PoolColumnGroups";
+import type { Pool, PoolFormValues } from "@/types/pool";
 
 const PoolSpecifications = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [editingPool, setEditingPool] = useState<any>(null);
+  const [editingPool, setEditingPool] = useState<Pool | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<string[]>(["basic-info", "dimensions", "volume-info", "pricing"]);
   const queryClient = useQueryClient();
-
-  const form = useForm({
-    resolver: zodResolver(poolSchema),
-    defaultValues: {
-      name: "",
-      dig_level: "",
-      pool_type_id: "",
-      length: 0,
-      width: 0,
-      depth_shallow: 0,
-      depth_deep: 0,
-      waterline_l_m: null,
-      volume_liters: null,
-      salt_volume_bags: null,
-      salt_volume_bags_fixed: null,
-      weight_kg: null,
-      minerals_kg_initial: null,
-      minerals_kg_topup: null,
-      buy_price_ex_gst: null,
-      buy_price_inc_gst: null,
-    },
-  });
 
   const { data: pools, isLoading: poolsLoading } = useQuery({
     queryKey: ["pool-specifications"],
@@ -108,7 +43,7 @@ const PoolSpecifications = () => {
         `);
 
       if (error) throw error;
-      return data;
+      return data as Pool[];
     },
   });
 
@@ -126,35 +61,14 @@ const PoolSpecifications = () => {
 
   const createMutation = useMutation({
     mutationFn: async (values: PoolFormValues) => {
-      // Ensure all required fields are present
-      const poolData = {
-        name: values.name,
-        dig_level: values.dig_level,
-        pool_type_id: values.pool_type_id,
-        length: values.length,
-        width: values.width,
-        depth_shallow: values.depth_shallow,
-        depth_deep: values.depth_deep,
-        waterline_l_m: values.waterline_l_m,
-        volume_liters: values.volume_liters,
-        salt_volume_bags: values.salt_volume_bags,
-        salt_volume_bags_fixed: values.salt_volume_bags_fixed,
-        weight_kg: values.weight_kg,
-        minerals_kg_initial: values.minerals_kg_initial,
-        minerals_kg_topup: values.minerals_kg_topup,
-        buy_price_ex_gst: values.buy_price_ex_gst,
-        buy_price_inc_gst: values.buy_price_inc_gst,
-      };
-
       const { error } = await supabase
         .from("pool_specifications")
-        .insert([poolData]);
+        .insert([values]);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       setIsOpen(false);
-      form.reset();
       toast.success("Pool specification created successfully");
     },
     onError: (error) => {
@@ -165,37 +79,16 @@ const PoolSpecifications = () => {
 
   const updateMutation = useMutation({
     mutationFn: async (values: PoolFormValues) => {
-      // Ensure all required fields are present
-      const poolData = {
-        name: values.name,
-        dig_level: values.dig_level,
-        pool_type_id: values.pool_type_id,
-        length: values.length,
-        width: values.width,
-        depth_shallow: values.depth_shallow,
-        depth_deep: values.depth_deep,
-        waterline_l_m: values.waterline_l_m,
-        volume_liters: values.volume_liters,
-        salt_volume_bags: values.salt_volume_bags,
-        salt_volume_bags_fixed: values.salt_volume_bags_fixed,
-        weight_kg: values.weight_kg,
-        minerals_kg_initial: values.minerals_kg_initial,
-        minerals_kg_topup: values.minerals_kg_topup,
-        buy_price_ex_gst: values.buy_price_ex_gst,
-        buy_price_inc_gst: values.buy_price_inc_gst,
-      };
-
       const { error } = await supabase
         .from("pool_specifications")
-        .update(poolData)
-        .eq("id", editingPool.id);
+        .update(values)
+        .eq("id", editingPool?.id);
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       setIsOpen(false);
       setEditingPool(null);
-      form.reset();
       toast.success("Pool specification updated successfully");
     },
     onError: (error) => {
@@ -222,7 +115,7 @@ const PoolSpecifications = () => {
     },
   });
 
-  const onSubmit = (values: z.infer<typeof poolSchema>) => {
+  const handleSubmit = (values: PoolFormValues) => {
     if (editingPool) {
       updateMutation.mutate(values);
     } else {
@@ -230,26 +123,8 @@ const PoolSpecifications = () => {
     }
   };
 
-  const handleEdit = (pool: any) => {
+  const handleEdit = (pool: Pool) => {
     setEditingPool(pool);
-    form.reset({
-      name: pool.name,
-      dig_level: pool.dig_level || "",
-      pool_type_id: pool.pool_type_id,
-      length: pool.length,
-      width: pool.width,
-      depth_shallow: pool.depth_shallow,
-      depth_deep: pool.depth_deep,
-      waterline_l_m: pool.waterline_l_m,
-      volume_liters: pool.volume_liters,
-      salt_volume_bags: pool.salt_volume_bags,
-      salt_volume_bags_fixed: pool.salt_volume_bags_fixed,
-      weight_kg: pool.weight_kg,
-      minerals_kg_initial: pool.minerals_kg_initial,
-      minerals_kg_topup: pool.minerals_kg_topup,
-      buy_price_ex_gst: pool.buy_price_ex_gst,
-      buy_price_inc_gst: pool.buy_price_inc_gst,
-    });
     setIsOpen(true);
   };
 
@@ -267,38 +142,9 @@ const PoolSpecifications = () => {
     }).format(value);
   };
 
-  const columnGroups = [
-    {
-      id: "basic-info",
-      title: "Basic Information",
-      columns: ["Actions", "Name", "Dig Level", "Pool Size"],
-    },
-    {
-      id: "dimensions",
-      title: "Dimensions",
-      columns: ["Length", "Width", "Shallow End", "Deep End"],
-    },
-    {
-      id: "volume-info",
-      title: "Volume Information",
-      columns: ["Waterline L/M", "Water Volume (L)", "Salt Volume Bags", "Salt Volume Fixed", "Weight (KG)", "Minerals Initial/Topup"],
-    },
-    {
-      id: "pricing",
-      title: "Pricing",
-      columns: ["Buy Price (ex GST)", "Buy Price (inc GST)"],
-    },
-  ];
-
   const isColumnVisible = (column: string) => {
     const group = columnGroups.find(g => g.columns.includes(column));
     return group ? expandedGroups.includes(group.id) : true;
-  };
-
-  const getVisibleColumns = () => {
-    return columnGroups
-      .filter(group => expandedGroups.includes(group.id))
-      .flatMap(group => group.columns);
   };
 
   if (poolsLoading || poolTypesLoading) {
@@ -315,7 +161,6 @@ const PoolSpecifications = () => {
               <Button 
                 onClick={() => {
                   setEditingPool(null);
-                  form.reset();
                 }}
               >
                 <Plus className="mr-2 h-4 w-4" />
@@ -328,146 +173,20 @@ const PoolSpecifications = () => {
                   {editingPool ? "Edit Pool Specification" : "Add New Pool Specification"}
                 </DialogTitle>
               </DialogHeader>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="dig_level"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Dig Level</FormLabel>
-                          <FormControl>
-                            <Input {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="pool_type_id"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Pool Type</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select pool type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {poolTypes?.map((type) => (
-                                <SelectItem key={type.id} value={type.id}>
-                                  {type.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="length"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Length (m)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="width"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Width (m)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="depth_shallow"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Shallow End (m)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="depth_deep"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Deep End (m)</FormLabel>
-                          <FormControl>
-                            <Input type="number" step="0.01" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit">
-                      {editingPool ? "Update" : "Create"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
+              <PoolForm
+                onSubmit={handleSubmit}
+                poolTypes={poolTypes || []}
+                defaultValues={editingPool || undefined}
+              />
             </DialogContent>
           </Dialog>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <Accordion
-              type="multiple"
-              value={expandedGroups}
-              onValueChange={setExpandedGroups}
-              className="w-full"
-            >
-              {columnGroups.map((group) => (
-                <AccordionItem key={group.id} value={group.id}>
-                  <AccordionTrigger className="px-4">
-                    {group.title}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="px-4 py-2 text-sm text-muted-foreground">
-                      Showing {group.columns.length} columns
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+            <PoolColumnGroups
+              expandedGroups={expandedGroups}
+              setExpandedGroups={setExpandedGroups}
+            />
             <div className="relative">
               <ScrollArea className="h-[800px] overflow-x-auto">
                 <div className="min-w-[1800px]">
@@ -485,51 +204,14 @@ const PoolSpecifications = () => {
                     </TableHeader>
                     <TableBody>
                       {pools?.map((pool) => (
-                        <TableRow key={pool.id}>
-                          {isColumnVisible("Actions") && (
-                            <TableCell>
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleEdit(pool)}
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  onClick={() => handleDelete(pool.id)}
-                                >
-                                  <Trash2 className="h-4 w-4 text-destructive" />
-                                </Button>
-                              </div>
-                            </TableCell>
-                          )}
-                          {isColumnVisible("Name") && <TableCell>{pool.name}</TableCell>}
-                          {isColumnVisible("Dig Level") && <TableCell>{pool.dig_level}</TableCell>}
-                          {isColumnVisible("Pool Size") && <TableCell>{pool.pool_type?.name}</TableCell>}
-                          {isColumnVisible("Length") && <TableCell>{pool.length}m</TableCell>}
-                          {isColumnVisible("Width") && <TableCell>{pool.width}m</TableCell>}
-                          {isColumnVisible("Shallow End") && <TableCell>{pool.depth_shallow}m</TableCell>}
-                          {isColumnVisible("Deep End") && <TableCell>{pool.depth_deep}m</TableCell>}
-                          {isColumnVisible("Waterline L/M") && <TableCell>{pool.waterline_l_m}</TableCell>}
-                          {isColumnVisible("Water Volume (L)") && <TableCell>{pool.volume_liters}</TableCell>}
-                          {isColumnVisible("Salt Volume Bags") && <TableCell>{pool.salt_volume_bags}</TableCell>}
-                          {isColumnVisible("Salt Volume Fixed") && <TableCell>{pool.salt_volume_bags_fixed}</TableCell>}
-                          {isColumnVisible("Weight (KG)") && <TableCell>{pool.weight_kg}</TableCell>}
-                          {isColumnVisible("Minerals Initial/Topup") && (
-                            <TableCell>
-                              {pool.minerals_kg_initial}/{pool.minerals_kg_topup}
-                            </TableCell>
-                          )}
-                          {isColumnVisible("Buy Price (ex GST)") && (
-                            <TableCell>{formatCurrency(pool.buy_price_ex_gst)}</TableCell>
-                          )}
-                          {isColumnVisible("Buy Price (inc GST)") && (
-                            <TableCell>{formatCurrency(pool.buy_price_inc_gst)}</TableCell>
-                          )}
-                        </TableRow>
+                        <PoolTableRow
+                          key={pool.id}
+                          pool={pool}
+                          onEdit={handleEdit}
+                          onDelete={handleDelete}
+                          isColumnVisible={isColumnVisible}
+                          formatCurrency={formatCurrency}
+                        />
                       ))}
                     </TableBody>
                   </Table>
