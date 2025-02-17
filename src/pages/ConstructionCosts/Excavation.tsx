@@ -2,20 +2,28 @@
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 import { DigTypeForm } from "./components/DigTypeForm";
-import { DigTypesTable } from "./components/DigTypesTable";
-import { PoolExcavationTable } from "./components/PoolExcavationTable";
+import { formatCurrency } from "@/utils/format";
 
 const Excavation = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -23,7 +31,7 @@ const Excavation = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: digTypes, isLoading: isLoadingDigTypes } = useQuery({
+  const { data: digTypes, isLoading } = useQuery({
     queryKey: ["excavation-dig-types"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -33,23 +41,6 @@ const Excavation = () => {
       
       if (error) throw error;
       return data as ExcavationDigType[];
-    },
-  });
-
-  const { data: poolDigTypes, isLoading: isLoadingPools } = useQuery({
-    queryKey: ["pool-excavation-types"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pool_excavation_types")
-        .select(`
-          *,
-          dig_type:excavation_dig_types(name)
-        `)
-        .order("range")
-        .order("name");
-      
-      if (error) throw error;
-      return data;
     },
   });
 
@@ -109,60 +100,98 @@ const Excavation = () => {
     setIsDialogOpen(true);
   };
 
-  if (isLoadingDigTypes || isLoadingPools) {
+  const calculateTotalCost = (digType: ExcavationDigType) => {
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto py-8 px-4 space-y-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Excavation Costs</h1>
-          <p className="text-lg text-gray-500">
-            Manage excavation dig types and associated costs
-          </p>
+      <div className="max-w-7xl mx-auto py-8 px-4">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-xl font-semibold text-gray-700">Dig Types</h2>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => setEditingDigType(null)}
+                className="flex items-center gap-2 bg-[#9FC8C0] hover:bg-[#8AB3AB] text-white"
+              >
+                <Plus className="h-4 w-4" />
+                Add Dig Type
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {editingDigType ? "Edit Dig Type" : "Add New Dig Type"}
+                </DialogTitle>
+              </DialogHeader>
+              <DigTypeForm 
+                onSubmit={handleSubmit}
+                editingDigType={editingDigType}
+              />
+            </DialogContent>
+          </Dialog>
         </div>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Excavation Dig Types</CardTitle>
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button 
-                  onClick={() => setEditingDigType(null)}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="h-4 w-4" />
-                  Add Dig Type
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DigTypeForm 
-                  onSubmit={handleSubmit}
-                  editingDigType={editingDigType}
-                />
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent>
-            <DigTypesTable 
-              digTypes={digTypes ?? []}
-              onEdit={handleEdit}
-            />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Pool Excavation Types</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <PoolExcavationTable 
-              pools={poolDigTypes ?? []}
-              digTypes={digTypes ?? []}
-            />
-          </CardContent>
-        </Card>
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead>Dig Type</TableHead>
+                <TableHead>Truck Count</TableHead>
+                <TableHead>Truck Rate</TableHead>
+                <TableHead>Truck Hours</TableHead>
+                <TableHead>Excavation Rate</TableHead>
+                <TableHead>Excavation Hours</TableHead>
+                <TableHead>Total Cost</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {digTypes?.map((digType) => (
+                <TableRow key={digType.id} className="hover:bg-gray-50">
+                  <TableCell className="font-medium">{digType.name}</TableCell>
+                  <TableCell>{digType.truck_count}</TableCell>
+                  <TableCell>{formatCurrency(digType.truck_hourly_rate)}</TableCell>
+                  <TableCell>{digType.truck_hours}</TableCell>
+                  <TableCell>{formatCurrency(digType.excavation_hourly_rate)}</TableCell>
+                  <TableCell>{digType.excavation_hours}</TableCell>
+                  <TableCell className="font-semibold">
+                    {formatCurrency(calculateTotalCost(digType))}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleEdit(digType)}
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                        />
+                      </svg>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </DashboardLayout>
   );
