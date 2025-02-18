@@ -21,14 +21,17 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Link } from "react-router-dom";
-import { Calculator } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Calculator, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
+import { Button } from "@/components/ui/button";
 import type { Pool } from "@/types/pool";
 
 const PricingWorksheet = () => {
+  const navigate = useNavigate();
+
   const { data: pools } = useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
@@ -76,6 +79,14 @@ const PricingWorksheet = () => {
 
         <div className="flex justify-between items-center mb-8">
           <div>
+            <Button 
+              variant="ghost" 
+              className="mb-4"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
             <h1 className="text-2xl font-semibold text-gray-900">Pricing Worksheet</h1>
             <p className="text-gray-500 mt-1">Pool pricing overview</p>
           </div>

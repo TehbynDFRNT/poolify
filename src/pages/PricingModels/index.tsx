@@ -7,15 +7,44 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { DollarSign, Calculator } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { DollarSign, Calculator, ArrowLeft } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 const PricingModels = () => {
+  const navigate = useNavigate();
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/">Home</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>Pricing Models</BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+
         <div className="flex justify-between items-center mb-8">
           <div>
+            <Button 
+              variant="ghost" 
+              className="mb-4"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back
+            </Button>
             <h1 className="text-2xl font-semibold text-gray-900">Pricing Models</h1>
             <p className="text-gray-500 mt-1">Manage and calculate pricing models</p>
           </div>
@@ -38,8 +67,6 @@ const PricingModels = () => {
               </CardContent>
             </Card>
           </Link>
-          
-          {/* Additional pricing model sections can be added here */}
         </div>
       </div>
     </DashboardLayout>
