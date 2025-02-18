@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import type { FiltrationComponent, HandoverKitPackage, PackageWithComponents } from "@/types/filtration";
 import { toast } from "sonner";
@@ -31,8 +31,8 @@ interface FormValues {
   light_id: string;
   pump_id: string;
   sanitiser_id: string;
-  standard_filter_id: string;
-  media_filter_id: string;
+  filter_id: string;
+  filter_type: 'standard' | 'media';
   handover_kit_id: string;
 }
 
@@ -88,14 +88,13 @@ export function EditFiltrationPackageForm({
   });
 
   useEffect(() => {
-    // Set initial form values when the package data is available
     if (pkg) {
       form.reset({
         light_id: pkg.light?.id || '',
         pump_id: pkg.pump?.id || '',
         sanitiser_id: pkg.sanitiser?.id || '',
-        standard_filter_id: pkg.standard_filter?.id || '',
-        media_filter_id: pkg.media_filter?.id || '',
+        filter_id: pkg.filter?.id || '',
+        filter_type: pkg.filter_type || 'standard',
         handover_kit_id: pkg.handover_kit?.id || '',
       });
     }
@@ -201,42 +200,42 @@ export function EditFiltrationPackageForm({
 
             <FormField
               control={form.control}
-              name="standard_filter_id"
+              name="filter_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Standard Filter</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a standard filter" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {components?.standard_filter?.map((component) => (
-                        <SelectItem key={component.id} value={component.id}>
-                          {component.name} ({component.model_number})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Filter Type</FormLabel>
+                  <RadioGroup
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="standard" id="standard" />
+                      <label htmlFor="standard">Standard Filter</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="media" id="media" />
+                      <label htmlFor="media">Media Filter</label>
+                    </div>
+                  </RadioGroup>
                 </FormItem>
               )}
             />
 
             <FormField
               control={form.control}
-              name="media_filter_id"
+              name="filter_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Media Filter</FormLabel>
+                  <FormLabel>Filter</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a media filter" />
+                        <SelectValue placeholder="Select a filter" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {components?.media_filter?.map((component) => (
+                      {(form.watch('filter_type') === 'standard' ? components?.standard_filter : components?.media_filter)?.map((component) => (
                         <SelectItem key={component.id} value={component.id}>
                           {component.name} ({component.model_number})
                         </SelectItem>

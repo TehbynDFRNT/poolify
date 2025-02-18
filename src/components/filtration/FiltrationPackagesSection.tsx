@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,11 +59,9 @@ export function FiltrationPackagesSection({
               <TableHead>Light</TableHead>
               <TableHead>Pool Pump</TableHead>
               <TableHead>Sanitiser</TableHead>
-              <TableHead>Standard Filter</TableHead>
-              <TableHead>Media Filter</TableHead>
+              <TableHead>Filter</TableHead>
               <TableHead>Handover Kit</TableHead>
-              <TableHead className="text-right">Standard Total</TableHead>
-              <TableHead className="text-right">Media Total</TableHead>
+              <TableHead className="text-right">Total</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -75,14 +72,16 @@ export function FiltrationPackagesSection({
                 <TableCell>{pkg.light?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.pump?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.sanitiser?.model_number || '-'}</TableCell>
-                <TableCell>{pkg.standard_filter?.model_number || '-'}</TableCell>
-                <TableCell>{pkg.media_filter?.model_number || '-'}</TableCell>
+                <TableCell>{pkg.filter?.model_number || '-'} ({pkg.filter_type})</TableCell>
                 <TableCell>{pkg.handover_kit?.model_number || '-'}</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(calculateTotalPrice(pkg))}
-                </TableCell>
-                <TableCell className="text-right">
-                  {formatCurrency(calculateTotalPrice(pkg, true))}
+                  {formatCurrency(
+                    (pkg.light?.price || 0) +
+                    (pkg.pump?.price || 0) +
+                    (pkg.sanitiser?.price || 0) +
+                    (pkg.filter?.price || 0) +
+                    (pkg.handover_kit?.price || 0)
+                  )}
                 </TableCell>
                 <TableCell>
                   <Button
