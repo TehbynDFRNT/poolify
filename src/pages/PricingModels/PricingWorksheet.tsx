@@ -7,6 +7,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -15,8 +23,25 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
 import { Calculator } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { formatCurrency } from "@/utils/format";
+import type { Pool } from "@/types/pool";
 
 const PricingWorksheet = () => {
+  const { data: pools } = useQuery({
+    queryKey: ["pool-specifications"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_specifications")
+        .select("*")
+        .order("range", { ascending: true });
+
+      if (error) throw error;
+      return data as Pool[];
+    },
+  });
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
@@ -41,48 +66,46 @@ const PricingWorksheet = () => {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Pricing Worksheet</h1>
-            <p className="text-gray-500 mt-1">Calculate and manage comprehensive pricing models</p>
+            <p className="text-gray-500 mt-1">Pool pricing overview</p>
           </div>
           <Calculator className="h-6 w-6 text-gray-500" />
         </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Pool Specific Costs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Content for pool specific costs will go here */}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Excavation & Dig Costs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Content for excavation costs will go here */}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Paving & Retaining Costs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Content for paving costs will go here */}
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Additional Costs</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {/* Content for additional costs like crane, traffic control, etc. */}
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Pool Prices</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Range</TableHead>
+                  <TableHead>Pool Name</TableHead>
+                  <TableHead className="text-right">Price (ex GST)</TableHead>
+                  <TableHead className="text-right">Price (inc GST)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pools?.map((pool) => (
+                  <TableRow key={pool.id}>
+                    <TableCell>{pool.range}</TableCell>
+                    <TableCell>{pool.name}</TableCell>
+                    <TableCell className="text-right">
+                      {pool.buy_price_ex_gst 
+                        ? formatCurrency(pool.buy_price_ex_gst)
+                        : "-"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {pool.buy_price_inc_gst
+                        ? formatCurrency(pool.buy_price_inc_gst)
+                        : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
