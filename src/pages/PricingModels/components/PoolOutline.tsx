@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -16,7 +16,32 @@ import { Pencil, Upload } from "lucide-react";
 export const PoolOutline = () => {
   const { id } = useParams();
   const [isEditing, setIsEditing] = useState(false);
-  const [imageUrl, setImageUrl] = useState("/lovable-uploads/df5d055b-4d38-49ed-8a2f-b0625c3b09d5.png");
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchExistingImage = async () => {
+      if (!id) return;
+      
+      // Try to get existing image
+      const { data } = await supabase.storage
+        .from('pool-outlines')
+        .list('', {
+          search: `${id}-outline`
+        });
+
+      if (data && data.length > 0) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('pool-outlines')
+          .getPublicUrl(data[0].name);
+        setImageUrl(publicUrl);
+      } else {
+        // Use default image if no custom image exists
+        setImageUrl("/lovable-uploads/df5d055b-4d38-49ed-8a2f-b0625c3b09d5.png");
+      }
+    };
+
+    fetchExistingImage();
+  }, [id]);
 
   const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -74,11 +99,13 @@ export const PoolOutline = () => {
           </div>
         ) : (
           <div className="flex justify-center">
-            <img 
-              src={imageUrl}
-              alt="Pool outline"
-              className="max-w-[400px] w-full h-auto"
-            />
+            {imageUrl && (
+              <img 
+                src={imageUrl}
+                alt="Pool outline"
+                className="max-w-[400px] w-full h-auto"
+              />
+            )}
           </div>
         )}
       </CardContent>
