@@ -37,7 +37,7 @@ const ConstructionCosts = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Link 
-            to="/excavation" 
+            to="/construction-costs/excavation" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
@@ -52,7 +52,7 @@ const ConstructionCosts = () => {
           </Link>
 
           <Link 
-            to="/paving-retaining" 
+            to="/construction-costs/paving-retaining" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
@@ -67,7 +67,7 @@ const ConstructionCosts = () => {
           </Link>
 
           <Link 
-            to="/bobcat-costs" 
+            to="/construction-costs/bobcat-costs" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
@@ -82,7 +82,7 @@ const ConstructionCosts = () => {
           </Link>
 
           <Link 
-            to="/crane-costs" 
+            to="/construction-costs/crane-costs" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
