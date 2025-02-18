@@ -85,44 +85,96 @@ const PoolSpecificCosts = () => {
             <CardTitle>Pool Specific Costs</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Range</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Length</TableHead>
-                  <TableHead>Width</TableHead>
-                  <TableHead>Shallow End</TableHead>
-                  <TableHead>Deep End</TableHead>
-                  <TableHead>Waterline L/M</TableHead>
-                  <TableHead>Water Volume (L)</TableHead>
-                  <TableHead>Salt Bags</TableHead>
-                  <TableHead>Salt Fixed</TableHead>
-                  <TableHead>Weight (KG)</TableHead>
-                  <TableHead>Minerals Initial</TableHead>
-                  <TableHead>Minerals Topup</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pools?.map((pool) => (
-                  <TableRow key={pool.id}>
-                    <TableCell>{pool.range}</TableCell>
-                    <TableCell>{pool.name}</TableCell>
-                    <TableCell>{pool.length}m</TableCell>
-                    <TableCell>{pool.width}m</TableCell>
-                    <TableCell>{pool.depth_shallow}m</TableCell>
-                    <TableCell>{pool.depth_deep}m</TableCell>
-                    <TableCell>{pool.waterline_l_m || "-"}</TableCell>
-                    <TableCell>{pool.volume_liters || "-"}</TableCell>
-                    <TableCell>{pool.salt_volume_bags || "-"}</TableCell>
-                    <TableCell>{pool.salt_volume_bags_fixed || "-"}</TableCell>
-                    <TableCell>{pool.weight_kg || "-"}</TableCell>
-                    <TableCell>{pool.minerals_kg_initial || "-"}</TableCell>
-                    <TableCell>{pool.minerals_kg_topup || "-"}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="whitespace-nowrap">Range</TableHead>
+                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                    <TableHead className="whitespace-nowrap">Length</TableHead>
+                    <TableHead className="whitespace-nowrap">Width</TableHead>
+                    <TableHead className="whitespace-nowrap">Shallow End</TableHead>
+                    <TableHead className="whitespace-nowrap">Deep End</TableHead>
+                    <TableHead className="whitespace-nowrap">Pea Gravel/Backfill</TableHead>
+                    <TableHead className="whitespace-nowrap">Install Fee</TableHead>
+                    <TableHead className="whitespace-nowrap">Trucked Water</TableHead>
+                    <TableHead className="whitespace-nowrap">Salt Bags</TableHead>
+                    <TableHead className="whitespace-nowrap">Coping Supply</TableHead>
+                    <TableHead className="whitespace-nowrap">Coping Lay</TableHead>
+                    <TableHead className="whitespace-nowrap">Beam</TableHead>
+                    <TableHead className="whitespace-nowrap">Excavation</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {pools?.map((pool) => (
+                    <TableRow key={pool.id}>
+                      <TableCell>{pool.range}</TableCell>
+                      <TableCell>{pool.name}</TableCell>
+                      <TableCell>{pool.length}m</TableCell>
+                      <TableCell>{pool.width}m</TableCell>
+                      <TableCell>{pool.depth_shallow}m</TableCell>
+                      <TableCell>{pool.depth_deep}m</TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Input
+                          type="number"
+                          className="w-32"
+                          placeholder="Enter cost"
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </CardContent>
         </Card>
       </div>
