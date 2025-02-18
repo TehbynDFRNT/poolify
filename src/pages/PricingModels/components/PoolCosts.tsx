@@ -19,7 +19,6 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
   const poolCosts = initialPoolCosts[poolName] || {
     truckedWater: 0,
     saltBags: 0,
-    misc: 2700,
     copingSupply: 0,
     beam: 0,
     copingLay: 0,
@@ -106,10 +105,6 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
                   <span>Beam:</span>
                   <span>{formatCurrency(poolCosts.beam)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Miscellaneous:</span>
-                  <span>{formatCurrency(poolCosts.misc)}</span>
-                </div>
               </div>
             </div>
           </div>
@@ -121,7 +116,6 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
                 {formatCurrency(
                   poolCosts.truckedWater +
                   poolCosts.saltBags +
-                  poolCosts.misc +
                   poolCosts.copingSupply +
                   poolCosts.beam +
                   poolCosts.copingLay +
