@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { DollarSign } from "lucide-react";
+import { DollarSign, Calculator } from "lucide-react";
 
 const PricingModels = () => {
   return (
