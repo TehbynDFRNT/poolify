@@ -32,13 +32,26 @@ const PoolSpecificCosts = () => {
   const { data: pools, isLoading } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First get the range order
+      const { data: ranges } = await supabase
+        .from("pool_ranges")
+        .select("name")
+        .order("display_order");
+
+      // Then get all pools
+      const { data: poolsData, error } = await supabase
         .from("pool_specifications")
-        .select("*")
-        .order("range", { ascending: true });
+        .select("*");
 
       if (error) throw error;
-      return data as Pool[];
+
+      // Sort pools based on range order
+      const rangeOrder = ranges?.map(r => r.name) || [];
+      return (poolsData || []).sort((a, b) => {
+        const aIndex = rangeOrder.indexOf(a.range);
+        const bIndex = rangeOrder.indexOf(b.range);
+        return aIndex - bIndex;
+      }) as Pool[];
     },
   });
 
