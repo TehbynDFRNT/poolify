@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { AddComponentForm } from "@/components/filtration/AddComponentForm";
 import { FiltrationComponentsSection } from "@/components/filtration/FiltrationComponentsSection";
+import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
 import { HandoverKitPackagesSection } from "@/components/filtration/HandoverKitPackagesSection";
 import { FiltrationPackagesSection } from "@/components/filtration/FiltrationPackagesSection";
 import {
@@ -59,6 +59,32 @@ const FiltrationSystems = () => {
     },
   });
 
+  const { data: handoverKits } = useQuery({
+    queryKey: ["handover-kits"],
+    queryFn: async () => {
+      const handoverKitType = componentTypes?.find(t => t.name === "Handover Kit");
+      
+      if (!handoverKitType) {
+        console.log("Handover Kit type not found");
+        return [];
+      }
+
+      const { data, error } = await supabase
+        .from("filtration_components")
+        .select("*")
+        .eq("type_id", handoverKitType.id)
+        .order("name");
+
+      if (error) {
+        console.error("Error fetching handover kits:", error);
+        throw error;
+      }
+
+      return data as FiltrationComponent[];
+    },
+    enabled: !!componentTypes,
+  });
+
   const { data: packages } = useQuery({
     queryKey: ["filtration-packages"],
     queryFn: async () => {
@@ -107,6 +133,11 @@ const FiltrationSystems = () => {
         onAddClick={() => setShowAddForm(true)}
       />
 
+      <HandoverKitsSection
+        handoverKits={handoverKits}
+        onAddClick={() => setShowAddForm(true)}
+      />
+
       <HandoverKitPackagesSection
         onAddClick={() => setShowAddForm(true)}
       />
@@ -125,6 +156,6 @@ const FiltrationSystems = () => {
       )}
     </div>
   );
-}
+};
 
 export default FiltrationSystems;
