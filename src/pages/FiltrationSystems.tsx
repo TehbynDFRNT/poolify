@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -80,6 +81,7 @@ const FiltrationSystems = () => {
         throw error;
       }
 
+      console.log("Handover kits fetched:", data); // Add this line to debug
       return data as FiltrationComponent[];
     },
     enabled: !!componentTypes,
@@ -109,6 +111,15 @@ const FiltrationSystems = () => {
     },
   });
 
+  const handleAddComponent = () => {
+    // Reset selectedTypeId to the Handover Kit type when adding from handover section
+    const handoverKitType = componentTypes?.find(t => t.name === "Handover Kit");
+    if (handoverKitType) {
+      setSelectedTypeId(handoverKitType.id);
+    }
+    setShowAddForm(true);
+  };
+
   return (
     <div className="container mx-auto py-8 space-y-8">
       <Breadcrumb>
@@ -135,7 +146,7 @@ const FiltrationSystems = () => {
 
       <HandoverKitsSection
         handoverKits={handoverKits}
-        onAddClick={() => setShowAddForm(true)}
+        onAddClick={handleAddComponent}
       />
 
       <HandoverKitPackagesSection
