@@ -70,7 +70,7 @@ export function FiltrationPackagesSection({
                 <TableCell>{pkg.light?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.pump?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.sanitiser?.model_number || '-'}</TableCell>
-                <TableCell>{pkg.filter?.model_number || '-'} ({pkg.filter_type})</TableCell>
+                <TableCell>{pkg.filter?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.handover_kit?.model_number || '-'}</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(calculateTotalPrice(pkg))}

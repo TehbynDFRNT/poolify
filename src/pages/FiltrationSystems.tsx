@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +13,7 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import type { FiltrationComponent, FiltrationComponentType, FiltrationPackage } from "@/types/filtration";
+import type { FiltrationComponent, FiltrationComponentType, FiltrationPackage, PackageWithComponents } from "@/types/filtration";
 
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -96,7 +95,7 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data as FiltrationPackage[];
+      return data as unknown as PackageWithComponents[];
     },
   });
 

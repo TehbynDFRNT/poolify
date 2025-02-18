@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +23,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import type { FiltrationComponent, HandoverKitPackage, PackageWithComponents } from "@/types/filtration";
 import { toast } from "sonner";
@@ -32,7 +32,6 @@ interface FormValues {
   pump_id: string;
   sanitiser_id: string;
   filter_id: string;
-  filter_type: 'standard' | 'media';
   handover_kit_id: string;
 }
 
@@ -94,7 +93,6 @@ export function EditFiltrationPackageForm({
         pump_id: pkg.pump?.id || '',
         sanitiser_id: pkg.sanitiser?.id || '',
         filter_id: pkg.filter?.id || '',
-        filter_type: pkg.filter_type || 'standard',
         handover_kit_id: pkg.handover_kit?.id || '',
       });
     }
@@ -200,30 +198,6 @@ export function EditFiltrationPackageForm({
 
             <FormField
               control={form.control}
-              name="filter_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Filter Type</FormLabel>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex gap-4"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="standard" id="standard" />
-                      <label htmlFor="standard">Standard Filter</label>
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <RadioGroupItem value="media" id="media" />
-                      <label htmlFor="media">Media Filter</label>
-                    </div>
-                  </RadioGroup>
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
               name="filter_id"
               render={({ field }) => (
                 <FormItem>
@@ -235,7 +209,7 @@ export function EditFiltrationPackageForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {(form.watch('filter_type') === 'standard' ? components?.standard_filter : components?.media_filter)?.map((component) => (
+                      {components?.pool_filter?.map((component) => (
                         <SelectItem key={component.id} value={component.id}>
                           {component.name} ({component.model_number})
                         </SelectItem>
