@@ -5,8 +5,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { CraneCost } from "@/types/crane-cost";
 import type { TrafficControlCost } from "@/types/traffic-control-cost";
+import type { FixedCost } from "@/types/fixed-cost";
 
-type TableNames = "crane_costs" | "traffic_control_costs";
+type TableNames = "crane_costs" | "traffic_control_costs" | "fixed_costs";
+type CostType = CraneCost | TrafficControlCost | FixedCost;
 
 export const useCosts = (tableName: TableNames, queryKey: string) => {
   const queryClient = useQueryClient();
@@ -26,16 +28,16 @@ export const useCosts = (tableName: TableNames, queryKey: string) => {
         throw error;
       }
 
-      return data as (CraneCost | TrafficControlCost)[];
+      return data as CostType[];
     },
   });
 
-  const startEditing = (cost: CraneCost | TrafficControlCost) => {
+  const startEditing = (cost: CostType) => {
     setEditingId(cost.id);
     setEditingPrice(cost.price.toString());
   };
 
-  const handleSave = async (cost: CraneCost | TrafficControlCost) => {
+  const handleSave = async (cost: CostType) => {
     try {
       const newPrice = parseFloat(editingPrice);
       if (isNaN(newPrice)) {
