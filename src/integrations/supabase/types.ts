@@ -234,7 +234,7 @@ export type Database = {
             foreignKeyName: "filtration_packages_handover_kit_id_fkey"
             columns: ["handover_kit_id"]
             isOneToOne: false
-            referencedRelation: "filtration_components"
+            referencedRelation: "handover_kit_packages"
             referencedColumns: ["id"]
           },
           {
