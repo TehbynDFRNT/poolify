@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,7 +72,6 @@ const FiltrationSystems = () => {
         throw error;
       }
 
-      console.log("Handover kits fetched:", data);
       return data as FiltrationComponent[];
     },
     enabled: !!componentTypes,
@@ -87,7 +87,6 @@ const FiltrationSystems = () => {
           name,
           display_order,
           created_at,
-          filter_type,
           light:filtration_components!light_id(id, name, model_number, price),
           pump:filtration_components!pump_id(id, name, model_number, price),
           sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
@@ -97,12 +96,7 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      
-      // Ensure filter_type is either 'standard' or 'media'
-      return data.map(pkg => ({
-        ...pkg,
-        filter_type: pkg.filter_type as 'standard' | 'media'
-      }));
+      return data as FiltrationPackage[];
     },
   });
 

@@ -1,3 +1,4 @@
+
 export interface FiltrationComponentType {
   id: string;
   name: string;
@@ -41,7 +42,6 @@ export interface FiltrationPackage {
   pump_id: string | null;
   sanitiser_id: string | null;
   filter_id: string | null;
-  filter_type: 'standard' | 'media' | null;
   handover_kit_id: string | null;
   created_at: string;
 }
