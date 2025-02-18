@@ -135,8 +135,28 @@ const PoolDetails = () => {
     poolCosts.installFee +
     excavationCost;
 
-  // Calculate grand total
-  const grandTotal = totalFixedCosts + totalPoolCosts;
+  // Calculate filtration package total
+  const calculatePackageTotal = (pkg: PackageWithComponents) => {
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
+  const filtrationTotal = selectedPackage ? calculatePackageTotal(selectedPackage) : 0;
+
+  // Calculate pool shell price
+  const poolShellPrice = pool.buy_price_inc_gst || 0;
+
+  // Calculate grand total including all components
+  const grandTotal = totalFixedCosts + totalPoolCosts + filtrationTotal + poolShellPrice;
 
   return (
     <DashboardLayout>
@@ -156,9 +176,27 @@ const PoolDetails = () => {
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <Card>
-          <CardContent className="pt-6">
-            <div className="flex justify-between text-lg font-semibold">
-              <span>Grand Total (Pool Specific + Fixed Costs):</span>
+          <CardContent className="pt-6 space-y-4">
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span>Pool Shell Price:</span>
+                <span>{formatCurrency(poolShellPrice)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Filtration Package:</span>
+                <span>{formatCurrency(filtrationTotal)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Pool Specific Costs:</span>
+                <span>{formatCurrency(totalPoolCosts)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Fixed Costs:</span>
+                <span>{formatCurrency(totalFixedCosts)}</span>
+              </div>
+            </div>
+            <div className="flex justify-between text-lg font-semibold pt-4 border-t">
+              <span>Grand Total:</span>
               <span>{formatCurrency(grandTotal)}</span>
             </div>
           </CardContent>
