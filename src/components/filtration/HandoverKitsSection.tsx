@@ -53,8 +53,8 @@ export function HandoverKitsSection({
           </TableHeader>
           <TableBody>
             {handoverKits?.map((kit) => (
-              <>
-                <TableRow key={kit.id} className="bg-muted/30 font-medium">
+              <React.Fragment key={kit.id}>
+                <TableRow className="bg-muted/30 font-medium">
                   <TableCell className="font-bold">{kit.model_number}</TableCell>
                   <TableCell className="font-bold">{kit.name}</TableCell>
                   <TableCell className="font-bold">{kit.description || '-'}</TableCell>
@@ -72,7 +72,7 @@ export function HandoverKitsSection({
                     </TableCell>
                   </TableRow>
                 ))}
-              </>
+              </React.Fragment>
             ))}
           </TableBody>
         </Table>
