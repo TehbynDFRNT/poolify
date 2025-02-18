@@ -13,6 +13,13 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Calculator, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -20,14 +27,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
-import { PoolFiltrationPackagesSection } from "@/components/filtration/PoolFiltrationPackagesSection";
 import type { PackageWithComponents } from "@/types/filtration";
 
 const PoolDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const { data: pool, isLoading } = useQuery({
+  const { data: pool, isLoading: poolLoading } = useQuery({
     queryKey: ["pool-specification", id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -41,40 +47,42 @@ const PoolDetails = () => {
     },
   });
 
-  const { data: filtrationPackages } = useQuery({
+  const { data: filtrationPackages, isLoading: packagesLoading } = useQuery({
     queryKey: ["filtration-packages"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("filtration_packages")
         .select(`
           *,
-          light:light_id(id, name, model_number, price),
-          pump:pump_id(id, name, model_number, price),
-          sanitiser:sanitiser_id(id, name, model_number, price),
-          filter:filter_id(id, name, model_number, price),
+          light:light_id(*),
+          pump:pump_id(*),
+          sanitiser:sanitiser_id(*),
+          filter:filter_id(*),
           handover_kit:handover_kit_id(
             id,
             name,
             components:handover_kit_package_components(
               quantity,
-              component:component_id(id, name, model_number, price)
+              component:component_id(*)
             )
           )
         `)
         .order('display_order');
 
       if (error) throw error;
-      return data as PackageWithComponents[];
+      return data as unknown as PackageWithComponents[];
     },
   });
 
-  if (isLoading) {
+  if (poolLoading || packagesLoading) {
     return <div>Loading...</div>;
   }
 
   if (!pool) {
     return <div>Pool not found</div>;
   }
+
+  const defaultPackage = filtrationPackages?.[0];
 
   return (
     <DashboardLayout>
@@ -158,7 +166,82 @@ const PoolDetails = () => {
           </CardContent>
         </Card>
 
-        <PoolFiltrationPackagesSection packages={filtrationPackages} />
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex justify-between items-center">
+              <span>Filtration Package</span>
+              <Select defaultValue={defaultPackage?.id}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select package" />
+                </SelectTrigger>
+                <SelectContent>
+                  {filtrationPackages?.map((pkg) => (
+                    <SelectItem key={pkg.id} value={pkg.id}>
+                      Option {pkg.display_order}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {defaultPackage && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="font-medium mb-2">Light</h3>
+                  {defaultPackage.light && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <p>Model: {defaultPackage.light.model_number}</p>
+                      <p className="text-right">{formatCurrency(defaultPackage.light.price)}</p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Pump</h3>
+                  {defaultPackage.pump && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <p>Model: {defaultPackage.pump.model_number}</p>
+                      <p className="text-right">{formatCurrency(defaultPackage.pump.price)}</p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Sanitiser</h3>
+                  {defaultPackage.sanitiser && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <p>Model: {defaultPackage.sanitiser.model_number}</p>
+                      <p className="text-right">{formatCurrency(defaultPackage.sanitiser.price)}</p>
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-medium mb-2">Filter</h3>
+                  {defaultPackage.filter && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <p>Model: {defaultPackage.filter.model_number}</p>
+                      <p className="text-right">{formatCurrency(defaultPackage.filter.price)}</p>
+                    </div>
+                  )}
+                </div>
+                {defaultPackage.handover_kit && (
+                  <div>
+                    <h3 className="font-medium mb-2">Handover Kit: {defaultPackage.handover_kit.name}</h3>
+                    <div className="space-y-2">
+                      {defaultPackage.handover_kit.components.map((comp) => (
+                        <div key={comp.component_id} className="grid grid-cols-2 gap-2">
+                          <p>{comp.component?.name} (x{comp.quantity})</p>
+                          <p className="text-right">
+                            {formatCurrency((comp.component?.price || 0) * comp.quantity)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
