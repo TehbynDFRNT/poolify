@@ -21,7 +21,7 @@ interface FiltrationComponentsSectionProps {
 
 interface EditableCell {
   id: string;
-  field: 'model_number' | 'name' | 'flow_rate' | 'power_consumption' | 'price';
+  field: keyof Omit<FiltrationComponent, 'id' | 'created_at'>;
   value: string | number | null;
 }
 
@@ -39,7 +39,7 @@ export function FiltrationComponentsSection({
     setEditingCell({
       id: component.id,
       field,
-      value: component[field]?.toString() || ''
+      value: field === 'type_id' ? component[field] || '' : component[field]?.toString() || ''
     });
   };
 
@@ -51,6 +51,10 @@ export function FiltrationComponentsSection({
       
       if (['price', 'flow_rate', 'power_consumption'].includes(editingCell.field)) {
         value = editingCell.value === '' ? null : parseFloat(editingCell.value.toString());
+      }
+
+      if (editingCell.field === 'type_id') {
+        value = editingCell.value === '' ? null : editingCell.value;
       }
 
       const { error } = await supabase
@@ -120,6 +124,7 @@ export function FiltrationComponentsSection({
                 key={component.id}
                 component={component}
                 componentType={componentTypes?.find(t => t.id === component.type_id)}
+                componentTypes={componentTypes}
                 editingCell={editingCell}
                 onStartEdit={(field) => handleStartEdit(component, field as EditableCell['field'])}
                 onSaveEdit={handleSaveEdit}
