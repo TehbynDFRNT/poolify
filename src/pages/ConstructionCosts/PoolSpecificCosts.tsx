@@ -23,13 +23,24 @@ import {
   BreadcrumbList,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
+import { useState } from "react";
 
 const PoolSpecificCosts = () => {
-  const { data: pools, isLoading } = useQuery({
+  const [selectedDigTypes, setSelectedDigTypes] = useState<Record<string, string>>({});
+
+  const { data: pools, isLoading: isLoadingPools } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
       // First get the range order
@@ -55,7 +66,35 @@ const PoolSpecificCosts = () => {
     },
   });
 
-  if (isLoading) {
+  const { data: digTypes, isLoading: isLoadingDigTypes } = useQuery({
+    queryKey: ["digTypes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("excavation_dig_types")
+        .select("*");
+      
+      if (error) throw error;
+      return data as ExcavationDigType[];
+    },
+  });
+
+  const calculateExcavationCost = (digType: ExcavationDigType) => {
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  const getExcavationCost = (poolId: string) => {
+    const selectedDigTypeId = selectedDigTypes[poolId];
+    if (!selectedDigTypeId || !digTypes) return null;
+    
+    const digType = digTypes.find(dt => dt.id === selectedDigTypeId);
+    if (!digType) return null;
+
+    return calculateExcavationCost(digType);
+  };
+
+  if (isLoadingPools || isLoadingDigTypes) {
     return <div>Loading...</div>;
   }
 
@@ -102,6 +141,7 @@ const PoolSpecificCosts = () => {
                     <TableHead className="whitespace-nowrap">Coping Supply</TableHead>
                     <TableHead className="whitespace-nowrap">Coping Lay</TableHead>
                     <TableHead className="whitespace-nowrap">Beam</TableHead>
+                    <TableHead className="whitespace-nowrap">Dig Type</TableHead>
                     <TableHead className="whitespace-nowrap">Excavation</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -164,11 +204,32 @@ const PoolSpecificCosts = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        <Input
-                          type="number"
-                          className="w-32"
-                          placeholder="Enter cost"
-                        />
+                        <Select
+                          value={selectedDigTypes[pool.id]}
+                          onValueChange={(value) => {
+                            setSelectedDigTypes(prev => ({
+                              ...prev,
+                              [pool.id]: value
+                            }));
+                          }}
+                        >
+                          <SelectTrigger className="w-32">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {digTypes?.map((digType) => (
+                              <SelectItem key={digType.id} value={digType.id}>
+                                {digType.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        {getExcavationCost(pool.id) ? 
+                          formatCurrency(getExcavationCost(pool.id)!) :
+                          "-"
+                        }
                       </TableCell>
                     </TableRow>
                   ))}
