@@ -76,7 +76,7 @@ const PoolDetails = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto py-8 space-y-8">
         <PoolBreadcrumb poolName={pool.name} />
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
