@@ -1,10 +1,9 @@
-
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -15,7 +14,10 @@ import {
 } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/format";
 import { AddHandoverKitPackageForm } from "./AddHandoverKitPackageForm";
+import { EditHandoverKitPackageForm } from "./EditHandoverKitPackageForm";
 import type { HandoverKitPackage, HandoverKitPackageComponent, FiltrationComponent } from "@/types/filtration";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
 
 interface HandoverKitPackagesSectionProps {
   onAddClick: () => void;
@@ -25,6 +27,9 @@ export function HandoverKitPackagesSection({
   onAddClick,
 }: HandoverKitPackagesSectionProps) {
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<HandoverKitPackage & { components: HandoverKitPackageComponent[] } | null>(null);
+  const [editingComponent, setEditingComponent] = useState<{ packageId: string; componentId: string; quantity: number } | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: handoverComponents } = useQuery({
     queryKey: ["handover-components"],
@@ -86,6 +91,25 @@ export function HandoverKitPackagesSection({
     },
   });
 
+  const handleUpdateQuantity = async (packageId: string, componentId: string, newQuantity: number) => {
+    try {
+      const { error } = await supabase
+        .from("handover_kit_package_components")
+        .update({ quantity: newQuantity })
+        .eq("package_id", packageId)
+        .eq("component_id", componentId);
+
+      if (error) throw error;
+
+      toast.success("Component quantity updated");
+      queryClient.invalidateQueries({ queryKey: ["handover-kit-packages"] });
+      setEditingComponent(null);
+    } catch (error) {
+      console.error("Error updating component quantity:", error);
+      toast.error("Failed to update component quantity");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -102,6 +126,7 @@ export function HandoverKitPackagesSection({
               <TableHead>Package Name</TableHead>
               <TableHead>Components</TableHead>
               <TableHead className="text-right">Total Price</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -121,6 +146,15 @@ export function HandoverKitPackagesSection({
                       ) || 0
                     )}
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setEditingPackage(pkg)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
                 {pkg.components?.map((comp) => (
                   <TableRow key={comp.id} className="text-sm">
@@ -128,11 +162,57 @@ export function HandoverKitPackagesSection({
                       {comp.component?.model_number}
                     </TableCell>
                     <TableCell>
-                      {comp.component?.name} (x{comp.quantity})
+                      {comp.component?.name}
                     </TableCell>
                     <TableCell className="text-right">
-                      {formatCurrency((comp.component?.price || 0) * comp.quantity)}
+                      {editingComponent?.packageId === pkg.id && 
+                       editingComponent?.componentId === comp.component_id ? (
+                        <div className="flex items-center justify-end gap-2">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={editingComponent.quantity}
+                            onChange={(e) => setEditingComponent({
+                              ...editingComponent,
+                              quantity: parseInt(e.target.value)
+                            })}
+                            className="w-20"
+                            autoFocus
+                            onBlur={() => {
+                              handleUpdateQuantity(
+                                pkg.id,
+                                comp.component_id,
+                                editingComponent.quantity
+                              );
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                handleUpdateQuantity(
+                                  pkg.id,
+                                  comp.component_id,
+                                  editingComponent.quantity
+                                );
+                              }
+                            }}
+                          />
+                        </div>
+                      ) : (
+                        <div
+                          className="cursor-pointer hover:bg-muted px-2 py-1 rounded"
+                          onClick={() => setEditingComponent({
+                            packageId: pkg.id,
+                            componentId: comp.component_id,
+                            quantity: comp.quantity
+                          })}
+                        >
+                          {formatCurrency((comp.component?.price || 0) * comp.quantity)}
+                          <span className="text-muted-foreground ml-2">
+                            (x{comp.quantity})
+                          </span>
+                        </div>
+                      )}
                     </TableCell>
+                    <TableCell></TableCell>
                   </TableRow>
                 ))}
               </React.Fragment>
@@ -144,6 +224,15 @@ export function HandoverKitPackagesSection({
           <AddHandoverKitPackageForm
             open={showAddForm}
             onOpenChange={setShowAddForm}
+            availableComponents={handoverComponents}
+          />
+        )}
+
+        {editingPackage && handoverComponents && (
+          <EditHandoverKitPackageForm
+            open={!!editingPackage}
+            onOpenChange={(open) => !open && setEditingPackage(null)}
+            package={editingPackage}
             availableComponents={handoverComponents}
           />
         )}
