@@ -64,7 +64,8 @@ const PoolSpecificCosts = () => {
     if (pools && digTypes) {
       const initialDigTypes: Record<string, string> = {};
       pools.forEach(pool => {
-        const mappedDigType = poolDigTypeMap[pool.name];
+        const fixedName = pool.name.replace("Westminister", "Westminster");
+        const mappedDigType = poolDigTypeMap[fixedName];
         if (mappedDigType) {
           const digType = digTypes.find(dt => dt.name === mappedDigType);
           if (digType) {
