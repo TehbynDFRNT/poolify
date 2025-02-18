@@ -1,23 +1,23 @@
+
 import React, { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil } from "lucide-react";
+import { Plus } from "lucide-react";
 import {
   Table,
   TableBody,
-  TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCurrency } from "@/utils/format";
 import { AddHandoverKitPackageForm } from "./AddHandoverKitPackageForm";
 import { EditHandoverKitPackageForm } from "./EditHandoverKitPackageForm";
+import { PackageHeaderRow } from "./handover-kit-packages/PackageHeaderRow";
+import { PackageComponentRow } from "./handover-kit-packages/PackageComponentRow";
 import type { HandoverKitPackage, HandoverKitPackageComponent, FiltrationComponent } from "@/types/filtration";
 import { toast } from "sonner";
-import { Input } from "@/components/ui/input";
 
 interface HandoverKitPackagesSectionProps {
   onAddClick: () => void;
@@ -110,6 +110,10 @@ export function HandoverKitPackagesSection({
     }
   };
 
+  const handleStartEdit = (packageId: string, componentId: string, quantity: number) => {
+    setEditingComponent({ packageId, componentId, quantity });
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -132,88 +136,19 @@ export function HandoverKitPackagesSection({
           <TableBody>
             {packages?.map((pkg) => (
               <React.Fragment key={pkg.id}>
-                <TableRow className="bg-muted/30">
-                  <TableCell className="font-bold">{pkg.name}</TableCell>
-                  <TableCell>
-                    {pkg.components?.length || 0} items
-                  </TableCell>
-                  <TableCell className="text-right font-bold">
-                    {formatCurrency(
-                      pkg.components?.reduce(
-                        (total, comp) => 
-                          total + (comp.component?.price || 0) * comp.quantity,
-                        0
-                      ) || 0
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setEditingPackage(pkg)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
+                <PackageHeaderRow
+                  pkg={pkg}
+                  onEdit={setEditingPackage}
+                />
                 {pkg.components?.map((comp) => (
-                  <TableRow key={comp.id} className="text-sm">
-                    <TableCell className="pl-8">
-                      {comp.component?.model_number}
-                    </TableCell>
-                    <TableCell>
-                      {comp.component?.name}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {editingComponent?.packageId === pkg.id && 
-                       editingComponent?.componentId === comp.component_id ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <Input
-                            type="number"
-                            min={1}
-                            value={editingComponent.quantity}
-                            onChange={(e) => setEditingComponent({
-                              ...editingComponent,
-                              quantity: parseInt(e.target.value)
-                            })}
-                            className="w-20"
-                            autoFocus
-                            onBlur={() => {
-                              handleUpdateQuantity(
-                                pkg.id,
-                                comp.component_id,
-                                editingComponent.quantity
-                              );
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                handleUpdateQuantity(
-                                  pkg.id,
-                                  comp.component_id,
-                                  editingComponent.quantity
-                                );
-                              }
-                            }}
-                          />
-                        </div>
-                      ) : (
-                        <div
-                          className="cursor-pointer hover:bg-muted px-2 py-1 rounded"
-                          onClick={() => setEditingComponent({
-                            packageId: pkg.id,
-                            componentId: comp.component_id,
-                            quantity: comp.quantity
-                          })}
-                        >
-                          {formatCurrency((comp.component?.price || 0) * comp.quantity)}
-                          <span className="text-muted-foreground ml-2">
-                            (x{comp.quantity})
-                          </span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell></TableCell>
-                  </TableRow>
+                  <PackageComponentRow
+                    key={comp.id}
+                    component={comp}
+                    packageId={pkg.id}
+                    editingComponent={editingComponent}
+                    onStartEdit={handleStartEdit}
+                    onUpdateQuantity={handleUpdateQuantity}
+                  />
                 ))}
               </React.Fragment>
             ))}
