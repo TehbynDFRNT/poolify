@@ -61,7 +61,7 @@ export const PoolCostsTable = ({
       </TableHeader>
       <TableBody>
         {pools?.map((pool) => {
-          const costs = initialPoolCosts[pool.name] || {
+          const costs = initialPoolCosts[pool.name.replace("Westminister", "Westminster")] || {
             truckedWater: 0,
             saltBags: 0,
             misc: 2700,
@@ -75,7 +75,9 @@ export const PoolCostsTable = ({
           return (
             <TableRow key={pool.id}>
               <TableCell className="sticky left-0 z-20 bg-background">{pool.range}</TableCell>
-              <TableCell className="sticky left-[80px] z-20 bg-background">{pool.name}</TableCell>
+              <TableCell className="sticky left-[80px] z-20 bg-background">
+                {pool.name.replace("Westminister", "Westminster")}
+              </TableCell>
               <TableCell>{pool.length}m</TableCell>
               <TableCell>{pool.width}m</TableCell>
               <TableCell>{pool.depth_shallow}m</TableCell>
