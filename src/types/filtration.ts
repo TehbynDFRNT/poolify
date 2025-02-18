@@ -31,7 +31,7 @@ export interface HandoverKitPackageComponent {
   component_id: string;
   quantity: number;
   created_at: string;
-  component?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'>;
+  component?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'>;
 }
 
 export interface FiltrationPackage {
@@ -48,10 +48,10 @@ export interface FiltrationPackage {
 }
 
 export interface PackageWithComponents extends Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'standard_filter_id' | 'media_filter_id' | 'handover_kit_id'> {
-  light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  standard_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  media_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  standard_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  media_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
 }
