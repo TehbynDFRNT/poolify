@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,26 +61,40 @@ export function AddFiltrationPackageForm({
   const { data: components } = useQuery({
     queryKey: ["filtration-components-by-type"],
     queryFn: async () => {
+      // First get the component types
       const { data: types, error: typesError } = await supabase
         .from("filtration_component_types")
         .select("*");
 
       if (typesError) throw typesError;
+      console.log("Component types:", types); // Debug log
 
+      // Then get the components with their types
       const { data: components, error: componentsError } = await supabase
         .from("filtration_components")
-        .select("*, filtration_component_types!inner(name)")
+        .select(`
+          *,
+          filtration_component_types (
+            name
+          )
+        `)
         .order("name");
 
       if (componentsError) throw componentsError;
+      console.log("Components with types:", components); // Debug log
 
-      return types.reduce((acc, type) => {
+      // Group components by type
+      const groupedComponents = types.reduce((acc, type) => {
         const key = type.name.toLowerCase().replace(/\s+/g, '_');
         acc[key] = components.filter(c => 
-          c.filtration_component_types.name === type.name
+          c.type_id === type.id
         );
+        console.log(`Components for type ${key}:`, acc[key]); // Debug log
         return acc;
       }, {} as Record<string, FiltrationComponent[]>);
+
+      console.log("Final grouped components:", groupedComponents); // Debug log
+      return groupedComponents;
     },
   });
 
