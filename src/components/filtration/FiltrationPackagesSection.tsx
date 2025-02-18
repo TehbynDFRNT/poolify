@@ -30,13 +30,20 @@ export function FiltrationPackagesSection({
   const [editingPackage, setEditingPackage] = useState<PackageWithComponents | null>(null);
   const queryClient = useQueryClient();
 
+  const calculateHandoverKitPrice = (pkg: PackageWithComponents) => {
+    if (!pkg.handover_kit?.components) return 0;
+    return pkg.handover_kit.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0);
+  };
+
   const calculateTotalPrice = (pkg: PackageWithComponents) => {
     return (
       (pkg.light?.price || 0) +
       (pkg.pump?.price || 0) +
       (pkg.sanitiser?.price || 0) +
       (pkg.filter?.price || 0) +
-      (pkg.handover_kit?.price || 0)
+      calculateHandoverKitPrice(pkg)
     );
   };
 
