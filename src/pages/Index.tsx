@@ -81,12 +81,15 @@ const Index = () => {
             icon={Droplets}
             title="Water Features"
             description="Configure additional water features and accessories"
+            isActive={false}
           />
           
           <DataSection
             icon={Calculator}
             title="Pricing Models"
             description="Set up pricing calculations and formulas"
+            onClick={() => navigate('/pricing-models')}
+            isActive={true}
           />
         </div>
 
