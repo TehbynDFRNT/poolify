@@ -47,11 +47,7 @@ export interface FiltrationPackage {
   created_at: string;
 }
 
-export interface PackageWithComponents {
-  id: string;
-  name: string;
-  display_order: number;
-  created_at: string;
+export interface PackageWithComponents extends Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'filter_id' | 'handover_kit_id'> {
   light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;

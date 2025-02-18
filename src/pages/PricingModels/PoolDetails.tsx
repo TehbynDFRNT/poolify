@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -53,7 +52,7 @@ const PoolDetails = () => {
         .single();
 
       if (error) throw error;
-      return data as Pool & { standard_filtration_package: PackageWithComponents | null };
+      return data as unknown as Pool & { standard_filtration_package: PackageWithComponents | null };
     },
   });
 
@@ -63,24 +62,27 @@ const PoolDetails = () => {
       const { data, error } = await supabase
         .from("filtration_packages")
         .select(`
-          *,
-          light:light_id(*),
-          pump:pump_id(*),
-          sanitiser:sanitiser_id(*),
-          filter:filter_id(*),
-          handover_kit:handover_kit_id(
+          id,
+          name,
+          display_order,
+          created_at,
+          light: light_id ( id, name, model_number, price ),
+          pump: pump_id ( id, name, model_number, price ),
+          sanitiser: sanitiser_id ( id, name, model_number, price ),
+          filter: filter_id ( id, name, model_number, price ),
+          handover_kit: handover_kit_id (
             id,
             name,
-            components:handover_kit_package_components(
+            components: handover_kit_package_components (
               quantity,
-              component:component_id(*)
+              component: component_id ( id, name, model_number, price )
             )
           )
         `)
         .order('display_order');
 
       if (error) throw error;
-      return data as PackageWithComponents[];
+      return data as unknown as PackageWithComponents[];
     },
   });
 

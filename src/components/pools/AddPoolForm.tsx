@@ -79,7 +79,7 @@ export const AddPoolForm = () => {
     try {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .insert([values])
+        .insert(values)
         .select();
 
       if (error) {
@@ -368,3 +368,5 @@ export const AddPoolForm = () => {
     </Form>
   );
 };
+
+export default AddPoolForm;
