@@ -18,6 +18,7 @@ import { Calculator, ArrowLeft } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 
 const PoolDetails = () => {
@@ -121,6 +122,8 @@ const PoolDetails = () => {
                 <h3 className="font-medium">Specifications</h3>
                 <p>Volume: {pool.volume_liters ? `${pool.volume_liters}L` : 'N/A'}</p>
                 <p>Weight: {pool.weight_kg ? `${pool.weight_kg}kg` : 'N/A'}</p>
+                <p>Price (ex GST): {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : 'N/A'}</p>
+                <p>Price (inc GST): {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : 'N/A'}</p>
               </div>
             </div>
           </CardContent>
