@@ -13,6 +13,9 @@ import { PoolSpecifications } from "./components/PoolSpecifications";
 import { FiltrationPackage } from "./components/FiltrationPackage";
 import { PoolCosts } from "./components/PoolCosts";
 import { FixedCosts } from "./components/FixedCosts";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/utils/format";
+import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -59,6 +62,35 @@ const PoolDetails = () => {
     },
   });
 
+  const { data: digType } = useQuery({
+    queryKey: ["excavation-dig-type", pool?.name ? poolDigTypeMap[pool.name] : null],
+    queryFn: async () => {
+      if (!pool?.name) return null;
+      const { data, error } = await supabase
+        .from("excavation_dig_types")
+        .select("*")
+        .eq("name", poolDigTypeMap[pool.name])
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!pool?.name,
+  });
+
+  const { data: fixedCosts = [] } = useQuery({
+    queryKey: ["fixed-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("fixed_costs")
+        .select("*")
+        .order('display_order');
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useEffect(() => {
     if (filtrationPackages?.length && !selectedPackageId) {
       setSelectedPackageId(filtrationPackages[0].id);
@@ -74,6 +106,37 @@ const PoolDetails = () => {
   }
 
   const selectedPackage = filtrationPackages?.find(pkg => pkg.id === selectedPackageId) || filtrationPackages?.[0];
+
+  // Calculate total fixed costs
+  const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
+
+  // Calculate total pool specific costs
+  const poolCosts = initialPoolCosts[pool.name] || {
+    truckedWater: 0,
+    saltBags: 0,
+    copingSupply: 0,
+    beam: 0,
+    copingLay: 0,
+    peaGravel: 0,
+    installFee: 0
+  };
+
+  const excavationCost = digType ? 
+    (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
+    (digType.excavation_hourly_rate * digType.excavation_hours) : 0;
+
+  const totalPoolCosts = 
+    poolCosts.truckedWater +
+    poolCosts.saltBags +
+    poolCosts.copingSupply +
+    poolCosts.beam +
+    poolCosts.copingLay +
+    poolCosts.peaGravel +
+    poolCosts.installFee +
+    excavationCost;
+
+  // Calculate grand total
+  const grandTotal = totalFixedCosts + totalPoolCosts;
 
   return (
     <DashboardLayout>
@@ -92,6 +155,14 @@ const PoolDetails = () => {
         )}
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex justify-between text-lg font-semibold">
+              <span>Grand Total (Pool Specific + Fixed Costs):</span>
+              <span>{formatCurrency(grandTotal)}</span>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
