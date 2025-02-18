@@ -128,8 +128,8 @@ const PoolSpecificCosts = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="whitespace-nowrap">Range</TableHead>
-                    <TableHead className="whitespace-nowrap">Name</TableHead>
+                    <TableHead className="whitespace-nowrap sticky left-0 z-20 bg-background">Range</TableHead>
+                    <TableHead className="whitespace-nowrap sticky left-[80px] z-20 bg-background">Name</TableHead>
                     <TableHead className="whitespace-nowrap">Length</TableHead>
                     <TableHead className="whitespace-nowrap">Width</TableHead>
                     <TableHead className="whitespace-nowrap">Shallow End</TableHead>
@@ -148,8 +148,8 @@ const PoolSpecificCosts = () => {
                 <TableBody>
                   {pools?.map((pool) => (
                     <TableRow key={pool.id}>
-                      <TableCell>{pool.range}</TableCell>
-                      <TableCell>{pool.name}</TableCell>
+                      <TableCell className="sticky left-0 z-20 bg-background">{pool.range}</TableCell>
+                      <TableCell className="sticky left-[80px] z-20 bg-background">{pool.name}</TableCell>
                       <TableCell>{pool.length}m</TableCell>
                       <TableCell>{pool.width}m</TableCell>
                       <TableCell>{pool.depth_shallow}m</TableCell>
