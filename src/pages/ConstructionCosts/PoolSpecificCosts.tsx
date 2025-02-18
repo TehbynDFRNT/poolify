@@ -35,7 +35,40 @@ import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const poolDigTypeMap: Record<string, string> = {
+  "Latina": "Dig 2",
+  "Sovereign": "Dig 3",
+  "Empire": "Dig 3",
+  "Oxford": "Dig 4",
+  "Sheffield": "Dig 4",
+  "Avellino": "Dig 4",
+  "Palazzo": "Dig 4",
+  "Valentina": "Dig 5",
+  "Westminster": "Dig 6",
+  "Kensington": "Dig 6",
+  "Bedarra": "Dig 4",
+  "Hayman": "Dig 4",
+  "Verona": "Dig 2",
+  "Portofino": "Dig 3",
+  "Florentina": "Dig 3",
+  "Bellagio": "Dig 3",
+  "Bellino": "Dig 3",
+  "Imperial": "Dig 4",
+  "Castello": "Dig 4",
+  "Grandeur": "Dig 4",
+  "Amalfi": "Dig 5",
+  "Serenity": "Dig 2",
+  "Allure": "Dig 3",
+  "Harmony": "Dig 3",
+  "Istana": "Dig 4",
+  "Terazza": "Dig 4",
+  "Elysian": "Dig 5",
+  "Infinity 3": "Dig 1",
+  "Infinity 4": "Dig 1",
+  "Terrace 3": "Dig 1"
+};
 
 const PoolSpecificCosts = () => {
   const [selectedDigTypes, setSelectedDigTypes] = useState<Record<string, string>>({});
@@ -43,20 +76,17 @@ const PoolSpecificCosts = () => {
   const { data: pools, isLoading: isLoadingPools } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
-      // First get the range order
       const { data: ranges } = await supabase
         .from("pool_ranges")
         .select("name")
         .order("display_order");
 
-      // Then get all pools
       const { data: poolsData, error } = await supabase
         .from("pool_specifications")
         .select("*");
 
       if (error) throw error;
 
-      // Sort pools based on range order
       const rangeOrder = ranges?.map(r => r.name) || [];
       return (poolsData || []).sort((a, b) => {
         const aIndex = rangeOrder.indexOf(a.range);
@@ -77,6 +107,23 @@ const PoolSpecificCosts = () => {
       return data as ExcavationDigType[];
     },
   });
+
+  // Set initial dig types when data is loaded
+  useEffect(() => {
+    if (pools && digTypes) {
+      const initialDigTypes: Record<string, string> = {};
+      pools.forEach(pool => {
+        const mappedDigType = poolDigTypeMap[pool.name];
+        if (mappedDigType) {
+          const digType = digTypes.find(dt => dt.name === mappedDigType);
+          if (digType) {
+            initialDigTypes[pool.id] = digType.id;
+          }
+        }
+      });
+      setSelectedDigTypes(initialDigTypes);
+    }
+  }, [pools, digTypes]);
 
   const calculateExcavationCost = (digType: ExcavationDigType) => {
     const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
