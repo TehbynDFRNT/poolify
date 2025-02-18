@@ -71,7 +71,7 @@ export function FiltrationPackagesSection({
                 <TableCell>{pkg.pump?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.sanitiser?.model_number || '-'}</TableCell>
                 <TableCell>{pkg.filter?.model_number || '-'}</TableCell>
-                <TableCell>{pkg.handover_kit?.model_number || '-'}</TableCell>
+                <TableCell>{pkg.handover_kit?.name || '-'}</TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(calculateTotalPrice(pkg))}
                 </TableCell>

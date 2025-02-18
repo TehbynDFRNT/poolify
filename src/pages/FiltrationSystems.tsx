@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -90,7 +91,7 @@ const FiltrationSystems = () => {
           pump:filtration_components!pump_id(id, name, model_number, price),
           sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
           filter:filtration_components!filter_id(id, name, model_number, price),
-          handover_kit:filtration_components!handover_kit_id(id, name, model_number, price)
+          handover_kit:handover_kit_packages!handover_kit_id(id, name)
         `)
         .order("display_order");
 

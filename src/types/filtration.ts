@@ -1,4 +1,3 @@
-
 export interface FiltrationComponentType {
   id: string;
   name: string;
@@ -55,5 +54,5 @@ export interface PackageWithComponents {
   pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  handover_kit: Pick<HandoverKitPackage, 'name' | 'id'> | null;
 }
