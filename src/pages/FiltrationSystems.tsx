@@ -8,6 +8,7 @@ import { FiltrationComponentsSection } from "@/components/filtration/FiltrationC
 import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
 import { HandoverKitPackagesSection } from "@/components/filtration/HandoverKitPackagesSection";
 import { FiltrationPackagesSection } from "@/components/filtration/FiltrationPackagesSection";
+import { PoolFiltrationPackagesSection } from "@/components/filtration/PoolFiltrationPackagesSection";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -157,6 +158,10 @@ const FiltrationSystems = () => {
       <FiltrationPackagesSection
         packages={packages}
         onAddClick={() => setShowAddForm(true)}
+      />
+
+      <PoolFiltrationPackagesSection
+        packages={packages}
       />
 
       {componentTypes && (
