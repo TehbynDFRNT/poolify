@@ -290,6 +290,30 @@ export type Database = {
         }
         Relationships: []
       }
+      fixed_costs: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       handover_kit_package_components: {
         Row: {
           component_id: string
