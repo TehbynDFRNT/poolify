@@ -6,6 +6,7 @@ import {
   TableRow,
   TableHead,
   TableCell,
+  TableFooter,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,6 +35,16 @@ export const CostTable = ({
   onPriceChange,
   nameLabel,
 }: CostTableProps) => {
+  // Calculate the total of all prices
+  const total = costs.reduce((sum, cost) => {
+    // If a row is being edited, use the editing price for that row
+    if (editingId === cost.id) {
+      const editingPriceNum = parseFloat(editingPrice);
+      return sum + (isNaN(editingPriceNum) ? 0 : editingPriceNum);
+    }
+    return sum + cost.price;
+  }, 0);
+
   return (
     <Table>
       <TableHeader>
@@ -90,6 +101,13 @@ export const CostTable = ({
           </TableRow>
         ))}
       </TableBody>
+      <TableFooter>
+        <TableRow>
+          <TableCell className="font-medium">Total</TableCell>
+          <TableCell className="text-right font-medium">{formatCurrency(total)}</TableCell>
+          <TableCell />
+        </TableRow>
+      </TableFooter>
     </Table>
   );
 };
