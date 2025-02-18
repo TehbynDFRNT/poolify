@@ -6,7 +6,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
-import { initialPoolCosts } from "@/pages/ConstructionCosts/constants";
+import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
 
 type PoolCostsProps = {
   poolName: string;
@@ -23,6 +26,24 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
     peaGravel: 0,
     installFee: 0
   };
+
+  const { data: digType } = useQuery({
+    queryKey: ["excavation-dig-type", poolDigTypeMap[poolName]],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("excavation_dig_types")
+        .select("*")
+        .eq("name", poolDigTypeMap[poolName])
+        .single();
+
+      if (error) throw error;
+      return data as ExcavationDigType;
+    },
+  });
+
+  const excavationCost = digType ? 
+    (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
+    (digType.excavation_hourly_rate * digType.excavation_hours) : 0;
 
   return (
     <Card className="mb-8">
@@ -42,6 +63,10 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
                 <div className="flex justify-between">
                   <span>Install Fee:</span>
                   <span>{formatCurrency(poolCosts.installFee)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Excavation:</span>
+                  <span>{formatCurrency(excavationCost)}</span>
                 </div>
               </div>
             </div>
@@ -101,7 +126,8 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
                   poolCosts.beam +
                   poolCosts.copingLay +
                   poolCosts.peaGravel +
-                  poolCosts.installFee
+                  poolCosts.installFee +
+                  excavationCost
                 )}
               </span>
             </div>
