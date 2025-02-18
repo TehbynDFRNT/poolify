@@ -103,8 +103,8 @@ const PricingWorksheet = () => {
                 <TableRow>
                   <TableHead>Range</TableHead>
                   <TableHead>Pool Name</TableHead>
-                  <TableHead className="text-right">Price (ex GST)</TableHead>
-                  <TableHead className="text-right">Price (inc GST)</TableHead>
+                  <TableHead className="text-right">Web Price</TableHead>
+                  <TableHead className="text-right">Margin</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -113,14 +113,10 @@ const PricingWorksheet = () => {
                     <TableCell>{pool.range}</TableCell>
                     <TableCell>{pool.name}</TableCell>
                     <TableCell className="text-right">
-                      {pool.buy_price_ex_gst 
-                        ? formatCurrency(pool.buy_price_ex_gst)
-                        : "-"}
+                      {formatCurrency(0)}
                     </TableCell>
                     <TableCell className="text-right">
-                      {pool.buy_price_inc_gst
-                        ? formatCurrency(pool.buy_price_inc_gst)
-                        : "-"}
+                      {formatCurrency(0)}
                     </TableCell>
                   </TableRow>
                 ))}
