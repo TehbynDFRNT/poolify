@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +14,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/format";
-import type { HandoverKitPackage, HandoverKitPackageComponent } from "@/types/filtration";
+import { AddHandoverKitPackageForm } from "./AddHandoverKitPackageForm";
+import type { HandoverKitPackage, HandoverKitPackageComponent, FiltrationComponent } from "@/types/filtration";
 
 interface HandoverKitPackagesSectionProps {
   onAddClick: () => void;
@@ -23,6 +24,30 @@ interface HandoverKitPackagesSectionProps {
 export function HandoverKitPackagesSection({
   onAddClick,
 }: HandoverKitPackagesSectionProps) {
+  const [showAddForm, setShowAddForm] = useState(false);
+
+  const { data: handoverComponents } = useQuery({
+    queryKey: ["handover-components"],
+    queryFn: async () => {
+      const { data: typeData, error: typeError } = await supabase
+        .from("filtration_component_types")
+        .select("id")
+        .eq("name", "Handover Kit")
+        .single();
+
+      if (typeError) throw typeError;
+
+      const { data, error } = await supabase
+        .from("filtration_components")
+        .select("*")
+        .eq("type_id", typeData.id)
+        .order("name");
+
+      if (error) throw error;
+      return data as FiltrationComponent[];
+    },
+  });
+
   const { data: packages } = useQuery({
     queryKey: ["handover-kit-packages"],
     queryFn: async () => {
@@ -63,7 +88,7 @@ export function HandoverKitPackagesSection({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Handover Kit Packages</CardTitle>
-        <Button onClick={onAddClick}>
+        <Button onClick={() => setShowAddForm(true)}>
           <Plus className="mr-2 h-4 w-4" />
           Create Package
         </Button>
@@ -112,6 +137,14 @@ export function HandoverKitPackagesSection({
             ))}
           </TableBody>
         </Table>
+
+        {handoverComponents && (
+          <AddHandoverKitPackageForm
+            open={showAddForm}
+            onOpenChange={setShowAddForm}
+            availableComponents={handoverComponents}
+          />
+        )}
       </CardContent>
     </Card>
   );
