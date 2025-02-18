@@ -28,10 +28,13 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { PackageWithComponents } from "@/types/filtration";
+import { useState } from "react";
 
 const PoolDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  
+  const [selectedPackageId, setSelectedPackageId] = useState<string>("");
 
   const { data: pool, isLoading: poolLoading } = useQuery({
     queryKey: ["pool-specification", id],
@@ -72,6 +75,11 @@ const PoolDetails = () => {
       if (error) throw error;
       return data as unknown as PackageWithComponents[];
     },
+    onSuccess: (data) => {
+      if (data?.[0] && !selectedPackageId) {
+        setSelectedPackageId(data[0].id);
+      }
+    }
   });
 
   if (poolLoading || packagesLoading) {
@@ -82,7 +90,7 @@ const PoolDetails = () => {
     return <div>Pool not found</div>;
   }
 
-  const defaultPackage = filtrationPackages?.[0];
+  const selectedPackage = filtrationPackages?.find(pkg => pkg.id === selectedPackageId) || filtrationPackages?.[0];
 
   const calculatePackageTotal = (pkg: PackageWithComponents) => {
     const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
@@ -184,7 +192,10 @@ const PoolDetails = () => {
           <CardHeader>
             <CardTitle className="flex justify-between items-center">
               <span>Filtration Package</span>
-              <Select defaultValue={defaultPackage?.id}>
+              <Select 
+                value={selectedPackageId} 
+                onValueChange={setSelectedPackageId}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select package" />
                 </SelectTrigger>
@@ -199,49 +210,49 @@ const PoolDetails = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {defaultPackage && (
+            {selectedPackage && (
               <div className="space-y-6">
                 <div>
                   <h3 className="font-medium mb-2">Light</h3>
-                  {defaultPackage.light && (
+                  {selectedPackage.light && (
                     <div className="grid grid-cols-2 gap-2">
-                      <p>Model: {defaultPackage.light.model_number}</p>
-                      <p className="text-right">{formatCurrency(defaultPackage.light.price)}</p>
+                      <p>Model: {selectedPackage.light.model_number}</p>
+                      <p className="text-right">{formatCurrency(selectedPackage.light.price)}</p>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="font-medium mb-2">Pump</h3>
-                  {defaultPackage.pump && (
+                  {selectedPackage.pump && (
                     <div className="grid grid-cols-2 gap-2">
-                      <p>Model: {defaultPackage.pump.model_number}</p>
-                      <p className="text-right">{formatCurrency(defaultPackage.pump.price)}</p>
+                      <p>Model: {selectedPackage.pump.model_number}</p>
+                      <p className="text-right">{formatCurrency(selectedPackage.pump.price)}</p>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="font-medium mb-2">Sanitiser</h3>
-                  {defaultPackage.sanitiser && (
+                  {selectedPackage.sanitiser && (
                     <div className="grid grid-cols-2 gap-2">
-                      <p>Model: {defaultPackage.sanitiser.model_number}</p>
-                      <p className="text-right">{formatCurrency(defaultPackage.sanitiser.price)}</p>
+                      <p>Model: {selectedPackage.sanitiser.model_number}</p>
+                      <p className="text-right">{formatCurrency(selectedPackage.sanitiser.price)}</p>
                     </div>
                   )}
                 </div>
                 <div>
                   <h3 className="font-medium mb-2">Filter</h3>
-                  {defaultPackage.filter && (
+                  {selectedPackage.filter && (
                     <div className="grid grid-cols-2 gap-2">
-                      <p>Model: {defaultPackage.filter.model_number}</p>
-                      <p className="text-right">{formatCurrency(defaultPackage.filter.price)}</p>
+                      <p>Model: {selectedPackage.filter.model_number}</p>
+                      <p className="text-right">{formatCurrency(selectedPackage.filter.price)}</p>
                     </div>
                   )}
                 </div>
-                {defaultPackage.handover_kit && (
+                {selectedPackage.handover_kit && (
                   <div>
-                    <h3 className="font-medium mb-2">Handover Kit: {defaultPackage.handover_kit.name}</h3>
+                    <h3 className="font-medium mb-2">Handover Kit: {selectedPackage.handover_kit.name}</h3>
                     <div className="space-y-2">
-                      {defaultPackage.handover_kit.components.map((comp) => (
+                      {selectedPackage.handover_kit.components.map((comp) => (
                         <div key={comp.component_id} className="grid grid-cols-2 gap-2">
                           <p>{comp.component?.name} (x{comp.quantity})</p>
                           <p className="text-right">
@@ -256,7 +267,7 @@ const PoolDetails = () => {
                   <div className="grid grid-cols-2 gap-2">
                     <h3 className="font-medium">Total Package Price:</h3>
                     <p className="text-right font-medium">
-                      {formatCurrency(calculatePackageTotal(defaultPackage))}
+                      {formatCurrency(calculatePackageTotal(selectedPackage))}
                     </p>
                   </div>
                 </div>
