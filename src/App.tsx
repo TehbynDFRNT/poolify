@@ -14,14 +14,16 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/pool-specifications" element={<PoolSpecifications />} />
-        <Route path="/construction-costs/*" element={<ConstructionCosts />} />
-        <Route path="/filtration-systems" element={<FiltrationSystems />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
+      <div className="min-h-screen">
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/pool-specifications" element={<PoolSpecifications />} />
+          <Route path="/construction-costs/*" element={<ConstructionCosts />} />
+          <Route path="/filtration-systems" element={<FiltrationSystems />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+      </div>
     </QueryClientProvider>
   );
 }
