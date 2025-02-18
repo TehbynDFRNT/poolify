@@ -2,21 +2,14 @@
 import { FiltrationComponent, FiltrationComponentType } from "@/types/filtration";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Pencil, Check, X } from "lucide-react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatCurrency } from "@/utils/format";
+import { Plus } from "lucide-react";
+import { Table, TableBody } from "@/components/ui/table";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { ComponentsTableHeader } from "./components/ComponentsTableHeader";
+import { ComponentTableRow } from "./components/ComponentTableRow";
 
 interface FiltrationComponentsSectionProps {
   components: FiltrationComponent[] | undefined;
@@ -56,7 +49,6 @@ export function FiltrationComponentsSection({
     try {
       let value: string | number | null = editingCell.value;
       
-      // Convert to number for numeric fields
       if (['price', 'flow_rate', 'power_consumption'].includes(editingCell.field)) {
         value = editingCell.value === '' ? null : parseFloat(editingCell.value.toString());
       }
@@ -114,146 +106,22 @@ export function FiltrationComponentsSection({
       </CardHeader>
       <CardContent>
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Model Number</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead className="text-right">Flow Rate</TableHead>
-              <TableHead className="text-right">Power Usage</TableHead>
-              <TableHead className="text-right">Price</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ComponentsTableHeader />
           <TableBody>
             {components?.filter(component => 
               componentTypes?.find(t => t.id === component.type_id)?.name !== "Handover Kit"
             ).map((component) => (
-              <TableRow key={component.id}>
-                <TableCell>
-                  {editingCell?.id === component.id && editingCell.field === 'model_number' ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={editingCell.value}
-                        onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-full"
-                      />
-                      <Button size="sm" variant="ghost" onClick={handleSaveEdit}><Check className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-between group"
-                      onClick={() => handleStartEdit(component, 'model_number')}
-                    >
-                      {component.model_number}
-                      <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editingCell?.id === component.id && editingCell.field === 'name' ? (
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={editingCell.value}
-                        onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-full"
-                      />
-                      <Button size="sm" variant="ghost" onClick={handleSaveEdit}><Check className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-between group"
-                      onClick={() => handleStartEdit(component, 'name')}
-                    >
-                      {component.name}
-                      <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {componentTypes?.find(t => t.id === component.type_id)?.name}
-                </TableCell>
-                <TableCell className="text-right">
-                  {editingCell?.id === component.id && editingCell.field === 'flow_rate' ? (
-                    <div className="flex items-center gap-2 justify-end">
-                      <Input
-                        type="number"
-                        value={editingCell.value === null ? '' : editingCell.value}
-                        onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-32"
-                        step="0.1"
-                      />
-                      <Button size="sm" variant="ghost" onClick={handleSaveEdit}><Check className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-end gap-2 group"
-                      onClick={() => handleStartEdit(component, 'flow_rate')}
-                    >
-                      {component.flow_rate ? `${component.flow_rate} L/min` : '-'}
-                      <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {editingCell?.id === component.id && editingCell.field === 'power_consumption' ? (
-                    <div className="flex items-center gap-2 justify-end">
-                      <Input
-                        type="number"
-                        value={editingCell.value === null ? '' : editingCell.value}
-                        onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-32"
-                        step="0.1"
-                      />
-                      <Button size="sm" variant="ghost" onClick={handleSaveEdit}><Check className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-end gap-2 group"
-                      onClick={() => handleStartEdit(component, 'power_consumption')}
-                    >
-                      {component.power_consumption ? `${component.power_consumption}W` : '-'}
-                      <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {editingCell?.id === component.id && editingCell.field === 'price' ? (
-                    <div className="flex items-center gap-2 justify-end">
-                      <Input
-                        type="number"
-                        value={editingCell.value}
-                        onChange={(e) => setEditingCell({ ...editingCell, value: e.target.value })}
-                        onKeyDown={handleKeyDown}
-                        autoFocus
-                        className="w-32"
-                        step="0.01"
-                      />
-                      <Button size="sm" variant="ghost" onClick={handleSaveEdit}><Check className="h-4 w-4" /></Button>
-                      <Button size="sm" variant="ghost" onClick={handleCancelEdit}><X className="h-4 w-4" /></Button>
-                    </div>
-                  ) : (
-                    <div
-                      className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-end gap-2 group"
-                      onClick={() => handleStartEdit(component, 'price')}
-                    >
-                      {formatCurrency(component.price)}
-                      <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
-                    </div>
-                  )}
-                </TableCell>
-              </TableRow>
+              <ComponentTableRow
+                key={component.id}
+                component={component}
+                componentType={componentTypes?.find(t => t.id === component.type_id)}
+                editingCell={editingCell}
+                onStartEdit={(field) => handleStartEdit(component, field as EditableCell['field'])}
+                onSaveEdit={handleSaveEdit}
+                onCancelEdit={handleCancelEdit}
+                onEditValueChange={(value) => setEditingCell(prev => prev ? { ...prev, value } : null)}
+                onKeyDown={handleKeyDown}
+              />
             ))}
           </TableBody>
         </Table>
