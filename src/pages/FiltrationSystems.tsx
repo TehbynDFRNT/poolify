@@ -16,15 +16,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import type { FiltrationComponent, FiltrationComponentType, FiltrationPackage } from "@/types/filtration";
 
-type PackageWithComponents = Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'standard_filter_id' | 'media_filter_id' | 'handover_kit_id'> & {
-  light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  standard_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  media_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-  handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
-};
-
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -81,7 +72,7 @@ const FiltrationSystems = () => {
         throw error;
       }
 
-      console.log("Handover kits fetched:", data); // Add this line to debug
+      console.log("Handover kits fetched:", data);
       return data as FiltrationComponent[];
     },
     enabled: !!componentTypes,
@@ -97,22 +88,21 @@ const FiltrationSystems = () => {
           name,
           display_order,
           created_at,
-          light:filtration_components!light_id(name, model_number, price),
-          pump:filtration_components!pump_id(name, model_number, price),
-          sanitiser:filtration_components!sanitiser_id(name, model_number, price),
-          standard_filter:filtration_components!standard_filter_id(name, model_number, price),
-          media_filter:filtration_components!media_filter_id(name, model_number, price),
-          handover_kit:filtration_components!handover_kit_id(name, model_number, price)
+          light:filtration_components!light_id(id, name, model_number, price),
+          pump:filtration_components!pump_id(id, name, model_number, price),
+          sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
+          standard_filter:filtration_components!standard_filter_id(id, name, model_number, price),
+          media_filter:filtration_components!media_filter_id(id, name, model_number, price),
+          handover_kit:filtration_components!handover_kit_id(id, name, model_number, price)
         `)
         .order("display_order");
 
       if (error) throw error;
-      return data as PackageWithComponents[];
+      return data;
     },
   });
 
   const handleAddComponent = () => {
-    // Reset selectedTypeId to the Handover Kit type when adding from handover section
     const handoverKitType = componentTypes?.find(t => t.name === "Handover Kit");
     if (handoverKitType) {
       setSelectedTypeId(handoverKitType.id);
