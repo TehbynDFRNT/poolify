@@ -81,6 +81,11 @@ export function FiltrationComponentsSection({
     }
   };
 
+  const filteredComponents = components?.filter(component => {
+    if (!selectedTypeId) return true;
+    return component.type_id === selectedTypeId;
+  });
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
@@ -108,7 +113,7 @@ export function FiltrationComponentsSection({
         <Table>
           <ComponentsTableHeader />
           <TableBody>
-            {components?.filter(component => 
+            {filteredComponents?.filter(component => 
               componentTypes?.find(t => t.id === component.type_id)?.name !== "Handover Kit"
             ).map((component) => (
               <ComponentTableRow
