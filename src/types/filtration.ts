@@ -18,6 +18,22 @@ export interface FiltrationComponent {
   created_at: string;
 }
 
+export interface HandoverKitPackage {
+  id: string;
+  name: string;
+  display_order: number;
+  created_at: string;
+}
+
+export interface HandoverKitPackageComponent {
+  id: string;
+  package_id: string;
+  component_id: string;
+  quantity: number;
+  created_at: string;
+  component?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'>;
+}
+
 export interface FiltrationPackage {
   id: string;
   name: string;

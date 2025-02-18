@@ -297,6 +297,66 @@ export type Database = {
         }
         Relationships: []
       }
+      handover_kit_package_components: {
+        Row: {
+          component_id: string
+          created_at: string
+          id: string
+          package_id: string
+          quantity: number
+        }
+        Insert: {
+          component_id: string
+          created_at?: string
+          id?: string
+          package_id: string
+          quantity?: number
+        }
+        Update: {
+          component_id?: string
+          created_at?: string
+          id?: string
+          package_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "handover_kit_package_components_component_id_fkey"
+            columns: ["component_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_components"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "handover_kit_package_components_package_id_fkey"
+            columns: ["package_id"]
+            isOneToOne: false
+            referencedRelation: "handover_kit_packages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      handover_kit_packages: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       paving_additional_costs: {
         Row: {
           amount: number
