@@ -73,7 +73,13 @@ const PricingWorksheet = () => {
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>Pricing Worksheet</BreadcrumbItem>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/pricing-models/pools">Pools</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>Worksheet</BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
@@ -109,7 +115,7 @@ const PricingWorksheet = () => {
               </TableHeader>
               <TableBody>
                 {pools?.map((pool) => (
-                  <TableRow key={pool.id}>
+                  <TableRow key={pool.id} className="cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/pricing-models/pools/${pool.id}`)}>
                     <TableCell>{pool.range}</TableCell>
                     <TableCell>{pool.name}</TableCell>
                     <TableCell className="text-right">
