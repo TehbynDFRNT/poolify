@@ -10,7 +10,6 @@ import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/cons
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
-import type { FixedCost } from "@/types/fixed-cost";
 
 type PoolCostsProps = {
   poolName: string;
@@ -42,24 +41,9 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
     },
   });
 
-  const { data: fixedCosts = [] } = useQuery({
-    queryKey: ["fixed-costs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fixed_costs")
-        .select("*")
-        .order('display_order');
-
-      if (error) throw error;
-      return data as FixedCost[];
-    },
-  });
-
   const excavationCost = digType ? 
     (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
     (digType.excavation_hourly_rate * digType.excavation_hours) : 0;
-
-  const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
 
   return (
     <Card className="mb-8">
@@ -130,21 +114,9 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
             </div>
           </div>
 
-          <div className="border-t pt-4">
-            <h3 className="font-medium mb-2">Fixed Costs</h3>
-            <div className="space-y-2">
-              {fixedCosts.map((cost) => (
-                <div key={cost.id} className="flex justify-between">
-                  <span>{cost.name}:</span>
-                  <span>{formatCurrency(cost.price)}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
           <div className="pt-4 mt-4 border-t">
             <div className="flex justify-between">
-              <h3 className="font-medium">Total Costs:</h3>
+              <h3 className="font-medium">Total Pool Costs:</h3>
               <span className="font-medium">
                 {formatCurrency(
                   poolCosts.truckedWater +
@@ -155,8 +127,7 @@ export const PoolCosts = ({ poolName }: PoolCostsProps) => {
                   poolCosts.copingLay +
                   poolCosts.peaGravel +
                   poolCosts.installFee +
-                  excavationCost +
-                  totalFixedCosts
+                  excavationCost
                 )}
               </span>
             </div>

@@ -12,6 +12,7 @@ import { PoolOutline } from "./components/PoolOutline";
 import { PoolSpecifications } from "./components/PoolSpecifications";
 import { FiltrationPackage } from "./components/FiltrationPackage";
 import { PoolCosts } from "./components/PoolCosts";
+import { FixedCosts } from "./components/FixedCosts";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -90,6 +91,7 @@ const PoolDetails = () => {
           />
         )}
         <PoolCosts poolName={pool.name} />
+        <FixedCosts />
       </div>
     </DashboardLayout>
   );
