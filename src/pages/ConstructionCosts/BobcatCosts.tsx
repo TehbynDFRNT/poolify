@@ -4,27 +4,16 @@ import { Link } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Truck } from "lucide-react";
-import { formatCurrency } from "@/utils/format";
-import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { toast } from "sonner";
 import type { BobcatCost } from "@/types/bobcat-cost";
-import { Button } from "@/components/ui/button";
-import { AddBobcatCostForm } from "./components/AddBobcatCostForm";
+import { BobcatCostGroup } from "./components/BobcatCostGroup";
 
 const BobcatCosts = () => {
   const queryClient = useQueryClient();
@@ -126,83 +115,18 @@ const BobcatCosts = () => {
           ) : (
             <div className="space-y-8">
               {groupedCosts && Object.entries(groupedCosts).map(([sizeCategory, costs]) => (
-                <div key={sizeCategory}>
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-lg font-medium text-gray-900">{sizeCategory}</h2>
-                    <Button
-                      variant="outline"
-                      onClick={() => setAddingToCategory(sizeCategory)}
-                    >
-                      Add New Code
-                    </Button>
-                  </div>
-                  
-                  {addingToCategory === sizeCategory && (
-                    <div className="mb-4 p-4 border rounded-lg bg-gray-50">
-                      <AddBobcatCostForm
-                        sizeCategory={sizeCategory}
-                        onSuccess={() => setAddingToCategory(null)}
-                      />
-                    </div>
-                  )}
-
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Code</TableHead>
-                        <TableHead className="text-right">Price</TableHead>
-                        <TableHead className="w-[100px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {costs.map((cost) => (
-                        <TableRow key={cost.id}>
-                          <TableCell>{cost.day_code}</TableCell>
-                          <TableCell className="text-right">
-                            {editingId === cost.id ? (
-                              <Input
-                                type="number"
-                                value={editingPrice}
-                                onChange={(e) => setEditingPrice(e.target.value)}
-                                className="w-32 ml-auto"
-                                step="0.01"
-                              />
-                            ) : (
-                              formatCurrency(cost.price)
-                            )}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {editingId === cost.id ? (
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => setEditingId(null)}
-                                >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  onClick={() => handleSave(cost)}
-                                >
-                                  Save
-                                </Button>
-                              </div>
-                            ) : (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => startEditing(cost)}
-                              >
-                                Edit
-                              </Button>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
+                <BobcatCostGroup
+                  key={sizeCategory}
+                  sizeCategory={sizeCategory}
+                  costs={costs}
+                  editingId={editingId}
+                  editingPrice={editingPrice}
+                  addingToCategory={addingToCategory}
+                  onEdit={startEditing}
+                  onSave={handleSave}
+                  onCancel={() => setEditingId(null)}
+                  setAddingToCategory={setAddingToCategory}
+                />
               ))}
             </div>
           )}
