@@ -11,6 +11,7 @@ import { PoolHeader } from "./components/PoolHeader";
 import { PoolOutline } from "./components/PoolOutline";
 import { PoolSpecifications } from "./components/PoolSpecifications";
 import { FiltrationPackage } from "./components/FiltrationPackage";
+import { PoolCosts } from "./components/PoolCosts";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -80,6 +81,7 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
+        <PoolCosts poolName={pool.name} />
         {selectedPackage && filtrationPackages && (
           <FiltrationPackage
             selectedPackageId={selectedPackageId}
