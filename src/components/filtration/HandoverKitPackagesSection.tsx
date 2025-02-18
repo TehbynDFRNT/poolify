@@ -33,14 +33,15 @@ export function HandoverKitPackagesSection({
         .from("filtration_component_types")
         .select("id")
         .eq("name", "Handover Kit")
-        .single();
+        .limit(1); // Add limit to get just the first match
 
       if (typeError) throw typeError;
+      if (!typeData?.length) return []; // Handle case where no type is found
 
       const { data, error } = await supabase
         .from("filtration_components")
         .select("*")
-        .eq("type_id", typeData.id)
+        .eq("type_id", typeData[0].id)
         .order("name");
 
       if (error) throw error;
