@@ -28,7 +28,7 @@ import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { PackageWithComponents } from "@/types/filtration";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -75,12 +75,14 @@ const PoolDetails = () => {
       if (error) throw error;
       return data as unknown as PackageWithComponents[];
     },
-    onSuccess: (data) => {
-      if (data?.[0] && !selectedPackageId) {
-        setSelectedPackageId(data[0].id);
-      }
-    }
   });
+
+  // Set initial package selection when data loads
+  useEffect(() => {
+    if (filtrationPackages?.length && !selectedPackageId) {
+      setSelectedPackageId(filtrationPackages[0].id);
+    }
+  }, [filtrationPackages, selectedPackageId]);
 
   if (poolLoading || packagesLoading) {
     return <div>Loading...</div>;
