@@ -70,14 +70,16 @@ export function AddFiltrationPackageForm({
 
       const { data: components, error: componentsError } = await supabase
         .from("filtration_components")
-        .select("*")
+        .select("*, filtration_component_types!inner(name)")
         .order("name");
 
       if (componentsError) throw componentsError;
 
       return types.reduce((acc, type) => {
         const key = type.name.toLowerCase().replace(/\s+/g, '_');
-        acc[key] = components.filter(c => c.type_id === type.id);
+        acc[key] = components.filter(c => 
+          c.filtration_component_types.name === type.name
+        );
         return acc;
       }, {} as Record<string, FiltrationComponent[]>);
     },
