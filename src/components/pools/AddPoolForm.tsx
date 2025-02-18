@@ -4,7 +4,6 @@ import { poolSchema, PoolFormValues } from "@/types/pool";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -65,7 +64,6 @@ export const AddPoolForm = () => {
       }
 
       if (data) {
-        // Extract the 'name' property from each object in the array
         const ranges = data.map((item) => item.name);
         setPoolRanges(ranges);
       }
@@ -77,9 +75,29 @@ export const AddPoolForm = () => {
   async function onSubmit(values: PoolFormValues) {
     setLoading(true);
     try {
+      // Ensure all required fields are present with their correct types
+      const poolData = {
+        name: values.name,
+        range: values.range,
+        length: values.length,
+        width: values.width,
+        depth_shallow: values.depth_shallow,
+        depth_deep: values.depth_deep,
+        waterline_l_m: values.waterline_l_m,
+        volume_liters: values.volume_liters,
+        salt_volume_bags: values.salt_volume_bags,
+        salt_volume_bags_fixed: values.salt_volume_bags_fixed,
+        weight_kg: values.weight_kg,
+        minerals_kg_initial: values.minerals_kg_initial,
+        minerals_kg_topup: values.minerals_kg_topup,
+        buy_price_ex_gst: values.buy_price_ex_gst,
+        buy_price_inc_gst: values.buy_price_inc_gst,
+        standard_filtration_package_id: values.standard_filtration_package_id,
+      };
+
       const { data, error } = await supabase
         .from("pool_specifications")
-        .insert(values)
+        .insert([poolData])
         .select();
 
       if (error) {

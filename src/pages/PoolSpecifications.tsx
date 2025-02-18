@@ -34,7 +34,6 @@ const PoolSpecifications = () => {
 
       if (error) throw error;
 
-      // Sort pools based on range order
       const rangeOrder = ranges?.map(r => r.name) || [];
       return (poolsData || []).sort((a, b) => {
         const aIndex = rangeOrder.indexOf(a.range);
@@ -78,7 +77,7 @@ const PoolSpecifications = () => {
           </Button>
         </CardHeader>
         <CardContent>
-          {showForm && <AddPoolForm onClose={() => setShowForm(false)} />}
+          {showForm && <AddPoolForm />}
           {pools && <PoolTable pools={pools} />}
         </CardContent>
       </Card>
