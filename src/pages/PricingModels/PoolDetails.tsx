@@ -81,7 +81,6 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
-        <PoolCosts poolName={pool.name} />
         {selectedPackage && filtrationPackages && (
           <FiltrationPackage
             selectedPackageId={selectedPackageId}
@@ -90,6 +89,7 @@ const PoolDetails = () => {
             selectedPackage={selectedPackage}
           />
         )}
+        <PoolCosts poolName={pool.name} />
       </div>
     </DashboardLayout>
   );
