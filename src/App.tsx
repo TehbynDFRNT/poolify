@@ -15,6 +15,7 @@ import PoolSpecificCosts from "@/pages/ConstructionCosts/PoolSpecificCosts";
 import FiltrationSystems from "@/pages/FiltrationSystems";
 import PricingModels from "@/pages/PricingModels";
 import PricingWorksheet from "@/pages/PricingModels/PricingWorksheet";
+import PoolDetails from "@/pages/PricingModels/PoolDetails";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ function App() {
           <Route path="/filtration-systems" element={<FiltrationSystems />} />
           <Route path="/pricing-models" element={<PricingModels />} />
           <Route path="/pricing-models/worksheet" element={<PricingWorksheet />} />
+          <Route path="/pricing-models/pools/:id" element={<PoolDetails />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
