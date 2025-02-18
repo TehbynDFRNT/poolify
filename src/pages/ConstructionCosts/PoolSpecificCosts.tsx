@@ -92,11 +92,15 @@ const PoolSpecificCosts = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Length</TableHead>
                   <TableHead>Width</TableHead>
-                  <TableHead>Depth (Shallow)</TableHead>
-                  <TableHead>Depth (Deep)</TableHead>
-                  <TableHead>Base Price</TableHead>
-                  <TableHead>Additional Costs</TableHead>
-                  <TableHead>Total Cost</TableHead>
+                  <TableHead>Shallow End</TableHead>
+                  <TableHead>Deep End</TableHead>
+                  <TableHead>Waterline L/M</TableHead>
+                  <TableHead>Water Volume (L)</TableHead>
+                  <TableHead>Salt Bags</TableHead>
+                  <TableHead>Salt Fixed</TableHead>
+                  <TableHead>Weight (KG)</TableHead>
+                  <TableHead>Minerals Initial</TableHead>
+                  <TableHead>Minerals Topup</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -108,18 +112,13 @@ const PoolSpecificCosts = () => {
                     <TableCell>{pool.width}m</TableCell>
                     <TableCell>{pool.depth_shallow}m</TableCell>
                     <TableCell>{pool.depth_deep}m</TableCell>
-                    <TableCell>{formatCurrency(pool.buy_price_ex_gst || 0)}</TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        placeholder="Enter cost"
-                        className="w-32"
-                        step="0.01"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      {formatCurrency((pool.buy_price_ex_gst || 0))}
-                    </TableCell>
+                    <TableCell>{pool.waterline_l_m || "-"}</TableCell>
+                    <TableCell>{pool.volume_liters || "-"}</TableCell>
+                    <TableCell>{pool.salt_volume_bags || "-"}</TableCell>
+                    <TableCell>{pool.salt_volume_bags_fixed || "-"}</TableCell>
+                    <TableCell>{pool.weight_kg || "-"}</TableCell>
+                    <TableCell>{pool.minerals_kg_initial || "-"}</TableCell>
+                    <TableCell>{pool.minerals_kg_topup || "-"}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
