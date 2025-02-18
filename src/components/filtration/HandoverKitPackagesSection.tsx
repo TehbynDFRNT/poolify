@@ -29,19 +29,20 @@ export function HandoverKitPackagesSection({
   const { data: handoverComponents } = useQuery({
     queryKey: ["handover-components"],
     queryFn: async () => {
+      // Get all types named "Handover Kit"
       const { data: typeData, error: typeError } = await supabase
         .from("filtration_component_types")
         .select("id")
-        .eq("name", "Handover Kit")
-        .limit(1); // Add limit to get just the first match
+        .eq("name", "Handover Kit");
 
       if (typeError) throw typeError;
-      if (!typeData?.length) return []; // Handle case where no type is found
+      if (!typeData?.length) return []; // Handle case where no types are found
 
+      // Get components for all handover kit types
       const { data, error } = await supabase
         .from("filtration_components")
         .select("*")
-        .eq("type_id", typeData[0].id)
+        .in("type_id", typeData.map(t => t.id))
         .order("name");
 
       if (error) throw error;
