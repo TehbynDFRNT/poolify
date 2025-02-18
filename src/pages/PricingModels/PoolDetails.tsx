@@ -84,6 +84,20 @@ const PoolDetails = () => {
 
   const defaultPackage = filtrationPackages?.[0];
 
+  const calculatePackageTotal = (pkg: PackageWithComponents) => {
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
@@ -238,6 +252,14 @@ const PoolDetails = () => {
                     </div>
                   </div>
                 )}
+                <div className="pt-4 mt-4 border-t">
+                  <div className="grid grid-cols-2 gap-2">
+                    <h3 className="font-medium">Total Package Price:</h3>
+                    <p className="text-right font-medium">
+                      {formatCurrency(calculatePackageTotal(defaultPackage))}
+                    </p>
+                  </div>
+                </div>
               </div>
             )}
           </CardContent>
