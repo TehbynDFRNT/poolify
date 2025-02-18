@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -27,7 +28,24 @@ const PoolDetails = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*, standard_filtration_package:standard_filtration_package_id(*)")
+        .select(`
+          *,
+          standard_filtration_package:standard_filtration_package_id(
+            *,
+            light:light_id(*),
+            pump:pump_id(*),
+            sanitiser:sanitiser_id(*),
+            filter:filter_id(*),
+            handover_kit:handover_kit_id(
+              id,
+              name,
+              components:handover_kit_package_components(
+                quantity,
+                component:component_id(*)
+              )
+            )
+          )
+        `)
         .eq("id", id)
         .single();
 
@@ -59,7 +77,7 @@ const PoolDetails = () => {
         .order('display_order');
 
       if (error) throw error;
-      return data as unknown as PackageWithComponents[];
+      return data as PackageWithComponents[];
     },
   });
 

@@ -1,5 +1,6 @@
 
 import { z } from "zod";
+import type { PackageWithComponents } from "./filtration";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -17,6 +18,7 @@ export const poolSchema = z.object({
   minerals_kg_topup: z.coerce.number().nullable(),
   buy_price_ex_gst: z.coerce.number().nullable(),
   buy_price_inc_gst: z.coerce.number().nullable(),
+  standard_filtration_package_id: z.string().nullable(),
 });
 
 export type PoolFormValues = z.infer<typeof poolSchema>;
@@ -39,6 +41,7 @@ export interface Pool {
   minerals_kg_topup: number | null;
   buy_price_ex_gst: number | null;
   buy_price_inc_gst: number | null;
+  standard_filtration_package_id: string | null;
 }
 
 export type NewPool = Omit<Pool, 'id' | 'created_at'>;

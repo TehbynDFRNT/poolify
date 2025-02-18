@@ -495,6 +495,7 @@ export type Database = {
           range: string
           salt_volume_bags: number | null
           salt_volume_bags_fixed: number | null
+          standard_filtration_package_id: string | null
           volume_liters: number | null
           waterline_l_m: number | null
           weight_kg: number | null
@@ -516,6 +517,7 @@ export type Database = {
           range?: string
           salt_volume_bags?: number | null
           salt_volume_bags_fixed?: number | null
+          standard_filtration_package_id?: string | null
           volume_liters?: number | null
           waterline_l_m?: number | null
           weight_kg?: number | null
@@ -537,6 +539,7 @@ export type Database = {
           range?: string
           salt_volume_bags?: number | null
           salt_volume_bags_fixed?: number | null
+          standard_filtration_package_id?: string | null
           volume_liters?: number | null
           waterline_l_m?: number | null
           weight_kg?: number | null
@@ -556,6 +559,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pool_ranges"
             referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "pool_specifications_standard_filtration_package_id_fkey"
+            columns: ["standard_filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
           },
         ]
       }
