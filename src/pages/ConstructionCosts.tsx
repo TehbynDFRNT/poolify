@@ -110,6 +110,21 @@ const ConstructionCosts = () => {
               </div>
             </div>
           </Link>
+
+          <Link 
+            to="/construction-costs/pool-specific-costs" 
+            className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Pool Specific Costs</h3>
+                <p className="text-sm text-gray-500 mt-1">Manage additional costs for specific pool models</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <DollarSign className="h-6 w-6 text-gray-600" />
+              </div>
+            </div>
+          </Link>
         </div>
       </div>
     </DashboardLayout>
