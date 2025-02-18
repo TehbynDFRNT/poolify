@@ -1,4 +1,5 @@
 
+import React from "react";
 import { FiltrationComponent } from "@/types/filtration";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
