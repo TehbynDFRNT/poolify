@@ -30,18 +30,21 @@ const PoolDetails = () => {
         .from("pool_specifications")
         .select(`
           *,
-          standard_filtration_package:standard_filtration_package_id(
-            *,
-            light:light_id(*),
-            pump:pump_id(*),
-            sanitiser:sanitiser_id(*),
-            filter:filter_id(*),
-            handover_kit:handover_kit_id(
+          standard_filtration_package: standard_filtration_package_id (
+            id,
+            name,
+            display_order,
+            created_at,
+            light: light_id ( id, name, model_number, price ),
+            pump: pump_id ( id, name, model_number, price ),
+            sanitiser: sanitiser_id ( id, name, model_number, price ),
+            filter: filter_id ( id, name, model_number, price ),
+            handover_kit: handover_kit_id (
               id,
               name,
-              components:handover_kit_package_components(
+              components: handover_kit_package_components (
                 quantity,
-                component:component_id(*)
+                component: component_id ( id, name, model_number, price )
               )
             )
           )

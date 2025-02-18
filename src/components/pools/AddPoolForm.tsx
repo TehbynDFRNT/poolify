@@ -1,9 +1,21 @@
-
-import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { poolSchema, PoolFormValues } from "@/types/pool";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -11,164 +23,348 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { toast } from "sonner";
-import type { NewPool } from "@/types/pool";
-import { POOL_RANGES } from "@/types/pool";
 
-interface AddPoolFormProps {
-  onClose: () => void;
-}
-
-const AddPoolForm = ({ onClose }: AddPoolFormProps) => {
-  const queryClient = useQueryClient();
-  const [newPool, setNewPool] = useState<NewPool>({
-    name: "",
-    range: "",
-    length: 0,
-    width: 0,
-    depth_shallow: 0,
-    depth_deep: 0,
-    waterline_l_m: null,
-    volume_liters: null,
-    salt_volume_bags: null,
-    salt_volume_bags_fixed: null,
-    weight_kg: null,
-    minerals_kg_initial: null,
-    minerals_kg_topup: null,
-    buy_price_ex_gst: null,
-    buy_price_inc_gst: null,
+export const AddPoolForm = () => {
+  const form = useForm<PoolFormValues>({
+    resolver: zodResolver(poolSchema),
+    defaultValues: {
+      name: "",
+      range: "",
+      length: 0,
+      width: 0,
+      depth_shallow: 0,
+      depth_deep: 0,
+      waterline_l_m: null,
+      volume_liters: null,
+      salt_volume_bags: null,
+      salt_volume_bags_fixed: null,
+      weight_kg: null,
+      minerals_kg_initial: null,
+      minerals_kg_topup: null,
+      buy_price_ex_gst: null,
+      buy_price_inc_gst: null,
+      standard_filtration_package_id: null,
+    },
   });
 
-  const addPoolMutation = useMutation({
-    mutationFn: async (pool: NewPool) => {
-      const poolWithGST = {
-        ...pool,
-        buy_price_inc_gst: pool.buy_price_ex_gst ? pool.buy_price_ex_gst * 1.1 : null,
-      };
-      const { error } = await supabase
+  const [poolRanges, setPoolRanges] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchPoolRanges = async () => {
+      const { data, error } = await supabase
+        .from("pool_ranges")
+        .select("name")
+        .order("display_order");
+
+      if (error) {
+        console.error("Error fetching pool ranges:", error);
+        toast.error("Failed to load pool ranges.");
+        return;
+      }
+
+      if (data) {
+        // Extract the 'name' property from each object in the array
+        const ranges = data.map((item) => item.name);
+        setPoolRanges(ranges);
+      }
+    };
+
+    fetchPoolRanges();
+  }, []);
+
+  async function onSubmit(values: PoolFormValues) {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
         .from("pool_specifications")
-        .insert(poolWithGST);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
-      toast.success("Pool specification added successfully");
-      onClose();
-    },
-    onError: (error) => {
-      toast.error("Failed to add pool specification");
-      console.error(error);
-    },
-  });
+        .insert([values])
+        .select();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addPoolMutation.mutate(newPool);
-  };
+      if (error) {
+        console.error("Error creating pool:", error);
+        toast.error("Failed to create pool.");
+        return;
+      }
+
+      toast.success("Pool created successfully!");
+      navigate(`/pricing-models/pool/${data[0].id}`);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-4 gap-4 mb-8">
-      <Select
-        value={newPool.range}
-        onValueChange={(value) => setNewPool({ ...newPool, range: value })}
+    <Form {...form}>
+      <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-8 w-full"
       >
-        <SelectTrigger>
-          <SelectValue placeholder="Select Range" />
-        </SelectTrigger>
-        <SelectContent>
-          {POOL_RANGES.map((range) => (
-            <SelectItem key={range} value={range}>
-              {range}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Input
-        placeholder="Name"
-        value={newPool.name}
-        onChange={(e) => setNewPool({ ...newPool, name: e.target.value })}
-      />
-      <Input
-        type="number"
-        step="0.01"
-        placeholder="Length (m)"
-        value={newPool.length}
-        onChange={(e) => setNewPool({ ...newPool, length: Number(e.target.value) })}
-      />
-      <Input
-        type="number"
-        step="0.01"
-        placeholder="Width (m)"
-        value={newPool.width}
-        onChange={(e) => setNewPool({ ...newPool, width: Number(e.target.value) })}
-      />
-      <Input
-        type="number"
-        step="0.01"
-        placeholder="Shallow End (m)"
-        value={newPool.depth_shallow}
-        onChange={(e) => setNewPool({ ...newPool, depth_shallow: Number(e.target.value) })}
-      />
-      <Input
-        type="number"
-        step="0.01"
-        placeholder="Deep End (m)"
-        value={newPool.depth_deep}
-        onChange={(e) => setNewPool({ ...newPool, depth_deep: Number(e.target.value) })}
-      />
-      <Input
-        type="number"
-        step="0.1"
-        placeholder="Waterline L/M"
-        value={newPool.waterline_l_m || ""}
-        onChange={(e) => setNewPool({ ...newPool, waterline_l_m: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        placeholder="Water Volume (L)"
-        value={newPool.volume_liters || ""}
-        onChange={(e) => setNewPool({ ...newPool, volume_liters: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        placeholder="Salt Volume Bags"
-        value={newPool.salt_volume_bags || ""}
-        onChange={(e) => setNewPool({ ...newPool, salt_volume_bags: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        placeholder="Salt Volume Fixed"
-        value={newPool.salt_volume_bags_fixed || ""}
-        onChange={(e) => setNewPool({ ...newPool, salt_volume_bags_fixed: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        placeholder="Weight (KG)"
-        value={newPool.weight_kg || ""}
-        onChange={(e) => setNewPool({ ...newPool, weight_kg: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        placeholder="Minerals Initial"
-        value={newPool.minerals_kg_initial || ""}
-        onChange={(e) => setNewPool({ ...newPool, minerals_kg_initial: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        placeholder="Minerals Topup"
-        value={newPool.minerals_kg_topup || ""}
-        onChange={(e) => setNewPool({ ...newPool, minerals_kg_topup: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Input
-        type="number"
-        step="0.01"
-        placeholder="Buy Price (ex GST)"
-        value={newPool.buy_price_ex_gst || ""}
-        onChange={(e) => setNewPool({ ...newPool, buy_price_ex_gst: e.target.value ? Number(e.target.value) : null })}
-      />
-      <Button type="submit" className="col-span-4">Add Pool</Button>
-    </form>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Pool Name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="range"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Range</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a range" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {poolRanges.map((range) => (
+                      <SelectItem key={range} value={range}>
+                        {range}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="length"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Length (m)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Pool Length"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="width"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Width (m)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Pool Width"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="depth_shallow"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Shallow Depth (m)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Shallow Depth"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="depth_deep"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Deep Depth (m)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Deep Depth"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="waterline_l_m"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Waterline (L/m)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Waterline"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="volume_liters"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Volume (Liters)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Volume"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="salt_volume_bags"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Salt Volume (Bags)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Salt Volume"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="salt_volume_bags_fixed"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Salt Volume Fixed (Bags)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Salt Volume Fixed"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="weight_kg"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Weight (KG)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Weight"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="minerals_kg_initial"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minerals Initial (KG)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Minerals Initial"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="minerals_kg_topup"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Minerals Topup (KG)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Minerals Topup"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="buy_price_ex_gst"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Buy Price (Ex GST)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Buy Price Ex GST"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="buy_price_inc_gst"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Buy Price (Inc GST)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    placeholder="Buy Price Inc GST"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+        <Button type="submit" disabled={loading}>
+          {loading ? "Creating..." : "Create Pool"}
+        </Button>
+      </form>
+    </Form>
   );
 };
-
-export default AddPoolForm;
