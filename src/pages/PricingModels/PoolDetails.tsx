@@ -20,6 +20,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
+import { PoolFiltrationPackagesSection } from "@/components/filtration/PoolFiltrationPackagesSection";
+import type { PackageWithComponents } from "@/types/filtration";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -36,6 +38,33 @@ const PoolDetails = () => {
 
       if (error) throw error;
       return data as Pool;
+    },
+  });
+
+  const { data: filtrationPackages } = useQuery({
+    queryKey: ["filtration-packages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("filtration_packages")
+        .select(`
+          *,
+          light:light_id(id, name, model_number, price),
+          pump:pump_id(id, name, model_number, price),
+          sanitiser:sanitiser_id(id, name, model_number, price),
+          filter:filter_id(id, name, model_number, price),
+          handover_kit:handover_kit_id(
+            id,
+            name,
+            components:handover_kit_package_components(
+              quantity,
+              component:component_id(id, name, model_number, price)
+            )
+          )
+        `)
+        .order('display_order');
+
+      if (error) throw error;
+      return data as PackageWithComponents[];
     },
   });
 
@@ -105,7 +134,7 @@ const PoolDetails = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="mb-8">
           <CardHeader>
             <CardTitle>Pool Details</CardTitle>
           </CardHeader>
@@ -128,6 +157,8 @@ const PoolDetails = () => {
             </div>
           </CardContent>
         </Card>
+
+        <PoolFiltrationPackagesSection packages={filtrationPackages} />
       </div>
     </DashboardLayout>
   );
