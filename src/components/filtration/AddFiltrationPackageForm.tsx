@@ -85,10 +85,9 @@ export function AddFiltrationPackageForm({
 
       // Group components by type
       const groupedComponents = types.reduce((acc, type) => {
+        // Convert type names to match the expected keys
         const key = type.name.toLowerCase().replace(/\s+/g, '_');
-        acc[key] = components.filter(c => 
-          c.type_id === type.id
-        );
+        acc[key] = components.filter(c => c.type_id === type.id);
         console.log(`Components for type ${key}:`, acc[key]); // Debug log
         return acc;
       }, {} as Record<string, FiltrationComponent[]>);
@@ -155,7 +154,7 @@ export function AddFiltrationPackageForm({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {components?.light?.map((component) => (
+                      {components?.lights?.map((component) => (
                         <SelectItem key={component.id} value={component.id}>
                           {component.name} ({component.model_number})
                         </SelectItem>
