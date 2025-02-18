@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/breadcrumb";
 import type { FiltrationComponent, FiltrationComponentType, FiltrationPackage } from "@/types/filtration";
 
-// Define the type for package with its relations
 type PackageWithComponents = Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'standard_filter_id' | 'media_filter_id' | 'handover_kit_id'> & {
   light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
   pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
@@ -60,16 +59,28 @@ const FiltrationSystems = () => {
     },
   });
 
-  const { data: handoverKits } = useQuery({
+  const { data: handoverKits, isLoading: isLoadingHandoverKits } = useQuery({
     queryKey: ["handover-kits"],
     queryFn: async () => {
+      const handoverKitType = componentTypes?.find(t => t.name === "Handover Kit");
+      
+      if (!handoverKitType) {
+        console.log("Handover Kit type not found");
+        return [];
+      }
+
       const { data, error } = await supabase
         .from("filtration_components")
         .select("*")
-        .eq("type_id", componentTypes?.find(t => t.name === "Handover Kit")?.id)
+        .eq("type_id", handoverKitType.id)
         .order("name");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching handover kits:", error);
+        throw error;
+      }
+
+      console.log("Fetched handover kits:", data);
       return data as FiltrationComponent[];
     },
     enabled: !!componentTypes,
