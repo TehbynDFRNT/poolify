@@ -52,14 +52,14 @@ const PoolSpecificCosts = () => {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink as={Link} to="/">
-                Home
+              <BreadcrumbLink asChild>
+                <Link to="/">Home</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink as={Link} to="/construction-costs">
-                Construction Costs
+              <BreadcrumbLink asChild>
+                <Link to="/construction-costs">Construction Costs</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
