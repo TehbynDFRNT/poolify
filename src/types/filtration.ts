@@ -30,3 +30,12 @@ export interface FiltrationPackage {
   handover_kit_id: string | null;
   created_at: string;
 }
+
+export interface PackageWithComponents extends Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'standard_filter_id' | 'media_filter_id' | 'handover_kit_id'> {
+  light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  standard_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  media_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+  handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price'> | null;
+}
