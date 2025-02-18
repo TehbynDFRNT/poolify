@@ -12,14 +12,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
 import type { PackageWithComponents } from "@/types/filtration";
+import { Star } from "lucide-react";
 
 type FiltrationPackageProps = {
   selectedPackageId: string;
   onPackageChange: (value: string) => void;
   filtrationPackages: PackageWithComponents[];
   selectedPackage: PackageWithComponents;
+  onSetStandard: () => void;
+  isStandard: boolean;
 };
 
 const calculatePackageTotal = (pkg: PackageWithComponents) => {
@@ -41,27 +45,44 @@ export const FiltrationPackage = ({
   onPackageChange,
   filtrationPackages,
   selectedPackage,
+  onSetStandard,
+  isStandard,
 }: FiltrationPackageProps) => (
   <Card>
     <CardHeader>
-      <CardTitle className="flex justify-between items-center">
-        <span>Filtration Package</span>
-        <Select 
-          value={selectedPackageId} 
-          onValueChange={onPackageChange}
-        >
-          <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="Select package" />
-          </SelectTrigger>
-          <SelectContent>
-            {filtrationPackages?.map((pkg) => (
-              <SelectItem key={pkg.id} value={pkg.id}>
-                Option {pkg.display_order}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </CardTitle>
+      <div className="flex justify-between items-center">
+        <CardTitle className="flex items-center gap-2">
+          <span>Filtration Package</span>
+          {isStandard && (
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+          )}
+        </CardTitle>
+        <div className="flex items-center gap-4">
+          <Button
+            variant={isStandard ? "secondary" : "outline"}
+            size="sm"
+            onClick={onSetStandard}
+            className="whitespace-nowrap"
+          >
+            {isStandard ? "Standard Package" : "Set as Standard"}
+          </Button>
+          <Select 
+            value={selectedPackageId} 
+            onValueChange={onPackageChange}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Select package" />
+            </SelectTrigger>
+            <SelectContent>
+              {filtrationPackages?.map((pkg) => (
+                <SelectItem key={pkg.id} value={pkg.id}>
+                  Option {pkg.display_order}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
     </CardHeader>
     <CardContent>
       {selectedPackage && (

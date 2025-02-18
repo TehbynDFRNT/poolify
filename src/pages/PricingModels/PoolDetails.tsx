@@ -1,7 +1,6 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Pool } from "@/types/pool";
 import type { PackageWithComponents } from "@/types/filtration";
@@ -16,22 +15,24 @@ import { FixedCosts } from "./components/FixedCosts";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
+import { toast } from "sonner";
 
 const PoolDetails = () => {
   const { id } = useParams();
   const [selectedPackageId, setSelectedPackageId] = useState<string>("");
+  const queryClient = useQueryClient();
 
   const { data: pool, isLoading: poolLoading } = useQuery({
     queryKey: ["pool-specification", id],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*")
+        .select("*, standard_filtration_package:standard_filtration_package_id(*)")
         .eq("id", id)
         .single();
 
       if (error) throw error;
-      return data as Pool;
+      return data as Pool & { standard_filtration_package: PackageWithComponents | null };
     },
   });
 
@@ -62,6 +63,32 @@ const PoolDetails = () => {
     },
   });
 
+  const updateStandardPackageMutation = useMutation({
+    mutationFn: async (packageId: string) => {
+      const { error } = await supabase
+        .from("pool_specifications")
+        .update({ standard_filtration_package_id: packageId })
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pool-specification", id] });
+      toast.success("Standard filtration package updated successfully");
+    },
+    onError: () => {
+      toast.error("Failed to update standard filtration package");
+    },
+  });
+
+  useEffect(() => {
+    if (pool?.standard_filtration_package_id) {
+      setSelectedPackageId(pool.standard_filtration_package_id);
+    } else if (filtrationPackages?.length && !selectedPackageId) {
+      setSelectedPackageId(filtrationPackages[0].id);
+    }
+  }, [filtrationPackages, selectedPackageId, pool?.standard_filtration_package_id]);
+
   const { data: digType } = useQuery({
     queryKey: ["excavation-dig-type", pool?.name ? poolDigTypeMap[pool.name] : null],
     queryFn: async () => {
@@ -90,12 +117,6 @@ const PoolDetails = () => {
       return data;
     },
   });
-
-  useEffect(() => {
-    if (filtrationPackages?.length && !selectedPackageId) {
-      setSelectedPackageId(filtrationPackages[0].id);
-    }
-  }, [filtrationPackages, selectedPackageId]);
 
   if (poolLoading || packagesLoading) {
     return <div>Loading...</div>;
@@ -171,6 +192,8 @@ const PoolDetails = () => {
             onPackageChange={setSelectedPackageId}
             filtrationPackages={filtrationPackages}
             selectedPackage={selectedPackage}
+            onSetStandard={() => updateStandardPackageMutation.mutate(selectedPackageId)}
+            isStandard={selectedPackageId === pool.standard_filtration_package_id}
           />
         )}
         <PoolCosts poolName={pool.name} />
