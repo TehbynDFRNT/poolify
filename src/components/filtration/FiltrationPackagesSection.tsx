@@ -1,6 +1,6 @@
+
 import React, { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -16,7 +16,6 @@ import { formatCurrency } from "@/utils/format";
 import { EditFiltrationPackageForm } from "./EditFiltrationPackageForm";
 import { AddFiltrationPackageForm } from "./AddFiltrationPackageForm";
 import type { PackageWithComponents } from "@/types/filtration";
-import { toast } from "sonner";
 
 interface FiltrationPackagesSectionProps {
   packages: PackageWithComponents[] | undefined;
@@ -31,13 +30,12 @@ export function FiltrationPackagesSection({
   const [editingPackage, setEditingPackage] = useState<PackageWithComponents | null>(null);
   const queryClient = useQueryClient();
 
-  const calculateTotalPrice = (pkg: PackageWithComponents | undefined, useMediaFilter: boolean = false) => {
-    if (!pkg) return 0;
+  const calculateTotalPrice = (pkg: PackageWithComponents) => {
     return (
       (pkg.light?.price || 0) +
       (pkg.pump?.price || 0) +
       (pkg.sanitiser?.price || 0) +
-      (useMediaFilter ? (pkg.media_filter?.price || 0) : (pkg.standard_filter?.price || 0)) +
+      (pkg.filter?.price || 0) +
       (pkg.handover_kit?.price || 0)
     );
   };
@@ -75,13 +73,7 @@ export function FiltrationPackagesSection({
                 <TableCell>{pkg.filter?.model_number || '-'} ({pkg.filter_type})</TableCell>
                 <TableCell>{pkg.handover_kit?.model_number || '-'}</TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(
-                    (pkg.light?.price || 0) +
-                    (pkg.pump?.price || 0) +
-                    (pkg.sanitiser?.price || 0) +
-                    (pkg.filter?.price || 0) +
-                    (pkg.handover_kit?.price || 0)
-                  )}
+                  {formatCurrency(calculateTotalPrice(pkg))}
                 </TableCell>
                 <TableCell>
                   <Button

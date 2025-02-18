@@ -97,7 +97,12 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data;
+      
+      // Ensure filter_type is either 'standard' or 'media'
+      return data.map(pkg => ({
+        ...pkg,
+        filter_type: pkg.filter_type as 'standard' | 'media'
+      }));
     },
   });
 
