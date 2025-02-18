@@ -1,4 +1,3 @@
-
 export interface FiltrationComponentType {
   id: string;
   name: string;
@@ -41,17 +40,16 @@ export interface FiltrationPackage {
   light_id: string | null;
   pump_id: string | null;
   sanitiser_id: string | null;
-  standard_filter_id: string | null;
-  media_filter_id: string | null;
+  filter_id: string | null;
+  filter_type: 'standard' | 'media' | null;
   handover_kit_id: string | null;
   created_at: string;
 }
 
-export interface PackageWithComponents extends Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'standard_filter_id' | 'media_filter_id' | 'handover_kit_id'> {
+export interface PackageWithComponents extends Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'filter_id' | 'handover_kit_id'> {
   light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  standard_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  media_filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   handover_kit: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
 }

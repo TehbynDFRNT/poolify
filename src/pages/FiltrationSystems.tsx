@@ -88,11 +88,11 @@ const FiltrationSystems = () => {
           name,
           display_order,
           created_at,
+          filter_type,
           light:filtration_components!light_id(id, name, model_number, price),
           pump:filtration_components!pump_id(id, name, model_number, price),
           sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
-          standard_filter:filtration_components!standard_filter_id(id, name, model_number, price),
-          media_filter:filtration_components!media_filter_id(id, name, model_number, price),
+          filter:filtration_components!filter_id(id, name, model_number, price),
           handover_kit:filtration_components!handover_kit_id(id, name, model_number, price)
         `)
         .order("display_order");

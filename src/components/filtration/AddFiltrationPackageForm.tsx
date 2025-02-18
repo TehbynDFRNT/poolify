@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -23,6 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useForm } from "react-hook-form";
 import type { FiltrationComponent, HandoverKitPackage } from "@/types/filtration";
 import { toast } from "sonner";
@@ -31,8 +32,8 @@ interface FormValues {
   light_id: string;
   pump_id: string;
   sanitiser_id: string;
-  standard_filter_id: string;
-  media_filter_id: string;
+  filter_id: string;
+  filter_type: 'standard' | 'media';
   handover_kit_id: string;
 }
 
@@ -46,8 +47,8 @@ export function AddFiltrationPackageForm({
   onOpenChange,
 }: AddFiltrationPackageFormProps) {
   const queryClient = useQueryClient();
-
   const form = useForm<FormValues>();
+  const [filterType, setFilterType] = useState<'standard' | 'media'>('standard');
 
   const { data: nextPackageNumber } = useQuery({
     queryKey: ["filtration-packages-count"],
@@ -203,42 +204,45 @@ export function AddFiltrationPackageForm({
 
             <FormField
               control={form.control}
-              name="standard_filter_id"
+              name="filter_type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Standard Filter</FormLabel>
-                  <Select onValueChange={field.onChange}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a standard filter" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {components?.standard_filter?.map((component) => (
-                        <SelectItem key={component.id} value={component.id}>
-                          {component.name} ({component.model_number})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <FormLabel>Filter Type</FormLabel>
+                  <RadioGroup
+                    onValueChange={value => {
+                      field.onChange(value);
+                      setFilterType(value as 'standard' | 'media');
+                    }}
+                    defaultValue="standard"
+                    className="flex gap-4"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="standard" id="standard" />
+                      <label htmlFor="standard">Standard Filter</label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="media" id="media" />
+                      <label htmlFor="media">Media Filter</label>
+                    </div>
+                  </RadioGroup>
                 </FormItem>
               )}
             />
 
             <FormField
               control={form.control}
-              name="media_filter_id"
+              name="filter_id"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Media Filter</FormLabel>
+                  <FormLabel>Filter</FormLabel>
                   <Select onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a media filter" />
+                        <SelectValue placeholder="Select a filter" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {components?.media_filter?.map((component) => (
+                      {(filterType === 'standard' ? components?.standard_filter : components?.media_filter)?.map((component) => (
                         <SelectItem key={component.id} value={component.id}>
                           {component.name} ({component.model_number})
                         </SelectItem>
