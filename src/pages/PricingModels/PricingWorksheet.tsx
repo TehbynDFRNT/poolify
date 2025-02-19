@@ -7,14 +7,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbLink,
@@ -23,161 +15,15 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Link, useNavigate } from "react-router-dom";
 import { Calculator, ArrowLeft } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { formatCurrency } from "@/utils/format";
 import { Button } from "@/components/ui/button";
-import type { Pool } from "@/types/pool";
-import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
-import type { PackageWithComponents, FiltrationComponent } from "@/types/filtration";
-
-// Type for the raw data from Supabase
-type SupabasePoolResponse = Omit<Pool, 'standard_filtration_package_id'> & {
-  standard_filtration_package: {
-    id: string;
-    name: string;
-    display_order: number;
-    created_at: string;
-    light: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
-    pump: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
-    sanitiser: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
-    filter: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
-    handover_kit: {
-      id: string;
-      name: string;
-      components: {
-        quantity: number;
-        component: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'>;
-      }[];
-    } | null;
-  } | null;
-};
+import { usePools } from "./hooks/usePools";
+import { usePricingCalculations } from "./hooks/usePricingCalculations";
+import { PricingTable } from "./components/PricingTable";
 
 const PricingWorksheet = () => {
   const navigate = useNavigate();
-
-  const { data: pools } = useQuery({
-    queryKey: ["pool-specifications"],
-    queryFn: async () => {
-      const { data: ranges } = await supabase
-        .from("pool_ranges")
-        .select("name")
-        .order("display_order");
-
-      const { data: poolsData, error } = await supabase
-        .from("pool_specifications")
-        .select(`
-          *,
-          standard_filtration_package: standard_filtration_package_id (
-            id,
-            name,
-            display_order,
-            created_at,
-            light: light_id ( id, name, model_number, price ),
-            pump: pump_id ( id, name, model_number, price ),
-            sanitiser: sanitiser_id ( id, name, model_number, price ),
-            filter: filter_id ( id, name, model_number, price ),
-            handover_kit: handover_kit_id (
-              id,
-              name,
-              components: handover_kit_package_components (
-                quantity,
-                component: component_id ( id, name, model_number, price )
-              )
-            )
-          )
-        `);
-
-      if (error) throw error;
-
-      const rangeOrder = ranges?.map(r => r.name) || [];
-      return (poolsData as SupabasePoolResponse[] || []).sort((a, b) => {
-        const aIndex = rangeOrder.indexOf(a.range);
-        const bIndex = rangeOrder.indexOf(b.range);
-        return aIndex - bIndex;
-      });
-    },
-  });
-
-  const { data: fixedCosts = [] } = useQuery({
-    queryKey: ["fixed-costs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fixed_costs")
-        .select("*")
-        .order('display_order');
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: digTypes = [] } = useQuery({
-    queryKey: ["excavation-dig-types"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("excavation_dig_types")
-        .select("*");
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const calculateTrueCost = (pool: SupabasePoolResponse) => {
-    // Calculate total fixed costs
-    const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
-
-    // Calculate pool specific costs
-    const poolCosts = initialPoolCosts[pool.name] || {
-      truckedWater: 0,
-      saltBags: 0,
-      copingSupply: 0,
-      beam: 0,
-      copingLay: 0,
-      peaGravel: 0,
-      installFee: 0
-    };
-
-    const digType = digTypes.find(dt => dt.name === poolDigTypeMap[pool.name]);
-    const excavationCost = digType ? 
-      (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
-      (digType.excavation_hourly_rate * digType.excavation_hours) : 0;
-
-    const totalPoolCosts = 
-      poolCosts.truckedWater +
-      poolCosts.saltBags +
-      poolCosts.copingSupply +
-      poolCosts.beam +
-      poolCosts.copingLay +
-      poolCosts.peaGravel +
-      poolCosts.installFee +
-      excavationCost;
-
-    // Calculate filtration package total
-    const calculatePackageTotal = (pkg: NonNullable<SupabasePoolResponse['standard_filtration_package']>) => {
-      const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
-        return total + ((comp.component?.price || 0) * comp.quantity);
-      }, 0) || 0;
-
-      return (
-        (pkg.light?.price || 0) +
-        (pkg.pump?.price || 0) +
-        (pkg.sanitiser?.price || 0) +
-        (pkg.filter?.price || 0) +
-        handoverKitTotal
-      );
-    };
-
-    const filtrationTotal = pool.standard_filtration_package ? 
-      calculatePackageTotal(pool.standard_filtration_package) : 0;
-
-    // Calculate pool shell price
-    const poolShellPrice = pool.buy_price_inc_gst || 0;
-
-    // Calculate true cost
-    return totalFixedCosts + totalPoolCosts + filtrationTotal + poolShellPrice;
-  };
+  const { data: pools } = usePools();
+  const { calculateTrueCost } = usePricingCalculations();
 
   return (
     <DashboardLayout>
@@ -227,37 +73,7 @@ const PricingWorksheet = () => {
             <CardTitle>Pool Prices</CardTitle>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Range</TableHead>
-                  <TableHead>Pool Name</TableHead>
-                  <TableHead className="text-right">True Cost</TableHead>
-                  <TableHead className="text-right">Web Price</TableHead>
-                  <TableHead className="text-right">Margin</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {pools?.map((pool) => {
-                  const trueCost = calculateTrueCost(pool);
-                  return (
-                    <TableRow key={pool.id} className="cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/pricing-models/pools/${pool.id}`)}>
-                      <TableCell>{pool.range}</TableCell>
-                      <TableCell>{pool.name}</TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(trueCost)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(0)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(0)}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            {pools && <PricingTable pools={pools} calculateTrueCost={calculateTrueCost} />}
           </CardContent>
         </Card>
       </div>
