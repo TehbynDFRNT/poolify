@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/utils/format";
@@ -29,7 +28,23 @@ export const PoolCostsTable = ({
     poolId: string;
     field: keyof PoolCosts;
   } | null>(null);
-  const [costs, setCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
+  const [costs, setCosts] = useState<Record<string, PoolCosts>>(() => {
+    const initialCosts: Record<string, PoolCosts> = {};
+    pools.forEach(pool => {
+      const fixedName = pool.name.replace("Westminister", "Westminster");
+      initialCosts[fixedName] = {
+        truckedWater: 0,
+        saltBags: 0,
+        misc: 2700,  // Set default misc cost to 2700
+        copingSupply: 0,
+        beam: 0,
+        copingLay: 0,
+        peaGravel: 0,
+        installFee: 0
+      };
+    });
+    return initialCosts;
+  });
 
   const calculateTotal = (poolName: string) => {
     const poolCosts = costs[poolName] || {
