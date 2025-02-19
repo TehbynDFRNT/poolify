@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, DollarSign, Package, List, Database } from "lucide-react";
@@ -110,10 +109,8 @@ const PoolPricing = () => {
                 </div>
                 <div className="flex flex-col justify-center">
                   <FileUpload
-                    accept="image/*"
-                    endpoint={`pool-outlines/${poolId}`}
-                    onUploadComplete={(url) => {
-                      console.log("Uploaded image URL:", url);
+                    onSheetData={(data) => {
+                      console.log("Processing data:", data);
                     }}
                   />
                 </div>
