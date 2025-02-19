@@ -30,12 +30,6 @@ const PoolPricing = () => {
         .from("pool_specifications")
         .select(`
           *,
-          pool_excavation:pool_excavation_types!dig_type_id (
-            id,
-            name,
-            range,
-            dig_type:excavation_dig_types!dig_type_id (*)
-          ),
           default_package:filtration_packages!default_filtration_package_id (
             id,
             name,
@@ -75,16 +69,7 @@ const PoolPricing = () => {
         .single();
 
       if (error) throw error;
-      
-      // Transform the data to match our Pool type
-      if (data) {
-        return {
-          ...data,
-          dig_type: data.pool_excavation?.dig_type || null,
-          default_package: data.default_package || null
-        } as Pool;
-      }
-      return null;
+      return data as Pool;
     },
   });
 
@@ -117,14 +102,6 @@ const PoolPricing = () => {
   }
 
   const poolCosts = initialPoolCosts[pool.name];
-
-  const calculateExcavationCost = () => {
-    if (!pool.dig_type) return 0;
-    const { truck_count, truck_hourly_rate, truck_hours, excavation_hourly_rate, excavation_hours } = pool.dig_type;
-    return (truck_count * truck_hourly_rate * truck_hours) + (excavation_hourly_rate * excavation_hours);
-  };
-
-  const excavationCost = calculateExcavationCost();
 
   return (
     <DashboardLayout>
@@ -372,7 +349,9 @@ const PoolPricing = () => {
                       </div>
                       <div>
                         <p className="text-sm text-muted-foreground">Excavation</p>
-                        <p className="text-lg font-semibold">{formatCurrency(excavationCost)}</p>
+                        <p className="text-lg font-semibold">
+                          {pool.excavation_cost ? formatCurrency(pool.excavation_cost) : '-'}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -422,7 +401,7 @@ const PoolPricing = () => {
                           poolCosts.truckedWater +
                           poolCosts.saltBags +
                           (poolCosts.misc || 0) +
-                          excavationCost
+                          (pool.excavation_cost || 0)
                         )}
                       </p>
                     </div>
