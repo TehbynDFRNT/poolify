@@ -70,20 +70,30 @@ export const usePricingCalculations = () => {
   });
 
   const calculateTrueCost = (pool: SupabasePoolResponse) => {
-    // Pool Shell Price should be exactly 15302.00
-    const poolShellPrice = 15302.00;
+    // Use the pool's buy price (shell price)
+    const poolShellPrice = pool.buy_price_ex_gst || 0;
     
-    // Fixed Costs should be exactly 6585.00
-    const totalFixedCosts = 6585.00;
+    // Calculate fixed costs total
+    const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
     
-    // Pool Specific Costs should be exactly 11367.00
-    const totalPoolCosts = 11367.00;
+    // Get the dig type for pool specific costs calculation
+    const digType = digTypes.find(dt => dt.name === pool.dig_level);
+    const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType || null);
     
-    // Filtration Package should be exactly 3205.86
-    const filtrationTotal = 3205.86;
+    // Calculate filtration package total
+    const filtrationPackage = pool.standard_filtration_package;
+    const filtrationTotal = calculateFiltrationTotal(filtrationPackage);
     
-    // Total should be exactly 36459.86
+    // Calculate total
     const total = poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
+    
+    console.log(`Calculating for ${pool.name}:`, {
+      poolShellPrice,
+      totalFixedCosts,
+      totalPoolCosts,
+      filtrationTotal,
+      total
+    });
     
     return total;
   };
