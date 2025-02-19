@@ -1,6 +1,5 @@
-
 import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -8,7 +7,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pool, POOL_RANGES } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 
-// Define editableFields outside the component
 const editableFields: (keyof Pool)[] = [
   "name",
   "range",
@@ -33,7 +31,7 @@ type EditingCell = {
 };
 
 interface PoolTableProps {
-  pools: Pool[];
+  pools: any[]; // Using any temporarily to handle the extended pool data
 }
 
 export const PoolTable = ({ pools }: PoolTableProps) => {
@@ -159,16 +157,99 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     );
   };
 
+  const calculateFiltrationTotal = (pkg: any) => {
+    if (!pkg) return 0;
+    
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total: number, comp: any) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
   return (
     <div className="rounded-md border">
       <Table>
+        <TableHeader>
+          <TableRow>
+            {editableFields.map((field) => (
+              <TableHead key={field}>{field}</TableHead>
+            ))}
+            <TableHead>Filtration Package</TableHead>
+          </TableRow>
+        </TableHeader>
         <TableBody>
           {pools.map((pool) => (
-            <TableRow key={pool.id}>
-              {editableFields.map((field) => (
-                <TableCell key={field}>{renderCell(pool, field)}</TableCell>
-              ))}
-            </TableRow>
+            <React.Fragment key={pool.id}>
+              <TableRow>
+                {editableFields.map((field) => (
+                  <TableCell key={field}>{renderCell(pool, field)}</TableCell>
+                ))}
+                <TableCell>
+                  {pool.standard_filtration_package ? (
+                    <div className="space-y-2">
+                      <div className="font-medium">
+                        Option {pool.standard_filtration_package.display_order}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Total: {formatCurrency(calculateFiltrationTotal(pool.standard_filtration_package))}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">No package selected</span>
+                  )}
+                </TableCell>
+              </TableRow>
+              {pool.standard_filtration_package && (
+                <TableRow className="bg-muted/50">
+                  <TableCell colSpan={editableFields.length + 1}>
+                    <div className="p-2 text-sm space-y-2">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <span className="font-medium">Light:</span>{' '}
+                          {pool.standard_filtration_package.light?.model_number || 'None'} 
+                          {pool.standard_filtration_package.light && ` (${formatCurrency(pool.standard_filtration_package.light.price)})`}
+                        </div>
+                        <div>
+                          <span className="font-medium">Pump:</span>{' '}
+                          {pool.standard_filtration_package.pump?.model_number || 'None'}
+                          {pool.standard_filtration_package.pump && ` (${formatCurrency(pool.standard_filtration_package.pump.price)})`}
+                        </div>
+                        <div>
+                          <span className="font-medium">Sanitiser:</span>{' '}
+                          {pool.standard_filtration_package.sanitiser?.model_number || 'None'}
+                          {pool.standard_filtration_package.sanitiser && ` (${formatCurrency(pool.standard_filtration_package.sanitiser.price)})`}
+                        </div>
+                        <div>
+                          <span className="font-medium">Filter:</span>{' '}
+                          {pool.standard_filtration_package.filter?.model_number || 'None'}
+                          {pool.standard_filtration_package.filter && ` (${formatCurrency(pool.standard_filtration_package.filter.price)})`}
+                        </div>
+                      </div>
+                      {pool.standard_filtration_package.handover_kit && (
+                        <div>
+                          <div className="font-medium">Handover Kit Components:</div>
+                          <div className="grid grid-cols-2 gap-2 mt-1">
+                            {pool.standard_filtration_package.handover_kit.components.map((comp: any) => (
+                              <div key={comp.component.id}>
+                                {comp.component.model_number} x{comp.quantity} 
+                                ({formatCurrency(comp.component.price * comp.quantity)})
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
+            </React.Fragment>
           ))}
         </TableBody>
       </Table>
