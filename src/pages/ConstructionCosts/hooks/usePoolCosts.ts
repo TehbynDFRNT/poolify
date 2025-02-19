@@ -13,18 +13,55 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
 
-  // Query hook - always present
   const poolCostsQuery = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      return initialPoolCosts; // Keep using initial costs for now until we properly set up the database
+      const { data: poolCosts, error } = await supabase
+        .from('pool_costs')
+        .select('*');
+
+      if (error) {
+        toast.error("Failed to fetch pool costs");
+        throw error;
+      }
+
+      // Transform the data into our expected format
+      const costsMap: Record<string, PoolCosts> = {};
+      poolCosts.forEach((cost: PoolCostsRow) => {
+        costsMap[cost.pool_id] = {
+          truckedWater: cost.trucked_water,
+          saltBags: cost.salt_bags,
+          misc: cost.misc,
+          copingSupply: cost.coping_supply,
+          beam: cost.beam,
+          copingLay: cost.coping_lay,
+          peaGravel: cost.pea_gravel,
+          installFee: cost.install_fee
+        };
+      });
+
+      // Merge with initial costs for any missing entries
+      return { ...initialPoolCosts, ...costsMap };
     },
   });
 
-  // Mutation hook - always present
   const updatePoolCostsMutation = useMutation({
-    mutationFn: async ({ poolName, costs }: { poolName: string, costs: PoolCosts }) => {
-      console.log('Would update pool costs for:', poolName, costs);
+    mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
+      const { error } = await supabase
+        .from('pool_costs')
+        .upsert({
+          pool_id: poolId,
+          trucked_water: costs.truckedWater,
+          salt_bags: costs.saltBags,
+          misc: costs.misc,
+          coping_supply: costs.copingSupply,
+          beam: costs.beam,
+          coping_lay: costs.copingLay,
+          pea_gravel: costs.peaGravel,
+          install_fee: costs.installFee,
+        });
+
+      if (error) throw error;
       return costs;
     },
     onSuccess: () => {
@@ -52,14 +89,14 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
     if (!updatedCosts) return;
 
     updatePoolCostsMutation.mutate({
-      poolName,
+      poolId,
       costs: updatedCosts
     });
   };
 
   const handleCancel = () => {
     setEditingRow(null);
-    setEditedCosts(initialPoolCosts);
+    setEditedCosts(poolCostsQuery.data || initialPoolCosts);
   };
 
   const handleCostChange = (poolName: string, field: keyof PoolCosts, value: string) => {
