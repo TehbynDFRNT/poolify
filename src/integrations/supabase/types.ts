@@ -457,6 +457,7 @@ export type Database = {
           depth_deep: number
           depth_shallow: number
           dig_level: string | null
+          dig_type_id: string | null
           id: string
           length: number
           minerals_kg_initial: number | null
@@ -479,6 +480,7 @@ export type Database = {
           depth_deep: number
           depth_shallow: number
           dig_level?: string | null
+          dig_type_id?: string | null
           id?: string
           length: number
           minerals_kg_initial?: number | null
@@ -501,6 +503,7 @@ export type Database = {
           depth_deep?: number
           depth_shallow?: number
           dig_level?: string | null
+          dig_type_id?: string | null
           id?: string
           length?: number
           minerals_kg_initial?: number | null
@@ -521,6 +524,13 @@ export type Database = {
             columns: ["default_filtration_package_id"]
             isOneToOne: false
             referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_specifications_dig_type_id_fkey"
+            columns: ["dig_type_id"]
+            isOneToOne: false
+            referencedRelation: "pool_excavation_types"
             referencedColumns: ["id"]
           },
           {
