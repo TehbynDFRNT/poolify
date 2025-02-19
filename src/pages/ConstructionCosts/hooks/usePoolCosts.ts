@@ -29,14 +29,14 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
       const costsMap: Record<string, PoolCosts> = {};
       data?.forEach(cost => {
         costsMap[cost.pool_id] = {
-          peaGravel: cost.pea_gravel,
-          installFee: cost.install_fee,
-          truckedWater: cost.trucked_water,
-          saltBags: cost.salt_bags,
+          peaGravel: cost.pea_gravel || 0,
+          installFee: cost.install_fee || 0,
+          truckedWater: cost.trucked_water || 0,
+          saltBags: cost.salt_bags || 0,
           misc: cost.misc || 2700,
-          copingSupply: cost.coping_supply,
-          beam: cost.beam,
-          copingLay: cost.coping_lay
+          copingSupply: cost.coping_supply || 0,
+          beam: cost.beam || 0,
+          copingLay: cost.coping_lay || 0
         };
       });
 
@@ -126,8 +126,8 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
     }
   };
 
-  const calculateTotal = (poolName: string) => {
-    const currentCosts = poolCosts?.[poolName] || initialPoolCosts[poolName] || {
+  const calculateTotal = (poolId: string) => {
+    const currentCosts = poolCosts?.[poolId] || initialPoolCosts[poolId] || {
       truckedWater: 0,
       saltBags: 0,
       misc: 2700,
