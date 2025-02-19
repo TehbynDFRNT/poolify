@@ -1,19 +1,26 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// Temporary type definition until we implement the new pricing models
+// Type definition based on the pool_specifications table schema
 type Pool = {
   id: string;
   name: string;
-  // Add other fields as needed
+  length: number;
+  width: number;
+  depth_shallow: number;
+  depth_deep: number;
+  volume_liters: number | null;
+  range: string;
+  created_at: string;
 };
 
 export const usePools = () => {
   return useQuery({
-    queryKey: ['pools'],
+    queryKey: ['pool-specifications'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('pools')
+        .from('pool_specifications')
         .select('*');
         
       if (error) throw error;
