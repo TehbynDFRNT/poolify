@@ -33,11 +33,18 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
           installFee: cost.install_fee,
           truckedWater: cost.trucked_water,
           saltBags: cost.salt_bags,
-          misc: cost.misc,
+          misc: cost.misc || 2700,
           copingSupply: cost.coping_supply,
           beam: cost.beam,
           copingLay: cost.coping_lay
         };
+      });
+
+      // Merge with initial costs for any pools that don't have data yet
+      Object.entries(initialPoolCosts).forEach(([poolId, costs]) => {
+        if (!costsMap[poolId]) {
+          costsMap[poolId] = costs;
+        }
       });
 
       return costsMap;
