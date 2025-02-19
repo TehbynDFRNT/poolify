@@ -1,11 +1,13 @@
+
 import React, { useState } from "react";
 import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from "@/components/ui/table";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Pool, POOL_RANGES } from "@/types/pool";
+import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
+import { EditableCell } from "./components/EditableCell";
+import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
+import { calculateFiltrationTotal } from "./utils/filtrationCalculations";
 
 const editableFields: (keyof Pool)[] = [
   "name",
@@ -80,99 +82,6 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     }
   };
 
-  const isStringField = (field: keyof Pool): boolean => {
-    return ["name", "range"].includes(field);
-  };
-
-  const calculateFiltrationTotal = (pkg: any) => {
-    if (!pkg) return 0;
-    
-    const handoverKitTotal = pkg.handover_kit?.components.reduce((total: number, comp: any) => {
-      return total + ((comp.component?.price || 0) * comp.quantity);
-    }, 0) || 0;
-
-    return (
-      (pkg.light?.price || 0) +
-      (pkg.pump?.price || 0) +
-      (pkg.sanitiser?.price || 0) +
-      (pkg.filter?.price || 0) +
-      handoverKitTotal
-    );
-  };
-
-  const renderCell = (pool: Pool, field: keyof Pool) => {
-    const isEditing = editingCell?.id === pool.id && editingCell?.field === field;
-    const value = pool[field];
-
-    // Skip rendering for non-primitive fields
-    if (typeof value === 'object') {
-      return null;
-    }
-
-    if (isEditing) {
-      if (field === "range") {
-        return (
-          <Select
-            value={pool.range}
-            onValueChange={(value) => {
-              updatePoolMutation.mutate({
-                id: pool.id,
-                range: value,
-              });
-            }}
-          >
-            <SelectTrigger className="w-[200px]">
-              <SelectValue placeholder="Select Range" />
-            </SelectTrigger>
-            <SelectContent>
-              {POOL_RANGES.map((range) => (
-                <SelectItem key={range} value={range}>
-                  {range}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      }
-
-      return (
-        <Input
-          autoFocus
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={() => handleCellBlur(pool)}
-          onKeyDown={(e) => handleKeyDown(e, pool)}
-          type={isStringField(field) ? "text" : "number"}
-          step={field === "length" || field === "width" || field === "depth_shallow" || field === "depth_deep" ? "0.01" : undefined}
-        />
-      );
-    }
-
-    const displayValue = (() => {
-      if (field === "buy_price_ex_gst" || field === "buy_price_inc_gst") {
-        return formatCurrency(value as number || 0);
-      }
-      if (field === "minerals_kg_initial" || field === "minerals_kg_topup") {
-        return value || "-";
-      }
-      if (typeof value === "number") {
-        return field.includes("length") || field.includes("width") || field.includes("depth") 
-          ? `${value}m` 
-          : value;
-      }
-      return value || "-";
-    })();
-
-    return (
-      <div
-        className="cursor-pointer hover:bg-gray-100 p-1 rounded"
-        onClick={() => handleCellClick(pool, field)}
-      >
-        {String(displayValue)}
-      </div>
-    );
-  };
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -189,7 +98,24 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
             <React.Fragment key={pool.id}>
               <TableRow>
                 {editableFields.map((field) => (
-                  <TableCell key={field}>{renderCell(pool, field)}</TableCell>
+                  <TableCell key={field} onClick={() => handleCellClick(pool, field)}>
+                    <EditableCell
+                      pool={pool}
+                      field={field}
+                      value={pool[field]}
+                      isEditing={editingCell?.id === pool.id && editingCell?.field === field}
+                      editValue={editValue}
+                      onValueChange={(e) => setEditValue(e.target.value)}
+                      onBlur={() => handleCellBlur(pool)}
+                      onKeyDown={(e) => handleKeyDown(e, pool)}
+                      onRangeChange={(value) => {
+                        updatePoolMutation.mutate({
+                          id: pool.id,
+                          range: value,
+                        });
+                      }}
+                    />
+                  </TableCell>
                 ))}
                 <TableCell>
                   {pool.standard_filtration_package ? (
@@ -207,44 +133,10 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
                 </TableCell>
               </TableRow>
               {pool.standard_filtration_package && (
-                <TableRow className="bg-muted/50">
-                  <TableCell colSpan={editableFields.length + 1}>
-                    <div className="p-2 text-sm space-y-2">
-                      <div className="grid grid-cols-5 gap-4">
-                        <div>
-                          <span className="font-medium">Light</span>
-                          <div className="mt-1 text-muted-foreground">
-                            {pool.standard_filtration_package.light?.model_number || 'None'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium">Pool Pump</span>
-                          <div className="mt-1 text-muted-foreground">
-                            {pool.standard_filtration_package.pump?.model_number || 'None'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium">Sanitiser</span>
-                          <div className="mt-1 text-muted-foreground">
-                            {pool.standard_filtration_package.sanitiser?.model_number || 'None'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium">Filter</span>
-                          <div className="mt-1 text-muted-foreground">
-                            {pool.standard_filtration_package.filter?.model_number || 'None'}
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium">Handover Kit</span>
-                          <div className="mt-1 text-muted-foreground">
-                            {pool.standard_filtration_package.handover_kit?.name || 'None'}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
+                <FiltrationPackageDetails 
+                  package={pool.standard_filtration_package}
+                  colSpan={editableFields.length + 1}
+                />
               )}
             </React.Fragment>
           ))}
