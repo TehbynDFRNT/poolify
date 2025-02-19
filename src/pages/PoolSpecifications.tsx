@@ -20,19 +20,29 @@ import {
 const PoolSpecifications = () => {
   const [showForm, setShowForm] = useState(false);
 
-  const { data: pools } = useQuery({
+  const { data: pools, isLoading } = useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
-      const { data: ranges } = await supabase
+      console.log('Fetching pool ranges...');
+      const { data: ranges, error: rangesError } = await supabase
         .from("pool_ranges")
         .select("name")
         .order("display_order");
 
-      const { data: poolsData, error } = await supabase
+      if (rangesError) {
+        console.error('Error fetching ranges:', rangesError);
+        throw rangesError;
+      }
+
+      console.log('Fetching pools...');
+      const { data: poolsData, error: poolsError } = await supabase
         .from("pool_specifications")
         .select("*");
 
-      if (error) throw error;
+      if (poolsError) {
+        console.error('Error fetching pools:', poolsError);
+        throw poolsError;
+      }
 
       const rangeOrder = ranges?.map(r => r.name) || [];
       return (poolsData || []).sort((a, b) => {
@@ -42,6 +52,10 @@ const PoolSpecifications = () => {
       }) as Pool[];
     },
   });
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="container mx-auto py-8 space-y-8">
