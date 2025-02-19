@@ -4,9 +4,9 @@ import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 import { PoolCosts } from "../types";
-import { EditableCell } from "@/components/pools/components/EditableCell";
 import { DigTypeCell } from "./DigTypeCell";
 import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
+import { EditableCostCell } from "./EditableCostCell";
 
 interface PoolCostTableRowProps {
   pool: Pool;
@@ -46,74 +46,66 @@ export const PoolCostTableRow = ({
       <TableCell>{pool.depth_shallow}m</TableCell>
       <TableCell>{pool.depth_deep}m</TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="peaGravel"
+        <EditableCostCell
           value={currentCosts.peaGravel}
           isEditing={isEditing}
+          field="peaGravel"
           onValueChange={(value) => onCostChange('peaGravel', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="installFee"
+        <EditableCostCell
           value={currentCosts.installFee}
           isEditing={isEditing}
+          field="installFee"
           onValueChange={(value) => onCostChange('installFee', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="truckedWater"
+        <EditableCostCell
           value={currentCosts.truckedWater}
           isEditing={isEditing}
+          field="truckedWater"
           onValueChange={(value) => onCostChange('truckedWater', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="saltBags"
+        <EditableCostCell
           value={currentCosts.saltBags}
           isEditing={isEditing}
+          field="saltBags"
           onValueChange={(value) => onCostChange('saltBags', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="misc"
+        <EditableCostCell
           value={currentCosts.misc}
           isEditing={isEditing}
+          field="misc"
           onValueChange={(value) => onCostChange('misc', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="copingSupply"
+        <EditableCostCell
           value={currentCosts.copingSupply}
           isEditing={isEditing}
+          field="copingSupply"
           onValueChange={(value) => onCostChange('copingSupply', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="beam"
+        <EditableCostCell
           value={currentCosts.beam}
           isEditing={isEditing}
+          field="beam"
           onValueChange={(value) => onCostChange('beam', value)}
         />
       </TableCell>
       <TableCell>
-        <EditableCell
-          pool={pool}
-          field="copingLay"
+        <EditableCostCell
           value={currentCosts.copingLay}
           isEditing={isEditing}
+          field="copingLay"
           onValueChange={(value) => onCostChange('copingLay', value)}
         />
       </TableCell>
