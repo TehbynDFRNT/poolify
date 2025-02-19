@@ -19,40 +19,6 @@ import {
   calculateFixedCostsTotal,
 } from "./utils/calculateCosts";
 
-// Define the package mapping here since it's needed for both components
-const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
-  "Latina": 1,
-  "Sovereign": 1,
-  "Empire": 1,
-  "Oxford": 1,
-  "Sheffield": 1,
-  "Avellino": 1,
-  "Palazzo": 1,
-  "Valentina": 2,
-  "Westminster": 2,
-  "Kensington": 3,
-  "Bedarra": 1,
-  "Hayman": 1,
-  "Verona": 1,
-  "Portofino": 1,
-  "Florentina": 1,
-  "Bellagio": 1,
-  "Bellino": 1,
-  "Imperial": 1,
-  "Castello": 1,
-  "Grandeur": 1,
-  "Amalfi": 1,
-  "Serenity": 1,
-  "Allure": 1,
-  "Harmony": 1,
-  "Istana": 1,
-  "Terazza": 1,
-  "Elysian": 1,
-  "Infinity 3": 1,
-  "Infinity 4": 1,
-  "Terrace 3": 1,
-};
-
 const PoolDetails = () => {
   const { id } = useParams();
 
@@ -62,7 +28,31 @@ const PoolDetails = () => {
       console.log("Fetching pool with ID:", id);
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*")
+        .select(`
+          *,
+          standard_filtration_package:filtration_packages!fk_pool_specs_filtration_package (
+            id,
+            name,
+            display_order,
+            light:light_id(id, name, model_number, price),
+            pump:pump_id(id, name, model_number, price),
+            sanitiser:sanitiser_id(id, name, model_number, price),
+            filter:filter_id(id, name, model_number, price),
+            handover_kit:handover_kit_id(
+              id, 
+              name,
+              components:handover_kit_package_components(
+                quantity,
+                component:component_id(
+                  id,
+                  name,
+                  model_number,
+                  price
+                )
+              )
+            )
+          )
+        `)
         .eq("id", id)
         .single();
 
@@ -104,45 +94,6 @@ const PoolDetails = () => {
     },
   });
 
-  const { data: filtrationPackage } = useQuery({
-    queryKey: ["pool-filtration-package", pool?.name],
-    queryFn: async () => {
-      if (!pool?.name) return null;
-      
-      const targetOption = DEFAULT_PACKAGE_MAPPING[pool.name];
-      
-      const { data, error } = await supabase
-        .from("filtration_packages")
-        .select(`
-          *,
-          light:filtration_components!light_id(id, name, model_number, price),
-          pump:filtration_components!pump_id(id, name, model_number, price),
-          sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
-          filter:filtration_components!filter_id(id, name, model_number, price),
-          handover_kit:handover_kit_packages!handover_kit_id(
-            id, 
-            name,
-            components:handover_kit_package_components(
-              id,
-              quantity,
-              component:filtration_components(
-                id,
-                name,
-                model_number,
-                price
-              )
-            )
-          )
-        `)
-        .eq('display_order', targetOption)
-        .single();
-
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!pool?.name,
-  });
-
   if (poolLoading) {
     return <div>Loading...</div>;
   }
@@ -152,7 +103,7 @@ const PoolDetails = () => {
   }
 
   const poolShellPrice = pool.buy_price_inc_gst || 0;
-  const filtrationTotal = calculateFiltrationTotal(filtrationPackage);
+  const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
   const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType);
   const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
 
@@ -163,7 +114,10 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
-        <PoolFiltration poolId={id!} />
+        <PoolFiltration 
+          filtrationPackage={pool.standard_filtration_package}
+          poolName={pool.name}
+        />
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <CostSummaryCard
