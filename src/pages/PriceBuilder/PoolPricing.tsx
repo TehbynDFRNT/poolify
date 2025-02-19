@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -23,29 +22,7 @@ const PoolPricing = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select(`
-          *,
-          standard_filtration_package:standard_filtration_package_id (
-            id,
-            name,
-            light:light_id (id, name, price),
-            pump:pump_id (id, name, price),
-            sanitiser:sanitiser_id (id, name, price),
-            filter:filter_id (id, name, price),
-            handover_kit:handover_kit_id (
-              id,
-              name,
-              components:handover_kit_package_components (
-                quantity,
-                component:component_id (
-                  id,
-                  name,
-                  price
-                )
-              )
-            )
-          )
-        `)
+        .select("*")
         .eq("id", poolId)
         .single();
 
@@ -90,56 +67,10 @@ const PoolPricing = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{pool.name} - Price Configuration</CardTitle>
+            <CardTitle>{pool.name} Price Configuration</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Base Information</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Range</dt>
-                      <dd className="text-sm">{pool.range}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Dimensions</dt>
-                      <dd className="text-sm">
-                        {pool.length}m x {pool.width}m
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Depth</dt>
-                      <dd className="text-sm">
-                        {pool.depth_shallow}m to {pool.depth_deep}m
-                      </dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Base Costs</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <dl className="space-y-2">
-                    <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Buy Price (ex GST)</dt>
-                      <dd className="text-sm">${pool.buy_price_ex_gst?.toFixed(2) || '0.00'}</dd>
-                    </div>
-                    <div>
-                      <dt className="text-sm font-medium text-muted-foreground">Buy Price (inc GST)</dt>
-                      <dd className="text-sm">${pool.buy_price_inc_gst?.toFixed(2) || '0.00'}</dd>
-                    </div>
-                  </dl>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* We'll add more pricing calculation sections here */}
+          <CardContent>
+            {/* We'll start building the pricing configuration here */}
           </CardContent>
         </Card>
       </div>
