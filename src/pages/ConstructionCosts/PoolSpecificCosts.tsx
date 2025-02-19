@@ -17,8 +17,14 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
 import type { Pool } from "@/types/pool";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
+import { useState, useEffect } from "react";
+import { poolDigTypeMap, initialPoolCosts } from "./constants";
+import { PoolCostsTable } from "./components/PoolCostsTable";
 
 const PoolSpecificCosts = () => {
+  const [selectedDigTypes, setSelectedDigTypes] = useState<Record<string, string>>({});
+
   const { data: pools, isLoading: isLoadingPools } = useQuery({
     queryKey: ["pools"],
     queryFn: async () => {
@@ -42,7 +48,52 @@ const PoolSpecificCosts = () => {
     },
   });
 
-  if (isLoadingPools) {
+  const { data: digTypes, isLoading: isLoadingDigTypes } = useQuery({
+    queryKey: ["digTypes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("excavation_dig_types")
+        .select("*");
+      
+      if (error) throw error;
+      return data as ExcavationDigType[];
+    },
+  });
+
+  useEffect(() => {
+    if (pools && digTypes) {
+      const initialDigTypes: Record<string, string> = {};
+      pools.forEach(pool => {
+        const fixedName = pool.name.replace("Westminister", "Westminster");
+        const mappedDigType = poolDigTypeMap[fixedName];
+        if (mappedDigType) {
+          const digType = digTypes.find(dt => dt.name === mappedDigType);
+          if (digType) {
+            initialDigTypes[pool.id] = digType.id;
+          }
+        }
+      });
+      setSelectedDigTypes(initialDigTypes);
+    }
+  }, [pools, digTypes]);
+
+  const calculateExcavationCost = (digType: ExcavationDigType) => {
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  const getExcavationCost = (poolId: string) => {
+    const selectedDigTypeId = selectedDigTypes[poolId];
+    if (!selectedDigTypeId || !digTypes) return null;
+    
+    const digType = digTypes.find(dt => dt.id === selectedDigTypeId);
+    if (!digType) return null;
+
+    return calculateExcavationCost(digType);
+  };
+
+  if (isLoadingPools || isLoadingDigTypes) {
     return <div>Loading...</div>;
   }
 
@@ -72,8 +123,20 @@ const PoolSpecificCosts = () => {
             <CardTitle>Pool Specific Costs</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-8 text-gray-500">
-              <p>Pool specific costs have been moved to a different section.</p>
+            <div className="overflow-x-auto">
+              <PoolCostsTable
+                pools={pools || []}
+                digTypes={digTypes || []}
+                selectedDigTypes={selectedDigTypes}
+                onDigTypeChange={(poolId, value) => {
+                  setSelectedDigTypes(prev => ({
+                    ...prev,
+                    [poolId]: value
+                  }));
+                }}
+                getExcavationCost={getExcavationCost}
+                initialPoolCosts={initialPoolCosts}
+              />
             </div>
           </CardContent>
         </Card>
