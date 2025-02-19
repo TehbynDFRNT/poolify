@@ -72,7 +72,7 @@ const PoolTable = ({ pools }: PoolTableProps) => {
   });
 
   const handleCellClick = (pool: Pool, field: keyof Pool) => {
-    if (field === "buy_price_inc_gst") return; // Don't allow editing of GST-inclusive price
+    if (field === "buy_price_inc_gst" || field === "standard_filtration_package") return;
     setEditingCell({ id: pool.id, field });
     setEditValue(String(pool[field] || ""));
   };
@@ -96,7 +96,6 @@ const PoolTable = ({ pools }: PoolTableProps) => {
       }
     }
 
-    // If updating buy_price_ex_gst, also calculate and update buy_price_inc_gst
     if (editingCell.field === 'buy_price_ex_gst' && typeof parsedValue === 'number') {
       const gstIncPrice = parsedValue * 1.1;
       await updatePoolMutation.mutateAsync({
@@ -124,6 +123,11 @@ const PoolTable = ({ pools }: PoolTableProps) => {
   const renderCell = (pool: Pool, field: keyof Pool) => {
     const isEditing = editingCell?.id === pool.id && editingCell?.field === field;
     const value = pool[field];
+
+    // Skip rendering for the filtration package field
+    if (field === 'standard_filtration_package') {
+      return null;
+    }
 
     if (isEditing) {
       if (field === "range") {
