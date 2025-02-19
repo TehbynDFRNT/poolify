@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Calculator, Database, Construction, Filter, List } from "lucide-react";
+import { Home, Calculator, Database, Construction, Filter } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface NavItemProps {
@@ -36,7 +36,6 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     { icon: <Construction className="h-5 w-5" />, label: "Construction Costs", path: "/construction-costs" },
     { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems" },
     { icon: <Calculator className="h-5 w-5" />, label: "Price Builder", path: "/price-builder" },
-    { icon: <List className="h-5 w-5" />, label: "Pool Listing", path: "/pool-listing" },
   ];
 
   return (

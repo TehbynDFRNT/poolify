@@ -6,7 +6,6 @@ import {
   Construction,
   Database,
   Filter,
-  List,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -35,12 +34,6 @@ const Index = () => {
       description: "Set up pricing calculations and formulas",
       icon: <Calculator className="w-6 h-6 text-primary" />,
       link: "/price-builder",
-    },
-    {
-      title: "Pool Listing",
-      description: "View and manage pool listings",
-      icon: <List className="w-6 h-6 text-primary" />,
-      link: "/pool-listing",
     },
   ];
 
