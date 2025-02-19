@@ -114,7 +114,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.peaGravel}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'peaGravel'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'peaGravel' })}
-                  onSave={() => handleCellSave(fixedName, 'peaGravel', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'peaGravel', value)}
                   onKeyDown={(e) => {
@@ -132,7 +132,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.installFee}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'installFee'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'installFee' })}
-                  onSave={() => handleCellSave(fixedName, 'installFee', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'installFee', value)}
                   onKeyDown={(e) => {
@@ -150,7 +150,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.truckedWater}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'truckedWater'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'truckedWater' })}
-                  onSave={() => handleCellSave(fixedName, 'truckedWater', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'truckedWater', value)}
                   onKeyDown={(e) => {
@@ -168,7 +168,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.saltBags}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'saltBags'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'saltBags' })}
-                  onSave={() => handleCellSave(fixedName, 'saltBags', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'saltBags', value)}
                   onKeyDown={(e) => {
@@ -186,7 +186,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.misc}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'misc'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'misc' })}
-                  onSave={() => handleCellSave(fixedName, 'misc', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'misc', value)}
                   onKeyDown={(e) => {
@@ -204,7 +204,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.copingSupply}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'copingSupply'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingSupply' })}
-                  onSave={() => handleCellSave(fixedName, 'copingSupply', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'copingSupply', value)}
                   onKeyDown={(e) => {
@@ -222,7 +222,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.beam}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'beam'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'beam' })}
-                  onSave={() => handleCellSave(fixedName, 'beam', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'beam', value)}
                   onKeyDown={(e) => {
@@ -240,7 +240,7 @@ export const PoolCostsTable = ({
                   value={currentCosts.copingLay}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'copingLay'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingLay' })}
-                  onSave={() => handleCellSave(fixedName, 'copingLay', editValue)}
+                  onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
                   onChange={(value) => handleCellSave(fixedName, 'copingLay', value)}
                   onKeyDown={(e) => {
