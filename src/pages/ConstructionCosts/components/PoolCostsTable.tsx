@@ -1,3 +1,4 @@
+
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/utils/format";
@@ -28,22 +29,10 @@ export const PoolCostsTable = ({
     poolId: string;
     field: keyof PoolCosts;
   } | null>(null);
+  
   const [costs, setCosts] = useState<Record<string, PoolCosts>>(() => {
-    const initialCosts: Record<string, PoolCosts> = {};
-    pools.forEach(pool => {
-      const fixedName = pool.name.replace("Westminister", "Westminster");
-      initialCosts[fixedName] = {
-        truckedWater: 0,
-        saltBags: 0,
-        misc: 2700,  // Set default misc cost to 2700
-        copingSupply: 0,
-        beam: 0,
-        copingLay: 0,
-        peaGravel: 0,
-        installFee: 0
-      };
-    });
-    return initialCosts;
+    // Initialize with the provided initialPoolCosts
+    return { ...initialPoolCosts };
   });
 
   const calculateTotal = (poolName: string) => {
@@ -59,6 +48,20 @@ export const PoolCostsTable = ({
     };
 
     return Object.values(poolCosts).reduce((sum, value) => sum + value, 0);
+  };
+
+  const handleCellSave = (poolName: string, field: keyof PoolCosts, value: string) => {
+    const numericValue = parseFloat(value);
+    if (isNaN(numericValue)) return;
+
+    setCosts(prev => ({
+      ...prev,
+      [poolName]: {
+        ...prev[poolName],
+        [field]: numericValue
+      }
+    }));
+    setEditingCell(null);
   };
 
   return (
@@ -97,20 +100,6 @@ export const PoolCostsTable = ({
             peaGravel: 0,
             installFee: 0
           };
-          
-          const handleCellSave = (field: keyof PoolCosts, value: string) => {
-            const numericValue = parseFloat(value);
-            if (isNaN(numericValue)) return;
-
-            setCosts(prev => ({
-              ...prev,
-              [fixedName]: {
-                ...prev[fixedName],
-                [field]: numericValue
-              }
-            }));
-            setEditingCell(null);
-          };
 
           return (
             <TableRow key={pool.id}>
@@ -125,12 +114,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.peaGravel}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'peaGravel'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'peaGravel' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'peaGravel', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('peaGravel', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'peaGravel', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('peaGravel', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'peaGravel', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -143,12 +132,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.installFee}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'installFee'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'installFee' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'installFee', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('installFee', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'installFee', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('installFee', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'installFee', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -161,12 +150,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.truckedWater}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'truckedWater'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'truckedWater' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'truckedWater', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('truckedWater', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'truckedWater', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('truckedWater', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'truckedWater', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -179,12 +168,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.saltBags}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'saltBags'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'saltBags' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'saltBags', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('saltBags', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'saltBags', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('saltBags', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'saltBags', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -197,12 +186,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.misc}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'misc'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'misc' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'misc', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('misc', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'misc', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('misc', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'misc', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -215,12 +204,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.copingSupply}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'copingSupply'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingSupply' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'copingSupply', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('copingSupply', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'copingSupply', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('copingSupply', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'copingSupply', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -233,12 +222,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.beam}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'beam'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'beam' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'beam', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('beam', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'beam', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('beam', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'beam', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -251,12 +240,12 @@ export const PoolCostsTable = ({
                   value={currentCosts.copingLay}
                   isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'copingLay'}
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingLay' })}
-                  onSave={() => setEditingCell(null)}
+                  onSave={() => handleCellSave(fixedName, 'copingLay', editValue)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('copingLay', value)}
+                  onChange={(value) => handleCellSave(fixedName, 'copingLay', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave('copingLay', (e.target as HTMLInputElement).value);
+                      handleCellSave(fixedName, 'copingLay', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
