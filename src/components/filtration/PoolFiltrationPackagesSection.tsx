@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -36,7 +35,7 @@ const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
   "Palazzo": 1,
   "Valentina": 2,
   "Westminster": 2,
-  "Kensington": 3,
+  "Kensington": 2,
   "Bedarra": 1,
   "Hayman": 1,
   "Verona": 1,
