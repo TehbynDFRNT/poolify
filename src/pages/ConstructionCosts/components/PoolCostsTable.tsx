@@ -42,8 +42,9 @@ export const PoolCostsTable = ({
       peaGravel: 0,
       installFee: 0
     };
+    const excavationCost = getExcavationCost(poolName) || 0;
 
-    return Object.values(poolCosts).reduce((sum, value) => sum + value, 0);
+    return Object.values(poolCosts).reduce((sum, value) => sum + value, 0) + excavationCost;
   };
 
   return (
@@ -82,20 +83,6 @@ export const PoolCostsTable = ({
             peaGravel: 0,
             installFee: 0
           };
-          
-          const handleCellSave = (field: keyof PoolCosts, value: string) => {
-            const numericValue = parseFloat(value);
-            if (isNaN(numericValue)) return;
-
-            setCosts(prev => ({
-              ...prev,
-              [fixedName]: {
-                ...prev[fixedName],
-                [field]: numericValue
-              }
-            }));
-            setEditingCell(null);
-          };
 
           return (
             <TableRow key={pool.id}>
@@ -112,11 +99,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'peaGravel' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('peaGravel', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('peaGravel', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        peaGravel: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -130,11 +122,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'installFee' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('installFee', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('installFee', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        installFee: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -148,11 +145,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'truckedWater' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('truckedWater', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('truckedWater', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        truckedWater: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -166,11 +168,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'saltBags' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('saltBags', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('saltBags', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        saltBags: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -184,11 +191,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'misc' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('misc', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('misc', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        misc: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -202,11 +214,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingSupply' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('copingSupply', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('copingSupply', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        copingSupply: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -220,11 +237,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'beam' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('beam', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('beam', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        beam: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -238,11 +260,16 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingLay' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('copingLay', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('copingLay', (e.target as HTMLInputElement).value);
-                    }
+                  onChange={(value) => {
+                    const numericValue = parseFloat(value);
+                    if (isNaN(numericValue)) return;
+                    setCosts(prev => ({
+                      ...prev,
+                      [fixedName]: {
+                        ...prev[fixedName],
+                        copingLay: numericValue
+                      }
+                    }));
                   }}
                   type="number"
                   align="right"
@@ -273,7 +300,7 @@ export const PoolCostsTable = ({
                 }
               </TableCell>
               <TableCell className="font-medium">
-                {formatCurrency(calculateTotal(fixedName) + (getExcavationCost(pool.id) || 0))}
+                {formatCurrency(calculateTotal(fixedName))}
               </TableCell>
             </TableRow>
           );
