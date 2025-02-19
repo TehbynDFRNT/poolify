@@ -45,6 +45,10 @@ export const PoolFiltrationMatchingTable = ({
     );
   }
 
+  const getSelectedPackage = (pool: any) => {
+    return packages?.find(p => p.id === pool.default_filtration_package_id);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -61,38 +65,41 @@ export const PoolFiltrationMatchingTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pools?.map((pool) => (
-              <TableRow key={pool.id}>
-                <TableCell>{pool.range}</TableCell>
-                <TableCell>{pool.name}</TableCell>
-                <TableCell>
-                  <Select
-                    value={pool.default_filtration_package_id || ""}
-                    onValueChange={(value) => onUpdatePackage(pool.id, value)}
-                    disabled={isUpdating}
-                  >
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select package">
-                        {packages?.find(p => p.id === pool.default_filtration_package_id)
-                          ? `Option ${packages.find(p => p.id === pool.default_filtration_package_id)?.display_order}`
-                          : "Select package"
-                        }
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {packages?.map((pkg) => (
-                        <SelectItem key={pkg.id} value={pkg.id}>
-                          Option {pkg.display_order}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell className="text-right">
-                  {pool.default_package ? formatCurrency(calculatePackagePrice(pool.default_package)) : "-"}
-                </TableCell>
-              </TableRow>
-            ))}
+            {pools?.map((pool) => {
+              const selectedPackage = getSelectedPackage(pool);
+              return (
+                <TableRow key={pool.id}>
+                  <TableCell>{pool.range}</TableCell>
+                  <TableCell>{pool.name}</TableCell>
+                  <TableCell>
+                    <Select
+                      value={pool.default_filtration_package_id || ""}
+                      onValueChange={(value) => {
+                        console.log('Selecting package:', value, 'for pool:', pool.name);
+                        onUpdatePackage(pool.id, value);
+                      }}
+                      disabled={isUpdating}
+                    >
+                      <SelectTrigger className="w-[200px]">
+                        <SelectValue>
+                          {selectedPackage ? `Option ${selectedPackage.display_order}` : "Select package"}
+                        </SelectValue>
+                      </SelectTrigger>
+                      <SelectContent>
+                        {packages?.map((pkg) => (
+                          <SelectItem key={pkg.id} value={pkg.id}>
+                            Option {pkg.display_order}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {pool.default_package ? formatCurrency(calculatePackagePrice(pool.default_package)) : "-"}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>
