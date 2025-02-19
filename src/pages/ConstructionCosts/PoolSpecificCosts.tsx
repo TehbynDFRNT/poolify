@@ -35,7 +35,10 @@ const PoolSpecificCosts = () => {
 
       const { data: poolsData, error } = await supabase
         .from("pool_specifications")
-        .select("*");
+        .select(`
+          *,
+          dig_type:excavation_dig_types!dig_type_id (*)
+        `);
 
       if (error) throw error;
 
