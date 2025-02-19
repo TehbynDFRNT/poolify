@@ -1,12 +1,13 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCurrency } from "@/utils/format";
 
 interface PoolFiltrationProps {
   poolId: string;
 }
 
-// Import the same mapping used in the filtration packages section
 const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
   "Latina": 1,
   "Sovereign": 1,
@@ -59,7 +60,27 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
       
       const { data: filtrationPackages } = await supabase
         .from("filtration_packages")
-        .select("*")
+        .select(`
+          *,
+          light:filtration_components!light_id(id, name, model_number, price),
+          pump:filtration_components!pump_id(id, name, model_number, price),
+          sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
+          filter:filtration_components!filter_id(id, name, model_number, price),
+          handover_kit:handover_kit_packages!handover_kit_id(
+            id, 
+            name,
+            components:handover_kit_package_components(
+              id,
+              quantity,
+              component:filtration_components(
+                id,
+                name,
+                model_number,
+                price
+              )
+            )
+          )
+        `)
         .eq('display_order', targetOption)
         .single();
 
@@ -68,18 +89,98 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
     },
   });
 
+  const calculatePackageTotal = () => {
+    if (!poolAndPackage?.package) return 0;
+    
+    const pkg = poolAndPackage.package;
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
   return (
     <Card className="bg-gradient-to-r from-slate-50 to-slate-100">
       <CardHeader>
         <CardTitle>Standard Filtration</CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="text-sm text-muted-foreground">
-          {poolAndPackage?.package ? 
-            `Option ${poolAndPackage.package.display_order}` : 
-            "No filtration package assigned"
-          }
-        </div>
+      <CardContent className="space-y-4">
+        {poolAndPackage?.package ? (
+          <>
+            <div className="text-sm text-muted-foreground">
+              Option {poolAndPackage.package.display_order}
+            </div>
+            <div className="space-y-2">
+              {poolAndPackage.package.light && (
+                <div className="flex justify-between text-sm">
+                  <span>Light:</span>
+                  <span className="text-right">
+                    <div>{poolAndPackage.package.light.model_number}</div>
+                    <div className="text-muted-foreground">{formatCurrency(poolAndPackage.package.light.price)}</div>
+                  </span>
+                </div>
+              )}
+              {poolAndPackage.package.pump && (
+                <div className="flex justify-between text-sm">
+                  <span>Pool Pump:</span>
+                  <span className="text-right">
+                    <div>{poolAndPackage.package.pump.model_number}</div>
+                    <div className="text-muted-foreground">{formatCurrency(poolAndPackage.package.pump.price)}</div>
+                  </span>
+                </div>
+              )}
+              {poolAndPackage.package.sanitiser && (
+                <div className="flex justify-between text-sm">
+                  <span>Sanitiser:</span>
+                  <span className="text-right">
+                    <div>{poolAndPackage.package.sanitiser.model_number}</div>
+                    <div className="text-muted-foreground">{formatCurrency(poolAndPackage.package.sanitiser.price)}</div>
+                  </span>
+                </div>
+              )}
+              {poolAndPackage.package.filter && (
+                <div className="flex justify-between text-sm">
+                  <span>Filter:</span>
+                  <span className="text-right">
+                    <div>{poolAndPackage.package.filter.model_number}</div>
+                    <div className="text-muted-foreground">{formatCurrency(poolAndPackage.package.filter.price)}</div>
+                  </span>
+                </div>
+              )}
+              {poolAndPackage.package.handover_kit && (
+                <div className="flex justify-between text-sm">
+                  <span>Handover Kit:</span>
+                  <span className="text-right">
+                    <div>{poolAndPackage.package.handover_kit.name}</div>
+                    <div className="text-muted-foreground">
+                      {formatCurrency(
+                        poolAndPackage.package.handover_kit.components.reduce(
+                          (total, comp) => total + ((comp.component?.price || 0) * comp.quantity),
+                          0
+                        )
+                      )}
+                    </div>
+                  </span>
+                </div>
+              )}
+            </div>
+            <div className="flex justify-between pt-4 border-t text-base font-semibold">
+              <span>Package Total:</span>
+              <span>{formatCurrency(calculatePackageTotal())}</span>
+            </div>
+          </>
+        ) : (
+          <div className="text-sm text-muted-foreground">
+            No filtration package assigned
+          </div>
+        )}
       </CardContent>
     </Card>
   );
