@@ -17,7 +17,9 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
         .select(`
           name,
           standard_filtration_package:standard_filtration_package_id(
-            display_order
+            id,
+            display_order,
+            name
           )
         `)
         .eq('id', poolId)
