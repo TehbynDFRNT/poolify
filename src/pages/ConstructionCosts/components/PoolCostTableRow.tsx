@@ -4,9 +4,9 @@ import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 import { PoolCosts } from "../types";
+import { CostCell } from "./CostCell";
 import { DigTypeCell } from "./DigTypeCell";
-import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
-import { EditableCostCell } from "./EditableCostCell";
+import { PoolCostActions } from "./PoolCostActions";
 
 interface PoolCostTableRowProps {
   pool: Pool;
@@ -45,70 +45,46 @@ export const PoolCostTableRow = ({
       <TableCell>{pool.width}m</TableCell>
       <TableCell>{pool.depth_shallow}m</TableCell>
       <TableCell>{pool.depth_deep}m</TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.peaGravel}
-          isEditing={isEditing}
-          field="peaGravel"
-          onValueChange={(value) => onCostChange('peaGravel', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.installFee}
-          isEditing={isEditing}
-          field="installFee"
-          onValueChange={(value) => onCostChange('installFee', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.truckedWater}
-          isEditing={isEditing}
-          field="truckedWater"
-          onValueChange={(value) => onCostChange('truckedWater', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.saltBags}
-          isEditing={isEditing}
-          field="saltBags"
-          onValueChange={(value) => onCostChange('saltBags', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.misc}
-          isEditing={isEditing}
-          field="misc"
-          onValueChange={(value) => onCostChange('misc', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.copingSupply}
-          isEditing={isEditing}
-          field="copingSupply"
-          onValueChange={(value) => onCostChange('copingSupply', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.beam}
-          isEditing={isEditing}
-          field="beam"
-          onValueChange={(value) => onCostChange('beam', value)}
-        />
-      </TableCell>
-      <TableCell>
-        <EditableCostCell
-          value={currentCosts.copingLay}
-          isEditing={isEditing}
-          field="copingLay"
-          onValueChange={(value) => onCostChange('copingLay', value)}
-        />
-      </TableCell>
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.peaGravel}
+        onChange={(value) => onCostChange('peaGravel', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.installFee}
+        onChange={(value) => onCostChange('installFee', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.truckedWater}
+        onChange={(value) => onCostChange('truckedWater', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.saltBags}
+        onChange={(value) => onCostChange('saltBags', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.misc}
+        onChange={(value) => onCostChange('misc', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.copingSupply}
+        onChange={(value) => onCostChange('copingSupply', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.beam}
+        onChange={(value) => onCostChange('beam', value)}
+      />
+      <CostCell
+        isEditing={isEditing}
+        value={currentCosts.copingLay}
+        onChange={(value) => onCostChange('copingLay', value)}
+      />
       <DigTypeCell
         digTypes={digTypes}
         selectedDigType={selectedDigTypes[pool.id]}
@@ -124,14 +100,12 @@ export const PoolCostTableRow = ({
       <TableCell className="font-medium">
         {formatCurrency(calculateTotal())}
       </TableCell>
-      <TableCell>
-        <PoolTableActions
-          isEditing={isEditing}
-          onEdit={onEdit}
-          onSave={onSave}
-          onCancel={onCancel}
-        />
-      </TableCell>
+      <PoolCostActions
+        isEditing={isEditing}
+        onEdit={onEdit}
+        onSave={onSave}
+        onCancel={onCancel}
+      />
     </TableRow>
   );
 };

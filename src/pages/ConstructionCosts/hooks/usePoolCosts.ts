@@ -8,72 +8,45 @@ import type { Database } from "@/integrations/supabase/types";
 
 type PoolCostsRow = Database['public']['Tables']['pool_costs']['Row'];
 
-const DEFAULT_COSTS: PoolCosts = {
-  truckedWater: 0,
-  saltBags: 0,
-  misc: 2700,
-  copingSupply: 0,
-  beam: 0,
-  copingLay: 0,
-  peaGravel: 0,
-  installFee: 0
-};
-
 export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const queryClient = useQueryClient();
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
 
-  const { data: costs = initialPoolCosts, isLoading } = useQuery({
+  const poolCostsQuery = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      console.log('Fetching pool costs...');
-      const { data, error } = await supabase
+      const { data: poolCosts, error } = await supabase
         .from('pool_costs')
         .select('*');
 
       if (error) {
-        console.error('Error fetching pool costs:', error);
+        toast.error("Failed to fetch pool costs");
         throw error;
       }
 
-      console.log('Received pool costs:', data);
-
+      // Transform the data into our expected format
       const costsMap: Record<string, PoolCosts> = {};
-      (data || []).forEach((cost: PoolCostsRow) => {
+      poolCosts.forEach((cost: PoolCostsRow) => {
         costsMap[cost.pool_id] = {
-          truckedWater: Number(cost.trucked_water) || 0,
-          saltBags: Number(cost.salt_bags) || 0,
-          misc: Number(cost.misc) || 2700,
-          copingSupply: Number(cost.coping_supply) || 0,
-          beam: Number(cost.beam) || 0,
-          copingLay: Number(cost.coping_lay) || 0,
-          peaGravel: Number(cost.pea_gravel) || 0,
-          installFee: Number(cost.install_fee) || 0
+          truckedWater: cost.trucked_water,
+          saltBags: cost.salt_bags,
+          misc: cost.misc,
+          copingSupply: cost.coping_supply,
+          beam: cost.beam,
+          copingLay: cost.coping_lay,
+          peaGravel: cost.pea_gravel,
+          installFee: cost.install_fee
         };
       });
 
-      // Ensure all pools have default costs
-      Object.keys(initialPoolCosts).forEach((poolId) => {
-        if (!costsMap[poolId]) {
-          costsMap[poolId] = { ...DEFAULT_COSTS };
-        }
-      });
-
-      return costsMap;
+      // Merge with initial costs for any missing entries
+      return { ...initialPoolCosts, ...costsMap };
     },
-    meta: {
-      onError: (error: Error) => {
-        console.error('Query error:', error);
-        toast.error("Failed to fetch pool costs");
-      }
-    }
   });
 
   const updatePoolCostsMutation = useMutation({
-    mutationFn: async ({ poolId, costs }: { poolId: string; costs: PoolCosts }) => {
-      console.log('Updating pool costs:', { poolId, costs });
-      
+    mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
       const { error } = await supabase
         .from('pool_costs')
         .upsert({
@@ -88,12 +61,8 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
           install_fee: costs.installFee,
         });
 
-      if (error) {
-        console.error('Error in mutation:', error);
-        throw error;
-      }
-
-      console.log('Successfully updated pool costs');
+      if (error) throw error;
+      return costs;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
@@ -107,21 +76,17 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   });
 
   const handleEdit = (poolName: string) => {
-    console.log('Starting edit for pool:', poolName);
+    const currentCosts = poolCostsQuery.data?.[poolName] || initialPoolCosts[poolName];
     setEditingRow(poolName);
     setEditedCosts(prev => ({
       ...prev,
-      [poolName]: { ...(costs[poolName] || DEFAULT_COSTS) }
+      [poolName]: { ...currentCosts }
     }));
   };
 
-  const handleSave = (poolId: string, poolName: string) => {
-    console.log('Saving costs for pool:', poolName);
+  const handleSave = async (poolId: string, poolName: string) => {
     const updatedCosts = editedCosts[poolName];
-    if (!updatedCosts) {
-      console.warn('No costs found to update');
-      return;
-    }
+    if (!updatedCosts) return;
 
     updatePoolCostsMutation.mutate({
       poolId,
@@ -130,13 +95,11 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const handleCancel = () => {
-    console.log('Cancelling edit');
     setEditingRow(null);
-    setEditedCosts(costs);
+    setEditedCosts(poolCostsQuery.data || initialPoolCosts);
   };
 
   const handleCostChange = (poolName: string, field: keyof PoolCosts, value: string) => {
-    console.log('Changing cost:', { poolName, field, value });
     const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
       setEditedCosts(prev => ({
@@ -150,16 +113,15 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const calculateTotal = (poolName: string) => {
-    const poolCosts = editingRow ? editedCosts[poolName] : costs[poolName];
-    if (!poolCosts) return 0;
-    return Object.values(poolCosts).reduce((sum, value) => sum + (value || 0), 0);
+    const costs = editingRow ? editedCosts[poolName] : (poolCostsQuery.data?.[poolName] || initialPoolCosts[poolName]);
+    if (!costs) return 0;
+    return Object.values(costs).reduce((sum, value) => sum + (value || 0), 0);
   };
 
   return {
     editingRow,
     editedCosts,
-    costs,
-    isLoading,
+    costs: poolCostsQuery.data || initialPoolCosts,
     handleEdit,
     handleSave,
     handleCancel,
