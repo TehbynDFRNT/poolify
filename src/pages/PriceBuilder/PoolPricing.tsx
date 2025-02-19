@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, DollarSign, Package, List, Database, ImagePlus } from "lucide-react";
@@ -98,12 +97,7 @@ const PoolPricing = () => {
                 <div>
                   <div className="relative w-full aspect-[4/3] border-2 border-gray-200 rounded-lg">
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                      <h3 className="text-2xl font-bold mb-2">{pool.name}</h3>
-                      <div className="space-y-1 text-gray-600">
-                        <p>External {pool.length}m x {pool.width}m</p>
-                        <p>Internal {(pool.length - 0.4).toFixed(1)}m x {(pool.width - 0.4).toFixed(1)}m</p>
-                        <p>Depth {pool.depth_shallow}m to {pool.depth_deep}m</p>
-                      </div>
+                      <h3 className="text-2xl font-bold">{pool.name}</h3>
                     </div>
                   </div>
                   <div className="mt-4">
