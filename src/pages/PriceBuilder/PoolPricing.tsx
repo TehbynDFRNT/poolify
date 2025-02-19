@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, DollarSign, Upload } from "lucide-react";
+import { ArrowLeft, DollarSign, Package, List, Database } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -113,15 +113,9 @@ const PoolPricing = () => {
                     accept="image/*"
                     endpoint={`pool-outlines/${poolId}`}
                     onUploadComplete={(url) => {
-                      // Handle the uploaded image URL
                       console.log("Uploaded image URL:", url);
                     }}
-                  >
-                    <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-lg">
-                      <Upload className="h-12 w-12 text-gray-400 mb-2" />
-                      <p className="text-sm text-gray-600">Click or drag and drop to upload pool outline image</p>
-                    </div>
-                  </FileUpload>
+                  />
                 </div>
               </div>
             </CardContent>
@@ -182,6 +176,48 @@ const PoolPricing = () => {
                   <dd className="text-lg">{pool.minerals_kg_topup ? `${pool.minerals_kg_topup}kg` : '-'}</dd>
                 </div>
               </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Package className="h-5 w-5" />
+                Default Filtration Package
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-gray-500">
+                <p>Default filtration package configuration will be displayed here</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <List className="h-5 w-5" />
+                Pool Specific Costs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-gray-500">
+                <p>Pool specific costs and calculations will be displayed here</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="h-5 w-5" />
+                Fixed Costs
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8 text-gray-500">
+                <p>Fixed costs applied to all pools will be displayed here</p>
+              </div>
             </CardContent>
           </Card>
 
