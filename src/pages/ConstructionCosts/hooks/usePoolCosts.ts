@@ -13,83 +13,68 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
 
-  const poolCostsQuery = useQuery({
+  const { data: costs = initialPoolCosts } = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      try {
-        const response = await supabase
-          .from('pool_costs')
-          .select('*');
+      const { data, error } = await supabase
+        .from('pool_costs')
+        .select('*');
 
-        if (response.error) {
-          throw response.error;
-        }
-
-        const costsMap: Record<string, PoolCosts> = {};
-        response.data.forEach((cost: PoolCostsRow) => {
-          costsMap[cost.pool_id] = {
-            truckedWater: Number(cost.trucked_water) || 0,
-            saltBags: Number(cost.salt_bags) || 0,
-            misc: Number(cost.misc) || 0,
-            copingSupply: Number(cost.coping_supply) || 0,
-            beam: Number(cost.beam) || 0,
-            copingLay: Number(cost.coping_lay) || 0,
-            peaGravel: Number(cost.pea_gravel) || 0,
-            installFee: Number(cost.install_fee) || 0
-          };
-        });
-
-        return { ...initialPoolCosts, ...costsMap };
-      } catch (error) {
-        console.error('Error fetching pool costs:', error);
+      if (error) {
         toast.error("Failed to fetch pool costs");
         throw error;
       }
+
+      const costsMap: Record<string, PoolCosts> = {};
+      (data || []).forEach((cost: PoolCostsRow) => {
+        costsMap[cost.pool_id] = {
+          truckedWater: cost.trucked_water || 0,
+          saltBags: cost.salt_bags || 0,
+          misc: cost.misc || 0,
+          copingSupply: cost.coping_supply || 0,
+          beam: cost.beam || 0,
+          copingLay: cost.coping_lay || 0,
+          peaGravel: cost.pea_gravel || 0,
+          installFee: cost.install_fee || 0
+        };
+      });
+
+      return { ...initialPoolCosts, ...costsMap };
     },
   });
 
   const updatePoolCostsMutation = useMutation({
-    mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
-      try {
-        const checkResponse = await supabase
+    mutationFn: async ({ poolId, costs }: { poolId: string; costs: PoolCosts }) => {
+      const { error: checkError, data: existing } = await supabase
+        .from('pool_costs')
+        .select('id')
+        .eq('pool_id', poolId)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      const updateData = {
+        trucked_water: costs.truckedWater,
+        salt_bags: costs.saltBags,
+        misc: costs.misc,
+        coping_supply: costs.copingSupply,
+        beam: costs.beam,
+        coping_lay: costs.copingLay,
+        pea_gravel: costs.peaGravel,
+        install_fee: costs.installFee,
+      };
+
+      if (existing) {
+        const { error } = await supabase
           .from('pool_costs')
-          .select('id')
-          .eq('pool_id', poolId)
-          .maybeSingle();
-
-        if (checkResponse.error) throw checkResponse.error;
-
-        const updateData = {
-          trucked_water: Number(costs.truckedWater) || 0,
-          salt_bags: Number(costs.saltBags) || 0,
-          misc: Number(costs.misc) || 0,
-          coping_supply: Number(costs.copingSupply) || 0,
-          beam: Number(costs.beam) || 0,
-          coping_lay: Number(costs.copingLay) || 0,
-          pea_gravel: Number(costs.peaGravel) || 0,
-          install_fee: Number(costs.installFee) || 0,
-        };
-
-        let response;
-        if (checkResponse.data) {
-          response = await supabase
-            .from('pool_costs')
-            .update(updateData)
-            .eq('pool_id', poolId);
-        } else {
-          response = await supabase
-            .from('pool_costs')
-            .insert({
-              pool_id: poolId,
-              ...updateData
-            });
-        }
-
-        if (response.error) throw response.error;
-        return costs;
-      } catch (error) {
-        console.error('Error updating pool costs:', error);
-        throw error;
+          .update(updateData)
+          .eq('pool_id', poolId);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('pool_costs')
+          .insert({ pool_id: poolId, ...updateData });
+        if (error) throw error;
       }
     },
     onSuccess: () => {
@@ -104,15 +89,14 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   });
 
   const handleEdit = (poolName: string) => {
-    const currentCosts = poolCostsQuery.data?.[poolName] || initialPoolCosts[poolName];
     setEditingRow(poolName);
     setEditedCosts(prev => ({
       ...prev,
-      [poolName]: { ...currentCosts }
+      [poolName]: { ...(costs[poolName] || initialPoolCosts[poolName]) }
     }));
   };
 
-  const handleSave = async (poolId: string, poolName: string) => {
+  const handleSave = (poolId: string, poolName: string) => {
     const updatedCosts = editedCosts[poolName];
     if (!updatedCosts) return;
 
@@ -124,7 +108,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
 
   const handleCancel = () => {
     setEditingRow(null);
-    setEditedCosts(poolCostsQuery.data || initialPoolCosts);
+    setEditedCosts(costs);
   };
 
   const handleCostChange = (poolName: string, field: keyof PoolCosts, value: string) => {
@@ -141,15 +125,15 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const calculateTotal = (poolName: string) => {
-    const costs = editingRow ? editedCosts[poolName] : (poolCostsQuery.data?.[poolName] || initialPoolCosts[poolName]);
-    if (!costs) return 0;
-    return Object.values(costs).reduce((sum, value) => sum + (value || 0), 0);
+    const poolCosts = editingRow ? editedCosts[poolName] : costs[poolName];
+    if (!poolCosts) return 0;
+    return Object.values(poolCosts).reduce((sum, value) => sum + (value || 0), 0);
   };
 
   return {
     editingRow,
     editedCosts,
-    costs: poolCostsQuery.data || initialPoolCosts,
+    costs,
     handleEdit,
     handleSave,
     handleCancel,
