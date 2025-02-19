@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -14,10 +15,14 @@ import { poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 import { calculatePoolSpecificCosts, calculateFixedCostsTotal } from "./utils/calculateCosts";
 import { calculateFiltrationTotal } from "@/components/pools/utils/filtrationCalculations";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
+import { useNavigate } from "react-router-dom";
+import { RefreshCw } from "lucide-react";
 
 const PoolDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const { data: pool, isLoading: poolLoading } = useQuery({
     queryKey: ["pool-specification", id],
@@ -31,17 +36,17 @@ const PoolDetails = () => {
             id,
             name,
             display_order,
-            light:light_id (id, name, model_number, price),
-            pump:pump_id (id, name, model_number, price),
-            sanitiser:sanitiser_id (id, name, model_number, price),
-            filter:filter_id (id, name, model_number, price),
-            handover_kit:handover_kit_id (
+            light:filtration_components!light_id (id, name, model_number, price),
+            pump:filtration_components!pump_id (id, name, model_number, price),
+            sanitiser:filtration_components!sanitiser_id (id, name, model_number, price),
+            filter:filtration_components!filter_id (id, name, model_number, price),
+            handover_kit:handover_kit_packages!handover_kit_id (
               id, 
               name,
               components:handover_kit_package_components(
                 id,
                 quantity,
-                component:component_id(
+                component:filtration_components!component_id(
                   id,
                   name,
                   model_number,
@@ -106,6 +111,10 @@ const PoolDetails = () => {
   const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
   const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package || null);
 
+  const handleSelectFiltrationPackage = () => {
+    navigate('/filtration-systems');
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8 space-y-8">
@@ -129,6 +138,15 @@ const PoolDetails = () => {
               <div className="space-y-6">
                 <div className="flex items-center justify-between text-sm text-gray-500">
                   <span>Option {pool.standard_filtration_package.display_order}</span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleSelectFiltrationPackage}
+                    className="flex items-center gap-2"
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    Change Package
+                  </Button>
                 </div>
                 <div className="grid grid-cols-5 gap-6">
                   <div>
@@ -164,10 +182,19 @@ const PoolDetails = () => {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
-                <div className="text-center space-y-3">
+              <div className="flex flex-col items-center justify-center h-40 bg-gray-50 rounded-lg">
+                <div className="text-center space-y-4">
                   <div className="text-3xl text-gray-400">🔄</div>
-                  <p className="text-gray-500">No filtration package selected</p>
+                  <div>
+                    <p className="text-gray-500 mb-2">No filtration package selected</p>
+                    <Button 
+                      onClick={handleSelectFiltrationPackage}
+                      className="flex items-center gap-2"
+                    >
+                      <RefreshCw className="h-4 w-4" />
+                      Select Package
+                    </Button>
+                  </div>
                   <p className="text-sm text-gray-400">
                     Light • Pool Pump • Sanitiser • Filter • Handover Kit
                   </p>
