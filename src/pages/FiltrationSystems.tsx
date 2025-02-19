@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -108,6 +107,9 @@ const FiltrationSystems = () => {
             components:handover_kit_package_components (
               id,
               quantity,
+              package_id,
+              component_id,
+              created_at,
               component:filtration_components!component_id (
                 id,
                 name,
@@ -120,7 +122,24 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data as PackageWithComponents[];
+      
+      // Transform the data to match our expected types
+      const transformedData: PackageWithComponents[] = (data || []).map(pkg => ({
+        id: pkg.id,
+        name: pkg.name,
+        display_order: pkg.display_order,
+        light: pkg.light,
+        pump: pkg.pump,
+        sanitiser: pkg.sanitiser,
+        filter: pkg.filter,
+        handover_kit: pkg.handover_kit ? {
+          id: pkg.handover_kit.id,
+          name: pkg.handover_kit.name,
+          components: pkg.handover_kit.components
+        } : null
+      }));
+
+      return transformedData;
     },
   });
 
