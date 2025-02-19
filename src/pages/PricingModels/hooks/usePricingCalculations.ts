@@ -44,12 +44,7 @@ const fetchFiltrationPackages = async () => {
         components:handover_kit_package_components(
           id,
           quantity,
-          component:filtration_components(
-            id,
-            name,
-            model_number,
-            price
-          )
+          component:component_id(id, name, model_number, price)
         )
       )
     `);
@@ -83,19 +78,28 @@ export const usePricingCalculations = () => {
     const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType);
     const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
 
+    // Debug logs to see what's happening
+    console.log('Pool filtration package ID:', pool.standard_filtration_package_id);
+    console.log('Available filtration packages:', filtrationPackages);
+
     // Get the correct filtration package for this pool
     const filtrationPackage = filtrationPackages.find(fp => fp.id === pool.standard_filtration_package_id);
+    console.log('Found filtration package:', filtrationPackage);
+
     const filtrationTotal = calculateFiltrationTotal(filtrationPackage);
+    console.log('Calculated filtration total:', filtrationTotal);
+    
+    const total = poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
     
     console.log('Cost breakdown for', pool.name, {
       poolShellPrice,
       filtrationTotal,
       totalPoolCosts,
       totalFixedCosts,
-      total: poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts
+      total
     });
     
-    return poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
+    return total;
   };
 
   return { calculateTrueCost };
