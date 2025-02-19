@@ -103,7 +103,7 @@ const PoolPricing = () => {
             buyPriceIncGst={pool.buy_price_inc_gst}
           />
           <FiltrationPackageCard defaultPackage={pool.default_package} />
-          <PoolSpecificCostsCard />
+          <PoolSpecificCostsCard poolId={pool.id} />
           <FixedCostsCard />
         </div>
       </div>
