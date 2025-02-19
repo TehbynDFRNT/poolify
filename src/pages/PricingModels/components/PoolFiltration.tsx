@@ -8,31 +8,18 @@ interface PoolFiltrationProps {
 }
 
 export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
-  const { data: filtrationOption } = useQuery({
+  const { data: filtrationPackage } = useQuery({
     queryKey: ["pool-filtration-option", poolId],
     queryFn: async () => {
       console.log("Fetching filtration package for pool:", poolId);
-      // First, get the pool's name
-      const { data: pool } = await supabase
-        .from("pool_specifications")
-        .select("name")
-        .eq('id', poolId)
-        .single();
-
-      if (!pool) throw new Error("Pool not found");
-
-      // Then, get the filtration package based on the pool's name
       const { data: filtrationPackages } = await supabase
         .from("filtration_packages")
         .select("*")
-        .eq('display_order', 1); // Empire uses Option 1
+        .eq('display_order', 1)
+        .single();
 
-      if (!filtrationPackages || filtrationPackages.length === 0) {
-        throw new Error("Filtration package not found");
-      }
-
-      console.log("Fetched filtration data:", filtrationPackages[0]);
-      return filtrationPackages[0];
+      console.log("Fetched filtration data:", filtrationPackages);
+      return filtrationPackages;
     },
   });
 
@@ -43,8 +30,8 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          {filtrationOption ? 
-            `Option ${filtrationOption.display_order}` : 
+          {filtrationPackage ? 
+            `Option ${filtrationPackage.display_order}` : 
             "No filtration package assigned"
           }
         </div>
