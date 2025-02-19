@@ -17,7 +17,7 @@ const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
   "Palazzo": 1,
   "Valentina": 2,
   "Westminster": 2,
-  "Kensington": 2,
+  "Kensington": 3,
   "Bedarra": 1,
   "Hayman": 1,
   "Verona": 1,
