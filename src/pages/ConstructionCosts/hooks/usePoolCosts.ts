@@ -16,16 +16,21 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const { data: costs = initialPoolCosts } = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      const response = await supabase.from('pool_costs').select('*');
-      
-      if (response.error) {
-        console.error('Error fetching pool costs:', response.error);
+      // Destructure the response immediately to avoid passing non-cloneable objects
+      const { data, error } = await supabase
+        .from('pool_costs')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching pool costs:', error);
         toast.error("Failed to fetch pool costs");
         return initialPoolCosts;
       }
 
+      // Create a plain object with only the data we need
       const costsMap: Record<string, PoolCosts> = {};
-      response.data.forEach((cost: PoolCostsRow) => {
+      (data || []).forEach((cost: PoolCostsRow) => {
+        // Ensure we're only working with plain numbers
         costsMap[cost.pool_id] = {
           truckedWater: Number(cost.trucked_water) || 0,
           saltBags: Number(cost.salt_bags) || 0,
@@ -44,13 +49,14 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
 
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string; costs: PoolCosts }) => {
-      // First check if record exists
-      const checkResponse = await supabase
+      // Destructure immediately to work with plain data
+      const { data: existing } = await supabase
         .from('pool_costs')
         .select('id')
         .eq('pool_id', poolId)
         .single();
 
+      // Create a plain object for the update
       const updateData = {
         trucked_water: Number(costs.truckedWater) || 0,
         salt_bags: Number(costs.saltBags) || 0,
@@ -62,22 +68,20 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
         install_fee: Number(costs.installFee) || 0,
       };
 
-      if (checkResponse.data) {
-        const response = await supabase
-          .from('pool_costs')
-          .update(updateData)
-          .eq('pool_id', poolId);
-          
-        if (response.error) throw response.error;
-      } else {
-        const response = await supabase
-          .from('pool_costs')
-          .insert({ pool_id: poolId, ...updateData });
-          
-        if (response.error) throw response.error;
-      }
+      // Handle update or insert
+      const { error } = existing 
+        ? await supabase
+            .from('pool_costs')
+            .update(updateData)
+            .eq('pool_id', poolId)
+        : await supabase
+            .from('pool_costs')
+            .insert({ pool_id: poolId, ...updateData });
 
-      return { success: true };
+      if (error) throw error;
+
+      // Return a plain object
+      return { poolId };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
