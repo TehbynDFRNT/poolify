@@ -1,27 +1,22 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Pool } from "@/types/pool";
 import type { PackageWithComponents } from "@/types/filtration";
-import { useState, useEffect } from "react";
 import { PoolBreadcrumb } from "./components/PoolBreadcrumb";
 import { PoolHeader } from "./components/PoolHeader";
 import { PoolOutline } from "./components/PoolOutline";
 import { PoolSpecifications } from "./components/PoolSpecifications";
-import { FiltrationPackage } from "./components/FiltrationPackage";
 import { PoolCosts } from "./components/PoolCosts";
 import { FixedCosts } from "./components/FixedCosts";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
-import { toast } from "sonner";
 
 const PoolDetails = () => {
   const { id } = useParams();
-  const [selectedPackageId, setSelectedPackageId] = useState<string>("");
-  const queryClient = useQueryClient();
 
   const { data: pool, isLoading: poolLoading } = useQuery({
     queryKey: ["pool-specification", id],
@@ -57,75 +52,6 @@ const PoolDetails = () => {
     },
   });
 
-  const { data: filtrationPackages, isLoading: packagesLoading } = useQuery({
-    queryKey: ["filtration-packages"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("filtration_packages")
-        .select(`
-          id,
-          name,
-          display_order,
-          created_at,
-          light: light_id ( id, name, model_number, price ),
-          pump: pump_id ( id, name, model_number, price ),
-          sanitiser: sanitiser_id ( id, name, model_number, price ),
-          filter: filter_id ( id, name, model_number, price ),
-          handover_kit: handover_kit_id (
-            id,
-            name,
-            components: handover_kit_package_components (
-              quantity,
-              component: component_id ( id, name, model_number, price )
-            )
-          )
-        `)
-        .order('display_order');
-
-      if (error) throw error;
-      return data as unknown as PackageWithComponents[];
-    },
-  });
-
-  const updateStandardPackageMutation = useMutation({
-    mutationFn: async (packageId: string) => {
-      console.log('Updating standard package to:', packageId);
-      const { data, error } = await supabase
-        .from("pool_specifications")
-        .update({ standard_filtration_package_id: packageId })
-        .eq("id", id!)
-        .select();
-      
-      if (error) {
-        console.error('Error updating standard package:', error);
-        throw error;
-      }
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["pool-specification", id] });
-      toast.success("Standard filtration package updated successfully");
-    },
-    onError: (error) => {
-      console.error('Mutation error:', error);
-      toast.error("Failed to update standard filtration package");
-    },
-  });
-
-  // Update the useEffect to properly handle the initial package selection
-  useEffect(() => {
-    if (pool?.standard_filtration_package_id) {
-      setSelectedPackageId(pool.standard_filtration_package_id);
-    } else if (filtrationPackages?.length && !selectedPackageId) {
-      const firstPackageId = filtrationPackages[0].id;
-      setSelectedPackageId(firstPackageId);
-      // If there's no standard package set, set the first one as standard
-      if (!pool?.standard_filtration_package_id) {
-        updateStandardPackageMutation.mutate(firstPackageId);
-      }
-    }
-  }, [pool?.standard_filtration_package_id, filtrationPackages, selectedPackageId]);
-
   const { data: digType } = useQuery({
     queryKey: ["excavation-dig-type", pool?.name ? poolDigTypeMap[pool.name] : null],
     queryFn: async () => {
@@ -155,15 +81,13 @@ const PoolDetails = () => {
     },
   });
 
-  if (poolLoading || packagesLoading) {
+  if (poolLoading) {
     return <div>Loading...</div>;
   }
 
   if (!pool) {
     return <div>Pool not found</div>;
   }
-
-  const selectedPackage = filtrationPackages?.find(pkg => pkg.id === selectedPackageId) || filtrationPackages?.[0];
 
   // Calculate total fixed costs
   const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
@@ -193,7 +117,7 @@ const PoolDetails = () => {
     poolCosts.installFee +
     excavationCost;
 
-  // Calculate filtration package total
+  // Calculate filtration package total for the standard package
   const calculatePackageTotal = (pkg: PackageWithComponents) => {
     const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
       return total + ((comp.component?.price || 0) * comp.quantity);
@@ -208,7 +132,8 @@ const PoolDetails = () => {
     );
   };
 
-  const filtrationTotal = selectedPackage ? calculatePackageTotal(selectedPackage) : 0;
+  const filtrationTotal = pool.standard_filtration_package ? 
+    calculatePackageTotal(pool.standard_filtration_package) : 0;
 
   // Calculate pool shell price
   const poolShellPrice = pool.buy_price_inc_gst || 0;
@@ -223,17 +148,21 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
-        {selectedPackage && filtrationPackages && (
-          <FiltrationPackage
-            key={selectedPackageId} // Add key to force re-render when package changes
-            selectedPackageId={selectedPackageId}
-            onPackageChange={setSelectedPackageId}
-            filtrationPackages={filtrationPackages}
-            selectedPackage={selectedPackage}
-            onSetStandard={() => updateStandardPackageMutation.mutate(selectedPackageId)}
-            isStandard={selectedPackageId === pool.standard_filtration_package_id}
-          />
-        )}
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Standard Filtration Package</h3>
+          {pool.standard_filtration_package ? (
+            <div className="space-y-2">
+              <p>Option {pool.standard_filtration_package.display_order}</p>
+              <p className="text-sm text-muted-foreground">
+                To change the standard package, please visit the Filtration Systems page
+              </p>
+            </div>
+          ) : (
+            <p className="text-sm text-muted-foreground">
+              No standard package set. Please visit the Filtration Systems page to set one.
+            </p>
+          )}
+        </Card>
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <Card>
