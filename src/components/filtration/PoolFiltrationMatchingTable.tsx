@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/utils/format";
 import { calculatePackagePrice } from "@/utils/package-calculations";
 import type { PackageWithComponents } from "@/types/filtration";
+import { useState } from "react";
 
 interface PoolFiltrationMatchingTableProps {
   pools: any[];
@@ -28,6 +29,13 @@ export const PoolFiltrationMatchingTable = ({
   isLoading = false,
   isUpdating = false,
 }: PoolFiltrationMatchingTableProps) => {
+  const [localSelections, setLocalSelections] = useState<Record<string, string>>(() => {
+    return pools.reduce((acc, pool) => ({
+      ...acc,
+      [pool.id]: pool.default_filtration_package_id || ""
+    }), {});
+  });
+
   if (isLoading) {
     return (
       <Card>
@@ -45,8 +53,9 @@ export const PoolFiltrationMatchingTable = ({
     );
   }
 
-  const getSelectedPackage = (pool: any) => {
-    return packages?.find(p => p.id === pool.default_filtration_package_id);
+  const handlePackageChange = (poolId: string, packageId: string) => {
+    setLocalSelections(prev => ({ ...prev, [poolId]: packageId }));
+    onUpdatePackage(poolId, packageId);
   };
 
   return (
@@ -65,41 +74,38 @@ export const PoolFiltrationMatchingTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pools?.map((pool) => {
-              const selectedPackage = getSelectedPackage(pool);
-              return (
-                <TableRow key={pool.id}>
-                  <TableCell>{pool.range}</TableCell>
-                  <TableCell>{pool.name}</TableCell>
-                  <TableCell>
-                    <Select
-                      value={pool.default_filtration_package_id || ""}
-                      onValueChange={(value) => {
-                        console.log('Selecting package:', value, 'for pool:', pool.name);
-                        onUpdatePackage(pool.id, value);
-                      }}
-                      disabled={isUpdating}
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue>
-                          {selectedPackage ? `Option ${selectedPackage.display_order}` : "Select package"}
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packages?.map((pkg) => (
-                          <SelectItem key={pkg.id} value={pkg.id}>
-                            Option {pkg.display_order}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {pool.default_package ? formatCurrency(calculatePackagePrice(pool.default_package)) : "-"}
-                  </TableCell>
-                </TableRow>
-              );
-            })}
+            {pools?.map((pool) => (
+              <TableRow key={pool.id}>
+                <TableCell>{pool.range}</TableCell>
+                <TableCell>{pool.name}</TableCell>
+                <TableCell>
+                  <Select
+                    value={localSelections[pool.id]}
+                    onValueChange={(value) => handlePackageChange(pool.id, value)}
+                    disabled={isUpdating}
+                  >
+                    <SelectTrigger className="w-[200px]">
+                      <SelectValue placeholder="Select package">
+                        {packages?.find(p => p.id === localSelections[pool.id])
+                          ? `Option ${packages.find(p => p.id === localSelections[pool.id])?.display_order}`
+                          : "Select package"
+                        }
+                      </SelectValue>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {packages?.map((pkg) => (
+                        <SelectItem key={pkg.id} value={pkg.id}>
+                          Option {pkg.display_order}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </TableCell>
+                <TableCell className="text-right">
+                  {pool.default_package ? formatCurrency(calculatePackagePrice(pool.default_package)) : "-"}
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </CardContent>
