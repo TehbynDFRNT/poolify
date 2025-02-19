@@ -32,15 +32,15 @@ const PoolDetails = () => {
         .from("pool_specifications")
         .select(`
           *,
-          standard_filtration_package:filtration_packages!fk_pool_specs_filtration_package (
+          standard_filtration_package:filtration_packages(
             id,
             name,
             display_order,
-            light:filtration_components!light_id (id, name, model_number, price),
-            pump:filtration_components!pump_id (id, name, model_number, price),
-            sanitiser:filtration_components!sanitiser_id (id, name, model_number, price),
-            filter:filtration_components!filter_id (id, name, model_number, price),
-            handover_kit:handover_kit_packages!handover_kit_id (
+            light:filtration_components!light_id(id, name, model_number, price),
+            pump:filtration_components!pump_id(id, name, model_number, price),
+            sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
+            filter:filtration_components!filter_id(id, name, model_number, price),
+            handover_kit:handover_kit_packages!handover_kit_id(
               id, 
               name,
               components:handover_kit_package_components(
