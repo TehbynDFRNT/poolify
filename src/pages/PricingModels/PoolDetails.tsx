@@ -66,6 +66,45 @@ const PoolDetails = () => {
     },
   });
 
+  const { data: filtrationPackage } = useQuery({
+    queryKey: ["pool-filtration-package", pool?.name],
+    queryFn: async () => {
+      if (!pool?.name) return null;
+      
+      const targetOption = DEFAULT_PACKAGE_MAPPING[pool.name];
+      
+      const { data, error } = await supabase
+        .from("filtration_packages")
+        .select(`
+          *,
+          light:filtration_components!light_id(id, name, model_number, price),
+          pump:filtration_components!pump_id(id, name, model_number, price),
+          sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
+          filter:filtration_components!filter_id(id, name, model_number, price),
+          handover_kit:handover_kit_packages!handover_kit_id(
+            id, 
+            name,
+            components:handover_kit_package_components(
+              id,
+              quantity,
+              component:filtration_components(
+                id,
+                name,
+                model_number,
+                price
+              )
+            )
+          )
+        `)
+        .eq('display_order', targetOption)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!pool?.name,
+  });
+
   if (poolLoading) {
     return <div>Loading...</div>;
   }
@@ -105,8 +144,27 @@ const PoolDetails = () => {
   // Calculate pool shell price
   const poolShellPrice = pool.buy_price_inc_gst || 0;
 
-  // Calculate grand total (without filtration for now)
-  const grandTotal = totalFixedCosts + totalPoolCosts + poolShellPrice;
+  // Calculate filtration package total
+  const calculateFiltrationTotal = () => {
+    if (!filtrationPackage) return 0;
+    
+    const handoverKitTotal = filtrationPackage.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (filtrationPackage.light?.price || 0) +
+      (filtrationPackage.pump?.price || 0) +
+      (filtrationPackage.sanitiser?.price || 0) +
+      (filtrationPackage.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
+  const filtrationTotal = calculateFiltrationTotal();
+
+  // Calculate grand total
+  const grandTotal = totalFixedCosts + totalPoolCosts + poolShellPrice + filtrationTotal;
 
   return (
     <DashboardLayout>
@@ -132,6 +190,10 @@ const PoolDetails = () => {
               <div className="flex justify-between text-sm">
                 <span>Fixed Costs:</span>
                 <span>{formatCurrency(totalFixedCosts)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Filtration Package:</span>
+                <span>{formatCurrency(filtrationTotal)}</span>
               </div>
             </div>
             <div className="flex justify-between text-lg font-semibold pt-4 border-t">
