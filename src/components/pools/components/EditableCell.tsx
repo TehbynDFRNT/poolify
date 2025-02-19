@@ -28,12 +28,18 @@ export const EditableCell = ({
   onKeyDown,
   onRangeChange,
 }: EditableCellProps) => {
-  const isStringField = ["name", "range"].includes(field);
-
   if (isEditing) {
     if (field === "range") {
       return (
-        <Select value={pool.range} onValueChange={onRangeChange}>
+        <Select 
+          value={pool.range} 
+          onValueChange={onRangeChange}
+          onOpenChange={(open) => {
+            if (!open) {
+              onBlur();
+            }
+          }}
+        >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select Range" />
           </SelectTrigger>
@@ -55,30 +61,38 @@ export const EditableCell = ({
         onChange={onValueChange}
         onBlur={onBlur}
         onKeyDown={onKeyDown}
-        type={isStringField ? "text" : "number"}
-        step={field === "length" || field === "width" || field === "depth_shallow" || field === "depth_deep" ? "0.01" : undefined}
+        type={field === "name" ? "text" : "number"}
+        step={field.includes("length") || field.includes("width") || field.includes("depth") ? "0.01" : "1"}
+        className="w-full"
       />
     );
   }
 
   const displayValue = (() => {
     if (field === "buy_price_ex_gst" || field === "buy_price_inc_gst") {
-      return formatCurrency(value as number || 0);
-    }
-    if (field === "minerals_kg_initial" || field === "minerals_kg_topup") {
-      return value || "-";
+      return value ? formatCurrency(value) : "-";
     }
     if (typeof value === "number") {
-      return field.includes("length") || field.includes("width") || field.includes("depth") 
-        ? `${value}m` 
-        : value;
+      if (field.includes("length") || field.includes("width") || field.includes("depth")) {
+        return `${value}m`;
+      }
+      if (field.includes("kg")) {
+        return `${value}kg`;
+      }
+      if (field === "volume_liters") {
+        return `${value}L`;
+      }
+      if (field === "waterline_l_m") {
+        return `${value}L/m`;
+      }
+      return value;
     }
     return value || "-";
   })();
 
   return (
-    <div className="cursor-pointer hover:bg-gray-100 p-1 rounded">
-      {String(displayValue)}
+    <div className="cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors">
+      {displayValue}
     </div>
   );
 };
