@@ -1,6 +1,6 @@
 
 import { z } from "zod";
-import type { PackageWithComponents } from "./filtration";
+import type { PackageWithComponents, FiltrationComponent } from "./filtration";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -23,6 +23,25 @@ export const poolSchema = z.object({
 
 export type PoolFormValues = z.infer<typeof poolSchema>;
 
+export interface FiltrationPackageResponse {
+  id: string;
+  name: string;
+  display_order: number;
+  light: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+  pump: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+  sanitiser: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+  filter: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+  handover_kit: {
+    id: string;
+    name: string;
+    components: {
+      id: string;
+      quantity: number;
+      component: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'>;
+    }[];
+  } | null;
+}
+
 export interface Pool {
   id: string;
   created_at: string;
@@ -42,7 +61,7 @@ export interface Pool {
   buy_price_ex_gst: number | null;
   buy_price_inc_gst: number | null;
   standard_filtration_package_id: string | null;
-  standard_filtration_package?: PackageWithComponents | null;
+  standard_filtration_package: FiltrationPackageResponse | null;
 }
 
 export const POOL_RANGES = [
