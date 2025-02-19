@@ -16,73 +16,76 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const poolCostsQuery = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pool_costs')
-        .select('*');
+      try {
+        const response = await supabase
+          .from('pool_costs')
+          .select('*');
 
-      if (error) {
+        if (response.error) {
+          throw response.error;
+        }
+
+        const costsMap: Record<string, PoolCosts> = {};
+        response.data.forEach((cost: PoolCostsRow) => {
+          costsMap[cost.pool_id] = {
+            truckedWater: Number(cost.trucked_water) || 0,
+            saltBags: Number(cost.salt_bags) || 0,
+            misc: Number(cost.misc) || 0,
+            copingSupply: Number(cost.coping_supply) || 0,
+            beam: Number(cost.beam) || 0,
+            copingLay: Number(cost.coping_lay) || 0,
+            peaGravel: Number(cost.pea_gravel) || 0,
+            installFee: Number(cost.install_fee) || 0
+          };
+        });
+
+        return { ...initialPoolCosts, ...costsMap };
+      } catch (error) {
+        console.error('Error fetching pool costs:', error);
         toast.error("Failed to fetch pool costs");
         throw error;
       }
-
-      // Transform the data into our expected format
-      const costsMap: Record<string, PoolCosts> = {};
-      (data || []).forEach((cost: PoolCostsRow) => {
-        costsMap[cost.pool_id] = {
-          truckedWater: cost.trucked_water || 0,
-          saltBags: cost.salt_bags || 0,
-          misc: cost.misc || 0,
-          copingSupply: cost.coping_supply || 0,
-          beam: cost.beam || 0,
-          copingLay: cost.coping_lay || 0,
-          peaGravel: cost.pea_gravel || 0,
-          installFee: cost.install_fee || 0
-        };
-      });
-
-      return { ...initialPoolCosts, ...costsMap };
     },
   });
 
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
       try {
-        // First check if a record exists
-        const { data: existingCost } = await supabase
+        const checkResponse = await supabase
           .from('pool_costs')
-          .select('pool_id')
+          .select('id')
           .eq('pool_id', poolId)
-          .single();
+          .maybeSingle();
+
+        if (checkResponse.error) throw checkResponse.error;
 
         const updateData = {
-          trucked_water: costs.truckedWater || 0,
-          salt_bags: costs.saltBags || 0,
-          misc: costs.misc || 0,
-          coping_supply: costs.copingSupply || 0,
-          beam: costs.beam || 0,
-          coping_lay: costs.copingLay || 0,
-          pea_gravel: costs.peaGravel || 0,
-          install_fee: costs.installFee || 0,
+          trucked_water: Number(costs.truckedWater) || 0,
+          salt_bags: Number(costs.saltBags) || 0,
+          misc: Number(costs.misc) || 0,
+          coping_supply: Number(costs.copingSupply) || 0,
+          beam: Number(costs.beam) || 0,
+          coping_lay: Number(costs.copingLay) || 0,
+          pea_gravel: Number(costs.peaGravel) || 0,
+          install_fee: Number(costs.installFee) || 0,
         };
 
-        if (existingCost) {
-          const { error: updateError } = await supabase
+        let response;
+        if (checkResponse.data) {
+          response = await supabase
             .from('pool_costs')
             .update(updateData)
             .eq('pool_id', poolId);
-
-          if (updateError) throw updateError;
         } else {
-          const { error: insertError } = await supabase
+          response = await supabase
             .from('pool_costs')
             .insert({
               pool_id: poolId,
               ...updateData
             });
-
-          if (insertError) throw insertError;
         }
 
+        if (response.error) throw response.error;
         return costs;
       } catch (error) {
         console.error('Error updating pool costs:', error);
