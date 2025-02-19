@@ -17,6 +17,7 @@ import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { calculatePackagePrice } from "@/utils/package-calculations";
+import { initialPoolCosts } from "@/pages/ConstructionCosts/constants";
 
 const PoolPricing = () => {
   const { poolId } = useParams();
@@ -99,6 +100,8 @@ const PoolPricing = () => {
   if (!pool) {
     return <div>Pool not found</div>;
   }
+
+  const poolCosts = initialPoolCosts[pool.name];
 
   return (
     <DashboardLayout>
@@ -327,9 +330,81 @@ const PoolPricing = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Pool specific costs and calculations will be displayed here</p>
-              </div>
+              {poolCosts ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Construction</p>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Beam</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.beam)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Pea Gravel/Backfill</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.peaGravel)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Install Fee</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.installFee)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Coping</p>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Coping Supply</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.copingSupply)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Coping Lay</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.copingLay)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-muted-foreground">Additional Costs</p>
+                    <div className="space-y-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Trucked Water</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.truckedWater)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Salt Bags</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.saltBags)}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Miscellaneous</p>
+                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.misc || 0)}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2 lg:col-span-3 pt-4 border-t">
+                    <div className="flex justify-between items-center">
+                      <p className="text-lg font-medium">Total Pool Specific Costs</p>
+                      <p className="text-2xl font-semibold text-primary">
+                        {formatCurrency(
+                          poolCosts.beam +
+                          poolCosts.peaGravel +
+                          poolCosts.installFee +
+                          poolCosts.copingSupply +
+                          poolCosts.copingLay +
+                          poolCosts.truckedWater +
+                          poolCosts.saltBags +
+                          (poolCosts.misc || 0)
+                        )}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p>No specific costs found for this pool</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
