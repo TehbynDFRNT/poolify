@@ -37,7 +37,7 @@ export const PricingTable = ({ pools, calculateTrueCost }: PricingTableProps) =>
             <TableRow 
               key={pool.id} 
               className="cursor-pointer hover:bg-gray-50" 
-              onClick={() => navigate(`/pricing-models/worksheet`)}
+              onClick={() => navigate(`/pricing-models/pools/${pool.id}`)}
             >
               <TableCell>{pool.range}</TableCell>
               <TableCell>{pool.name}</TableCell>
