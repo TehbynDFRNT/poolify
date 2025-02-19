@@ -31,13 +31,16 @@ interface PoolTableProps {
   pools: Pool[];
 }
 
+type PoolUpdates = {
+  [K in keyof Partial<Pool>]: Pool[K] | null;
+};
+
 export const PoolTable = ({ pools }: PoolTableProps) => {
-  // Track edits per row
   const [editingRows, setEditingRows] = useState<Record<string, Partial<Pool>>>({});
   const queryClient = useQueryClient();
 
   const updatePoolMutation = useMutation({
-    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pool> }) => {
+    mutationFn: async ({ id, updates }: { id: string; updates: PoolUpdates }) => {
       const { data, error } = await supabase
         .from("pool_specifications")
         .update(updates)
@@ -50,7 +53,6 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       toast.success("Pool updated successfully");
-      // Clear editing state for this row
       setEditingRows((prev) => {
         const next = { ...prev };
         delete next[variables.id];
@@ -77,9 +79,8 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     const updates = editingRows[pool.id];
     if (!updates) return;
 
-    const validatedUpdates: Partial<Pool> = {};
+    const validatedUpdates: PoolUpdates = {};
 
-    // Validate and convert values
     for (const [key, value] of Object.entries(updates)) {
       const field = key as keyof Pool;
       
