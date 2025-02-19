@@ -2,7 +2,7 @@
 import type { Pool } from "@/types/pool";
 import type { FiltrationComponent } from "@/types/filtration";
 
-export type SupabasePoolResponse = Omit<Pool, 'standard_filtration_package_id'> & {
+export type SupabasePoolResponse = Pool & {
   standard_filtration_package: {
     id: string;
     name: string;
