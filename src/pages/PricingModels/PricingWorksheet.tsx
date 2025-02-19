@@ -56,7 +56,7 @@ const PricingWorksheet = () => {
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>Worksheet</BreadcrumbItem>
+            <BreadcrumbItem>Cost Breakdown</BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
@@ -70,14 +70,14 @@ const PricingWorksheet = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <h1 className="text-2xl font-semibold text-gray-900">Pool Worksheet</h1>
-            <p className="text-gray-500 mt-1">Pool overview</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Cost Breakdown</h1>
+            <p className="text-gray-500 mt-1">Pool cost overview</p>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Pools</CardTitle>
+            <CardTitle>Cost Breakdown</CardTitle>
           </CardHeader>
           <CardContent>
             {pools && <PricingTable pools={pools} />}
