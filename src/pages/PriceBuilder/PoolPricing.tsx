@@ -30,7 +30,12 @@ const PoolPricing = () => {
         .from("pool_specifications")
         .select(`
           *,
-          dig_type:excavation_dig_types!dig_type_id (*),
+          pool_excavation:pool_excavation_types!dig_type_id (
+            id,
+            name,
+            range,
+            dig_type:excavation_dig_types!dig_type_id (*)
+          ),
           default_package:filtration_packages!default_filtration_package_id (
             id,
             name,
@@ -70,7 +75,16 @@ const PoolPricing = () => {
         .single();
 
       if (error) throw error;
-      return data as Pool;
+      
+      // Transform the data to match our Pool type
+      if (data) {
+        return {
+          ...data,
+          dig_type: data.pool_excavation?.dig_type || null,
+          default_package: data.default_package || null
+        } as Pool;
+      }
+      return null;
     },
   });
 

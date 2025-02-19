@@ -22,6 +22,39 @@ export const poolSchema = z.object({
 
 export type PoolFormValues = z.infer<typeof poolSchema>;
 
+interface FiltrationComponent {
+  id: string;
+  name: string;
+  model_number: string;
+  price: number;
+}
+
+interface HandoverKitComponent {
+  id: string;
+  quantity: number;
+  package_id: string;
+  component_id: string;
+  created_at: string;
+  component: FiltrationComponent;
+}
+
+interface HandoverKit {
+  id: string;
+  name: string;
+  components: HandoverKitComponent[];
+}
+
+interface FiltrationPackage {
+  id: string;
+  name: string;
+  display_order: number;
+  light: FiltrationComponent | null;
+  pump: FiltrationComponent | null;
+  sanitiser: FiltrationComponent | null;
+  filter: FiltrationComponent | null;
+  handover_kit: HandoverKit | null;
+}
+
 export interface Pool {
   id: string;
   created_at: string;
@@ -41,6 +74,7 @@ export interface Pool {
   buy_price_ex_gst: number | null;
   buy_price_inc_gst: number | null;
   dig_type: ExcavationDigType | null;
+  default_package: FiltrationPackage | null;
 }
 
 export const POOL_RANGES = [
