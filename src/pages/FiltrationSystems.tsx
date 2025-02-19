@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 import { AddComponentForm } from "@/components/filtration/AddComponentForm";
 import { FiltrationComponentsSection } from "@/components/filtration/FiltrationComponentsSection";
 import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
@@ -79,7 +80,7 @@ const FiltrationSystems = () => {
     enabled: !!componentTypes,
   });
 
-  const { data: packages } = useQuery({
+  const { data: packages, isLoading: isLoadingPackages } = useQuery({
     queryKey: ["filtration-packages"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -123,7 +124,6 @@ const FiltrationSystems = () => {
 
       if (error) throw error;
       
-      // Transform the data to match our expected types
       const transformedData: PackageWithComponents[] = (data || []).map(pkg => ({
         id: pkg.id,
         name: pkg.name,
@@ -149,6 +149,21 @@ const FiltrationSystems = () => {
       setSelectedTypeId(handoverKitType.id);
     }
     setShowAddForm(true);
+  };
+
+  const handleUpdatePackage = (poolId: string, packageId: string) => {
+    updatePoolPackageMutation.mutate(
+      { poolId, packageId },
+      {
+        onSuccess: () => {
+          toast.success("Package updated successfully");
+        },
+        onError: (error) => {
+          console.error("Error updating package:", error);
+          toast.error("Failed to update package");
+        },
+      }
+    );
   };
 
   return (
@@ -192,10 +207,9 @@ const FiltrationSystems = () => {
       <PoolFiltrationMatchingTable
         pools={poolsWithPackages || []}
         packages={packages}
-        onUpdatePackage={(poolId, packageId) => {
-          console.log('Updating package:', { poolId, packageId });
-          updatePoolPackageMutation.mutate({ poolId, packageId });
-        }}
+        onUpdatePackage={handleUpdatePackage}
+        isLoading={isLoadingPackages}
+        isUpdating={updatePoolPackageMutation.isPending}
       />
 
       {componentTypes && (
