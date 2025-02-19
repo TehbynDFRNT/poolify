@@ -111,7 +111,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
     setEditingRow(poolName);
     setEditedCosts(prev => ({
       ...prev,
-      [poolName]: { ...(costs[poolName] || initialPoolCosts[poolName]) }
+      [poolName]: { ...(costs[poolName] || DEFAULT_COSTS) }
     }));
   };
 
@@ -150,7 +150,8 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const calculateTotal = (poolName: string) => {
-    const poolCosts = editingRow ? editedCosts[poolName] : costs[poolName] || DEFAULT_COSTS;
+    const poolCosts = editingRow ? editedCosts[poolName] : costs[poolName];
+    if (!poolCosts) return 0;
     return Object.values(poolCosts).reduce((sum, value) => sum + (value || 0), 0);
   };
 
