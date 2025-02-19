@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -11,7 +10,7 @@ import { PoolOutline } from "./components/PoolOutline";
 import { PoolSpecifications } from "./components/PoolSpecifications";
 import { PoolCosts } from "./components/PoolCosts";
 import { FixedCosts } from "./components/FixedCosts";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 
@@ -81,6 +80,20 @@ const PoolDetails = () => {
     },
   });
 
+  const calculatePackageTotal = (pkg: PackageWithComponents) => {
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
   if (poolLoading) {
     return <div>Loading...</div>;
   }
@@ -118,20 +131,6 @@ const PoolDetails = () => {
     excavationCost;
 
   // Calculate filtration package total for the standard package
-  const calculatePackageTotal = (pkg: PackageWithComponents) => {
-    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
-      return total + ((comp.component?.price || 0) * comp.quantity);
-    }, 0) || 0;
-
-    return (
-      (pkg.light?.price || 0) +
-      (pkg.pump?.price || 0) +
-      (pkg.sanitiser?.price || 0) +
-      (pkg.filter?.price || 0) +
-      handoverKitTotal
-    );
-  };
-
   const filtrationTotal = pool.standard_filtration_package ? 
     calculatePackageTotal(pool.standard_filtration_package) : 0;
 
@@ -148,20 +147,77 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Standard Filtration Package</h3>
-          {pool.standard_filtration_package ? (
-            <div className="space-y-2">
-              <p>Option {pool.standard_filtration_package.display_order}</p>
+        <Card>
+          <CardHeader>
+            <CardTitle>Standard Filtration Package</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pool.standard_filtration_package ? (
+              <div className="space-y-6">
+                <div className="flex justify-between items-center">
+                  <h4 className="text-lg font-semibold">
+                    Option {pool.standard_filtration_package.display_order}
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Set in Filtration Systems
+                  </p>
+                </div>
+                
+                <div className="space-y-4">
+                  {pool.standard_filtration_package.light && (
+                    <div className="flex justify-between text-sm">
+                      <span>Light: {pool.standard_filtration_package.light.name}</span>
+                      <span>{formatCurrency(pool.standard_filtration_package.light.price)}</span>
+                    </div>
+                  )}
+                  
+                  {pool.standard_filtration_package.pump && (
+                    <div className="flex justify-between text-sm">
+                      <span>Pump: {pool.standard_filtration_package.pump.name}</span>
+                      <span>{formatCurrency(pool.standard_filtration_package.pump.price)}</span>
+                    </div>
+                  )}
+                  
+                  {pool.standard_filtration_package.sanitiser && (
+                    <div className="flex justify-between text-sm">
+                      <span>Sanitiser: {pool.standard_filtration_package.sanitiser.name}</span>
+                      <span>{formatCurrency(pool.standard_filtration_package.sanitiser.price)}</span>
+                    </div>
+                  )}
+                  
+                  {pool.standard_filtration_package.filter && (
+                    <div className="flex justify-between text-sm">
+                      <span>Filter: {pool.standard_filtration_package.filter.name}</span>
+                      <span>{formatCurrency(pool.standard_filtration_package.filter.price)}</span>
+                    </div>
+                  )}
+                  
+                  {pool.standard_filtration_package.handover_kit && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm font-medium">
+                        <span>Handover Kit: {pool.standard_filtration_package.handover_kit.name}</span>
+                      </div>
+                      {pool.standard_filtration_package.handover_kit.components.map((comp) => (
+                        <div key={comp.component?.id} className="flex justify-between text-sm pl-4">
+                          <span>{comp.component?.name} (x{comp.quantity})</span>
+                          <span>{formatCurrency((comp.component?.price || 0) * comp.quantity)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-between pt-4 border-t font-medium">
+                  <span>Package Total:</span>
+                  <span>{formatCurrency(calculatePackageTotal(pool.standard_filtration_package))}</span>
+                </div>
+              </div>
+            ) : (
               <p className="text-sm text-muted-foreground">
-                To change the standard package, please visit the Filtration Systems page
+                No standard package set. Please visit the Filtration Systems page to set one.
               </p>
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground">
-              No standard package set. Please visit the Filtration Systems page to set one.
-            </p>
-          )}
+            )}
+          </CardContent>
         </Card>
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
