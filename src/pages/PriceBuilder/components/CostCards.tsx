@@ -1,4 +1,3 @@
-
 import { List, Database } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -20,8 +19,7 @@ export const PoolSpecificCostsCard = ({ poolId }: PoolSpecificCostsCardProps) =>
         .select(`
           *,
           dig_type:pool_excavation_types(
-            id,
-            name,
+            *,
             dig_type:excavation_dig_types(*)
           )
         `)
@@ -95,8 +93,8 @@ export const PoolSpecificCostsCard = ({ poolId }: PoolSpecificCostsCardProps) =>
     );
   }
 
-  const excavationCost = pool?.dig_type?.dig_type 
-    ? calculateExcavationCost(pool.dig_type.dig_type)
+  const excavationCost = pool?.dig_type?.[0]?.dig_type 
+    ? calculateExcavationCost(pool.dig_type[0].dig_type)
     : 0;
 
   if (!poolCosts) {
