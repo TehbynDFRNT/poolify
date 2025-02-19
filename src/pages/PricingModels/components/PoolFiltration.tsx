@@ -10,13 +10,17 @@ interface PoolFiltrationProps {
 }
 
 export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
-  const { data: filtrationPackage } = useQuery({
+  console.log("PoolFiltration component rendered with poolId:", poolId);
+  
+  const { data: filtrationPackage, isLoading, error } = useQuery({
     queryKey: ["pool-filtration-package", poolId],
     queryFn: async () => {
+      console.log("Fetching filtration package for poolId:", poolId);
+      
       const { data, error } = await supabase
         .from("pool_specifications")
         .select(`
-          standard_filtration_package:filtration_packages!pool_specifications_standard_filtration_package_id_fkey (
+          standard_filtration_package:filtration_packages!inner (
             id,
             name,
             display_order,
@@ -47,13 +51,31 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
         .eq('id', poolId)
         .single();
 
-      if (error) throw error;
+      console.log("Filtration package query result:", { data, error });
+
+      if (error) {
+        console.error("Error fetching filtration package:", error);
+        throw error;
+      }
+
       return data?.standard_filtration_package as PackageWithComponents;
     }
   });
 
+  console.log("Filtration package data:", filtrationPackage);
+  console.log("Loading:", isLoading);
+  console.log("Error:", error);
+
+  if (isLoading) {
+    return <div>Loading filtration package...</div>;
+  }
+
+  if (error) {
+    return <div>Error loading filtration package</div>;
+  }
+
   if (!filtrationPackage) {
-    return null;
+    return <div>No filtration package assigned to this pool</div>;
   }
 
   const calculateHandoverKitTotal = () => {
