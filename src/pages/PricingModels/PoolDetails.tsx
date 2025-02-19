@@ -15,6 +15,40 @@ import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 
+// Define the package mapping here since it's needed for both components
+const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
+  "Latina": 1,
+  "Sovereign": 1,
+  "Empire": 1,
+  "Oxford": 1,
+  "Sheffield": 1,
+  "Avellino": 1,
+  "Palazzo": 1,
+  "Valentina": 2,
+  "Westminster": 2,
+  "Kensington": 3,
+  "Bedarra": 1,
+  "Hayman": 1,
+  "Verona": 1,
+  "Portofino": 1,
+  "Florentina": 1,
+  "Bellagio": 1,
+  "Bellino": 1,
+  "Imperial": 1,
+  "Castello": 1,
+  "Grandeur": 1,
+  "Amalfi": 1,
+  "Serenity": 1,
+  "Allure": 1,
+  "Harmony": 1,
+  "Istana": 1,
+  "Terazza": 1,
+  "Elysian": 1,
+  "Infinity 3": 1,
+  "Infinity 4": 1,
+  "Terrace 3": 1,
+};
+
 const PoolDetails = () => {
   const { id } = useParams();
 
@@ -113,8 +147,27 @@ const PoolDetails = () => {
     return <div>Pool not found</div>;
   }
 
-  // Calculate total fixed costs
-  const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
+  // Calculate pool shell price (including GST)
+  const poolShellPrice = pool.buy_price_inc_gst || 0;
+
+  // Calculate filtration package total
+  const calculateFiltrationTotal = () => {
+    if (!filtrationPackage) return 0;
+    
+    const handoverKitTotal = filtrationPackage.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (filtrationPackage.light?.price || 0) +
+      (filtrationPackage.pump?.price || 0) +
+      (filtrationPackage.sanitiser?.price || 0) +
+      (filtrationPackage.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
+  const filtrationTotal = calculateFiltrationTotal();
 
   // Calculate total pool specific costs
   const poolCosts = initialPoolCosts[pool.name] || {
@@ -141,30 +194,11 @@ const PoolDetails = () => {
     poolCosts.installFee +
     excavationCost;
 
-  // Calculate pool shell price
-  const poolShellPrice = pool.buy_price_inc_gst || 0;
-
-  // Calculate filtration package total
-  const calculateFiltrationTotal = () => {
-    if (!filtrationPackage) return 0;
-    
-    const handoverKitTotal = filtrationPackage.handover_kit?.components.reduce((total, comp) => {
-      return total + ((comp.component?.price || 0) * comp.quantity);
-    }, 0) || 0;
-
-    return (
-      (filtrationPackage.light?.price || 0) +
-      (filtrationPackage.pump?.price || 0) +
-      (filtrationPackage.sanitiser?.price || 0) +
-      (filtrationPackage.filter?.price || 0) +
-      handoverKitTotal
-    );
-  };
-
-  const filtrationTotal = calculateFiltrationTotal();
+  // Calculate total fixed costs
+  const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
 
   // Calculate grand total
-  const grandTotal = totalFixedCosts + totalPoolCosts + poolShellPrice + filtrationTotal;
+  const grandTotal = poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
 
   return (
     <DashboardLayout>
@@ -180,8 +214,12 @@ const PoolDetails = () => {
           <CardContent className="pt-6 space-y-4">
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Pool Shell Price:</span>
+                <span>Pool Shell Price (inc. GST):</span>
                 <span>{formatCurrency(poolShellPrice)}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span>Filtration Package:</span>
+                <span>{formatCurrency(filtrationTotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span>Pool Specific Costs:</span>
@@ -190,10 +228,6 @@ const PoolDetails = () => {
               <div className="flex justify-between text-sm">
                 <span>Fixed Costs:</span>
                 <span>{formatCurrency(totalFixedCosts)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Filtration Package:</span>
-                <span>{formatCurrency(filtrationTotal)}</span>
               </div>
             </div>
             <div className="flex justify-between text-lg font-semibold pt-4 border-t">
