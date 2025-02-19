@@ -10,6 +10,11 @@ import {
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import type { SupabasePoolResponse } from "../types";
+import { 
+  calculateFiltrationTotal,
+  calculatePoolSpecificCosts,
+  calculateFixedCostsTotal
+} from "../utils/calculateCosts";
 
 type PricingTableProps = {
   pools: SupabasePoolResponse[];
@@ -25,6 +30,10 @@ export const PricingTable = ({ pools, calculateTrueCost }: PricingTableProps) =>
         <TableRow>
           <TableHead>Range</TableHead>
           <TableHead>Pool Name</TableHead>
+          <TableHead className="text-right">Shell Price</TableHead>
+          <TableHead className="text-right">Filtration</TableHead>
+          <TableHead className="text-right">Pool Specific</TableHead>
+          <TableHead className="text-right">Fixed Costs</TableHead>
           <TableHead className="text-right">True Cost</TableHead>
           <TableHead className="text-right">Web Price</TableHead>
           <TableHead className="text-right">Margin</TableHead>
@@ -32,7 +41,12 @@ export const PricingTable = ({ pools, calculateTrueCost }: PricingTableProps) =>
       </TableHeader>
       <TableBody>
         {pools?.map((pool) => {
+          const shellPrice = pool.buy_price_inc_gst || 0;
+          const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
+          const poolSpecificCosts = calculatePoolSpecificCosts(pool.name, null); // We'll get digType in next update
+          const fixedCostsTotal = calculateFixedCostsTotal([]);  // We'll get fixed costs in next update
           const trueCost = calculateTrueCost(pool);
+          
           return (
             <TableRow 
               key={pool.id} 
@@ -42,7 +56,19 @@ export const PricingTable = ({ pools, calculateTrueCost }: PricingTableProps) =>
               <TableCell>{pool.range}</TableCell>
               <TableCell>{pool.name}</TableCell>
               <TableCell className="text-right">
-                {formatCurrency(Math.round(trueCost * 100) / 100)}
+                {formatCurrency(shellPrice)}
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(filtrationTotal)}
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(poolSpecificCosts)}
+              </TableCell>
+              <TableCell className="text-right">
+                {formatCurrency(fixedCostsTotal)}
+              </TableCell>
+              <TableCell className="text-right font-medium">
+                {formatCurrency(trueCost)}
               </TableCell>
               <TableCell className="text-right">
                 {formatCurrency(0)}

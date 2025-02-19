@@ -22,8 +22,18 @@ import { PricingTable } from "./components/PricingTable";
 
 const PricingWorksheet = () => {
   const navigate = useNavigate();
-  const { data: pools } = usePools();
-  const { calculateTrueCost } = usePricingCalculations();
+  const { data: pools, isLoading: isLoadingPools } = usePools();
+  const { calculateTrueCost, isLoading: isLoadingCalculations } = usePricingCalculations();
+
+  if (isLoadingPools || isLoadingCalculations) {
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-8">
+          Loading...
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

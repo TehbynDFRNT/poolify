@@ -30,12 +30,12 @@ const fetchDigTypes = async () => {
 };
 
 export const usePricingCalculations = () => {
-  const { data: fixedCosts = [] } = useQuery({
+  const { data: fixedCosts = [], isLoading: isLoadingFixedCosts } = useQuery({
     queryKey: ["fixed-costs"],
     queryFn: fetchFixedCosts,
   });
 
-  const { data: digTypes = [] } = useQuery({
+  const { data: digTypes = [], isLoading: isLoadingDigTypes } = useQuery({
     queryKey: ["excavation-dig-types"],
     queryFn: fetchDigTypes,
   });
@@ -52,22 +52,16 @@ export const usePricingCalculations = () => {
     const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType || null);
     
     // Calculate filtration package total
-    const filtrationPackage = pool.standard_filtration_package;
-    const filtrationTotal = calculateFiltrationTotal(filtrationPackage);
+    const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
     
     // Calculate total
     const total = poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
     
-    console.log(`Calculating for ${pool.name}:`, {
-      poolShellPrice,
-      totalFixedCosts,
-      totalPoolCosts,
-      filtrationTotal,
-      total
-    });
-    
     return total;
   };
 
-  return { calculateTrueCost };
+  return { 
+    calculateTrueCost,
+    isLoading: isLoadingFixedCosts || isLoadingDigTypes
+  };
 };
