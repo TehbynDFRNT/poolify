@@ -16,9 +16,10 @@ export const usePoolUpdates = () => {
 
       const { data, error } = await supabase
         .from("pool_specifications")
-        .upsert({ id, ...updates })
+        .update(updates)
+        .eq('id', id)
         .select()
-        .limit(1);
+        .single();
 
       console.log('Update response:', { data, error });
 
@@ -27,12 +28,7 @@ export const usePoolUpdates = () => {
         throw error;
       }
 
-      if (!data || data.length === 0) {
-        console.error('No data returned after update');
-        throw new Error('Failed to update pool');
-      }
-
-      return data[0] as Pool;
+      return data as Pool;
     },
     onSuccess: (data, variables) => {
       console.log('Update successful:', data);
