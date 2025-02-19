@@ -31,6 +31,10 @@ import type { Pool } from "@/types/pool";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 import type { PackageWithComponents } from "@/types/filtration";
 
+type PoolWithPackage = Omit<Pool, 'standard_filtration_package_id'> & {
+  standard_filtration_package: PackageWithComponents | null;
+};
+
 const PricingWorksheet = () => {
   const navigate = useNavigate();
 
@@ -73,7 +77,7 @@ const PricingWorksheet = () => {
         const aIndex = rangeOrder.indexOf(a.range);
         const bIndex = rangeOrder.indexOf(b.range);
         return aIndex - bIndex;
-      });
+      }) as PoolWithPackage[];
     },
   });
 
@@ -102,7 +106,7 @@ const PricingWorksheet = () => {
     },
   });
 
-  const calculateTrueCost = (pool: Pool & { standard_filtration_package: PackageWithComponents | null }) => {
+  const calculateTrueCost = (pool: PoolWithPackage) => {
     // Calculate total fixed costs
     const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
 
@@ -217,7 +221,7 @@ const PricingWorksheet = () => {
               </TableHeader>
               <TableBody>
                 {pools?.map((pool) => {
-                  const trueCost = calculateTrueCost(pool as Pool & { standard_filtration_package: PackageWithComponents | null });
+                  const trueCost = calculateTrueCost(pool);
                   return (
                     <TableRow key={pool.id} className="cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/pricing-models/pools/${pool.id}`)}>
                       <TableCell>{pool.range}</TableCell>
