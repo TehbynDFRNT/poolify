@@ -48,7 +48,23 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
       const { data: poolsData, error } = await supabase
         .from("pool_specifications")
         .select(`
-          *,
+          id,
+          name,
+          range,
+          length,
+          width,
+          depth_shallow,
+          depth_deep,
+          waterline_l_m,
+          volume_liters,
+          salt_volume_bags,
+          salt_volume_bags_fixed,
+          weight_kg,
+          minerals_kg_initial,
+          minerals_kg_topup,
+          buy_price_ex_gst,
+          buy_price_inc_gst,
+          standard_filtration_package_id,
           standard_filtration_package:filtration_packages(
             id,
             name,
@@ -76,8 +92,14 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
 
       if (error) throw error;
 
+      console.log("Fetched pools data:", poolsData);
+
       const rangeOrder = ranges?.map(r => r.name) || [];
-      return poolsData as Pool[];
+      return (poolsData || []).sort((a, b) => {
+        const aIndex = rangeOrder.indexOf(a.range);
+        const bIndex = rangeOrder.indexOf(b.range);
+        return aIndex - bIndex;
+      }) as Pool[];
     },
   });
 
