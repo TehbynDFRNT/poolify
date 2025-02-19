@@ -31,9 +31,25 @@ interface PoolTableProps {
   pools: Pool[];
 }
 
+// Define which fields can be null
+type NullableNumericFields = 
+  | "waterline_l_m"
+  | "volume_liters"
+  | "salt_volume_bags"
+  | "salt_volume_bags_fixed"
+  | "weight_kg"
+  | "minerals_kg_initial"
+  | "minerals_kg_topup"
+  | "buy_price_ex_gst"
+  | "buy_price_inc_gst";
+
 type PoolUpdates = {
-  [K in keyof Partial<Pool>]: Pool[K] | null;
-};
+  [K in keyof Pool]?: K extends NullableNumericFields 
+    ? number | null 
+    : K extends "name" | "range" 
+      ? string 
+      : number;
+}
 
 export const PoolTable = ({ pools }: PoolTableProps) => {
   const [editingRows, setEditingRows] = useState<Record<string, Partial<Pool>>>({});
@@ -90,7 +106,12 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
       }
 
       if (value === "" || value === null) {
-        validatedUpdates[field] = null;
+        // Only assign null to nullable fields
+        if (field in ["waterline_l_m", "volume_liters", "salt_volume_bags", 
+            "salt_volume_bags_fixed", "weight_kg", "minerals_kg_initial", 
+            "minerals_kg_topup", "buy_price_ex_gst", "buy_price_inc_gst"]) {
+          validatedUpdates[field as NullableNumericFields] = null;
+        }
         continue;
       }
 
