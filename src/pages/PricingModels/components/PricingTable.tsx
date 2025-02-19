@@ -23,7 +23,8 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
         <TableRow>
           <TableHead>Range</TableHead>
           <TableHead>Pool Name</TableHead>
-          <TableHead>Filtration Package</TableHead>
+          <TableHead>Base Price (ex GST)</TableHead>
+          <TableHead>Base Price (inc GST)</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -36,7 +37,10 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
             <TableCell>{pool.range}</TableCell>
             <TableCell>{pool.name}</TableCell>
             <TableCell>
-              {pool.standard_filtration_package?.name || 'No package assigned'}
+              ${pool.buy_price_ex_gst?.toLocaleString() || 'N/A'}
+            </TableCell>
+            <TableCell>
+              ${pool.buy_price_inc_gst?.toLocaleString() || 'N/A'}
             </TableCell>
           </TableRow>
         ))}
