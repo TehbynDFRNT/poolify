@@ -8,7 +8,7 @@ import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Pool } from "@/types/pool";
 import AddPoolForm from "@/components/pools/AddPoolForm";
-import PoolTable from "@/components/pools/PoolTable";
+import { PoolTable } from "@/components/pools/PoolTable";
 import { PoolRangeManager } from "@/components/pools/PoolRangeManager";
 import {
   Breadcrumb,
