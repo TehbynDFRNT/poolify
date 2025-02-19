@@ -173,6 +173,28 @@ const FiltrationSystems = () => {
         </BreadcrumbList>
       </Breadcrumb>
 
+      <FiltrationComponentsSection
+        components={components}
+        componentTypes={componentTypes}
+        selectedTypeId={selectedTypeId}
+        onTypeChange={setSelectedTypeId}
+        onAddClick={() => setShowAddForm(true)}
+      />
+
+      <HandoverKitsSection
+        handoverKits={handoverKits}
+        onAddClick={handleAddComponent}
+      />
+
+      <HandoverKitPackagesSection
+        onAddClick={() => setShowAddForm(true)}
+      />
+
+      <FiltrationPackagesSection
+        packages={packages}
+        onAddClick={() => setShowAddForm(true)}
+      />
+
       <Card>
         <CardHeader>
           <CardTitle>Pool Filtration Matching</CardTitle>
@@ -196,28 +218,6 @@ const FiltrationSystems = () => {
           </Table>
         </CardContent>
       </Card>
-
-      <FiltrationComponentsSection
-        components={components}
-        componentTypes={componentTypes}
-        selectedTypeId={selectedTypeId}
-        onTypeChange={setSelectedTypeId}
-        onAddClick={() => setShowAddForm(true)}
-      />
-
-      <HandoverKitsSection
-        handoverKits={handoverKits}
-        onAddClick={handleAddComponent}
-      />
-
-      <HandoverKitPackagesSection
-        onAddClick={() => setShowAddForm(true)}
-      />
-
-      <FiltrationPackagesSection
-        packages={packages}
-        onAddClick={() => setShowAddForm(true)}
-      />
 
       {componentTypes && (
         <AddComponentForm
