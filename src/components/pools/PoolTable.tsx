@@ -50,15 +50,17 @@ type RequiredNumericFields =
   | "depth_shallow"
   | "depth_deep";
 
-type PoolUpdates = Partial<{
-  [K in keyof Pool]: K extends NullableNumericFields 
-    ? number | null 
-    : K extends RequiredNumericFields
-      ? number
-      : K extends "name" | "range"
-        ? string
-        : Pool[K];
-}>;
+type PoolUpdateFieldType<K extends keyof Pool> = K extends NullableNumericFields 
+  ? number | null 
+  : K extends RequiredNumericFields
+    ? number
+    : K extends "name" | "range"
+      ? string
+      : Pool[K];
+
+type PoolUpdates = {
+  [K in keyof Partial<Pool>]: PoolUpdateFieldType<K>;
+};
 
 export const PoolTable = ({ pools }: PoolTableProps) => {
   const [editingRows, setEditingRows] = useState<Record<string, Partial<Pool>>>({});
@@ -115,21 +117,31 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
       }
 
       if (value === "" || value === null) {
-        // Only assign null to nullable fields
         if (["waterline_l_m", "volume_liters", "salt_volume_bags", 
             "salt_volume_bags_fixed", "weight_kg", "minerals_kg_initial", 
             "minerals_kg_topup", "buy_price_ex_gst", "buy_price_inc_gst"].includes(field)) {
-          validatedUpdates[field as NullableNumericFields] = null;
+          validatedUpdates[field] = null;
         }
         continue;
       }
 
-      const numValue = parseFloat(value as string);
-      if (isNaN(numValue)) {
-        toast.error(`Invalid number for ${field}`);
-        return;
+      if (["length", "width", "depth_shallow", "depth_deep"].includes(field)) {
+        const numValue = parseFloat(value as string);
+        if (isNaN(numValue)) {
+          toast.error(`Invalid number for ${field}`);
+          return;
+        }
+        validatedUpdates[field] = numValue;
+      } else if (["waterline_l_m", "volume_liters", "salt_volume_bags", 
+                 "salt_volume_bags_fixed", "weight_kg", "minerals_kg_initial", 
+                 "minerals_kg_topup", "buy_price_ex_gst", "buy_price_inc_gst"].includes(field)) {
+        const numValue = parseFloat(value as string);
+        if (isNaN(numValue)) {
+          toast.error(`Invalid number for ${field}`);
+          return;
+        }
+        validatedUpdates[field] = numValue;
       }
-      validatedUpdates[field] = numValue;
     }
 
     updatePoolMutation.mutate({ 
