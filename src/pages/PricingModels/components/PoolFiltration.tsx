@@ -16,7 +16,7 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
         .from("pool_specifications")
         .select(`
           name,
-          standard_filtration_package:filtration_packages (
+          standard_filtration_package:standard_filtration_package_id(
             display_order
           )
         `)
@@ -40,10 +40,7 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          {filtrationOption?.standard_filtration_package ? 
-            `Option ${filtrationOption.standard_filtration_package.display_order}` :
-            "No filtration package assigned"
-          }
+          Option {filtrationOption?.standard_filtration_package?.display_order}
         </div>
       </CardContent>
     </Card>
