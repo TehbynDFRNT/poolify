@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -88,18 +89,25 @@ const PoolDetails = () => {
 
   const updateStandardPackageMutation = useMutation({
     mutationFn: async (packageId: string) => {
-      const { error } = await supabase
+      console.log('Updating standard package to:', packageId);
+      const { data, error } = await supabase
         .from("pool_specifications")
         .update({ standard_filtration_package_id: packageId })
-        .eq("id", id);
+        .eq("id", id)
+        .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating standard package:', error);
+        throw error;
+      }
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specification", id] });
       toast.success("Standard filtration package updated successfully");
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Mutation error:', error);
       toast.error("Failed to update standard filtration package");
     },
   });
