@@ -30,10 +30,8 @@ export const PoolCostsTable = ({
   } | null>(null);
   const [costs, setCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
 
-  const handleKeyDown = (e: React.KeyboardEvent, pool: Pool, field: keyof PoolCosts) => {
-    if (e.key === 'Enter') {
-      setEditingCell(null);
-    } else if (e.key === 'Escape') {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
       setEditingCell(null);
     }
   };
@@ -117,7 +115,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'peaGravel')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -141,7 +139,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'installFee')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -165,7 +163,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'truckedWater')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -189,7 +187,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'saltBags')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -213,7 +211,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'misc')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -237,7 +235,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'copingSupply')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -261,7 +259,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'beam')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
@@ -285,7 +283,7 @@ export const PoolCostsTable = ({
                       }
                     }));
                   }}
-                  onKeyDown={(e) => handleKeyDown(e, pool, 'copingLay')}
+                  onKeyDown={handleKeyDown}
                   type="number"
                   align="right"
                   format={formatCurrency}
