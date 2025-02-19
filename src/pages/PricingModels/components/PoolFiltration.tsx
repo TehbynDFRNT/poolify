@@ -3,11 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-export const PoolFiltration = () => {
+interface PoolFiltrationProps {
+  poolId: string;
+}
+
+export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
   const { data: filtrationOption } = useQuery({
-    queryKey: ["pool-filtration-option", "Empire"],
+    queryKey: ["pool-filtration-option", poolId],
     queryFn: async () => {
-      console.log("Fetching filtration package for Empire pool");
+      console.log("Fetching filtration package for pool:", poolId);
       const { data, error } = await supabase
         .from("pool_specifications")
         .select(`
@@ -16,7 +20,7 @@ export const PoolFiltration = () => {
             display_order
           )
         `)
-        .eq('name', 'Empire')
+        .eq('id', poolId)
         .single();
 
       if (error) {

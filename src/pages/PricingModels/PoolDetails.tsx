@@ -115,7 +115,7 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
-        <PoolFiltration />
+        <PoolFiltration poolId={id!} />
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <Card>
