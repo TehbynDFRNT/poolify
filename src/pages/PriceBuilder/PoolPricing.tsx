@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, DollarSign, Package, List, Database, ImagePlus } from "lucide-react";
@@ -48,9 +49,16 @@ const PoolPricing = () => {
               id, 
               name,
               components:handover_kit_package_components (
+                id,
                 quantity,
+                package_id,
+                component_id,
+                created_at,
                 component:filtration_components!component_id (
-                  id, name, model_number, price
+                  id,
+                  name,
+                  model_number,
+                  price
                 )
               )
             )
@@ -345,3 +353,4 @@ const PoolPricing = () => {
 };
 
 export default PoolPricing;
+
