@@ -25,7 +25,7 @@ const PoolPricing = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*, standard_filtration_package:standard_filtration_package_id(name)")
+        .select("*, standard_filtration_package:filtration_packages!standard_filtration_package_id(name)")
         .eq("id", poolId)
         .single();
 
@@ -42,7 +42,7 @@ const PoolPricing = () => {
         .select(`
           id,
           name,
-          standard_filtration_package:standard_filtration_package_id(
+          standard_filtration_package:filtration_packages!standard_filtration_package_id(
             id,
             name,
             display_order
