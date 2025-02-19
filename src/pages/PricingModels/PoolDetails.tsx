@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Pool } from "@/types/pool";
+import type { PackageWithComponents } from "@/types/filtration";
 import { PoolBreadcrumb } from "./components/PoolBreadcrumb";
 import { PoolHeader } from "./components/PoolHeader";
 import { PoolOutline } from "./components/PoolOutline";
@@ -12,11 +13,10 @@ import { PoolCosts } from "./components/PoolCosts";
 import { FixedCosts } from "./components/FixedCosts";
 import { CostSummaryCard } from "./components/CostSummaryCard";
 import { poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
-import {
-  calculatePoolSpecificCosts,
-  calculateFixedCostsTotal,
-} from "./utils/calculateCosts";
+import { calculatePoolSpecificCosts, calculateFixedCostsTotal } from "./utils/calculateCosts";
+import { calculateFiltrationTotal } from "@/components/pools/utils/filtrationCalculations";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/utils/format";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -27,7 +27,32 @@ const PoolDetails = () => {
       console.log("Fetching pool with ID:", id);
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*")
+        .select(`
+          *,
+          standard_filtration_package:filtration_packages!standard_filtration_package_id (
+            id,
+            name,
+            display_order,
+            light:light_id (id, name, model_number, price),
+            pump:pump_id (id, name, model_number, price),
+            sanitiser:sanitiser_id (id, name, model_number, price),
+            filter:filter_id (id, name, model_number, price),
+            handover_kit:handover_kit_id (
+              id, 
+              name,
+              components:handover_kit_package_components(
+                id,
+                quantity,
+                component:component_id(
+                  id,
+                  name,
+                  model_number,
+                  price
+                )
+              )
+            )
+          )
+        `)
         .eq("id", id)
         .single();
 
@@ -81,6 +106,7 @@ const PoolDetails = () => {
   const poolShellPrice = pool.buy_price_inc_gst || 0;
   const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType);
   const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
+  const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package as PackageWithComponents);
 
   return (
     <DashboardLayout>
@@ -90,21 +116,66 @@ const PoolDetails = () => {
         <PoolOutline />
         <PoolSpecifications pool={pool} />
         
-        {/* Filtration Placeholder Card */}
-        <Card className="bg-gradient-to-br from-white to-gray-50 border-2 border-dashed border-gray-200">
-          <CardHeader>
+        {/* Filtration Package Card */}
+        <Card className="bg-gradient-to-br from-white to-gray-50">
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-gray-700">Pool Filtration Package</CardTitle>
+            {pool.standard_filtration_package && (
+              <div className="text-lg font-semibold text-gray-700">
+                {formatCurrency(filtrationTotal)}
+              </div>
+            )}
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
-              <div className="text-center space-y-3">
-                <div className="text-3xl text-gray-400">🔄</div>
-                <p className="text-gray-500">Pool filtration options coming soon</p>
-                <p className="text-sm text-gray-400">
-                  Light • Pool Pump • Sanitiser • Filter • Handover Kit
-                </p>
+            {pool.standard_filtration_package ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>Option {pool.standard_filtration_package.display_order}</span>
+                </div>
+                <div className="grid grid-cols-5 gap-6">
+                  <div>
+                    <div className="font-medium mb-1">Light</div>
+                    <div className="text-sm text-gray-600">
+                      {pool.standard_filtration_package.light?.model_number || 'None'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-1">Pool Pump</div>
+                    <div className="text-sm text-gray-600">
+                      {pool.standard_filtration_package.pump?.model_number || 'None'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-1">Sanitiser</div>
+                    <div className="text-sm text-gray-600">
+                      {pool.standard_filtration_package.sanitiser?.model_number || 'None'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-1">Filter</div>
+                    <div className="text-sm text-gray-600">
+                      {pool.standard_filtration_package.filter?.model_number || 'None'}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="font-medium mb-1">Handover Kit</div>
+                    <div className="text-sm text-gray-600">
+                      {pool.standard_filtration_package.handover_kit?.name || 'None'}
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
+                <div className="text-center space-y-3">
+                  <div className="text-3xl text-gray-400">🔄</div>
+                  <p className="text-gray-500">No filtration package selected</p>
+                  <p className="text-sm text-gray-400">
+                    Light • Pool Pump • Sanitiser • Filter • Handover Kit
+                  </p>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
 
@@ -112,7 +183,7 @@ const PoolDetails = () => {
         <FixedCosts />
         <CostSummaryCard
           poolShellPrice={poolShellPrice}
-          filtrationTotal={0}
+          filtrationTotal={filtrationTotal}
           totalPoolCosts={totalPoolCosts}
           totalFixedCosts={totalFixedCosts}
         />
