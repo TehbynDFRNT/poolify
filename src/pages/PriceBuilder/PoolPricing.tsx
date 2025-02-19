@@ -195,6 +195,31 @@ const PoolPricing = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Shell Price
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Price (ex GST)</dt>
+                  <dd className="text-lg font-medium">
+                    {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Price (inc GST)</dt>
+                  <dd className="text-2xl font-semibold text-primary">
+                    {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5" />
                 Default Filtration Package
               </CardTitle>
@@ -231,31 +256,6 @@ const PoolPricing = () => {
               <div className="text-center py-8 text-gray-500">
                 <p>Fixed costs applied to all pools will be displayed here</p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Pool Price
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-2 gap-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Price (ex GST)</dt>
-                  <dd className="text-lg font-medium">
-                    {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Price (inc GST)</dt>
-                  <dd className="text-2xl font-semibold text-primary">
-                    {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}
-                  </dd>
-                </div>
-              </dl>
             </CardContent>
           </Card>
         </div>
