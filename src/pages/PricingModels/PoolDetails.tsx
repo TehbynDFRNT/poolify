@@ -29,7 +29,7 @@ const PoolDetails = () => {
         .from("pool_specifications")
         .select(`
           *,
-          standard_filtration_package:filtration_packages!standard_filtration_package_id (
+          standard_filtration_package:filtration_packages!fk_pool_specs_filtration_package (
             id,
             name,
             display_order,
