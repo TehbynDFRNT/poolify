@@ -4,7 +4,6 @@ import { Table, TableBody, TableCell, TableRow, TableHead, TableHeader } from "@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
-import { formatCurrency } from "@/utils/format";
 import { EditableCell } from "./components/EditableCell";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -39,12 +38,14 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
 
   const updatePoolMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pool> }) => {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from("pool_specifications")
         .update(updates)
-        .eq("id", id);
+        .eq("id", id)
+        .select();
 
       if (error) throw error;
+      return data;
     },
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
@@ -76,20 +77,34 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     const updates = editingRows[pool.id];
     if (!updates) return;
 
-    // Validate numeric fields
-    for (const [field, value] of Object.entries(updates)) {
-      if (field === "name" || field === "range") continue;
-      if (value === "") continue; // Allow clearing values
+    const validatedUpdates: Partial<Pool> = {};
+
+    // Validate and convert values
+    for (const [key, value] of Object.entries(updates)) {
+      const field = key as keyof Pool;
       
+      if (field === "name" || field === "range") {
+        validatedUpdates[field] = value as string;
+        continue;
+      }
+
+      if (value === "" || value === null) {
+        validatedUpdates[field] = null;
+        continue;
+      }
+
       const numValue = parseFloat(value as string);
       if (isNaN(numValue)) {
         toast.error(`Invalid number for ${field}`);
         return;
       }
-      updates[field as keyof Pool] = numValue;
+      validatedUpdates[field] = numValue;
     }
 
-    updatePoolMutation.mutate({ id: pool.id, updates });
+    updatePoolMutation.mutate({ 
+      id: pool.id, 
+      updates: validatedUpdates 
+    });
   };
 
   const handleCancelRow = (poolId: string) => {
