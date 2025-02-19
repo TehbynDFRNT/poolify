@@ -48,7 +48,11 @@ const PoolPricing = () => {
               id, 
               name,
               components:handover_kit_package_components (
+                id,
+                package_id,
+                component_id,
                 quantity,
+                created_at,
                 component:filtration_components!component_id (
                   id, name, model_number, price
                 )
@@ -289,7 +293,7 @@ const PoolPricing = () => {
                       </TableRow>
                     )}
                     {pool.default_package.handover_kit?.components.map((comp) => (
-                      <TableRow key={comp.component.id}>
+                      <TableRow key={comp.id}>
                         <TableCell>
                           {comp.component.name}
                           {comp.quantity > 1 && ` (x${comp.quantity})`}
