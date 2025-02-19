@@ -124,8 +124,8 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     const isEditing = editingCell?.id === pool.id && editingCell?.field === field;
     const value = pool[field];
 
-    // Skip rendering for the filtration package field
-    if (field === 'standard_filtration_package') {
+    // Skip rendering for object fields
+    if (field === 'standard_filtration_package' || typeof value === 'object') {
       return null;
     }
 
@@ -188,7 +188,7 @@ const PoolTable = ({ pools }: PoolTableProps) => {
         className="cursor-pointer hover:bg-gray-100 p-1 rounded"
         onClick={() => handleCellClick(pool, field)}
       >
-        {displayValue}
+        {String(displayValue)}
       </div>
     );
   };

@@ -47,10 +47,13 @@ export interface FiltrationPackage {
   created_at: string;
 }
 
-export interface PackageWithComponents extends Omit<FiltrationPackage, 'light_id' | 'pump_id' | 'sanitiser_id' | 'filter_id' | 'handover_kit_id'> {
-  light: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  pump: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  sanitiser: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  filter: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  handover_kit: (Pick<HandoverKitPackage, 'name' | 'id'> & { components: HandoverKitPackageComponent[] }) | null;
+export interface PackageWithComponents {
+  id: string;
+  name: string;
+  display_order: number;
+  light?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  pump?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  sanitiser?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  filter?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  handover_kit?: (Pick<HandoverKitPackage, 'name' | 'id'> & { components: HandoverKitPackageComponent[] }) | null;
 }
