@@ -13,6 +13,24 @@ export const usePoolUpdates = () => {
   const updatePoolMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: PoolUpdates }) => {
       console.log('Updating pool with:', { id, updates });
+      
+      // First, check if the pool exists
+      const { data: existingPool, error: checkError } = await supabase
+        .from("pool_specifications")
+        .select()
+        .eq("id", id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking pool:', checkError);
+        throw checkError;
+      }
+
+      if (!existingPool) {
+        throw new Error('Pool not found');
+      }
+
+      // Then perform the update
       const { data, error } = await supabase
         .from("pool_specifications")
         .update(updates)
@@ -26,7 +44,7 @@ export const usePoolUpdates = () => {
       }
 
       if (!data) {
-        throw new Error('Pool not found');
+        throw new Error('Failed to update pool');
       }
 
       return data;
