@@ -16,6 +16,7 @@ import {
   calculatePoolSpecificCosts,
   calculateFixedCostsTotal,
 } from "./utils/calculateCosts";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 const PoolDetails = () => {
   const { id } = useParams();
@@ -88,6 +89,25 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
+        
+        {/* Filtration Placeholder Card */}
+        <Card className="bg-gradient-to-br from-white to-gray-50 border-2 border-dashed border-gray-200">
+          <CardHeader>
+            <CardTitle className="text-gray-700">Pool Filtration Package</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center justify-center h-40 bg-gray-50 rounded-lg">
+              <div className="text-center space-y-3">
+                <div className="text-3xl text-gray-400">🔄</div>
+                <p className="text-gray-500">Pool filtration options coming soon</p>
+                <p className="text-sm text-gray-400">
+                  Light • Pool Pump • Sanitiser • Filter • Handover Kit
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <CostSummaryCard
