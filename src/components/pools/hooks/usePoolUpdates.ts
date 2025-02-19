@@ -12,43 +12,31 @@ export const usePoolUpdates = () => {
 
   const updatePoolMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: PoolUpdates }) => {
-      console.log('Updating pool with:', { id, updates });
-      
-      // First check if the pool exists
-      const { data: existingPool, error: checkError } = await supabase
-        .from("pool_specifications")
-        .select()
-        .eq("id", id);
+      console.log('Starting pool update:', { id, updates });
 
-      if (checkError) {
-        console.error('Error checking pool:', checkError);
-        throw checkError;
-      }
-
-      if (!existingPool || existingPool.length === 0) {
-        throw new Error('Pool not found');
-      }
-
-      // Perform the update
-      const { data: updatedData, error: updateError } = await supabase
+      const { data, error } = await supabase
         .from("pool_specifications")
         .update(updates)
-        .eq("id", id)
-        .select();
+        .match({ id })
+        .select('*');
 
-      if (updateError) {
-        console.error('Update error:', updateError);
-        throw updateError;
+      console.log('Update response:', { data, error });
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw new Error(error.message);
       }
 
-      if (!updatedData || updatedData.length === 0) {
-        throw new Error('Failed to update pool');
+      if (!data || data.length === 0) {
+        console.error('No data returned after update');
+        throw new Error('Failed to update pool - no data returned');
       }
 
-      return updatedData[0];
+      console.log('Update successful, returning:', data[0]);
+      return data[0];
     },
-    onSuccess: (_, variables) => {
-      console.log('Update successful');
+    onSuccess: (data, variables) => {
+      console.log('Mutation success handler:', { data, variables });
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       toast.success("Pool updated successfully");
       setEditingRows((prev) => {
@@ -58,7 +46,7 @@ export const usePoolUpdates = () => {
       });
     },
     onError: (error) => {
-      console.error("Error updating pool:", error);
+      console.error("Error in mutation:", error);
       toast.error(error instanceof Error ? error.message : "Failed to update pool");
     },
   });
