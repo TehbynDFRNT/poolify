@@ -4,7 +4,7 @@ import { formatCurrency } from "@/utils/format";
 import { PoolCosts } from "../types";
 
 interface EditableCostCellProps {
-  value: number;
+  value: number | undefined;
   isEditing: boolean;
   field: keyof PoolCosts;
   onValueChange: (value: string) => void;
@@ -19,7 +19,7 @@ export const EditableCostCell = ({
     return (
       <Input
         type="number"
-        value={value}
+        value={value || 0}
         onChange={(e) => onValueChange(e.target.value)}
         className="w-full"
       />
@@ -28,7 +28,7 @@ export const EditableCostCell = ({
 
   return (
     <div className="cursor-pointer p-1 rounded">
-      {formatCurrency(value)}
+      {formatCurrency(value || 0)}
     </div>
   );
 };

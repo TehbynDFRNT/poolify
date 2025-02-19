@@ -8,6 +8,17 @@ import type { Database } from "@/integrations/supabase/types";
 
 type PoolCostsRow = Database['public']['Tables']['pool_costs']['Row'];
 
+const DEFAULT_COSTS: PoolCosts = {
+  truckedWater: 0,
+  saltBags: 0,
+  misc: 2700,
+  copingSupply: 0,
+  beam: 0,
+  copingLay: 0,
+  peaGravel: 0,
+  installFee: 0
+};
+
 export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const queryClient = useQueryClient();
   const [editingRow, setEditingRow] = useState<string | null>(null);
@@ -40,6 +51,13 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
           peaGravel: Number(cost.pea_gravel) || 0,
           installFee: Number(cost.install_fee) || 0
         };
+      });
+
+      // Ensure all pools have default costs
+      Object.keys(initialPoolCosts).forEach((poolId) => {
+        if (!costsMap[poolId]) {
+          costsMap[poolId] = { ...DEFAULT_COSTS };
+        }
       });
 
       return costsMap;
@@ -132,8 +150,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const calculateTotal = (poolName: string) => {
-    const poolCosts = editingRow ? editedCosts[poolName] : costs[poolName];
-    if (!poolCosts) return 0;
+    const poolCosts = editingRow ? editedCosts[poolName] : costs[poolName] || DEFAULT_COSTS;
     return Object.values(poolCosts).reduce((sum, value) => sum + (value || 0), 0);
   };
 
