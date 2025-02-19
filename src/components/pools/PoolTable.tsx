@@ -1,3 +1,4 @@
+
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -44,15 +45,19 @@ const PoolTable = ({ pools }: PoolTableProps) => {
 
   const updatePoolMutation = useMutation({
     mutationFn: async (pool: Partial<Pool> & { id: string }) => {
-      console.log('Updating pool with data:', pool); // Add logging
-      const { error } = await supabase
+      console.log('Updating pool with data:', pool);
+      const { data, error } = await supabase
         .from("pool_specifications")
         .update(pool)
-        .eq("id", pool.id);
+        .eq("id", pool.id)
+        .select();
+
       if (error) {
-        console.error('Error updating pool:', error); // Add error logging
+        console.error('Error updating pool:', error);
         throw error;
       }
+      
+      return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
@@ -72,7 +77,7 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     setEditValue(String(pool[field] || ""));
   };
 
-  const handleCellBlur = (pool: Pool) => {
+  const handleCellBlur = async (pool: Pool) => {
     if (!editingCell) return;
 
     const value = editValue.trim();
@@ -93,13 +98,14 @@ const PoolTable = ({ pools }: PoolTableProps) => {
 
     // If updating buy_price_ex_gst, also calculate and update buy_price_inc_gst
     if (editingCell.field === 'buy_price_ex_gst' && typeof parsedValue === 'number') {
-      updatePoolMutation.mutate({
+      const gstIncPrice = parsedValue * 1.1;
+      await updatePoolMutation.mutateAsync({
         id: pool.id,
         buy_price_ex_gst: parsedValue,
-        buy_price_inc_gst: parsedValue * 1.1 // Add 10% GST
+        buy_price_inc_gst: gstIncPrice
       });
     } else {
-      updatePoolMutation.mutate({
+      await updatePoolMutation.mutateAsync({
         id: pool.id,
         [editingCell.field]: parsedValue,
       });
