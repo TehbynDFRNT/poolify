@@ -88,13 +88,38 @@ const PoolPricing = () => {
           </Button>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Pool Price
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Price (ex GST)</dt>
+                  <dd className="text-lg font-medium">
+                    {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Price (inc GST)</dt>
+                  <dd className="text-2xl font-semibold text-primary">
+                    {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle>Pool Specifications</CardTitle>
             </CardHeader>
             <CardContent>
-              <dl className="grid grid-cols-2 gap-4">
+              <dl className="grid grid-cols-4 gap-4">
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Range</dt>
                   <dd className="text-lg">{pool.range}</dd>
@@ -126,31 +151,6 @@ const PoolPricing = () => {
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Volume</dt>
                   <dd className="text-lg">{pool.volume_liters ? `${pool.volume_liters}L` : '-'}</dd>
-                </div>
-              </dl>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                Pricing Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="grid grid-cols-2 gap-4">
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Price (ex GST)</dt>
-                  <dd className="text-lg font-medium">
-                    {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Price (inc GST)</dt>
-                  <dd className="text-lg font-medium text-primary">
-                    {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}
-                  </dd>
                 </div>
                 <div>
                   <dt className="text-sm font-medium text-gray-500">Weight</dt>
