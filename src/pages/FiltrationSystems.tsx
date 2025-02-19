@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,17 +7,22 @@ import { FiltrationComponentsSection } from "@/components/filtration/FiltrationC
 import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
 import { HandoverKitPackagesSection } from "@/components/filtration/HandoverKitPackagesSection";
 import { FiltrationPackagesSection } from "@/components/filtration/FiltrationPackagesSection";
+import { EditFiltrationPackageForm } from "@/components/filtration/EditFiltrationPackageForm";
 import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { FiltrationComponent, FiltrationComponentType, PackageWithComponents } from "@/types/filtration";
 
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingPackage, setEditingPackage] = useState<PackageWithComponents | null>(null);
 
   const { data: componentTypes } = useQuery({
     queryKey: ["filtration-component-types"],
@@ -121,6 +125,27 @@ const FiltrationSystems = () => {
     },
   });
 
+  const { data: poolsWithPackages } = useQuery({
+    queryKey: ["pools-with-packages"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_specifications")
+        .select(`
+          id,
+          name,
+          standard_filtration_package:filtration_packages!standard_filtration_package_id (
+            id,
+            name,
+            display_order
+          )
+        `)
+        .order('name');
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const handleAddComponent = () => {
     const handoverKitType = componentTypes?.find(t => t.name === "Handover Kit");
     if (handoverKitType) {
@@ -167,11 +192,62 @@ const FiltrationSystems = () => {
         onAddClick={() => setShowAddForm(true)}
       />
 
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Filtration Package Assignment</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Pool Name</TableHead>
+                <TableHead>Standard Filtration Package</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {poolsWithPackages?.map((pool) => (
+                <TableRow key={pool.id}>
+                  <TableCell>{pool.name}</TableCell>
+                  <TableCell>
+                    {pool.standard_filtration_package?.name || 'Not set'}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        if (packages) {
+                          const pkg = packages.find(p => p.id === pool.standard_filtration_package?.id);
+                          if (pkg) {
+                            setEditingPackage(pkg);
+                          }
+                        }
+                      }}
+                    >
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
       {componentTypes && (
         <AddComponentForm
           open={showAddForm}
           onOpenChange={setShowAddForm}
           componentTypes={componentTypes}
+        />
+      )}
+
+      {editingPackage && (
+        <EditFiltrationPackageForm
+          open={!!editingPackage}
+          onOpenChange={(open) => !open && setEditingPackage(null)}
+          package={editingPackage}
         />
       )}
     </div>
