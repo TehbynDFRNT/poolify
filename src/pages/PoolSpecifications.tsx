@@ -16,11 +16,12 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { toast } from "sonner";
 
 const PoolSpecifications = () => {
   const [showForm, setShowForm] = useState(false);
 
-  const { data: pools, isLoading } = useQuery({
+  const { data: pools, isLoading, error } = useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
       console.log('Fetching pool ranges...');
@@ -51,10 +52,32 @@ const PoolSpecifications = () => {
         return aIndex - bIndex;
       }) as Pool[];
     },
+    onError: (error) => {
+      console.error('Query error:', error);
+      toast.error("Failed to load pool specifications");
+    },
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-muted-foreground">Loading pool specifications...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-destructive">
+            Error loading pool specifications. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
