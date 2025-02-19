@@ -73,7 +73,7 @@ const PricingWorksheet = () => {
         const aIndex = rangeOrder.indexOf(a.range);
         const bIndex = rangeOrder.indexOf(b.range);
         return aIndex - bIndex;
-      }) as (Pool & { standard_filtration_package: PackageWithComponents | null })[];
+      });
     },
   });
 
@@ -217,7 +217,7 @@ const PricingWorksheet = () => {
               </TableHeader>
               <TableBody>
                 {pools?.map((pool) => {
-                  const trueCost = calculateTrueCost(pool);
+                  const trueCost = calculateTrueCost(pool as Pool & { standard_filtration_package: PackageWithComponents | null });
                   return (
                     <TableRow key={pool.id} className="cursor-pointer hover:bg-gray-50" onClick={() => navigate(`/pricing-models/pools/${pool.id}`)}>
                       <TableCell>{pool.range}</TableCell>
