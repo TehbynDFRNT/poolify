@@ -23,8 +23,6 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
         <TableRow>
           <TableHead>Range</TableHead>
           <TableHead>Pool Name</TableHead>
-          <TableHead>Length</TableHead>
-          <TableHead>Width</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -36,8 +34,6 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
           >
             <TableCell>{pool.range}</TableCell>
             <TableCell>{pool.name}</TableCell>
-            <TableCell>{pool.length}m</TableCell>
-            <TableCell>{pool.width}m</TableCell>
           </TableRow>
         ))}
       </TableBody>
