@@ -9,11 +9,12 @@ import type { Database } from "@/integrations/supabase/types";
 type PoolCostsRow = Database['public']['Tables']['pool_costs']['Row'];
 
 export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
+  const queryClient = useQueryClient();
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
-  const queryClient = useQueryClient();
 
-  const { data: poolCosts } = useQuery({
+  // Query hook - always present
+  const poolCostsQuery = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
       console.log('Fetching pool costs');
@@ -26,7 +27,6 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
         throw error;
       }
 
-      // If we have data from the database, use it, otherwise use initial costs
       return data?.length ? data.reduce((acc, cost) => ({
         ...acc,
         [cost.pool_id]: {
@@ -43,6 +43,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
     },
   });
 
+  // Mutation hook - always present
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
       console.log('Updating pool costs:', { poolId, costs });
@@ -59,8 +60,8 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
           pea_gravel: costs.peaGravel,
           install_fee: costs.installFee
         })
-        .select()
-        .single();
+        .select('*')
+        .maybeSingle();
 
       if (error) {
         console.error('Error updating pool costs:', error);
@@ -81,7 +82,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   });
 
   const handleEdit = (poolName: string) => {
-    const currentCosts = poolCosts?.[poolName] || initialPoolCosts[poolName];
+    const currentCosts = poolCostsQuery.data?.[poolName] || initialPoolCosts[poolName];
     setEditingRow(poolName);
     setEditedCosts(prev => ({
       ...prev,
@@ -118,7 +119,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const calculateTotal = (poolId: string) => {
-    const costs = editingRow ? editedCosts[poolId] : (poolCosts?.[poolId] || initialPoolCosts[poolId]);
+    const costs = editingRow ? editedCosts[poolId] : (poolCostsQuery.data?.[poolId] || initialPoolCosts[poolId]);
     if (!costs) return 0;
     return Object.values(costs).reduce((sum, value) => sum + (value || 0), 0);
   };
@@ -126,7 +127,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   return {
     editingRow,
     editedCosts,
-    costs: poolCosts || initialPoolCosts,
+    costs: poolCostsQuery.data || initialPoolCosts,
     handleEdit,
     handleSave,
     handleCancel,

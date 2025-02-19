@@ -24,16 +24,7 @@ export const PoolCostsTable = ({
   getExcavationCost,
   initialPoolCosts,
 }: PoolCostsTableProps) => {
-  const {
-    editingRow,
-    editedCosts,
-    costs,
-    handleEdit,
-    handleSave,
-    handleCancel,
-    handleCostChange,
-    calculateTotal,
-  } = usePoolCosts(initialPoolCosts);
+  const poolCosts = usePoolCosts(initialPoolCosts);
 
   return (
     <Table>
@@ -41,8 +32,8 @@ export const PoolCostsTable = ({
       <TableBody>
         {pools?.map((pool) => {
           const fixedName = pool.name.replace("Westminister", "Westminster");
-          const isEditing = editingRow === fixedName;
-          const currentCosts = isEditing ? editedCosts[fixedName] : costs[pool.id] || {
+          const isEditing = poolCosts.editingRow === fixedName;
+          const currentCosts = isEditing ? poolCosts.editedCosts[fixedName] : poolCosts.costs[pool.id] || {
             truckedWater: 0,
             saltBags: 0,
             misc: 2700,
@@ -63,11 +54,11 @@ export const PoolCostsTable = ({
               selectedDigTypes={selectedDigTypes}
               onDigTypeChange={onDigTypeChange}
               getExcavationCost={getExcavationCost}
-              onEdit={() => handleEdit(fixedName)}
-              onSave={() => handleSave(pool.id, fixedName)}
-              onCancel={handleCancel}
-              onCostChange={(field, value) => handleCostChange(fixedName, field, value)}
-              calculateTotal={() => calculateTotal(pool.id) + (getExcavationCost(pool.id) || 0)}
+              onEdit={() => poolCosts.handleEdit(fixedName)}
+              onSave={() => poolCosts.handleSave(pool.id, fixedName)}
+              onCancel={poolCosts.handleCancel}
+              onCostChange={(field, value) => poolCosts.handleCostChange(fixedName, field, value)}
+              calculateTotal={() => poolCosts.calculateTotal(pool.id) + (getExcavationCost(pool.id) || 0)}
             />
           );
         })}
