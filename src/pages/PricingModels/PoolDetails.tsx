@@ -20,6 +20,7 @@ const PoolDetails = () => {
   const { data: pool, isLoading: poolLoading } = useQuery({
     queryKey: ["pool-specification", id],
     queryFn: async () => {
+      console.log("Fetching pool with ID:", id);
       const { data, error } = await supabase
         .from("pool_specifications")
         .select(`
@@ -46,7 +47,11 @@ const PoolDetails = () => {
         .eq("id", id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching pool:", error);
+        throw error;
+      }
+      console.log("Fetched pool data:", data);
       return data as unknown as Pool & { standard_filtration_package: PackageWithComponents | null };
     },
   });
