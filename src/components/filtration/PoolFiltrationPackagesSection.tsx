@@ -24,7 +24,8 @@ import type { PackageWithComponents } from "@/types/filtration";
 import { FiltrationPackageDetails } from "../pools/components/FiltrationPackageDetails";
 import { calculateFiltrationTotal } from "../pools/utils/filtrationCalculations";
 import { toast } from "sonner";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Save } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PoolFiltrationPackagesSectionProps {
   packages: PackageWithComponents[] | undefined;
@@ -32,6 +33,7 @@ interface PoolFiltrationPackagesSectionProps {
 
 export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackagesSectionProps) {
   const [selectedPackages, setSelectedPackages] = React.useState<Record<string, string>>({});
+  const [pendingChanges, setPendingChanges] = React.useState<Record<string, string>>({});
   const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
   const queryClient = useQueryClient();
 
@@ -75,11 +77,7 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
       if (error) throw error;
 
       const rangeOrder = ranges?.map(r => r.name) || [];
-      return (poolsData as Pool[] || []).sort((a, b) => {
-        const aIndex = rangeOrder.indexOf(a.range);
-        const bIndex = rangeOrder.indexOf(b.range);
-        return aIndex - bIndex;
-      });
+      return poolsData as Pool[];
     },
   });
 
@@ -92,25 +90,39 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
         }
       });
       setSelectedPackages(initialSelections);
+      setPendingChanges({});
     }
   }, [pools]);
 
-  const handlePackageChange = async (poolId: string, packageId: string) => {
+  const handlePackageChange = (poolId: string, packageId: string) => {
+    setPendingChanges(prev => ({
+      ...prev,
+      [poolId]: packageId
+    }));
+  };
+
+  const handleSaveChanges = async (poolId: string) => {
+    const newPackageId = pendingChanges[poolId];
+    if (!newPackageId) return;
+
     try {
       const { error } = await supabase
         .from("pool_specifications")
-        .update({ standard_filtration_package_id: packageId })
+        .update({ standard_filtration_package_id: newPackageId })
         .eq("id", poolId);
 
       if (error) throw error;
 
       setSelectedPackages(prev => ({
         ...prev,
-        [poolId]: packageId
+        [poolId]: newPackageId
       }));
 
-      // Expand the row to show the details
-      setExpandedRow(poolId);
+      // Clear the pending change after successful save
+      setPendingChanges(prev => {
+        const { [poolId]: _, ...rest } = prev;
+        return rest;
+      });
 
       // Invalidate the pool specifications query to refresh the data
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
@@ -121,9 +133,9 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
     }
   };
 
-  const getSelectedPackageDetails = (poolId: string) => {
-    const selectedPackageId = selectedPackages[poolId];
-    return packages?.find(p => p.id === selectedPackageId);
+  const getPackageDetails = (poolId: string, isPending: boolean = false) => {
+    const packageId = isPending ? pendingChanges[poolId] : selectedPackages[poolId];
+    return packages?.find(p => p.id === packageId);
   };
 
   const toggleExpandedRow = (poolId: string) => {
@@ -141,47 +153,83 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
             <TableRow>
               <TableHead>Pool Name</TableHead>
               <TableHead>Filtration Package</TableHead>
+              <TableHead>Actions</TableHead>
               <TableHead className="text-right">Package Total</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pools?.map((pool) => (
-              <React.Fragment key={pool.id}>
-                <TableRow 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => toggleExpandedRow(pool.id)}
-                >
-                  <TableCell>{pool.name}</TableCell>
-                  <TableCell onClick={(e) => e.stopPropagation()}>
-                    <Select
-                      value={selectedPackages[pool.id] || ""}
-                      onValueChange={(value) => handlePackageChange(pool.id, value)}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select package" />
-                        <ChevronDown className="h-4 w-4 opacity-50" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packages?.map((pkg) => (
-                          <SelectItem key={pkg.id} value={pkg.id}>
-                            Option {pkg.display_order}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(calculateFiltrationTotal(getSelectedPackageDetails(pool.id)))}
-                  </TableCell>
-                </TableRow>
-                {expandedRow === pool.id && getSelectedPackageDetails(pool.id) && (
-                  <FiltrationPackageDetails
-                    package={getSelectedPackageDetails(pool.id)!}
-                    colSpan={3}
-                  />
-                )}
-              </React.Fragment>
-            ))}
+            {pools?.map((pool) => {
+              const hasPendingChange = pendingChanges[pool.id] !== undefined;
+              const pendingPackage = getPackageDetails(pool.id, true);
+              const currentPackage = getPackageDetails(pool.id, false);
+              
+              return (
+                <React.Fragment key={pool.id}>
+                  <TableRow 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => toggleExpandedRow(pool.id)}
+                  >
+                    <TableCell>{pool.name}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Select
+                        value={hasPendingChange ? pendingChanges[pool.id] : selectedPackages[pool.id] || ""}
+                        onValueChange={(value) => handlePackageChange(pool.id, value)}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select package" />
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {packages?.map((pkg) => (
+                            <SelectItem key={pkg.id} value={pkg.id}>
+                              Option {pkg.display_order}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      {hasPendingChange && (
+                        <div className="flex items-center gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleSaveChanges(pool.id)}
+                            className="flex items-center gap-2"
+                          >
+                            <Save className="h-4 w-4" />
+                            Save Changes
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => setPendingChanges(prev => {
+                              const { [pool.id]: _, ...rest } = prev;
+                              return rest;
+                            })}
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(calculateFiltrationTotal(hasPendingChange ? pendingPackage : currentPackage))}
+                      {hasPendingChange && currentPackage && (
+                        <div className="text-sm text-muted-foreground line-through">
+                          {formatCurrency(calculateFiltrationTotal(currentPackage))}
+                        </div>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                  {expandedRow === pool.id && (hasPendingChange ? pendingPackage : currentPackage) && (
+                    <FiltrationPackageDetails
+                      package={hasPendingChange ? pendingPackage! : currentPackage!}
+                      colSpan={4}
+                    />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>
