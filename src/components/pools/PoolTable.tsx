@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { EditableCell } from "./components/EditableCell";
+import { toast } from "sonner";
 
 const editableFields: (keyof Pool)[] = [
   "name",
@@ -40,7 +41,9 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
   const queryClient = useQueryClient();
 
   const updatePoolMutation = useMutation({
-    mutationFn: async ({ id, ...updates }: Partial<Pool> & { id: string }) => {
+    mutationFn: async ({ id, field, value }: { id: string; field: keyof Pool; value: any }) => {
+      const updates = { [field]: value };
+      
       const { error } = await supabase
         .from("pool_specifications")
         .update(updates)
@@ -50,7 +53,13 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
+      toast.success("Pool updated successfully");
       setEditingCell(null);
+      setEditValue("");
+    },
+    onError: (error) => {
+      console.error("Error updating pool:", error);
+      toast.error("Failed to update pool");
     },
   });
 
@@ -61,22 +70,33 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     setEditValue(String(pool[field] || ""));
   };
 
-  const handleCellBlur = (pool: Pool) => {
+  const handleCellBlur = (pool: Pool, field: keyof Pool) => {
     if (!editingCell) return;
 
-    const updates: Partial<Pool> & { id: string } = {
-      id: pool.id,
-      [editingCell.field]: editValue,
-    };
+    let value: string | number | null = editValue;
 
-    updatePoolMutation.mutate(updates);
+    // Convert value based on field type
+    if (field === "range" || field === "name") {
+      value = editValue;
+    } else if (editValue === "") {
+      value = null;
+    } else {
+      value = parseFloat(editValue);
+      if (isNaN(value)) {
+        toast.error("Please enter a valid number");
+        return;
+      }
+    }
+
+    updatePoolMutation.mutate({ id: pool.id, field, value });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, pool: Pool) => {
+  const handleKeyDown = (e: React.KeyboardEvent, pool: Pool, field: keyof Pool) => {
     if (e.key === "Enter") {
-      handleCellBlur(pool);
+      handleCellBlur(pool, field);
     } else if (e.key === "Escape") {
       setEditingCell(null);
+      setEditValue("");
     }
   };
 
@@ -102,12 +122,13 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
                     isEditing={editingCell?.id === pool.id && editingCell?.field === field}
                     editValue={editValue}
                     onValueChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => handleCellBlur(pool)}
-                    onKeyDown={(e) => handleKeyDown(e, pool)}
+                    onBlur={() => handleCellBlur(pool, field)}
+                    onKeyDown={(e) => handleKeyDown(e, pool, field)}
                     onRangeChange={(value) => {
                       updatePoolMutation.mutate({
                         id: pool.id,
-                        range: value,
+                        field: 'range',
+                        value,
                       });
                     }}
                   />
