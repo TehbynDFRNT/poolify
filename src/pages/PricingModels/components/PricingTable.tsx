@@ -22,17 +22,21 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
     if (!pool.standard_filtration_package) return null;
     
     const pkg = pool.standard_filtration_package;
-    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
-      return total + ((comp.component?.price || 0) * comp.quantity);
-    }, 0) || 0;
-
-    return (
+    
+    // Sum the main components
+    const componentTotal = (
       (pkg.light?.price || 0) +
       (pkg.pump?.price || 0) +
       (pkg.sanitiser?.price || 0) +
-      (pkg.filter?.price || 0) +
-      handoverKitTotal
+      (pkg.filter?.price || 0)
     );
+
+    // Calculate handover kit total
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
+      return total + (comp.component?.price || 0);
+    }, 0) || 0;
+
+    return componentTotal + handoverKitTotal;
   };
 
   return (
