@@ -3,6 +3,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 import type { SupabasePoolResponse } from "../types";
+import { 
+  calculateFiltrationTotal,
+  calculatePoolSpecificCosts,
+  calculateFixedCostsTotal
+} from "../utils/calculateCosts";
 
 export const usePricingCalculations = () => {
   const { data: fixedCosts = [] } = useQuery({
@@ -31,58 +36,25 @@ export const usePricingCalculations = () => {
   });
 
   const calculateTrueCost = (pool: SupabasePoolResponse) => {
-    // Calculate total fixed costs
-    const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
-
-    // Calculate pool specific costs
-    const poolCosts = initialPoolCosts[pool.name] || {
-      truckedWater: 0,
-      saltBags: 0,
-      copingSupply: 0,
-      beam: 0,
-      copingLay: 0,
-      peaGravel: 0,
-      installFee: 0
-    };
-
+    // Get dig type for the pool
     const digType = digTypes.find(dt => dt.name === poolDigTypeMap[pool.name]);
-    const excavationCost = digType ? 
-      (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
-      (digType.excavation_hourly_rate * digType.excavation_hours) : 0;
-
-    const totalPoolCosts = 
-      poolCosts.truckedWater +
-      poolCosts.saltBags +
-      poolCosts.copingSupply +
-      poolCosts.beam +
-      poolCosts.copingLay +
-      poolCosts.peaGravel +
-      poolCosts.installFee +
-      excavationCost;
-
-    // Calculate filtration package total
-    const calculatePackageTotal = (pkg: NonNullable<SupabasePoolResponse['standard_filtration_package']>) => {
-      const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
-        return total + ((comp.component?.price || 0) * comp.quantity);
-      }, 0) || 0;
-
-      return (
-        (pkg.light?.price || 0) +
-        (pkg.pump?.price || 0) +
-        (pkg.sanitiser?.price || 0) +
-        (pkg.filter?.price || 0) +
-        handoverKitTotal
-      );
-    };
-
-    const filtrationTotal = pool.standard_filtration_package ? 
-      calculatePackageTotal(pool.standard_filtration_package) : 0;
-
-    // Calculate pool shell price
+    
+    // Calculate individual components
     const poolShellPrice = pool.buy_price_inc_gst || 0;
+    const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
+    const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType);
+    const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
+
+    console.log('Cost breakdown for', pool.name, {
+      poolShellPrice,
+      filtrationTotal,
+      totalPoolCosts,
+      totalFixedCosts,
+      total: poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts
+    });
 
     // Calculate true cost
-    return totalFixedCosts + totalPoolCosts + filtrationTotal + poolShellPrice;
+    return poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
   };
 
   return { calculateTrueCost };
