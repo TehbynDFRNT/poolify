@@ -4,9 +4,9 @@ import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 import { PoolCosts } from "../types";
-import { EditableCell } from "@/components/filtration/components/EditableCell";
+import { EditableCell } from "@/components/pools/components/EditableCell";
 import { DigTypeCell } from "./DigTypeCell";
-import { PoolCostActions } from "./PoolCostActions";
+import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
 
 interface PoolCostTableRowProps {
   pool: Pool;
@@ -47,138 +47,74 @@ export const PoolCostTableRow = ({
       <TableCell>{pool.depth_deep}m</TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="peaGravel"
           value={currentCosts.peaGravel}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('peaGravel', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('peaGravel', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="installFee"
           value={currentCosts.installFee}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('installFee', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('installFee', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="truckedWater"
           value={currentCosts.truckedWater}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('truckedWater', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('truckedWater', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="saltBags"
           value={currentCosts.saltBags}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('saltBags', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('saltBags', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="misc"
           value={currentCosts.misc}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('misc', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('misc', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="copingSupply"
           value={currentCosts.copingSupply}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('copingSupply', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('copingSupply', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="beam"
           value={currentCosts.beam}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('beam', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('beam', value)}
         />
       </TableCell>
       <TableCell>
         <EditableCell
+          pool={pool}
+          field="copingLay"
           value={currentCosts.copingLay}
           isEditing={isEditing}
-          onEdit={() => {}}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChange={(value) => onCostChange('copingLay', value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') onSave();
-            if (e.key === 'Escape') onCancel();
-          }}
-          type="number"
-          align="right"
-          format={formatCurrency}
+          onValueChange={(value) => onCostChange('copingLay', value)}
         />
       </TableCell>
       <DigTypeCell
@@ -197,14 +133,12 @@ export const PoolCostTableRow = ({
         {formatCurrency(calculateTotal())}
       </TableCell>
       <TableCell>
-        {isEditing ? (
-          <div className="flex gap-2">
-            <button onClick={onSave} className="text-green-600 hover:text-green-700">Save</button>
-            <button onClick={onCancel} className="text-red-600 hover:text-red-700">Cancel</button>
-          </div>
-        ) : (
-          <button onClick={onEdit} className="text-blue-600 hover:text-blue-700">Edit</button>
-        )}
+        <PoolTableActions
+          isEditing={isEditing}
+          onEdit={onEdit}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
       </TableCell>
     </TableRow>
   );
