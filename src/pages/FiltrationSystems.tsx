@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,7 +22,7 @@ import type { FiltrationComponent, FiltrationComponentType, PackageWithComponent
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const { poolsWithPackages, updatePoolPackageMutation } = usePoolPackages();
+  const { poolsWithPackages, isLoading, updatePoolPackageMutation } = usePoolPackages();
 
   const { data: componentTypes } = useQuery({
     queryKey: ["filtration-component-types"],
@@ -152,10 +153,12 @@ const FiltrationSystems = () => {
   };
 
   const handleUpdatePackage = (poolId: string, packageId: string) => {
+    console.log('Updating package:', { poolId, packageId }); // Debug log
     updatePoolPackageMutation.mutate(
       { poolId, packageId },
       {
         onSuccess: () => {
+          console.log('Package updated successfully'); // Debug log
           toast.success("Package updated successfully");
         },
         onError: (error) => {
@@ -208,7 +211,7 @@ const FiltrationSystems = () => {
         pools={poolsWithPackages || []}
         packages={packages}
         onUpdatePackage={handleUpdatePackage}
-        isLoading={isLoadingPackages}
+        isLoading={isLoading}
         isUpdating={updatePoolPackageMutation.isPending}
       />
 
