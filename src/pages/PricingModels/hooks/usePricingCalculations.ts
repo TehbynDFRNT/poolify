@@ -2,7 +2,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { SupabasePoolResponse } from "../types";
-import { poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 import { 
   calculateFiltrationTotal,
   calculatePoolSpecificCosts,
@@ -29,30 +28,6 @@ const fetchDigTypes = async () => {
   return data;
 };
 
-const fetchFiltrationPackages = async () => {
-  const { data, error } = await supabase
-    .from("filtration_packages")
-    .select(`
-      *,
-      light:filtration_components!light_id(id, name, model_number, price),
-      pump:filtration_components!pump_id(id, name, model_number, price),
-      sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
-      filter:filtration_components!filter_id(id, name, model_number, price),
-      handover_kit:handover_kit_packages!handover_kit_id(
-        id, 
-        name,
-        components:handover_kit_package_components(
-          id,
-          quantity,
-          component:component_id(id, name, model_number, price)
-        )
-      )
-    `);
-
-  if (error) throw error;
-  return data;
-};
-
 export const usePricingCalculations = () => {
   const { data: fixedCosts = [] } = useQuery({
     queryKey: ["fixed-costs"],
@@ -64,20 +39,15 @@ export const usePricingCalculations = () => {
     queryFn: fetchDigTypes,
   });
 
-  const { data: filtrationPackages = [] } = useQuery({
-    queryKey: ["filtration-packages"],
-    queryFn: fetchFiltrationPackages,
-  });
-
   const calculateTrueCost = (pool: SupabasePoolResponse) => {
     // Use the pool's buy price (shell price)
-    const poolShellPrice = pool.buy_price_ex_gst || 0;
+    const poolShellPrice = pool.buy_price_inc_gst || 0;
     
     // Calculate fixed costs total
     const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
     
     // Get the dig type for pool specific costs calculation
-    const digType = digTypes.find(dt => dt.name === pool.dig_level);
+    const digType = digTypes.find(dt => dt.name === poolDigTypeMap[pool.name]);
     const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType || null);
     
     // Calculate filtration package total
