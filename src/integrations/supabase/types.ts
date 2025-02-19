@@ -260,36 +260,6 @@ export type Database = {
           },
         ]
       }
-      filtration_systems: {
-        Row: {
-          created_at: string
-          description: string | null
-          flow_rate: number | null
-          id: string
-          name: string
-          power_consumption: number | null
-          price: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          flow_rate?: number | null
-          id?: string
-          name: string
-          power_consumption?: number | null
-          price: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          flow_rate?: number | null
-          id?: string
-          name?: string
-          power_consumption?: number | null
-          price?: number
-        }
-        Relationships: []
-      }
       fixed_costs: {
         Row: {
           created_at: string

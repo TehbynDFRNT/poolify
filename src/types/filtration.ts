@@ -55,5 +55,9 @@ export interface PackageWithComponents {
   pump?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   sanitiser?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
   filter?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  handover_kit?: (Pick<HandoverKitPackage, 'name' | 'id'> & { components: HandoverKitPackageComponent[] }) | null;
+  handover_kit?: (Pick<HandoverKitPackage, 'name' | 'id'> & { 
+    components: (HandoverKitPackageComponent & {
+      component: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'>;
+    })[];
+  }) | null;
 }
