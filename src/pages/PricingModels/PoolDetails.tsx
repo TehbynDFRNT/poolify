@@ -2,7 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { Pool, FiltrationPackageResponse } from "@/types/pool";
+import type { Pool } from "@/types/pool";
 import { PoolBreadcrumb } from "./components/PoolBreadcrumb";
 import { PoolHeader } from "./components/PoolHeader";
 import { PoolOutline } from "./components/PoolOutline";
@@ -60,7 +60,7 @@ const PoolDetails = () => {
       }
 
       console.log("Fetched pool data:", data);
-      return data as Pool;
+      return data as unknown as Pool;
     },
   });
 
@@ -104,7 +104,7 @@ const PoolDetails = () => {
   const poolShellPrice = pool.buy_price_inc_gst || 0;
   const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType);
   const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
-  const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package as FiltrationPackageResponse);
+  const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package || null);
 
   return (
     <DashboardLayout>
