@@ -14,8 +14,8 @@ export const usePoolUpdates = () => {
     mutationFn: async ({ id, updates }: { id: string; updates: PoolUpdates }) => {
       console.log('Updating pool with:', { id, updates });
       
-      // First, check if the pool exists and get its current data
-      const { data: poolsData, error: checkError } = await supabase
+      // First check if the pool exists
+      const { data: existingPool, error: checkError } = await supabase
         .from("pool_specifications")
         .select()
         .eq("id", id);
@@ -25,34 +25,27 @@ export const usePoolUpdates = () => {
         throw checkError;
       }
 
-      if (!poolsData || poolsData.length === 0) {
+      if (!existingPool || existingPool.length === 0) {
         throw new Error('Pool not found');
       }
 
-      // Then perform the update
-      const { error: updateError } = await supabase
+      // Perform the update
+      const { data: updatedData, error: updateError } = await supabase
         .from("pool_specifications")
         .update(updates)
-        .eq("id", id);
+        .eq("id", id)
+        .select();
 
       if (updateError) {
         console.error('Update error:', updateError);
         throw updateError;
       }
 
-      // Finally, fetch the updated data
-      const { data: updatedPool, error: fetchError } = await supabase
-        .from("pool_specifications")
-        .select()
-        .eq("id", id)
-        .single();
-
-      if (fetchError) {
-        console.error('Error fetching updated pool:', fetchError);
-        throw fetchError;
+      if (!updatedData || updatedData.length === 0) {
+        throw new Error('Failed to update pool');
       }
 
-      return updatedPool;
+      return updatedData[0];
     },
     onSuccess: (_, variables) => {
       console.log('Update successful');
