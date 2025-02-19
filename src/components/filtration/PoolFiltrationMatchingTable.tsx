@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/utils/format";
 import { calculatePackagePrice } from "@/utils/package-calculations";
 import type { PackageWithComponents } from "@/types/filtration";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface PoolFiltrationMatchingTableProps {
   pools: any[];
@@ -29,12 +29,16 @@ export const PoolFiltrationMatchingTable = ({
   isLoading = false,
   isUpdating = false,
 }: PoolFiltrationMatchingTableProps) => {
-  const [localSelections, setLocalSelections] = useState<Record<string, string>>(() => {
-    return pools.reduce((acc, pool) => ({
+  const [localSelections, setLocalSelections] = useState<Record<string, string>>({});
+
+  // Update local selections when pools data changes
+  useEffect(() => {
+    const initialSelections = pools.reduce((acc, pool) => ({
       ...acc,
       [pool.id]: pool.default_filtration_package_id || ""
     }), {});
-  });
+    setLocalSelections(initialSelections);
+  }, [pools]);
 
   if (isLoading) {
     return (
@@ -80,14 +84,14 @@ export const PoolFiltrationMatchingTable = ({
                 <TableCell>{pool.name}</TableCell>
                 <TableCell>
                   <Select
-                    value={localSelections[pool.id]}
+                    value={pool.default_filtration_package_id || ""}
                     onValueChange={(value) => handlePackageChange(pool.id, value)}
                     disabled={isUpdating}
                   >
                     <SelectTrigger className="w-[200px]">
                       <SelectValue placeholder="Select package">
-                        {packages?.find(p => p.id === localSelections[pool.id])
-                          ? `Option ${packages.find(p => p.id === localSelections[pool.id])?.display_order}`
+                        {packages?.find(p => p.id === pool.default_filtration_package_id)
+                          ? `Option ${packages.find(p => p.id === pool.default_filtration_package_id)?.display_order}`
                           : "Select package"
                         }
                       </SelectValue>
