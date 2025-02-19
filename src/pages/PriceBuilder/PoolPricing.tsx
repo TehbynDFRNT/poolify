@@ -1,6 +1,7 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, DollarSign, Package, List, Database } from "lucide-react";
+import { ArrowLeft, DollarSign, Package, List, Database, ImagePlus } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -14,7 +15,6 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileUpload } from "@/components/FileUpload";
 
 const PoolPricing = () => {
   const { poolId } = useParams();
@@ -106,13 +106,29 @@ const PoolPricing = () => {
                       </div>
                     </div>
                   </div>
+                  <div className="mt-4">
+                    <Button variant="outline" size="sm" className="w-full">
+                      <ImagePlus className="h-4 w-4 mr-2" />
+                      Change Pool Image
+                    </Button>
+                  </div>
                 </div>
-                <div className="flex flex-col justify-center">
-                  <FileUpload
-                    onSheetData={(data) => {
-                      console.log("Processing data:", data);
-                    }}
-                  />
+                <div className="flex flex-col justify-center space-y-4">
+                  <h4 className="font-medium text-lg">Pool Dimensions</h4>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">External</p>
+                      <p className="font-medium">{pool.length}m x {pool.width}m</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Internal</p>
+                      <p className="font-medium">{(pool.length - 0.4).toFixed(1)}m x {(pool.width - 0.4).toFixed(1)}m</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Depth Range</p>
+                      <p className="font-medium">{pool.depth_shallow}m to {pool.depth_deep}m</p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </CardContent>
