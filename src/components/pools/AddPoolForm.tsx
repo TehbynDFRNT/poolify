@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { poolSchema, PoolFormValues } from "@/types/pool";
@@ -74,9 +75,28 @@ export const AddPoolForm = () => {
   async function onSubmit(values: PoolFormValues) {
     setLoading(true);
     try {
+      // Ensure required fields are present with their correct types
+      const poolData = {
+        name: values.name,
+        range: values.range,
+        length: values.length || 0,
+        width: values.width || 0,
+        depth_shallow: values.depth_shallow || 0,
+        depth_deep: values.depth_deep || 0,
+        waterline_l_m: values.waterline_l_m,
+        volume_liters: values.volume_liters,
+        salt_volume_bags: values.salt_volume_bags,
+        salt_volume_bags_fixed: values.salt_volume_bags_fixed,
+        weight_kg: values.weight_kg,
+        minerals_kg_initial: values.minerals_kg_initial,
+        minerals_kg_topup: values.minerals_kg_topup,
+        buy_price_ex_gst: values.buy_price_ex_gst,
+        buy_price_inc_gst: values.buy_price_inc_gst,
+      };
+
       const { data, error } = await supabase
         .from("pool_specifications")
-        .insert([values])
+        .insert([poolData])
         .select();
 
       if (error) {
