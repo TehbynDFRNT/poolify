@@ -16,6 +16,7 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
   const { editingRows, setEditingRows, updatePoolMutation } = usePoolUpdates();
 
   const handleValueChange = (pool: Pool, field: keyof Pool, value: any) => {
+    console.log('Value changing:', { field, value });
     setEditingRows((prev) => ({
       ...prev,
       [pool.id]: {
@@ -27,11 +28,19 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
 
   const handleSaveRow = (pool: Pool) => {
     const updates = editingRows[pool.id];
-    if (!updates) return;
+    if (!updates) {
+      console.log('No updates found for pool:', pool.id);
+      return;
+    }
 
+    console.log('Attempting to save updates:', updates);
     const validatedUpdates = validatePoolUpdates(updates);
-    if (!validatedUpdates) return;
+    if (!validatedUpdates) {
+      console.log('Validation failed for updates');
+      return;
+    }
 
+    console.log('Sending validated updates:', validatedUpdates);
     updatePoolMutation.mutate({ 
       id: pool.id, 
       updates: validatedUpdates 

@@ -12,16 +12,22 @@ export const usePoolUpdates = () => {
 
   const updatePoolMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: PoolUpdates }) => {
+      console.log('Updating pool with:', { id, updates });
       const { data, error } = await supabase
         .from("pool_specifications")
         .update(updates)
         .eq("id", id)
-        .select();
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       return data;
     },
     onSuccess: (_, variables) => {
+      console.log('Update successful');
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       toast.success("Pool updated successfully");
       setEditingRows((prev) => {
