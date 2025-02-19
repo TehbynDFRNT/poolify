@@ -42,7 +42,7 @@ export const PoolCostsTable = ({
         {pools?.map((pool) => {
           const fixedName = pool.name.replace("Westminister", "Westminster");
           const isEditing = editingRow === fixedName;
-          const currentCosts = isEditing ? editedCosts[fixedName] : costs[fixedName] || {
+          const currentCosts = isEditing ? editedCosts[fixedName] : costs[pool.id] || {
             truckedWater: 0,
             saltBags: 0,
             misc: 2700,
@@ -64,10 +64,10 @@ export const PoolCostsTable = ({
               onDigTypeChange={onDigTypeChange}
               getExcavationCost={getExcavationCost}
               onEdit={() => handleEdit(fixedName)}
-              onSave={() => handleSave(fixedName)}
+              onSave={() => handleSave(pool.id, fixedName)}
               onCancel={handleCancel}
               onCostChange={(field, value) => handleCostChange(fixedName, field, value)}
-              calculateTotal={() => calculateTotal(fixedName) + (getExcavationCost(pool.id) || 0)}
+              calculateTotal={() => calculateTotal(pool.id) + (getExcavationCost(pool.id) || 0)}
             />
           );
         })}
