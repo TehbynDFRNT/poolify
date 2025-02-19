@@ -453,6 +453,7 @@ export type Database = {
           buy_price_ex_gst: number | null
           buy_price_inc_gst: number | null
           created_at: string
+          default_filtration_package_id: string | null
           depth_deep: number
           depth_shallow: number
           dig_level: string | null
@@ -474,6 +475,7 @@ export type Database = {
           buy_price_ex_gst?: number | null
           buy_price_inc_gst?: number | null
           created_at?: string
+          default_filtration_package_id?: string | null
           depth_deep: number
           depth_shallow: number
           dig_level?: string | null
@@ -495,6 +497,7 @@ export type Database = {
           buy_price_ex_gst?: number | null
           buy_price_inc_gst?: number | null
           created_at?: string
+          default_filtration_package_id?: string | null
           depth_deep?: number
           depth_shallow?: number
           dig_level?: string | null
@@ -513,6 +516,13 @@ export type Database = {
           width?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "pool_specifications_default_filtration_package_id_fkey"
+            columns: ["default_filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pool_specifications_pool_type_id_fkey"
             columns: ["pool_type_id"]
