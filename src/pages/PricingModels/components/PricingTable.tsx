@@ -19,35 +19,19 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
   const navigate = useNavigate();
 
   const calculateFiltrationTotal = (pool: SupabasePoolResponse) => {
-    // Debug logs
-    console.log('Pool:', pool.name);
-    console.log('Filtration package:', pool.standard_filtration_package);
-    
-    if (!pool.standard_filtration_package) {
-      console.log('No filtration package found');
-      return null;
-    }
+    if (!pool.standard_filtration_package) return null;
     
     const pkg = pool.standard_filtration_package;
-    
-    // Debug component prices
-    console.log('Light price:', pkg.light?.price);
-    console.log('Pump price:', pkg.pump?.price);
-    console.log('Sanitiser price:', pkg.sanitiser?.price);
-    console.log('Filter price:', pkg.filter?.price);
-    console.log('Handover kit:', pkg.handover_kit?.components);
-    
     const total = (
       (pkg.light?.price || 0) +
       (pkg.pump?.price || 0) +
       (pkg.sanitiser?.price || 0) +
       (pkg.filter?.price || 0) +
       (pkg.handover_kit?.components.reduce((sum, comp) => 
-        sum + (comp.component?.price || 0), 0) || 0)
+        sum + ((comp.component?.price || 0) * (comp.quantity || 1)), 0) || 0)
     );
 
-    console.log('Calculated total:', total);
-    return total || null;
+    return total;
   };
 
   return (
@@ -71,7 +55,7 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
             <TableCell>{pool.name}</TableCell>
             <TableCell>{pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : 'N/A'}</TableCell>
             <TableCell>
-              {calculateFiltrationTotal(pool) ? formatCurrency(calculateFiltrationTotal(pool)!) : 'N/A'}
+              {calculateFiltrationTotal(pool) !== null ? formatCurrency(calculateFiltrationTotal(pool)!) : 'N/A'}
             </TableCell>
           </TableRow>
         ))}
