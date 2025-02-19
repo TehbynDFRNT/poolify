@@ -18,12 +18,17 @@ export const usePoolUpdates = () => {
         .update(updates)
         .eq("id", id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Supabase error:', error);
         throw error;
       }
+
+      if (!data) {
+        throw new Error('Pool not found');
+      }
+
       return data;
     },
     onSuccess: (_, variables) => {
@@ -38,7 +43,7 @@ export const usePoolUpdates = () => {
     },
     onError: (error) => {
       console.error("Error updating pool:", error);
-      toast.error("Failed to update pool");
+      toast.error(error instanceof Error ? error.message : "Failed to update pool");
     },
   });
 
