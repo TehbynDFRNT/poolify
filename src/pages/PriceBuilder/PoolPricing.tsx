@@ -126,6 +126,13 @@ const PoolPricing = () => {
 
   const excavationCost = calculateExcavationCost();
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === 'Escape') {
+      // Close editing on Enter or Escape
+      setEditingCell(null);
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8 space-y-8">
