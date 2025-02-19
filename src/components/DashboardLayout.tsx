@@ -35,7 +35,6 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     { icon: <Database className="h-5 w-5" />, label: "Pool Specifications", path: "/pool-specifications" },
     { icon: <Construction className="h-5 w-5" />, label: "Construction Costs", path: "/construction-costs" },
     { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems" },
-    { icon: <Calculator className="h-5 w-5" />, label: "Pricing Models", path: "/pricing-models" },
   ];
 
   return (

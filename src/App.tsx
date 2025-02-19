@@ -13,7 +13,6 @@ import CraneCosts from "@/pages/ConstructionCosts/CraneCosts";
 import FixedCosts from "@/pages/ConstructionCosts/FixedCosts";
 import PoolSpecificCosts from "@/pages/ConstructionCosts/PoolSpecificCosts";
 import FiltrationSystems from "@/pages/FiltrationSystems";
-import PricingModels from "@/pages/PricingModels";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -33,7 +32,6 @@ function App() {
           <Route path="/construction-costs/fixed-costs" element={<FixedCosts />} />
           <Route path="/construction-costs/pool-specific-costs" element={<PoolSpecificCosts />} />
           <Route path="/filtration-systems" element={<FiltrationSystems />} />
-          <Route path="/pricing-models" element={<PricingModels />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />
