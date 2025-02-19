@@ -29,11 +29,7 @@ export const PoolCostsTable = ({
     poolId: string;
     field: keyof PoolCosts;
   } | null>(null);
-  
-  const [costs, setCosts] = useState<Record<string, PoolCosts>>(() => {
-    // Initialize with the provided initialPoolCosts
-    return { ...initialPoolCosts };
-  });
+  const [costs, setCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
 
   const calculateTotal = (poolName: string) => {
     const poolCosts = costs[poolName] || {
@@ -48,20 +44,6 @@ export const PoolCostsTable = ({
     };
 
     return Object.values(poolCosts).reduce((sum, value) => sum + value, 0);
-  };
-
-  const handleCellSave = (poolName: string, field: keyof PoolCosts, value: string) => {
-    const numericValue = parseFloat(value);
-    if (isNaN(numericValue)) return;
-
-    setCosts(prev => ({
-      ...prev,
-      [poolName]: {
-        ...prev[poolName],
-        [field]: numericValue
-      }
-    }));
-    setEditingCell(null);
   };
 
   return (
@@ -100,6 +82,20 @@ export const PoolCostsTable = ({
             peaGravel: 0,
             installFee: 0
           };
+          
+          const handleCellSave = (field: keyof PoolCosts, value: string) => {
+            const numericValue = parseFloat(value);
+            if (isNaN(numericValue)) return;
+
+            setCosts(prev => ({
+              ...prev,
+              [fixedName]: {
+                ...prev[fixedName],
+                [field]: numericValue
+              }
+            }));
+            setEditingCell(null);
+          };
 
           return (
             <TableRow key={pool.id}>
@@ -116,10 +112,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'peaGravel' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'peaGravel', value)}
+                  onChange={(value) => handleCellSave('peaGravel', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'peaGravel', (e.target as HTMLInputElement).value);
+                      handleCellSave('peaGravel', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -134,10 +130,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'installFee' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'installFee', value)}
+                  onChange={(value) => handleCellSave('installFee', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'installFee', (e.target as HTMLInputElement).value);
+                      handleCellSave('installFee', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -152,10 +148,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'truckedWater' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'truckedWater', value)}
+                  onChange={(value) => handleCellSave('truckedWater', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'truckedWater', (e.target as HTMLInputElement).value);
+                      handleCellSave('truckedWater', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -170,10 +166,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'saltBags' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'saltBags', value)}
+                  onChange={(value) => handleCellSave('saltBags', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'saltBags', (e.target as HTMLInputElement).value);
+                      handleCellSave('saltBags', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -188,10 +184,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'misc' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'misc', value)}
+                  onChange={(value) => handleCellSave('misc', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'misc', (e.target as HTMLInputElement).value);
+                      handleCellSave('misc', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -206,10 +202,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingSupply' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'copingSupply', value)}
+                  onChange={(value) => handleCellSave('copingSupply', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'copingSupply', (e.target as HTMLInputElement).value);
+                      handleCellSave('copingSupply', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -224,10 +220,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'beam' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'beam', value)}
+                  onChange={(value) => handleCellSave('beam', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'beam', (e.target as HTMLInputElement).value);
+                      handleCellSave('beam', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
@@ -242,10 +238,10 @@ export const PoolCostsTable = ({
                   onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingLay' })}
                   onSave={() => setEditingCell(null)}
                   onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave(fixedName, 'copingLay', value)}
+                  onChange={(value) => handleCellSave('copingLay', value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
-                      handleCellSave(fixedName, 'copingLay', (e.target as HTMLInputElement).value);
+                      handleCellSave('copingLay', (e.target as HTMLInputElement).value);
                     }
                   }}
                   type="number"
