@@ -14,18 +14,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Link, useNavigate } from "react-router-dom";
-import { Calculator, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePools } from "./hooks/usePools";
-import { usePricingCalculations } from "./hooks/usePricingCalculations";
-import { PricingTable } from "./components/PricingTable";
 
 const PricingWorksheet = () => {
   const navigate = useNavigate();
   const { data: pools, isLoading: isLoadingPools } = usePools();
-  const { calculateTrueCost, isLoading: isLoadingCalculations } = usePricingCalculations();
 
-  if (isLoadingPools || isLoadingCalculations) {
+  if (isLoadingPools) {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-8">
@@ -72,18 +69,17 @@ const PricingWorksheet = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <h1 className="text-2xl font-semibold text-gray-900">Pricing Worksheet</h1>
-            <p className="text-gray-500 mt-1">Pool pricing overview</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Pool Worksheet</h1>
+            <p className="text-gray-500 mt-1">Pool overview</p>
           </div>
-          <Calculator className="h-6 w-6 text-gray-500" />
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Pool Prices</CardTitle>
+            <CardTitle>Pools</CardTitle>
           </CardHeader>
           <CardContent>
-            {pools && <PricingTable pools={pools} calculateTrueCost={calculateTrueCost} />}
+            {pools && <PricingTable pools={pools} />}
           </CardContent>
         </Card>
       </div>

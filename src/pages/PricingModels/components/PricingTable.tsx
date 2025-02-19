@@ -1,5 +1,4 @@
 
-import { formatCurrency } from "@/utils/format";
 import {
   Table,
   TableBody,
@@ -10,18 +9,12 @@ import {
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import type { SupabasePoolResponse } from "../types";
-import { 
-  calculateFiltrationTotal,
-  calculatePoolSpecificCosts,
-  calculateFixedCostsTotal
-} from "../utils/calculateCosts";
 
 type PricingTableProps = {
   pools: SupabasePoolResponse[];
-  calculateTrueCost: (pool: SupabasePoolResponse) => number;
 };
 
-export const PricingTable = ({ pools, calculateTrueCost }: PricingTableProps) => {
+export const PricingTable = ({ pools }: PricingTableProps) => {
   const navigate = useNavigate();
 
   return (
