@@ -1,114 +1,77 @@
 
+import React, { useState } from "react";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Pool, POOL_RANGES } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
-import { Edit2 } from "lucide-react";
-import { toast } from "sonner";
-import type { Pool } from "@/types/pool";
-import { POOL_RANGES } from "@/types/pool";
-import { useState } from "react";
+
+// Define editableFields outside the component
+const editableFields: (keyof Pool)[] = [
+  "name",
+  "range",
+  "length",
+  "width",
+  "depth_shallow",
+  "depth_deep",
+  "waterline_l_m",
+  "volume_liters",
+  "salt_volume_bags",
+  "salt_volume_bags_fixed",
+  "weight_kg",
+  "minerals_kg_initial",
+  "minerals_kg_topup",
+  "buy_price_ex_gst",
+  "buy_price_inc_gst"
+];
+
+type EditingCell = {
+  id: string;
+  field: keyof Pool;
+};
 
 interface PoolTableProps {
   pools: Pool[];
 }
 
-interface EditingCell {
-  id: string;
-  field: keyof Pool;
-}
-
-const isStringField = (field: keyof Pool): boolean => {
-  return ["name", "range"].includes(field as string);
-};
-
-const PoolTable = ({ pools }: PoolTableProps) => {
-  const queryClient = useQueryClient();
+export const PoolTable = ({ pools }: PoolTableProps) => {
   const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
   const [editValue, setEditValue] = useState<string>("");
+  const queryClient = useQueryClient();
 
   const updatePoolMutation = useMutation({
-    mutationFn: async (pool: Partial<Pool> & { id: string }) => {
-      console.log('Updating pool with data:', pool);
-      const { data, error } = await supabase
+    mutationFn: async ({ id, ...updates }: Partial<Pool> & { id: string }) => {
+      const { error } = await supabase
         .from("pool_specifications")
-        .update(pool)
-        .eq("id", pool.id)
-        .select();
+        .update(updates)
+        .eq("id", id);
 
-      if (error) {
-        console.error('Error updating pool:', error);
-        throw error;
-      }
-      
-      return data;
+      if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
-      toast.success("Pool specification updated successfully");
       setEditingCell(null);
-      setEditValue("");
-    },
-    onError: (error) => {
-      toast.error("Failed to update pool specification");
-      console.error(error);
     },
   });
 
   const handleCellClick = (pool: Pool, field: keyof Pool) => {
-    if (field === "buy_price_inc_gst" || field === "standard_filtration_package") return;
+    if (!editableFields.includes(field)) return;
+    
     setEditingCell({ id: pool.id, field });
     setEditValue(String(pool[field] || ""));
   };
 
-  const handleCellBlur = async (pool: Pool) => {
+  const handleCellBlur = (pool: Pool) => {
     if (!editingCell) return;
 
-    const value = editValue.trim();
-    if (value === String(pool[editingCell.field])) {
-      setEditingCell(null);
-      setEditValue("");
-      return;
-    }
+    const updates: Partial<Pool> & { id: string } = {
+      id: pool.id,
+      [editingCell.field]: editValue,
+    };
 
-    let parsedValue: string | number | null = value;
-    if (!isStringField(editingCell.field)) {
-      parsedValue = value === "" ? null : Number(value);
-      if (typeof parsedValue === "number" && isNaN(parsedValue)) {
-        toast.error("Please enter a valid number");
-        return;
-      }
-    }
-
-    if (editingCell.field === 'buy_price_ex_gst' && typeof parsedValue === 'number') {
-      const gstIncPrice = parsedValue * 1.1;
-      await updatePoolMutation.mutateAsync({
-        id: pool.id,
-        buy_price_ex_gst: parsedValue,
-        buy_price_inc_gst: gstIncPrice
-      });
-    } else {
-      await updatePoolMutation.mutateAsync({
-        id: pool.id,
-        [editingCell.field]: parsedValue,
-      });
-    }
+    updatePoolMutation.mutate(updates);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, pool: Pool) => {
@@ -116,16 +79,19 @@ const PoolTable = ({ pools }: PoolTableProps) => {
       handleCellBlur(pool);
     } else if (e.key === "Escape") {
       setEditingCell(null);
-      setEditValue("");
     }
+  };
+
+  const isStringField = (field: keyof Pool): boolean => {
+    return ["name", "range"].includes(field);
   };
 
   const renderCell = (pool: Pool, field: keyof Pool) => {
     const isEditing = editingCell?.id === pool.id && editingCell?.field === field;
     const value = pool[field];
 
-    // Skip rendering for object fields
-    if (field === 'standard_filtration_package' || typeof value === 'object') {
+    // Skip rendering for non-primitive fields
+    if (typeof value === 'object') {
       return null;
     }
 
@@ -196,43 +162,12 @@ const PoolTable = ({ pools }: PoolTableProps) => {
   return (
     <div className="rounded-md border">
       <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Range</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Length</TableHead>
-            <TableHead>Width</TableHead>
-            <TableHead>Shallow End</TableHead>
-            <TableHead>Deep End</TableHead>
-            <TableHead>Waterline L/M</TableHead>
-            <TableHead>Water Volume (L)</TableHead>
-            <TableHead>Salt Bags</TableHead>
-            <TableHead>Salt Fixed</TableHead>
-            <TableHead>Weight (KG)</TableHead>
-            <TableHead>Minerals Initial</TableHead>
-            <TableHead>Minerals Topup</TableHead>
-            <TableHead>Buy Price (ex GST)</TableHead>
-            <TableHead>Buy Price (inc GST)</TableHead>
-          </TableRow>
-        </TableHeader>
         <TableBody>
-          {pools?.map((pool) => (
+          {pools.map((pool) => (
             <TableRow key={pool.id}>
-              <TableCell>{renderCell(pool, "range")}</TableCell>
-              <TableCell>{renderCell(pool, "name")}</TableCell>
-              <TableCell>{renderCell(pool, "length")}</TableCell>
-              <TableCell>{renderCell(pool, "width")}</TableCell>
-              <TableCell>{renderCell(pool, "depth_shallow")}</TableCell>
-              <TableCell>{renderCell(pool, "depth_deep")}</TableCell>
-              <TableCell>{renderCell(pool, "waterline_l_m")}</TableCell>
-              <TableCell>{renderCell(pool, "volume_liters")}</TableCell>
-              <TableCell>{renderCell(pool, "salt_volume_bags")}</TableCell>
-              <TableCell>{renderCell(pool, "salt_volume_bags_fixed")}</TableCell>
-              <TableCell>{renderCell(pool, "weight_kg")}</TableCell>
-              <TableCell>{renderCell(pool, "minerals_kg_initial")}</TableCell>
-              <TableCell>{renderCell(pool, "minerals_kg_topup")}</TableCell>
-              <TableCell>{renderCell(pool, "buy_price_ex_gst")}</TableCell>
-              <TableCell>{renderCell(pool, "buy_price_inc_gst")}</TableCell>
+              {editableFields.map((field) => (
+                <TableCell key={field}>{renderCell(pool, field)}</TableCell>
+              ))}
             </TableRow>
           ))}
         </TableBody>
@@ -240,5 +175,3 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     </div>
   );
 };
-
-export default PoolTable;
