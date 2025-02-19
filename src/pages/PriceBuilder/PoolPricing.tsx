@@ -14,17 +14,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const PoolPricing = () => {
   const { poolId } = useParams();
   const navigate = useNavigate();
 
-  const { data: pool, isLoading } = useQuery({
+  const { data: pool, isLoading: isPoolLoading } = useQuery({
     queryKey: ["pool-pricing", poolId],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*")
+        .select("*, standard_filtration_package:standard_filtration_package_id(name)")
         .eq("id", poolId)
         .single();
 
@@ -33,7 +34,28 @@ const PoolPricing = () => {
     },
   });
 
-  if (isLoading) {
+  const { data: allPools, isLoading: isAllPoolsLoading } = useQuery({
+    queryKey: ["all-pools-filtration"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_specifications")
+        .select(`
+          id,
+          name,
+          standard_filtration_package:standard_filtration_package_id(
+            id,
+            name,
+            display_order
+          )
+        `)
+        .order('name');
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  if (isPoolLoading || isAllPoolsLoading) {
     return <div>Loading...</div>;
   }
 
@@ -118,10 +140,40 @@ const PoolPricing = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>{pool.name} Price Configuration</CardTitle>
+            <CardTitle>Pool Filtration Packages</CardTitle>
           </CardHeader>
           <CardContent>
-            {/* We'll add pricing configuration components here */}
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Pool Name</TableHead>
+                  <TableHead>Standard Filtration Package</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {allPools?.map((pool) => (
+                  <TableRow key={pool.id}>
+                    <TableCell>{pool.name}</TableCell>
+                    <TableCell>
+                      {pool.standard_filtration_package?.name || 'Not set'}
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // We'll implement the edit functionality next
+                          console.log('Edit package for pool:', pool.name);
+                        }}
+                      >
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
       </div>
