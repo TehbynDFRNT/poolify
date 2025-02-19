@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, DollarSign, Package, List, Database, ImagePlus } from "lucide-react";
@@ -30,6 +29,7 @@ const PoolPricing = () => {
         .from("pool_specifications")
         .select(`
           *,
+          dig_type:excavation_dig_types!dig_type_id (*),
           default_package:filtration_packages!default_filtration_package_id (
             id,
             name,
@@ -102,6 +102,14 @@ const PoolPricing = () => {
   }
 
   const poolCosts = initialPoolCosts[pool.name];
+
+  const calculateExcavationCost = () => {
+    if (!pool.dig_type) return 0;
+    const { truck_count, truck_hourly_rate, truck_hours, excavation_hourly_rate, excavation_hours } = pool.dig_type;
+    return (truck_count * truck_hourly_rate * truck_hours) + (excavation_hourly_rate * excavation_hours);
+  };
+
+  const excavationCost = calculateExcavationCost();
 
   return (
     <DashboardLayout>
@@ -347,6 +355,10 @@ const PoolPricing = () => {
                         <p className="text-sm text-muted-foreground">Install Fee</p>
                         <p className="text-lg font-semibold">{formatCurrency(poolCosts.installFee)}</p>
                       </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Excavation</p>
+                        <p className="text-lg font-semibold">{formatCurrency(excavationCost)}</p>
+                      </div>
                     </div>
                   </div>
 
@@ -394,7 +406,8 @@ const PoolPricing = () => {
                           poolCosts.copingLay +
                           poolCosts.truckedWater +
                           poolCosts.saltBags +
-                          (poolCosts.misc || 0)
+                          (poolCosts.misc || 0) +
+                          excavationCost
                         )}
                       </p>
                     </div>
@@ -428,4 +441,3 @@ const PoolPricing = () => {
 };
 
 export default PoolPricing;
-
