@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, DollarSign, Package, List, Database, ImagePlus } from "lucide-react";
@@ -94,13 +95,15 @@ const PoolPricing = () => {
             </CardHeader>
             <CardContent>
               <div className="w-full max-w-md mx-auto">
-                <div className="relative w-full aspect-[4/3] border-2 border-gray-200 rounded-lg">
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
-                    <p className="text-gray-400">No pool image</p>
-                  </div>
+                <div className="relative w-full aspect-[4/3] border-2 border-gray-200 rounded-lg overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/067e2299-40f3-4c0e-bf8a-3fb279d3c79b.png"
+                    alt={`${pool.name} outline`}
+                    className="w-full h-full object-contain bg-white"
+                  />
                 </div>
                 <div className="mt-4">
-                  <Button variant="outline" size="sm" className="w-full">
+                  <Button variant="outline" size="sm" className="w-full" disabled>
                     <ImagePlus className="h-4 w-4 mr-2" />
                     Change Pool Image
                   </Button>
