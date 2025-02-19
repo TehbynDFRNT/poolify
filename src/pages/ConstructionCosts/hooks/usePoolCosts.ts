@@ -16,8 +16,68 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const { data: poolCosts } = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      return initialPoolCosts;
+      console.log('Fetching pool costs');
+      const { data, error } = await supabase
+        .from('pool_costs')
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching pool costs:', error);
+        throw error;
+      }
+
+      // If we have data from the database, use it, otherwise use initial costs
+      return data?.length ? data.reduce((acc, cost) => ({
+        ...acc,
+        [cost.pool_id]: {
+          truckedWater: cost.trucked_water,
+          saltBags: cost.salt_bags,
+          misc: cost.misc,
+          copingSupply: cost.coping_supply,
+          beam: cost.beam,
+          copingLay: cost.coping_lay,
+          peaGravel: cost.pea_gravel,
+          installFee: cost.install_fee
+        }
+      }), {...initialPoolCosts}) : initialPoolCosts;
     },
+  });
+
+  const updatePoolCostsMutation = useMutation({
+    mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
+      console.log('Updating pool costs:', { poolId, costs });
+      const { data, error } = await supabase
+        .from('pool_costs')
+        .upsert({
+          pool_id: poolId,
+          trucked_water: costs.truckedWater,
+          salt_bags: costs.saltBags,
+          misc: costs.misc,
+          coping_supply: costs.copingSupply,
+          beam: costs.beam,
+          coping_lay: costs.copingLay,
+          pea_gravel: costs.peaGravel,
+          install_fee: costs.installFee
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating pool costs:', error);
+        throw error;
+      }
+
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
+      toast.success("Changes saved successfully");
+      setEditingRow(null);
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
+      toast.error("Failed to save changes");
+    }
   });
 
   const handleEdit = (poolName: string) => {
@@ -30,8 +90,13 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const handleSave = async (poolId: string, poolName: string) => {
-    setEditingRow(null);
-    toast.success("Changes saved successfully");
+    const updatedCosts = editedCosts[poolName];
+    if (!updatedCosts) return;
+
+    updatePoolCostsMutation.mutate({
+      poolId,
+      costs: updatedCosts
+    });
   };
 
   const handleCancel = () => {
