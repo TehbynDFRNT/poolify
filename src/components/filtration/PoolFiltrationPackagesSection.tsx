@@ -16,53 +16,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
-import type { Pool, FiltrationPackageResponse } from "@/types/pool";
+import type { Pool } from "@/types/pool";
+import type { PackageWithComponents } from "@/types/filtration";
 import { FiltrationPackageDetails } from "../pools/components/FiltrationPackageDetails";
 import { calculateFiltrationTotal } from "../pools/utils/filtrationCalculations";
+import { toast } from "sonner";
+import { ChevronDown } from "lucide-react";
 
 interface PoolFiltrationPackagesSectionProps {
-  packages: FiltrationPackageResponse[] | undefined;
+  packages: PackageWithComponents[] | undefined;
 }
-
-const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
-  "Latina": 1,
-  "Sovereign": 1,
-  "Empire": 1,
-  "Oxford": 1,
-  "Sheffield": 1,
-  "Avellino": 1,
-  "Palazzo": 1,
-  "Valentina": 2,
-  "Westminster": 2,
-  "Kensington": 3,
-  "Bedarra": 1,
-  "Hayman": 1,
-  "Verona": 1,
-  "Portofino": 1,
-  "Florentina": 1,
-  "Bellagio": 1,
-  "Bellino": 1,
-  "Imperial": 1,
-  "Castello": 1,
-  "Grandeur": 1,
-  "Amalfi": 1,
-  "Serenity": 1,
-  "Allure": 1,
-  "Harmony": 1,
-  "Istana": 1,
-  "Terazza": 1,
-  "Elysian": 1,
-  "Infinity 3": 1,
-  "Infinity 4": 1,
-  "Terrace 3": 1,
-};
 
 export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackagesSectionProps) {
   const [selectedPackages, setSelectedPackages] = React.useState<Record<string, string>>({});
   const [expandedRow, setExpandedRow] = React.useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   const { data: pools } = useQuery({
     queryKey: ["pool-specifications"],
@@ -74,7 +45,32 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
 
       const { data: poolsData, error } = await supabase
         .from("pool_specifications")
-        .select("*");
+        .select(`
+          *,
+          standard_filtration_package:filtration_packages(
+            id,
+            name,
+            display_order,
+            light:filtration_components!light_id(id, name, model_number, price),
+            pump:filtration_components!pump_id(id, name, model_number, price),
+            sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
+            filter:filtration_components!filter_id(id, name, model_number, price),
+            handover_kit:handover_kit_packages!handover_kit_id(
+              id,
+              name,
+              components:handover_kit_package_components(
+                id,
+                quantity,
+                component:filtration_components!component_id(
+                  id,
+                  name,
+                  model_number,
+                  price
+                )
+              )
+            )
+          )
+        `);
 
       if (error) throw error;
 
@@ -88,29 +84,41 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
   });
 
   React.useEffect(() => {
-    if (packages && pools) {
+    if (pools) {
       const initialSelections: Record<string, string> = {};
-      
       pools.forEach((pool) => {
-        const targetOption = DEFAULT_PACKAGE_MAPPING[pool.name];
-        if (targetOption) {
-          const matchingPackage = packages.find(p => p.display_order === targetOption);
-          if (matchingPackage) {
-            initialSelections[pool.id] = matchingPackage.id;
-          }
+        if (pool.standard_filtration_package?.id) {
+          initialSelections[pool.id] = pool.standard_filtration_package.id;
         }
       });
-
       setSelectedPackages(initialSelections);
     }
-  }, [packages, pools]);
+  }, [pools]);
 
-  const handlePackageChange = (poolId: string, packageId: string) => {
-    setSelectedPackages(prev => ({
-      ...prev,
-      [poolId]: packageId
-    }));
-    setExpandedRow(poolId);
+  const handlePackageChange = async (poolId: string, packageId: string) => {
+    try {
+      const { error } = await supabase
+        .from("pool_specifications")
+        .update({ standard_filtration_package_id: packageId })
+        .eq("id", poolId);
+
+      if (error) throw error;
+
+      setSelectedPackages(prev => ({
+        ...prev,
+        [poolId]: packageId
+      }));
+
+      // Expand the row to show the details
+      setExpandedRow(poolId);
+
+      // Invalidate the pool specifications query to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
+      toast.success("Filtration package updated successfully");
+    } catch (error) {
+      console.error("Error updating filtration package:", error);
+      toast.error("Failed to update filtration package");
+    }
   };
 
   const getSelectedPackageDetails = (poolId: string) => {
@@ -144,13 +152,14 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
                   onClick={() => toggleExpandedRow(pool.id)}
                 >
                   <TableCell>{pool.name}</TableCell>
-                  <TableCell>
+                  <TableCell onClick={(e) => e.stopPropagation()}>
                     <Select
                       value={selectedPackages[pool.id] || ""}
                       onValueChange={(value) => handlePackageChange(pool.id, value)}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select package" />
+                        <ChevronDown className="h-4 w-4 opacity-50" />
                       </SelectTrigger>
                       <SelectContent>
                         {packages?.map((pkg) => (
