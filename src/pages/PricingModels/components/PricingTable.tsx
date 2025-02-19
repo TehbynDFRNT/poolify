@@ -37,8 +37,15 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
   const calculateTrueCost = (pool: SupabasePoolResponse) => {
     const poolShellPrice = pool.buy_price_inc_gst || 0;
     const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
-    const totalPoolCosts = calculatePoolSpecificCosts(pool.name, null); // We don't have dig type here, so passing null
+    const totalPoolCosts = calculatePoolSpecificCosts(pool.name, null);
     const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
+
+    console.log(`=== Cost Breakdown for ${pool.name} ===`);
+    console.log('Pool Shell Price:', poolShellPrice);
+    console.log('Filtration Total:', filtrationTotal);
+    console.log('Pool Specific Costs:', totalPoolCosts);
+    console.log('Fixed Costs:', totalFixedCosts);
+    console.log('Total:', poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts);
 
     return poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
   };
