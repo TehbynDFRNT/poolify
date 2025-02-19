@@ -15,7 +15,8 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import type { FiltrationComponent, FiltrationComponentType, FiltrationPackage, PackageWithComponents } from "@/types/filtration";
+import type { FiltrationComponent, FiltrationComponentType } from "@/types/filtration";
+import type { FiltrationPackageResponse } from "@/types/pool";
 
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -88,17 +89,17 @@ const FiltrationSystems = () => {
           name,
           display_order,
           created_at,
-          light:filtration_components!light_id(id, name, model_number, price),
-          pump:filtration_components!pump_id(id, name, model_number, price),
-          sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
-          filter:filtration_components!filter_id(id, name, model_number, price),
-          handover_kit:handover_kit_packages!handover_kit_id(
+          light:light_id (id, name, model_number, price),
+          pump:pump_id (id, name, model_number, price),
+          sanitiser:sanitiser_id (id, name, model_number, price),
+          filter:filter_id (id, name, model_number, price),
+          handover_kit:handover_kit_id (
             id, 
             name,
             components:handover_kit_package_components(
               id,
               quantity,
-              component:filtration_components(
+              component:component_id(
                 id,
                 name,
                 model_number,
@@ -110,7 +111,7 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data as unknown as PackageWithComponents[];
+      return data as FiltrationPackageResponse[];
     },
   });
 

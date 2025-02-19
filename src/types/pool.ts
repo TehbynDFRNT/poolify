@@ -1,6 +1,6 @@
 
 import { z } from "zod";
-import type { FiltrationComponent, HandoverKitPackage, HandoverKitPackageComponent } from "./filtration";
+import type { FiltrationComponent } from "./filtration";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -46,11 +46,11 @@ export interface FiltrationPackageResponse {
   id: string;
   name: string;
   display_order: number;
-  light: FiltrationComponentResponse | null;
-  pump: FiltrationComponentResponse | null;
-  sanitiser: FiltrationComponentResponse | null;
-  filter: FiltrationComponentResponse | null;
-  handover_kit: HandoverKitPackageResponse | null;
+  light?: FiltrationComponentResponse | null;
+  pump?: FiltrationComponentResponse | null;
+  sanitiser?: FiltrationComponentResponse | null;
+  filter?: FiltrationComponentResponse | null;
+  handover_kit?: HandoverKitPackageResponse | null;
 }
 
 export interface Pool {
