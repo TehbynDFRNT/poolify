@@ -84,6 +84,22 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     return ["name", "range"].includes(field);
   };
 
+  const calculateFiltrationTotal = (pkg: any) => {
+    if (!pkg) return 0;
+    
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total: number, comp: any) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
   const renderCell = (pool: Pool, field: keyof Pool) => {
     const isEditing = editingCell?.id === pool.id && editingCell?.field === field;
     const value = pool[field];
@@ -157,22 +173,6 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     );
   };
 
-  const calculateFiltrationTotal = (pkg: any) => {
-    if (!pkg) return 0;
-    
-    const handoverKitTotal = pkg.handover_kit?.components.reduce((total: number, comp: any) => {
-      return total + ((comp.component?.price || 0) * comp.quantity);
-    }, 0) || 0;
-
-    return (
-      (pkg.light?.price || 0) +
-      (pkg.pump?.price || 0) +
-      (pkg.sanitiser?.price || 0) +
-      (pkg.filter?.price || 0) +
-      handoverKitTotal
-    );
-  };
-
   return (
     <div className="rounded-md border">
       <Table>
@@ -210,41 +210,38 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
                 <TableRow className="bg-muted/50">
                   <TableCell colSpan={editableFields.length + 1}>
                     <div className="p-2 text-sm space-y-2">
-                      <div className="grid grid-cols-2 gap-4">
+                      <div className="grid grid-cols-5 gap-4">
                         <div>
-                          <span className="font-medium">Light:</span>{' '}
-                          {pool.standard_filtration_package.light?.model_number || 'None'} 
-                          {pool.standard_filtration_package.light && ` (${formatCurrency(pool.standard_filtration_package.light.price)})`}
-                        </div>
-                        <div>
-                          <span className="font-medium">Pump:</span>{' '}
-                          {pool.standard_filtration_package.pump?.model_number || 'None'}
-                          {pool.standard_filtration_package.pump && ` (${formatCurrency(pool.standard_filtration_package.pump.price)})`}
-                        </div>
-                        <div>
-                          <span className="font-medium">Sanitiser:</span>{' '}
-                          {pool.standard_filtration_package.sanitiser?.model_number || 'None'}
-                          {pool.standard_filtration_package.sanitiser && ` (${formatCurrency(pool.standard_filtration_package.sanitiser.price)})`}
-                        </div>
-                        <div>
-                          <span className="font-medium">Filter:</span>{' '}
-                          {pool.standard_filtration_package.filter?.model_number || 'None'}
-                          {pool.standard_filtration_package.filter && ` (${formatCurrency(pool.standard_filtration_package.filter.price)})`}
-                        </div>
-                      </div>
-                      {pool.standard_filtration_package.handover_kit && (
-                        <div>
-                          <div className="font-medium">Handover Kit Components:</div>
-                          <div className="grid grid-cols-2 gap-2 mt-1">
-                            {pool.standard_filtration_package.handover_kit.components.map((comp: any) => (
-                              <div key={comp.component.id}>
-                                {comp.component.model_number} x{comp.quantity} 
-                                ({formatCurrency(comp.component.price * comp.quantity)})
-                              </div>
-                            ))}
+                          <span className="font-medium">Light</span>
+                          <div className="mt-1 text-muted-foreground">
+                            {pool.standard_filtration_package.light?.model_number || 'None'}
                           </div>
                         </div>
-                      )}
+                        <div>
+                          <span className="font-medium">Pool Pump</span>
+                          <div className="mt-1 text-muted-foreground">
+                            {pool.standard_filtration_package.pump?.model_number || 'None'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Sanitiser</span>
+                          <div className="mt-1 text-muted-foreground">
+                            {pool.standard_filtration_package.sanitiser?.model_number || 'None'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Filter</span>
+                          <div className="mt-1 text-muted-foreground">
+                            {pool.standard_filtration_package.filter?.model_number || 'None'}
+                          </div>
+                        </div>
+                        <div>
+                          <span className="font-medium">Handover Kit</span>
+                          <div className="mt-1 text-muted-foreground">
+                            {pool.standard_filtration_package.handover_kit?.name || 'None'}
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                 </TableRow>
