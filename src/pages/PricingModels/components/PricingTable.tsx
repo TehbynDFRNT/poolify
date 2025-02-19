@@ -19,11 +19,24 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
   const navigate = useNavigate();
 
   const calculateFiltrationTotal = (pool: SupabasePoolResponse) => {
-    if (!pool.standard_filtration_package) return null;
+    // Debug logs
+    console.log('Pool:', pool.name);
+    console.log('Filtration package:', pool.standard_filtration_package);
+    
+    if (!pool.standard_filtration_package) {
+      console.log('No filtration package found');
+      return null;
+    }
     
     const pkg = pool.standard_filtration_package;
     
-    // Sum all components including handover kit
+    // Debug component prices
+    console.log('Light price:', pkg.light?.price);
+    console.log('Pump price:', pkg.pump?.price);
+    console.log('Sanitiser price:', pkg.sanitiser?.price);
+    console.log('Filter price:', pkg.filter?.price);
+    console.log('Handover kit:', pkg.handover_kit?.components);
+    
     const total = (
       (pkg.light?.price || 0) +
       (pkg.pump?.price || 0) +
@@ -33,8 +46,8 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
         sum + (comp.component?.price || 0), 0) || 0)
     );
 
-    // Only return null if the total is actually 0
-    return total === 0 ? null : total;
+    console.log('Calculated total:', total);
+    return total || null;
   };
 
   return (
