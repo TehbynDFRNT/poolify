@@ -14,7 +14,10 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { FiltrationComponent, FiltrationComponentType, PackageWithComponents } from "@/types/filtration";
+import type { Pool } from "@/types/pool";
 
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -121,6 +124,31 @@ const FiltrationSystems = () => {
     },
   });
 
+  const { data: pools } = useQuery({
+    queryKey: ["pools-for-filtration"],
+    queryFn: async () => {
+      const { data: ranges } = await supabase
+        .from("pool_ranges")
+        .select("name")
+        .order("display_order");
+
+      const { data: poolsData, error } = await supabase
+        .from("pool_specifications")
+        .select("id, name, range")
+        .order("range", { ascending: true })
+        .order("name", { ascending: true });
+
+      if (error) throw error;
+
+      const rangeOrder = ranges?.map(r => r.name) || [];
+      return (poolsData || []).sort((a, b) => {
+        const aIndex = rangeOrder.indexOf(a.range);
+        const bIndex = rangeOrder.indexOf(b.range);
+        return aIndex - bIndex;
+      }) as Pool[];
+    },
+  });
+
   const handleAddComponent = () => {
     const handoverKitType = componentTypes?.find(t => t.name === "Handover Kit");
     if (handoverKitType) {
@@ -144,6 +172,30 @@ const FiltrationSystems = () => {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Filtration Matching</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Range</TableHead>
+                <TableHead>Pool</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {pools?.map((pool) => (
+                <TableRow key={pool.id}>
+                  <TableCell>{pool.range}</TableCell>
+                  <TableCell>{pool.name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
 
       <FiltrationComponentsSection
         components={components}
