@@ -16,7 +16,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { usePoolPackages } from "@/hooks/usePoolPackages";
-import type { FiltrationComponent, FiltrationComponentType } from "@/types/filtration";
+import type { FiltrationComponent, FiltrationComponentType, PackageWithComponents } from "@/types/filtration";
 
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
@@ -120,7 +120,7 @@ const FiltrationSystems = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data as unknown as PackageWithComponents[];
+      return data as PackageWithComponents[];
     },
   });
 
@@ -173,9 +173,10 @@ const FiltrationSystems = () => {
       <PoolFiltrationMatchingTable
         pools={poolsWithPackages || []}
         packages={packages}
-        onUpdatePackage={(poolId, packageId) => 
-          updatePoolPackageMutation.mutate({ poolId, packageId })
-        }
+        onUpdatePackage={(poolId, packageId) => {
+          console.log('Updating package:', { poolId, packageId });
+          updatePoolPackageMutation.mutate({ poolId, packageId });
+        }}
       />
 
       {componentTypes && (
