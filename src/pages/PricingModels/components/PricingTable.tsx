@@ -18,6 +18,23 @@ type PricingTableProps = {
 export const PricingTable = ({ pools }: PricingTableProps) => {
   const navigate = useNavigate();
 
+  const calculateFiltrationTotal = (pool: SupabasePoolResponse) => {
+    if (!pool.standard_filtration_package) return null;
+    
+    const pkg = pool.standard_filtration_package;
+    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
+      return total + ((comp.component?.price || 0) * comp.quantity);
+    }, 0) || 0;
+
+    return (
+      (pkg.light?.price || 0) +
+      (pkg.pump?.price || 0) +
+      (pkg.sanitiser?.price || 0) +
+      (pkg.filter?.price || 0) +
+      handoverKitTotal
+    );
+  };
+
   return (
     <Table>
       <TableHeader>
@@ -25,6 +42,7 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
           <TableHead>Range</TableHead>
           <TableHead>Pool Name</TableHead>
           <TableHead>Price (inc GST)</TableHead>
+          <TableHead>Standard Filtration</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -37,6 +55,9 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
             <TableCell>{pool.range}</TableCell>
             <TableCell>{pool.name}</TableCell>
             <TableCell>{pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : 'N/A'}</TableCell>
+            <TableCell>
+              {calculateFiltrationTotal(pool) ? formatCurrency(calculateFiltrationTotal(pool)!) : 'N/A'}
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
