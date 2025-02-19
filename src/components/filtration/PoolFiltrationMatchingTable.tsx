@@ -56,12 +56,12 @@ export const PoolFiltrationMatchingTable = ({
     setTempSelection(currentPackageId || "");
   };
 
-  const handleSave = (poolId: string) => {
-    if (tempSelection) {
+  const handleSave = async (poolId: string) => {
+    if (tempSelection && tempSelection !== "") {
       onUpdatePackage(poolId, tempSelection);
+      setEditingRow(null);
+      setTempSelection("");
     }
-    setEditingRow(null);
-    setTempSelection("");
   };
 
   const handleCancel = () => {
@@ -86,78 +86,81 @@ export const PoolFiltrationMatchingTable = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {pools?.map((pool) => (
-              <TableRow key={pool.id}>
-                <TableCell>{pool.range}</TableCell>
-                <TableCell>{pool.name}</TableCell>
-                <TableCell>
-                  {editingRow === pool.id ? (
-                    <Select
-                      value={tempSelection}
-                      onValueChange={setTempSelection}
-                      disabled={isUpdating}
-                    >
-                      <SelectTrigger className="w-[200px]">
-                        <SelectValue placeholder="Select package">
-                          {packages?.find(p => p.id === tempSelection)
-                            ? `Option ${packages.find(p => p.id === tempSelection)?.display_order}`
-                            : "Select package"
-                          }
-                        </SelectValue>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {packages?.map((pkg) => (
-                          <SelectItem key={pkg.id} value={pkg.id}>
-                            Option {pkg.display_order}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <div className="w-[200px] py-2">
-                      {packages?.find(p => p.id === pool.default_filtration_package_id)
-                        ? `Option ${packages.find(p => p.id === pool.default_filtration_package_id)?.display_order}`
-                        : "No package selected"
-                      }
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="text-right">
-                  {pool.default_package ? formatCurrency(calculatePackagePrice(pool.default_package)) : "-"}
-                </TableCell>
-                <TableCell>
-                  {editingRow === pool.id ? (
-                    <div className="flex items-center gap-2">
+            {pools?.map((pool) => {
+              const selectedPackage = packages?.find(p => p.id === pool.default_filtration_package_id);
+              return (
+                <TableRow key={pool.id}>
+                  <TableCell>{pool.range}</TableCell>
+                  <TableCell>{pool.name}</TableCell>
+                  <TableCell>
+                    {editingRow === pool.id ? (
+                      <Select
+                        value={tempSelection}
+                        onValueChange={setTempSelection}
+                        disabled={isUpdating}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select package">
+                            {packages?.find(p => p.id === tempSelection)
+                              ? `Option ${packages.find(p => p.id === tempSelection)?.display_order}`
+                              : "Select package"
+                            }
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          {packages?.map((pkg) => (
+                            <SelectItem key={pkg.id} value={pkg.id}>
+                              Option {pkg.display_order}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="w-[200px] py-2">
+                        {selectedPackage 
+                          ? `Option ${selectedPackage.display_order}`
+                          : "No package selected"
+                        }
+                      </div>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {pool.default_package ? formatCurrency(calculatePackagePrice(pool.default_package)) : "-"}
+                  </TableCell>
+                  <TableCell>
+                    {editingRow === pool.id ? (
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSave(pool.id)}
+                          disabled={isUpdating}
+                        >
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleCancel}
+                          disabled={isUpdating}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ) : (
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleSave(pool.id)}
+                        onClick={() => handleEdit(pool.id, pool.default_filtration_package_id)}
                         disabled={isUpdating}
                       >
-                        <Check className="h-4 w-4" />
+                        <Pencil className="h-4 w-4" />
                       </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={handleCancel}
-                        disabled={isUpdating}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(pool.id, pool.default_filtration_package_id)}
-                      disabled={isUpdating}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            ))}
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </CardContent>

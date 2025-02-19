@@ -2,11 +2,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { PackageWithComponents } from "@/types/filtration";
+import { toast } from "sonner";
 
 export const usePoolPackages = () => {
   const queryClient = useQueryClient();
 
-  const { data: poolsWithPackages } = useQuery({
+  const { data: poolsWithPackages, isLoading } = useQuery({
     queryKey: ["pools-with-packages"],
     queryFn: async () => {
       const { data: ranges } = await supabase
@@ -52,7 +53,10 @@ export const usePoolPackages = () => {
         .order("range", { ascending: true })
         .order("name", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching pools:", error);
+        throw error;
+      }
 
       const rangeOrder = ranges?.map(r => r.name) || [];
       return (poolsData || []).sort((a, b) => {
@@ -70,15 +74,24 @@ export const usePoolPackages = () => {
         .update({ default_filtration_package_id: packageId })
         .eq("id", poolId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating pool package:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pools-with-packages"] });
+      toast.success("Package updated successfully");
+    },
+    onError: (error) => {
+      console.error("Mutation error:", error);
+      toast.error("Failed to update package");
     },
   });
 
   return {
     poolsWithPackages,
+    isLoading,
     updatePoolPackageMutation,
   };
 };
