@@ -30,18 +30,39 @@ const PoolDetails = () => {
         .from("pool_specifications")
         .select(`
           *,
-          standard_filtration_package:filtration_packages!fk_pool_specs_filtration_package (
+          standard_filtration_package:filtration_packages(
             id,
             name,
             display_order,
-            light:light_id(id, name, model_number, price),
-            pump:pump_id(id, name, model_number, price),
-            sanitiser:sanitiser_id(id, name, model_number, price),
-            filter:filter_id(id, name, model_number, price),
+            light:light_id(
+              id,
+              name,
+              model_number,
+              price
+            ),
+            pump:pump_id(
+              id,
+              name,
+              model_number,
+              price
+            ),
+            sanitiser:sanitiser_id(
+              id,
+              name,
+              model_number,
+              price
+            ),
+            filter:filter_id(
+              id,
+              name,
+              model_number,
+              price
+            ),
             handover_kit:handover_kit_id(
-              id, 
+              id,
               name,
               components:handover_kit_package_components(
+                id,
                 quantity,
                 component:component_id(
                   id,
@@ -60,8 +81,22 @@ const PoolDetails = () => {
         console.error("Error fetching pool:", error);
         throw error;
       }
-      console.log("Fetched pool data:", data);
-      return data as Pool;
+      
+      // Transform the data to match our expected types
+      const transformedData = {
+        ...data,
+        standard_filtration_package: data.standard_filtration_package ? {
+          ...data.standard_filtration_package,
+          light: data.standard_filtration_package.light || null,
+          pump: data.standard_filtration_package.pump || null,
+          sanitiser: data.standard_filtration_package.sanitiser || null,
+          filter: data.standard_filtration_package.filter || null,
+          handover_kit: data.standard_filtration_package.handover_kit || null
+        } : null
+      };
+
+      console.log("Transformed pool data:", transformedData);
+      return transformedData as Pool;
     },
   });
 
