@@ -27,7 +27,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
 
       // Transform the data into our expected format
       const costsMap: Record<string, PoolCosts> = {};
-      poolCosts.forEach((cost: PoolCostsRow) => {
+      poolCosts?.forEach((cost: PoolCostsRow) => {
         costsMap[cost.pool_id] = {
           truckedWater: cost.trucked_water,
           saltBags: cost.salt_bags,
@@ -40,29 +40,61 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
         };
       });
 
-      // Merge with initial costs for any missing entries
       return { ...initialPoolCosts, ...costsMap };
     },
   });
 
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string, costs: PoolCosts }) => {
-      const { error } = await supabase
-        .from('pool_costs')
-        .upsert({
-          pool_id: poolId,
-          trucked_water: costs.truckedWater,
-          salt_bags: costs.saltBags,
-          misc: costs.misc,
-          coping_supply: costs.copingSupply,
-          beam: costs.beam,
-          coping_lay: costs.copingLay,
-          pea_gravel: costs.peaGravel,
-          install_fee: costs.installFee,
-        });
+      try {
+        // First check if a record exists
+        const { data: existingCost } = await supabase
+          .from('pool_costs')
+          .select('*')
+          .eq('pool_id', poolId)
+          .maybeSingle();
 
-      if (error) throw error;
-      return costs;
+        if (existingCost) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('pool_costs')
+            .update({
+              trucked_water: costs.truckedWater,
+              salt_bags: costs.saltBags,
+              misc: costs.misc,
+              coping_supply: costs.copingSupply,
+              beam: costs.beam,
+              coping_lay: costs.copingLay,
+              pea_gravel: costs.peaGravel,
+              install_fee: costs.installFee,
+            })
+            .eq('pool_id', poolId);
+
+          if (updateError) throw updateError;
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('pool_costs')
+            .insert({
+              pool_id: poolId,
+              trucked_water: costs.truckedWater,
+              salt_bags: costs.saltBags,
+              misc: costs.misc,
+              coping_supply: costs.copingSupply,
+              beam: costs.beam,
+              coping_lay: costs.copingLay,
+              pea_gravel: costs.peaGravel,
+              install_fee: costs.installFee,
+            });
+
+          if (insertError) throw insertError;
+        }
+
+        return costs;
+      } catch (error) {
+        console.error('Error updating pool costs:', error);
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
