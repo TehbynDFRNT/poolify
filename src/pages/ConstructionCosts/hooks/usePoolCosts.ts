@@ -16,26 +16,25 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const { data: costs = initialPoolCosts } = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pool_costs')
-        .select('*');
-
-      if (error) {
+      const response = await supabase.from('pool_costs').select('*');
+      
+      if (response.error) {
+        console.error('Error fetching pool costs:', response.error);
         toast.error("Failed to fetch pool costs");
-        throw error;
+        return initialPoolCosts;
       }
 
       const costsMap: Record<string, PoolCosts> = {};
-      (data || []).forEach((cost: PoolCostsRow) => {
+      response.data.forEach((cost: PoolCostsRow) => {
         costsMap[cost.pool_id] = {
-          truckedWater: cost.trucked_water || 0,
-          saltBags: cost.salt_bags || 0,
-          misc: cost.misc || 0,
-          copingSupply: cost.coping_supply || 0,
-          beam: cost.beam || 0,
-          copingLay: cost.coping_lay || 0,
-          peaGravel: cost.pea_gravel || 0,
-          installFee: cost.install_fee || 0
+          truckedWater: Number(cost.trucked_water) || 0,
+          saltBags: Number(cost.salt_bags) || 0,
+          misc: Number(cost.misc) || 0,
+          copingSupply: Number(cost.coping_supply) || 0,
+          beam: Number(cost.beam) || 0,
+          copingLay: Number(cost.coping_lay) || 0,
+          peaGravel: Number(cost.pea_gravel) || 0,
+          installFee: Number(cost.install_fee) || 0
         };
       });
 
@@ -45,37 +44,40 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
 
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string; costs: PoolCosts }) => {
-      const { error: checkError, data: existing } = await supabase
+      // First check if record exists
+      const checkResponse = await supabase
         .from('pool_costs')
         .select('id')
         .eq('pool_id', poolId)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
+        .single();
 
       const updateData = {
-        trucked_water: costs.truckedWater,
-        salt_bags: costs.saltBags,
-        misc: costs.misc,
-        coping_supply: costs.copingSupply,
-        beam: costs.beam,
-        coping_lay: costs.copingLay,
-        pea_gravel: costs.peaGravel,
-        install_fee: costs.installFee,
+        trucked_water: Number(costs.truckedWater) || 0,
+        salt_bags: Number(costs.saltBags) || 0,
+        misc: Number(costs.misc) || 0,
+        coping_supply: Number(costs.copingSupply) || 0,
+        beam: Number(costs.beam) || 0,
+        coping_lay: Number(costs.copingLay) || 0,
+        pea_gravel: Number(costs.peaGravel) || 0,
+        install_fee: Number(costs.installFee) || 0,
       };
 
-      if (existing) {
-        const { error } = await supabase
+      if (checkResponse.data) {
+        const response = await supabase
           .from('pool_costs')
           .update(updateData)
           .eq('pool_id', poolId);
-        if (error) throw error;
+          
+        if (response.error) throw response.error;
       } else {
-        const { error } = await supabase
+        const response = await supabase
           .from('pool_costs')
           .insert({ pool_id: poolId, ...updateData });
-        if (error) throw error;
+          
+        if (response.error) throw response.error;
       }
+
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
