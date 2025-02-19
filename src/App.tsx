@@ -14,6 +14,7 @@ import FixedCosts from "@/pages/ConstructionCosts/FixedCosts";
 import PoolSpecificCosts from "@/pages/ConstructionCosts/PoolSpecificCosts";
 import FiltrationSystems from "@/pages/FiltrationSystems";
 import PriceBuilder from "@/pages/PriceBuilder";
+import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -34,6 +35,7 @@ function App() {
           <Route path="/construction-costs/pool-specific-costs" element={<PoolSpecificCosts />} />
           <Route path="/filtration-systems" element={<FiltrationSystems />} />
           <Route path="/price-builder" element={<PriceBuilder />} />
+          <Route path="/price-builder/:poolId" element={<PoolPricing />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <Toaster />

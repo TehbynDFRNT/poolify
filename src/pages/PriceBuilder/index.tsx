@@ -1,6 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Calculator } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -18,8 +19,10 @@ import {
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
 const PriceBuilder = () => {
+  const navigate = useNavigate();
   const { data: pools, isLoading } = useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
@@ -72,7 +75,14 @@ const PriceBuilder = () => {
                   </TableHeader>
                   <TableBody>
                     {pools?.map((pool) => (
-                      <TableRow key={pool.id}>
+                      <TableRow 
+                        key={pool.id}
+                        className={cn(
+                          "cursor-pointer hover:bg-muted/50",
+                          "transition-colors"
+                        )}
+                        onClick={() => navigate(`/price-builder/${pool.id}`)}
+                      >
                         <TableCell className="font-medium">{pool.range}</TableCell>
                         <TableCell>{pool.name}</TableCell>
                       </TableRow>
