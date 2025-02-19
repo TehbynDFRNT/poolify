@@ -16,12 +16,12 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
         .from("pool_specifications")
         .select(`
           name,
-          standard_filtration_package:filtration_packages!inner (
+          standard_filtration_package:filtration_packages (
             display_order
           )
         `)
         .eq('id', poolId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching filtration option:", error);
@@ -40,7 +40,10 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          Option {filtrationOption?.standard_filtration_package?.display_order}
+          {filtrationOption?.standard_filtration_package ? 
+            `Option ${filtrationOption.standard_filtration_package.display_order}` :
+            "No filtration package assigned"
+          }
         </div>
       </CardContent>
     </Card>
