@@ -162,6 +162,20 @@ const PoolPricing = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Filtration Information Placeholder */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Filtration Package</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-8 text-center text-muted-foreground">
+                Filtration package information will be displayed here
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </DashboardLayout>
   );
