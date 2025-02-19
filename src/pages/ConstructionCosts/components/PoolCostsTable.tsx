@@ -33,7 +33,7 @@ export const PoolCostsTable = ({
         {pools?.map((pool) => {
           const fixedName = pool.name.replace("Westminister", "Westminster");
           const isEditing = poolCosts.editingRow === fixedName;
-          const currentCosts = isEditing ? poolCosts.editedCosts[fixedName] : poolCosts.costs[pool.id] || {
+          const currentCosts = isEditing ? poolCosts.editedCosts[fixedName] : poolCosts.costs[fixedName] || {
             truckedWater: 0,
             saltBags: 0,
             misc: 2700,
@@ -58,7 +58,7 @@ export const PoolCostsTable = ({
               onSave={() => poolCosts.handleSave(pool.id, fixedName)}
               onCancel={poolCosts.handleCancel}
               onCostChange={(field, value) => poolCosts.handleCostChange(fixedName, field, value)}
-              calculateTotal={() => poolCosts.calculateTotal(pool.id) + (getExcavationCost(pool.id) || 0)}
+              calculateTotal={() => poolCosts.calculateTotal(fixedName) + (getExcavationCost(pool.id) || 0)}
             />
           );
         })}
