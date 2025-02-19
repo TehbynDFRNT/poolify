@@ -7,11 +7,13 @@ export const usePools = () => {
   return useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
+      // First fetch the ordered ranges
       const { data: ranges } = await supabase
         .from("pool_ranges")
         .select("name")
         .order("display_order");
 
+      // Now fetch pools with their filtration packages
       const { data: poolsData, error } = await supabase
         .from("pool_specifications")
         .select(`
@@ -64,6 +66,8 @@ export const usePools = () => {
         console.error("Error fetching pools:", error);
         throw error;
       }
+
+      console.log("Fetched pools data:", poolsData);
 
       const rangeOrder = ranges?.map(r => r.name) || [];
       return (poolsData as unknown as SupabasePoolResponse[] || []).sort((a, b) => {
