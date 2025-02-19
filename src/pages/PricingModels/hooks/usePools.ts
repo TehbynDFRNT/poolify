@@ -16,7 +16,7 @@ export const usePools = () => {
         .from("pool_specifications")
         .select(`
           *,
-          standard_filtration_package: standard_filtration_package_id (
+          standard_filtration_package: filtration_packages!fk_pool_specs_filtration_package (
             id,
             name,
             display_order,
