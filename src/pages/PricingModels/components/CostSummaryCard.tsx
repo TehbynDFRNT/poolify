@@ -1,13 +1,18 @@
 
-import { Card, CardContent } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
 
-interface CostSummaryCardProps {
+type CostSummaryCardProps = {
   poolShellPrice: number;
   filtrationTotal: number;
   totalPoolCosts: number;
   totalFixedCosts: number;
-}
+};
 
 export const CostSummaryCard = ({
   poolShellPrice,
@@ -15,32 +20,31 @@ export const CostSummaryCard = ({
   totalPoolCosts,
   totalFixedCosts,
 }: CostSummaryCardProps) => {
-  const grandTotal = poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
+  const trueTotal = poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
 
   return (
     <Card>
-      <CardContent className="pt-6 space-y-4">
-        <div className="space-y-2">
-          <div className="flex justify-between text-sm">
-            <span>Pool Shell Price (inc. GST):</span>
-            <span>{formatCurrency(poolShellPrice)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Filtration Package:</span>
-            <span>{formatCurrency(filtrationTotal)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Pool Specific Costs:</span>
-            <span>{formatCurrency(totalPoolCosts)}</span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <span>Fixed Costs:</span>
-            <span>{formatCurrency(totalFixedCosts)}</span>
-          </div>
+      <CardHeader>
+        <CardTitle>Cost Breakdown</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-2">
+          <span>Pool Shell Price (inc. GST):</span>
+          <span className="text-right">{formatCurrency(poolShellPrice)}</span>
+          
+          <span>Filtration Package:</span>
+          <span className="text-right">{formatCurrency(filtrationTotal)}</span>
+          
+          <span>Pool Specific Costs:</span>
+          <span className="text-right">{formatCurrency(totalPoolCosts)}</span>
+          
+          <span>Fixed Costs:</span>
+          <span className="text-right">{formatCurrency(totalFixedCosts)}</span>
         </div>
-        <div className="flex justify-between text-lg font-semibold pt-4 border-t">
+        
+        <div className="border-t pt-4 grid grid-cols-2 gap-2 font-semibold">
           <span>True Cost:</span>
-          <span>{formatCurrency(grandTotal)}</span>
+          <span className="text-right">{formatCurrency(trueTotal)}</span>
         </div>
       </CardContent>
     </Card>
