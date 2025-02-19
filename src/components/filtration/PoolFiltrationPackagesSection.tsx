@@ -49,6 +49,7 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
         .from("pool_specifications")
         .select(`
           id,
+          created_at,
           name,
           range,
           length,
