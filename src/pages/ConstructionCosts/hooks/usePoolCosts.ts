@@ -16,8 +16,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const { data: costs = initialPoolCosts } = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      // Destructure the response immediately to avoid passing non-cloneable objects
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('pool_costs')
         .select('*');
 
@@ -27,10 +26,8 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
         return initialPoolCosts;
       }
 
-      // Create a plain object with only the data we need
       const costsMap: Record<string, PoolCosts> = {};
       (data || []).forEach((cost: PoolCostsRow) => {
-        // Ensure we're only working with plain numbers
         costsMap[cost.pool_id] = {
           truckedWater: Number(cost.trucked_water) || 0,
           saltBags: Number(cost.salt_bags) || 0,
@@ -49,42 +46,30 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
 
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string; costs: PoolCosts }) => {
-      // Destructure immediately to work with plain data
-      const { data: existing } = await supabase
-        .from('pool_costs')
-        .select('id')
-        .eq('pool_id', poolId)
-        .maybeSingle();
-
-      // Create a plain object for the update
       const updateData = {
-        trucked_water: Number(costs.truckedWater) || 0,
-        salt_bags: Number(costs.saltBags) || 0,
-        misc: Number(costs.misc) || 0,
-        coping_supply: Number(costs.copingSupply) || 0,
-        beam: Number(costs.beam) || 0,
-        coping_lay: Number(costs.copingLay) || 0,
-        pea_gravel: Number(costs.peaGravel) || 0,
-        install_fee: Number(costs.installFee) || 0,
+        pool_id: poolId,
+        trucked_water: costs.truckedWater || 0,
+        salt_bags: costs.saltBags || 0,
+        misc: costs.misc || 0,
+        coping_supply: costs.copingSupply || 0,
+        beam: costs.beam || 0,
+        coping_lay: costs.copingLay || 0,
+        pea_gravel: costs.peaGravel || 0,
+        install_fee: costs.installFee || 0,
       };
 
-      // Handle update or insert
-      const { error } = existing 
-        ? await supabase
-            .from('pool_costs')
-            .update(updateData)
-            .eq('pool_id', poolId)
-        : await supabase
-            .from('pool_costs')
-            .insert({ pool_id: poolId, ...updateData });
+      const { error } = await supabase
+        .from('pool_costs')
+        .upsert(updateData, {
+          onConflict: 'pool_id'
+        });
 
       if (error) {
-        console.error('Database operation error:', error);
-        throw error;
+        console.error('Error updating pool costs:', error);
+        throw new Error('Failed to update pool costs');
       }
 
-      // Return a plain object
-      return { poolId };
+      return { success: true };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
