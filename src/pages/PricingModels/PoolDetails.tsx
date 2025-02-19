@@ -242,7 +242,7 @@ const PoolDetails = () => {
               </div>
             </div>
             <div className="flex justify-between text-lg font-semibold pt-4 border-t">
-              <span>Grand Total:</span>
+              <span>True Cost:</span>
               <span>{formatCurrency(grandTotal)}</span>
             </div>
           </CardContent>
