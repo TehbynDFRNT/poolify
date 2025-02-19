@@ -42,7 +42,7 @@ export const PricingTable = ({ pools, calculateTrueCost }: PricingTableProps) =>
               <TableCell>{pool.range}</TableCell>
               <TableCell>{pool.name}</TableCell>
               <TableCell className="text-right">
-                {formatCurrency(trueCost)}
+                {formatCurrency(Math.round(trueCost * 100) / 100)}
               </TableCell>
               <TableCell className="text-right">
                 {formatCurrency(0)}
