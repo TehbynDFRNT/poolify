@@ -16,7 +16,6 @@ import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { calculatePackagePrice } from "@/utils/package-calculations";
-import { initialPoolCosts } from "@/pages/ConstructionCosts/constants";
 import { Pool } from "@/types/pool";
 
 const PoolPricing = () => {
@@ -30,12 +29,6 @@ const PoolPricing = () => {
         .from("pool_specifications")
         .select(`
           *,
-          pool_excavation:pool_excavation_types!dig_type_id (
-            id,
-            name,
-            range,
-            dig_type:excavation_dig_types!dig_type_id (*)
-          ),
           default_package:filtration_packages!default_filtration_package_id (
             id,
             name,
@@ -76,15 +69,7 @@ const PoolPricing = () => {
 
       if (error) throw error;
       
-      // Transform the data to match our Pool type
-      if (data) {
-        return {
-          ...data,
-          dig_type: data.pool_excavation?.dig_type || null,
-          default_package: data.default_package || null
-        } as Pool;
-      }
-      return null;
+      return data as Pool;
     },
   });
 
@@ -115,23 +100,6 @@ const PoolPricing = () => {
   if (!pool) {
     return <div>Pool not found</div>;
   }
-
-  const poolCosts = initialPoolCosts[pool.name];
-
-  const calculateExcavationCost = () => {
-    if (!pool.dig_type) return 0;
-    const { truck_count, truck_hourly_rate, truck_hours, excavation_hourly_rate, excavation_hours } = pool.dig_type;
-    return (truck_count * truck_hourly_rate * truck_hours) + (excavation_hourly_rate * excavation_hours);
-  };
-
-  const excavationCost = calculateExcavationCost();
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === 'Escape') {
-      // Close editing on Enter or Escape
-      setEditingCell(null);
-    }
-  };
 
   return (
     <DashboardLayout>
@@ -266,178 +234,87 @@ const PoolPricing = () => {
             </CardContent>
           </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Package className="h-5 w-5" />
-              Default Filtration Package
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {pool.default_package ? (
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-semibold">
-                    Option {pool.default_package.display_order}
-                  </h3>
-                  <p className="text-lg font-semibold text-primary">
-                    {formatCurrency(calculatePackagePrice(pool.default_package))}
-                  </p>
-                </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Component</TableHead>
-                      <TableHead>Model</TableHead>
-                      <TableHead className="text-right">Price</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {pool.default_package.light && (
-                      <TableRow>
-                        <TableCell>Light</TableCell>
-                        <TableCell>{pool.default_package.light.model_number}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(pool.default_package.light.price)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {pool.default_package.pump && (
-                      <TableRow>
-                        <TableCell>Pool Pump</TableCell>
-                        <TableCell>{pool.default_package.pump.model_number}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(pool.default_package.pump.price)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {pool.default_package.sanitiser && (
-                      <TableRow>
-                        <TableCell>Sanitiser</TableCell>
-                        <TableCell>{pool.default_package.sanitiser.model_number}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(pool.default_package.sanitiser.price)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {pool.default_package.filter && (
-                      <TableRow>
-                        <TableCell>Filter</TableCell>
-                        <TableCell>{pool.default_package.filter.model_number}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(pool.default_package.filter.price)}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                    {pool.default_package.handover_kit?.components.map((comp) => (
-                      <TableRow key={comp.component.id}>
-                        <TableCell>
-                          {comp.component.name}
-                          {comp.quantity > 1 && ` (x${comp.quantity})`}
-                        </TableCell>
-                        <TableCell>{comp.component.model_number}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(comp.component.price * comp.quantity)}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <p>No default filtration package assigned</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <List className="h-5 w-5" />
-                Pool Specific Costs
+                <Package className="h-5 w-5" />
+                Default Filtration Package
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {poolCosts ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Construction</p>
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Beam</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.beam)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Pea Gravel/Backfill</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.peaGravel)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Install Fee</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.installFee)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Excavation</p>
-                        <p className="text-lg font-semibold">{formatCurrency(excavationCost)}</p>
-                      </div>
-                    </div>
+              {pool.default_package ? (
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">
+                      Option {pool.default_package.display_order}
+                    </h3>
+                    <p className="text-lg font-semibold text-primary">
+                      {formatCurrency(calculatePackagePrice(pool.default_package))}
+                    </p>
                   </div>
-
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Coping</p>
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Coping Supply</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.copingSupply)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Coping Lay</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.copingLay)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium text-muted-foreground">Additional Costs</p>
-                    <div className="space-y-4">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Trucked Water</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.truckedWater)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Salt Bags</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.saltBags)}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Miscellaneous</p>
-                        <p className="text-lg font-semibold">{formatCurrency(poolCosts.misc || 0)}</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-2 lg:col-span-3 pt-4 border-t">
-                    <div className="flex justify-between items-center">
-                      <p className="text-lg font-medium">Total Pool Specific Costs</p>
-                      <p className="text-2xl font-semibold text-primary">
-                        {formatCurrency(
-                          poolCosts.beam +
-                          poolCosts.peaGravel +
-                          poolCosts.installFee +
-                          poolCosts.copingSupply +
-                          poolCosts.copingLay +
-                          poolCosts.truckedWater +
-                          poolCosts.saltBags +
-                          (poolCosts.misc || 0) +
-                          excavationCost
-                        )}
-                      </p>
-                    </div>
-                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Component</TableHead>
+                        <TableHead>Model</TableHead>
+                        <TableHead className="text-right">Price</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {pool.default_package.light && (
+                        <TableRow>
+                          <TableCell>Light</TableCell>
+                          <TableCell>{pool.default_package.light.model_number}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(pool.default_package.light.price)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {pool.default_package.pump && (
+                        <TableRow>
+                          <TableCell>Pool Pump</TableCell>
+                          <TableCell>{pool.default_package.pump.model_number}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(pool.default_package.pump.price)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {pool.default_package.sanitiser && (
+                        <TableRow>
+                          <TableCell>Sanitiser</TableCell>
+                          <TableCell>{pool.default_package.sanitiser.model_number}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(pool.default_package.sanitiser.price)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {pool.default_package.filter && (
+                        <TableRow>
+                          <TableCell>Filter</TableCell>
+                          <TableCell>{pool.default_package.filter.model_number}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(pool.default_package.filter.price)}
+                          </TableCell>
+                        </TableRow>
+                      )}
+                      {pool.default_package.handover_kit?.components.map((comp) => (
+                        <TableRow key={comp.component.id}>
+                          <TableCell>
+                            {comp.component.name}
+                            {comp.quantity > 1 && ` (x${comp.quantity})`}
+                          </TableCell>
+                          <TableCell>{comp.component.model_number}</TableCell>
+                          <TableCell className="text-right">
+                            {formatCurrency(comp.component.price * comp.quantity)}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <p>No specific costs found for this pool</p>
+                  <p>No default filtration package assigned</p>
                 </div>
               )}
             </CardContent>
