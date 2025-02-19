@@ -8,10 +8,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
-import { formatCurrency } from "@/utils/format";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { calculateFiltrationTotal, calculatePoolSpecificCosts, calculateFixedCostsTotal } from "../utils/calculateCosts";
 import type { SupabasePoolResponse } from "../types";
 
 type PricingTableProps = {
@@ -21,42 +17,12 @@ type PricingTableProps = {
 export const PricingTable = ({ pools }: PricingTableProps) => {
   const navigate = useNavigate();
 
-  const { data: fixedCosts = [] } = useQuery({
-    queryKey: ["fixed-costs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fixed_costs")
-        .select("*")
-        .order('display_order');
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const calculateTrueCost = (pool: SupabasePoolResponse) => {
-    const poolShellPrice = pool.buy_price_inc_gst || 0;
-    const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
-    const totalPoolCosts = calculatePoolSpecificCosts(pool.name, null);
-    const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
-
-    console.log(`=== Cost Breakdown for ${pool.name} ===`);
-    console.log('Pool Shell Price:', poolShellPrice);
-    console.log('Filtration Total:', filtrationTotal);
-    console.log('Pool Specific Costs:', totalPoolCosts);
-    console.log('Fixed Costs:', totalFixedCosts);
-    console.log('Total:', poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts);
-
-    return poolShellPrice + filtrationTotal + totalPoolCosts + totalFixedCosts;
-  };
-
   return (
     <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Range</TableHead>
           <TableHead>Pool Name</TableHead>
-          <TableHead className="text-right">True Cost</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -68,7 +34,6 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
           >
             <TableCell>{pool.range}</TableCell>
             <TableCell>{pool.name}</TableCell>
-            <TableCell className="text-right">{formatCurrency(calculateTrueCost(pool))}</TableCell>
           </TableRow>
         ))}
       </TableBody>

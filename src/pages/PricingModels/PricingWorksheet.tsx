@@ -17,7 +17,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePools } from "./hooks/usePools";
-import { PricingTable } from "./components/PricingTable";
 
 const PricingWorksheet = () => {
   const navigate = useNavigate();
@@ -56,7 +55,7 @@ const PricingWorksheet = () => {
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>Pricing Worksheet</BreadcrumbItem>
+            <BreadcrumbItem>Worksheet</BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
 
@@ -70,14 +69,14 @@ const PricingWorksheet = () => {
               <ArrowLeft className="mr-2 h-4 w-4" />
               Back
             </Button>
-            <h1 className="text-2xl font-semibold text-gray-900">Pricing Worksheet</h1>
-            <p className="text-gray-500 mt-1">Pool pricing overview</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Pool Worksheet</h1>
+            <p className="text-gray-500 mt-1">Pool overview</p>
           </div>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Pricing Worksheet</CardTitle>
+            <CardTitle>Pools</CardTitle>
           </CardHeader>
           <CardContent>
             {pools && <PricingTable pools={pools} />}
