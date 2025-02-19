@@ -17,6 +17,7 @@ import type { PackageWithComponents } from "@/types/filtration";
 import { PoolDetails } from "./components/PoolDetails";
 import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
 import { PoolSpecificCosts } from "./components/PoolSpecificCosts";
+import { PoolFixedCosts } from "./components/PoolFixedCosts";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const PoolPricing = () => {
@@ -131,7 +132,7 @@ const PoolPricing = () => {
                 <BreadcrumbLink href="/price-builder">Price Builder</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem>{pool.name}</BreadcrumbItem>
+              <BreadcrumbItem>{pool?.name}</BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <Button 
@@ -146,6 +147,7 @@ const PoolPricing = () => {
         <PoolDetails pool={pool} />
         <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
         <PoolSpecificCosts />
+        <PoolFixedCosts />
       </div>
     </DashboardLayout>
   );
