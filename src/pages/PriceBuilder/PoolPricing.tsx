@@ -1,6 +1,7 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, DollarSign } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -12,6 +13,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { formatCurrency } from "@/utils/format";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const PoolPricing = () => {
   const { poolId } = useParams();
@@ -32,7 +35,27 @@ const PoolPricing = () => {
   });
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <DashboardLayout>
+        <div className="container mx-auto py-8 space-y-8">
+          <div className="flex items-center justify-between">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <Card>
+            <CardHeader>
+              <Skeleton className="h-8 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </DashboardLayout>
+    );
   }
 
   if (!pool) {
@@ -65,14 +88,90 @@ const PoolPricing = () => {
           </Button>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{pool.name} Price Configuration</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {/* We'll start building the pricing configuration here */}
-          </CardContent>
-        </Card>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Card>
+            <CardHeader>
+              <CardTitle>Pool Specifications</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Range</dt>
+                  <dd className="text-lg">{pool.range}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Name</dt>
+                  <dd className="text-lg">{pool.name}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Length</dt>
+                  <dd className="text-lg">{pool.length}m</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Width</dt>
+                  <dd className="text-lg">{pool.width}m</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Shallow Depth</dt>
+                  <dd className="text-lg">{pool.depth_shallow}m</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Deep Depth</dt>
+                  <dd className="text-lg">{pool.depth_deep}m</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Waterline</dt>
+                  <dd className="text-lg">{pool.waterline_l_m ? `${pool.waterline_l_m}L/m` : '-'}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Volume</dt>
+                  <dd className="text-lg">{pool.volume_liters ? `${pool.volume_liters}L` : '-'}</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5" />
+                Pricing Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid grid-cols-2 gap-4">
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Price (ex GST)</dt>
+                  <dd className="text-lg font-medium">
+                    {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Price (inc GST)</dt>
+                  <dd className="text-lg font-medium text-primary">
+                    {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Weight</dt>
+                  <dd className="text-lg">{pool.weight_kg ? `${pool.weight_kg}kg` : '-'}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Salt Bags</dt>
+                  <dd className="text-lg">{pool.salt_volume_bags || '-'}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Initial Minerals</dt>
+                  <dd className="text-lg">{pool.minerals_kg_initial ? `${pool.minerals_kg_initial}kg` : '-'}</dd>
+                </div>
+                <div>
+                  <dt className="text-sm font-medium text-gray-500">Topup Minerals</dt>
+                  <dd className="text-lg">{pool.minerals_kg_topup ? `${pool.minerals_kg_topup}kg` : '-'}</dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
