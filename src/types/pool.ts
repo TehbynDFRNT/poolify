@@ -1,6 +1,5 @@
 
 import { z } from "zod";
-import type { PackageWithComponents } from "./filtration";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -42,7 +41,6 @@ export interface Pool {
   buy_price_ex_gst: number | null;
   buy_price_inc_gst: number | null;
   standard_filtration_package_id: string | null;
-  standard_filtration_package?: PackageWithComponents | null;
 }
 
 export type NewPool = Omit<Pool, 'id' | 'created_at'>;

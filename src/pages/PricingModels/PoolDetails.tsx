@@ -8,13 +8,11 @@ import { PoolBreadcrumb } from "./components/PoolBreadcrumb";
 import { PoolHeader } from "./components/PoolHeader";
 import { PoolOutline } from "./components/PoolOutline";
 import { PoolSpecifications } from "./components/PoolSpecifications";
-import { PoolFiltration } from "./components/PoolFiltration";
 import { PoolCosts } from "./components/PoolCosts";
 import { FixedCosts } from "./components/FixedCosts";
 import { CostSummaryCard } from "./components/CostSummaryCard";
 import { poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
 import {
-  calculateFiltrationTotal,
   calculatePoolSpecificCosts,
   calculateFixedCostsTotal,
 } from "./utils/calculateCosts";
@@ -28,52 +26,7 @@ const PoolDetails = () => {
       console.log("Fetching pool with ID:", id);
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select(`
-          *,
-          standard_filtration_package:filtration_packages(
-            id,
-            name,
-            display_order,
-            light:light_id(
-              id,
-              name,
-              model_number,
-              price
-            ),
-            pump:pump_id(
-              id,
-              name,
-              model_number,
-              price
-            ),
-            sanitiser:sanitiser_id(
-              id,
-              name,
-              model_number,
-              price
-            ),
-            filter:filter_id(
-              id,
-              name,
-              model_number,
-              price
-            ),
-            handover_kit:handover_kit_id(
-              id,
-              name,
-              components:handover_kit_package_components(
-                id,
-                quantity,
-                component:component_id(
-                  id,
-                  name,
-                  model_number,
-                  price
-                )
-              )
-            )
-          )
-        `)
+        .select("*")
         .eq("id", id)
         .single();
 
@@ -81,22 +34,9 @@ const PoolDetails = () => {
         console.error("Error fetching pool:", error);
         throw error;
       }
-      
-      // Transform the data to match our expected types
-      const transformedData = {
-        ...data,
-        standard_filtration_package: data.standard_filtration_package ? {
-          ...data.standard_filtration_package,
-          light: data.standard_filtration_package.light || null,
-          pump: data.standard_filtration_package.pump || null,
-          sanitiser: data.standard_filtration_package.sanitiser || null,
-          filter: data.standard_filtration_package.filter || null,
-          handover_kit: data.standard_filtration_package.handover_kit || null
-        } : null
-      };
 
-      console.log("Transformed pool data:", transformedData);
-      return transformedData as Pool;
+      console.log("Fetched pool data:", data);
+      return data as Pool;
     },
   });
 
@@ -138,7 +78,6 @@ const PoolDetails = () => {
   }
 
   const poolShellPrice = pool.buy_price_inc_gst || 0;
-  const filtrationTotal = calculateFiltrationTotal(pool.standard_filtration_package);
   const totalPoolCosts = calculatePoolSpecificCosts(pool.name, digType);
   const totalFixedCosts = calculateFixedCostsTotal(fixedCosts);
 
@@ -149,15 +88,11 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
-        <PoolFiltration 
-          filtrationPackage={pool.standard_filtration_package}
-          poolName={pool.name}
-        />
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <CostSummaryCard
           poolShellPrice={poolShellPrice}
-          filtrationTotal={filtrationTotal}
+          filtrationTotal={0}
           totalPoolCosts={totalPoolCosts}
           totalFixedCosts={totalFixedCosts}
         />
