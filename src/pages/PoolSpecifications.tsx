@@ -52,10 +52,11 @@ const PoolSpecifications = () => {
         return aIndex - bIndex;
       }) as Pool[];
     },
-    onError: (error) => {
-      console.error('Query error:', error);
-      toast.error("Failed to load pool specifications");
-    },
+    meta: {
+      onError: () => {
+        toast.error("Failed to load pool specifications");
+      }
+    }
   });
 
   if (isLoading) {
