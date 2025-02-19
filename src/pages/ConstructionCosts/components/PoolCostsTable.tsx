@@ -1,8 +1,10 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
-import { EditableCell } from "@/components/filtration/components/EditableCell";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 import { PoolCosts } from "../types";
@@ -25,11 +27,43 @@ export const PoolCostsTable = ({
   getExcavationCost,
   initialPoolCosts,
 }: PoolCostsTableProps) => {
-  const [editingCell, setEditingCell] = useState<{
-    poolId: string;
-    field: keyof PoolCosts;
-  } | null>(null);
+  const [editingRow, setEditingRow] = useState<string | null>(null);
+  const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
   const [costs, setCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
+
+  const handleEdit = (poolName: string) => {
+    setEditingRow(poolName);
+    setEditedCosts(prev => ({
+      ...prev,
+      [poolName]: { ...costs[poolName] }
+    }));
+  };
+
+  const handleSave = (poolName: string) => {
+    setCosts(prev => ({
+      ...prev,
+      [poolName]: editedCosts[poolName]
+    }));
+    setEditingRow(null);
+  };
+
+  const handleCancel = () => {
+    setEditingRow(null);
+    setEditedCosts(costs);
+  };
+
+  const handleCostChange = (poolName: string, field: keyof PoolCosts, value: string) => {
+    const numValue = parseFloat(value);
+    if (!isNaN(numValue)) {
+      setEditedCosts(prev => ({
+        ...prev,
+        [poolName]: {
+          ...prev[poolName],
+          [field]: numValue
+        }
+      }));
+    }
+  };
 
   const calculateTotal = (poolName: string) => {
     const poolCosts = costs[poolName] || {
@@ -67,12 +101,14 @@ export const PoolCostsTable = ({
           <TableHead className="whitespace-nowrap">Dig Type</TableHead>
           <TableHead className="whitespace-nowrap">Excavation</TableHead>
           <TableHead className="whitespace-nowrap">Total</TableHead>
+          <TableHead className="whitespace-nowrap">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {pools?.map((pool) => {
           const fixedName = pool.name.replace("Westminister", "Westminster");
-          const currentCosts = costs[fixedName] || {
+          const isEditing = editingRow === fixedName;
+          const currentCosts = isEditing ? editedCosts[fixedName] : costs[fixedName] || {
             truckedWater: 0,
             saltBags: 0,
             misc: 2700,
@@ -81,20 +117,6 @@ export const PoolCostsTable = ({
             copingLay: 0,
             peaGravel: 0,
             installFee: 0
-          };
-          
-          const handleCellSave = (field: keyof PoolCosts, value: string) => {
-            const numericValue = parseFloat(value);
-            if (isNaN(numericValue)) return;
-
-            setCosts(prev => ({
-              ...prev,
-              [fixedName]: {
-                ...prev[fixedName],
-                [field]: numericValue
-              }
-            }));
-            setEditingCell(null);
           };
 
           return (
@@ -106,153 +128,106 @@ export const PoolCostsTable = ({
               <TableCell>{pool.depth_shallow}m</TableCell>
               <TableCell>{pool.depth_deep}m</TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.peaGravel}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'peaGravel'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'peaGravel' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('peaGravel', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('peaGravel', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.peaGravel}
+                    onChange={(e) => handleCostChange(fixedName, 'peaGravel', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.peaGravel)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.installFee}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'installFee'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'installFee' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('installFee', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('installFee', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.installFee}
+                    onChange={(e) => handleCostChange(fixedName, 'installFee', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.installFee)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.truckedWater}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'truckedWater'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'truckedWater' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('truckedWater', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('truckedWater', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.truckedWater}
+                    onChange={(e) => handleCostChange(fixedName, 'truckedWater', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.truckedWater)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.saltBags}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'saltBags'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'saltBags' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('saltBags', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('saltBags', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.saltBags}
+                    onChange={(e) => handleCostChange(fixedName, 'saltBags', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.saltBags)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.misc}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'misc'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'misc' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('misc', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('misc', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.misc}
+                    onChange={(e) => handleCostChange(fixedName, 'misc', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.misc)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.copingSupply}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'copingSupply'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingSupply' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('copingSupply', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('copingSupply', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.copingSupply}
+                    onChange={(e) => handleCostChange(fixedName, 'copingSupply', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.copingSupply)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.beam}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'beam'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'beam' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('beam', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('beam', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.beam}
+                    onChange={(e) => handleCostChange(fixedName, 'beam', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.beam)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={currentCosts.copingLay}
-                  isEditing={editingCell?.poolId === pool.id && editingCell?.field === 'copingLay'}
-                  onEdit={() => setEditingCell({ poolId: pool.id, field: 'copingLay' })}
-                  onSave={() => setEditingCell(null)}
-                  onCancel={() => setEditingCell(null)}
-                  onChange={(value) => handleCellSave('copingLay', value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleCellSave('copingLay', (e.target as HTMLInputElement).value);
-                    }
-                  }}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                />
+                {isEditing ? (
+                  <Input
+                    type="number"
+                    value={currentCosts.copingLay}
+                    onChange={(e) => handleCostChange(fixedName, 'copingLay', e.target.value)}
+                    className="w-32"
+                  />
+                ) : (
+                  formatCurrency(currentCosts.copingLay)
+                )}
               </TableCell>
               <TableCell>
                 <Select
                   value={selectedDigTypes[pool.id]}
                   onValueChange={(value) => onDigTypeChange(pool.id, value)}
+                  disabled={!isEditing}
                 >
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Select type" />
@@ -274,6 +249,34 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell className="font-medium">
                 {formatCurrency(calculateTotal(fixedName) + (getExcavationCost(pool.id) || 0))}
+              </TableCell>
+              <TableCell>
+                {isEditing ? (
+                  <div className="flex gap-2">
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={() => handleSave(fixedName)}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      variant="ghost"
+                      onClick={handleCancel}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button 
+                    size="sm" 
+                    variant="ghost"
+                    onClick={() => handleEdit(fixedName)}
+                  >
+                    Edit
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           );
