@@ -8,6 +8,7 @@ import { PoolBreadcrumb } from "./components/PoolBreadcrumb";
 import { PoolHeader } from "./components/PoolHeader";
 import { PoolOutline } from "./components/PoolOutline";
 import { PoolSpecifications } from "./components/PoolSpecifications";
+import { PoolFiltration } from "./components/PoolFiltration";
 import { PoolCosts } from "./components/PoolCosts";
 import { FixedCosts } from "./components/FixedCosts";
 import { Card, CardContent } from "@/components/ui/card";
@@ -114,6 +115,7 @@ const PoolDetails = () => {
         <PoolHeader name={pool.name} range={pool.range} />
         <PoolOutline />
         <PoolSpecifications pool={pool} />
+        <PoolFiltration poolId={pool.id} />
         <PoolCosts poolName={pool.name} />
         <FixedCosts />
         <Card>
