@@ -73,8 +73,8 @@ export interface Pool {
   minerals_kg_topup: number | null;
   buy_price_ex_gst: number | null;
   buy_price_inc_gst: number | null;
-  dig_type: ExcavationDigType | null;
-  default_package: FiltrationPackage | null;
+  dig_type?: ExcavationDigType | null;
+  default_package?: FiltrationPackage | null;
 }
 
 export const POOL_RANGES = [
