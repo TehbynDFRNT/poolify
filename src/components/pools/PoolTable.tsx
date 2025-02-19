@@ -1,4 +1,3 @@
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -45,14 +44,15 @@ const PoolTable = ({ pools }: PoolTableProps) => {
 
   const updatePoolMutation = useMutation({
     mutationFn: async (pool: Partial<Pool> & { id: string }) => {
-      if (pool.buy_price_ex_gst !== undefined) {
-        pool.buy_price_inc_gst = pool.buy_price_ex_gst * 1.1;
-      }
+      console.log('Updating pool with data:', pool); // Add logging
       const { error } = await supabase
         .from("pool_specifications")
         .update(pool)
         .eq("id", pool.id);
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating pool:', error); // Add error logging
+        throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
@@ -83,9 +83,7 @@ const PoolTable = ({ pools }: PoolTableProps) => {
     }
 
     let parsedValue: string | number | null = value;
-    if (isStringField(editingCell.field)) {
-      parsedValue = value;
-    } else {
+    if (!isStringField(editingCell.field)) {
       parsedValue = value === "" ? null : Number(value);
       if (typeof parsedValue === "number" && isNaN(parsedValue)) {
         toast.error("Please enter a valid number");
@@ -93,10 +91,19 @@ const PoolTable = ({ pools }: PoolTableProps) => {
       }
     }
 
-    updatePoolMutation.mutate({
-      id: pool.id,
-      [editingCell.field]: parsedValue,
-    });
+    // If updating buy_price_ex_gst, also calculate and update buy_price_inc_gst
+    if (editingCell.field === 'buy_price_ex_gst' && typeof parsedValue === 'number') {
+      updatePoolMutation.mutate({
+        id: pool.id,
+        buy_price_ex_gst: parsedValue,
+        buy_price_inc_gst: parsedValue * 1.1 // Add 10% GST
+      });
+    } else {
+      updatePoolMutation.mutate({
+        id: pool.id,
+        [editingCell.field]: parsedValue,
+      });
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent, pool: Pool) => {
