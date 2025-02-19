@@ -12,20 +12,37 @@ export const PoolSpecificCosts = () => {
   const { data: poolCosts, isLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
+      console.log("Fetching pool costs for poolId:", poolId);
       const { data, error } = await supabase
         .from("pool_costs")
         .select("*")
         .eq("pool_id", poolId)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error("Error fetching pool costs:", error);
+        throw error;
+      }
+      
+      console.log("Pool costs data:", data);
+      // If no data exists, return default values
+      return data || {
+        pea_gravel: 0,
+        install_fee: 0,
+        trucked_water: 0,
+        salt_bags: 0,
+        misc: 2700, // Default value from schema
+        coping_supply: 0,
+        beam: 0,
+        coping_lay: 0,
+      };
     },
   });
 
   const { data: digType } = useQuery({
     queryKey: ["pool-dig-type", poolId],
     queryFn: async () => {
+      console.log("Fetching dig type for poolId:", poolId);
       const { data: pool } = await supabase
         .from("pool_specifications")
         .select("dig_type_id")
@@ -40,7 +57,12 @@ export const PoolSpecificCosts = () => {
         .eq("id", pool.dig_type_id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching dig type:", error);
+        throw error;
+      }
+      
+      console.log("Dig type data:", data);
       return data;
     },
     enabled: !!poolId,
@@ -71,15 +93,15 @@ export const PoolSpecificCosts = () => {
   // Calculate total including excavation
   const total = poolCosts ? 
     Object.values({
-      pea_gravel: poolCosts.pea_gravel,
-      install_fee: poolCosts.install_fee,
-      trucked_water: poolCosts.trucked_water,
-      salt_bags: poolCosts.salt_bags,
-      misc: poolCosts.misc,
-      coping_supply: poolCosts.coping_supply,
-      beam: poolCosts.beam,
-      coping_lay: poolCosts.coping_lay,
-    }).reduce((sum, value) => sum + (value || 0), 0) + excavationCost :
+      pea_gravel: poolCosts.pea_gravel || 0,
+      install_fee: poolCosts.install_fee || 0,
+      trucked_water: poolCosts.trucked_water || 0,
+      salt_bags: poolCosts.salt_bags || 0,
+      misc: poolCosts.misc || 0,
+      coping_supply: poolCosts.coping_supply || 0,
+      beam: poolCosts.beam || 0,
+      coping_lay: poolCosts.coping_lay || 0,
+    }).reduce((sum, value) => sum + value, 0) + excavationCost :
     0;
 
   return (
@@ -92,35 +114,35 @@ export const PoolSpecificCosts = () => {
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             <div>
               <dt className="text-sm font-medium text-gray-500">Pea Gravel/Backfill</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.pea_gravel) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.pea_gravel || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Install Fee</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.install_fee) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.install_fee || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Trucked Water</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.trucked_water) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.trucked_water || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Salt Bags</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.salt_bags) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.salt_bags || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Misc</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.misc) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.misc || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Coping Supply</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.coping_supply) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.coping_supply || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Beam</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.beam) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.beam || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Coping Lay</dt>
-              <dd className="text-lg">{poolCosts ? formatCurrency(poolCosts.coping_lay) : '-'}</dd>
+              <dd className="text-lg">{formatCurrency(poolCosts?.coping_lay || 0)}</dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Dig Type</dt>
