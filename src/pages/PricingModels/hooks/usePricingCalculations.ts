@@ -9,65 +9,70 @@ import {
   calculateFixedCostsTotal
 } from "../utils/calculateCosts";
 
+// Query functions moved outside the hook
+const fetchFixedCosts = async () => {
+  const { data, error } = await supabase
+    .from("fixed_costs")
+    .select("*")
+    .order('display_order');
+
+  if (error) throw error;
+  return data;
+};
+
+const fetchDigTypes = async () => {
+  const { data, error } = await supabase
+    .from("excavation_dig_types")
+    .select("*");
+
+  if (error) throw error;
+  return data;
+};
+
+const fetchFiltrationPackages = async () => {
+  const { data, error } = await supabase
+    .from("filtration_packages")
+    .select(`
+      *,
+      light:filtration_components!light_id(id, name, model_number, price),
+      pump:filtration_components!pump_id(id, name, model_number, price),
+      sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
+      filter:filtration_components!filter_id(id, name, model_number, price),
+      handover_kit:handover_kit_packages!handover_kit_id(
+        id, 
+        name,
+        components:handover_kit_package_components(
+          id,
+          quantity,
+          component:filtration_components(
+            id,
+            name,
+            model_number,
+            price
+          )
+        )
+      )
+    `);
+
+  if (error) throw error;
+  return data;
+};
+
 export const usePricingCalculations = () => {
-  // Fetch fixed costs
+  // All queries defined at the top level of the hook
   const { data: fixedCosts = [] } = useQuery({
     queryKey: ["fixed-costs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("fixed_costs")
-        .select("*")
-        .order('display_order');
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: fetchFixedCosts,
   });
 
-  // Fetch dig types
   const { data: digTypes = [] } = useQuery({
     queryKey: ["excavation-dig-types"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("excavation_dig_types")
-        .select("*");
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: fetchDigTypes,
   });
 
-  // Fetch all filtration packages with their components
   const { data: filtrationPackages = [] } = useQuery({
     queryKey: ["filtration-packages"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("filtration_packages")
-        .select(`
-          *,
-          light:filtration_components!light_id(id, name, model_number, price),
-          pump:filtration_components!pump_id(id, name, model_number, price),
-          sanitiser:filtration_components!sanitiser_id(id, name, model_number, price),
-          filter:filtration_components!filter_id(id, name, model_number, price),
-          handover_kit:handover_kit_packages!handover_kit_id(
-            id, 
-            name,
-            components:handover_kit_package_components(
-              id,
-              quantity,
-              component:filtration_components(
-                id,
-                name,
-                model_number,
-                price
-              )
-            )
-          )
-        `);
-
-      if (error) throw error;
-      return data;
-    },
+    queryFn: fetchFiltrationPackages,
   });
 
   const calculateTrueCost = (pool: SupabasePoolResponse) => {
