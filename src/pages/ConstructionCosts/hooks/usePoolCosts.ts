@@ -16,7 +16,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const poolCostsQuery = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      const { data: poolCosts, error } = await supabase
+      const { data, error } = await supabase
         .from('pool_costs')
         .select('*');
 
@@ -27,16 +27,16 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
 
       // Transform the data into our expected format
       const costsMap: Record<string, PoolCosts> = {};
-      poolCosts?.forEach((cost: PoolCostsRow) => {
+      (data || []).forEach((cost: PoolCostsRow) => {
         costsMap[cost.pool_id] = {
-          truckedWater: cost.trucked_water,
-          saltBags: cost.salt_bags,
-          misc: cost.misc,
-          copingSupply: cost.coping_supply,
-          beam: cost.beam,
-          copingLay: cost.coping_lay,
-          peaGravel: cost.pea_gravel,
-          installFee: cost.install_fee
+          truckedWater: cost.trucked_water || 0,
+          saltBags: cost.salt_bags || 0,
+          misc: cost.misc || 0,
+          copingSupply: cost.coping_supply || 0,
+          beam: cost.beam || 0,
+          copingLay: cost.coping_lay || 0,
+          peaGravel: cost.pea_gravel || 0,
+          installFee: cost.install_fee || 0
         };
       });
 
@@ -50,41 +50,34 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
         // First check if a record exists
         const { data: existingCost } = await supabase
           .from('pool_costs')
-          .select('*')
+          .select('pool_id')
           .eq('pool_id', poolId)
-          .maybeSingle();
+          .single();
+
+        const updateData = {
+          trucked_water: costs.truckedWater || 0,
+          salt_bags: costs.saltBags || 0,
+          misc: costs.misc || 0,
+          coping_supply: costs.copingSupply || 0,
+          beam: costs.beam || 0,
+          coping_lay: costs.copingLay || 0,
+          pea_gravel: costs.peaGravel || 0,
+          install_fee: costs.installFee || 0,
+        };
 
         if (existingCost) {
-          // Update existing record
           const { error: updateError } = await supabase
             .from('pool_costs')
-            .update({
-              trucked_water: costs.truckedWater,
-              salt_bags: costs.saltBags,
-              misc: costs.misc,
-              coping_supply: costs.copingSupply,
-              beam: costs.beam,
-              coping_lay: costs.copingLay,
-              pea_gravel: costs.peaGravel,
-              install_fee: costs.installFee,
-            })
+            .update(updateData)
             .eq('pool_id', poolId);
 
           if (updateError) throw updateError;
         } else {
-          // Insert new record
           const { error: insertError } = await supabase
             .from('pool_costs')
             .insert({
               pool_id: poolId,
-              trucked_water: costs.truckedWater,
-              salt_bags: costs.saltBags,
-              misc: costs.misc,
-              coping_supply: costs.copingSupply,
-              beam: costs.beam,
-              coping_lay: costs.copingLay,
-              pea_gravel: costs.peaGravel,
-              install_fee: costs.installFee,
+              ...updateData
             });
 
           if (insertError) throw insertError;
