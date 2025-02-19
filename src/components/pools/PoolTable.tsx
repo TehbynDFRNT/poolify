@@ -6,8 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { EditableCell } from "./components/EditableCell";
-import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
-import { calculateFiltrationTotal } from "./utils/filtrationCalculations";
 
 const editableFields: (keyof Pool)[] = [
   "name",
@@ -33,7 +31,7 @@ type EditingCell = {
 };
 
 interface PoolTableProps {
-  pools: any[]; // Using any temporarily to handle the extended pool data
+  pools: Pool[];
 }
 
 export const PoolTable = ({ pools }: PoolTableProps) => {
@@ -90,55 +88,32 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
             {editableFields.map((field) => (
               <TableHead key={field}>{field}</TableHead>
             ))}
-            <TableHead>Filtration Package</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {pools.map((pool) => (
-            <React.Fragment key={pool.id}>
-              <TableRow>
-                {editableFields.map((field) => (
-                  <TableCell key={field} onClick={() => handleCellClick(pool, field)}>
-                    <EditableCell
-                      pool={pool}
-                      field={field}
-                      value={pool[field]}
-                      isEditing={editingCell?.id === pool.id && editingCell?.field === field}
-                      editValue={editValue}
-                      onValueChange={(e) => setEditValue(e.target.value)}
-                      onBlur={() => handleCellBlur(pool)}
-                      onKeyDown={(e) => handleKeyDown(e, pool)}
-                      onRangeChange={(value) => {
-                        updatePoolMutation.mutate({
-                          id: pool.id,
-                          range: value,
-                        });
-                      }}
-                    />
-                  </TableCell>
-                ))}
-                <TableCell>
-                  {pool.standard_filtration_package ? (
-                    <div className="space-y-2">
-                      <div className="font-medium">
-                        Option {pool.standard_filtration_package.display_order}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Total: {formatCurrency(calculateFiltrationTotal(pool.standard_filtration_package))}
-                      </div>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">No package selected</span>
-                  )}
+            <TableRow key={pool.id}>
+              {editableFields.map((field) => (
+                <TableCell key={field} onClick={() => handleCellClick(pool, field)}>
+                  <EditableCell
+                    pool={pool}
+                    field={field}
+                    value={pool[field]}
+                    isEditing={editingCell?.id === pool.id && editingCell?.field === field}
+                    editValue={editValue}
+                    onValueChange={(e) => setEditValue(e.target.value)}
+                    onBlur={() => handleCellBlur(pool)}
+                    onKeyDown={(e) => handleKeyDown(e, pool)}
+                    onRangeChange={(value) => {
+                      updatePoolMutation.mutate({
+                        id: pool.id,
+                        range: value,
+                      });
+                    }}
+                  />
                 </TableCell>
-              </TableRow>
-              {pool.standard_filtration_package && (
-                <FiltrationPackageDetails 
-                  package={pool.standard_filtration_package}
-                  colSpan={editableFields.length + 1}
-                />
-              )}
-            </React.Fragment>
+              ))}
+            </TableRow>
           ))}
         </TableBody>
       </Table>
