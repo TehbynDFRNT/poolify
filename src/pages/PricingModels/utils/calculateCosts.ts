@@ -5,10 +5,10 @@ import type { FixedCost } from "@/types/fixed-cost";
 import type { PackageWithComponents } from "@/types/filtration";
 import { initialPoolCosts } from "@/pages/ConstructionCosts/constants";
 
-export const calculateFiltrationTotal = (filtrationPackage: PackageWithComponents | null) => {
+export const calculateFiltrationTotal = (filtrationPackage: any) => {
   if (!filtrationPackage) return 0;
   
-  const handoverKitTotal = filtrationPackage.handover_kit?.components.reduce((total, comp) => {
+  const handoverKitTotal = filtrationPackage.handover_kit?.components.reduce((total: number, comp: any) => {
     return total + ((comp.component?.price || 0) * comp.quantity);
   }, 0) || 0;
 
