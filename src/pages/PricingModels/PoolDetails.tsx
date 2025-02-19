@@ -93,7 +93,7 @@ const PoolDetails = () => {
       const { data, error } = await supabase
         .from("pool_specifications")
         .update({ standard_filtration_package_id: packageId })
-        .eq("id", id)
+        .eq("id", id!)
         .select();
       
       if (error) {
@@ -112,13 +112,19 @@ const PoolDetails = () => {
     },
   });
 
+  // Update the useEffect to properly handle the initial package selection
   useEffect(() => {
     if (pool?.standard_filtration_package_id) {
       setSelectedPackageId(pool.standard_filtration_package_id);
     } else if (filtrationPackages?.length && !selectedPackageId) {
-      setSelectedPackageId(filtrationPackages[0].id);
+      const firstPackageId = filtrationPackages[0].id;
+      setSelectedPackageId(firstPackageId);
+      // If there's no standard package set, set the first one as standard
+      if (!pool?.standard_filtration_package_id) {
+        updateStandardPackageMutation.mutate(firstPackageId);
+      }
     }
-  }, [filtrationPackages, selectedPackageId, pool?.standard_filtration_package_id]);
+  }, [pool?.standard_filtration_package_id, filtrationPackages, selectedPackageId]);
 
   const { data: digType } = useQuery({
     queryKey: ["excavation-dig-type", pool?.name ? poolDigTypeMap[pool.name] : null],
@@ -219,6 +225,7 @@ const PoolDetails = () => {
         <PoolSpecifications pool={pool} />
         {selectedPackage && filtrationPackages && (
           <FiltrationPackage
+            key={selectedPackageId} // Add key to force re-render when package changes
             selectedPackageId={selectedPackageId}
             onPackageChange={setSelectedPackageId}
             filtrationPackages={filtrationPackages}
