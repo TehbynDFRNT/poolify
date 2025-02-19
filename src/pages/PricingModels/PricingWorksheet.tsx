@@ -17,6 +17,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { usePools } from "./hooks/usePools";
+import { PricingTable } from "./components/PricingTable";
 
 const PricingWorksheet = () => {
   const navigate = useNavigate();
