@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { useNavigate } from "react-router-dom";
 import type { SupabasePoolResponse } from "../types";
+import { formatCurrency } from "@/utils/format";
 
 type PricingTableProps = {
   pools: SupabasePoolResponse[];
@@ -23,6 +24,7 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
         <TableRow>
           <TableHead>Range</TableHead>
           <TableHead>Pool Name</TableHead>
+          <TableHead>Price (inc GST)</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -34,6 +36,7 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
           >
             <TableCell>{pool.range}</TableCell>
             <TableCell>{pool.name}</TableCell>
+            <TableCell>{pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : 'N/A'}</TableCell>
           </TableRow>
         ))}
       </TableBody>
