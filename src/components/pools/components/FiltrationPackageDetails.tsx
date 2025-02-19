@@ -1,10 +1,10 @@
 
 import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
-import { PackageWithComponents } from "@/types/filtration";
+import type { FiltrationPackageResponse } from "@/types/pool";
 
 interface FiltrationPackageDetailsProps {
-  package: PackageWithComponents;
+  package: FiltrationPackageResponse;
   colSpan: number;
 }
 

@@ -19,13 +19,12 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
-import type { Pool } from "@/types/pool";
-import type { PackageWithComponents } from "@/types/filtration";
+import type { Pool, FiltrationPackageResponse } from "@/types/pool";
 import { FiltrationPackageDetails } from "../pools/components/FiltrationPackageDetails";
 import { calculateFiltrationTotal } from "../pools/utils/filtrationCalculations";
 
 interface PoolFiltrationPackagesSectionProps {
-  packages: PackageWithComponents[] | undefined;
+  packages: FiltrationPackageResponse[] | undefined;
 }
 
 const DEFAULT_PACKAGE_MAPPING: Record<string, number> = {
@@ -80,11 +79,11 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
       if (error) throw error;
 
       const rangeOrder = ranges?.map(r => r.name) || [];
-      return (poolsData || []).sort((a, b) => {
+      return (poolsData as Pool[] || []).sort((a, b) => {
         const aIndex = rangeOrder.indexOf(a.range);
         const bIndex = rangeOrder.indexOf(b.range);
         return aIndex - bIndex;
-      }) as Pool[];
+      });
     },
   });
 
@@ -111,7 +110,7 @@ export function PoolFiltrationPackagesSection({ packages }: PoolFiltrationPackag
       ...prev,
       [poolId]: packageId
     }));
-    setExpandedRow(poolId); // Expand the row when package is selected
+    setExpandedRow(poolId);
   };
 
   const getSelectedPackageDetails = (poolId: string) => {
