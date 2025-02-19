@@ -23,20 +23,18 @@ export const PricingTable = ({ pools }: PricingTableProps) => {
     
     const pkg = pool.standard_filtration_package;
     
-    // Sum the main components
-    const componentTotal = (
+    // Sum all components including handover kit
+    const total = (
       (pkg.light?.price || 0) +
       (pkg.pump?.price || 0) +
       (pkg.sanitiser?.price || 0) +
-      (pkg.filter?.price || 0)
+      (pkg.filter?.price || 0) +
+      (pkg.handover_kit?.components.reduce((sum, comp) => 
+        sum + (comp.component?.price || 0), 0) || 0)
     );
 
-    // Calculate handover kit total
-    const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
-      return total + (comp.component?.price || 0);
-    }, 0) || 0;
-
-    return componentTotal + handoverKitTotal;
+    // Only return null if the total is actually 0
+    return total === 0 ? null : total;
   };
 
   return (
