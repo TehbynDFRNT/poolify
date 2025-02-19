@@ -1,5 +1,6 @@
 
 import { z } from "zod";
+import { ExcavationDigType } from "./excavation-dig-type";
 
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -73,6 +74,7 @@ export interface Pool {
   buy_price_ex_gst: number | null;
   buy_price_inc_gst: number | null;
   excavation_cost?: number | null;
+  dig_type: ExcavationDigType | null;
   default_package?: FiltrationPackage | null;
 }
 
