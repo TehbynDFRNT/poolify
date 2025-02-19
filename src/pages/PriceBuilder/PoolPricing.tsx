@@ -17,6 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { calculatePackagePrice } from "@/utils/package-calculations";
 import { initialPoolCosts } from "@/pages/ConstructionCosts/constants";
+import { Pool } from "@/types/pool";
 
 const PoolPricing = () => {
   const { poolId } = useParams();
@@ -69,7 +70,7 @@ const PoolPricing = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as Pool;
     },
   });
 
