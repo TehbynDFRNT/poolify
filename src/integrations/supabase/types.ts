@@ -547,6 +547,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "fk_pool_specs_filtration_package"
+            columns: ["standard_filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pool_specifications_pool_type_id_fkey"
             columns: ["pool_type_id"]
             isOneToOne: false

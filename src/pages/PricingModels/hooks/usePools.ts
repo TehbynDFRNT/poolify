@@ -20,23 +20,50 @@ export const usePools = () => {
             id,
             name,
             display_order,
-            created_at,
-            light: light_id ( id, name, model_number, price ),
-            pump: pump_id ( id, name, model_number, price ),
-            sanitiser: sanitiser_id ( id, name, model_number, price ),
-            filter: filter_id ( id, name, model_number, price ),
+            light: light_id (
+              id,
+              name,
+              model_number,
+              price
+            ),
+            pump: pump_id (
+              id,
+              name,
+              model_number,
+              price
+            ),
+            sanitiser: sanitiser_id (
+              id,
+              name,
+              model_number,
+              price
+            ),
+            filter: filter_id (
+              id,
+              name,
+              model_number,
+              price
+            ),
             handover_kit: handover_kit_id (
               id,
               name,
               components: handover_kit_package_components (
                 quantity,
-                component: component_id ( id, name, model_number, price )
+                component: component_id (
+                  id,
+                  name,
+                  model_number,
+                  price
+                )
               )
             )
           )
         `);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching pools:", error);
+        throw error;
+      }
 
       const rangeOrder = ranges?.map(r => r.name) || [];
       return (poolsData as unknown as SupabasePoolResponse[] || []).sort((a, b) => {
