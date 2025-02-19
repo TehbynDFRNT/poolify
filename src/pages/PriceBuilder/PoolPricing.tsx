@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, DollarSign, Package, List, Database, ImagePlus } from "lucide-react";
@@ -15,6 +14,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { calculatePackagePrice } from "@/utils/package-calculations";
 
 const PoolPricing = () => {
   const { poolId } = useParams();
@@ -25,7 +26,36 @@ const PoolPricing = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("*")
+        .select(`
+          *,
+          default_package:filtration_packages!default_filtration_package_id (
+            id,
+            name,
+            display_order,
+            light:filtration_components!light_id (
+              id, name, model_number, price
+            ),
+            pump:filtration_components!pump_id (
+              id, name, model_number, price
+            ),
+            sanitiser:filtration_components!sanitiser_id (
+              id, name, model_number, price
+            ),
+            filter:filtration_components!filter_id (
+              id, name, model_number, price
+            ),
+            handover_kit:handover_kit_packages!handover_kit_id (
+              id, 
+              name,
+              components:handover_kit_package_components (
+                quantity,
+                component:filtration_components!component_id (
+                  id, name, model_number, price
+                )
+              )
+            )
+          )
+        `)
         .eq("id", poolId)
         .single();
 
@@ -195,19 +225,91 @@ const PoolPricing = () => {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Package className="h-5 w-5" />
-                Default Filtration Package
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-8 text-gray-500">
-                <p>Default filtration package configuration will be displayed here</p>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Package className="h-5 w-5" />
+              Default Filtration Package
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {pool.default_package ? (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold">
+                    Option {pool.default_package.display_order}
+                  </h3>
+                  <p className="text-lg font-semibold text-primary">
+                    {formatCurrency(calculatePackagePrice(pool.default_package))}
+                  </p>
+                </div>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Component</TableHead>
+                      <TableHead>Model</TableHead>
+                      <TableHead className="text-right">Price</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {pool.default_package.light && (
+                      <TableRow>
+                        <TableCell>Light</TableCell>
+                        <TableCell>{pool.default_package.light.model_number}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(pool.default_package.light.price)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {pool.default_package.pump && (
+                      <TableRow>
+                        <TableCell>Pool Pump</TableCell>
+                        <TableCell>{pool.default_package.pump.model_number}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(pool.default_package.pump.price)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {pool.default_package.sanitiser && (
+                      <TableRow>
+                        <TableCell>Sanitiser</TableCell>
+                        <TableCell>{pool.default_package.sanitiser.model_number}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(pool.default_package.sanitiser.price)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {pool.default_package.filter && (
+                      <TableRow>
+                        <TableCell>Filter</TableCell>
+                        <TableCell>{pool.default_package.filter.model_number}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(pool.default_package.filter.price)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {pool.default_package.handover_kit?.components.map((comp) => (
+                      <TableRow key={comp.component.id}>
+                        <TableCell>
+                          {comp.component.name}
+                          {comp.quantity > 1 && ` (x${comp.quantity})`}
+                        </TableCell>
+                        <TableCell>{comp.component.model_number}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCurrency(comp.component.price * comp.quantity)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
-            </CardContent>
-          </Card>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p>No default filtration package assigned</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
           <Card>
             <CardHeader>
