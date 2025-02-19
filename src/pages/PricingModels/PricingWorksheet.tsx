@@ -29,10 +29,28 @@ import { formatCurrency } from "@/utils/format";
 import { Button } from "@/components/ui/button";
 import type { Pool } from "@/types/pool";
 import { initialPoolCosts, poolDigTypeMap } from "@/pages/ConstructionCosts/constants";
-import type { PackageWithComponents } from "@/types/filtration";
+import type { PackageWithComponents, FiltrationComponent } from "@/types/filtration";
 
-type PoolWithPackage = Omit<Pool, 'standard_filtration_package_id'> & {
-  standard_filtration_package: PackageWithComponents | null;
+// Type for the raw data from Supabase
+type SupabasePoolResponse = Omit<Pool, 'standard_filtration_package_id'> & {
+  standard_filtration_package: {
+    id: string;
+    name: string;
+    display_order: number;
+    created_at: string;
+    light: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+    pump: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+    sanitiser: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+    filter: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'> | null;
+    handover_kit: {
+      id: string;
+      name: string;
+      components: {
+        quantity: number;
+        component: Pick<FiltrationComponent, 'id' | 'name' | 'model_number' | 'price'>;
+      }[];
+    } | null;
+  } | null;
 };
 
 const PricingWorksheet = () => {
@@ -73,11 +91,11 @@ const PricingWorksheet = () => {
       if (error) throw error;
 
       const rangeOrder = ranges?.map(r => r.name) || [];
-      return (poolsData || []).sort((a, b) => {
+      return (poolsData as SupabasePoolResponse[] || []).sort((a, b) => {
         const aIndex = rangeOrder.indexOf(a.range);
         const bIndex = rangeOrder.indexOf(b.range);
         return aIndex - bIndex;
-      }) as PoolWithPackage[];
+      });
     },
   });
 
@@ -106,7 +124,7 @@ const PricingWorksheet = () => {
     },
   });
 
-  const calculateTrueCost = (pool: PoolWithPackage) => {
+  const calculateTrueCost = (pool: SupabasePoolResponse) => {
     // Calculate total fixed costs
     const totalFixedCosts = fixedCosts.reduce((sum, cost) => sum + cost.price, 0);
 
@@ -137,7 +155,7 @@ const PricingWorksheet = () => {
       excavationCost;
 
     // Calculate filtration package total
-    const calculatePackageTotal = (pkg: PackageWithComponents) => {
+    const calculatePackageTotal = (pkg: NonNullable<SupabasePoolResponse['standard_filtration_package']>) => {
       const handoverKitTotal = pkg.handover_kit?.components.reduce((total, comp) => {
         return total + ((comp.component?.price || 0) * comp.quantity);
       }, 0) || 0;
