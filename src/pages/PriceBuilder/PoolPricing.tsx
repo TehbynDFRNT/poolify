@@ -93,36 +93,17 @@ const PoolPricing = () => {
               <CardTitle>Pool Outline</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div>
-                  <div className="relative w-full aspect-[4/3] border-2 border-gray-200 rounded-lg">
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
-                      <h3 className="text-2xl font-bold">{pool.name}</h3>
-                    </div>
-                  </div>
-                  <div className="mt-4">
-                    <Button variant="outline" size="sm" className="w-full">
-                      <ImagePlus className="h-4 w-4 mr-2" />
-                      Change Pool Image
-                    </Button>
+              <div className="w-full max-w-md mx-auto">
+                <div className="relative w-full aspect-[4/3] border-2 border-gray-200 rounded-lg">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                    <p className="text-gray-400">No pool image</p>
                   </div>
                 </div>
-                <div className="flex flex-col justify-center space-y-4">
-                  <h4 className="font-medium text-lg">Pool Dimensions</h4>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-gray-500">External</p>
-                      <p className="font-medium">{pool.length}m x {pool.width}m</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Internal</p>
-                      <p className="font-medium">{(pool.length - 0.4).toFixed(1)}m x {(pool.width - 0.4).toFixed(1)}m</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-500">Depth Range</p>
-                      <p className="font-medium">{pool.depth_shallow}m to {pool.depth_deep}m</p>
-                    </div>
-                  </div>
+                <div className="mt-4">
+                  <Button variant="outline" size="sm" className="w-full">
+                    <ImagePlus className="h-4 w-4 mr-2" />
+                    Change Pool Image
+                  </Button>
                 </div>
               </div>
             </CardContent>
