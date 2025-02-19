@@ -40,7 +40,10 @@ export const PoolFiltration = ({ poolId }: PoolFiltrationProps) => {
       </CardHeader>
       <CardContent>
         <div className="text-sm text-muted-foreground">
-          Option {filtrationOption?.standard_filtration_package?.display_order}
+          {filtrationOption?.standard_filtration_package ? 
+            `Option ${filtrationOption.standard_filtration_package.display_order}` : 
+            "No filtration package assigned"
+          }
         </div>
       </CardContent>
     </Card>
