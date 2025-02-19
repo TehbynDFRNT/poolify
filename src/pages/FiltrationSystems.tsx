@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -133,7 +134,7 @@ const FiltrationSystems = () => {
         .select(`
           id,
           name,
-          standard_filtration_package:filtration_packages!standard_filtration_package_id (
+          standard_filtration_package:filtration_packages!standard_filtration_package_id(
             id,
             name,
             display_order
