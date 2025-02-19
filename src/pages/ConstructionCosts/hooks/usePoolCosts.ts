@@ -13,25 +13,27 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
 
-  const { data: costs = initialPoolCosts } = useQuery({
+  const { data: costs = initialPoolCosts, isLoading } = useQuery({
     queryKey: ["pool-costs"],
     queryFn: async () => {
-      let { data, error } = await supabase
+      console.log('Fetching pool costs...');
+      const { data, error } = await supabase
         .from('pool_costs')
         .select('*');
 
       if (error) {
         console.error('Error fetching pool costs:', error);
-        toast.error("Failed to fetch pool costs");
-        return initialPoolCosts;
+        throw error;
       }
+
+      console.log('Received pool costs:', data);
 
       const costsMap: Record<string, PoolCosts> = {};
       (data || []).forEach((cost: PoolCostsRow) => {
         costsMap[cost.pool_id] = {
           truckedWater: Number(cost.trucked_water) || 0,
           saltBags: Number(cost.salt_bags) || 0,
-          misc: Number(cost.misc) || 0,
+          misc: Number(cost.misc) || 2700,
           copingSupply: Number(cost.coping_supply) || 0,
           beam: Number(cost.beam) || 0,
           copingLay: Number(cost.coping_lay) || 0,
@@ -40,36 +42,40 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
         };
       });
 
-      return { ...initialPoolCosts, ...costsMap };
+      return costsMap;
     },
+    meta: {
+      onError: (error: Error) => {
+        console.error('Query error:', error);
+        toast.error("Failed to fetch pool costs");
+      }
+    }
   });
 
   const updatePoolCostsMutation = useMutation({
     mutationFn: async ({ poolId, costs }: { poolId: string; costs: PoolCosts }) => {
-      const updateData = {
-        pool_id: poolId,
-        trucked_water: costs.truckedWater || 0,
-        salt_bags: costs.saltBags || 0,
-        misc: costs.misc || 0,
-        coping_supply: costs.copingSupply || 0,
-        beam: costs.beam || 0,
-        coping_lay: costs.copingLay || 0,
-        pea_gravel: costs.peaGravel || 0,
-        install_fee: costs.installFee || 0,
-      };
-
+      console.log('Updating pool costs:', { poolId, costs });
+      
       const { error } = await supabase
         .from('pool_costs')
-        .upsert(updateData, {
-          onConflict: 'pool_id'
+        .upsert({
+          pool_id: poolId,
+          trucked_water: costs.truckedWater,
+          salt_bags: costs.saltBags,
+          misc: costs.misc,
+          coping_supply: costs.copingSupply,
+          beam: costs.beam,
+          coping_lay: costs.copingLay,
+          pea_gravel: costs.peaGravel,
+          install_fee: costs.installFee,
         });
 
       if (error) {
-        console.error('Error updating pool costs:', error);
-        throw new Error('Failed to update pool costs');
+        console.error('Error in mutation:', error);
+        throw error;
       }
 
-      return { success: true };
+      console.log('Successfully updated pool costs');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pool-costs"] });
@@ -83,6 +89,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   });
 
   const handleEdit = (poolName: string) => {
+    console.log('Starting edit for pool:', poolName);
     setEditingRow(poolName);
     setEditedCosts(prev => ({
       ...prev,
@@ -91,8 +98,12 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const handleSave = (poolId: string, poolName: string) => {
+    console.log('Saving costs for pool:', poolName);
     const updatedCosts = editedCosts[poolName];
-    if (!updatedCosts) return;
+    if (!updatedCosts) {
+      console.warn('No costs found to update');
+      return;
+    }
 
     updatePoolCostsMutation.mutate({
       poolId,
@@ -101,11 +112,13 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   };
 
   const handleCancel = () => {
+    console.log('Cancelling edit');
     setEditingRow(null);
     setEditedCosts(costs);
   };
 
   const handleCostChange = (poolName: string, field: keyof PoolCosts, value: string) => {
+    console.log('Changing cost:', { poolName, field, value });
     const numValue = parseFloat(value);
     if (!isNaN(numValue)) {
       setEditedCosts(prev => ({
@@ -128,6 +141,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
     editingRow,
     editedCosts,
     costs,
+    isLoading,
     handleEdit,
     handleSave,
     handleCancel,

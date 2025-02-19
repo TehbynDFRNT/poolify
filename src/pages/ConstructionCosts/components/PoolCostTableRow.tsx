@@ -4,7 +4,7 @@ import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 import { PoolCosts } from "../types";
-import { CostCell } from "./CostCell";
+import { EditableCell } from "@/components/filtration/components/EditableCell";
 import { DigTypeCell } from "./DigTypeCell";
 import { PoolCostActions } from "./PoolCostActions";
 
@@ -45,46 +45,142 @@ export const PoolCostTableRow = ({
       <TableCell>{pool.width}m</TableCell>
       <TableCell>{pool.depth_shallow}m</TableCell>
       <TableCell>{pool.depth_deep}m</TableCell>
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.peaGravel}
-        onChange={(value) => onCostChange('peaGravel', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.installFee}
-        onChange={(value) => onCostChange('installFee', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.truckedWater}
-        onChange={(value) => onCostChange('truckedWater', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.saltBags}
-        onChange={(value) => onCostChange('saltBags', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.misc}
-        onChange={(value) => onCostChange('misc', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.copingSupply}
-        onChange={(value) => onCostChange('copingSupply', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.beam}
-        onChange={(value) => onCostChange('beam', value)}
-      />
-      <CostCell
-        isEditing={isEditing}
-        value={currentCosts.copingLay}
-        onChange={(value) => onCostChange('copingLay', value)}
-      />
+      <TableCell>
+        <EditableCell
+          value={currentCosts.peaGravel}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('peaGravel', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.installFee}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('installFee', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.truckedWater}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('truckedWater', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.saltBags}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('saltBags', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.misc}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('misc', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.copingSupply}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('copingSupply', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.beam}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('beam', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
+      <TableCell>
+        <EditableCell
+          value={currentCosts.copingLay}
+          isEditing={isEditing}
+          onEdit={() => {}}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onCostChange('copingLay', value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+          align="right"
+          format={formatCurrency}
+        />
+      </TableCell>
       <DigTypeCell
         digTypes={digTypes}
         selectedDigType={selectedDigTypes[pool.id]}
@@ -100,12 +196,16 @@ export const PoolCostTableRow = ({
       <TableCell className="font-medium">
         {formatCurrency(calculateTotal())}
       </TableCell>
-      <PoolCostActions
-        isEditing={isEditing}
-        onEdit={onEdit}
-        onSave={onSave}
-        onCancel={onCancel}
-      />
+      <TableCell>
+        {isEditing ? (
+          <div className="flex gap-2">
+            <button onClick={onSave} className="text-green-600 hover:text-green-700">Save</button>
+            <button onClick={onCancel} className="text-red-600 hover:text-red-700">Cancel</button>
+          </div>
+        ) : (
+          <button onClick={onEdit} className="text-blue-600 hover:text-blue-700">Edit</button>
+        )}
+      </TableCell>
     </TableRow>
   );
 };
