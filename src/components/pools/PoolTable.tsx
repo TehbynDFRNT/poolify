@@ -7,6 +7,8 @@ import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { EditableCell } from "./components/EditableCell";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Check, X } from "lucide-react";
 
 const editableFields: (keyof Pool)[] = [
   "name",
@@ -26,24 +28,17 @@ const editableFields: (keyof Pool)[] = [
   "buy_price_inc_gst"
 ];
 
-type EditingCell = {
-  id: string;
-  field: keyof Pool;
-};
-
 interface PoolTableProps {
   pools: Pool[];
 }
 
 export const PoolTable = ({ pools }: PoolTableProps) => {
-  const [editingCell, setEditingCell] = useState<EditingCell | null>(null);
-  const [editValue, setEditValue] = useState<string>("");
+  // Track edits per row
+  const [editingRows, setEditingRows] = useState<Record<string, Partial<Pool>>>({});
   const queryClient = useQueryClient();
 
   const updatePoolMutation = useMutation({
-    mutationFn: async ({ id, field, value }: { id: string; field: keyof Pool; value: any }) => {
-      const updates = { [field]: value };
-      
+    mutationFn: async ({ id, updates }: { id: string; updates: Partial<Pool> }) => {
       const { error } = await supabase
         .from("pool_specifications")
         .update(updates)
@@ -51,11 +46,15 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       toast.success("Pool updated successfully");
-      setEditingCell(null);
-      setEditValue("");
+      // Clear editing state for this row
+      setEditingRows((prev) => {
+        const next = { ...prev };
+        delete next[variables.id];
+        return next;
+      });
     },
     onError: (error) => {
       console.error("Error updating pool:", error);
@@ -63,41 +62,42 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
     },
   });
 
-  const handleCellClick = (pool: Pool, field: keyof Pool) => {
-    if (!editableFields.includes(field)) return;
-    
-    setEditingCell({ id: pool.id, field });
-    setEditValue(String(pool[field] || ""));
+  const handleValueChange = (pool: Pool, field: keyof Pool, value: any) => {
+    setEditingRows((prev) => ({
+      ...prev,
+      [pool.id]: {
+        ...prev[pool.id],
+        [field]: value
+      }
+    }));
   };
 
-  const handleCellBlur = (pool: Pool, field: keyof Pool) => {
-    if (!editingCell) return;
+  const handleSaveRow = (pool: Pool) => {
+    const updates = editingRows[pool.id];
+    if (!updates) return;
 
-    let value: string | number | null = editValue;
-
-    // Convert value based on field type
-    if (field === "range" || field === "name") {
-      value = editValue;
-    } else if (editValue === "") {
-      value = null;
-    } else {
-      value = parseFloat(editValue);
-      if (isNaN(value)) {
-        toast.error("Please enter a valid number");
+    // Validate numeric fields
+    for (const [field, value] of Object.entries(updates)) {
+      if (field === "name" || field === "range") continue;
+      if (value === "") continue; // Allow clearing values
+      
+      const numValue = parseFloat(value as string);
+      if (isNaN(numValue)) {
+        toast.error(`Invalid number for ${field}`);
         return;
       }
+      updates[field as keyof Pool] = numValue;
     }
 
-    updatePoolMutation.mutate({ id: pool.id, field, value });
+    updatePoolMutation.mutate({ id: pool.id, updates });
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, pool: Pool, field: keyof Pool) => {
-    if (e.key === "Enter") {
-      handleCellBlur(pool, field);
-    } else if (e.key === "Escape") {
-      setEditingCell(null);
-      setEditValue("");
-    }
+  const handleCancelRow = (poolId: string) => {
+    setEditingRows((prev) => {
+      const next = { ...prev };
+      delete next[poolId];
+      return next;
+    });
   };
 
   return (
@@ -108,34 +108,59 @@ export const PoolTable = ({ pools }: PoolTableProps) => {
             {editableFields.map((field) => (
               <TableHead key={field}>{field}</TableHead>
             ))}
+            <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {pools.map((pool) => (
-            <TableRow key={pool.id}>
-              {editableFields.map((field) => (
-                <TableCell key={field} onClick={() => handleCellClick(pool, field)}>
-                  <EditableCell
-                    pool={pool}
-                    field={field}
-                    value={pool[field]}
-                    isEditing={editingCell?.id === pool.id && editingCell?.field === field}
-                    editValue={editValue}
-                    onValueChange={(e) => setEditValue(e.target.value)}
-                    onBlur={() => handleCellBlur(pool, field)}
-                    onKeyDown={(e) => handleKeyDown(e, pool, field)}
-                    onRangeChange={(value) => {
-                      updatePoolMutation.mutate({
-                        id: pool.id,
-                        field: 'range',
-                        value,
-                      });
-                    }}
-                  />
+          {pools.map((pool) => {
+            const isEditing = !!editingRows[pool.id];
+            return (
+              <TableRow key={pool.id}>
+                {editableFields.map((field) => (
+                  <TableCell key={field}>
+                    <EditableCell
+                      pool={pool}
+                      field={field}
+                      value={editingRows[pool.id]?.[field] ?? pool[field]}
+                      isEditing={isEditing}
+                      onValueChange={(value) => handleValueChange(pool, field, value)}
+                    />
+                  </TableCell>
+                ))}
+                <TableCell>
+                  {isEditing ? (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleSaveRow(pool)}
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCancelRow(pool.id)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setEditingRows((prev) => ({
+                        ...prev,
+                        [pool.id]: {}
+                      }))}
+                    >
+                      Edit
+                    </Button>
+                  )}
                 </TableCell>
-              ))}
-            </TableRow>
-          ))}
+              </TableRow>
+            );
+          })}
         </TableBody>
       </Table>
     </div>

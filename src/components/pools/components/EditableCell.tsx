@@ -10,11 +10,7 @@ interface EditableCellProps {
   field: keyof Pool;
   value: any;
   isEditing: boolean;
-  editValue: string;
-  onValueChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur: () => void;
-  onKeyDown: (e: React.KeyboardEvent) => void;
-  onRangeChange: (value: string) => void;
+  onValueChange: (value: any) => void;
 }
 
 export const EditableCell = ({
@@ -22,23 +18,14 @@ export const EditableCell = ({
   field,
   value,
   isEditing,
-  editValue,
   onValueChange,
-  onBlur,
-  onKeyDown,
-  onRangeChange,
 }: EditableCellProps) => {
   if (isEditing) {
     if (field === "range") {
       return (
         <Select 
-          value={pool.range} 
-          onValueChange={onRangeChange}
-          onOpenChange={(open) => {
-            if (!open) {
-              onBlur();
-            }
-          }}
+          value={value || pool.range}
+          onValueChange={onValueChange}
         >
           <SelectTrigger className="w-[200px]">
             <SelectValue placeholder="Select Range" />
@@ -56,11 +43,8 @@ export const EditableCell = ({
 
     return (
       <Input
-        autoFocus
-        value={editValue}
-        onChange={onValueChange}
-        onBlur={onBlur}
-        onKeyDown={onKeyDown}
+        value={value ?? pool[field] ?? ""}
+        onChange={(e) => onValueChange(e.target.value)}
         type={field === "name" ? "text" : "number"}
         step={field.includes("length") || field.includes("width") || field.includes("depth") ? "0.01" : "1"}
         className="w-full"
@@ -91,7 +75,7 @@ export const EditableCell = ({
   })();
 
   return (
-    <div className="cursor-pointer hover:bg-gray-100 p-1 rounded transition-colors">
+    <div className="cursor-pointer p-1 rounded">
       {displayValue}
     </div>
   );
