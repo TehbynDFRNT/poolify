@@ -1,6 +1,6 @@
 
 import { Pool } from "@/types/pool";
-import { PoolUpdates, NullableNumericFields } from "../types/poolTableTypes";
+import { PoolUpdates, NullableNumericFields, RequiredNumericFields } from "../types/poolTableTypes";
 import { toast } from "sonner";
 
 export const validatePoolUpdates = (updates: Partial<Pool>): PoolUpdates | null => {
@@ -29,7 +29,7 @@ export const validatePoolUpdates = (updates: Partial<Pool>): PoolUpdates | null 
         toast.error(`Invalid number for ${field}`);
         return null;
       }
-      validatedUpdates[field] = numValue;
+      validatedUpdates[field as RequiredNumericFields] = numValue;
     } else if (["waterline_l_m", "volume_liters", "salt_volume_bags", 
                "salt_volume_bags_fixed", "weight_kg", "minerals_kg_initial", 
                "minerals_kg_topup", "buy_price_ex_gst", "buy_price_inc_gst"].includes(field)) {
@@ -38,7 +38,7 @@ export const validatePoolUpdates = (updates: Partial<Pool>): PoolUpdates | null 
         toast.error(`Invalid number for ${field}`);
         return null;
       }
-      validatedUpdates[field] = numValue;
+      validatedUpdates[field as NullableNumericFields] = numValue;
     }
   }
 
