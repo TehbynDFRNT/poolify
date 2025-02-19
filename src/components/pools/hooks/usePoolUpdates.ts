@@ -16,27 +16,26 @@ export const usePoolUpdates = () => {
 
       const { data, error } = await supabase
         .from("pool_specifications")
-        .update(updates)
-        .match({ id })
-        .select('*');
+        .upsert({ id, ...updates })
+        .select()
+        .limit(1);
 
       console.log('Update response:', { data, error });
 
       if (error) {
         console.error('Supabase error:', error);
-        throw new Error(error.message);
+        throw error;
       }
 
       if (!data || data.length === 0) {
         console.error('No data returned after update');
-        throw new Error('Failed to update pool - no data returned');
+        throw new Error('Failed to update pool');
       }
 
-      console.log('Update successful, returning:', data[0]);
-      return data[0];
+      return data[0] as Pool;
     },
     onSuccess: (data, variables) => {
-      console.log('Mutation success handler:', { data, variables });
+      console.log('Update successful:', data);
       queryClient.invalidateQueries({ queryKey: ["pool-specifications"] });
       toast.success("Pool updated successfully");
       setEditingRows((prev) => {
