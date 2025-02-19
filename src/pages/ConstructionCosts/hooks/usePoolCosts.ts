@@ -5,6 +5,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { PoolCosts } from "../types";
 import { toast } from "sonner";
 
+// Define the database row type
+interface PoolCostsRow {
+  id: string;
+  pool_id: string;
+  pea_gravel: number;
+  install_fee: number;
+  trucked_water: number;
+  salt_bags: number;
+  misc: number;
+  coping_supply: number;
+  beam: number;
+  coping_lay: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [editedCosts, setEditedCosts] = useState<Record<string, PoolCosts>>(initialPoolCosts);
@@ -15,7 +31,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
     queryKey: ["pool-costs"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("pool_costs")
+        .from<PoolCostsRow>("pool_costs")
         .select("*");
 
       if (error) {
@@ -47,7 +63,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
       console.log("Updating pool costs:", variables);
 
       const { data, error } = await supabase
-        .from("pool_costs")
+        .from<PoolCostsRow>("pool_costs")
         .upsert({
           pool_id: variables.poolId,
           pea_gravel: variables.costs.peaGravel,
@@ -59,8 +75,7 @@ export const usePoolCosts = (initialPoolCosts: Record<string, PoolCosts>) => {
           beam: variables.costs.beam,
           coping_lay: variables.costs.copingLay
         })
-        .select()
-        .single();
+        .select();
 
       if (error) {
         console.error("Error updating pool costs:", error);

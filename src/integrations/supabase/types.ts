@@ -395,6 +395,59 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_costs: {
+        Row: {
+          beam: number
+          coping_lay: number
+          coping_supply: number
+          created_at: string
+          id: string
+          install_fee: number
+          misc: number
+          pea_gravel: number
+          pool_id: string
+          salt_bags: number
+          trucked_water: number
+          updated_at: string
+        }
+        Insert: {
+          beam?: number
+          coping_lay?: number
+          coping_supply?: number
+          created_at?: string
+          id?: string
+          install_fee?: number
+          misc?: number
+          pea_gravel?: number
+          pool_id: string
+          salt_bags?: number
+          trucked_water?: number
+          updated_at?: string
+        }
+        Update: {
+          beam?: number
+          coping_lay?: number
+          coping_supply?: number
+          created_at?: string
+          id?: string
+          install_fee?: number
+          misc?: number
+          pea_gravel?: number
+          pool_id?: string
+          salt_bags?: number
+          trucked_water?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_costs_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_excavation_types: {
         Row: {
           created_at: string
