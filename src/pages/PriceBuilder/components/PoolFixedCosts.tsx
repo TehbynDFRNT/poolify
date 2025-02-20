@@ -10,17 +10,24 @@ export const PoolFixedCosts = () => {
   const { data: fixedCosts, isLoading } = useQuery({
     queryKey: ["fixed-costs"],
     queryFn: async () => {
+      console.log("Fetching fixed costs...");
       const { data, error } = await supabase
         .from("fixed_costs")
         .select("*")
         .order("display_order");
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching fixed costs:", error);
+        throw error;
+      }
+      
+      console.log("Fixed costs data:", data);
       return data as FixedCost[];
     },
   });
 
   if (isLoading) {
+    console.log("Fixed costs loading state:", isLoading);
     return (
       <Card>
         <CardHeader>
@@ -37,6 +44,7 @@ export const PoolFixedCosts = () => {
   }
 
   const total = fixedCosts?.reduce((sum, cost) => sum + cost.price, 0) || 0;
+  console.log("Fixed costs total:", total);
 
   return (
     <Card>
