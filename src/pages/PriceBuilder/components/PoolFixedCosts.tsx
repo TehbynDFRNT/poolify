@@ -59,10 +59,10 @@ export const PoolFixedCosts = () => {
                 key={cost.id} 
                 className="bg-muted/50 rounded-lg p-4 space-y-2"
               >
-                <div className="text-sm font-medium text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                   {cost.name}
                 </div>
-                <div className="text-2xl font-bold">
+                <div className="text-xl">
                   {formatCurrency(cost.price)}
                 </div>
               </div>
@@ -71,8 +71,8 @@ export const PoolFixedCosts = () => {
 
           <div className="border-t pt-6 mt-6">
             <div className="flex justify-between items-center">
-              <div className="text-lg font-medium">Total Fixed Costs</div>
-              <div className="text-2xl font-bold text-primary">
+              <div className="text-lg text-muted-foreground">Total Fixed Costs</div>
+              <div className="text-xl text-primary">
                 {formatCurrency(total)}
               </div>
             </div>
