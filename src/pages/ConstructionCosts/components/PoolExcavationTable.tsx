@@ -63,6 +63,21 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
     }
   };
 
+  // Group pools by range (case-insensitive)
+  const groupedPools = pools.reduce((acc, pool) => {
+    const normalizedRange = pool.range.toLowerCase();
+    if (!acc[normalizedRange]) {
+      acc[normalizedRange] = [];
+    }
+    acc[normalizedRange].push(pool);
+    return acc;
+  }, {} as Record<string, PoolExcavationType[]>);
+
+  // Sort ranges and create a flat list of pools
+  const sortedPools = Object.entries(groupedPools)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .flatMap(([range, poolGroup]) => poolGroup);
+
   return (
     <Table>
       <TableHeader>
@@ -75,9 +90,9 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
         </TableRow>
       </TableHeader>
       <TableBody>
-        {pools?.map((pool) => (
+        {sortedPools.map((pool) => (
           <TableRow key={pool.id} className="hover:bg-gray-50">
-            <TableCell>{pool.range}</TableCell>
+            <TableCell className="capitalize">{pool.range.toLowerCase()}</TableCell>
             <TableCell>{pool.name}</TableCell>
             <TableCell>
               {editingId === pool.id ? (
