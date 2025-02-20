@@ -1,46 +1,44 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { ExcavationDigType, PoolExcavationType } from "@/types/excavation-dig-type";
+import type { DigType, PoolDigType } from "@/types/excavation-dig-type";
 
 export const useDigTypes = () => {
   return useQuery({
-    queryKey: ["excavation-dig-types"],
+    queryKey: ["dig-types"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("excavation_dig_types")
+        .from("dig_types")
         .select("*")
         .order("name");
       
       if (error) throw error;
-      return data as ExcavationDigType[];
+      return data as DigType[];
     },
   });
 };
 
-export const usePoolExcavationTypes = () => {
+export const usePoolDigTypes = () => {
   return useQuery({
-    queryKey: ["pool-excavation-types"],
+    queryKey: ["pool-dig-types"],
     queryFn: async () => {
       console.log('Fetching pools...');
       const { data, error } = await supabase
-        .from("pool_excavation_types")
+        .from("pool_dig_types")
         .select(`
           *,
-          dig_type:excavation_dig_types(*)
+          dig_type:dig_types(*)
         `);
       
       if (error) throw error;
 
-      // Sort pools by range (using the order from POOL_RANGES) and then by name
+      // Sort pools by range and then by name
       return (data || []).sort((a, b) => {
-        // First sort by range name
-        if (a.range !== b.range) {
-          return a.range.localeCompare(b.range);
+        if (a.pool_range !== b.pool_range) {
+          return a.pool_range.localeCompare(b.pool_range);
         }
-        // Then sort by pool name within the same range
-        return a.name.localeCompare(b.name);
-      }) as PoolExcavationType[];
+        return a.pool_name.localeCompare(b.pool_name);
+      }) as PoolDigType[];
     },
   });
 };

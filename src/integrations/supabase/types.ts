@@ -114,36 +114,24 @@ export type Database = {
         }
         Relationships: []
       }
-      excavation_dig_types: {
+      dig_types: {
         Row: {
+          cost: number
           created_at: string
-          excavation_hourly_rate: number
-          excavation_hours: number
           id: string
           name: string
-          truck_count: number
-          truck_hourly_rate: number
-          truck_hours: number
         }
         Insert: {
+          cost: number
           created_at?: string
-          excavation_hourly_rate: number
-          excavation_hours: number
           id?: string
           name: string
-          truck_count: number
-          truck_hourly_rate: number
-          truck_hours: number
         }
         Update: {
+          cost?: number
           created_at?: string
-          excavation_hourly_rate?: number
-          excavation_hours?: number
           id?: string
           name?: string
-          truck_count?: number
-          truck_hourly_rate?: number
-          truck_hours?: number
         }
         Relationships: []
       }
@@ -478,34 +466,34 @@ export type Database = {
           },
         ]
       }
-      pool_excavation_types: {
+      pool_dig_types: {
         Row: {
           created_at: string
           dig_type_id: string
           id: string
-          name: string
-          range: string
+          pool_name: string
+          pool_range: string
         }
         Insert: {
           created_at?: string
           dig_type_id: string
           id?: string
-          name: string
-          range: string
+          pool_name: string
+          pool_range: string
         }
         Update: {
           created_at?: string
           dig_type_id?: string
           id?: string
-          name?: string
-          range?: string
+          pool_name?: string
+          pool_range?: string
         }
         Relationships: [
           {
-            foreignKeyName: "pool_excavation_types_dig_type_id_fkey"
+            foreignKeyName: "pool_dig_types_dig_type_id_fkey"
             columns: ["dig_type_id"]
             isOneToOne: false
-            referencedRelation: "excavation_dig_types"
+            referencedRelation: "dig_types"
             referencedColumns: ["id"]
           },
         ]
@@ -643,13 +631,6 @@ export type Database = {
             columns: ["default_filtration_package_id"]
             isOneToOne: false
             referencedRelation: "filtration_packages"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_specifications_dig_type_id_fkey"
-            columns: ["dig_type_id"]
-            isOneToOne: false
-            referencedRelation: "pool_excavation_types"
             referencedColumns: ["id"]
           },
           {

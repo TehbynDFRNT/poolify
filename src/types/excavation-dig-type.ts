@@ -1,20 +1,16 @@
 
-export interface ExcavationDigType {
+export interface DigType {
   id: string;
   name: string;
+  cost: number;
   created_at: string;
-  truck_count: number;
-  truck_hourly_rate: number;
-  truck_hours: number;
-  excavation_hourly_rate: number;
-  excavation_hours: number;
 }
 
-export interface PoolExcavationType {
+export interface PoolDigType {
   id: string;
-  name: string;
-  range: string;
+  pool_name: string;
+  pool_range: string;
   dig_type_id: string;
   created_at: string;
-  dig_type?: ExcavationDigType;
+  dig_type?: DigType;
 }

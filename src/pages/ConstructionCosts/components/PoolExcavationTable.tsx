@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { type PoolExcavationType, type ExcavationDigType } from "@/types/excavation-dig-type";
+import { type PoolDigType, type DigType } from "@/types/excavation-dig-type";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -23,8 +23,8 @@ import { useToast } from "@/hooks/use-toast";
 import { formatCurrency } from "@/utils/format";
 
 interface PoolExcavationTableProps {
-  pools: PoolExcavationType[];
-  digTypes: ExcavationDigType[];
+  pools: PoolDigType[];
+  digTypes: DigType[];
 }
 
 export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProps) => {
@@ -32,16 +32,10 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const calculateDigCost = (digType: ExcavationDigType) => {
-    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-    return truckCost + excavationCost;
-  };
-
   const handleDigTypeChange = async (poolId: string, newDigTypeId: string) => {
     try {
       const { error } = await supabase
-        .from("pool_excavation_types")
+        .from("pool_dig_types")
         .update({ dig_type_id: newDigTypeId })
         .eq("id", poolId);
 
@@ -52,7 +46,7 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
         description: "Dig type updated successfully",
       });
 
-      queryClient.invalidateQueries({ queryKey: ["pool-excavation-types"] });
+      queryClient.invalidateQueries({ queryKey: ["pool-dig-types"] });
       setEditingId(null);
     } catch (error: any) {
       toast({
@@ -65,18 +59,18 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
 
   // Group pools by range (case-insensitive)
   const groupedPools = pools.reduce((acc, pool) => {
-    const normalizedRange = pool.range.toLowerCase();
+    const normalizedRange = pool.pool_range.toLowerCase();
     if (!acc[normalizedRange]) {
       acc[normalizedRange] = [];
     }
     acc[normalizedRange].push(pool);
     return acc;
-  }, {} as Record<string, PoolExcavationType[]>);
+  }, {} as Record<string, PoolDigType[]>);
 
   // Sort ranges and create a flat list of pools
   const sortedPools = Object.entries(groupedPools)
     .sort(([a], [b]) => a.localeCompare(b))
-    .flatMap(([range, poolGroup]) => poolGroup.sort((a, b) => a.name.localeCompare(b.name)));
+    .flatMap(([range, poolGroup]) => poolGroup.sort((a, b) => a.pool_name.localeCompare(b.pool_name)));
 
   return (
     <Table>
@@ -92,8 +86,8 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
       <TableBody>
         {sortedPools.map((pool) => (
           <TableRow key={pool.id} className="hover:bg-gray-50">
-            <TableCell className="capitalize">{pool.range.toLowerCase()}</TableCell>
-            <TableCell>{pool.name}</TableCell>
+            <TableCell className="capitalize">{pool.pool_range.toLowerCase()}</TableCell>
+            <TableCell>{pool.pool_name}</TableCell>
             <TableCell>
               {editingId === pool.id ? (
                 <Select
@@ -116,7 +110,7 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
               )}
             </TableCell>
             <TableCell className="font-medium">
-              {pool.dig_type && formatCurrency(calculateDigCost(pool.dig_type))}
+              {pool.dig_type && formatCurrency(pool.dig_type.cost)}
             </TableCell>
             <TableCell>
               <Button
