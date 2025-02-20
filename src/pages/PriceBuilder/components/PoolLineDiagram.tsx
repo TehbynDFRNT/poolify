@@ -15,7 +15,7 @@ export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
   return (
     <Card className="bg-white shadow-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold">Pool Line Diagram</CardTitle>
+        <CardTitle className="text-lg font-semibold">Pool Outline</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex justify-center">
