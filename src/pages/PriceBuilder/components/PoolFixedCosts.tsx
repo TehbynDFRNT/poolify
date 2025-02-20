@@ -13,7 +13,7 @@ export const PoolFixedCosts = () => {
       console.log("Fetching fixed costs...");
       const { data, error } = await supabase
         .from("fixed_costs")
-        .select("*")
+        .select("id, name, price, display_order")
         .order("display_order");
 
       if (error) {

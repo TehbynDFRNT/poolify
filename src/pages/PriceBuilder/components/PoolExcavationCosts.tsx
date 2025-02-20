@@ -14,16 +14,25 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
   const { data: excavationDetails, isLoading } = useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
-      const { data: match } = await supabase
+      const { data, error } = await supabase
         .from("pool_dig_type_matches")
         .select(`
           dig_type_id,
-          dig_type:dig_types (*)
+          dig_types (
+            id,
+            name,
+            base_price,
+            rock_price,
+            access_price,
+            concrete_price,
+            crane_access
+          )
         `)
         .eq("pool_id", poolId)
         .maybeSingle();
 
-      return match;
+      if (error) throw error;
+      return data;
     },
   });
 
@@ -38,18 +47,18 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-4 w-16" />
           </div>
-        ) : excavationDetails?.dig_type ? (
+        ) : excavationDetails?.dig_types ? (
           <div className="space-y-4">
             <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
               <span className="text-sm text-muted-foreground">Dig Type</span>
               <span className="text-sm font-medium">
-                {excavationDetails.dig_type.name}
+                {excavationDetails.dig_types.name}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
               <span className="text-sm text-muted-foreground">Total Excavation Cost</span>
               <span className="text-sm font-medium text-primary">
-                {formatCurrency(calculateGrandTotal(excavationDetails.dig_type))}
+                {formatCurrency(calculateGrandTotal(excavationDetails.dig_types))}
               </span>
             </div>
           </div>
@@ -62,4 +71,3 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
     </Card>
   );
 };
-
