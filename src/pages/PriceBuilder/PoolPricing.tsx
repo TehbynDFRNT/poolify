@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import type { PackageWithComponents } from "@/types/filtration";
 import { PoolDetails } from "./components/PoolDetails";
 import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
-import { PoolSpecificCosts } from "./components/PoolSpecificCosts";
 import { PoolFixedCosts } from "./components/PoolFixedCosts";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
@@ -146,7 +145,6 @@ const PoolPricing = () => {
 
         <PoolDetails pool={pool} />
         <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
-        <PoolSpecificCosts />
         <PoolFixedCosts />
       </div>
     </DashboardLayout>
