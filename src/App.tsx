@@ -6,6 +6,7 @@ import NotFound from "@/pages/NotFound";
 import Index from "@/pages/Index";
 import PoolSpecifications from "@/pages/PoolSpecifications";
 import ConstructionCosts from "@/pages/ConstructionCosts";
+import Excavation from "@/pages/ConstructionCosts/Excavation";
 import PavingRetaining from "@/pages/ConstructionCosts/PavingRetaining";
 import BobcatCosts from "@/pages/ConstructionCosts/BobcatCosts";
 import CraneCosts from "@/pages/ConstructionCosts/CraneCosts";
@@ -26,6 +27,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/pool-specifications" element={<PoolSpecifications />} />
           <Route path="/construction-costs" element={<ConstructionCosts />} />
+          <Route path="/construction-costs/excavation" element={<Excavation />} />
           <Route path="/construction-costs/paving-retaining" element={<PavingRetaining />} />
           <Route path="/construction-costs/bobcat-costs" element={<BobcatCosts />} />
           <Route path="/construction-costs/crane-costs" element={<CraneCosts />} />
