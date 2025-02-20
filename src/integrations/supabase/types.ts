@@ -87,54 +87,6 @@ export type Database = {
         }
         Relationships: []
       }
-      dig_costs: {
-        Row: {
-          created_at: string
-          dig_cost: number
-          dig_type: string
-          id: string
-          name: string
-          range: string
-        }
-        Insert: {
-          created_at?: string
-          dig_cost?: number
-          dig_type: string
-          id?: string
-          name: string
-          range: string
-        }
-        Update: {
-          created_at?: string
-          dig_cost?: number
-          dig_type?: string
-          id?: string
-          name?: string
-          range?: string
-        }
-        Relationships: []
-      }
-      dig_types: {
-        Row: {
-          cost: number
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          cost: number
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          cost?: number
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
       filtration_component_types: {
         Row: {
           created_at: string
@@ -416,7 +368,6 @@ export type Database = {
           coping_lay: number
           coping_supply: number
           created_at: string
-          excavation_cost: number
           id: string
           install_fee: number
           misc: number
@@ -431,7 +382,6 @@ export type Database = {
           coping_lay?: number
           coping_supply?: number
           created_at?: string
-          excavation_cost?: number
           id?: string
           install_fee?: number
           misc?: number
@@ -446,7 +396,6 @@ export type Database = {
           coping_lay?: number
           coping_supply?: number
           created_at?: string
-          excavation_cost?: number
           id?: string
           install_fee?: number
           misc?: number
@@ -462,38 +411,6 @@ export type Database = {
             columns: ["pool_id"]
             isOneToOne: true
             referencedRelation: "pool_specifications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pool_dig_types: {
-        Row: {
-          created_at: string
-          dig_type_id: string
-          id: string
-          pool_name: string
-          pool_range: string
-        }
-        Insert: {
-          created_at?: string
-          dig_type_id: string
-          id?: string
-          pool_name: string
-          pool_range: string
-        }
-        Update: {
-          created_at?: string
-          dig_type_id?: string
-          id?: string
-          pool_name?: string
-          pool_range?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_dig_types_dig_type_id_fkey"
-            columns: ["dig_type_id"]
-            isOneToOne: false
-            referencedRelation: "dig_types"
             referencedColumns: ["id"]
           },
         ]
@@ -756,12 +673,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      calculate_dig_cost: {
-        Args: {
-          dig_type_id: string
-        }
-        Returns: number
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never
