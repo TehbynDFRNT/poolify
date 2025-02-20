@@ -87,6 +87,36 @@ export type Database = {
         }
         Relationships: []
       }
+      dig_types: {
+        Row: {
+          created_at: string
+          description: string | null
+          excavation_hours: number
+          id: string
+          name: string
+          truck_hours: number
+          truck_quantity: number
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          excavation_hours?: number
+          id?: string
+          name: string
+          truck_hours?: number
+          truck_quantity?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          excavation_hours?: number
+          id?: string
+          name?: string
+          truck_hours?: number
+          truck_quantity?: number
+        }
+        Relationships: []
+      }
       excavation_rates: {
         Row: {
           category: Database["public"]["Enums"]["excavation_category"]
@@ -439,6 +469,7 @@ export type Database = {
       pool_excavation_details: {
         Row: {
           created_at: string
+          dig_type_id: string | null
           excavation_hours: number
           id: string
           pool_id: string
@@ -448,6 +479,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          dig_type_id?: string | null
           excavation_hours?: number
           id?: string
           pool_id: string
@@ -457,6 +489,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          dig_type_id?: string | null
           excavation_hours?: number
           id?: string
           pool_id?: string
@@ -465,6 +498,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pool_excavation_details_dig_type_id_fkey"
+            columns: ["dig_type_id"]
+            isOneToOne: false
+            referencedRelation: "dig_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pool_excavation_details_pool_id_fkey"
             columns: ["pool_id"]

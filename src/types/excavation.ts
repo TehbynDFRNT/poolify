@@ -14,6 +14,17 @@ export interface PoolExcavationDetails {
   excavation_hours: number;
   created_at: string;
   updated_at: string;
+  dig_type_id: string | null;
+}
+
+export interface DigType {
+  id: string;
+  name: string;
+  description: string | null;
+  truck_hours: number;
+  truck_quantity: number;
+  excavation_hours: number;
+  created_at: string;
 }
 
 export interface ExcavationCosts {
