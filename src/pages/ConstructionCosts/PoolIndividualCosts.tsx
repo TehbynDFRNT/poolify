@@ -10,50 +10,16 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
-import { toast } from "sonner";
 import { usePoolCosts } from "./hooks/usePoolCosts";
+import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
+import { useExcavationCosts } from "./hooks/useExcavationCosts";
 import { PoolCostsTable } from "./components/PoolCostsTable";
-import type { Pool } from "@/types/pool";
-import type { ExcavationDigType } from "@/types/excavation-dig-type";
+import { LoadingState } from "./components/LoadingState";
+import { ErrorState } from "./components/ErrorState";
 
 const PoolIndividualCosts = () => {
-  const { data: pools, isLoading, error } = useQuery({
-    queryKey: ["pool-specifications"],
-    queryFn: async () => {
-      console.log('Fetching pool ranges...');
-      const { data: ranges, error: rangesError } = await supabase
-        .from("pool_ranges")
-        .select("name")
-        .order("display_order");
-
-      if (rangesError) {
-        console.error('Error fetching ranges:', rangesError);
-        throw rangesError;
-      }
-
-      console.log('Fetching pools...');
-      const { data: poolsData, error: poolsError } = await supabase
-        .from("pool_specifications")
-        .select("*");
-
-      if (poolsError) {
-        console.error('Error fetching pools:', poolsError);
-        throw poolsError;
-      }
-
-      const rangeOrder = ranges?.map(r => r.name) || [];
-      return (poolsData || []).sort((a, b) => {
-        const aIndex = rangeOrder.indexOf(a.range);
-        const bIndex = rangeOrder.indexOf(b.range);
-        return aIndex - bIndex;
-      }) as Pool[];
-    },
-    meta: {
-      onError: () => {
-        toast.error("Failed to load pool specifications");
-      }
-    }
-  });
+  const { data: pools, isLoading, error } = usePoolSpecifications();
+  const excavationCosts = useExcavationCosts();
 
   // Fetch pool costs
   const { data: poolCosts } = useQuery({
@@ -65,29 +31,12 @@ const PoolIndividualCosts = () => {
       
       if (error) throw error;
       
-      // Create a map of pool_id to costs
       const costsMap = new Map();
       data?.forEach(cost => {
         costsMap.set(cost.pool_id, cost);
       });
       
       return costsMap;
-    }
-  });
-
-  // Fetch excavation data
-  const { data: excavationData } = useQuery({
-    queryKey: ["pool-excavation-costs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pool_excavation_types")
-        .select(`
-          *,
-          dig_type:excavation_dig_types(*)
-        `);
-      
-      if (error) throw error;
-      return data;
     }
   });
 
@@ -98,21 +47,6 @@ const PoolIndividualCosts = () => {
     setEditingCosts, 
     updateCostMutation 
   } = usePoolCosts();
-
-  // Calculate dig cost function
-  const calculateDigCost = (digType: ExcavationDigType) => {
-    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-    return truckCost + excavationCost;
-  };
-
-  // Create a map of pool names to their excavation costs
-  const excavationCosts = new Map();
-  excavationData?.forEach(excavation => {
-    if (excavation.dig_type) {
-      excavationCosts.set(excavation.name, calculateDigCost(excavation.dig_type));
-    }
-  });
 
   const handleEdit = (poolId: string) => {
     setEditingId(poolId);
@@ -142,31 +76,8 @@ const PoolIndividualCosts = () => {
     }
   };
 
-  if (isLoading) {
-    return (
-      <DashboardLayout>
-        <div className="container mx-auto py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-lg text-muted-foreground">Loading pool specifications...</div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
-
-  if (error) {
-    return (
-      <DashboardLayout>
-        <div className="container mx-auto py-8">
-          <div className="flex items-center justify-center h-64">
-            <div className="text-lg text-destructive">
-              Error loading pool specifications. Please try again later.
-            </div>
-          </div>
-        </div>
-      </DashboardLayout>
-    );
-  }
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState />;
 
   return (
     <DashboardLayout>
