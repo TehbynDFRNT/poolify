@@ -10,54 +10,6 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
-  // Get excavation details
-  const { data: excavationDetails, isLoading: isLoadingExcavation } = useQuery({
-    queryKey: ["pool-excavation", poolId],
-    queryFn: async () => {
-      // First get the pool details
-      console.log('Fetching pool details for ID:', poolId);
-      const { data: pool, error: poolError } = await supabase
-        .from("pool_specifications")
-        .select("*")
-        .eq("id", poolId)
-        .maybeSingle();
-
-      if (poolError) {
-        console.error('Error fetching pool:', poolError);
-        return null;
-      }
-
-      console.log('Found pool:', pool);
-
-      if (!pool) return null;
-
-      // Now get the excavation type
-      console.log('Fetching excavation type for pool:', pool.name, pool.range);
-      const { data: excavationType, error: excavationError } = await supabase
-        .from("pool_excavation_types")
-        .select("*, excavation_dig_types(*)")
-        .eq("name", pool.name)
-        .eq("range", pool.range)
-        .maybeSingle();
-
-      if (excavationError) {
-        console.error('Error fetching excavation type:', excavationError);
-        return null;
-      }
-
-      console.log('Found excavation type:', excavationType);
-      return excavationType;
-    }
-  });
-
-  // Calculate dig cost
-  const calculateDigCost = (digType: any) => {
-    if (!digType) return 0;
-    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-    return truckCost + excavationCost;
-  };
-
   // Get pool costs
   const { data: costs, isLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
@@ -84,8 +36,6 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  console.log('Current excavation details:', excavationDetails);
-
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
     { name: "Install Fee", value: costs?.install_fee || 0 },
@@ -99,90 +49,44 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const total = costItems.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Excavation</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoadingExcavation ? (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
+    <Card>
+      <CardHeader>
+        <CardTitle>Pool Individual Costs</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-4">
+            {Array.from({ length: 7 }).map((_, index) => (
+              <div key={index} className="flex justify-between items-center">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-16" />
               </div>
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-5 w-24" />
-              </div>
+            ))}
+            <div className="mt-4 pt-4 border-t flex justify-between items-center">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-24" />
             </div>
-          ) : excavationDetails?.excavation_dig_types ? (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Dig Type</span>
-                <span className="text-sm font-medium">{excavationDetails.excavation_dig_types.name}</span>
-              </div>
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <span className="font-medium text-sm">Total Excavation Cost</span>
-                <span className="font-medium text-sm">
-                  {formatCurrency(calculateDigCost(excavationDetails.excavation_dig_types))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {costItems.map((item, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center"
+              >
+                <span className="text-sm">{item.name}</span>
+                <span className="text-sm font-medium">
+                  {formatCurrency(item.value)}
                 </span>
               </div>
+            ))}
+            <div className="mt-4 pt-4 border-t flex justify-between items-center">
+              <span className="font-medium text-sm">Total Individual Costs</span>
+              <span className="font-medium text-sm">{formatCurrency(total)}</span>
             </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Dig Type</span>
-                <span className="text-sm font-medium text-gray-500">Not assigned</span>
-              </div>
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <span className="font-medium text-sm">Total Excavation Cost</span>
-                <span className="font-medium text-sm text-gray-500">Not available</span>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Pool Individual Costs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 7 }).map((_, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
-                </div>
-              ))}
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-5 w-24" />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {costItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center"
-                >
-                  <span className="text-sm">{item.name}</span>
-                  <span className="text-sm font-medium">
-                    {formatCurrency(item.value)}
-                  </span>
-                </div>
-              ))}
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <span className="font-medium text-sm">Total Individual Costs</span>
-                <span className="font-medium text-sm">{formatCurrency(total)}</span>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
