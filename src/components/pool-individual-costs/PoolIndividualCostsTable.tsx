@@ -87,3 +87,11 @@ export const PoolIndividualCostsTable: React.FC<PoolIndividualCostsTableProps> =
                     }))}
                   />
                 </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
+    </div>
+  );
+};
