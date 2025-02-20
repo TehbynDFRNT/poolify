@@ -10,6 +10,49 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
+  // Get excavation details
+  const { data: excavationDetails, isLoading: isLoadingExcavation } = useQuery({
+    queryKey: ["pool-excavation", poolId],
+    queryFn: async () => {
+      // First get the pool name
+      const { data: pool } = await supabase
+        .from("pool_specifications")
+        .select("name")
+        .eq("id", poolId)
+        .maybeSingle();
+
+      if (!pool) return null;
+
+      // Get the excavation type and dig type details
+      const { data: excavationType } = await supabase
+        .from("pool_excavation_types")
+        .select(`
+          name,
+          dig_type:excavation_dig_types(
+            id,
+            name,
+            truck_count,
+            truck_hourly_rate,
+            truck_hours,
+            excavation_hourly_rate,
+            excavation_hours
+          )
+        `)
+        .eq("name", pool.name)
+        .maybeSingle();
+
+      return excavationType;
+    }
+  });
+
+  // Calculate dig cost
+  const calculateDigCost = (digType: any) => {
+    if (!digType) return 0;
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
   // Get pool costs
   const { data: costs, isLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
@@ -55,16 +98,42 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
           <CardTitle>Excavation</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Excavation Cost</span>
-              <span className="text-sm font-medium">Coming soon</span>
+          {isLoadingExcavation ? (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-24" />
+              </div>
             </div>
-            <div className="mt-4 pt-4 border-t flex justify-between items-center">
-              <span className="font-medium text-sm">Total Excavation Cost</span>
-              <span className="font-medium text-sm">Coming soon</span>
+          ) : excavationDetails?.dig_type ? (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Dig Type</span>
+                <span className="text-sm font-medium">{excavationDetails.dig_type.name}</span>
+              </div>
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                <span className="font-medium text-sm">Total Excavation Cost</span>
+                <span className="font-medium text-sm">
+                  {formatCurrency(calculateDigCost(excavationDetails.dig_type))}
+                </span>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Dig Type</span>
+                <span className="text-sm font-medium text-gray-500">Not assigned</span>
+              </div>
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                <span className="font-medium text-sm">Total Excavation Cost</span>
+                <span className="font-medium text-sm text-gray-500">Not available</span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
