@@ -17,12 +17,20 @@ const Excavation = () => {
     <DashboardLayout>
       <div className="max-w-7xl mx-auto py-8 px-4">
         <ExcavationPageHeader />
-        <DigTypesSection digTypes={digTypes || []} />
-        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-          <PoolExcavationTable 
-            pools={poolExcavationTypes || []} 
-            digTypes={digTypes || []}
-          />
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold text-gray-700 mb-6">Dig Types</h2>
+          <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+            <DigTypesSection digTypes={digTypes || []} />
+          </div>
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold text-gray-700 mb-6">Dig Costs Table</h2>
+          <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+            <PoolExcavationTable 
+              pools={poolExcavationTypes || []} 
+              digTypes={digTypes || []}
+            />
+          </div>
         </div>
       </div>
     </DashboardLayout>
