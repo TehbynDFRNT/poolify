@@ -523,6 +523,38 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_margins: {
+        Row: {
+          created_at: string
+          id: string
+          margin_percentage: number
+          pool_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          margin_percentage?: number
+          pool_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          margin_percentage?: number
+          pool_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_margins_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_ranges: {
         Row: {
           created_at: string

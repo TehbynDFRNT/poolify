@@ -4,6 +4,14 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+interface PoolMargin {
+  id: string;
+  pool_id: string;
+  margin_percentage: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useMarginCalculator = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempMargin, setTempMargin] = useState<string>("");
@@ -15,7 +23,7 @@ export const useMarginCalculator = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_margins")
-        .select("pool_id, margin_percentage");
+        .select("*") as { data: PoolMargin[] | null; error: any };
 
       if (error) {
         console.error("Error fetching margins:", error);
@@ -23,7 +31,7 @@ export const useMarginCalculator = () => {
       }
 
       // Convert array of margins to a Record object
-      return data.reduce((acc, curr) => ({
+      return (data || []).reduce((acc, curr) => ({
         ...acc,
         [curr.pool_id]: curr.margin_percentage
       }), {} as Record<string, number>);
@@ -40,7 +48,7 @@ export const useMarginCalculator = () => {
           { onConflict: "pool_id" }
         )
         .select()
-        .single();
+        .single() as { data: PoolMargin | null; error: any };
 
       if (error) throw error;
       return data;
