@@ -117,8 +117,8 @@ const ConstructionCosts = () => {
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Pool Specific Costs</h3>
-                <p className="text-sm text-gray-500 mt-1">Manage additional costs for specific pool models</p>
+                <h3 className="text-lg font-medium text-gray-900">Pool Individual Costs</h3>
+                <p className="text-sm text-gray-500 mt-1">Manage additional costs for individual pool models</p>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <DollarSign className="h-6 w-6 text-gray-600" />
