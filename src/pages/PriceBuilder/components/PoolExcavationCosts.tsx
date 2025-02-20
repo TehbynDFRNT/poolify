@@ -28,9 +28,9 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Excavation Costs</CardTitle>
+    <Card className="bg-white shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold">Excavation Costs</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -40,21 +40,21 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
           </div>
         ) : excavationDetails?.dig_type ? (
           <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Dig Type</span>
+            <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+              <span className="text-sm text-muted-foreground">Dig Type</span>
               <span className="text-sm font-medium">
                 {excavationDetails.dig_type.name}
               </span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm">Total Excavation Cost</span>
-              <span className="text-sm font-medium">
+            <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+              <span className="text-sm text-muted-foreground">Total Excavation Cost</span>
+              <span className="text-sm font-medium text-primary">
                 {formatCurrency(calculateGrandTotal(excavationDetails.dig_type))}
               </span>
             </div>
           </div>
         ) : (
-          <div className="text-sm text-muted-foreground">
+          <div className="text-sm text-muted-foreground text-center p-8 bg-muted/50 rounded-lg">
             No excavation costs set for this pool
           </div>
         )}
@@ -62,3 +62,4 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
     </Card>
   );
 };
+

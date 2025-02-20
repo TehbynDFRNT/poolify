@@ -95,11 +95,11 @@ const PoolPricing = () => {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-8 space-y-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-8">
             <Skeleton className="h-8 w-64" />
             <Skeleton className="h-10 w-32" />
           </div>
-          <Card>
+          <Card className="bg-white shadow-sm">
             <CardHeader>
               <Skeleton className="h-8 w-48" />
             </CardHeader>
@@ -121,8 +121,8 @@ const PoolPricing = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8 space-y-8">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-between mb-8">
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -133,20 +133,21 @@ const PoolPricing = () => {
                 <BreadcrumbLink href="/price-builder">Price Builder</BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
-              <BreadcrumbItem>{pool?.name}</BreadcrumbItem>
+              <BreadcrumbItem className="text-muted-foreground">{pool?.name}</BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
           <Button 
             variant="outline" 
             onClick={() => navigate('/price-builder')}
+            className="hover:bg-muted"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Price Builder
           </Button>
         </div>
 
-        <PoolDetails pool={pool} />
-        <div className="space-y-8">
+        <div className="space-y-6">
+          <PoolDetails pool={pool} />
           <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
           <PoolFixedCosts />
           <PoolIndividualCostsDetails poolId={pool.id} />
@@ -158,3 +159,4 @@ const PoolPricing = () => {
 };
 
 export default PoolPricing;
+
