@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
 
 interface PoolIndividualCostsDetailsProps {
   poolId: string;
@@ -26,26 +27,28 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  // Get dig costs using pool name and range
-  const { data: digData, isLoading: isDigLoading } = useQuery({
-    queryKey: ["dig-costs", poolDetails?.name, poolDetails?.range],
+  // Get excavation details using pool name and range
+  const { data: excavationData, isLoading: isExcavationLoading } = useQuery({
+    queryKey: ["pool-excavation", poolDetails?.name, poolDetails?.range],
     queryFn: async () => {
       if (!poolDetails?.name || !poolDetails?.range) return null;
 
-      console.log("Looking up dig costs for:", {
+      console.log("Looking up excavation for:", {
         name: poolDetails.name,
         range: poolDetails.range
       });
 
       const { data, error } = await supabase
-        .from("dig_costs")
-        .select("*")
+        .from("pool_excavation_types")
+        .select(`
+          dig_type:excavation_dig_types!dig_type_id(*)
+        `)
         .eq("name", poolDetails.name)
         .eq("range", poolDetails.range)
         .maybeSingle();
 
       if (error) throw error;
-      console.log("Dig costs data:", data);
+      console.log("Excavation data:", data);
       return data;
     },
     enabled: !!poolDetails?.name && !!poolDetails?.range,
@@ -77,7 +80,15 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  const isLoading = isCostsLoading || isDigLoading || isPoolLoading;
+  const calculateDigCost = (digType: ExcavationDigType | null) => {
+    if (!digType) return 0;
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  const digCost = calculateDigCost(excavationData?.dig_type);
+  const isLoading = isCostsLoading || isExcavationLoading || isPoolLoading;
 
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
@@ -108,13 +119,13 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
               <div className="flex justify-between items-center">
                 <span className="text-sm">Dig Type</span>
                 <span className="text-sm font-medium">
-                  {digData?.dig_type || 'Not assigned'}
+                  {excavationData?.dig_type?.name || 'Not assigned'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-sm">Dig Cost</span>
                 <span className="text-sm font-medium">
-                  {formatCurrency(digData?.dig_cost || 0)}
+                  {formatCurrency(digCost)}
                 </span>
               </div>
             </div>
