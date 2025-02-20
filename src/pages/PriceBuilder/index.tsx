@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -26,10 +25,14 @@ import { calculatePackagePrice } from "@/utils/package-calculations";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Check, Pencil, X } from "lucide-react";
 
 const PriceBuilder = () => {
   const navigate = useNavigate();
   const [margins, setMargins] = useState<Record<string, number>>({});
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [tempMargin, setTempMargin] = useState<string>("");
 
   // Fetch pools with ranges for sorting
   const { data: pools, isLoading: isLoadingPools } = useQuery({
@@ -170,14 +173,24 @@ const PriceBuilder = () => {
     };
   };
 
-  const handleMarginChange = (poolId: string, value: string) => {
-    const numValue = parseFloat(value) || 0;
-    // Prevent margins of 100% or greater as they would result in division by zero or negative prices
+  const handleStartEdit = (poolId: string) => {
+    setEditingId(poolId);
+    setTempMargin(margins[poolId]?.toString() || "");
+  };
+
+  const handleSave = (poolId: string) => {
+    const numValue = parseFloat(tempMargin) || 0;
     const clampedValue = Math.min(numValue, 99.9);
     setMargins(prev => ({
       ...prev,
       [poolId]: clampedValue
     }));
+    setEditingId(null);
+  };
+
+  const handleCancel = () => {
+    setEditingId(null);
+    setTempMargin("");
   };
 
   return (
@@ -230,8 +243,8 @@ const PriceBuilder = () => {
                             "transition-colors"
                           )}
                           onClick={(e) => {
-                            // Don't navigate if clicking on the margin input
-                            if ((e.target as HTMLElement).closest('.margin-input')) {
+                            // Don't navigate if clicking on the margin cell
+                            if ((e.target as HTMLElement).closest('.margin-cell')) {
                               e.stopPropagation();
                               return;
                             }
@@ -246,17 +259,34 @@ const PriceBuilder = () => {
                           <TableCell className="text-right">{formatCurrency(costs.individualCostsTotal)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(costs.excavationCost)}</TableCell>
                           <TableCell className="text-right font-medium">{formatCurrency(costs.total)}</TableCell>
-                          <TableCell className="text-right" onClick={e => e.stopPropagation()}>
-                            <Input
-                              type="number"
-                              value={margins[pool.id] || ''}
-                              onChange={(e) => handleMarginChange(pool.id, e.target.value)}
-                              className="margin-input w-24 text-right"
-                              min={0}
-                              max={99.9}
-                              step={0.1}
-                              placeholder="0.0"
-                            />
+                          <TableCell className="margin-cell" onClick={e => e.stopPropagation()}>
+                            {editingId === pool.id ? (
+                              <div className="flex items-center gap-2 justify-end">
+                                <Input
+                                  type="number"
+                                  value={tempMargin}
+                                  onChange={(e) => setTempMargin(e.target.value)}
+                                  className="w-24 text-right"
+                                  min={0}
+                                  max={99.9}
+                                  step={0.1}
+                                />
+                                <Button size="sm" variant="ghost" onClick={() => handleSave(pool.id)}>
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                                <Button size="sm" variant="ghost" onClick={handleCancel}>
+                                  <X className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            ) : (
+                              <div
+                                className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-end gap-2 group"
+                                onClick={() => handleStartEdit(pool.id)}
+                              >
+                                {margins[pool.id]?.toFixed(1) || '0.0'}%
+                                <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
+                              </div>
+                            )}
                           </TableCell>
                           <TableCell className="text-right font-medium text-primary">
                             {formatCurrency(costs.rrp)}
