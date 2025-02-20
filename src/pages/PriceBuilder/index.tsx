@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -24,9 +23,12 @@ import { formatCurrency } from "@/utils/format";
 import { calculateGrandTotal } from "@/utils/digTypeCalculations";
 import { calculatePackagePrice } from "@/utils/package-calculations";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { useState } from "react";
 
 const PriceBuilder = () => {
   const navigate = useNavigate();
+  const [margins, setMargins] = useState<Record<string, number>>({});
 
   // Fetch pools with ranges for sorting
   const { data: pools, isLoading: isLoadingPools } = useQuery({
@@ -128,7 +130,7 @@ const PriceBuilder = () => {
   const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation;
 
   const calculateCosts = (pool: any) => {
-    const basePrice = pool.buy_price_inc_gst || 0; // Changed from buy_price_ex_gst to buy_price_inc_gst
+    const basePrice = pool.buy_price_inc_gst || 0;
     const filtrationCost = pool.default_filtration_package ? calculatePackagePrice(pool.default_filtration_package) : 0;
     const fixedCostsTotal = fixedCosts?.reduce((sum, cost) => sum + cost.price, 0) || 0;
     
@@ -142,14 +144,27 @@ const PriceBuilder = () => {
     
     const excavationCost = excavationDetails?.get(pool.id) ? calculateGrandTotal(excavationDetails.get(pool.id)) : 0;
     
+    const totalCost = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost;
+    const marginPercentage = margins[pool.id] || 0;
+    const rrp = totalCost * (1 + marginPercentage / 100);
+
     return {
       basePrice,
       filtrationCost,
       fixedCostsTotal,
       individualCostsTotal,
       excavationCost,
-      total: basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost
+      total: totalCost,
+      rrp
     };
+  };
+
+  const handleMarginChange = (poolId: string, value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setMargins(prev => ({
+      ...prev,
+      [poolId]: numValue
+    }));
   };
 
   return (
@@ -187,6 +202,8 @@ const PriceBuilder = () => {
                       <TableHead className="text-right">Individual Costs</TableHead>
                       <TableHead className="text-right">Excavation</TableHead>
                       <TableHead className="text-right">True Cost</TableHead>
+                      <TableHead className="text-right">Margin Percentage</TableHead>
+                      <TableHead className="text-right">RRP</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -199,7 +216,14 @@ const PriceBuilder = () => {
                             "cursor-pointer hover:bg-muted/50",
                             "transition-colors"
                           )}
-                          onClick={() => navigate(`/price-builder/${pool.id}`)}
+                          onClick={(e) => {
+                            // Don't navigate if clicking on the margin input
+                            if ((e.target as HTMLElement).closest('.margin-input')) {
+                              e.stopPropagation();
+                              return;
+                            }
+                            navigate(`/price-builder/${pool.id}`);
+                          }}
                         >
                           <TableCell className="font-medium">{pool.range}</TableCell>
                           <TableCell>{pool.name}</TableCell>
@@ -208,8 +232,20 @@ const PriceBuilder = () => {
                           <TableCell className="text-right">{formatCurrency(costs.fixedCostsTotal)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(costs.individualCostsTotal)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(costs.excavationCost)}</TableCell>
+                          <TableCell className="text-right font-medium">{formatCurrency(costs.total)}</TableCell>
+                          <TableCell className="text-right" onClick={e => e.stopPropagation()}>
+                            <Input
+                              type="number"
+                              value={margins[pool.id] || ''}
+                              onChange={(e) => handleMarginChange(pool.id, e.target.value)}
+                              className="margin-input w-24 text-right"
+                              min={0}
+                              step={0.1}
+                              placeholder="0.0"
+                            />
+                          </TableCell>
                           <TableCell className="text-right font-medium text-primary">
-                            {formatCurrency(costs.total)}
+                            {formatCurrency(costs.rrp)}
                           </TableCell>
                         </TableRow>
                       );
