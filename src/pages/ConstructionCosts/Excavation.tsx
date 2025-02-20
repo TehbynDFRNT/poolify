@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import {
@@ -32,9 +33,11 @@ import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
 import { usePoolDigTypeMatches } from "./hooks/usePoolDigTypeMatches";
 import { formatCurrency } from "@/utils/format";
 import { calculateGrandTotal } from "@/utils/digTypeCalculations";
+import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
 
 const Excavation = () => {
   const [editingRows, setEditingRows] = useState<Record<string, Partial<DigType>>>({});
+  const [editingPoolMatches, setEditingPoolMatches] = useState<Record<string, { digTypeId: string }>>({});
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { digTypes, isLoading, updateDigType } = useDigTypes();
   const { data: pools, isLoading: isLoadingPools } = usePoolSpecifications();
@@ -76,7 +79,41 @@ const Excavation = () => {
 
   const getSelectedDigType = (poolId: string) => {
     const match = matches?.find(m => m.pool_id === poolId);
-    return digTypes?.find(d => d.id === match?.dig_type_id);
+    const editingMatch = editingPoolMatches[poolId];
+    const digTypeId = editingMatch?.digTypeId || match?.dig_type_id;
+    return digTypes?.find(d => d.id === digTypeId);
+  };
+
+  const handleEditPoolMatch = (poolId: string) => {
+    const currentMatch = matches?.find(m => m.pool_id === poolId);
+    setEditingPoolMatches(prev => ({
+      ...prev,
+      [poolId]: { digTypeId: currentMatch?.dig_type_id || '' }
+    }));
+  };
+
+  const handleSavePoolMatch = (poolId: string) => {
+    const updates = editingPoolMatches[poolId];
+    if (!updates) return;
+
+    updateMatch({ 
+      poolId, 
+      digTypeId: updates.digTypeId 
+    });
+    
+    setEditingPoolMatches(prev => {
+      const next = { ...prev };
+      delete next[poolId];
+      return next;
+    });
+  };
+
+  const handleCancelPoolMatch = (poolId: string) => {
+    setEditingPoolMatches(prev => {
+      const next = { ...prev };
+      delete next[poolId];
+      return next;
+    });
   };
 
   return (
@@ -173,40 +210,59 @@ const Excavation = () => {
                   <TableHead>Pool Name</TableHead>
                   <TableHead>Dig Type</TableHead>
                   <TableHead>Grand Total</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoadingPools || isLoadingMatches ? (
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center py-4">
+                    <TableCell colSpan={5} className="text-center py-4">
                       Loading pools...
                     </TableCell>
                   </TableRow>
                 ) : pools?.map((pool) => {
+                  const isEditing = !!editingPoolMatches[pool.id];
                   const selectedDigType = getSelectedDigType(pool.id);
                   return (
                     <TableRow key={pool.id}>
                       <TableCell>{pool.range}</TableCell>
                       <TableCell>{pool.name}</TableCell>
                       <TableCell>
-                        <Select
-                          value={selectedDigType?.id || ""}
-                          onValueChange={(value) => updateMatch({ poolId: pool.id, digTypeId: value })}
-                        >
-                          <SelectTrigger className="w-[200px]">
-                            <SelectValue placeholder="Select dig type" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {digTypes?.map((digType) => (
-                              <SelectItem key={digType.id} value={digType.id}>
-                                {digType.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        {isEditing ? (
+                          <Select
+                            value={editingPoolMatches[pool.id]?.digTypeId || ''}
+                            onValueChange={(value) => setEditingPoolMatches(prev => ({
+                              ...prev,
+                              [pool.id]: { digTypeId: value }
+                            }))}
+                          >
+                            <SelectTrigger className="w-[200px]">
+                              <SelectValue placeholder="Select dig type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {digTypes?.map((digType) => (
+                                <SelectItem key={digType.id} value={digType.id}>
+                                  {digType.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <div className="px-3 py-2">
+                            {selectedDigType?.name || 'No dig type selected'}
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         {selectedDigType ? formatCurrency(calculateGrandTotal(selectedDigType)) : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <PoolTableActions
+                          isEditing={isEditing}
+                          onEdit={() => handleEditPoolMatch(pool.id)}
+                          onSave={() => handleSavePoolMatch(pool.id)}
+                          onCancel={() => handleCancelPoolMatch(pool.id)}
+                        />
                       </TableCell>
                     </TableRow>
                   );
