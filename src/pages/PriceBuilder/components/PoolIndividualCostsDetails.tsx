@@ -17,7 +17,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     queryFn: async () => {
       const { data, error } = await supabase
         .from("pool_specifications")
-        .select("name, range")
+        .select("name, range, dig_type_id")
         .eq("id", poolId)
         .maybeSingle();
 
@@ -27,31 +27,25 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  // Get excavation details using pool name and range
-  const { data: excavationData, isLoading: isExcavationLoading } = useQuery({
-    queryKey: ["pool-excavation", poolDetails?.name, poolDetails?.range],
+  // Get excavation details using dig_type_id
+  const { data: digType, isLoading: isDigTypeLoading } = useQuery({
+    queryKey: ["dig-type", poolDetails?.dig_type_id],
     queryFn: async () => {
-      if (!poolDetails?.name || !poolDetails?.range) return null;
+      if (!poolDetails?.dig_type_id) return null;
 
-      console.log("Looking up excavation for:", {
-        name: poolDetails.name,
-        range: poolDetails.range
-      });
+      console.log("Looking up dig type for ID:", poolDetails.dig_type_id);
 
       const { data, error } = await supabase
-        .from("pool_excavation_types")
-        .select(`
-          dig_type:excavation_dig_types!dig_type_id(*)
-        `)
-        .eq("name", poolDetails.name)
-        .eq("range", poolDetails.range)
+        .from("excavation_dig_types")
+        .select("*")
+        .eq("id", poolDetails.dig_type_id)
         .maybeSingle();
 
       if (error) throw error;
-      console.log("Excavation data:", data);
+      console.log("Dig type data:", data);
       return data;
     },
-    enabled: !!poolDetails?.name && !!poolDetails?.range,
+    enabled: !!poolDetails?.dig_type_id,
   });
 
   // Get pool costs
@@ -87,8 +81,8 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     return truckCost + excavationCost;
   };
 
-  const digCost = calculateDigCost(excavationData?.dig_type);
-  const isLoading = isCostsLoading || isExcavationLoading || isPoolLoading;
+  const digCost = calculateDigCost(digType);
+  const isLoading = isCostsLoading || isDigTypeLoading || isPoolLoading;
 
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
@@ -119,7 +113,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
               <div className="flex justify-between items-center">
                 <span className="text-sm">Dig Type</span>
                 <span className="text-sm font-medium">
-                  {excavationData?.dig_type?.name || 'Not assigned'}
+                  {digType?.name || 'Not assigned'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
