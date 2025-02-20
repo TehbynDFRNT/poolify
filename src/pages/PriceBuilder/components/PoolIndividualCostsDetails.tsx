@@ -13,18 +13,52 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
       console.log("Fetching costs for pool:", poolId);
-      const { data, error } = await supabase
+      
+      // First get the pool specifications to get the dig_type_id
+      const { data: poolSpec, error: poolError } = await supabase
+        .from("pool_specifications")
+        .select("dig_type_id")
+        .eq("id", poolId)
+        .single();
+
+      if (poolError) {
+        console.error("Error fetching pool:", poolError);
+        throw poolError;
+      }
+
+      // Get the dig type details
+      const { data: digType, error: digError } = await supabase
+        .from("excavation_dig_types")
+        .select("*")
+        .eq("id", poolSpec.dig_type_id)
+        .single();
+
+      if (digError) {
+        console.error("Error fetching dig type:", digError);
+        throw digError;
+      }
+
+      // Calculate excavation cost
+      const excavationCost = digType ? 
+        (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
+        (digType.excavation_hourly_rate * digType.excavation_hours) : 0;
+
+      // Get the pool costs
+      const { data: costs, error: costsError } = await supabase
         .from("pool_costs")
         .select("*")
         .eq("pool_id", poolId)
         .single();
 
-      if (error) {
-        console.error("Error fetching costs:", error);
-        throw error;
+      if (costsError) {
+        console.error("Error fetching costs:", costsError);
+        throw costsError;
       }
-      console.log("Fetched costs:", data);
-      return data;
+
+      return {
+        ...costs,
+        excavation_cost: excavationCost
+      };
     },
   });
 
