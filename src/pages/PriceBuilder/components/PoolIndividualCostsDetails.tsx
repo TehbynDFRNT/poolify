@@ -26,34 +26,6 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  // Get dig type details using pool name and range
-  const { data: digData, isLoading: isDigLoading } = useQuery({
-    queryKey: ["pool-dig-type", poolDetails?.name, poolDetails?.range],
-    queryFn: async () => {
-      if (!poolDetails?.name || !poolDetails?.range) return null;
-
-      console.log("Looking up dig type for:", {
-        name: poolDetails.name,
-        range: poolDetails.range
-      });
-
-      const { data, error } = await supabase
-        .from("pool_dig_types")
-        .select(`
-          *,
-          dig_type:dig_types(*)
-        `)
-        .eq("pool_name", poolDetails.name)
-        .eq("pool_range", poolDetails.range)
-        .maybeSingle();
-
-      if (error) throw error;
-      console.log("Dig type data:", data);
-      return data;
-    },
-    enabled: !!poolDetails?.name && !!poolDetails?.range,
-  });
-
   // Get pool costs
   const { data: costs, isLoading: isCostsLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
@@ -80,7 +52,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  const isLoading = isCostsLoading || isDigLoading || isPoolLoading;
+  const isLoading = isCostsLoading || isPoolLoading;
 
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
@@ -96,35 +68,6 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Dig Costs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-4 w-24" />
-              <Skeleton className="h-4 w-16" />
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Dig Type</span>
-                <span className="text-sm font-medium">
-                  {digData?.dig_type?.name || 'Not assigned'}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm">Dig Cost</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(digData?.dig_type?.cost || 0)}
-                </span>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       <Card>
         <CardHeader>
           <CardTitle>Pool Individual Costs</CardTitle>
