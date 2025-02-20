@@ -45,20 +45,15 @@ export const usePoolExcavationTypes = () => {
 
       // Create an ordered map of ranges using display_order
       const rangeOrder = new Map(
-        ranges?.map((r, index) => [r.name, index]) || []
+        ranges?.map((range) => [range.name, range.display_order]) || []
       );
 
       return (data || []).sort((a, b) => {
-        // Get the order index for each range, defaulting to Infinity if not found
-        // This ensures unknown ranges go to the end
-        const aIndex = rangeOrder.get(a.range) ?? Infinity;
-        const bIndex = rangeOrder.get(b.range) ?? Infinity;
+        // Get the order for each range, defaulting to Infinity if not found
+        const aOrder = rangeOrder.get(a.range) ?? Infinity;
+        const bOrder = rangeOrder.get(b.range) ?? Infinity;
         
-        // First sort by range order
-        if (aIndex !== bIndex) return aIndex - bIndex;
-        
-        // Then sort by name within the same range
-        return a.name.localeCompare(b.name);
+        return aOrder - bOrder || a.name.localeCompare(b.name);
       }) as PoolExcavationType[];
     },
   });
