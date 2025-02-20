@@ -1,16 +1,64 @@
 
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { FileText } from "lucide-react";
+import { Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { PoolIndividualCostsTable } from "@/components/pool-individual-costs/PoolIndividualCostsTable";
+import { supabase } from "@/integrations/supabase/client";
 import {
   Breadcrumb,
   BreadcrumbList,
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 
 const PoolIndividualCosts = () => {
+  const [showForm, setShowForm] = useState(false);
+
+  const { data: costs, isLoading, error } = useQuery({
+    queryKey: ["pool-individual-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_individual_costs")
+        .select("*")
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+    meta: {
+      onError: () => {
+        toast.error("Failed to load pool individual costs");
+      }
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-muted-foreground">Loading pool individual costs...</div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg text-destructive">
+            Error loading pool individual costs. Please try again later.
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto p-6">
@@ -38,13 +86,16 @@ const PoolIndividualCosts = () => {
         </div>
 
         <Card>
-          <CardHeader>
-            <CardTitle>Coming Soon</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Pool Individual Costs</CardTitle>
+            <Button onClick={() => setShowForm(!showForm)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Cost
+            </Button>
           </CardHeader>
-          <CardContent className="flex flex-col items-center justify-center py-12">
-            <FileText className="h-16 w-16 text-gray-400 mb-4" />
-            <p className="text-lg text-gray-500">This feature is currently under development.</p>
-            <p className="text-sm text-gray-400 mt-2">Check back soon for updates.</p>
+          <CardContent>
+            {/* TODO: Add form component here */}
+            {costs && <PoolIndividualCostsTable costs={costs} />}
           </CardContent>
         </Card>
       </div>

@@ -2,7 +2,7 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { PoolIndividualCost } from "@/types/pool-individual-cost";
-import { EditableCell } from "@/components/pools/components/EditableCell";
+import { EditableCell } from "./components/EditableCell";
 import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
 import { usePoolIndividualCosts } from "./hooks/usePoolIndividualCosts";
 
@@ -55,7 +55,9 @@ export const PoolIndividualCostsTable: React.FC<PoolIndividualCostsTableProps> =
         <TableHeader>
           <TableRow>
             {editableFields.map((field) => (
-              <TableHead key={field}>{field}</TableHead>
+              <TableHead key={field} className="capitalize">
+                {field.replace(/_/g, ' ')}
+              </TableHead>
             ))}
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -68,7 +70,7 @@ export const PoolIndividualCostsTable: React.FC<PoolIndividualCostsTableProps> =
                 {editableFields.map((field) => (
                   <TableCell key={field}>
                     <EditableCell
-                      pool={cost}
+                      cost={cost}
                       field={field}
                       value={editingRows[cost.id]?.[field] ?? cost[field]}
                       isEditing={isEditing}
