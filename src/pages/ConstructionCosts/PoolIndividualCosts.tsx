@@ -15,6 +15,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { toast } from "sonner";
+import { PoolRangeManager } from "@/components/pools/PoolRangeManager";
 
 const PoolIndividualCosts = () => {
   const [showForm, setShowForm] = useState(false);
@@ -60,46 +61,46 @@ const PoolIndividualCosts = () => {
   }
 
   return (
-    <DashboardLayout>
-      <div className="max-w-7xl mx-auto p-6">
-        <Breadcrumb className="mb-6">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <Link to="/" className="transition-colors hover:text-foreground">Home</Link>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <Link to="/construction-costs" className="transition-colors hover:text-foreground">
-                Construction Costs
-              </Link>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>Pool Individual Costs</BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+    <div className="container mx-auto py-8 space-y-8">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <Link to="/" className="transition-colors hover:text-foreground">Home</Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <Link to="/construction-costs" className="transition-colors hover:text-foreground">
+              Construction Costs
+            </Link>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>Pool Individual Costs</BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
 
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Pool Individual Costs</h1>
-            <p className="text-gray-500 mt-1">Manage additional costs for individual pool models</p>
-          </div>
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Range Order</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PoolRangeManager />
+        </CardContent>
+      </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Pool Individual Costs</CardTitle>
-            <Button onClick={() => setShowForm(!showForm)}>
-              <Plus className="mr-2 h-4 w-4" />
-              Add Cost
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {/* TODO: Add form component here */}
-            {costs && <PoolIndividualCostsTable costs={costs} />}
-          </CardContent>
-        </Card>
-      </div>
-    </DashboardLayout>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Pool Individual Costs</CardTitle>
+          <Button onClick={() => setShowForm(!showForm)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Cost
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {/* TODO: Add form component here */}
+          {costs && <PoolIndividualCostsTable costs={costs} />}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
