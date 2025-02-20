@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import {
@@ -14,6 +13,7 @@ import {
   TableBody,
   TableRow,
   TableHead,
+  TableCell,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import type { DigType } from "@/types/dig-type";
@@ -21,11 +21,13 @@ import { useState } from "react";
 import { useDigTypes } from "@/hooks/useDigTypes";
 import { DigTypeRow } from "@/components/dig-types/DigTypeRow";
 import { AddDigTypeForm } from "@/components/dig-types/AddDigTypeForm";
+import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
 
 const Excavation = () => {
   const [editingRows, setEditingRows] = useState<Record<string, Partial<DigType>>>({});
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { digTypes, isLoading, updateDigType } = useDigTypes();
+  const { data: pools, isLoading: isLoadingPools } = usePoolSpecifications();
 
   const handleValueChange = (digType: DigType, field: keyof DigType, value: any) => {
     setEditingRows((prev) => ({
@@ -100,46 +102,77 @@ const Excavation = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Dig Type</TableHead>
-                <TableHead>Trucks</TableHead>
-                <TableHead>Truck Rate</TableHead>
-                <TableHead>Truck Hours</TableHead>
-                <TableHead>Truck Subtotal</TableHead>
-                <TableHead>Excavation Rate</TableHead>
-                <TableHead>Excavation Hours</TableHead>
-                <TableHead>Excavation Subtotal</TableHead>
-                <TableHead>Grand Total</TableHead>
-                <TableHead className="w-[100px]">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
+        <div className="space-y-8">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableHead colSpan={10} className="text-center py-4">
-                    Loading dig types...
-                  </TableHead>
+                  <TableHead>Dig Type</TableHead>
+                  <TableHead>Trucks</TableHead>
+                  <TableHead>Truck Rate</TableHead>
+                  <TableHead>Truck Hours</TableHead>
+                  <TableHead>Truck Subtotal</TableHead>
+                  <TableHead>Excavation Rate</TableHead>
+                  <TableHead>Excavation Hours</TableHead>
+                  <TableHead>Excavation Subtotal</TableHead>
+                  <TableHead>Grand Total</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
-              ) : digTypes?.map((type) => (
-                <DigTypeRow
-                  key={type.id}
-                  digType={type}
-                  isEditing={!!editingRows[type.id]}
-                  editingRow={editingRows[type.id]}
-                  onEdit={() => setEditingRows((prev) => ({
-                    ...prev,
-                    [type.id]: {}
-                  }))}
-                  onSave={() => handleSaveRow(type)}
-                  onCancel={() => handleCancelRow(type.id)}
-                  onValueChange={(field, value) => handleValueChange(type, field, value)}
-                />
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={10} className="text-center py-4">
+                      Loading dig types...
+                    </TableCell>
+                  </TableRow>
+                ) : digTypes?.map((type) => (
+                  <DigTypeRow
+                    key={type.id}
+                    digType={type}
+                    isEditing={!!editingRows[type.id]}
+                    editingRow={editingRows[type.id]}
+                    onEdit={() => setEditingRows((prev) => ({
+                      ...prev,
+                      [type.id]: {}
+                    }))}
+                    onSave={() => handleSaveRow(type)}
+                    onCancel={() => handleCancelRow(type.id)}
+                    onValueChange={(field, value) => handleValueChange(type, field, value)}
+                  />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+            <div className="p-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">Pool Dig Type Matching</h2>
+              <p className="text-sm text-gray-500">Match pools with their appropriate dig types</p>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Pool Range</TableHead>
+                  <TableHead>Pool Name</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoadingPools ? (
+                  <TableRow>
+                    <TableCell colSpan={2} className="text-center py-4">
+                      Loading pools...
+                    </TableCell>
+                  </TableRow>
+                ) : pools?.map((pool) => (
+                  <TableRow key={pool.id}>
+                    <TableCell>{pool.range}</TableCell>
+                    <TableCell>{pool.name}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
 
         <AddDigTypeForm
