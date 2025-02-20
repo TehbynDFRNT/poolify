@@ -15,13 +15,18 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const { data: poolDetails, isLoading: isPoolLoading } = useQuery({
     queryKey: ["pool-details", poolId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("pool_specifications")
         .select("name, range")
         .eq("id", poolId)
         .maybeSingle();
       
-      console.log("Pool details:", data);
+      if (error) {
+        console.error("Error fetching pool details:", error);
+        throw error;
+      }
+      
+      console.log("Pool details found:", data);
       return data;
     },
   });
@@ -56,20 +61,32 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const { data: excavationData, isLoading: isExcavationLoading } = useQuery({
     queryKey: ["pool-excavation", poolDetails?.name, poolDetails?.range],
     queryFn: async () => {
-      if (!poolDetails?.name || !poolDetails?.range) return null;
+      if (!poolDetails?.name || !poolDetails?.range) {
+        console.log("No pool details available yet");
+        return null;
+      }
 
-      console.log("Fetching excavation data for:", poolDetails.name, poolDetails.range);
-      const { data } = await supabase
+      console.log("Fetching excavation data for pool:", {
+        name: poolDetails.name,
+        range: poolDetails.range
+      });
+
+      const { data, error } = await supabase
         .from("pool_excavation_types")
         .select(`
           *,
-          dig_type:excavation_dig_types!dig_type_id(*)
+          dig_type:excavation_dig_types!inner(*)
         `)
         .eq("name", poolDetails.name)
         .eq("range", poolDetails.range)
         .maybeSingle();
 
-      console.log("Excavation data:", data);
+      if (error) {
+        console.error("Error fetching excavation data:", error);
+        throw error;
+      }
+
+      console.log("Found excavation data:", data);
       return data;
     },
     enabled: !!poolDetails?.name && !!poolDetails?.range,
