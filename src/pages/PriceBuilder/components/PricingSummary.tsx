@@ -66,7 +66,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
     return (
       <Card className="bg-white shadow-sm">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold">Pricing Summary</CardTitle>
+          <CardTitle className="text-lg font-semibold">Cost Price Summary</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -106,7 +106,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   return (
     <Card className="bg-white shadow-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg font-semibold">Pricing Summary</CardTitle>
+        <CardTitle className="text-lg font-semibold">Cost Price Summary</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
