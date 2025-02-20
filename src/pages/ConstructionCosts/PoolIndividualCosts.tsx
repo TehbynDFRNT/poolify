@@ -19,7 +19,9 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { formatCurrency } from "@/utils/format";
 import type { Pool } from "@/types/pool";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
 
 const PoolIndividualCosts = () => {
   const { data: pools, isLoading, error } = useQuery({
@@ -57,6 +59,37 @@ const PoolIndividualCosts = () => {
       onError: () => {
         toast.error("Failed to load pool specifications");
       }
+    }
+  });
+
+  // Fetch excavation data
+  const { data: excavationData } = useQuery({
+    queryKey: ["pool-excavation-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_excavation_types")
+        .select(`
+          *,
+          dig_type:excavation_dig_types(*)
+        `);
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Calculate dig cost function
+  const calculateDigCost = (digType: ExcavationDigType) => {
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  // Create a map of pool names to their excavation costs
+  const excavationCosts = new Map();
+  excavationData?.forEach(excavation => {
+    if (excavation.dig_type) {
+      excavationCosts.set(excavation.name, calculateDigCost(excavation.dig_type));
     }
   });
 
@@ -120,6 +153,7 @@ const PoolIndividualCosts = () => {
                   <TableRow>
                     <TableHead>Range</TableHead>
                     <TableHead>Pool Name</TableHead>
+                    <TableHead>Excavation Cost</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -127,6 +161,11 @@ const PoolIndividualCosts = () => {
                     <TableRow key={pool.id}>
                       <TableCell>{pool.range}</TableCell>
                       <TableCell>{pool.name}</TableCell>
+                      <TableCell>
+                        {excavationCosts.has(pool.name) 
+                          ? formatCurrency(excavationCosts.get(pool.name))
+                          : '-'}
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
