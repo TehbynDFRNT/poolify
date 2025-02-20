@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -48,17 +47,35 @@ const Excavation = () => {
   const { data: poolExcavationTypes } = useQuery({
     queryKey: ["pool-excavation-types"],
     queryFn: async () => {
+      console.log('Fetching pool ranges...');
+      const { data: ranges, error: rangesError } = await supabase
+        .from("pool_ranges")
+        .select("name")
+        .order("display_order");
+
+      if (rangesError) {
+        console.error('Error fetching ranges:', rangesError);
+        throw rangesError;
+      }
+
+      console.log('Fetching pools...');
       const { data, error } = await supabase
         .from("pool_excavation_types")
         .select(`
           *,
           dig_type:excavation_dig_types(*)
-        `)
-        .order("range")
-        .order("name");
+        `);
       
       if (error) throw error;
-      return data as PoolExcavationType[];
+
+      // Sort pools based on range order and then by name
+      const rangeOrder = ranges?.map(r => r.name.toLowerCase()) || [];
+      return (data || []).sort((a, b) => {
+        const aIndex = rangeOrder.indexOf(a.range.toLowerCase());
+        const bIndex = rangeOrder.indexOf(b.range.toLowerCase());
+        if (aIndex !== bIndex) return aIndex - bIndex;
+        return a.name.localeCompare(b.name);
+      }) as PoolExcavationType[];
     },
   });
 

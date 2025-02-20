@@ -76,7 +76,7 @@ export const PoolExcavationTable = ({ pools, digTypes }: PoolExcavationTableProp
   // Sort ranges and create a flat list of pools
   const sortedPools = Object.entries(groupedPools)
     .sort(([a], [b]) => a.localeCompare(b))
-    .flatMap(([range, poolGroup]) => poolGroup);
+    .flatMap(([range, poolGroup]) => poolGroup.sort((a, b) => a.name.localeCompare(b.name)));
 
   return (
     <Table>
