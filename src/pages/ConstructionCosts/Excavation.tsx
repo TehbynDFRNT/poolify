@@ -1,29 +1,13 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 import type { ExcavationRate, DigType } from "@/types/excavation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-
-interface RateFormValues {
-  truckRate: number;
-  excavationRate: number;
-}
 
 const Excavation = () => {
-  const form = useForm<RateFormValues>({
-    defaultValues: {
-      truckRate: 0,
-      excavationRate: 0,
-    },
-  });
-
   const { data: rates, isLoading: isLoadingRates } = useQuery({
     queryKey: ["excavation-rates"],
     queryFn: async () => {
@@ -32,14 +16,7 @@ const Excavation = () => {
         .select("*");
 
       if (error) throw error;
-      
-      const result = data as ExcavationRate[];
-      const truckRate = result.find(rate => rate.category === 'truck')?.hourly_rate || 0;
-      const excavationRate = result.find(rate => rate.category === 'excavation')?.hourly_rate || 0;
-      form.setValue('truckRate', truckRate);
-      form.setValue('excavationRate', excavationRate);
-      
-      return result;
+      return data as ExcavationRate[];
     },
   });
 
@@ -55,18 +32,16 @@ const Excavation = () => {
     },
   });
 
+  const truckRate = rates?.find(rate => rate.category === 'truck')?.hourly_rate || 115;
+  const excavationRate = rates?.find(rate => rate.category === 'excavation')?.hourly_rate || 150;
+
   const calculateCosts = (digType: DigType) => {
-    const truckRate = form.watch('truckRate');
-    const excavationRate = form.watch('excavationRate');
-    
     const truckSubtotal = truckRate * digType.truck_hours * digType.truck_quantity;
     const excavationSubtotal = excavationRate * digType.excavation_hours;
-    const total = truckSubtotal + excavationSubtotal;
-
     return {
       truckSubtotal,
       excavationSubtotal,
-      total,
+      total: truckSubtotal + excavationSubtotal
     };
   };
 
@@ -75,77 +50,48 @@ const Excavation = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
-        <Card className="mb-6">
-          <CardHeader>
-            <CardTitle>Hourly Rates</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="truckRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Truck Hourly Rate</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="excavationRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Excavation Hourly Rate</FormLabel>
-                      <FormControl>
-                        <Input type="number" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </Form>
-          </CardContent>
-        </Card>
-
         <Card>
-          <CardHeader>
-            <CardTitle>Dig Type Costs</CardTitle>
-          </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             {isLoading ? (
               <p>Loading rates...</p>
             ) : (
               <Table>
                 <TableHeader>
+                  <TableRow className="border-b-2 border-black">
+                    <TableHead className="border-r border-black">Dig Type</TableHead>
+                    <TableHead colSpan={4} className="text-center border-r border-black">Trucks</TableHead>
+                    <TableHead colSpan={3} className="text-center border-r border-black">Excavation</TableHead>
+                    <TableHead className="text-right">Grand Total</TableHead>
+                  </TableRow>
                   <TableRow>
-                    <TableHead>Dig Type</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Truck Hours</TableHead>
-                    <TableHead className="text-right">Truck Quantity</TableHead>
-                    <TableHead className="text-right">Excavation Hours</TableHead>
-                    <TableHead className="text-right">Total Cost</TableHead>
+                    <TableHead className="border-r border-black"></TableHead>
+                    <TableHead className="text-center border-r border-black"># of Trucks</TableHead>
+                    <TableHead className="text-center border-r border-black">Hourly Rate</TableHead>
+                    <TableHead className="text-center border-r border-black">Hours</TableHead>
+                    <TableHead className="text-center border-r border-black">Sub Total</TableHead>
+                    <TableHead className="text-center border-r border-black">Hourly Rate</TableHead>
+                    <TableHead className="text-center border-r border-black">Hours</TableHead>
+                    <TableHead className="text-center border-r border-black">Sub Total</TableHead>
+                    <TableHead className="text-right"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {digTypes?.map((digType) => {
                     const costs = calculateCosts(digType);
                     return (
-                      <TableRow key={digType.id}>
-                        <TableCell>{digType.name}</TableCell>
-                        <TableCell>{digType.description}</TableCell>
-                        <TableCell className="text-right">{digType.truck_hours}</TableCell>
-                        <TableCell className="text-right">{digType.truck_quantity}</TableCell>
-                        <TableCell className="text-right">{digType.excavation_hours}</TableCell>
-                        <TableCell className="text-right font-medium">
-                          {formatCurrency(costs.total)}
-                        </TableCell>
+                      <TableRow key={digType.id} className="border-b border-black">
+                        <TableCell className="border-r border-black font-medium">{digType.name}</TableCell>
+                        <TableCell className="text-center border-r border-black bg-green-50">{digType.truck_quantity}</TableCell>
+                        <TableCell className="text-center border-r border-black">{formatCurrency(truckRate)}</TableCell>
+                        <TableCell className="text-center border-r border-black">{digType.truck_hours}</TableCell>
+                        <TableCell className="text-right border-r border-black bg-gray-100">{formatCurrency(costs.truckSubtotal)}</TableCell>
+                        <TableCell className="text-center border-r border-black">{formatCurrency(excavationRate)}</TableCell>
+                        <TableCell className="text-center border-r border-black">{digType.excavation_hours}</TableCell>
+                        <TableCell className="text-right border-r border-black">{formatCurrency(costs.excavationSubtotal)}</TableCell>
+                        <TableCell className="text-right font-medium">{formatCurrency(costs.total)}</TableCell>
                       </TableRow>
-                    )}
-                  )}
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}
