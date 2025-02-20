@@ -401,6 +401,7 @@ export type Database = {
           coping_lay: number
           coping_supply: number
           created_at: string
+          excavation_cost: number
           id: string
           install_fee: number
           misc: number
@@ -415,6 +416,7 @@ export type Database = {
           coping_lay?: number
           coping_supply?: number
           created_at?: string
+          excavation_cost?: number
           id?: string
           install_fee?: number
           misc?: number
@@ -429,6 +431,7 @@ export type Database = {
           coping_lay?: number
           coping_supply?: number
           created_at?: string
+          excavation_cost?: number
           id?: string
           install_fee?: number
           misc?: number
