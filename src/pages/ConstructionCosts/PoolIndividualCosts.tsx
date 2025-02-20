@@ -10,6 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
 import {
   Breadcrumb,
@@ -146,28 +147,58 @@ const PoolIndividualCosts = () => {
           <CardHeader>
             <CardTitle>Pool Individual Costs</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="rounded-md border">
+          <CardContent className="overflow-x-auto">
+            <div className="rounded-md border min-w-[1200px]">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Range</TableHead>
                     <TableHead>Pool Name</TableHead>
                     <TableHead>Excavation Cost</TableHead>
+                    <TableHead>Pea Gravel/Backfill</TableHead>
+                    <TableHead>Install Fee</TableHead>
+                    <TableHead>Trucked Water</TableHead>
+                    <TableHead>Salt Bags</TableHead>
+                    <TableHead>Misc.</TableHead>
+                    <TableHead>Coping Supply</TableHead>
+                    <TableHead>Beam</TableHead>
+                    <TableHead>Coping Lay</TableHead>
+                    <TableHead>Total</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pools?.map((pool) => (
-                    <TableRow key={pool.id}>
-                      <TableCell>{pool.range}</TableCell>
-                      <TableCell>{pool.name}</TableCell>
-                      <TableCell>
-                        {excavationCosts.has(pool.name) 
-                          ? formatCurrency(excavationCosts.get(pool.name))
-                          : '-'}
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {pools?.map((pool) => {
+                    const excavationCost = excavationCosts.get(pool.name) || 0;
+                    // Placeholder values until you provide the real data
+                    const peaGravel = 0;
+                    const installFee = 0;
+                    const truckedWater = 0;
+                    const saltBags = 0;
+                    const misc = 0;
+                    const copingSupply = 0;
+                    const beam = 0;
+                    const copingLay = 0;
+                    
+                    const total = excavationCost + peaGravel + installFee + 
+                      truckedWater + saltBags + misc + copingSupply + beam + copingLay;
+
+                    return (
+                      <TableRow key={pool.id}>
+                        <TableCell>{pool.range}</TableCell>
+                        <TableCell>{pool.name}</TableCell>
+                        <TableCell>{formatCurrency(excavationCost)}</TableCell>
+                        <TableCell>{formatCurrency(peaGravel)}</TableCell>
+                        <TableCell>{formatCurrency(installFee)}</TableCell>
+                        <TableCell>{formatCurrency(truckedWater)}</TableCell>
+                        <TableCell>{formatCurrency(saltBags)}</TableCell>
+                        <TableCell>{formatCurrency(misc)}</TableCell>
+                        <TableCell>{formatCurrency(copingSupply)}</TableCell>
+                        <TableCell>{formatCurrency(beam)}</TableCell>
+                        <TableCell>{formatCurrency(copingLay)}</TableCell>
+                        <TableCell className="font-medium">{formatCurrency(total)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>
