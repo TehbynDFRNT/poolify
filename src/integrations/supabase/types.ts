@@ -748,7 +748,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_dig_cost: {
+        Args: {
+          dig_type_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
