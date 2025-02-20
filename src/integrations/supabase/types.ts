@@ -480,6 +480,42 @@ export type Database = {
           },
         ]
       }
+      pool_individual_costs: {
+        Row: {
+          cost_value: number
+          created_at: string
+          description: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          name: string
+          notes: string | null
+          range: string
+        }
+        Insert: {
+          cost_value?: number
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          range?: string
+        }
+        Update: {
+          cost_value?: number
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          notes?: string | null
+          range?: string
+        }
+        Relationships: []
+      }
       pool_ranges: {
         Row: {
           created_at: string
