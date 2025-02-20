@@ -5,33 +5,40 @@ import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 
 interface PoolIndividualCostsDetailsProps {
-  poolRange: string;
+  poolId: string;
 }
 
-export const PoolIndividualCostsDetails = ({ poolRange }: PoolIndividualCostsDetailsProps) => {
-  console.log("Pool range:", poolRange); // Debug log
-
-  const { data: individualCosts, isLoading } = useQuery({
-    queryKey: ["pool-individual-costs", poolRange],
+export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
+  const { data: costs, isLoading } = useQuery({
+    queryKey: ["pool-costs", poolId],
     queryFn: async () => {
-      console.log("Fetching costs for range:", poolRange); // Debug log
+      console.log("Fetching costs for pool:", poolId);
       const { data, error } = await supabase
-        .from("pool_individual_costs")
+        .from("pool_costs")
         .select("*")
-        .eq("range", poolRange)
-        .eq("is_active", true)
-        .order("display_order", { ascending: true });
+        .eq("pool_id", poolId)
+        .single();
 
       if (error) {
-        console.error("Error fetching costs:", error); // Debug log
+        console.error("Error fetching costs:", error);
         throw error;
       }
-      console.log("Fetched costs:", data); // Debug log
+      console.log("Fetched costs:", data);
       return data;
     },
   });
 
-  const total = individualCosts?.reduce((sum, cost) => sum + (cost.cost_value || 0), 0) || 0;
+  const costItems = [
+    { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
+    { name: "Install Fee", value: costs?.install_fee || 0 },
+    { name: "Trucked Water", value: costs?.trucked_water || 0 },
+    { name: "Salt Bags", value: costs?.salt_bags || 0 },
+    { name: "Coping Supply", value: costs?.coping_supply || 0 },
+    { name: "Beam", value: costs?.beam || 0 },
+    { name: "Coping Lay", value: costs?.coping_lay || 0 },
+  ];
+
+  const total = costItems.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <Card>
@@ -43,27 +50,21 @@ export const PoolIndividualCostsDetails = ({ poolRange }: PoolIndividualCostsDet
           <div>Loading costs...</div>
         ) : (
           <div className="space-y-4">
-            {individualCosts?.length === 0 ? (
-              <div className="text-muted-foreground text-sm">No individual costs found for this pool range.</div>
-            ) : (
-              <>
-                {individualCosts?.map((cost) => (
-                  <div
-                    key={cost.id}
-                    className="flex justify-between items-center"
-                  >
-                    <span className="text-sm">{cost.name}</span>
-                    <span className="text-sm font-medium">
-                      {formatCurrency(cost.cost_value)}
-                    </span>
-                  </div>
-                ))}
-                <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                  <span className="font-medium text-sm">Total Individual Costs</span>
-                  <span className="font-medium text-sm">{formatCurrency(total)}</span>
-                </div>
-              </>
-            )}
+            {costItems.map((item, index) => (
+              <div
+                key={index}
+                className="flex justify-between items-center"
+              >
+                <span className="text-sm">{item.name}</span>
+                <span className="text-sm font-medium">
+                  {formatCurrency(item.value)}
+                </span>
+              </div>
+            ))}
+            <div className="mt-4 pt-4 border-t flex justify-between items-center">
+              <span className="font-medium text-sm">Total Individual Costs</span>
+              <span className="font-medium text-sm">{formatCurrency(total)}</span>
+            </div>
           </div>
         )}
       </CardContent>
