@@ -1,9 +1,13 @@
 
+import { DashboardLayout } from "@/components/DashboardLayout";
+
 const PoolIndividualCosts = () => {
   return (
-    <div>
-      Pool Individual Costs Page
-    </div>
+    <DashboardLayout>
+      <div>
+        Pool Individual Costs Page
+      </div>
+    </DashboardLayout>
   );
 };
 
