@@ -10,6 +10,41 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
+  // First get the pool details to get dig type info
+  const { data: poolExcavation } = useQuery({
+    queryKey: ["pool-excavation", poolId],
+    queryFn: async () => {
+      const { data: pool } = await supabase
+        .from("pool_specifications")
+        .select("*")
+        .eq("id", poolId)
+        .single();
+
+      if (!pool) return null;
+
+      const { data: excavationType } = await supabase
+        .from("pool_excavation_types")
+        .select(`
+          *,
+          dig_type:excavation_dig_types(*)
+        `)
+        .eq("name", pool.name)
+        .single();
+
+      return excavationType;
+    }
+  });
+
+  const calculateDigCost = (digType: any) => {
+    if (!digType) return 0;
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  const excavationCost = poolExcavation?.dig_type ? calculateDigCost(poolExcavation.dig_type) : 0;
+
+  // Get other pool costs
   const { data: costs, isLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
@@ -44,7 +79,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   });
 
   const costItems = [
-    { name: "Excavation Cost", value: costs?.excavation_cost || 0 },
+    { name: "Excavation Cost", value: excavationCost },
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
     { name: "Install Fee", value: costs?.install_fee || 0 },
     { name: "Trucked Water", value: costs?.trucked_water || 0 },
