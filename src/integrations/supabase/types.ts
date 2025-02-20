@@ -87,57 +87,6 @@ export type Database = {
         }
         Relationships: []
       }
-      dig_types: {
-        Row: {
-          created_at: string
-          description: string | null
-          excavation_hours: number
-          id: string
-          name: string
-          truck_hours: number
-          truck_quantity: number
-        }
-        Insert: {
-          created_at?: string
-          description?: string | null
-          excavation_hours?: number
-          id?: string
-          name: string
-          truck_hours?: number
-          truck_quantity?: number
-        }
-        Update: {
-          created_at?: string
-          description?: string | null
-          excavation_hours?: number
-          id?: string
-          name?: string
-          truck_hours?: number
-          truck_quantity?: number
-        }
-        Relationships: []
-      }
-      excavation_rates: {
-        Row: {
-          category: Database["public"]["Enums"]["excavation_category"]
-          created_at: string
-          hourly_rate: number
-          id: string
-        }
-        Insert: {
-          category: Database["public"]["Enums"]["excavation_category"]
-          created_at?: string
-          hourly_rate?: number
-          id?: string
-        }
-        Update: {
-          category?: Database["public"]["Enums"]["excavation_category"]
-          created_at?: string
-          hourly_rate?: number
-          id?: string
-        }
-        Relationships: []
-      }
       filtration_component_types: {
         Row: {
           created_at: string
@@ -466,54 +415,6 @@ export type Database = {
           },
         ]
       }
-      pool_excavation_details: {
-        Row: {
-          created_at: string
-          dig_type_id: string | null
-          excavation_hours: number
-          id: string
-          pool_id: string
-          truck_hours: number
-          truck_quantity: number
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          dig_type_id?: string | null
-          excavation_hours?: number
-          id?: string
-          pool_id: string
-          truck_hours?: number
-          truck_quantity?: number
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          dig_type_id?: string | null
-          excavation_hours?: number
-          id?: string
-          pool_id?: string
-          truck_hours?: number
-          truck_quantity?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_excavation_details_dig_type_id_fkey"
-            columns: ["dig_type_id"]
-            isOneToOne: false
-            referencedRelation: "dig_types"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_excavation_details_pool_id_fkey"
-            columns: ["pool_id"]
-            isOneToOne: true
-            referencedRelation: "pool_specifications"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       pool_individual_costs: {
         Row: {
           cost_value: number
@@ -775,7 +676,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      excavation_category: "truck" | "excavation"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
