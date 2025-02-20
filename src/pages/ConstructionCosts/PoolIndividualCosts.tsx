@@ -4,7 +4,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 const PoolIndividualCosts = () => {
   return (
     <DashboardLayout>
-      <div>
+      <div className="p-8">
         Pool Individual Costs Page
       </div>
     </DashboardLayout>
