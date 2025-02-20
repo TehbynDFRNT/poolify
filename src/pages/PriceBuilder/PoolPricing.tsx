@@ -155,7 +155,7 @@ const PoolPricing = () => {
           <PoolExcavationCosts poolId={pool.id} />
           <PricingSummary 
             poolId={pool.id}
-            poolBasePrice={pool.buy_price_ex_gst || 0}
+            poolBasePrice={pool.buy_price_inc_gst || 0}
             filtrationPackage={filtrationPackage}
           />
         </div>
