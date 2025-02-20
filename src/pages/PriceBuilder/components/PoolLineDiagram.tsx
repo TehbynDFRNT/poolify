@@ -28,7 +28,9 @@ export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
       setLoading(true);
       const { error } = await supabase
         .from("pool_specifications")
-        .update({ outline_image_url: url })
+        .update({
+          outline_image_url: url,
+        })
         .eq("id", pool.id);
 
       if (error) throw error;
@@ -83,9 +85,9 @@ export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
         ) : (
           <div className="space-y-4">
             <FileUpload
-              accept="image/*"
-              endpoint="pool-outlines"
               onUploadComplete={handleImageUpload}
+              bucket="pool-outlines"
+              acceptedFileTypes={["image/*"]}
             />
             <div className="text-sm text-muted-foreground">
               Upload a new pool outline image. Supported formats: PNG, JPG, JPEG.
