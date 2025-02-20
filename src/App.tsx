@@ -11,6 +11,7 @@ import PavingRetaining from "@/pages/ConstructionCosts/PavingRetaining";
 import BobcatCosts from "@/pages/ConstructionCosts/BobcatCosts";
 import CraneCosts from "@/pages/ConstructionCosts/CraneCosts";
 import FixedCosts from "@/pages/ConstructionCosts/FixedCosts";
+import PoolIndividualCosts from "@/pages/ConstructionCosts/PoolIndividualCosts";
 import FiltrationSystems from "@/pages/FiltrationSystems";
 import PriceBuilder from "@/pages/PriceBuilder";
 import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
@@ -31,6 +32,7 @@ function App() {
           <Route path="/construction-costs/bobcat-costs" element={<BobcatCosts />} />
           <Route path="/construction-costs/crane-costs" element={<CraneCosts />} />
           <Route path="/construction-costs/fixed-costs" element={<FixedCosts />} />
+          <Route path="/construction-costs/pool-individual-costs" element={<PoolIndividualCosts />} />
           <Route path="/filtration-systems" element={<FiltrationSystems />} />
           <Route path="/price-builder" element={<PriceBuilder />} />
           <Route path="/price-builder/:poolId" element={<PoolPricing />} />

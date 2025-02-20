@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Menu, Construction, Truck, Shovel, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -112,7 +111,7 @@ const ConstructionCosts = () => {
           </Link>
 
           <Link 
-            to="/construction-costs/pool-specific-costs" 
+            to="/construction-costs/pool-individual-costs" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
