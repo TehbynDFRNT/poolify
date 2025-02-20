@@ -27,7 +27,7 @@ export const PoolCostsTableRow = ({
   onCancel,
   onCostChange,
 }: PoolCostsTableRowProps) => {
-  const total = excavationCost; // Only include excavation cost
+  const total = excavationCost + (costs?.pea_gravel || 0); // Include excavation and pea gravel
 
   const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
     if (e.key === 'Enter') onSave(pool.id);
@@ -36,7 +36,7 @@ export const PoolCostsTableRow = ({
 
   const renderEditableCell = (field: string) => (
     <EditableCell
-      value={0}
+      value={field === 'pea_gravel' ? (costs?.[field] || 0) : 0}
       isEditing={isEditing}
       onEdit={() => onEdit(pool.id)}
       onSave={() => onSave(pool.id)}
