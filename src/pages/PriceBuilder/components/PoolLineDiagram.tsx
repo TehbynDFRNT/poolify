@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FileUpload } from "@/components/FileUpload";
-import { Check, Pencil, X } from "lucide-react";
+import { ImageUpload } from "@/components/ImageUpload";
+import { Pencil, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -84,7 +84,7 @@ export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
           </div>
         ) : (
           <div className="space-y-4">
-            <FileUpload
+            <ImageUpload
               onUploadComplete={handleImageUpload}
               bucket="pool-outlines"
               acceptedFileTypes={["image/*"]}
