@@ -11,7 +11,7 @@ interface PoolIndividualCostsDetailsProps {
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
   // Get pool costs
-  const { data: costs, isLoading } = useQuery({
+  const { data: costs, isLoading: isCostsLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
       const { data: poolCosts } = await supabase
@@ -36,6 +36,33 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
+  // Get pool excavation details
+  const { data: excavationData, isLoading: isExcavationLoading } = useQuery({
+    queryKey: ["pool-excavation", poolId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("pool_excavation_types")
+        .select(`
+          *,
+          dig_type:excavation_dig_types(*)
+        `)
+        .eq("id", poolId)
+        .maybeSingle();
+
+      return data;
+    },
+  });
+
+  const calculateDigCost = (digType: any) => {
+    if (!digType) return 0;
+    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+    return truckCost + excavationCost;
+  };
+
+  const digCost = excavationData?.dig_type ? calculateDigCost(excavationData.dig_type) : 0;
+  const isLoading = isCostsLoading || isExcavationLoading;
+
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
     { name: "Install Fee", value: costs?.install_fee || 0 },
@@ -55,9 +82,27 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
           <CardTitle>Dig Costs</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="bg-white/10 backdrop-blur-lg border border-gray-200 rounded-lg p-6 text-center text-gray-500">
-            Dig costs calculation coming soon
-          </div>
+          {isExcavationLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-24" />
+              <Skeleton className="h-4 w-16" />
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Dig Type</span>
+                <span className="text-sm font-medium">
+                  {excavationData?.dig_type?.name || 'Not assigned'}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm">Dig Cost</span>
+                <span className="text-sm font-medium">
+                  {formatCurrency(digCost)}
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
