@@ -17,6 +17,7 @@ import type { PackageWithComponents } from "@/types/filtration";
 import { PoolDetails } from "./components/PoolDetails";
 import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
 import { PoolFixedCosts } from "./components/PoolFixedCosts";
+import { PoolIndividualCostsDetails } from "./components/PoolIndividualCostsDetails";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const PoolPricing = () => {
@@ -144,8 +145,11 @@ const PoolPricing = () => {
         </div>
 
         <PoolDetails pool={pool} />
-        <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
-        <PoolFixedCosts />
+        <div className="grid grid-cols-2 gap-8">
+          <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
+          <PoolFixedCosts />
+          <PoolIndividualCostsDetails poolRange={pool.range} />
+        </div>
       </div>
     </DashboardLayout>
   );
