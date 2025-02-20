@@ -10,6 +10,19 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
+  // Get pool details first
+  const { data: poolDetails, isLoading: isPoolLoading } = useQuery({
+    queryKey: ["pool-details", poolId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("pool_specifications")
+        .select("name, range")
+        .eq("id", poolId)
+        .maybeSingle();
+      return data;
+    },
+  });
+
   // Get pool costs
   const { data: costs, isLoading: isCostsLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
@@ -36,21 +49,25 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  // Get pool excavation details
+  // Get pool excavation details using pool name and range
   const { data: excavationData, isLoading: isExcavationLoading } = useQuery({
-    queryKey: ["pool-excavation", poolId],
+    queryKey: ["pool-excavation", poolDetails?.name, poolDetails?.range],
     queryFn: async () => {
+      if (!poolDetails?.name || !poolDetails?.range) return null;
+
       const { data } = await supabase
         .from("pool_excavation_types")
         .select(`
           *,
           dig_type:excavation_dig_types(*)
         `)
-        .eq("id", poolId)
+        .eq("name", poolDetails.name)
+        .eq("range", poolDetails.range)
         .maybeSingle();
 
       return data;
     },
+    enabled: !!poolDetails?.name && !!poolDetails?.range,
   });
 
   const calculateDigCost = (digType: any) => {
@@ -61,7 +78,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   };
 
   const digCost = excavationData?.dig_type ? calculateDigCost(excavationData.dig_type) : 0;
-  const isLoading = isCostsLoading || isExcavationLoading;
+  const isLoading = isCostsLoading || isExcavationLoading || isPoolLoading;
 
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
@@ -82,7 +99,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
           <CardTitle>Dig Costs</CardTitle>
         </CardHeader>
         <CardContent>
-          {isExcavationLoading ? (
+          {isLoading ? (
             <div className="space-y-4">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-4 w-16" />
