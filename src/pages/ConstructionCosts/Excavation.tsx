@@ -3,14 +3,26 @@ import { useQuery } from "@tanstack/react-query";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 import type { ExcavationRate, DigType } from "@/types/excavation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
+
+interface RateFormValues {
+  truckRate: number;
+  excavationRate: number;
+}
 
 const Excavation = () => {
-  const [selectedDigTypeId, setSelectedDigTypeId] = useState<string | null>(null);
+  const form = useForm<RateFormValues>({
+    defaultValues: {
+      truckRate: 0,
+      excavationRate: 0,
+    },
+  });
 
   const { data: rates, isLoading: isLoadingRates } = useQuery({
     queryKey: ["excavation-rates"],
@@ -21,6 +33,12 @@ const Excavation = () => {
 
       if (error) throw error;
       return data as ExcavationRate[];
+    },
+    onSuccess: (data) => {
+      const truckRate = data.find(rate => rate.category === 'truck')?.hourly_rate || 0;
+      const excavationRate = data.find(rate => rate.category === 'excavation')?.hourly_rate || 0;
+      form.setValue('truckRate', truckRate);
+      form.setValue('excavationRate', excavationRate);
     },
   });
 
@@ -36,82 +54,97 @@ const Excavation = () => {
     },
   });
 
-  const truckRate = rates?.find(rate => rate.category === 'truck')?.hourly_rate || 0;
-  const excavationRate = rates?.find(rate => rate.category === 'excavation')?.hourly_rate || 0;
+  const calculateCosts = (digType: DigType) => {
+    const truckRate = form.watch('truckRate');
+    const excavationRate = form.watch('excavationRate');
+    
+    const truckSubtotal = truckRate * digType.truck_hours * digType.truck_quantity;
+    const excavationSubtotal = excavationRate * digType.excavation_hours;
+    const total = truckSubtotal + excavationSubtotal;
 
-  const selectedDigType = digTypes?.find(type => type.id === selectedDigTypeId);
-  
-  const truckHours = selectedDigType?.truck_hours || 0;
-  const truckQuantity = selectedDigType?.truck_quantity || 0;
-  const excavationHours = selectedDigType?.excavation_hours || 0;
-
-  const truckSubtotal = truckRate * truckHours * truckQuantity;
-  const excavationSubtotal = excavationRate * excavationHours;
-  const total = truckSubtotal + excavationSubtotal;
+    return {
+      truckSubtotal,
+      excavationSubtotal,
+      total,
+    };
+  };
 
   const isLoading = isLoadingRates || isLoadingDigTypes;
 
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
-        <Card>
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Excavation Cost Calculator</CardTitle>
+            <CardTitle>Hourly Rates</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Select Dig Type
-              </label>
-              <Select
-                value={selectedDigTypeId || ""}
-                onValueChange={(value) => setSelectedDigTypeId(value)}
-              >
-                <SelectTrigger className="w-[300px]">
-                  <SelectValue placeholder="Select a dig type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {digTypes?.map((digType) => (
-                    <SelectItem key={digType.id} value={digType.id}>
-                      {digType.name} - {digType.description}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Form {...form}>
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="truckRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Truck Hourly Rate</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="excavationRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Excavation Hourly Rate</FormLabel>
+                      <FormControl>
+                        <Input type="number" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </Form>
+          </CardContent>
+        </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle>Dig Type Costs</CardTitle>
+          </CardHeader>
+          <CardContent>
             {isLoading ? (
               <p>Loading rates...</p>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead>Dig Type</TableHead>
                     <TableHead>Description</TableHead>
-                    <TableHead className="text-right">Rate</TableHead>
-                    <TableHead className="text-right">Hours</TableHead>
-                    <TableHead className="text-right">Quantity</TableHead>
-                    <TableHead className="text-right">Subtotal</TableHead>
+                    <TableHead className="text-right">Truck Hours</TableHead>
+                    <TableHead className="text-right">Truck Quantity</TableHead>
+                    <TableHead className="text-right">Excavation Hours</TableHead>
+                    <TableHead className="text-right">Total Cost</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  <TableRow>
-                    <TableCell>Trucks</TableCell>
-                    <TableCell className="text-right">{formatCurrency(truckRate)}/hr</TableCell>
-                    <TableCell className="text-right">{truckHours}</TableCell>
-                    <TableCell className="text-right">{truckQuantity}</TableCell>
-                    <TableCell className="text-right">{formatCurrency(truckSubtotal)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell>Excavation</TableCell>
-                    <TableCell className="text-right">{formatCurrency(excavationRate)}/hr</TableCell>
-                    <TableCell className="text-right">{excavationHours}</TableCell>
-                    <TableCell className="text-right">1</TableCell>
-                    <TableCell className="text-right">{formatCurrency(excavationSubtotal)}</TableCell>
-                  </TableRow>
-                  <TableRow>
-                    <TableCell colSpan={4} className="font-medium">Total</TableCell>
-                    <TableCell className="text-right font-medium">{formatCurrency(total)}</TableCell>
-                  </TableRow>
+                  {digTypes?.map((digType) => {
+                    const costs = calculateCosts(digType);
+                    return (
+                      <TableRow key={digType.id}>
+                        <TableCell>{digType.name}</TableCell>
+                        <TableCell>{digType.description}</TableCell>
+                        <TableCell className="text-right">{digType.truck_hours}</TableCell>
+                        <TableCell className="text-right">{digType.truck_quantity}</TableCell>
+                        <TableCell className="text-right">{digType.excavation_hours}</TableCell>
+                        <TableCell className="text-right font-medium">
+                          {formatCurrency(costs.total)}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  )}
                 </TableBody>
               </Table>
             )}
