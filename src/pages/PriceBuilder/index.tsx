@@ -74,11 +74,13 @@ const PriceBuilder = () => {
                       <TableHead className="text-right">True Cost</TableHead>
                       <TableHead className="text-right">Margin %</TableHead>
                       <TableHead className="text-right">RRP</TableHead>
+                      <TableHead className="text-right">Actual Margin</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {pools?.map((pool) => {
                       const costs = calculateCosts(pool, margins[pool.id] || 0, fixedCosts, poolCosts, excavationDetails);
+                      const actualMargin = costs.rrp - costs.total;
                       return (
                         <TableRow 
                           key={pool.id}
@@ -116,6 +118,9 @@ const PriceBuilder = () => {
                           </TableCell>
                           <TableCell className="text-right font-medium text-primary">
                             {formatCurrency(costs.rrp)}
+                          </TableCell>
+                          <TableCell className="text-right font-medium text-primary">
+                            {formatCurrency(actualMargin)}
                           </TableCell>
                         </TableRow>
                       );
