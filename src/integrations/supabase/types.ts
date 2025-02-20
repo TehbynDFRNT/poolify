@@ -87,6 +87,42 @@ export type Database = {
         }
         Relationships: []
       }
+      dig_types: {
+        Row: {
+          created_at: string
+          excavation_hourly_rate: number
+          excavation_hours: number
+          id: string
+          name: string
+          truck_hourly_rate: number
+          truck_hours: number
+          truck_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          excavation_hourly_rate: number
+          excavation_hours: number
+          id?: string
+          name: string
+          truck_hourly_rate: number
+          truck_hours: number
+          truck_quantity: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          excavation_hourly_rate?: number
+          excavation_hours?: number
+          id?: string
+          name?: string
+          truck_hourly_rate?: number
+          truck_hours?: number
+          truck_quantity?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       filtration_component_types: {
         Row: {
           created_at: string

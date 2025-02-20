@@ -10,7 +10,6 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Construction } from "lucide-react";
-import { CostSection } from "./components/CostSection";
 import { formatCurrency } from "@/utils/format";
 import {
   Table,
@@ -20,16 +19,7 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
-
-interface DigType {
-  id: string;
-  name: string;
-  truck_quantity: number;
-  truck_hourly_rate: number;
-  truck_hours: number;
-  excavation_hourly_rate: number;
-  excavation_hours: number;
-}
+import type { DigType } from "@/types/dig-type";
 
 const Excavation = () => {
   const { data: digTypes, isLoading } = useQuery({
@@ -38,10 +28,10 @@ const Excavation = () => {
       const { data, error } = await supabase
         .from('dig_types')
         .select('*')
-        .order('name');
+        .order('name') as { data: DigType[] | null; error: any };
       
       if (error) throw error;
-      return data as DigType[];
+      return data ?? [];
     },
   });
 
