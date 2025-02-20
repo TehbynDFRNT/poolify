@@ -25,7 +25,7 @@ export const usePoolExcavationTypes = () => {
       console.log('Fetching pool ranges...');
       const { data: ranges, error: rangesError } = await supabase
         .from("pool_ranges")
-        .select("name")
+        .select("*")
         .order("display_order");
 
       if (rangesError) {
@@ -43,11 +43,21 @@ export const usePoolExcavationTypes = () => {
       
       if (error) throw error;
 
-      const rangeOrder = ranges?.map(r => r.name) || [];
+      // Create an ordered map of ranges using display_order
+      const rangeOrder = new Map(
+        ranges?.map((r, index) => [r.name, index]) || []
+      );
+
       return (data || []).sort((a, b) => {
-        const aIndex = rangeOrder.indexOf(a.range);
-        const bIndex = rangeOrder.indexOf(b.range);
+        // Get the order index for each range, defaulting to Infinity if not found
+        // This ensures unknown ranges go to the end
+        const aIndex = rangeOrder.get(a.range) ?? Infinity;
+        const bIndex = rangeOrder.get(b.range) ?? Infinity;
+        
+        // First sort by range order
         if (aIndex !== bIndex) return aIndex - bIndex;
+        
+        // Then sort by name within the same range
         return a.name.localeCompare(b.name);
       }) as PoolExcavationType[];
     },
