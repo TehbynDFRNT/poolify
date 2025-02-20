@@ -8,32 +8,15 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Construction, Plus } from "lucide-react";
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import type { DigType } from "@/types/dig-type";
 import { useState } from "react";
 import { useDigTypes } from "@/hooks/useDigTypes";
-import { DigTypeRow } from "@/components/dig-types/DigTypeRow";
 import { AddDigTypeForm } from "@/components/dig-types/AddDigTypeForm";
 import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
 import { usePoolDigTypeMatches } from "./hooks/usePoolDigTypeMatches";
-import { formatCurrency } from "@/utils/format";
-import { calculateGrandTotal } from "@/utils/digTypeCalculations";
-import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
+import { DigTypesTable } from "./components/DigTypesTable";
+import { PoolDigTypeMatchesTable } from "./components/PoolDigTypeMatchesTable";
 
 const Excavation = () => {
   const [editingRows, setEditingRows] = useState<Record<string, Partial<DigType>>>({});
@@ -116,6 +99,13 @@ const Excavation = () => {
     });
   };
 
+  const handleDigTypeChange = (poolId: string, digTypeId: string) => {
+    setEditingPoolMatches(prev => ({
+      ...prev,
+      [poolId]: { digTypeId }
+    }));
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto py-8 px-4">
@@ -156,120 +146,27 @@ const Excavation = () => {
         </div>
 
         <div className="space-y-8">
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Dig Type</TableHead>
-                  <TableHead>Trucks</TableHead>
-                  <TableHead>Truck Rate</TableHead>
-                  <TableHead>Truck Hours</TableHead>
-                  <TableHead>Truck Subtotal</TableHead>
-                  <TableHead>Excavation Rate</TableHead>
-                  <TableHead>Excavation Hours</TableHead>
-                  <TableHead>Excavation Subtotal</TableHead>
-                  <TableHead>Grand Total</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={10} className="text-center py-4">
-                      Loading dig types...
-                    </TableCell>
-                  </TableRow>
-                ) : digTypes?.map((type) => (
-                  <DigTypeRow
-                    key={type.id}
-                    digType={type}
-                    isEditing={!!editingRows[type.id]}
-                    editingRow={editingRows[type.id]}
-                    onEdit={() => setEditingRows((prev) => ({
-                      ...prev,
-                      [type.id]: {}
-                    }))}
-                    onSave={() => handleSaveRow(type)}
-                    onCancel={() => handleCancelRow(type.id)}
-                    onValueChange={(field, value) => handleValueChange(type, field, value)}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <DigTypesTable
+            digTypes={digTypes}
+            isLoading={isLoading}
+            editingRows={editingRows}
+            onEdit={(id) => setEditingRows((prev) => ({ ...prev, [id]: {} }))}
+            onSave={handleSaveRow}
+            onCancel={handleCancelRow}
+            onValueChange={handleValueChange}
+          />
 
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-            <div className="p-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">Pool Dig Type Matching</h2>
-              <p className="text-sm text-gray-500">Match pools with their appropriate dig types</p>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Pool Range</TableHead>
-                  <TableHead>Pool Name</TableHead>
-                  <TableHead>Dig Type</TableHead>
-                  <TableHead>Grand Total</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoadingPools || isLoadingMatches ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-4">
-                      Loading pools...
-                    </TableCell>
-                  </TableRow>
-                ) : pools?.map((pool) => {
-                  const isEditing = !!editingPoolMatches[pool.id];
-                  const selectedDigType = getSelectedDigType(pool.id);
-                  return (
-                    <TableRow key={pool.id}>
-                      <TableCell>{pool.range}</TableCell>
-                      <TableCell>{pool.name}</TableCell>
-                      <TableCell>
-                        {isEditing ? (
-                          <Select
-                            value={editingPoolMatches[pool.id]?.digTypeId || ''}
-                            onValueChange={(value) => setEditingPoolMatches(prev => ({
-                              ...prev,
-                              [pool.id]: { digTypeId: value }
-                            }))}
-                          >
-                            <SelectTrigger className="w-[200px]">
-                              <SelectValue placeholder="Select dig type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {digTypes?.map((digType) => (
-                                <SelectItem key={digType.id} value={digType.id}>
-                                  {digType.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        ) : (
-                          <div className="px-3 py-2">
-                            {selectedDigType?.name || 'No dig type selected'}
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {selectedDigType ? formatCurrency(calculateGrandTotal(selectedDigType)) : '-'}
-                      </TableCell>
-                      <TableCell>
-                        <PoolTableActions
-                          isEditing={isEditing}
-                          onEdit={() => handleEditPoolMatch(pool.id)}
-                          onSave={() => handleSavePoolMatch(pool.id)}
-                          onCancel={() => handleCancelPoolMatch(pool.id)}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+          <PoolDigTypeMatchesTable
+            pools={pools}
+            digTypes={digTypes}
+            isLoading={isLoadingPools || isLoadingMatches}
+            editingPoolMatches={editingPoolMatches}
+            getSelectedDigType={getSelectedDigType}
+            onEdit={handleEditPoolMatch}
+            onSave={handleSavePoolMatch}
+            onCancel={handleCancelPoolMatch}
+            onDigTypeChange={handleDigTypeChange}
+          />
         </div>
 
         <AddDigTypeForm
