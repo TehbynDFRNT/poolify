@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,21 +14,11 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const { data: excavationDetails, isLoading: isLoadingExcavation } = useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
-      // First get the pool details
       const { data: pool } = await supabase
         .from("pool_specifications")
-        .select("name, range")
-        .eq("id", poolId)
-        .maybeSingle();
-
-      if (!pool) return null;
-
-      // Get the excavation type and dig type details
-      const { data: excavationType } = await supabase
-        .from("pool_excavation_types")
         .select(`
-          name,
-          dig_type:excavation_dig_types(
+          dig_type_id,
+          dig_type:excavation_dig_types!pool_specifications_dig_type_id_fkey(
             id,
             name,
             truck_count,
@@ -37,14 +28,11 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
             excavation_hours
           )
         `)
-        .eq("name", pool.name)
-        .eq("range", pool.range)
+        .eq("id", poolId)
         .maybeSingle();
 
-      console.log('Pool details:', pool);
-      console.log('Excavation type:', excavationType);
-
-      return excavationType;
+      console.log('Pool with dig type:', pool);
+      return pool;
     }
   });
 
