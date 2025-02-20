@@ -186,7 +186,10 @@ const Excavation = () => {
         </div>
 
         <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
-          <PoolExcavationTable pools={poolExcavationTypes || []} />
+          <PoolExcavationTable 
+            pools={poolExcavationTypes || []} 
+            digTypes={digTypes || []}
+          />
         </div>
       </div>
     </DashboardLayout>
