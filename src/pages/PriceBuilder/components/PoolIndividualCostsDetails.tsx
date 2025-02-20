@@ -14,11 +14,21 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const { data: excavationDetails, isLoading: isLoadingExcavation } = useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
+      // First get the pool details to get its name and range
       const { data: pool } = await supabase
         .from("pool_specifications")
+        .select("name, range")
+        .eq("id", poolId)
+        .maybeSingle();
+
+      if (!pool) return null;
+
+      // Get the pool excavation type and its associated dig type
+      const { data: excavationType } = await supabase
+        .from("pool_excavation_types")
         .select(`
-          dig_type_id,
-          dig_type:excavation_dig_types!pool_specifications_dig_type_id_fkey(
+          name,
+          dig_type:excavation_dig_types(
             id,
             name,
             truck_count,
@@ -28,11 +38,14 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
             excavation_hours
           )
         `)
-        .eq("id", poolId)
+        .eq("name", pool.name)
+        .eq("range", pool.range)
         .maybeSingle();
 
-      console.log('Pool with dig type:', pool);
-      return pool;
+      console.log('Pool:', pool);
+      console.log('Excavation type:', excavationType);
+      
+      return excavationType;
     }
   });
 
@@ -100,16 +113,16 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
                 <Skeleton className="h-5 w-24" />
               </div>
             </div>
-          ) : excavationDetails?.dig_type ? (
+          ) : excavationDetails?.dig_type?.[0] ? (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Dig Type</span>
-                <span className="text-sm font-medium">{excavationDetails.dig_type.name}</span>
+                <span className="text-sm font-medium">{excavationDetails.dig_type[0].name}</span>
               </div>
               <div className="mt-4 pt-4 border-t flex justify-between items-center">
                 <span className="font-medium text-sm">Total Excavation Cost</span>
                 <span className="font-medium text-sm">
-                  {formatCurrency(calculateDigCost(excavationDetails.dig_type))}
+                  {formatCurrency(calculateDigCost(excavationDetails.dig_type[0]))}
                 </span>
               </div>
             </div>
