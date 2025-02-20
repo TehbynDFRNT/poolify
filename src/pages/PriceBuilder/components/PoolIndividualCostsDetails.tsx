@@ -29,6 +29,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   });
 
   const costItems = [
+    { name: "Excavation Cost", value: costs?.excavation_cost || 0 },
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
     { name: "Install Fee", value: costs?.install_fee || 0 },
     { name: "Trucked Water", value: costs?.trucked_water || 0 },
