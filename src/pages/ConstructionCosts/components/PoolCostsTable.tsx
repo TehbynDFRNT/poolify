@@ -58,15 +58,8 @@ export const PoolCostsTable = ({
           const costs = isEditing ? editingCosts : (poolCosts?.get(pool.id) || {});
           const excavationCost = excavationCosts.get(pool.name) || 0;
           
-          const total = excavationCost +
-            (costs.pea_gravel || 0) +
-            (costs.install_fee || 0) +
-            (costs.trucked_water || 0) +
-            (costs.salt_bags || 0) +
-            (costs.misc || 0) +
-            (costs.coping_supply || 0) +
-            (costs.beam || 0) +
-            (costs.coping_lay || 0);
+          // For now, only include excavation cost in the total
+          const total = excavationCost;
 
           return (
             <TableRow key={pool.id}>
@@ -75,7 +68,7 @@ export const PoolCostsTable = ({
               <TableCell>{formatCurrency(excavationCost)}</TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.pea_gravel || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -92,7 +85,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.install_fee || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -109,7 +102,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.trucked_water || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -126,7 +119,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.salt_bags || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -143,7 +136,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.misc || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -160,7 +153,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.coping_supply || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -177,7 +170,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.beam || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
@@ -194,7 +187,7 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell>
                 <EditableCell
-                  value={costs.coping_lay || 0}
+                  value={0}
                   isEditing={isEditing}
                   onEdit={() => onEdit(pool.id)}
                   onSave={() => onSave(pool.id)}
