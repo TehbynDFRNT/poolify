@@ -20,6 +20,7 @@ import { PoolFixedCosts } from "./components/PoolFixedCosts";
 import { PoolIndividualCostsDetails } from "./components/PoolIndividualCostsDetails";
 import { PoolExcavationCosts } from "./components/PoolExcavationCosts";
 import { PricingSummary } from "./components/PricingSummary";
+import { PoolLineDiagram } from "./components/PoolLineDiagram";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const PoolPricing = () => {
@@ -148,6 +149,7 @@ const PoolPricing = () => {
         </div>
 
         <div className="space-y-6">
+          <PoolLineDiagram pool={pool} />
           <PoolDetails pool={pool} />
           <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
           <PoolFixedCosts />
