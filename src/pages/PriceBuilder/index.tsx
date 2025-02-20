@@ -128,7 +128,7 @@ const PriceBuilder = () => {
   const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation;
 
   const calculateCosts = (pool: any) => {
-    const basePrice = pool.buy_price_ex_gst || 0;
+    const basePrice = pool.buy_price_inc_gst || 0; // Changed from buy_price_ex_gst to buy_price_inc_gst
     const filtrationCost = pool.default_filtration_package ? calculatePackagePrice(pool.default_filtration_package) : 0;
     const fixedCostsTotal = fixedCosts?.reduce((sum, cost) => sum + cost.price, 0) || 0;
     
