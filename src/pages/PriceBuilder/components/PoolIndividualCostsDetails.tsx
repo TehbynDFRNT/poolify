@@ -14,37 +14,38 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const { data: excavationDetails, isLoading: isLoadingExcavation } = useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
-      // First get the pool details to get its name and range
-      const { data: pool } = await supabase
+      // First get the pool details
+      console.log('Fetching pool details for ID:', poolId);
+      const { data: pool, error: poolError } = await supabase
         .from("pool_specifications")
-        .select("name, range")
+        .select("*")
         .eq("id", poolId)
         .maybeSingle();
 
+      if (poolError) {
+        console.error('Error fetching pool:', poolError);
+        return null;
+      }
+
+      console.log('Found pool:', pool);
+
       if (!pool) return null;
 
-      // Get the pool excavation type with its dig type details
-      const { data: excavationType } = await supabase
+      // Now get the excavation type
+      console.log('Fetching excavation type for pool:', pool.name, pool.range);
+      const { data: excavationType, error: excavationError } = await supabase
         .from("pool_excavation_types")
-        .select(`
-          dig_type_id,
-          excavation_dig_types!pool_excavation_types_dig_type_id_fkey(
-            id,
-            name,
-            truck_count,
-            truck_hourly_rate,
-            truck_hours,
-            excavation_hourly_rate,
-            excavation_hours
-          )
-        `)
+        .select("*, excavation_dig_types(*)")
         .eq("name", pool.name)
         .eq("range", pool.range)
         .maybeSingle();
 
-      console.log('Pool:', pool);
-      console.log('Excavation type:', excavationType);
-      
+      if (excavationError) {
+        console.error('Error fetching excavation type:', excavationError);
+        return null;
+      }
+
+      console.log('Found excavation type:', excavationType);
       return excavationType;
     }
   });
@@ -82,6 +83,8 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
       return poolCosts;
     },
   });
+
+  console.log('Current excavation details:', excavationDetails);
 
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
