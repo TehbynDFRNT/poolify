@@ -12,15 +12,12 @@ import {
 import { Link } from "react-router-dom";
 import { usePoolCosts } from "./hooks/usePoolCosts";
 import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
-import { useDigTypes, usePoolDigTypes } from "./hooks/useExcavationQueries";
 import { PoolCostsTable } from "./components/PoolCostsTable";
 import { LoadingState } from "./components/LoadingState";
 import { ErrorState } from "./components/ErrorState";
 
 const PoolIndividualCosts = () => {
   const { data: pools, isLoading, error } = usePoolSpecifications();
-  const { data: poolDigTypes } = usePoolDigTypes();
-  const { data: digTypes } = useDigTypes();
 
   // Fetch pool costs
   const { data: poolCosts } = useQuery({
@@ -77,18 +74,6 @@ const PoolIndividualCosts = () => {
     }
   };
 
-  // Get excavation costs for each pool
-  const excavationCosts = new Map();
-  if (poolDigTypes && digTypes) {
-    poolDigTypes.forEach(poolDigType => {
-      const digType = digTypes.find(dt => dt.id === poolDigType.dig_type_id);
-      if (digType) {
-        const key = `${poolDigType.pool_name}-${poolDigType.pool_range}`;
-        excavationCosts.set(key, digType.cost);
-      }
-    });
-  }
-
   if (isLoading) return <LoadingState />;
   if (error) return <ErrorState />;
 
@@ -123,7 +108,6 @@ const PoolIndividualCosts = () => {
             <div className="rounded-md border min-w-[1200px]">
               <PoolCostsTable
                 pools={pools || []}
-                excavationCosts={excavationCosts}
                 poolCosts={poolCosts || new Map()}
                 editingId={editingId}
                 editingCosts={editingCosts}
