@@ -12,7 +12,6 @@ export const PoolCostsTableHeader = () => {
         <TableHead>Install Fee</TableHead>
         <TableHead>Trucked Water</TableHead>
         <TableHead>Salt Bags</TableHead>
-        <TableHead>Misc.</TableHead>
         <TableHead>Coping Supply</TableHead>
         <TableHead>Beam</TableHead>
         <TableHead>Coping Lay</TableHead>

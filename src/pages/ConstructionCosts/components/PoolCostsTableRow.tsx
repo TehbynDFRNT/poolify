@@ -27,7 +27,15 @@ export const PoolCostsTableRow = ({
   onCancel,
   onCostChange,
 }: PoolCostsTableRowProps) => {
-  const total = excavationCost + (costs?.pea_gravel || 0) + (costs?.install_fee || 0); // Include excavation, pea gravel, and install fee
+  const total = 
+    excavationCost + 
+    (costs?.pea_gravel || 0) + 
+    (costs?.install_fee || 0) + 
+    (costs?.trucked_water || 0) + 
+    (costs?.salt_bags || 0) + 
+    (costs?.coping_supply || 0) + 
+    (costs?.beam || 0) + 
+    (costs?.coping_lay || 0);
 
   const handleKeyDown = (e: React.KeyboardEvent, field: string) => {
     if (e.key === 'Enter') onSave(pool.id);
@@ -58,7 +66,6 @@ export const PoolCostsTableRow = ({
       <TableCell>{renderEditableCell('install_fee')}</TableCell>
       <TableCell>{renderEditableCell('trucked_water')}</TableCell>
       <TableCell>{renderEditableCell('salt_bags')}</TableCell>
-      <TableCell>{renderEditableCell('misc')}</TableCell>
       <TableCell>{renderEditableCell('coping_supply')}</TableCell>
       <TableCell>{renderEditableCell('beam')}</TableCell>
       <TableCell>{renderEditableCell('coping_lay')}</TableCell>
