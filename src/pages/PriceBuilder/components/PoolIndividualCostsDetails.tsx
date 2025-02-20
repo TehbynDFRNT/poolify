@@ -10,41 +10,49 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
-  // First get the pool details to get dig type info
+  // Get excavation cost
   const { data: excavationCost } = useQuery({
     queryKey: ["pool-excavation-cost", poolId],
     queryFn: async () => {
-      // Get pool name
-      const { data: pool } = await supabase
-        .from("pool_specifications")
-        .select("name")
-        .eq("id", poolId)
-        .maybeSingle();
+      try {
+        // Get pool name first
+        const poolResponse = await supabase
+          .from("pool_specifications")
+          .select("name")
+          .eq("id", poolId)
+          .maybeSingle();
 
-      if (!pool?.name) return 0;
+        const poolName = poolResponse.data?.name;
+        if (!poolName) return 0;
 
-      // Get excavation type and dig type details
-      const { data: excavation } = await supabase
-        .from("pool_excavation_types")
-        .select(`
-          dig_type:excavation_dig_types(
-            truck_count,
-            truck_hourly_rate,
-            truck_hours,
-            excavation_hourly_rate,
-            excavation_hours
-          )
-        `)
-        .eq("name", pool.name)
-        .maybeSingle();
+        // Get excavation type
+        const excavationResponse = await supabase
+          .from("pool_excavation_types")
+          .select("dig_type_id")
+          .eq("name", poolName)
+          .maybeSingle();
 
-      if (!excavation?.dig_type) return 0;
+        const digTypeId = excavationResponse.data?.dig_type_id;
+        if (!digTypeId) return 0;
 
-      const digType = excavation.dig_type;
-      const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-      const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-      
-      return truckCost + excavationCost;
+        // Get dig type details
+        const digTypeResponse = await supabase
+          .from("excavation_dig_types")
+          .select("*")
+          .eq("id", digTypeId)
+          .maybeSingle();
+
+        const digType = digTypeResponse.data;
+        if (!digType) return 0;
+
+        const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
+        const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+        
+        return truckCost + excavationCost;
+      } catch (error) {
+        console.error("Error calculating excavation cost:", error);
+        return 0;
+      }
     }
   });
 
