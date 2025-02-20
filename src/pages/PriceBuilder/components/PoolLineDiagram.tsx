@@ -22,6 +22,7 @@ interface PoolLineDiagramProps {
 export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [currentImage, setCurrentImage] = useState(pool.outline_image_url || "/lovable-uploads/590580b8-d08d-42ee-b7a5-d72d576b2263.png");
 
   const handleImageUpload = async (url: string) => {
     try {
@@ -35,6 +36,7 @@ export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
 
       if (error) throw error;
 
+      setCurrentImage(url);
       toast.success("Pool outline image updated successfully");
       setIsEditing(false);
     } catch (error) {
@@ -77,7 +79,7 @@ export const PoolLineDiagram = ({ pool }: PoolLineDiagramProps) => {
         {!isEditing ? (
           <div className="flex justify-center">
             <img 
-              src={pool.outline_image_url || "/lovable-uploads/590580b8-d08d-42ee-b7a5-d72d576b2263.png"}
+              src={currentImage}
               alt={`${pool.name} Pool Outline`}
               className="max-w-xl w-full h-auto"
             />

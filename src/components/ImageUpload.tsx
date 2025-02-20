@@ -2,6 +2,7 @@
 import { useState, useCallback } from "react";
 import { Upload } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface ImageUploadProps {
   onUploadComplete: (url: string) => void;
@@ -25,7 +26,8 @@ export const ImageUpload = ({ onUploadComplete, bucket, acceptedFileTypes }: Ima
 
   const uploadFile = async (file: File) => {
     if (!acceptedFileTypes.some(type => file.type.startsWith(type.replace('/*', '')))) {
-      throw new Error('Invalid file type');
+      toast.error('Invalid file type. Please upload an image file.');
+      return;
     }
 
     setIsUploading(true);
@@ -33,7 +35,7 @@ export const ImageUpload = ({ onUploadComplete, bucket, acceptedFileTypes }: Ima
       const fileExt = file.name.split('.').pop();
       const filePath = `${crypto.randomUUID()}.${fileExt}`;
 
-      const { error: uploadError, data } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from(bucket)
         .upload(filePath, file);
 
@@ -46,7 +48,7 @@ export const ImageUpload = ({ onUploadComplete, bucket, acceptedFileTypes }: Ima
       onUploadComplete(publicUrl);
     } catch (error) {
       console.error('Error uploading file:', error);
-      throw error;
+      toast.error('Failed to upload image. Please try again.');
     } finally {
       setIsUploading(false);
     }
