@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -68,11 +69,10 @@ const Excavation = () => {
       
       if (error) throw error;
 
-      // Sort pools based on range order and then by name
-      const rangeOrder = ranges?.map(r => r.name.toLowerCase()) || [];
+      const rangeOrder = ranges?.map(r => r.name) || [];
       return (data || []).sort((a, b) => {
-        const aIndex = rangeOrder.indexOf(a.range.toLowerCase());
-        const bIndex = rangeOrder.indexOf(b.range.toLowerCase());
+        const aIndex = rangeOrder.indexOf(a.range);
+        const bIndex = rangeOrder.indexOf(b.range);
         if (aIndex !== bIndex) return aIndex - bIndex;
         return a.name.localeCompare(b.name);
       }) as PoolExcavationType[];
