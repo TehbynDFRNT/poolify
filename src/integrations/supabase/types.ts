@@ -451,6 +451,42 @@ export type Database = {
           },
         ]
       }
+      pool_dig_type_matches: {
+        Row: {
+          created_at: string
+          dig_type_id: string
+          id: string
+          pool_id: string
+        }
+        Insert: {
+          created_at?: string
+          dig_type_id: string
+          id?: string
+          pool_id: string
+        }
+        Update: {
+          created_at?: string
+          dig_type_id?: string
+          id?: string
+          pool_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_dig_type_matches_dig_type_id_fkey"
+            columns: ["dig_type_id"]
+            isOneToOne: false
+            referencedRelation: "dig_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_dig_type_matches_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_individual_costs: {
         Row: {
           cost_value: number

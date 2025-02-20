@@ -15,6 +15,13 @@ import {
   TableHead,
   TableCell,
 } from "@/components/ui/table";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import type { DigType } from "@/types/dig-type";
 import { useState } from "react";
@@ -22,12 +29,16 @@ import { useDigTypes } from "@/hooks/useDigTypes";
 import { DigTypeRow } from "@/components/dig-types/DigTypeRow";
 import { AddDigTypeForm } from "@/components/dig-types/AddDigTypeForm";
 import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
+import { usePoolDigTypeMatches } from "./hooks/usePoolDigTypeMatches";
+import { formatCurrency } from "@/utils/format";
+import { calculateGrandTotal } from "@/utils/digTypeCalculations";
 
 const Excavation = () => {
   const [editingRows, setEditingRows] = useState<Record<string, Partial<DigType>>>({});
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const { digTypes, isLoading, updateDigType } = useDigTypes();
   const { data: pools, isLoading: isLoadingPools } = usePoolSpecifications();
+  const { matches, updateMatch, isLoading: isLoadingMatches } = usePoolDigTypeMatches();
 
   const handleValueChange = (digType: DigType, field: keyof DigType, value: any) => {
     setEditingRows((prev) => ({
@@ -61,6 +72,11 @@ const Excavation = () => {
       delete next[digTypeId];
       return next;
     });
+  };
+
+  const getSelectedDigType = (poolId: string) => {
+    const match = matches?.find(m => m.pool_id === poolId);
+    return digTypes?.find(d => d.id === match?.dig_type_id);
   };
 
   return (
@@ -155,21 +171,46 @@ const Excavation = () => {
                 <TableRow>
                   <TableHead>Pool Range</TableHead>
                   <TableHead>Pool Name</TableHead>
+                  <TableHead>Dig Type</TableHead>
+                  <TableHead>Grand Total</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoadingPools ? (
+                {isLoadingPools || isLoadingMatches ? (
                   <TableRow>
-                    <TableCell colSpan={2} className="text-center py-4">
+                    <TableCell colSpan={4} className="text-center py-4">
                       Loading pools...
                     </TableCell>
                   </TableRow>
-                ) : pools?.map((pool) => (
-                  <TableRow key={pool.id}>
-                    <TableCell>{pool.range}</TableCell>
-                    <TableCell>{pool.name}</TableCell>
-                  </TableRow>
-                ))}
+                ) : pools?.map((pool) => {
+                  const selectedDigType = getSelectedDigType(pool.id);
+                  return (
+                    <TableRow key={pool.id}>
+                      <TableCell>{pool.range}</TableCell>
+                      <TableCell>{pool.name}</TableCell>
+                      <TableCell>
+                        <Select
+                          value={selectedDigType?.id || ""}
+                          onValueChange={(value) => updateMatch({ poolId: pool.id, digTypeId: value })}
+                        >
+                          <SelectTrigger className="w-[200px]">
+                            <SelectValue placeholder="Select dig type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {digTypes?.map((digType) => (
+                              <SelectItem key={digType.id} value={digType.id}>
+                                {digType.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell>
+                        {selectedDigType ? formatCurrency(calculateGrandTotal(selectedDigType)) : '-'}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
