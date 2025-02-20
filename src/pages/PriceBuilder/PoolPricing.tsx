@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
@@ -145,10 +144,8 @@ const PoolPricing = () => {
         </div>
 
         <PoolDetails pool={pool} />
-        <div className="grid grid-cols-3 gap-8">
-          <div className="col-span-2">
-            <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
-          </div>
+        <div className="space-y-8">
+          <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
           <PoolFixedCosts />
           <PoolIndividualCostsDetails poolRange={pool.range} />
         </div>
