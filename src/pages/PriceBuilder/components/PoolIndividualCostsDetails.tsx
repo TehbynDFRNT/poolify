@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { ExcavationDigType } from "@/types/excavation-dig-type";
 
 interface PoolIndividualCostsDetailsProps {
   poolId: string;
@@ -19,6 +20,8 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
         .select("name, range")
         .eq("id", poolId)
         .maybeSingle();
+      
+      console.log("Pool details:", data);
       return data;
     },
   });
@@ -55,22 +58,24 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     queryFn: async () => {
       if (!poolDetails?.name || !poolDetails?.range) return null;
 
+      console.log("Fetching excavation data for:", poolDetails.name, poolDetails.range);
       const { data } = await supabase
         .from("pool_excavation_types")
         .select(`
           *,
-          dig_type:excavation_dig_types(*)
+          dig_type:excavation_dig_types!dig_type_id(*)
         `)
         .eq("name", poolDetails.name)
         .eq("range", poolDetails.range)
         .maybeSingle();
 
+      console.log("Excavation data:", data);
       return data;
     },
     enabled: !!poolDetails?.name && !!poolDetails?.range,
   });
 
-  const calculateDigCost = (digType: any) => {
+  const calculateDigCost = (digType: ExcavationDigType) => {
     if (!digType) return 0;
     const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
     const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
