@@ -23,12 +23,12 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
 
       if (!pool) return null;
 
-      // Get the pool excavation type and its associated dig type
+      // Get the pool excavation type with its dig type details
       const { data: excavationType } = await supabase
         .from("pool_excavation_types")
         .select(`
-          name,
-          dig_type:excavation_dig_types(
+          dig_type_id,
+          excavation_dig_types!pool_excavation_types_dig_type_id_fkey(
             id,
             name,
             truck_count,
@@ -113,16 +113,16 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
                 <Skeleton className="h-5 w-24" />
               </div>
             </div>
-          ) : excavationDetails?.dig_type?.[0] ? (
+          ) : excavationDetails?.excavation_dig_types ? (
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <span className="text-sm">Dig Type</span>
-                <span className="text-sm font-medium">{excavationDetails.dig_type[0].name}</span>
+                <span className="text-sm font-medium">{excavationDetails.excavation_dig_types.name}</span>
               </div>
               <div className="mt-4 pt-4 border-t flex justify-between items-center">
                 <span className="font-medium text-sm">Total Excavation Cost</span>
                 <span className="font-medium text-sm">
-                  {formatCurrency(calculateDigCost(excavationDetails.dig_type[0]))}
+                  {formatCurrency(calculateDigCost(excavationDetails.excavation_dig_types))}
                 </span>
               </div>
             </div>
