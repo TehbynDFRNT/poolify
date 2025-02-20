@@ -10,53 +10,7 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
-  // Get excavation cost
-  const { data: excavationCost } = useQuery({
-    queryKey: ["pool-excavation-cost", poolId],
-    queryFn: async () => {
-      try {
-        // Get pool name first
-        const poolResponse = await supabase
-          .from("pool_specifications")
-          .select("name")
-          .eq("id", poolId)
-          .maybeSingle();
-
-        const poolName = poolResponse.data?.name;
-        if (!poolName) return 0;
-
-        // Get excavation type
-        const excavationResponse = await supabase
-          .from("pool_excavation_types")
-          .select("dig_type_id")
-          .eq("name", poolName)
-          .maybeSingle();
-
-        const digTypeId = excavationResponse.data?.dig_type_id;
-        if (!digTypeId) return 0;
-
-        // Get dig type details
-        const digTypeResponse = await supabase
-          .from("excavation_dig_types")
-          .select("*")
-          .eq("id", digTypeId)
-          .maybeSingle();
-
-        const digType = digTypeResponse.data;
-        if (!digType) return 0;
-
-        const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-        const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-        
-        return truckCost + excavationCost;
-      } catch (error) {
-        console.error("Error calculating excavation cost:", error);
-        return 0;
-      }
-    }
-  });
-
-  // Get other pool costs
+  // Get pool costs
   const { data: costs, isLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
@@ -74,8 +28,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
           salt_bags: 0,
           coping_supply: 0,
           beam: 0,
-          coping_lay: 0,
-          excavation_cost: 0
+          coping_lay: 0
         };
       }
 
@@ -84,7 +37,6 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   });
 
   const costItems = [
-    { name: "Excavation Cost", value: excavationCost || 0 },
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
     { name: "Install Fee", value: costs?.install_fee || 0 },
     { name: "Trucked Water", value: costs?.trucked_water || 0 },
@@ -104,7 +56,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
       <CardContent>
         {isLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: 8 }).map((_, index) => (
+            {Array.from({ length: 7 }).map((_, index) => (
               <div key={index} className="flex justify-between items-center">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-16" />
