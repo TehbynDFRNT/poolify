@@ -145,8 +145,10 @@ const PoolPricing = () => {
         </div>
 
         <PoolDetails pool={pool} />
-        <div className="grid grid-cols-2 gap-8">
-          <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
+        <div className="grid grid-cols-3 gap-8">
+          <div className="col-span-2">
+            <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
+          </div>
           <PoolFixedCosts />
           <PoolIndividualCostsDetails poolRange={pool.range} />
         </div>

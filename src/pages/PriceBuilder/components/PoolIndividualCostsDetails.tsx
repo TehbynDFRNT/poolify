@@ -9,16 +9,24 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolRange }: PoolIndividualCostsDetailsProps) => {
+  console.log("Pool range:", poolRange); // Debug log
+
   const { data: individualCosts, isLoading } = useQuery({
     queryKey: ["pool-individual-costs", poolRange],
     queryFn: async () => {
+      console.log("Fetching costs for range:", poolRange); // Debug log
       const { data, error } = await supabase
         .from("pool_individual_costs")
         .select("*")
         .eq("range", poolRange)
+        .eq("is_active", true)
         .order("display_order", { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching costs:", error); // Debug log
+        throw error;
+      }
+      console.log("Fetched costs:", data); // Debug log
       return data;
     },
   });
@@ -26,7 +34,7 @@ export const PoolIndividualCostsDetails = ({ poolRange }: PoolIndividualCostsDet
   const total = individualCosts?.reduce((sum, cost) => sum + (cost.cost_value || 0), 0) || 0;
 
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader>
         <CardTitle>Pool Individual Costs</CardTitle>
       </CardHeader>
@@ -35,23 +43,27 @@ export const PoolIndividualCostsDetails = ({ poolRange }: PoolIndividualCostsDet
           <div>Loading costs...</div>
         ) : (
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              {individualCosts?.map((cost) => (
-                <div
-                  key={cost.id}
-                  className="flex justify-between items-center p-4 rounded-lg bg-secondary"
-                >
-                  <span className="text-sm font-medium">{cost.name}</span>
-                  <span className="text-sm font-medium">
-                    {formatCurrency(cost.cost_value)}
-                  </span>
+            {individualCosts?.length === 0 ? (
+              <div className="text-muted-foreground text-sm">No individual costs found for this pool range.</div>
+            ) : (
+              <>
+                {individualCosts?.map((cost) => (
+                  <div
+                    key={cost.id}
+                    className="flex justify-between items-center"
+                  >
+                    <span className="text-sm">{cost.name}</span>
+                    <span className="text-sm font-medium">
+                      {formatCurrency(cost.cost_value)}
+                    </span>
+                  </div>
+                ))}
+                <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                  <span className="font-medium text-sm">Total Individual Costs</span>
+                  <span className="font-medium text-sm">{formatCurrency(total)}</span>
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-between items-center p-4 rounded-lg bg-primary/10">
-              <span className="font-semibold">Total Individual Costs</span>
-              <span className="font-semibold">{formatCurrency(total)}</span>
-            </div>
+              </>
+            )}
           </div>
         )}
       </CardContent>
