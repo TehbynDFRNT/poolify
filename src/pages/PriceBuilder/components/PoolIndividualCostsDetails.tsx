@@ -10,24 +10,7 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
-  // Get pool details first
-  const { data: poolDetails, isLoading: isPoolLoading } = useQuery({
-    queryKey: ["pool-details", poolId],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pool_specifications")
-        .select("name, range")
-        .eq("id", poolId)
-        .maybeSingle();
-
-      if (error) throw error;
-      console.log("Pool details:", data);
-      return data;
-    },
-  });
-
-  // Get pool costs
-  const { data: costs, isLoading: isCostsLoading } = useQuery({
+  const { data: costs, isLoading } = useQuery({
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
       const { data: poolCosts } = await supabase
@@ -52,8 +35,6 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  const isLoading = isCostsLoading || isPoolLoading;
-
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
     { name: "Install Fee", value: costs?.install_fee || 0 },
@@ -67,46 +48,36 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const total = costItems.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Pool Individual Costs</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 7 }).map((_, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-4 w-16" />
+    <Card className="bg-white shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold">Pool Individual Costs</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {costItems.map((item, index) => (
+              <div
+                key={index}
+                className="bg-muted/50 rounded-lg p-4 space-y-2"
+              >
+                <div className="text-sm text-muted-foreground">
+                  {item.name}
                 </div>
-              ))}
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <Skeleton className="h-5 w-32" />
-                <Skeleton className="h-5 w-24" />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {costItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex justify-between items-center"
-                >
-                  <span className="text-sm">{item.name}</span>
-                  <span className="text-sm font-medium">
-                    {formatCurrency(item.value)}
-                  </span>
+                <div className="text-sm font-medium">
+                  {formatCurrency(item.value)}
                 </div>
-              ))}
-              <div className="mt-4 pt-4 border-t flex justify-between items-center">
-                <span className="font-medium text-sm">Total Individual Costs</span>
-                <span className="font-medium text-sm">{formatCurrency(total)}</span>
               </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+            ))}
+          </div>
+
+          <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg mt-6">
+            <span className="text-sm text-muted-foreground">Total Individual Costs</span>
+            <span className="text-sm font-medium text-primary">
+              {formatCurrency(total)}
+            </span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };

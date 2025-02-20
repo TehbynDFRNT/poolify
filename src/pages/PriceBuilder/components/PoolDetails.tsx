@@ -22,76 +22,56 @@ interface PoolDetailsProps {
 }
 
 export const PoolDetails = ({ pool }: PoolDetailsProps) => {
+  const details = [
+    { label: "Range", value: pool.range },
+    { label: "Name", value: pool.name },
+    { label: "Length", value: `${pool.length}m` },
+    { label: "Width", value: `${pool.width}m` },
+    { label: "Shallow Depth", value: `${pool.depth_shallow}m` },
+    { label: "Deep Depth", value: `${pool.depth_deep}m` },
+    { label: "Waterline", value: pool.waterline_l_m ? `${pool.waterline_l_m}L/m` : '-' },
+    { label: "Volume", value: pool.volume_liters ? `${pool.volume_liters}L` : '-' },
+    { label: "Salt Bags", value: pool.salt_volume_bags || '-' },
+    { label: "Weight", value: pool.weight_kg ? `${pool.weight_kg}kg` : '-' },
+    { label: "Initial Minerals", value: pool.minerals_kg_initial ? `${pool.minerals_kg_initial}kg` : '-' },
+    { label: "Topup Minerals", value: pool.minerals_kg_topup ? `${pool.minerals_kg_topup}kg` : '-' },
+  ];
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Pool Details</CardTitle>
+    <Card className="bg-white shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold">Pool Details</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <dl className="grid grid-cols-2 gap-4">
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Range</dt>
-              <dd className="text-lg">{pool.range}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Name</dt>
-              <dd className="text-lg">{pool.name}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Length</dt>
-              <dd className="text-lg">{pool.length}m</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Width</dt>
-              <dd className="text-lg">{pool.width}m</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Shallow Depth</dt>
-              <dd className="text-lg">{pool.depth_shallow}m</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Deep Depth</dt>
-              <dd className="text-lg">{pool.depth_deep}m</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Waterline</dt>
-              <dd className="text-lg">{pool.waterline_l_m ? `${pool.waterline_l_m}L/m` : '-'}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Volume</dt>
-              <dd className="text-lg">{pool.volume_liters ? `${pool.volume_liters}L` : '-'}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Salt Bags</dt>
-              <dd className="text-lg">{pool.salt_volume_bags || '-'}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Weight</dt>
-              <dd className="text-lg">{pool.weight_kg ? `${pool.weight_kg}kg` : '-'}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Initial Minerals</dt>
-              <dd className="text-lg">{pool.minerals_kg_initial ? `${pool.minerals_kg_initial}kg` : '-'}</dd>
-            </div>
-            <div>
-              <dt className="text-sm font-medium text-gray-500">Topup Minerals</dt>
-              <dd className="text-lg">{pool.minerals_kg_topup ? `${pool.minerals_kg_topup}kg` : '-'}</dd>
-            </div>
-          </dl>
-          
-          <div className="border-t pt-4 mt-6 flex justify-between items-center">
-            <div className="space-y-1">
-              <dt className="text-sm font-medium text-gray-500">Price (ex GST)</dt>
-              <dd className="text-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {details.map((item, index) => (
+              <div
+                key={index}
+                className="bg-muted/50 rounded-lg p-4 space-y-2"
+              >
+                <div className="text-sm text-muted-foreground">
+                  {item.label}
+                </div>
+                <div className="text-sm font-medium">
+                  {item.value}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex flex-col space-y-4">
+            <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+              <span className="text-sm text-muted-foreground">Price (ex GST)</span>
+              <span className="text-sm font-medium">
                 {pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}
-              </dd>
+              </span>
             </div>
-            <div className="text-right space-y-1">
-              <dt className="text-sm font-medium text-gray-500">Price (inc GST)</dt>
-              <dd className="text-2xl font-bold text-primary">
+            <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
+              <span className="text-sm text-muted-foreground">Price (inc GST)</span>
+              <span className="text-sm font-medium text-primary">
                 {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}
-              </dd>
+              </span>
             </div>
           </div>
         </div>
