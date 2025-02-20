@@ -127,7 +127,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
           </div>
 
           <div className="flex justify-between items-center p-6 bg-primary/10 rounded-lg mt-6">
-            <span className="text-base font-semibold text-primary">Total Package Price</span>
+            <span className="text-base font-semibold text-primary">True Cost</span>
             <span className="text-xl font-bold text-primary">
               {formatCurrency(grandTotal)}
             </span>
