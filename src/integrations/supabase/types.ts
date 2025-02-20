@@ -87,6 +87,33 @@ export type Database = {
         }
         Relationships: []
       }
+      dig_costs: {
+        Row: {
+          created_at: string
+          dig_cost: number
+          dig_type: string
+          id: string
+          name: string
+          range: string
+        }
+        Insert: {
+          created_at?: string
+          dig_cost?: number
+          dig_type: string
+          id?: string
+          name: string
+          range: string
+        }
+        Update: {
+          created_at?: string
+          dig_cost?: number
+          dig_type?: string
+          id?: string
+          name?: string
+          range?: string
+        }
+        Relationships: []
+      }
       excavation_dig_types: {
         Row: {
           created_at: string
