@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Calculator } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -146,7 +147,17 @@ const PriceBuilder = () => {
     
     const totalCost = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost;
     const marginPercentage = margins[pool.id] || 0;
-    const rrp = totalCost * (1 + marginPercentage / 100);
+    
+    // Convert margin to RRP
+    // If we want a margin of M%, then:
+    // M = (RRP - Cost) / RRP * 100
+    // Solving for RRP:
+    // M/100 = (RRP - Cost) / RRP
+    // M*RRP/100 = RRP - Cost
+    // RRP - M*RRP/100 = Cost
+    // RRP*(1 - M/100) = Cost
+    // RRP = Cost / (1 - M/100)
+    const rrp = marginPercentage >= 100 ? 0 : totalCost / (1 - marginPercentage / 100);
 
     return {
       basePrice,
@@ -161,9 +172,11 @@ const PriceBuilder = () => {
 
   const handleMarginChange = (poolId: string, value: string) => {
     const numValue = parseFloat(value) || 0;
+    // Prevent margins of 100% or greater as they would result in division by zero or negative prices
+    const clampedValue = Math.min(numValue, 99.9);
     setMargins(prev => ({
       ...prev,
-      [poolId]: numValue
+      [poolId]: clampedValue
     }));
   };
 
@@ -202,7 +215,7 @@ const PriceBuilder = () => {
                       <TableHead className="text-right">Individual Costs</TableHead>
                       <TableHead className="text-right">Excavation</TableHead>
                       <TableHead className="text-right">True Cost</TableHead>
-                      <TableHead className="text-right">Margin Percentage</TableHead>
+                      <TableHead className="text-right">Margin %</TableHead>
                       <TableHead className="text-right">RRP</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -240,6 +253,7 @@ const PriceBuilder = () => {
                               onChange={(e) => handleMarginChange(pool.id, e.target.value)}
                               className="margin-input w-24 text-right"
                               min={0}
+                              max={99.9}
                               step={0.1}
                               placeholder="0.0"
                             />
