@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import type { ExcavationDigType } from "@/types/excavation-dig-type";
+import type { ExcavationDigType, PoolExcavationType } from "@/types/excavation-dig-type";
 import { DigTypeForm } from "./components/DigTypeForm";
 import { formatCurrency } from "@/utils/format";
 
@@ -49,6 +48,23 @@ const Excavation = () => {
       
       if (error) throw error;
       return data as ExcavationDigType[];
+    },
+  });
+
+  const { data: poolExcavationTypes } = useQuery({
+    queryKey: ["pool-excavation-types"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_excavation_types")
+        .select(`
+          *,
+          dig_type:excavation_dig_types(*)
+        `)
+        .order("range")
+        .order("name");
+      
+      if (error) throw error;
+      return data as PoolExcavationType[];
     },
   });
 
@@ -167,7 +183,7 @@ const Excavation = () => {
           </Dialog>
         </div>
 
-        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden mb-8">
           <Table>
             <TableHeader>
               <TableRow className="bg-gray-50">
@@ -215,6 +231,27 @@ const Excavation = () => {
                       </svg>
                     </Button>
                   </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50">
+                <TableHead>Range</TableHead>
+                <TableHead>Pool Name</TableHead>
+                <TableHead>Dig Type</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {poolExcavationTypes?.map((pool) => (
+                <TableRow key={pool.id} className="hover:bg-gray-50">
+                  <TableCell>{pool.range}</TableCell>
+                  <TableCell>{pool.name}</TableCell>
+                  <TableCell>{pool.dig_type?.name}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
