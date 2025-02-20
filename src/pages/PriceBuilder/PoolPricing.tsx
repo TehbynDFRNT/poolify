@@ -18,6 +18,7 @@ import { PoolDetails } from "./components/PoolDetails";
 import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
 import { PoolFixedCosts } from "./components/PoolFixedCosts";
 import { PoolIndividualCostsDetails } from "./components/PoolIndividualCostsDetails";
+import { PoolExcavationCosts } from "./components/PoolExcavationCosts";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const PoolPricing = () => {
@@ -149,6 +150,7 @@ const PoolPricing = () => {
           <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
           <PoolFixedCosts />
           <PoolIndividualCostsDetails poolId={pool.id} />
+          <PoolExcavationCosts poolId={pool.id} />
         </div>
       </div>
     </DashboardLayout>
