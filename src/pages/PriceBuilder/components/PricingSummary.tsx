@@ -81,8 +81,12 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   // Calculate totals
   const fixedCostsTotal = fixedCosts?.reduce((sum, cost) => sum + cost.price, 0) || 0;
   
-  const individualCostsTotal = individualCosts ? Object.values(individualCosts).reduce((sum, value) => {
-    return typeof value === 'number' && value !== individualCosts.id ? sum + value : sum;
+  const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
+    // Skip the id field and only add numeric values
+    if (key !== 'id' && typeof value === 'number') {
+      return sum + value;
+    }
+    return sum;
   }, 0) : 0;
   
   const excavationTotal = excavationDetails?.dig_type ? calculateGrandTotal(excavationDetails.dig_type) : 0;
