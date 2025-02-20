@@ -11,24 +11,34 @@ interface PoolIndividualCostsDetailsProps {
 }
 
 export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetailsProps) => {
-  // Get pool details first
-  const { data: poolDetails, isLoading: isPoolLoading } = useQuery({
-    queryKey: ["pool-details", poolId],
+  // First get the dig type ID from pool specifications directly
+  const { data: poolSpec, isLoading: isPoolLoading } = useQuery({
+    queryKey: ["pool-specs", poolId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("pool_specifications")
-        .select("name, range")
+        .select("dig_type_id")
         .eq("id", poolId)
         .maybeSingle();
-      
-      if (error) {
-        console.error("Error fetching pool details:", error);
-        throw error;
-      }
-      
-      console.log("Pool details found:", data);
       return data;
     },
+  });
+
+  // Then get the dig type details using the dig_type_id
+  const { data: digType, isLoading: isDigTypeLoading } = useQuery({
+    queryKey: ["dig-type", poolSpec?.dig_type_id],
+    queryFn: async () => {
+      if (!poolSpec?.dig_type_id) return null;
+      
+      const { data } = await supabase
+        .from("excavation_dig_types")
+        .select("*")
+        .eq("id", poolSpec.dig_type_id)
+        .maybeSingle();
+      
+      return data;
+    },
+    enabled: !!poolSpec?.dig_type_id,
   });
 
   // Get pool costs
@@ -57,50 +67,15 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     },
   });
 
-  // Get pool excavation details using pool name and range
-  const { data: excavationData, isLoading: isExcavationLoading } = useQuery({
-    queryKey: ["pool-excavation", poolDetails?.name, poolDetails?.range],
-    queryFn: async () => {
-      if (!poolDetails?.name || !poolDetails?.range) {
-        console.log("No pool details available yet");
-        return null;
-      }
-
-      console.log("Fetching excavation data for pool:", {
-        name: poolDetails.name,
-        range: poolDetails.range
-      });
-
-      const { data, error } = await supabase
-        .from("pool_excavation_types")
-        .select(`
-          *,
-          dig_type:excavation_dig_types!inner(*)
-        `)
-        .eq("name", poolDetails.name)
-        .eq("range", poolDetails.range)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Error fetching excavation data:", error);
-        throw error;
-      }
-
-      console.log("Found excavation data:", data);
-      return data;
-    },
-    enabled: !!poolDetails?.name && !!poolDetails?.range,
-  });
-
-  const calculateDigCost = (digType: ExcavationDigType) => {
+  const calculateDigCost = (digType: ExcavationDigType | null) => {
     if (!digType) return 0;
     const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
     const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
     return truckCost + excavationCost;
   };
 
-  const digCost = excavationData?.dig_type ? calculateDigCost(excavationData.dig_type) : 0;
-  const isLoading = isCostsLoading || isExcavationLoading || isPoolLoading;
+  const digCost = calculateDigCost(digType);
+  const isLoading = isCostsLoading || isDigTypeLoading || isPoolLoading;
 
   const costItems = [
     { name: "Pea Gravel/Backfill", value: costs?.pea_gravel || 0 },
@@ -131,7 +106,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
               <div className="flex justify-between items-center">
                 <span className="text-sm">Dig Type</span>
                 <span className="text-sm font-medium">
-                  {excavationData?.dig_type?.name || 'Not assigned'}
+                  {digType?.name || 'Not assigned'}
                 </span>
               </div>
               <div className="flex justify-between items-center">
