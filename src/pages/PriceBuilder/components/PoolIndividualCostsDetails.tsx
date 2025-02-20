@@ -49,44 +49,57 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
   const total = costItems.reduce((sum, item) => sum + item.value, 0);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Pool Individual Costs</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="space-y-4">
-            {Array.from({ length: 7 }).map((_, index) => (
-              <div key={index} className="flex justify-between items-center">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-4 w-16" />
-              </div>
-            ))}
-            <div className="mt-4 pt-4 border-t flex justify-between items-center">
-              <Skeleton className="h-5 w-32" />
-              <Skeleton className="h-5 w-24" />
-            </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Dig Costs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="bg-white/10 backdrop-blur-lg border border-gray-200 rounded-lg p-6 text-center text-gray-500">
+            Dig costs calculation coming soon
           </div>
-        ) : (
-          <div className="space-y-4">
-            {costItems.map((item, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center"
-              >
-                <span className="text-sm">{item.name}</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(item.value)}
-                </span>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Pool Individual Costs</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="space-y-4">
+              {Array.from({ length: 7 }).map((_, index) => (
+                <div key={index} className="flex justify-between items-center">
+                  <Skeleton className="h-4 w-24" />
+                  <Skeleton className="h-4 w-16" />
+                </div>
+              ))}
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                <Skeleton className="h-5 w-32" />
+                <Skeleton className="h-5 w-24" />
               </div>
-            ))}
-            <div className="mt-4 pt-4 border-t flex justify-between items-center">
-              <span className="font-medium text-sm">Total Individual Costs</span>
-              <span className="font-medium text-sm">{formatCurrency(total)}</span>
             </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          ) : (
+            <div className="space-y-4">
+              {costItems.map((item, index) => (
+                <div
+                  key={index}
+                  className="flex justify-between items-center"
+                >
+                  <span className="text-sm">{item.name}</span>
+                  <span className="text-sm font-medium">
+                    {formatCurrency(item.value)}
+                  </span>
+                </div>
+              ))}
+              <div className="mt-4 pt-4 border-t flex justify-between items-center">
+                <span className="font-medium text-sm">Total Individual Costs</span>
+                <span className="font-medium text-sm">{formatCurrency(total)}</span>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
