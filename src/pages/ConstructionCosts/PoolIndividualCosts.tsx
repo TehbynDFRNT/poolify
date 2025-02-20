@@ -4,15 +4,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-  TableFooter,
-} from "@/components/ui/table";
-import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
@@ -20,9 +11,8 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
-import { formatCurrency } from "@/utils/format";
-import { EditableCell } from "@/components/filtration/components/EditableCell";
 import { usePoolCosts } from "./hooks/usePoolCosts";
+import { PoolCostsTable } from "./components/PoolCostsTable";
 import type { Pool } from "@/types/pool";
 import type { ExcavationDigType } from "@/types/excavation-dig-type";
 
@@ -207,188 +197,17 @@ const PoolIndividualCosts = () => {
           </CardHeader>
           <CardContent className="overflow-x-auto">
             <div className="rounded-md border min-w-[1200px]">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Range</TableHead>
-                    <TableHead>Pool Name</TableHead>
-                    <TableHead>Excavation Cost</TableHead>
-                    <TableHead>Pea Gravel/Backfill</TableHead>
-                    <TableHead>Install Fee</TableHead>
-                    <TableHead>Trucked Water</TableHead>
-                    <TableHead>Salt Bags</TableHead>
-                    <TableHead>Misc.</TableHead>
-                    <TableHead>Coping Supply</TableHead>
-                    <TableHead>Beam</TableHead>
-                    <TableHead>Coping Lay</TableHead>
-                    <TableHead>Total</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {pools?.map((pool) => {
-                    const isEditing = editingId === pool.id;
-                    const costs = isEditing ? editingCosts : (poolCosts?.get(pool.id) || {});
-                    const excavationCost = excavationCosts.get(pool.name) || 0;
-                    
-                    const total = excavationCost +
-                      (costs.pea_gravel || 0) +
-                      (costs.install_fee || 0) +
-                      (costs.trucked_water || 0) +
-                      (costs.salt_bags || 0) +
-                      (costs.misc || 0) +
-                      (costs.coping_supply || 0) +
-                      (costs.beam || 0) +
-                      (costs.coping_lay || 0);
-
-                    return (
-                      <TableRow key={pool.id}>
-                        <TableCell>{pool.range}</TableCell>
-                        <TableCell>{pool.name}</TableCell>
-                        <TableCell>{formatCurrency(excavationCost)}</TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.pea_gravel || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('pea_gravel', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.install_fee || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('install_fee', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.trucked_water || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('trucked_water', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.salt_bags || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('salt_bags', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.misc || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('misc', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.coping_supply || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('coping_supply', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.beam || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('beam', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <EditableCell
-                            value={costs.coping_lay || 0}
-                            isEditing={isEditing}
-                            onEdit={() => handleEdit(pool.id)}
-                            onSave={() => handleSave(pool.id)}
-                            onCancel={handleCancel}
-                            onChange={(value) => handleCostChange('coping_lay', value)}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') handleSave(pool.id);
-                              if (e.key === 'Escape') handleCancel();
-                            }}
-                            type="number"
-                            align="right"
-                            format={formatCurrency}
-                          />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {formatCurrency(total)}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+              <PoolCostsTable
+                pools={pools || []}
+                excavationCosts={excavationCosts}
+                poolCosts={poolCosts || new Map()}
+                editingId={editingId}
+                editingCosts={editingCosts}
+                onEdit={handleEdit}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                onCostChange={handleCostChange}
+              />
             </div>
           </CardContent>
         </Card>
