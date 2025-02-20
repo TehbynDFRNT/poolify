@@ -1,5 +1,5 @@
 
-import { type ExcavationDigType } from "@/types/excavation-dig-type";
+import { type DigType } from "@/types/excavation-dig-type";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -12,23 +12,17 @@ import {
 import { formatCurrency } from "@/utils/format";
 
 interface DigTypesTableProps {
-  digTypes: ExcavationDigType[];
-  onEdit: (digType: ExcavationDigType) => void;
-  calculateTotalCost: (digType: ExcavationDigType) => number;
+  digTypes: DigType[];
+  onEdit: (digType: DigType) => void;
 }
 
-export const DigTypesTable = ({ digTypes, onEdit, calculateTotalCost }: DigTypesTableProps) => {
+export const DigTypesTable = ({ digTypes, onEdit }: DigTypesTableProps) => {
   return (
     <Table>
       <TableHeader>
         <TableRow className="bg-gray-50">
           <TableHead>Dig Type</TableHead>
-          <TableHead>Truck Count</TableHead>
-          <TableHead>Truck Rate</TableHead>
-          <TableHead>Truck Hours</TableHead>
-          <TableHead>Excavation Rate</TableHead>
-          <TableHead>Excavation Hours</TableHead>
-          <TableHead>Total Cost</TableHead>
+          <TableHead>Cost</TableHead>
           <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -36,14 +30,7 @@ export const DigTypesTable = ({ digTypes, onEdit, calculateTotalCost }: DigTypes
         {digTypes?.map((digType) => (
           <TableRow key={digType.id} className="hover:bg-gray-50">
             <TableCell className="font-medium">{digType.name}</TableCell>
-            <TableCell>{digType.truck_count}</TableCell>
-            <TableCell>{formatCurrency(digType.truck_hourly_rate)}</TableCell>
-            <TableCell>{digType.truck_hours}</TableCell>
-            <TableCell>{formatCurrency(digType.excavation_hourly_rate)}</TableCell>
-            <TableCell>{digType.excavation_hours}</TableCell>
-            <TableCell className="font-semibold">
-              {formatCurrency(calculateTotalCost(digType))}
-            </TableCell>
+            <TableCell>{formatCurrency(digType.cost)}</TableCell>
             <TableCell>
               <Button
                 variant="ghost"

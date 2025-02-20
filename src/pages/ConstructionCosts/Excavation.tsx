@@ -3,11 +3,11 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { ExcavationPageHeader } from "./components/ExcavationPageHeader";
 import { DigTypesSection } from "./components/DigTypesSection";
 import { PoolExcavationTable } from "./components/PoolExcavationTable";
-import { useDigTypes, usePoolExcavationTypes } from "./hooks/useExcavationQueries";
+import { useDigTypes, usePoolDigTypes } from "./hooks/useExcavationQueries";
 
 const Excavation = () => {
   const { data: digTypes, isLoading } = useDigTypes();
-  const { data: poolExcavationTypes } = usePoolExcavationTypes();
+  const { data: poolDigTypes } = usePoolDigTypes();
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -27,7 +27,7 @@ const Excavation = () => {
           <h2 className="text-xl font-semibold text-gray-700 mb-6">Dig Costs Table</h2>
           <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
             <PoolExcavationTable 
-              pools={poolExcavationTypes || []} 
+              pools={poolDigTypes || []} 
               digTypes={digTypes || []}
             />
           </div>

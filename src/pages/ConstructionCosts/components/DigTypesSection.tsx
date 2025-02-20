@@ -7,30 +7,22 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import type { ExcavationDigType } from "@/types/excavation-dig-type";
+import type { DigType } from "@/types/excavation-dig-type";
 import { DigTypeForm } from "./DigTypeForm";
 import { DigTypesTable } from "./DigTypesTable";
 
 interface DigTypesSectionProps {
-  digTypes: ExcavationDigType[];
+  digTypes: DigType[];
 }
 
 export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [editingDigType, setEditingDigType] = useState<ExcavationDigType | null>(null);
+  const [editingDigType, setEditingDigType] = useState<DigType | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
-
-  const calculateTotalCost = (digType: ExcavationDigType) => {
-    const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-    const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-    return truckCost + excavationCost;
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,17 +31,13 @@ export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
     
     const digTypeData = {
       name: formData.get("name") as string,
-      truck_count: parseInt(formData.get("truck_count") as string),
-      truck_hourly_rate: parseFloat(formData.get("truck_hourly_rate") as string),
-      truck_hours: parseInt(formData.get("truck_hours") as string),
-      excavation_hourly_rate: parseFloat(formData.get("excavation_hourly_rate") as string),
-      excavation_hours: parseInt(formData.get("excavation_hours") as string),
+      cost: parseFloat(formData.get("cost") as string),
     };
 
     try {
       if (editingDigType) {
         const { error } = await supabase
-          .from("excavation_dig_types")
+          .from("dig_types")
           .update(digTypeData)
           .eq("id", editingDigType.id);
         
@@ -60,7 +48,7 @@ export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
         });
       } else {
         const { error } = await supabase
-          .from("excavation_dig_types")
+          .from("dig_types")
           .insert([digTypeData]);
         
         if (error) throw error;
@@ -70,7 +58,7 @@ export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
         });
       }
       
-      queryClient.invalidateQueries({ queryKey: ["excavation-dig-types"] });
+      queryClient.invalidateQueries({ queryKey: ["dig-types"] });
       setIsDialogOpen(false);
       setEditingDigType(null);
       form.reset();
@@ -83,7 +71,7 @@ export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
     }
   };
 
-  const handleEdit = (digType: ExcavationDigType) => {
+  const handleEdit = (digType: DigType) => {
     setEditingDigType(digType);
     setIsDialogOpen(true);
   };
@@ -103,11 +91,6 @@ export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
             </Button>
           </DialogTrigger>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {editingDigType ? "Edit Dig Type" : "Add New Dig Type"}
-              </DialogTitle>
-            </DialogHeader>
             <DigTypeForm 
               onSubmit={handleSubmit}
               editingDigType={editingDigType}
@@ -120,7 +103,6 @@ export const DigTypesSection = ({ digTypes }: DigTypesSectionProps) => {
         <DigTypesTable
           digTypes={digTypes}
           onEdit={handleEdit}
-          calculateTotalCost={calculateTotalCost}
         />
       </div>
     </>

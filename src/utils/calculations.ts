@@ -1,8 +1,7 @@
 
-import { type ExcavationDigType } from "@/types/excavation-dig-type";
+import { type DigType } from "@/types/excavation-dig-type";
 
-export const calculateDigTypeCost = (digType: ExcavationDigType) => {
-  const truckCost = digType.truck_count * digType.truck_hourly_rate * digType.truck_hours;
-  const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
-  return truckCost + excavationCost;
+export const calculateDigCost = (digType: DigType | null) => {
+  if (!digType) return 0;
+  return digType.cost;
 };
