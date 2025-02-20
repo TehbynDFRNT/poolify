@@ -401,6 +401,7 @@ export type Database = {
           coping_lay: number
           coping_supply: number
           created_at: string
+          excavation_cost: number
           id: string
           install_fee: number
           misc: number
@@ -415,6 +416,7 @@ export type Database = {
           coping_lay?: number
           coping_supply?: number
           created_at?: string
+          excavation_cost?: number
           id?: string
           install_fee?: number
           misc?: number
@@ -429,6 +431,7 @@ export type Database = {
           coping_lay?: number
           coping_supply?: number
           created_at?: string
+          excavation_cost?: number
           id?: string
           install_fee?: number
           misc?: number
@@ -745,7 +748,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_dig_cost: {
+        Args: {
+          dig_type_id: string
+        }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
