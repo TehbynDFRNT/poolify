@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/table";
 import { EditableCell } from "@/components/filtration/components/EditableCell";
 import { formatCurrency } from "@/utils/format";
+import { Button } from "@/components/ui/button";
+import { Check, X, Edit } from "lucide-react";
 import type { Pool } from "@/types/pool";
 
 interface PoolCostsTableProps {
@@ -50,6 +52,7 @@ export const PoolCostsTable = ({
           <TableHead>Beam</TableHead>
           <TableHead>Coping Lay</TableHead>
           <TableHead>Total</TableHead>
+          <TableHead>Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -204,6 +207,34 @@ export const PoolCostsTable = ({
               </TableCell>
               <TableCell className="font-medium">
                 {formatCurrency(total)}
+              </TableCell>
+              <TableCell>
+                {isEditing ? (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => onSave(pool.id)}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={onCancel}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => onEdit(pool.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           );
