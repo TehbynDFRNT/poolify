@@ -20,7 +20,7 @@ import {
   TableCell,
 } from "@/components/ui/table";
 import type { DigType } from "@/types/dig-type";
-import { EditableCell } from "@/components/pools/components/EditableCell";
+import { EditableCell } from "@/components/dig-types/EditableCell";
 import { PoolTableActions } from "@/components/pools/components/PoolTableActions";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -117,15 +117,6 @@ const Excavation = () => {
     return calculateTruckSubTotal(type) + calculateExcavationSubTotal(type);
   };
 
-  const editableFields: (keyof DigType)[] = [
-    'name',
-    'truck_quantity',
-    'truck_hourly_rate',
-    'truck_hours',
-    'excavation_hourly_rate',
-    'excavation_hours'
-  ];
-
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto py-8 px-4">
@@ -190,7 +181,7 @@ const Excavation = () => {
                       <EditableCell
                         value={editingRows[type.id]?.name ?? type.name}
                         isEditing={isEditing}
-                        onChange={(value) => handleValueChange(type, 'name', value)}
+                        onValueChange={(value) => handleValueChange(type, 'name', value)}
                         type="text"
                       />
                     </TableCell>
@@ -198,7 +189,7 @@ const Excavation = () => {
                       <EditableCell
                         value={editingRows[type.id]?.truck_quantity ?? type.truck_quantity}
                         isEditing={isEditing}
-                        onChange={(value) => handleValueChange(type, 'truck_quantity', parseInt(value))}
+                        onValueChange={(value) => handleValueChange(type, 'truck_quantity', parseInt(value))}
                         type="number"
                       />
                     </TableCell>
@@ -206,7 +197,7 @@ const Excavation = () => {
                       <EditableCell
                         value={editingRows[type.id]?.truck_hourly_rate ?? type.truck_hourly_rate}
                         isEditing={isEditing}
-                        onChange={(value) => handleValueChange(type, 'truck_hourly_rate', parseFloat(value))}
+                        onValueChange={(value) => handleValueChange(type, 'truck_hourly_rate', parseFloat(value))}
                         type="number"
                         step="0.01"
                       />
@@ -215,7 +206,7 @@ const Excavation = () => {
                       <EditableCell
                         value={editingRows[type.id]?.truck_hours ?? type.truck_hours}
                         isEditing={isEditing}
-                        onChange={(value) => handleValueChange(type, 'truck_hours', parseInt(value))}
+                        onValueChange={(value) => handleValueChange(type, 'truck_hours', parseInt(value))}
                         type="number"
                       />
                     </TableCell>
@@ -224,7 +215,7 @@ const Excavation = () => {
                       <EditableCell
                         value={editingRows[type.id]?.excavation_hourly_rate ?? type.excavation_hourly_rate}
                         isEditing={isEditing}
-                        onChange={(value) => handleValueChange(type, 'excavation_hourly_rate', parseFloat(value))}
+                        onValueChange={(value) => handleValueChange(type, 'excavation_hourly_rate', parseFloat(value))}
                         type="number"
                         step="0.01"
                       />
@@ -233,7 +224,7 @@ const Excavation = () => {
                       <EditableCell
                         value={editingRows[type.id]?.excavation_hours ?? type.excavation_hours}
                         isEditing={isEditing}
-                        onChange={(value) => handleValueChange(type, 'excavation_hours', parseInt(value))}
+                        onValueChange={(value) => handleValueChange(type, 'excavation_hours', parseInt(value))}
                         type="number"
                       />
                     </TableCell>
