@@ -32,13 +32,14 @@ const Excavation = () => {
         .select("*");
 
       if (error) throw error;
-      return data as ExcavationRate[];
-    },
-    onSuccess: (data) => {
-      const truckRate = data.find(rate => rate.category === 'truck')?.hourly_rate || 0;
-      const excavationRate = data.find(rate => rate.category === 'excavation')?.hourly_rate || 0;
+      
+      const result = data as ExcavationRate[];
+      const truckRate = result.find(rate => rate.category === 'truck')?.hourly_rate || 0;
+      const excavationRate = result.find(rate => rate.category === 'excavation')?.hourly_rate || 0;
       form.setValue('truckRate', truckRate);
       form.setValue('excavationRate', excavationRate);
+      
+      return result;
     },
   });
 
