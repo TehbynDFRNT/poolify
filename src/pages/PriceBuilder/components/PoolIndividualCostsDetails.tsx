@@ -14,7 +14,6 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     queryFn: async () => {
       console.log("Fetching costs for pool:", poolId);
       
-      // Get the pool costs first
       const { data: poolCosts, error: costsError } = await supabase
         .from("pool_costs")
         .select("*")
@@ -39,47 +38,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
         };
       }
 
-      // Get the pool specifications to get the dig_type_id
-      const { data: poolSpec, error: poolError } = await supabase
-        .from("pool_specifications")
-        .select("dig_type_id")
-        .eq("id", poolCosts.pool_id)
-        .maybeSingle();
-
-      if (poolError) {
-        console.error("Error fetching pool:", poolError);
-        throw poolError;
-      }
-
-      if (!poolSpec?.dig_type_id) {
-        return poolCosts;
-      }
-
-      // Get the dig type details
-      const { data: digType, error: digError } = await supabase
-        .from("excavation_dig_types")
-        .select("*")
-        .eq("id", poolSpec.dig_type_id)
-        .maybeSingle();
-
-      if (digError) {
-        console.error("Error fetching dig type:", digError);
-        throw digError;
-      }
-
-      if (!digType) {
-        return poolCosts;
-      }
-
-      // Calculate excavation cost
-      const excavationCost = 
-        (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
-        (digType.excavation_hourly_rate * digType.excavation_hours);
-
-      return {
-        ...poolCosts,
-        excavation_cost: excavationCost
-      };
+      return poolCosts;
     },
   });
 
