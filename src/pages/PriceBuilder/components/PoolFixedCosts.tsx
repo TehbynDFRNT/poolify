@@ -29,9 +29,9 @@ export const PoolFixedCosts = () => {
   if (isLoading) {
     console.log("Fixed costs loading state:", isLoading);
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Fixed Costs</CardTitle>
+      <Card className="bg-white shadow-sm">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold">Fixed Costs</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -47,13 +47,13 @@ export const PoolFixedCosts = () => {
   console.log("Fixed costs total:", total);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Fixed Costs</CardTitle>
+    <Card className="bg-white shadow-sm">
+      <CardHeader className="pb-4">
+        <CardTitle className="text-lg font-semibold">Fixed Costs</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {fixedCosts?.map((cost) => (
               <div 
                 key={cost.id} 
@@ -62,20 +62,18 @@ export const PoolFixedCosts = () => {
                 <div className="text-sm text-muted-foreground">
                   {cost.name}
                 </div>
-                <div className="text-xl">
+                <div className="text-sm font-medium">
                   {formatCurrency(cost.price)}
                 </div>
               </div>
             ))}
           </div>
 
-          <div className="border-t pt-6 mt-6">
-            <div className="flex justify-between items-center">
-              <div className="text-lg text-muted-foreground">Total Fixed Costs</div>
-              <div className="text-xl text-primary">
-                {formatCurrency(total)}
-              </div>
-            </div>
+          <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg mt-6">
+            <span className="text-sm text-muted-foreground">Total Fixed Costs</span>
+            <span className="text-sm font-medium text-primary">
+              {formatCurrency(total)}
+            </span>
           </div>
         </div>
       </CardContent>
