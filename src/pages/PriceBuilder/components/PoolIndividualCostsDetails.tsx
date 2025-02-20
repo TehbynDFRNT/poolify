@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatCurrency } from "@/utils/format";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PoolIndividualCostsDetailsProps {
   poolId: string;
@@ -14,9 +15,15 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     queryFn: async () => {
       console.log("Fetching costs for pool:", poolId);
       
+      // Get the pool costs first
       const { data: poolCosts, error: costsError } = await supabase
         .from("pool_costs")
-        .select("*")
+        .select(`
+          *,
+          pool:pool_specifications!inner (
+            dig_type:excavation_dig_types!inner (*)
+          )
+        `)
         .eq("pool_id", poolId)
         .maybeSingle();
 
@@ -38,7 +45,17 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
         };
       }
 
-      return poolCosts;
+      // Calculate excavation cost if we have dig type data
+      const digType = poolCosts.pool?.dig_type;
+      const excavationCost = digType ? 
+        (digType.truck_count * digType.truck_hourly_rate * digType.truck_hours) +
+        (digType.excavation_hourly_rate * digType.excavation_hours) 
+        : poolCosts.excavation_cost;
+
+      return {
+        ...poolCosts,
+        excavation_cost: excavationCost
+      };
     },
   });
 
@@ -62,7 +79,18 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div>Loading costs...</div>
+          <div className="space-y-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="flex justify-between items-center">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+            ))}
+            <div className="mt-4 pt-4 border-t flex justify-between items-center">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-24" />
+            </div>
+          </div>
         ) : (
           <div className="space-y-4">
             {costItems.map((item, index) => (
