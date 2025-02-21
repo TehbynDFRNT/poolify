@@ -46,6 +46,11 @@ export interface QuoteFormData {
   // Extra Paving on Existing Concrete
   modification_type: string;
   additional_concrete_work: string;
+  square_meters_existing: number;
+  paving_total_existing: number;
+  laying_total_existing: number;
+  price_total_existing: number;
+  extra_existing_paving_total: number;
 
   // Retaining Walls
   wall_type: string;
