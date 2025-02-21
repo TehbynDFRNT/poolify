@@ -72,4 +72,23 @@ export interface QuoteFormData {
   // Electrical
   electrical_wiring: string;
   additional_power_requirements: string;
+
+  // Extra Paving
+  extra_paving_needed: string;
+  paving_category: string;
+  shallow_end_width: number;
+  deep_end_width: number;
+  side_one_width: number;
+  side_two_width: number;
+  square_meters: number;
+  paving_total: number;
+  laying_total: number;
+  concrete_pump_needed: string;
+  concrete_pump_total: number;
+  diagonal_cuts_meters: number;
+  diagonal_cuts_total: number;
+  round_pool_cuts: number;
+  round_pool_cuts_total: number;
+  under_fence_concrete_type: string;
+  under_fence_concrete_total: number;
 }
