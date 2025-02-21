@@ -1,3 +1,4 @@
+
 import Index from './pages/Index';
 import PoolSpecifications from './pages/PoolSpecifications';
 import ConstructionCosts from './pages/ConstructionCosts';
@@ -6,6 +7,7 @@ import PriceBuilder from './pages/PriceBuilder';
 import NotFound from './pages/NotFound';
 import { Routes, Route } from 'react-router-dom';
 import SalesBuilder from './pages/SalesBuilder';
+import QuoteGeneration from './pages/SalesBuilder/QuoteGeneration';
 
 const App = () => {
   return (
@@ -16,6 +18,7 @@ const App = () => {
       <Route path="/filtration-systems" element={<FiltrationSystems />} />
       <Route path="/price-builder/*" element={<PriceBuilder />} />
       <Route path="/sales-builder" element={<SalesBuilder />} />
+      <Route path="/sales-builder/quotes" element={<QuoteGeneration />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

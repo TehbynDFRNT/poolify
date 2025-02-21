@@ -2,6 +2,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card } from "@/components/ui/card";
 import { Briefcase, FileText, FileSpreadsheet, PenLine } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const SalesBuilder = () => {
   const features = [
@@ -9,16 +10,19 @@ const SalesBuilder = () => {
       title: "Quote Generation",
       description: "Create professional quotes for customers",
       icon: <FileText className="w-6 h-6 text-primary" />,
+      link: "/sales-builder/quotes"
     },
     {
       title: "Proposal Templates",
       description: "Customize and manage proposal templates",
       icon: <FileSpreadsheet className="w-6 h-6 text-primary" />,
+      link: "#"
     },
     {
       title: "Contract Management",
       description: "Handle contracts and agreements",
       icon: <PenLine className="w-6 h-6 text-primary" />,
+      link: "#"
     },
   ];
 
@@ -38,17 +42,19 @@ const SalesBuilder = () => {
 
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title} className="p-6">
-              <div className="flex items-center gap-4">
-                {feature.icon}
-                <div>
-                  <h2 className="text-lg font-semibold">{feature.title}</h2>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
+            <Link key={feature.title} to={feature.link}>
+              <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+                <div className="flex items-center gap-4">
+                  {feature.icon}
+                  <div>
+                    <h2 className="text-lg font-semibold">{feature.title}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {feature.description}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
 
