@@ -1,3 +1,14 @@
+export interface RetainingWall {
+  needed: string;
+  wall_type: string;
+  cladding_style: string;
+  paint_color: string;
+  height_1: number;
+  height_2: number;
+  length: number;
+  square_meters: number;
+  total: number;
+}
 
 export interface QuoteFormData {
   // Core Customer Information
@@ -9,6 +20,16 @@ export interface QuoteFormData {
   pool_color: string;
   coping_type: string;
   base_installation_cost: number;
+
+  // Retaining Walls
+  retaining_walls: {
+    wall_1: RetainingWall;
+    wall_2: RetainingWall;
+    wall_3: RetainingWall;
+    wall_4: RetainingWall;
+    concrete_pump_needed: string;
+    concrete_pump_price: number;
+  };
 
   // Site Costs
   bobcat_runout: string;
