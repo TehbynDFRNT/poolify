@@ -28,10 +28,12 @@ const QuoteGeneration = () => {
 
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Recent Quotes</h2>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            New Quote
-          </Button>
+          <Link to="/sales-builder/quotes/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              New Quote
+            </Button>
+          </Link>
         </div>
 
         <div className="bg-muted/10 rounded-lg p-8 text-center">
@@ -40,10 +42,12 @@ const QuoteGeneration = () => {
           <p className="text-muted-foreground mb-4">
             Get started by creating your first quote
           </p>
-          <Button>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Quote
-          </Button>
+          <Link to="/sales-builder/quotes/new">
+            <Button>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Quote
+            </Button>
+          </Link>
         </div>
       </div>
     </DashboardLayout>

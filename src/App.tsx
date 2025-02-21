@@ -8,6 +8,7 @@ import NotFound from './pages/NotFound';
 import { Routes, Route } from 'react-router-dom';
 import SalesBuilder from './pages/SalesBuilder';
 import QuoteGeneration from './pages/SalesBuilder/QuoteGeneration';
+import NewQuote from './pages/SalesBuilder/NewQuote';
 import BobcatCosts from './pages/ConstructionCosts/BobcatCosts';
 import CraneCosts from './pages/ConstructionCosts/CraneCosts';
 import Excavation from './pages/ConstructionCosts/Excavation';
@@ -31,6 +32,7 @@ const App = () => {
       <Route path="/price-builder/*" element={<PriceBuilder />} />
       <Route path="/sales-builder" element={<SalesBuilder />} />
       <Route path="/sales-builder/quotes" element={<QuoteGeneration />} />
+      <Route path="/sales-builder/quotes/new" element={<NewQuote />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
