@@ -6,6 +6,7 @@ import {
   Construction,
   Database,
   Filter,
+  Briefcase,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -34,6 +35,12 @@ const Index = () => {
       description: "Set up pricing calculations and formulas",
       icon: <Calculator className="w-6 h-6 text-primary" />,
       link: "/price-builder",
+    },
+    {
+      title: "Sales Builder",
+      description: "Create and manage sales documents",
+      icon: <Briefcase className="w-6 h-6 text-primary" />,
+      link: "/sales-builder",
     },
   ];
 
