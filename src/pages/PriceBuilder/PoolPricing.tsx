@@ -1,6 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -8,120 +9,157 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePoolData } from "./hooks/usePoolData";
+import type { PackageWithComponents } from "@/types/filtration";
+import { PoolDetails } from "./components/PoolDetails";
+import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
+import { PoolFixedCosts } from "./components/PoolFixedCosts";
+import { PoolIndividualCostsDetails } from "./components/PoolIndividualCostsDetails";
+import { PoolExcavationCosts } from "./components/PoolExcavationCosts";
+import { PricingSummary } from "./components/PricingSummary";
+import { PoolLineDiagram } from "./components/PoolLineDiagram";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const PoolPricing = () => {
-  const { poolId } = useParams<{ poolId: string }>();
+  const { poolId } = useParams();
   const navigate = useNavigate();
-  
-  if (!poolId) {
-    navigate('/price-builder');
-    return null;
-  }
 
-  const { data: pool, isLoading, error } = usePoolData(poolId);
+  const { data: pool, isLoading: isPoolLoading } = useQuery({
+    queryKey: ["pool-pricing", poolId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_specifications")
+        .select("*")
+        .eq("id", poolId)
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: filtrationPackage, isLoading: isPackageLoading } = useQuery({
+    queryKey: ["filtration-package", pool?.default_filtration_package_id],
+    queryFn: async () => {
+      if (!pool?.default_filtration_package_id) return null;
+
+      const { data, error } = await supabase
+        .from("filtration_packages")
+        .select(`
+          id,
+          name,
+          display_order,
+          light:filtration_components!light_id (
+            id, name, model_number, price
+          ),
+          pump:filtration_components!pump_id (
+            id, name, model_number, price
+          ),
+          sanitiser:filtration_components!sanitiser_id (
+            id, name, model_number, price
+          ),
+          filter:filtration_components!filter_id (
+            id, name, model_number, price
+          ),
+          handover_kit:handover_kit_packages!handover_kit_id (
+            id, 
+            name,
+            components:handover_kit_package_components (
+              id,
+              quantity,
+              package_id,
+              component_id,
+              created_at,
+              component:filtration_components!component_id (
+                id,
+                name,
+                model_number,
+                price
+              )
+            )
+          )
+        `)
+        .eq('id', pool.default_filtration_package_id)
+        .single();
+
+      if (error) throw error;
+      return data as PackageWithComponents;
+    },
+    enabled: !!pool?.default_filtration_package_id,
+  });
+
+  const isLoading = isPoolLoading || isPackageLoading;
 
   if (isLoading) {
     return (
       <DashboardLayout>
         <div className="container mx-auto py-8 space-y-8">
-          <Skeleton className="h-8 w-64" />
-          <Skeleton className="h-64 w-full" />
+          <div className="flex items-center justify-between mb-8">
+            <Skeleton className="h-8 w-64" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <Card className="bg-white shadow-sm">
+            <CardHeader>
+              <Skeleton className="h-8 w-48" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Skeleton className="h-24 w-full" />
+                <Skeleton className="h-24 w-full" />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </DashboardLayout>
     );
   }
 
-  if (error || !pool) {
-    return (
-      <DashboardLayout>
-        <div className="container mx-auto py-8 space-y-4">
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem>
-                <BreadcrumbLink onClick={() => navigate('/')}>Home</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbLink onClick={() => navigate('/price-builder')}>Price Builder</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>Error</BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
-          <Card className="p-6">
-            <p className="text-red-500">Failed to load pool details. Please try again.</p>
-          </Card>
-        </div>
-      </DashboardLayout>
-    );
+  if (!pool) {
+    return <div>Pool not found</div>;
   }
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8 space-y-8">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink onClick={() => navigate('/')}>Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink onClick={() => navigate('/price-builder')}>Price Builder</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>{pool.name}</BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+      <div className="container mx-auto py-8">
+        <div className="flex items-center justify-between mb-8">
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem>
+                <BreadcrumbLink href="/price-builder">Price Builder</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              <BreadcrumbItem className="text-muted-foreground">{pool?.name}</BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+          <Button 
+            variant="outline" 
+            onClick={() => navigate('/price-builder')}
+            className="hover:bg-muted"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Price Builder
+          </Button>
+        </div>
 
-        <div className="grid gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>{pool.name}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid gap-4">
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Range</h3>
-                  <p>{pool.range}</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Dimensions</h3>
-                  <p>{pool.length}m × {pool.width}m</p>
-                </div>
-                
-                <div className="space-y-2">
-                  <h3 className="text-lg font-semibold">Depth</h3>
-                  <p>{pool.depth_shallow}m - {pool.depth_deep}m</p>
-                </div>
-
-                {pool.volume_liters && (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Volume</h3>
-                    <p>{pool.volume_liters.toLocaleString()} L</p>
-                  </div>
-                )}
-
-                {pool.waterline_l_m && (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Waterline</h3>
-                    <p>{pool.waterline_l_m} L/m</p>
-                  </div>
-                )}
-
-                {(pool.buy_price_ex_gst || pool.buy_price_inc_gst) && (
-                  <div className="space-y-2">
-                    <h3 className="text-lg font-semibold">Buy Price</h3>
-                    {pool.buy_price_ex_gst && <p>Ex GST: ${pool.buy_price_ex_gst.toLocaleString()}</p>}
-                    {pool.buy_price_inc_gst && <p>Inc GST: ${pool.buy_price_inc_gst.toLocaleString()}</p>}
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+        <div className="space-y-6">
+          <PoolLineDiagram pool={pool} />
+          <PoolDetails pool={pool} />
+          <FiltrationPackageDetails filtrationPackage={filtrationPackage} />
+          <PoolFixedCosts />
+          <PoolIndividualCostsDetails poolId={pool.id} />
+          <PoolExcavationCosts poolId={pool.id} />
+          <PricingSummary 
+            poolId={pool.id}
+            poolBasePrice={pool.buy_price_inc_gst || 0}
+            filtrationPackage={filtrationPackage}
+          />
         </div>
       </div>
     </DashboardLayout>
