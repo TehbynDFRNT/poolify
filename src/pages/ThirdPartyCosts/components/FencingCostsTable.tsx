@@ -164,7 +164,7 @@ export const FencingCostsTable = ({ isAdding, setIsAdding }: FencingCostsTablePr
                 )}
               </TableCell>
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
     </div>
