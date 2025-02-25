@@ -123,6 +123,33 @@ export type Database = {
         }
         Relationships: []
       }
+      electrical_costs: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          rate: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          display_order?: number
+          id?: string
+          rate?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          rate?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       filtration_component_types: {
         Row: {
           created_at: string
