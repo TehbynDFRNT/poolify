@@ -89,11 +89,10 @@ const PriceBuilder = () => {
                             "transition-colors"
                           )}
                           onClick={(e) => {
-                            if ((e.target as HTMLElement).closest('.margin-cell')) {
-                              e.stopPropagation();
-                              return;
+                            // Only navigate if not clicking margin cell
+                            if (!(e.target as HTMLElement).closest('.margin-cell')) {
+                              navigate(`/price-builder/${pool.id}`);
                             }
-                            navigate(`/price-builder/${pool.id}`);
                           }}
                         >
                           <TableCell className="font-medium">{pool.range}</TableCell>
@@ -104,7 +103,7 @@ const PriceBuilder = () => {
                           <TableCell className="text-right">{formatCurrency(costs.individualCostsTotal)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(costs.excavationCost)}</TableCell>
                           <TableCell className="text-right font-medium">{formatCurrency(costs.total)}</TableCell>
-                          <TableCell className="margin-cell" onClick={e => e.stopPropagation()}>
+                          <TableCell className="margin-cell">
                             <MarginEditorCell
                               poolId={pool.id}
                               margin={margins[pool.id] || 0}

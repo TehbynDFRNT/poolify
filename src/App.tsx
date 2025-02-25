@@ -1,41 +1,42 @@
 
-import Index from './pages/Index';
-import PoolSpecifications from './pages/PoolSpecifications';
-import ConstructionCosts from './pages/ConstructionCosts';
-import FiltrationSystems from './pages/FiltrationSystems';
-import PriceBuilder from './pages/PriceBuilder';
-import NotFound from './pages/NotFound';
-import { Routes, Route } from 'react-router-dom';
-import SalesBuilder from './pages/SalesBuilder';
-import QuoteGeneration from './pages/SalesBuilder/QuoteGeneration';
-import NewQuote from './pages/SalesBuilder/NewQuote';
-import BobcatCosts from './pages/ConstructionCosts/BobcatCosts';
-import CraneCosts from './pages/ConstructionCosts/CraneCosts';
-import Excavation from './pages/ConstructionCosts/Excavation';
-import FixedCosts from './pages/ConstructionCosts/FixedCosts';
-import PavingRetaining from './pages/ConstructionCosts/PavingRetaining';
-import PoolIndividualCosts from './pages/ConstructionCosts/PoolIndividualCosts';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider } from "./components/ThemeProvider";
+import { Toaster } from "@/components/ui/toaster";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const App = () => {
+import Index from "@/pages/Index";
+import PoolSpecifications from "@/pages/PoolSpecifications";
+import FiltrationSystems from "@/pages/FiltrationSystems";
+import ConstructionCosts from "@/pages/ConstructionCosts";
+import PriceBuilder from "@/pages/PriceBuilder";
+import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
+import SalesBuilder from "@/pages/SalesBuilder";
+import NotFound from "@/pages/NotFound";
+
+import "./App.css";
+
+const queryClient = new QueryClient();
+
+function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Index />} />
-      <Route path="/pool-specifications" element={<PoolSpecifications />} />
-      <Route path="/construction-costs" element={<ConstructionCosts />} />
-      <Route path="/construction-costs/excavation" element={<Excavation />} />
-      <Route path="/construction-costs/paving-retaining" element={<PavingRetaining />} />
-      <Route path="/construction-costs/bobcat-costs" element={<BobcatCosts />} />
-      <Route path="/construction-costs/crane-costs" element={<CraneCosts />} />
-      <Route path="/construction-costs/fixed-costs" element={<FixedCosts />} />
-      <Route path="/construction-costs/pool-individual-costs" element={<PoolIndividualCosts />} />
-      <Route path="/filtration-systems" element={<FiltrationSystems />} />
-      <Route path="/price-builder/*" element={<PriceBuilder />} />
-      <Route path="/sales-builder" element={<SalesBuilder />} />
-      <Route path="/sales-builder/quotes" element={<QuoteGeneration />} />
-      <Route path="/sales-builder/quotes/new" element={<NewQuote />} />
-      <Route path="*" element={<NotFound />} />
-    </Routes>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ThemeProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/pool-specifications" element={<PoolSpecifications />} />
+            <Route path="/filtration-systems" element={<FiltrationSystems />} />
+            <Route path="/construction-costs" element={<ConstructionCosts />} />
+            <Route path="/price-builder" element={<PriceBuilder />} />
+            <Route path="/price-builder/:poolId" element={<PoolPricing />} />
+            <Route path="/sales-builder" element={<SalesBuilder />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </ThemeProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
-};
+}
 
 export default App;
