@@ -150,6 +150,33 @@ export type Database = {
         }
         Relationships: []
       }
+      fencing_costs: {
+        Row: {
+          created_at: string
+          display_order: number | null
+          id: string
+          item: string
+          type: string
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          item: string
+          type: string
+          unit_price: number
+        }
+        Update: {
+          created_at?: string
+          display_order?: number | null
+          id?: string
+          item?: string
+          type?: string
+          unit_price?: number
+        }
+        Relationships: []
+      }
       filtration_component_types: {
         Row: {
           created_at: string
