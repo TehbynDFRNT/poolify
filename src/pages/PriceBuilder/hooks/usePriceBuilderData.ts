@@ -69,7 +69,9 @@ export const usePriceBuilderData = () => {
         toast.error("Failed to load pool data");
       }
     },
-    retry: 2
+    retry: 2,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnWindowFocus: false
   });
 
   // Fetch fixed costs
@@ -85,8 +87,10 @@ export const usePriceBuilderData = () => {
         console.error('Error fetching fixed costs:', error);
         throw error;
       }
-      return data;
-    }
+      return data || [];
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false
   });
 
   // Fetch pool costs
@@ -103,12 +107,14 @@ export const usePriceBuilderData = () => {
       }
       
       const costsMap = new Map();
-      data?.forEach(cost => {
+      (data || []).forEach(cost => {
         costsMap.set(cost.pool_id, cost);
       });
       
       return costsMap;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false
   });
 
   // Fetch excavation details
@@ -128,12 +134,14 @@ export const usePriceBuilderData = () => {
       }
 
       const excavationMap = new Map();
-      data?.forEach(match => {
+      (data || []).forEach(match => {
         excavationMap.set(match.pool_id, match.dig_type);
       });
 
       return excavationMap;
-    }
+    },
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false
   });
 
   const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation;
