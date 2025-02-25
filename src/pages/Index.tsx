@@ -6,6 +6,7 @@ import {
   Construction,
   Database,
   Filter,
+  Users,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -22,6 +23,12 @@ const Index = () => {
       description: "Manage construction and installation costs",
       icon: <Construction className="w-6 h-6 text-primary" />,
       link: "/construction-costs",
+    },
+    {
+      title: "Third Party Costs",
+      description: "Manage fencing, electrical and other contractor costs",
+      icon: <Users className="w-6 h-6 text-primary" />,
+      link: "/third-party-costs",
     },
     {
       title: "Filtration Systems",
