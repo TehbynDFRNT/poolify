@@ -6,58 +6,53 @@ import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
 import { toast } from "sonner";
 import { FencingCost } from "../types/fencing";
-import { useFencingCosts } from "../hooks/useFencingCosts";
+import { EditableCell } from "@/components/filtration/components/EditableCell";
 
 interface FencingCostsTableProps {
-  isAdding: boolean;
-  setIsAdding: (value: boolean) => void;
+  costs: FencingCost[];
+  onUpdate: (id: string, updates: Partial<FencingCost>) => void;
+  onAdd: (cost: Omit<FencingCost, 'id' | 'created_at'>) => void;
 }
 
-export const FencingCostsTable = ({ isAdding, setIsAdding }: FencingCostsTableProps) => {
+export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<FencingCost>>({});
-  const { fencingCosts, updateMutation, addMutation } = useFencingCosts();
+  const [isAdding, setIsAdding] = useState(false);
+  const [newCost, setNewCost] = useState<Partial<FencingCost>>({
+    item: '',
+    type: '',
+    unit_price: 0
+  });
 
   const handleEdit = (cost: FencingCost) => {
     setEditingId(cost.id);
     setEditValues({
-      description: cost.description,
-      rate: cost.rate
+      item: cost.item,
+      type: cost.type,
+      unit_price: cost.unit_price
     });
   };
 
   const handleSave = (id: string) => {
-    if (!editValues.description || !editValues.rate) {
-      toast.error('Description and rate are required');
+    if (!editValues.item || !editValues.type || typeof editValues.unit_price !== 'number') {
+      toast.error('All fields are required');
       return;
     }
     
-    updateMutation.mutate({
-      id,
-      updates: editValues
-    });
+    onUpdate(id, editValues);
     setEditingId(null);
     setEditValues({});
   };
 
   const handleAdd = () => {
-    if (!editValues.description || !editValues.rate) {
-      toast.error('Description and rate are required');
+    if (!newCost.item || !newCost.type || typeof newCost.unit_price !== 'number') {
+      toast.error('All fields are required');
       return;
     }
 
-    addMutation.mutate({
-      description: editValues.description,
-      rate: editValues.rate
-    });
+    onAdd(newCost as Omit<FencingCost, 'id' | 'created_at'>);
     setIsAdding(false);
-    setEditValues({});
-  };
-
-  const handleCancel = () => {
-    setEditingId(null);
-    setIsAdding(false);
-    setEditValues({});
+    setNewCost({ item: '', type: '', unit_price: 0 });
   };
 
   return (
@@ -65,8 +60,9 @@ export const FencingCostsTable = ({ isAdding, setIsAdding }: FencingCostsTablePr
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Description</TableHead>
-            <TableHead>Rate</TableHead>
+            <TableHead>Item</TableHead>
+            <TableHead>Type</TableHead>
+            <TableHead>Unit Price ($)</TableHead>
             <TableHead className="w-[100px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -75,98 +71,109 @@ export const FencingCostsTable = ({ isAdding, setIsAdding }: FencingCostsTablePr
             <TableRow>
               <TableCell>
                 <Input
-                  value={editValues.description ?? ''}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Enter description"
-                  className="max-w-sm"
+                  value={newCost.item}
+                  onChange={(e) => setNewCost(prev => ({ ...prev, item: e.target.value }))}
+                  placeholder="Enter item name"
+                />
+              </TableCell>
+              <TableCell>
+                <Input
+                  value={newCost.type}
+                  onChange={(e) => setNewCost(prev => ({ ...prev, type: e.target.value }))}
+                  placeholder="Enter type"
                 />
               </TableCell>
               <TableCell>
                 <Input
                   type="number"
-                  value={editValues.rate ?? ''}
-                  onChange={(e) => setEditValues(prev => ({ ...prev, rate: parseFloat(e.target.value) }))}
-                  placeholder="Enter rate"
-                  className="max-w-[150px]"
+                  value={newCost.unit_price}
+                  onChange={(e) => setNewCost(prev => ({ ...prev, unit_price: parseFloat(e.target.value) }))}
+                  placeholder="Enter unit price"
                 />
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleAdd}
-                  >
-                    Save
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCancel}
-                  >
-                    Cancel
-                  </Button>
+                  <Button variant="ghost" size="sm" onClick={handleAdd}>Save</Button>
+                  <Button variant="ghost" size="sm" onClick={() => setIsAdding(false)}>Cancel</Button>
                 </div>
               </TableCell>
             </TableRow>
           )}
-          {fencingCosts?.map((cost) => (
+          {costs.map((cost) => (
             <TableRow key={cost.id}>
               <TableCell>
-                {editingId === cost.id ? (
-                  <Input
-                    value={editValues.description ?? cost.description}
-                    onChange={(e) => setEditValues(prev => ({ ...prev, description: e.target.value }))}
-                    className="max-w-sm"
-                  />
-                ) : (
-                  cost.description
-                )}
+                <EditableCell
+                  value={editingId === cost.id ? editValues.item || '' : cost.item}
+                  isEditing={editingId === cost.id}
+                  onEdit={() => handleEdit(cost)}
+                  onSave={() => handleSave(cost.id)}
+                  onCancel={() => {
+                    setEditingId(null);
+                    setEditValues({});
+                  }}
+                  onChange={(value) => setEditValues(prev => ({ ...prev, item: value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSave(cost.id);
+                    if (e.key === 'Escape') setEditingId(null);
+                  }}
+                />
               </TableCell>
               <TableCell>
-                {editingId === cost.id ? (
-                  <Input
-                    type="number"
-                    value={editValues.rate ?? cost.rate}
-                    onChange={(e) => setEditValues(prev => ({ ...prev, rate: parseFloat(e.target.value) }))}
-                    className="max-w-[150px]"
-                  />
-                ) : (
-                  formatCurrency(cost.rate)
-                )}
+                <EditableCell
+                  value={editingId === cost.id ? editValues.type || '' : cost.type}
+                  isEditing={editingId === cost.id}
+                  onEdit={() => handleEdit(cost)}
+                  onSave={() => handleSave(cost.id)}
+                  onCancel={() => {
+                    setEditingId(null);
+                    setEditValues({});
+                  }}
+                  onChange={(value) => setEditValues(prev => ({ ...prev, type: value }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSave(cost.id);
+                    if (e.key === 'Escape') setEditingId(null);
+                  }}
+                />
+              </TableCell>
+              <TableCell>
+                <EditableCell
+                  value={editingId === cost.id ? editValues.unit_price?.toString() || '' : formatCurrency(cost.unit_price)}
+                  isEditing={editingId === cost.id}
+                  onEdit={() => handleEdit(cost)}
+                  onSave={() => handleSave(cost.id)}
+                  onCancel={() => {
+                    setEditingId(null);
+                    setEditValues({});
+                  }}
+                  onChange={(value) => setEditValues(prev => ({ ...prev, unit_price: parseFloat(value) }))}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') handleSave(cost.id);
+                    if (e.key === 'Escape') setEditingId(null);
+                  }}
+                  type="number"
+                />
               </TableCell>
               <TableCell>
                 {editingId === cost.id ? (
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleSave(cost.id)}
-                    >
-                      Save
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCancel}
-                    >
-                      Cancel
-                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleSave(cost.id)}>Save</Button>
+                    <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>Cancel</Button>
                   </div>
                 ) : (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleEdit(cost)}
-                  >
-                    Edit
-                  </Button>
+                  <Button variant="ghost" size="sm" onClick={() => handleEdit(cost)}>Edit</Button>
                 )}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      {!isAdding && (
+        <div className="p-4 border-t">
+          <Button variant="outline" onClick={() => setIsAdding(true)}>
+            Add New Fencing Component
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
