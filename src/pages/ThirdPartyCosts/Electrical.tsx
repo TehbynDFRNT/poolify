@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { Zap } from "lucide-react";
+import { Zap, Plus } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -34,6 +34,7 @@ interface ElectricalCost {
 const Electrical = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<ElectricalCost>>({});
+  const [isAdding, setIsAdding] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: electricalCosts, isLoading } = useQuery({
@@ -73,6 +74,32 @@ const Electrical = () => {
     }
   });
 
+  const addMutation = useMutation({
+    mutationFn: async (newCost: Partial<ElectricalCost>) => {
+      const maxOrder = electricalCosts?.reduce((max, cost) => 
+        Math.max(max, cost.display_order), 0) ?? 0;
+
+      const { data, error } = await supabase
+        .from('electrical_costs')
+        .insert([{ ...newCost, display_order: maxOrder + 1 }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['electrical-costs'] });
+      setIsAdding(false);
+      setEditValues({});
+      toast.success('New electrical cost added successfully');
+    },
+    onError: (error) => {
+      toast.error('Failed to add electrical cost');
+      console.error('Add error:', error);
+    }
+  });
+
   const handleEdit = (cost: ElectricalCost) => {
     setEditingId(cost.id);
     setEditValues({
@@ -93,8 +120,21 @@ const Electrical = () => {
     });
   };
 
+  const handleAdd = () => {
+    if (!editValues.description || !editValues.rate) {
+      toast.error('Description and rate are required');
+      return;
+    }
+
+    addMutation.mutate({
+      description: editValues.description,
+      rate: editValues.rate
+    });
+  };
+
   const handleCancel = () => {
     setEditingId(null);
+    setIsAdding(false);
     setEditValues({});
   };
 
@@ -132,7 +172,16 @@ const Electrical = () => {
             <h1 className="text-2xl font-semibold text-gray-900">Electrical Costs</h1>
             <p className="text-gray-500 mt-1">Manage electrical contractor costs and requirements</p>
           </div>
-          <Zap className="h-6 w-6 text-gray-500" />
+          <Button
+            onClick={() => {
+              setIsAdding(true);
+              setEditValues({});
+            }}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add New
+          </Button>
         </div>
 
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
@@ -145,6 +194,45 @@ const Electrical = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {isAdding && (
+                <TableRow>
+                  <TableCell>
+                    <Input
+                      value={editValues.description ?? ''}
+                      onChange={(e) => setEditValues(prev => ({ ...prev, description: e.target.value }))}
+                      placeholder="Enter description"
+                      className="max-w-sm"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <Input
+                      type="number"
+                      value={editValues.rate ?? ''}
+                      onChange={(e) => setEditValues(prev => ({ ...prev, rate: parseFloat(e.target.value) }))}
+                      placeholder="Enter rate"
+                      className="max-w-[150px]"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleAdd}
+                      >
+                        Save
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCancel}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )}
               {electricalCosts?.map((cost) => (
                 <TableRow key={cost.id}>
                   <TableCell>
