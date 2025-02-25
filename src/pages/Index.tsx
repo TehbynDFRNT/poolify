@@ -43,7 +43,11 @@ const Index = () => {
         <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => (
-            <Link key={module.title} to={module.link}>
+            <Link 
+              key={module.title} 
+              to={module.link}
+              className="block"
+            >
               <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-4">
                   {module.icon}

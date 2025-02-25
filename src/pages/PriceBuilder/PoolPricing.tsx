@@ -1,6 +1,6 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import {
   Breadcrumb,
@@ -128,11 +128,11 @@ const PoolPricing = () => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
-                <BreadcrumbLink href="/">Home</BreadcrumbLink>
+                <Link to="/" className="hover:text-foreground transition-colors">Home</Link>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbLink href="/price-builder">Price Builder</BreadcrumbLink>
+                <Link to="/price-builder" className="hover:text-foreground transition-colors">Price Builder</Link>
               </BreadcrumbItem>
               <BreadcrumbSeparator />
               <BreadcrumbItem className="text-muted-foreground">{pool?.name}</BreadcrumbItem>
