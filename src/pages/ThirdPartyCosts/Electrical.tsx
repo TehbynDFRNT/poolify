@@ -60,7 +60,7 @@ const Electrical = () => {
           </Button>
         </div>
 
-        <ElectricalCostsTable />
+        <ElectricalCostsTable isAdding={isAdding} setIsAdding={setIsAdding} />
       </div>
     </DashboardLayout>
   );

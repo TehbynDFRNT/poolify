@@ -8,10 +8,14 @@ import { toast } from "sonner";
 import { ElectricalCost } from "../types/electrical";
 import { useElectricalCosts } from "../hooks/useElectricalCosts";
 
-export const ElectricalCostsTable = () => {
+interface ElectricalCostsTableProps {
+  isAdding: boolean;
+  setIsAdding: (value: boolean) => void;
+}
+
+export const ElectricalCostsTable = ({ isAdding, setIsAdding }: ElectricalCostsTableProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<ElectricalCost>>({});
-  const [isAdding, setIsAdding] = useState(false);
   const { electricalCosts, updateMutation, addMutation } = useElectricalCosts();
 
   const handleEdit = (cost: ElectricalCost) => {
