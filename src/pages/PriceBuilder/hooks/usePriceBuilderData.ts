@@ -11,6 +11,8 @@ export const usePriceBuilderData = () => {
     queryKey: ["pool-specifications"],
     queryFn: async () => {
       try {
+        console.log('Starting price builder data fetch');
+        
         const { data: ranges } = await supabase
           .from("pool_ranges")
           .select("name")
@@ -38,14 +40,25 @@ export const usePriceBuilderData = () => {
             )
           `);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching pools:', error);
+          throw error;
+        }
+
+        if (!poolsData) {
+          console.log('No pool data returned');
+          return [];
+        }
 
         const rangeOrder = ranges?.map(r => r.name) || [];
-        return (poolsData || []).sort((a, b) => {
+        const sortedPools = poolsData.sort((a, b) => {
           const aIndex = rangeOrder.indexOf(a.range);
           const bIndex = rangeOrder.indexOf(b.range);
           return aIndex - bIndex;
         });
+
+        console.log(`Successfully fetched ${sortedPools.length} pools in price builder`);
+        return sortedPools;
       } catch (error) {
         console.error('Error fetching price builder data:', error);
         throw error;
@@ -55,7 +68,8 @@ export const usePriceBuilderData = () => {
       onError: (error: Error) => {
         toast.error("Failed to load pool data");
       }
-    }
+    },
+    retry: 2
   });
 
   // Fetch fixed costs
@@ -67,7 +81,10 @@ export const usePriceBuilderData = () => {
         .select("*")
         .order("display_order");
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching fixed costs:', error);
+        throw error;
+      }
       return data;
     }
   });
@@ -80,7 +97,10 @@ export const usePriceBuilderData = () => {
         .from("pool_costs")
         .select("*");
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching pool costs:', error);
+        throw error;
+      }
       
       const costsMap = new Map();
       data?.forEach(cost => {
@@ -102,7 +122,10 @@ export const usePriceBuilderData = () => {
           dig_type:dig_types (*)
         `);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching excavation details:', error);
+        throw error;
+      }
 
       const excavationMap = new Map();
       data?.forEach(match => {
