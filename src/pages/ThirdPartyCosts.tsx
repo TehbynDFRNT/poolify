@@ -16,6 +16,7 @@ const ThirdPartyCosts = () => {
       description: "Manage electrical contractor costs and requirements",
       icon: <Zap className="h-6 w-6 text-gray-600" />,
       link: "/third-party-costs/electrical",
+      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800",
     },
     {
       title: "Fencing",
@@ -55,15 +56,26 @@ const ThirdPartyCosts = () => {
             <Link 
               key={section.title} 
               to={section.link}
-              className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
             >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-medium text-gray-900">{section.title}</h3>
-                  <p className="text-sm text-gray-500 mt-1">{section.description}</p>
+              {section.image && (
+                <div className="relative h-48 w-full">
+                  <img 
+                    src={section.image} 
+                    alt={section.title}
+                    className="object-cover w-full h-full"
+                  />
                 </div>
-                <div className="bg-gray-50 p-3 rounded-lg">
-                  {section.icon}
+              )}
+              <div className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900">{section.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">{section.description}</p>
+                  </div>
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    {section.icon}
+                  </div>
                 </div>
               </div>
             </Link>
