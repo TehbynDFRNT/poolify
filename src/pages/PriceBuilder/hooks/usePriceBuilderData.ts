@@ -9,42 +9,52 @@ export const usePriceBuilderData = () => {
   const { data: pools, isLoading: isLoadingPools } = useQuery({
     queryKey: ["pool-specifications"],
     queryFn: async () => {
-      const { data: ranges } = await supabase
-        .from("pool_ranges")
-        .select("name")
-        .order("display_order");
+      try {
+        const { data: ranges } = await supabase
+          .from("pool_ranges")
+          .select("name")
+          .order("display_order");
 
-      const { data: poolsData, error } = await supabase
-        .from("pool_specifications")
-        .select(`
-          *,
-          default_filtration_package:filtration_packages!pool_specifications_default_filtration_package_id_fkey (
-            id,
-            name,
-            light:filtration_components!filtration_packages_light_id_fkey (id, name, model_number, price),
-            pump:filtration_components!filtration_packages_pump_id_fkey (id, name, model_number, price),
-            sanitiser:filtration_components!filtration_packages_sanitiser_id_fkey (id, name, model_number, price),
-            filter:filtration_components!filtration_packages_filter_id_fkey (id, name, model_number, price),
-            handover_kit:handover_kit_packages (
+        const { data: poolsData, error } = await supabase
+          .from("pool_specifications")
+          .select(`
+            *,
+            default_filtration_package:filtration_packages!pool_specifications_default_filtration_package_id_fkey (
               id,
               name,
-              components:handover_kit_package_components (
-                quantity,
-                component:filtration_components (id, name, model_number, price)
+              light:filtration_components!filtration_packages_light_id_fkey (id, name, model_number, price),
+              pump:filtration_components!filtration_packages_pump_id_fkey (id, name, model_number, price),
+              sanitiser:filtration_components!filtration_packages_sanitiser_id_fkey (id, name, model_number, price),
+              filter:filtration_components!filtration_packages_filter_id_fkey (id, name, model_number, price),
+              handover_kit:handover_kit_packages (
+                id,
+                name,
+                components:handover_kit_package_components (
+                  quantity,
+                  component:filtration_components (id, name, model_number, price)
+                )
               )
             )
-          )
-        `);
+          `);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      const rangeOrder = ranges?.map(r => r.name) || [];
-      return (poolsData || []).sort((a, b) => {
-        const aIndex = rangeOrder.indexOf(a.range);
-        const bIndex = rangeOrder.indexOf(b.range);
-        return aIndex - bIndex;
-      });
+        const rangeOrder = ranges?.map(r => r.name) || [];
+        return (poolsData || []).sort((a, b) => {
+          const aIndex = rangeOrder.indexOf(a.range);
+          const bIndex = rangeOrder.indexOf(b.range);
+          return aIndex - bIndex;
+        });
+      } catch (error) {
+        console.error('Error fetching price builder data:', error);
+        throw error;
+      }
     },
+    meta: {
+      onError: (error: Error) => {
+        toast.error("Failed to load pool data");
+      }
+    }
   });
 
   // Fetch fixed costs
@@ -58,7 +68,7 @@ export const usePriceBuilderData = () => {
 
       if (error) throw error;
       return data;
-    },
+    }
   });
 
   // Fetch pool costs
@@ -99,7 +109,7 @@ export const usePriceBuilderData = () => {
       });
 
       return excavationMap;
-    },
+    }
   });
 
   const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation;
