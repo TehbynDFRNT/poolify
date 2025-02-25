@@ -19,8 +19,8 @@ const queryClient = new QueryClient();
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <Routes>
             <Route path="/" element={<Index />} />
@@ -34,8 +34,8 @@ function App() {
           </Routes>
           <Toaster />
         </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }
 
