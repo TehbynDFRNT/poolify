@@ -9,6 +9,7 @@ import ThirdPartyCosts from "@/pages/ThirdPartyCosts";
 import FiltrationSystems from "@/pages/FiltrationSystems";
 import PriceBuilder from "@/pages/PriceBuilder";
 import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
+import Electrical from "@/pages/ThirdPartyCosts/Electrical";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/pool-specifications" element={<PoolSpecifications />} />
         <Route path="/construction-costs" element={<ConstructionCosts />} />
         <Route path="/third-party-costs" element={<ThirdPartyCosts />} />
+        <Route path="/third-party-costs/electrical" element={<Electrical />} />
         <Route path="/filtration-systems" element={<FiltrationSystems />} />
         <Route path="/price-builder" element={<PriceBuilder />} />
         <Route path="/price-builder/:poolId" element={<PoolPricing />} />
