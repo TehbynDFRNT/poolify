@@ -31,6 +31,13 @@ interface ElectricalCost {
   display_order: number;
 }
 
+// Define types for insert and update operations
+type ElectricalCostInsert = {
+  description: string;  // Required
+  rate: number;        // Required
+  display_order?: number;
+}
+
 const Electrical = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editValues, setEditValues] = useState<Partial<ElectricalCost>>({});
@@ -76,12 +83,23 @@ const Electrical = () => {
 
   const addMutation = useMutation({
     mutationFn: async (newCost: Partial<ElectricalCost>) => {
+      // Ensure required fields are present
+      if (!newCost.description || !newCost.rate) {
+        throw new Error('Description and rate are required');
+      }
+
       const maxOrder = electricalCosts?.reduce((max, cost) => 
         Math.max(max, cost.display_order), 0) ?? 0;
 
+      const insertData: ElectricalCostInsert = {
+        description: newCost.description,
+        rate: newCost.rate,
+        display_order: maxOrder + 1
+      };
+
       const { data, error } = await supabase
         .from('electrical_costs')
-        .insert([{ ...newCost, display_order: maxOrder + 1 }])
+        .insert(insertData)
         .select()
         .single();
 
