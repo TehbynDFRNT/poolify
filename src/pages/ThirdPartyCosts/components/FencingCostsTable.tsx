@@ -24,7 +24,8 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
     unit_price: 0
   });
 
-  const handleEdit = (cost: FencingCost) => {
+  const handleEdit = (e: React.MouseEvent, cost: FencingCost) => {
+    e.preventDefault();
     setEditingId(cost.id);
     setEditValues({
       item: cost.item,
@@ -33,7 +34,8 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
     });
   };
 
-  const handleSave = (id: string) => {
+  const handleSave = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
     if (!editValues.item || !editValues.type || typeof editValues.unit_price !== 'number') {
       toast.error('All fields are required');
       return;
@@ -44,7 +46,8 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
     setEditValues({});
   };
 
-  const handleAdd = () => {
+  const handleAdd = (e: React.MouseEvent) => {
+    e.preventDefault();
     if (!newCost.item || !newCost.type || typeof newCost.unit_price !== 'number') {
       toast.error('All fields are required');
       return;
@@ -53,6 +56,12 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
     onAdd(newCost as Omit<FencingCost, 'id' | 'created_at'>);
     setIsAdding(false);
     setNewCost({ item: '', type: '', unit_price: 0 });
+  };
+
+  const handleCancel = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setEditingId(null);
+    setEditValues({});
   };
 
   return (
@@ -94,7 +103,16 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Button variant="ghost" size="sm" onClick={handleAdd}>Save</Button>
-                  <Button variant="ghost" size="sm" onClick={() => setIsAdding(false)}>Cancel</Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsAdding(false);
+                    }}
+                  >
+                    Cancel
+                  </Button>
                 </div>
               </TableCell>
             </TableRow>
@@ -105,15 +123,15 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
                 <EditableCell
                   value={editingId === cost.id ? editValues.item || '' : cost.item}
                   isEditing={editingId === cost.id}
-                  onEdit={() => handleEdit(cost)}
-                  onSave={() => handleSave(cost.id)}
+                  onEdit={() => handleEdit(new MouseEvent('click'), cost)}
+                  onSave={() => handleSave(new MouseEvent('click'), cost.id)}
                   onCancel={() => {
                     setEditingId(null);
                     setEditValues({});
                   }}
                   onChange={(value) => setEditValues(prev => ({ ...prev, item: value }))}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSave(cost.id);
+                    if (e.key === 'Enter') handleSave(new MouseEvent('click'), cost.id);
                     if (e.key === 'Escape') setEditingId(null);
                   }}
                 />
@@ -122,15 +140,15 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
                 <EditableCell
                   value={editingId === cost.id ? editValues.type || '' : cost.type}
                   isEditing={editingId === cost.id}
-                  onEdit={() => handleEdit(cost)}
-                  onSave={() => handleSave(cost.id)}
+                  onEdit={() => handleEdit(new MouseEvent('click'), cost)}
+                  onSave={() => handleSave(new MouseEvent('click'), cost.id)}
                   onCancel={() => {
                     setEditingId(null);
                     setEditValues({});
                   }}
                   onChange={(value) => setEditValues(prev => ({ ...prev, type: value }))}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSave(cost.id);
+                    if (e.key === 'Enter') handleSave(new MouseEvent('click'), cost.id);
                     if (e.key === 'Escape') setEditingId(null);
                   }}
                 />
@@ -139,15 +157,15 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
                 <EditableCell
                   value={editingId === cost.id ? editValues.unit_price?.toString() || '' : formatCurrency(cost.unit_price)}
                   isEditing={editingId === cost.id}
-                  onEdit={() => handleEdit(cost)}
-                  onSave={() => handleSave(cost.id)}
+                  onEdit={() => handleEdit(new MouseEvent('click'), cost)}
+                  onSave={() => handleSave(new MouseEvent('click'), cost.id)}
                   onCancel={() => {
                     setEditingId(null);
                     setEditValues({});
                   }}
                   onChange={(value) => setEditValues(prev => ({ ...prev, unit_price: parseFloat(value) }))}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSave(cost.id);
+                    if (e.key === 'Enter') handleSave(new MouseEvent('click'), cost.id);
                     if (e.key === 'Escape') setEditingId(null);
                   }}
                   type="number"
@@ -156,11 +174,29 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
               <TableCell>
                 {editingId === cost.id ? (
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleSave(cost.id)}>Save</Button>
-                    <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>Cancel</Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={(e) => handleSave(e, cost.id)}
+                    >
+                      Save
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleCancel}
+                    >
+                      Cancel
+                    </Button>
                   </div>
                 ) : (
-                  <Button variant="ghost" size="sm" onClick={() => handleEdit(cost)}>Edit</Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={(e) => handleEdit(e, cost)}
+                  >
+                    Edit
+                  </Button>
                 )}
               </TableCell>
             </TableRow>
@@ -169,7 +205,13 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
       </Table>
       {!isAdding && (
         <div className="p-4 border-t">
-          <Button variant="outline" onClick={() => setIsAdding(true)}>
+          <Button 
+            variant="outline" 
+            onClick={(e) => {
+              e.preventDefault();
+              setIsAdding(true);
+            }}
+          >
             Add New Fencing Component
           </Button>
         </div>
