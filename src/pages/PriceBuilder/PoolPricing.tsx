@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbLink,
 } from "@/components/ui/breadcrumb";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePoolData } from "./hooks/usePoolData";
 
@@ -76,20 +76,53 @@ const PoolPricing = () => {
           </BreadcrumbList>
         </Breadcrumb>
 
-        <Card className="p-6">
-          <h1 className="text-2xl font-bold mb-4">{pool.name}</h1>
-          <div className="space-y-4">
-            <div>
-              <span className="font-semibold">Range:</span> {pool.range}
-            </div>
-            <div>
-              <span className="font-semibold">Dimensions:</span> {pool.length}m × {pool.width}m
-            </div>
-            <div>
-              <span className="font-semibold">Depth:</span> {pool.depth_shallow}m - {pool.depth_deep}m
-            </div>
-          </div>
-        </Card>
+        <div className="grid gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>{pool.name}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Range</h3>
+                  <p>{pool.range}</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Dimensions</h3>
+                  <p>{pool.length}m × {pool.width}m</p>
+                </div>
+                
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Depth</h3>
+                  <p>{pool.depth_shallow}m - {pool.depth_deep}m</p>
+                </div>
+
+                {pool.volume_liters && (
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Volume</h3>
+                    <p>{pool.volume_liters.toLocaleString()} L</p>
+                  </div>
+                )}
+
+                {pool.waterline_l_m && (
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Waterline</h3>
+                    <p>{pool.waterline_l_m} L/m</p>
+                  </div>
+                )}
+
+                {(pool.buy_price_ex_gst || pool.buy_price_inc_gst) && (
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-semibold">Buy Price</h3>
+                    {pool.buy_price_ex_gst && <p>Ex GST: ${pool.buy_price_ex_gst.toLocaleString()}</p>}
+                    {pool.buy_price_inc_gst && <p>Inc GST: ${pool.buy_price_inc_gst.toLocaleString()}</p>}
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </DashboardLayout>
   );
