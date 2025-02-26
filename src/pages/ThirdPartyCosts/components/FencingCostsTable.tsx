@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { formatCurrency } from "@/utils/format";
 import { toast } from "sonner";
 import { FencingCost, FENCE_CATEGORIES, FENCE_TYPES, FenceCategory, FenceType } from "../types/fencing";
 import { EditableCell } from "@/components/filtration/components/EditableCell";
+import { Plus } from "lucide-react";
 
 interface FencingCostsTableProps {
   costs: FencingCost[];
@@ -141,16 +143,15 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
 
   return (
     <div className="space-y-4">
-      {!isAdding && (
-        <div className="flex justify-end">
-          <Button 
-            variant="outline" 
-            onClick={() => setIsAdding(true)}
-          >
-            Add New Fencing Component
-          </Button>
-        </div>
-      )}
+      <div className="flex justify-end">
+        <Button 
+          onClick={() => setIsAdding(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add New
+        </Button>
+      </div>
       
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
         <Table>
