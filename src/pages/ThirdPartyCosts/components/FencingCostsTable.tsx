@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -141,140 +140,9 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
   let currentCategory: string | null = null;
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Item</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Unit Price ($)</TableHead>
-            <TableHead className="w-[100px]">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isAdding && renderNewCostRow()}
-          {sortedCosts.map((cost) => {
-            const isNewCategory = currentCategory !== cost.category;
-            currentCategory = cost.category;
-
-            return (
-              <TableRow key={cost.id} className={isNewCategory ? "border-t-2 border-t-gray-200" : ""}>
-                <TableCell>
-                  <EditableCell
-                    value={editingId === cost.id ? editValues.item || '' : cost.item}
-                    isEditing={editingId === cost.id}
-                    onEdit={() => handleEdit(cost)}
-                    onSave={() => handleSave(cost.id)}
-                    onCancel={() => {
-                      setEditingId(null);
-                      setEditValues({});
-                    }}
-                    onChange={(value) => setEditValues(prev => ({ ...prev, item: value }))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSave(cost.id);
-                      if (e.key === 'Escape') setEditingId(null);
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  {editingId === cost.id ? (
-                    <Select 
-                      value={editValues.category || cost.category} 
-                      onValueChange={(value: FenceCategory) => setEditValues(prev => ({ ...prev, category: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FENCE_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <span>{cost.category}</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  {editingId === cost.id ? (
-                    <Select 
-                      value={editValues.type || cost.type} 
-                      onValueChange={(value: FenceType) => setEditValues(prev => ({ ...prev, type: value }))}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {FENCE_TYPES.map((type) => (
-                          <SelectItem key={type} value={type}>
-                            {type}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <span>{cost.type}</span>
-                  )}
-                </TableCell>
-                <TableCell>
-                  <EditableCell
-                    value={editingId === cost.id ? editValues.unit_price?.toString() || '' : formatCurrency(cost.unit_price)}
-                    isEditing={editingId === cost.id}
-                    onEdit={() => handleEdit(cost)}
-                    onSave={() => handleSave(cost.id)}
-                    onCancel={() => {
-                      setEditingId(null);
-                      setEditValues({});
-                    }}
-                    onChange={(value) => setEditValues(prev => ({ ...prev, unit_price: parseFloat(value) }))}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSave(cost.id);
-                      if (e.key === 'Escape') setEditingId(null);
-                    }}
-                    type="number"
-                  />
-                </TableCell>
-                <TableCell>
-                  {editingId === cost.id ? (
-                    <div className="flex items-center gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleSave(cost.id)}
-                      >
-                        Save
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => {
-                          setEditingId(null);
-                          setEditValues({});
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleEdit(cost)}
-                    >
-                      Edit
-                    </Button>
-                  )}
-                </TableCell>
-              </TableRow>
-            );
-          })}
-        </TableBody>
-      </Table>
+    <div className="space-y-4">
       {!isAdding && (
-        <div className="p-4 border-t">
+        <div className="flex justify-end">
           <Button 
             variant="outline" 
             onClick={() => setIsAdding(true)}
@@ -283,6 +151,140 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
           </Button>
         </div>
       )}
+      
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead>Category</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Unit Price ($)</TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isAdding && renderNewCostRow()}
+            {sortedCosts.map((cost) => {
+              const isNewCategory = currentCategory !== cost.category;
+              currentCategory = cost.category;
+
+              return (
+                <TableRow key={cost.id} className={isNewCategory ? "border-t-2 border-t-gray-200" : ""}>
+                  <TableCell>
+                    <EditableCell
+                      value={editingId === cost.id ? editValues.item || '' : cost.item}
+                      isEditing={editingId === cost.id}
+                      onEdit={() => handleEdit(cost)}
+                      onSave={() => handleSave(cost.id)}
+                      onCancel={() => {
+                        setEditingId(null);
+                        setEditValues({});
+                      }}
+                      onChange={(value) => setEditValues(prev => ({ ...prev, item: value }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSave(cost.id);
+                        if (e.key === 'Escape') setEditingId(null);
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {editingId === cost.id ? (
+                      <Select 
+                        value={editValues.category || cost.category} 
+                        onValueChange={(value: FenceCategory) => setEditValues(prev => ({ ...prev, category: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FENCE_CATEGORIES.map((category) => (
+                            <SelectItem key={category} value={category}>
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span>{cost.category}</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === cost.id ? (
+                      <Select 
+                        value={editValues.type || cost.type} 
+                        onValueChange={(value: FenceType) => setEditValues(prev => ({ ...prev, type: value }))}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {FENCE_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <span>{cost.type}</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <EditableCell
+                      value={editingId === cost.id ? editValues.unit_price?.toString() || '' : formatCurrency(cost.unit_price)}
+                      isEditing={editingId === cost.id}
+                      onEdit={() => handleEdit(cost)}
+                      onSave={() => handleSave(cost.id)}
+                      onCancel={() => {
+                        setEditingId(null);
+                        setEditValues({});
+                      }}
+                      onChange={(value) => setEditValues(prev => ({ ...prev, unit_price: parseFloat(value) }))}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSave(cost.id);
+                        if (e.key === 'Escape') setEditingId(null);
+                      }}
+                      type="number"
+                    />
+                  </TableCell>
+                  <TableCell>
+                    {editingId === cost.id ? (
+                      <div className="flex items-center gap-2">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleSave(cost.id)}
+                        >
+                          Save
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => {
+                            setEditingId(null);
+                            setEditValues({});
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleEdit(cost)}
+                      >
+                        Edit
+                      </Button>
+                    )}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 };
