@@ -14,10 +14,18 @@ import { RetainingWall, WALL_TYPES } from "@/types/retaining-wall";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const RetainingWalls = () => {
   const [walls, setWalls] = useState<RetainingWall[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedType, setSelectedType] = useState<string>("");
 
   useEffect(() => {
     fetchWalls();
@@ -61,19 +69,20 @@ const RetainingWalls = () => {
   };
 
   const handleAdd = async () => {
-    // Find the first unused wall type
-    const unusedType = WALL_TYPES.find(type => 
-      !walls.some(wall => wall.type === type)
-    );
+    if (!selectedType) {
+      toast.error("Please select a wall type");
+      return;
+    }
 
-    if (!unusedType) {
-      toast.error("All wall types are already in use");
+    // Check if the wall type already exists
+    if (walls.some(wall => wall.type === selectedType)) {
+      toast.error("This wall type already exists");
       return;
     }
 
     try {
       const newWall = {
-        type: unusedType,
+        type: selectedType,
         rate: 0,
         extra_rate: 0,
         total: 0
@@ -88,12 +97,18 @@ const RetainingWalls = () => {
       if (error) throw error;
 
       setWalls(currentWalls => [...currentWalls, data]);
-      toast.success("New retaining wall added");
+      setSelectedType(""); // Reset selection
+      toast.success("New wall type added");
     } catch (error) {
-      console.error('Error adding retaining wall:', error);
-      toast.error("Failed to add retaining wall");
+      console.error('Error adding wall type:', error);
+      toast.error("Failed to add wall type");
     }
   };
+
+  // Get available wall types (types not already in use)
+  const availableWallTypes = WALL_TYPES.filter(
+    type => !walls.some(wall => wall.type === type)
+  );
 
   if (isLoading) {
     return (
@@ -144,10 +159,24 @@ const RetainingWalls = () => {
             <p className="text-gray-500 mt-1">Manage retaining wall specifications and costs</p>
           </div>
           <div className="flex items-center gap-4">
-            <Button onClick={handleAdd} size="sm">
-              <Plus className="h-4 w-4" />
-              New Wall
-            </Button>
+            <div className="flex items-center gap-2">
+              <Select value={selectedType} onValueChange={setSelectedType}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select wall type" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableWallTypes.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button onClick={handleAdd} size="sm" disabled={!selectedType || availableWallTypes.length === 0}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add Type
+              </Button>
+            </div>
             <Construction className="h-6 w-6 text-gray-500" />
           </div>
         </div>
