@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { FencingCost } from "../types/fencing";
+import { FencingCost, FENCE_CATEGORIES } from "../types/fencing";
 import { NewFencingCostRow } from "./NewFencingCostRow";
 import { FencingCostRow } from "./FencingCostRow";
 

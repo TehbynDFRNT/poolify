@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Menu, Construction, Truck, Shovel, DollarSign } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -51,13 +52,28 @@ const ConstructionCosts = () => {
           </Link>
 
           <Link 
+            to="/construction-costs/retaining-walls" 
+            className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Retaining Walls</h3>
+                <p className="text-sm text-gray-500 mt-1">Manage retaining wall specifications and costs</p>
+              </div>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <Construction className="h-6 w-6 text-gray-600" />
+              </div>
+            </div>
+          </Link>
+
+          <Link 
             to="/construction-costs/paving-retaining" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Paving & Retaining</h3>
-                <p className="text-sm text-gray-500 mt-1">Manage paving and retaining wall costs</p>
+                <h3 className="text-lg font-medium text-gray-900">Paving</h3>
+                <p className="text-sm text-gray-500 mt-1">Manage paving costs</p>
               </div>
               <div className="bg-gray-50 p-3 rounded-lg">
                 <Construction className="h-6 w-6 text-gray-600" />
