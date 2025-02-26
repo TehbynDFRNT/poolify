@@ -152,6 +152,7 @@ export type Database = {
       }
       fencing_costs: {
         Row: {
+          category: string | null
           created_at: string
           display_order: number | null
           id: string
@@ -160,6 +161,7 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          category?: string | null
           created_at?: string
           display_order?: number | null
           id?: string
@@ -168,6 +170,7 @@ export type Database = {
           unit_price: number
         }
         Update: {
+          category?: string | null
           created_at?: string
           display_order?: number | null
           id?: string
@@ -837,7 +840,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      fence_item_type: "Fence (per meter)" | "Gate (per unit)" | "Per meter"
     }
     CompositeTypes: {
       [_ in never]: never

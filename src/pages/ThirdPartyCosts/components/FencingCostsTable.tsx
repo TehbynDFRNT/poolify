@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { formatCurrency } from "@/utils/format";
 import { toast } from "sonner";
-import { FencingCost, FENCE_CATEGORIES, FENCE_TYPES } from "../types/fencing";
+import { FencingCost, FENCE_CATEGORIES, FENCE_TYPES, FenceCategory, FenceType } from "../types/fencing";
 import { EditableCell } from "@/components/filtration/components/EditableCell";
 
 interface FencingCostsTableProps {
@@ -21,7 +21,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
   const [isAdding, setIsAdding] = useState(false);
   const [newCost, setNewCost] = useState<Partial<FencingCost>>({
     item: '',
-    type: '',
+    type: 'Fence (per meter)',
     unit_price: 0,
     category: 'Fencing'
   });
@@ -37,7 +37,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
   };
 
   const handleSave = (id: string) => {
-    if (!editValues.item || !editValues.type || typeof editValues.unit_price !== 'number') {
+    if (!editValues.item || !editValues.type || typeof editValues.unit_price !== 'number' || !editValues.category) {
       toast.error('All fields are required');
       return;
     }
@@ -55,7 +55,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
 
     onAdd(newCost as Omit<FencingCost, 'id' | 'created_at'>);
     setIsAdding(false);
-    setNewCost({ item: '', type: '', unit_price: 0, category: 'Fencing' });
+    setNewCost({ item: '', type: 'Fence (per meter)', unit_price: 0, category: 'Fencing' });
   };
 
   const sortedCosts = [...costs].sort((a, b) => {
@@ -84,7 +84,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
       <TableCell>
         <Select 
           value={newCost.category} 
-          onValueChange={(value) => setNewCost(prev => ({ ...prev, category: value }))}
+          onValueChange={(value: FenceCategory) => setNewCost(prev => ({ ...prev, category: value }))}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select category" />
@@ -101,7 +101,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
       <TableCell>
         <Select 
           value={newCost.type} 
-          onValueChange={(value) => setNewCost(prev => ({ ...prev, type: value }))}
+          onValueChange={(value: FenceType) => setNewCost(prev => ({ ...prev, type: value }))}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select type" />
@@ -181,7 +181,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
                   {editingId === cost.id ? (
                     <Select 
                       value={editValues.category || cost.category} 
-                      onValueChange={(value) => setEditValues(prev => ({ ...prev, category: value }))}
+                      onValueChange={(value: FenceCategory) => setEditValues(prev => ({ ...prev, category: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -202,7 +202,7 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
                   {editingId === cost.id ? (
                     <Select 
                       value={editValues.type || cost.type} 
-                      onValueChange={(value) => setEditValues(prev => ({ ...prev, type: value }))}
+                      onValueChange={(value: FenceType) => setEditValues(prev => ({ ...prev, type: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
