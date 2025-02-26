@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { Construction } from "lucide-react";
+import { Construction, Plus } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -10,9 +10,10 @@ import {
 } from "@/components/ui/breadcrumb";
 import { RetainingWallsTable } from "@/components/retaining-walls/RetainingWallsTable";
 import { useState, useEffect } from "react";
-import { RetainingWall } from "@/types/retaining-wall";
+import { RetainingWall, WALL_TYPES } from "@/types/retaining-wall";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const RetainingWalls = () => {
   const [walls, setWalls] = useState<RetainingWall[]>([]);
@@ -56,6 +57,41 @@ const RetainingWalls = () => {
     } catch (error) {
       console.error('Error updating retaining wall:', error);
       toast.error("Failed to update retaining wall");
+    }
+  };
+
+  const handleAdd = async () => {
+    // Find the first unused wall type
+    const unusedType = WALL_TYPES.find(type => 
+      !walls.some(wall => wall.type === type)
+    );
+
+    if (!unusedType) {
+      toast.error("All wall types are already in use");
+      return;
+    }
+
+    try {
+      const newWall = {
+        type: unusedType,
+        rate: 0,
+        extra_rate: 0,
+        total: 0
+      };
+
+      const { data, error } = await supabase
+        .from('retaining_walls')
+        .insert([newWall])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setWalls(currentWalls => [...currentWalls, data]);
+      toast.success("New retaining wall added");
+    } catch (error) {
+      console.error('Error adding retaining wall:', error);
+      toast.error("Failed to add retaining wall");
     }
   };
 
@@ -107,7 +143,13 @@ const RetainingWalls = () => {
             <h1 className="text-2xl font-semibold text-gray-900">Retaining Walls</h1>
             <p className="text-gray-500 mt-1">Manage retaining wall specifications and costs</p>
           </div>
-          <Construction className="h-6 w-6 text-gray-500" />
+          <div className="flex items-center gap-4">
+            <Button onClick={handleAdd} size="sm">
+              <Plus className="h-4 w-4" />
+              New Wall
+            </Button>
+            <Construction className="h-6 w-6 text-gray-500" />
+          </div>
         </div>
 
         <RetainingWallsTable walls={walls} onUpdate={handleUpdate} />
