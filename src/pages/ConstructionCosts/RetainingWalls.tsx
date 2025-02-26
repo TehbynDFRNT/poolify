@@ -9,29 +9,44 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { RetainingWallsTable } from "@/components/retaining-walls/RetainingWallsTable";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { RetainingWall } from "@/types/retaining-wall";
 import { toast } from "sonner";
-
-const initialWalls: RetainingWall[] = [
-  { id: "1", type: "Block Wall - Clad", rate: 400, extra_rate: 200, total: 600 },
-  { id: "2", type: "Block Wall - Finished Block Work", rate: 500, extra_rate: 0, total: 500 },
-  { id: "3", type: "Block Wall - Finished Block Work & Painted", rate: 400, extra_rate: 40, total: 440 },
-  { id: "4", type: "Block Wall - Rendered", rate: 400, extra_rate: 100, total: 500 },
-  { id: "5", type: "Block Wall - Rendered & Painted", rate: 400, extra_rate: 140, total: 540 },
-  { id: "6", type: "Drop Edge - Clad", rate: 400, extra_rate: 200, total: 600 },
-  { id: "7", type: "Drop Edge - Render", rate: 400, extra_rate: 100, total: 500 },
-  { id: "8", type: "Drop Edge - Render & Painted", rate: 400, extra_rate: 140, total: 540 },
-  { id: "9", type: "Drop Edge - Strip Finish", rate: 400, extra_rate: 0, total: 400 },
-  { id: "10", type: "Drop Edge - Strip Finish & Painted", rate: 400, extra_rate: 40, total: 440 },
-  { id: "11", type: "Timber", rate: 400, extra_rate: 0, total: 400 }
-];
+import { supabase } from "@/integrations/supabase/client";
 
 const RetainingWalls = () => {
-  const [walls, setWalls] = useState<RetainingWall[]>(initialWalls);
+  const [walls, setWalls] = useState<RetainingWall[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchWalls();
+  }, []);
+
+  const fetchWalls = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('retaining_walls')
+        .select('*');
+
+      if (error) throw error;
+      setWalls(data);
+    } catch (error) {
+      console.error('Error fetching retaining walls:', error);
+      toast.error("Failed to load retaining walls");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleUpdate = async (id: string, updates: Partial<RetainingWall>) => {
     try {
+      const { error } = await supabase
+        .from('retaining_walls')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) throw error;
+
       setWalls(currentWalls => 
         currentWalls.map(wall => 
           wall.id === id ? { ...wall, ...updates } : wall
@@ -43,6 +58,24 @@ const RetainingWalls = () => {
       toast.error("Failed to update retaining wall");
     }
   };
+
+  if (isLoading) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-7xl mx-auto p-6">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-10 bg-gray-200 rounded"></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>

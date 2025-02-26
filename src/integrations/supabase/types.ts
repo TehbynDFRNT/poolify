@@ -781,6 +781,36 @@ export type Database = {
         }
         Relationships: []
       }
+      retaining_walls: {
+        Row: {
+          created_at: string
+          extra_rate: number
+          id: string
+          rate: number
+          total: number
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          extra_rate?: number
+          id?: string
+          rate?: number
+          total?: number
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          extra_rate?: number
+          id?: string
+          rate?: number
+          total?: number
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       traffic_control_costs: {
         Row: {
           created_at: string
