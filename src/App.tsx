@@ -11,6 +11,7 @@ import PriceBuilder from "@/pages/PriceBuilder";
 import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
 import Electrical from "@/pages/ThirdPartyCosts/Electrical";
 import Fencing from "@/pages/ThirdPartyCosts/Fencing";
+import RetainingWalls from "@/pages/ConstructionCosts/RetainingWalls";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/" element={<Index />} />
         <Route path="/pool-specifications" element={<PoolSpecifications />} />
         <Route path="/construction-costs" element={<ConstructionCosts />} />
+        <Route path="/construction-costs/retaining-walls" element={<RetainingWalls />} />
         <Route path="/third-party-costs" element={<ThirdPartyCosts />} />
         <Route path="/third-party-costs/electrical" element={<Electrical />} />
         <Route path="/third-party-costs/fencing" element={<Fencing />} />
