@@ -8,8 +8,42 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { RetainingWallsTable } from "@/components/retaining-walls/RetainingWallsTable";
+import { useState } from "react";
+import { RetainingWall } from "@/types/retaining-wall";
+import { toast } from "sonner";
+
+const initialWalls: RetainingWall[] = [
+  { id: "1", type: "Block Wall - Clad", rate: 400, extra_rate: 200, total: 600 },
+  { id: "2", type: "Block Wall - Finished Block Work", rate: 500, extra_rate: 0, total: 500 },
+  { id: "3", type: "Block Wall - Finished Block Work & Painted", rate: 400, extra_rate: 40, total: 440 },
+  { id: "4", type: "Block Wall - Rendered", rate: 400, extra_rate: 100, total: 500 },
+  { id: "5", type: "Block Wall - Rendered & Painted", rate: 400, extra_rate: 140, total: 540 },
+  { id: "6", type: "Drop Edge - Clad", rate: 400, extra_rate: 200, total: 600 },
+  { id: "7", type: "Drop Edge - Render", rate: 400, extra_rate: 100, total: 500 },
+  { id: "8", type: "Drop Edge - Render & Painted", rate: 400, extra_rate: 140, total: 540 },
+  { id: "9", type: "Drop Edge - Strip Finish", rate: 400, extra_rate: 0, total: 400 },
+  { id: "10", type: "Drop Edge - Strip Finish & Painted", rate: 400, extra_rate: 40, total: 440 },
+  { id: "11", type: "Timber", rate: 400, extra_rate: 0, total: 400 }
+];
 
 const RetainingWalls = () => {
+  const [walls, setWalls] = useState<RetainingWall[]>(initialWalls);
+
+  const handleUpdate = async (id: string, updates: Partial<RetainingWall>) => {
+    try {
+      setWalls(currentWalls => 
+        currentWalls.map(wall => 
+          wall.id === id ? { ...wall, ...updates } : wall
+        )
+      );
+      toast.success("Retaining wall updated successfully");
+    } catch (error) {
+      console.error('Error updating retaining wall:', error);
+      toast.error("Failed to update retaining wall");
+    }
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto p-6">
@@ -43,13 +77,7 @@ const RetainingWalls = () => {
           <Construction className="h-6 w-6 text-gray-500" />
         </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-          <div className="text-center py-12">
-            <Construction className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-semibold text-gray-900">No retaining walls configured</h3>
-            <p className="mt-1 text-sm text-gray-500">Get started by adding your first retaining wall configuration.</p>
-          </div>
-        </div>
+        <RetainingWallsTable walls={walls} onUpdate={handleUpdate} />
       </div>
     </DashboardLayout>
   );
