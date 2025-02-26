@@ -2,13 +2,11 @@
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { formatCurrency } from "@/utils/format";
-import { toast } from "sonner";
-import { FencingCost, FENCE_CATEGORIES, FENCE_TYPES, FenceCategory, FenceType } from "../types/fencing";
-import { EditableCell } from "@/components/filtration/components/EditableCell";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import { FencingCost } from "../types/fencing";
+import { NewFencingCostRow } from "./NewFencingCostRow";
+import { FencingCostRow } from "./FencingCostRow";
 
 interface FencingCostsTableProps {
   costs: FencingCost[];
@@ -60,84 +58,15 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
   };
 
   const sortedCosts = [...costs].sort((a, b) => {
-    // First sort by category
     const categoryOrder = FENCE_CATEGORIES.indexOf(a.category) - FENCE_CATEGORIES.indexOf(b.category);
     if (categoryOrder !== 0) return categoryOrder;
     
-    // Then by display_order if it exists
     if (a.display_order !== undefined && b.display_order !== undefined) {
       return a.display_order - b.display_order;
     }
     
-    // Finally by item name
     return a.item.localeCompare(b.item);
   });
-
-  const renderNewCostRow = () => (
-    <TableRow>
-      <TableCell>
-        <Input
-          value={newCost.item}
-          onChange={(e) => setNewCost(prev => ({ ...prev, item: e.target.value }))}
-          placeholder="Enter item name"
-        />
-      </TableCell>
-      <TableCell>
-        <Select 
-          value={newCost.category} 
-          onValueChange={(value: FenceCategory) => setNewCost(prev => ({ ...prev, category: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select category" />
-          </SelectTrigger>
-          <SelectContent>
-            {FENCE_CATEGORIES.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </TableCell>
-      <TableCell>
-        <Select 
-          value={newCost.type} 
-          onValueChange={(value: FenceType) => setNewCost(prev => ({ ...prev, type: value }))}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select type" />
-          </SelectTrigger>
-          <SelectContent>
-            {FENCE_TYPES.map((type) => (
-              <SelectItem key={type} value={type}>
-                {type}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </TableCell>
-      <TableCell>
-        <Input
-          type="number"
-          value={newCost.unit_price}
-          onChange={(e) => setNewCost(prev => ({ ...prev, unit_price: parseFloat(e.target.value) }))}
-          placeholder="Enter unit price"
-        />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleAdd}>Save</Button>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => setIsAdding(false)}
-          >
-            Cancel
-          </Button>
-        </div>
-      </TableCell>
-    </TableRow>
-  );
 
   let currentCategory: string | null = null;
 
@@ -165,122 +94,33 @@ export const FencingCostsTable = ({ costs, onUpdate, onAdd }: FencingCostsTableP
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isAdding && renderNewCostRow()}
+            {isAdding && (
+              <NewFencingCostRow
+                newCost={newCost}
+                onNewCostChange={(updates) => setNewCost(prev => ({ ...prev, ...updates }))}
+                onSave={handleAdd}
+                onCancel={() => setIsAdding(false)}
+              />
+            )}
             {sortedCosts.map((cost) => {
               const isNewCategory = currentCategory !== cost.category;
               currentCategory = cost.category;
 
               return (
-                <TableRow key={cost.id} className={isNewCategory ? "border-t-2 border-t-gray-200" : ""}>
-                  <TableCell>
-                    <EditableCell
-                      value={editingId === cost.id ? editValues.item || '' : cost.item}
-                      isEditing={editingId === cost.id}
-                      onEdit={() => handleEdit(cost)}
-                      onSave={() => handleSave(cost.id)}
-                      onCancel={() => {
-                        setEditingId(null);
-                        setEditValues({});
-                      }}
-                      onChange={(value) => setEditValues(prev => ({ ...prev, item: value }))}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSave(cost.id);
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {editingId === cost.id ? (
-                      <Select 
-                        value={editValues.category || cost.category} 
-                        onValueChange={(value: FenceCategory) => setEditValues(prev => ({ ...prev, category: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FENCE_CATEGORIES.map((category) => (
-                            <SelectItem key={category} value={category}>
-                              {category}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <span>{cost.category}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    {editingId === cost.id ? (
-                      <Select 
-                        value={editValues.type || cost.type} 
-                        onValueChange={(value: FenceType) => setEditValues(prev => ({ ...prev, type: value }))}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {FENCE_TYPES.map((type) => (
-                            <SelectItem key={type} value={type}>
-                              {type}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    ) : (
-                      <span>{cost.type}</span>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <EditableCell
-                      value={editingId === cost.id ? editValues.unit_price?.toString() || '' : formatCurrency(cost.unit_price)}
-                      isEditing={editingId === cost.id}
-                      onEdit={() => handleEdit(cost)}
-                      onSave={() => handleSave(cost.id)}
-                      onCancel={() => {
-                        setEditingId(null);
-                        setEditValues({});
-                      }}
-                      onChange={(value) => setEditValues(prev => ({ ...prev, unit_price: parseFloat(value) }))}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') handleSave(cost.id);
-                        if (e.key === 'Escape') setEditingId(null);
-                      }}
-                      type="number"
-                    />
-                  </TableCell>
-                  <TableCell>
-                    {editingId === cost.id ? (
-                      <div className="flex items-center gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => handleSave(cost.id)}
-                        >
-                          Save
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          onClick={() => {
-                            setEditingId(null);
-                            setEditValues({});
-                          }}
-                        >
-                          Cancel
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleEdit(cost)}
-                      >
-                        Edit
-                      </Button>
-                    )}
-                  </TableCell>
-                </TableRow>
+                <FencingCostRow
+                  key={cost.id}
+                  cost={cost}
+                  isEditing={editingId === cost.id}
+                  editValues={editValues}
+                  isNewCategory={isNewCategory}
+                  onEdit={() => handleEdit(cost)}
+                  onSave={() => handleSave(cost.id)}
+                  onCancel={() => {
+                    setEditingId(null);
+                    setEditValues({});
+                  }}
+                  onEditValueChange={(updates) => setEditValues(prev => ({ ...prev, ...updates }))}
+                />
               );
             })}
           </TableBody>
