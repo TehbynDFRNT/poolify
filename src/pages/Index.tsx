@@ -29,6 +29,7 @@ const Index = () => {
       description: "Manage fencing, electrical and other contractor costs",
       icon: <Users className="w-6 h-6 text-primary" />,
       link: "/third-party-costs",
+      className: "lg:col-span-1", // Ensure it takes up one column space
     },
     {
       title: "Filtration Systems",
@@ -53,9 +54,9 @@ const Index = () => {
             <Link 
               key={module.title} 
               to={module.link}
-              className="block"
+              className={`block ${module.className || ''}`}
             >
-              <Card className="p-6 hover:bg-gray-50 transition-colors cursor-pointer">
+              <Card className="h-full p-6 hover:bg-gray-50 transition-colors cursor-pointer">
                 <div className="flex items-center gap-4">
                   {module.icon}
                   <div>
