@@ -1,7 +1,16 @@
 
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Calculator, Database, Construction, Filter, ChevronLeft, ChevronRight, Briefcase } from "lucide-react";
+import { 
+  Home, 
+  Calculator, 
+  Database, 
+  Construction, 
+  Filter, 
+  ChevronLeft, 
+  ChevronRight, 
+  Users 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
 
@@ -37,9 +46,9 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     { icon: <Home className="h-5 w-5" />, label: "Dashboard", path: "/" },
     { icon: <Database className="h-5 w-5" />, label: "Pool Specifications", path: "/pool-specifications" },
     { icon: <Construction className="h-5 w-5" />, label: "Construction Costs", path: "/construction-costs" },
+    { icon: <Users className="h-5 w-5" />, label: "Third Party Costs", path: "/third-party-costs" },
     { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems" },
     { icon: <Calculator className="h-5 w-5" />, label: "Price Builder", path: "/price-builder" },
-    { icon: <Briefcase className="h-5 w-5" />, label: "Sales Builder", path: "/sales-builder" },
   ];
 
   return (
