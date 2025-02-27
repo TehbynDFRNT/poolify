@@ -12,6 +12,12 @@ import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
 import Electrical from "@/pages/ThirdPartyCosts/Electrical";
 import Fencing from "@/pages/ThirdPartyCosts/Fencing";
 import RetainingWalls from "@/pages/ConstructionCosts/RetainingWalls";
+import BobcatCosts from "@/pages/ConstructionCosts/BobcatCosts";
+import CraneCosts from "@/pages/ConstructionCosts/CraneCosts";
+import Excavation from "@/pages/ConstructionCosts/Excavation";
+import FixedCosts from "@/pages/ConstructionCosts/FixedCosts";
+import PavingRetaining from "@/pages/ConstructionCosts/PavingRetaining";
+import PoolIndividualCosts from "@/pages/ConstructionCosts/PoolIndividualCosts";
 
 function App() {
   return (
@@ -21,6 +27,12 @@ function App() {
         <Route path="/pool-specifications" element={<PoolSpecifications />} />
         <Route path="/construction-costs" element={<ConstructionCosts />} />
         <Route path="/construction-costs/retaining-walls" element={<RetainingWalls />} />
+        <Route path="/construction-costs/bobcat-costs" element={<BobcatCosts />} />
+        <Route path="/construction-costs/crane-costs" element={<CraneCosts />} />
+        <Route path="/construction-costs/excavation" element={<Excavation />} />
+        <Route path="/construction-costs/fixed-costs" element={<FixedCosts />} />
+        <Route path="/construction-costs/paving-retaining" element={<PavingRetaining />} />
+        <Route path="/construction-costs/pool-individual-costs" element={<PoolIndividualCosts />} />
         <Route path="/third-party-costs" element={<ThirdPartyCosts />} />
         <Route path="/third-party-costs/electrical" element={<Electrical />} />
         <Route path="/third-party-costs/fencing" element={<Fencing />} />
