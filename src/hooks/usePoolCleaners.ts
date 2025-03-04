@@ -11,25 +11,25 @@ export const usePoolCleaners = () => {
     queryKey: ['pool-cleaners'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('pool_cleaners')
+        .from('pool_cleaners' as any)
         .select('*')
         .order('model_number');
       
       if (error) throw error;
-      return data ?? [];
+      return data as PoolCleaner[];
     },
   });
 
   const addMutation = useMutation({
     mutationFn: async (newCleaner: Omit<PoolCleaner, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
-        .from('pool_cleaners')
+        .from('pool_cleaners' as any)
         .insert([newCleaner])
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as PoolCleaner;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -44,14 +44,14 @@ export const usePoolCleaners = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<PoolCleaner> }) => {
       const { data, error } = await supabase
-        .from('pool_cleaners')
+        .from('pool_cleaners' as any)
         .update(updates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data;
+      return data as PoolCleaner;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -66,7 +66,7 @@ export const usePoolCleaners = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('pool_cleaners')
+        .from('pool_cleaners' as any)
         .delete()
         .eq('id', id);
 

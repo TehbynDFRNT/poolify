@@ -455,6 +455,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_cleaners: {
+        Row: {
+          created_at: string
+          id: string
+          margin: number
+          model_number: string
+          name: string
+          price: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          margin: number
+          model_number: string
+          name: string
+          price: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          margin?: number
+          model_number?: string
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       pool_costs: {
         Row: {
           beam: number
