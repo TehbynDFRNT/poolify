@@ -4,6 +4,7 @@ export interface PoolCleaner {
   model_number: string;
   name: string;
   price: number;
+  cost_price: number;
   margin: number;
   created_at: string;
 }

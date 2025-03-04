@@ -24,6 +24,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
     model_number: "",
     name: "",
     price: "",
+    cost_price: "",
     margin: "30", // Default margin
   });
 
@@ -31,7 +32,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!formData.model_number || !formData.name || !formData.price) {
+    if (!formData.model_number || !formData.name || !formData.price || !formData.cost_price) {
       toast.error("Please fill in all required fields");
       setIsSubmitting(false);
       return;
@@ -42,6 +43,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
         model_number: formData.model_number,
         name: formData.name,
         price: parseFloat(formData.price),
+        cost_price: parseFloat(formData.cost_price),
         margin: parseFloat(formData.margin || "30"),
       });
 
@@ -50,6 +52,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
         model_number: "",
         name: "",
         price: "",
+        cost_price: "",
         margin: "30",
       });
       onOpenChange(false);
@@ -103,6 +106,19 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
               type="number"
               step="0.01"
               value={formData.price}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="cost_price">Cost Price ($) *</Label>
+            <Input
+              id="cost_price"
+              name="cost_price"
+              type="number"
+              step="0.01"
+              value={formData.cost_price}
               onChange={handleChange}
               required
             />

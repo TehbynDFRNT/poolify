@@ -38,6 +38,7 @@ export const PoolCleanersTable = () => {
             model_number: cleaner.model_number,
             name: cleaner.name,
             price: cleaner.price,
+            cost_price: cleaner.cost_price,
             margin: cleaner.margin,
           },
         }));
@@ -59,7 +60,7 @@ export const PoolCleanersTable = () => {
     const updates: Partial<PoolCleaner> = {};
     
     if (editValues[id] && editValues[id][field] !== undefined) {
-      if (field === 'price' || field === 'margin') {
+      if (field === 'price' || field === 'margin' || field === 'cost_price') {
         updates[field] = parseFloat(editValues[id][field]);
       } else {
         updates[field] = editValues[id][field];
@@ -115,6 +116,7 @@ export const PoolCleanersTable = () => {
               <TableHead>Model Number</TableHead>
               <TableHead>Name</TableHead>
               <TableHead className="text-right">RRP ($)</TableHead>
+              <TableHead className="text-right">Cost Price ($)</TableHead>
               <TableHead className="text-right">Margin (%)</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>
@@ -122,7 +124,7 @@ export const PoolCleanersTable = () => {
           <TableBody>
             {poolCleaners?.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-6">
+                <TableCell colSpan={6} className="text-center py-6">
                   No pool cleaners found. Add your first one!
                 </TableCell>
               </TableRow>
@@ -168,6 +170,21 @@ export const PoolCleanersTable = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <EditableCell
+                      value={editValues[cleaner.id]?.cost_price || cleaner.cost_price}
+                      isEditing={editingCells[cleaner.id]?.cost_price || false}
+                      onEdit={() => handleEditStart(cleaner.id, "cost_price")}
+                      onSave={() => handleEditSave(cleaner.id, "cost_price")}
+                      onCancel={() => handleEditCancel(cleaner.id, "cost_price")}
+                      onChange={(value) => handleEditChange(cleaner.id, "cost_price", value)}
+                      onKeyDown={(e) => handleEditKeyDown(e, cleaner.id, "cost_price")}
+                      type="number"
+                      align="right"
+                      format={formatCurrency}
+                      step="0.01"
+                    />
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <EditableCell
                       value={editValues[cleaner.id]?.margin || cleaner.margin}
                       isEditing={editingCells[cleaner.id]?.margin || false}
                       onEdit={() => handleEditStart(cleaner.id, "margin")}
@@ -201,4 +218,4 @@ export const PoolCleanersTable = () => {
       <AddPoolCleanerForm open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   );
-};
+}

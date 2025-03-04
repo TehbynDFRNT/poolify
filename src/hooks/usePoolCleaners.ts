@@ -16,7 +16,7 @@ export const usePoolCleaners = () => {
         .order('model_number');
       
       if (error) throw error;
-      return data as PoolCleaner[];
+      return data as unknown as PoolCleaner[];
     },
   });
 
@@ -29,7 +29,7 @@ export const usePoolCleaners = () => {
         .single();
 
       if (error) throw error;
-      return data as PoolCleaner;
+      return data as unknown as PoolCleaner;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -51,7 +51,7 @@ export const usePoolCleaners = () => {
         .single();
 
       if (error) throw error;
-      return data as PoolCleaner;
+      return data as unknown as PoolCleaner;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
