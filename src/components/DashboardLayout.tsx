@@ -9,7 +9,8 @@ import {
   Filter, 
   ChevronLeft, 
   ChevronRight, 
-  Users 
+  Users,
+  PlusCircle 
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "./ui/button";
@@ -48,6 +49,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
     { icon: <Construction className="h-5 w-5" />, label: "Construction Costs", path: "/construction-costs" },
     { icon: <Users className="h-5 w-5" />, label: "Third Party Costs", path: "/third-party-costs" },
     { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems" },
+    { icon: <PlusCircle className="h-5 w-5" />, label: "Add-Ons", path: "/add-ons" },
     { icon: <Calculator className="h-5 w-5" />, label: "Price Builder", path: "/price-builder" },
   ];
 

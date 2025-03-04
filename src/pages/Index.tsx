@@ -7,6 +7,7 @@ import {
   Database,
   Filter,
   Users,
+  PlusCircle,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -36,6 +37,12 @@ const Index = () => {
       description: "Configure filtration systems and components",
       icon: <Filter className="w-6 h-6 text-primary" />,
       link: "/filtration-systems",
+    },
+    {
+      title: "Add-Ons",
+      description: "Manage pool add-ons and optional features",
+      icon: <PlusCircle className="w-6 h-6 text-primary" />,
+      link: "/add-ons",
     },
     {
       title: "Price Builder",

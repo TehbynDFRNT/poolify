@@ -18,6 +18,7 @@ import Excavation from "@/pages/ConstructionCosts/Excavation";
 import FixedCosts from "@/pages/ConstructionCosts/FixedCosts";
 import PavingRetaining from "@/pages/ConstructionCosts/PavingRetaining";
 import PoolIndividualCosts from "@/pages/ConstructionCosts/PoolIndividualCosts";
+import AddOns from "@/pages/AddOns";
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
         <Route path="/third-party-costs/electrical" element={<Electrical />} />
         <Route path="/third-party-costs/fencing" element={<Fencing />} />
         <Route path="/filtration-systems" element={<FiltrationSystems />} />
+        <Route path="/add-ons" element={<AddOns />} />
         <Route path="/price-builder" element={<PriceBuilder />} />
         <Route path="/price-builder/:poolId" element={<PoolPricing />} />
         <Route path="*" element={<NotFound />} />
