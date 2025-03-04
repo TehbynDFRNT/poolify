@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scroll, Bath } from "lucide-react";
+import { PoolCleanersTable } from "./AddOns/components/PoolCleanersTable";
 
 const AddOns = () => {
   return (
@@ -49,14 +50,7 @@ const AddOns = () => {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="bg-gray-50 p-6 rounded-md text-center">
-                  <p className="text-lg text-muted-foreground mb-4">
-                    Manage pool cleaning systems and equipment.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    This section will be expanded with pricing options, specifications, and configuration settings for various pool cleaning systems.
-                  </p>
-                </div>
+                <PoolCleanersTable />
               </CardContent>
             </Card>
           </TabsContent>
