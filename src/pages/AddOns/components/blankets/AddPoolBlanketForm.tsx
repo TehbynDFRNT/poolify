@@ -1,71 +1,133 @@
 
-import { useState } from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { usePoolBlankets } from "@/hooks/usePoolBlankets";
-import type { PoolBlanket } from "@/types/pool-blanket";
+import { PoolBlanket } from "@/types/pool-blanket";
+
+const formSchema = z.object({
+  pool_range: z.string().min(1, "Pool range is required"),
+  pool_model: z.string().min(1, "Pool model is required"),
+  blanket_sku: z.string().min(1, "Blanket SKU is required"),
+  blanket_description: z.string().min(1, "Blanket description is required"),
+  blanket_rrp: z.string().min(1, "Blanket RRP is required"),
+  blanket_trade: z.string().min(1, "Blanket trade is required"),
+  blanket_margin: z.string().min(1, "Blanket margin is required"),
+  heatpump_sku: z.string().min(1, "Heat pump SKU is required"),
+  heatpump_description: z.string().min(1, "Heat pump description is required"),
+  heatpump_rrp: z.string().min(1, "Heat pump RRP is required"),
+  heatpump_trade: z.string().min(1, "Heat pump trade is required"),
+  heatpump_margin: z.string().min(1, "Heat pump margin is required"),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface AddPoolBlanketFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  editBlanket?: PoolBlanket | null;
 }
 
-export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormProps) => {
-  const { addPoolBlanket } = usePoolBlankets();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export const AddPoolBlanketForm = ({
+  open,
+  onOpenChange,
+  editBlanket = null,
+}: AddPoolBlanketFormProps) => {
+  const { addPoolBlanket, updatePoolBlanket } = usePoolBlankets();
+  const isEditing = !!editBlanket;
 
-  const form = useForm<Omit<PoolBlanket, 'id' | 'created_at'>>({
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       pool_range: "",
       pool_model: "",
       blanket_sku: "",
       blanket_description: "",
-      blanket_rrp: 0,
-      blanket_trade: 0,
-      blanket_margin: 0,
+      blanket_rrp: "",
+      blanket_trade: "",
+      blanket_margin: "",
       heatpump_sku: "",
       heatpump_description: "",
-      heatpump_rrp: 0,
-      heatpump_trade: 0,
-      heatpump_margin: 0
-    }
+      heatpump_rrp: "",
+      heatpump_trade: "",
+      heatpump_margin: "",
+    },
   });
 
-  const onSubmit = async (data: Omit<PoolBlanket, 'id' | 'created_at'>) => {
-    setIsSubmitting(true);
-    try {
-      // Convert numeric strings to numbers
-      const formattedData = {
-        ...data,
-        blanket_rrp: Number(data.blanket_rrp),
-        blanket_trade: Number(data.blanket_trade),
-        blanket_margin: Number(data.blanket_margin),
-        heatpump_rrp: Number(data.heatpump_rrp),
-        heatpump_trade: Number(data.heatpump_trade),
-        heatpump_margin: Number(data.heatpump_margin)
-      };
-
-      addPoolBlanket(formattedData);
-      form.reset();
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error submitting form:", error);
-    } finally {
-      setIsSubmitting(false);
+  useEffect(() => {
+    if (editBlanket) {
+      form.reset({
+        pool_range: editBlanket.pool_range,
+        pool_model: editBlanket.pool_model,
+        blanket_sku: editBlanket.blanket_sku,
+        blanket_description: editBlanket.blanket_description,
+        blanket_rrp: editBlanket.blanket_rrp.toString(),
+        blanket_trade: editBlanket.blanket_trade.toString(),
+        blanket_margin: editBlanket.blanket_margin.toString(),
+        heatpump_sku: editBlanket.heatpump_sku,
+        heatpump_description: editBlanket.heatpump_description,
+        heatpump_rrp: editBlanket.heatpump_rrp.toString(),
+        heatpump_trade: editBlanket.heatpump_trade.toString(),
+        heatpump_margin: editBlanket.heatpump_margin.toString(),
+      });
+    } else {
+      form.reset({
+        pool_range: "",
+        pool_model: "",
+        blanket_sku: "",
+        blanket_description: "",
+        blanket_rrp: "",
+        blanket_trade: "",
+        blanket_margin: "",
+        heatpump_sku: "",
+        heatpump_description: "",
+        heatpump_rrp: "",
+        heatpump_trade: "",
+        heatpump_margin: "",
+      });
     }
+  }, [editBlanket, form]);
+
+  const onSubmit = (data: FormData) => {
+    const blanketData = {
+      pool_range: data.pool_range,
+      pool_model: data.pool_model,
+      blanket_sku: data.blanket_sku,
+      blanket_description: data.blanket_description,
+      blanket_rrp: parseFloat(data.blanket_rrp),
+      blanket_trade: parseFloat(data.blanket_trade),
+      blanket_margin: parseFloat(data.blanket_margin),
+      heatpump_sku: data.heatpump_sku,
+      heatpump_description: data.heatpump_description,
+      heatpump_rrp: parseFloat(data.heatpump_rrp),
+      heatpump_trade: parseFloat(data.heatpump_trade),
+      heatpump_margin: parseFloat(data.heatpump_margin),
+    };
+
+    if (isEditing && editBlanket) {
+      updatePoolBlanket({ id: editBlanket.id, updates: blanketData });
+    } else {
+      addPoolBlanket(blanketData);
+    }
+
+    onOpenChange(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[700px]">
         <DialogHeader>
-          <DialogTitle>Add New Pool Blanket</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Pool Blanket" : "Add New Pool Blanket"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -74,9 +136,8 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                   <FormItem>
                     <FormLabel>Pool Range</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. Piazza" />
+                      <Input placeholder="e.g. Piazza" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
@@ -87,16 +148,15 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                   <FormItem>
                     <FormLabel>Pool Model</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="e.g. Alto" />
+                      <Input placeholder="e.g. Alto" {...field} />
                     </FormControl>
-                    <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2">Blanket Information</h3>
+            <div className="space-y-4">
+              <h3 className="font-medium">Blanket Details</h3>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -105,9 +165,8 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                     <FormItem>
                       <FormLabel>Blanket SKU</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="e.g. IX9B&R" />
+                        <Input placeholder="e.g. IX9B&R INS ONLY" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -118,24 +177,22 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                     <FormItem>
                       <FormLabel>Blanket Description</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Product description" />
+                        <Input placeholder="Description" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4 mt-2">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="blanket_rrp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>RRP ($)</FormLabel>
+                      <FormLabel>RRP</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" />
+                        <Input type="number" step="0.01" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -144,11 +201,10 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                   name="blanket_trade"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trade Price ($)</FormLabel>
+                      <FormLabel>Trade</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" />
+                        <Input type="number" step="0.01" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -157,19 +213,18 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                   name="blanket_margin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Margin ($)</FormLabel>
+                      <FormLabel>Margin</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" />
+                        <Input type="number" step="0.01" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2">Heat Pump Information</h3>
+            <div className="space-y-4">
+              <h3 className="font-medium">Heat Pump Details</h3>
               <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -178,9 +233,8 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                     <FormItem>
                       <FormLabel>Heat Pump SKU</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="e.g. IX9" />
+                        <Input placeholder="e.g. IX9" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -191,24 +245,22 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                     <FormItem>
                       <FormLabel>Heat Pump Description</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Product description" />
+                        <Input placeholder="Description" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
-              <div className="grid grid-cols-3 gap-4 mt-2">
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="heatpump_rrp"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>RRP ($)</FormLabel>
+                      <FormLabel>RRP</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" />
+                        <Input type="number" step="0.01" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -217,11 +269,10 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                   name="heatpump_trade"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Trade Price ($)</FormLabel>
+                      <FormLabel>Trade</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" />
+                        <Input type="number" step="0.01" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
@@ -230,23 +281,22 @@ export const AddPoolBlanketForm = ({ open, onOpenChange }: AddPoolBlanketFormPro
                   name="heatpump_margin"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Margin ($)</FormLabel>
+                      <FormLabel>Margin</FormLabel>
                       <FormControl>
-                        <Input {...field} type="number" step="0.01" min="0" />
+                        <Input type="number" step="0.01" {...field} />
                       </FormControl>
-                      <FormMessage />
                     </FormItem>
                   )}
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
+            <div className="flex justify-end gap-2">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Adding...' : 'Add Blanket'}
+              <Button type="submit">
+                {isEditing ? "Update" : "Add"} Blanket
               </Button>
             </div>
           </form>

@@ -15,3 +15,8 @@ export interface PoolBlanket {
   heatpump_margin: number;
   created_at: string;
 }
+
+export const calculateMarginPercentage = (rrp: number, trade: number): number => {
+  if (trade === 0) return 0;
+  return ((rrp - trade) / rrp) * 100;
+};
