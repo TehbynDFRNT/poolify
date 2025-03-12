@@ -60,7 +60,22 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
     },
   });
 
-  const isLoading = isLoadingFixed || isLoadingIndividual || isLoadingExcavation;
+  // Fetch margin data
+  const { data: marginData, isLoading: isLoadingMargin } = useQuery({
+    queryKey: ["pool-margin", poolId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_margins")
+        .select("margin_percentage")
+        .eq("pool_id", poolId)
+        .maybeSingle();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data ? data.margin_percentage : 0;
+    },
+  });
+
+  const isLoading = isLoadingFixed || isLoadingIndividual || isLoadingExcavation || isLoadingMargin;
 
   if (isLoading) {
     return (
@@ -102,6 +117,11 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   ];
 
   const grandTotal = costBreakdown.reduce((sum, item) => sum + item.value, 0);
+  
+  // Calculate margin, RRP and actual margin
+  const marginPercentage = marginData || 0;
+  const rrp = marginPercentage >= 100 ? 0 : grandTotal / (1 - marginPercentage / 100);
+  const actualMargin = rrp - grandTotal;
 
   return (
     <Card className="bg-white shadow-sm">
@@ -131,6 +151,38 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
             <span className="text-xl font-bold text-primary">
               {formatCurrency(grandTotal)}
             </span>
+          </div>
+          
+          {/* Margin Information */}
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  Margin %
+                </div>
+                <div className="text-sm font-medium">
+                  {marginPercentage.toFixed(2)}%
+                </div>
+              </div>
+              
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  RRP
+                </div>
+                <div className="text-sm font-medium text-primary">
+                  {formatCurrency(rrp)}
+                </div>
+              </div>
+              
+              <div className="bg-muted/50 rounded-lg p-4 space-y-2">
+                <div className="text-sm text-muted-foreground">
+                  Actual Margin
+                </div>
+                <div className="text-sm font-medium text-primary">
+                  {formatCurrency(actualMargin)}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </CardContent>
