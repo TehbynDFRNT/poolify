@@ -70,44 +70,44 @@ export const deleteAllPavingCosts = async (): Promise<void> => {
   }
 };
 
-// Check if default costs already exist
-export const checkIfCostsExist = async (): Promise<boolean> => {
+// Check if specific default costs already exist
+export const checkIfDefaultsExist = async (): Promise<string[]> => {
+  const defaultNames = ["Paver", "Wastage", "Margin"];
+  
   const { data, error } = await supabase
     .from("paving_costs")
     .select("name")
-    .limit(1);
+    .in("name", defaultNames);
   
   if (error) {
-    console.error("Error checking if costs exist:", error);
+    console.error("Error checking if defaults exist:", error);
     throw error;
   }
   
-  return data && data.length > 0;
+  return data ? data.map(item => item.name) : [];
 };
 
 // Helper to create default paving costs
 export const createDefaultPavingCosts = async (): Promise<void> => {
-  // First check if any costs already exist
-  const costsExist = await checkIfCostsExist();
+  // First check which defaults already exist
+  const existingDefaults = await checkIfDefaultsExist();
   
-  // If costs already exist, don't create defaults
-  if (costsExist) {
-    console.log("Paving costs already exist, skipping initialization");
-    return;
-  }
-  
+  // Define the defaults we need
   const defaultCosts = [
     { name: "Paver", category1: 99, category2: 114, category3: 137, category4: 137, display_order: 1 },
     { name: "Wastage", category1: 13, category2: 13, category3: 13, category4: 13, display_order: 2 },
     { name: "Margin", category1: 100, category2: 100, category3: 100, category4: 100, display_order: 3 }
   ];
 
+  // Only insert defaults that don't already exist
   for (const cost of defaultCosts) {
-    try {
-      await addPavingCost(cost);
-    } catch (error) {
-      console.error(`Failed to initialize ${cost.name}:`, error);
-      throw error;
+    if (!existingDefaults.includes(cost.name)) {
+      try {
+        await addPavingCost(cost);
+      } catch (error) {
+        console.error(`Failed to initialize ${cost.name}:`, error);
+        throw error;
+      }
     }
   }
 };

@@ -24,7 +24,8 @@ const PavingConcreting = () => {
     handleSave,
     handleCancel,
     handleValueChange,
-    initializeDefaultValues
+    initializeDefaultValues,
+    deleteAllPavingCosts
   } = usePavingCosts();
 
   // Initialize default values if the table is empty
