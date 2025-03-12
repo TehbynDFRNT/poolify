@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableHeader,
@@ -11,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
-import type { PavingCost } from "../hooks/usePavingCosts";
+import type { PavingCost } from "../types/pavingCosts";
 
 interface PavingCostsTableProps {
   pavingCosts: PavingCost[];

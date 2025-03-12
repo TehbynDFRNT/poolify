@@ -1,20 +1,17 @@
 
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { type PavingCost } from "../types/pavingCosts";
+import {
+  fetchPavingCosts,
+  updatePavingCost,
+  addPavingCost,
+  deleteAllPavingCosts,
+  createDefaultPavingCosts
+} from "../services/pavingCostsService";
 
-export interface PavingCost {
-  id: string;
-  name: string;
-  category1: number;
-  category2: number;
-  category3: number;
-  category4: number;
-  display_order: number;
-  created_at: string;
-  updated_at: string;
-}
+export type { PavingCost } from "../types/pavingCosts";
 
 export const usePavingCosts = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -24,38 +21,13 @@ export const usePavingCosts = () => {
   // Fetch paving costs
   const { data: pavingCosts, isLoading } = useQuery({
     queryKey: ["paving-costs"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("paving_costs")
-        .select("*")
-        .order("display_order");
-
-      if (error) {
-        console.error("Error fetching paving costs:", error);
-        toast.error("Failed to load paving costs");
-        throw error;
-      }
-
-      return data as PavingCost[];
-    }
+    queryFn: fetchPavingCosts
   });
 
   // Update paving cost
   const updatePavingCostMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<PavingCost> }) => {
-      const { data, error } = await supabase
-        .from("paving_costs")
-        .update(updates)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error updating paving cost:", error);
-        throw error;
-      }
-
-      return data as PavingCost;
+      return updatePavingCost(id, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
@@ -72,18 +44,7 @@ export const usePavingCosts = () => {
   // Add new paving cost
   const addPavingCostMutation = useMutation({
     mutationFn: async (newCost: Omit<PavingCost, "id" | "created_at" | "updated_at">) => {
-      const { data, error } = await supabase
-        .from("paving_costs")
-        .insert(newCost)
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error adding paving cost:", error);
-        throw error;
-      }
-
-      return data as PavingCost;
+      return addPavingCost(newCost);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
@@ -133,21 +94,11 @@ export const usePavingCosts = () => {
   };
 
   // Delete all paving costs data from the table
-  const deleteAllPavingCosts = async () => {
+  const deleteAllPavingCostsHandler = async () => {
     try {
       console.log("Deleting all paving costs");
       
-      // Delete all paving costs
-      const { error } = await supabase
-        .from("paving_costs")
-        .delete()
-        .neq("id", "00000000-0000-0000-0000-000000000000");
-      
-      if (error) {
-        console.error("Error deleting paving costs:", error);
-        toast.error("Failed to delete paving costs");
-        throw error;
-      }
+      await deleteAllPavingCosts();
       
       // Refresh the data
       queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
@@ -164,21 +115,9 @@ export const usePavingCosts = () => {
       console.log("Initializing default paving costs");
       
       // First delete all existing paving costs to prevent duplicates
-      await supabase.from("paving_costs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      await deleteAllPavingCosts();
       
-      const defaultCosts = [
-        { name: "Paver", category1: 99, category2: 114, category3: 137, category4: 137, display_order: 1 },
-        { name: "Wastage", category1: 13, category2: 13, category3: 13, category4: 13, display_order: 2 },
-        { name: "Margin", category1: 100, category2: 100, category3: 100, category4: 100, display_order: 3 }
-      ];
-
-      for (const cost of defaultCosts) {
-        try {
-          await addPavingCostMutation.mutateAsync(cost);
-        } catch (error) {
-          console.error(`Failed to initialize ${cost.name}:`, error);
-        }
-      }
+      await createDefaultPavingCosts();
       
       // Refresh the data
       queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
@@ -201,6 +140,6 @@ export const usePavingCosts = () => {
     updatePavingCostMutation,
     addPavingCostMutation,
     initializeDefaultValues,
-    deleteAllPavingCosts
+    deleteAllPavingCosts: deleteAllPavingCostsHandler
   };
 };
