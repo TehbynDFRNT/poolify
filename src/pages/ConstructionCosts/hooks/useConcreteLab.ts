@@ -17,7 +17,7 @@ export const useConcreteLab = () => {
         .order("display_order");
 
       if (error) throw error;
-      return data as ConcreteLab[];
+      return data as unknown as ConcreteLab[];
     },
   });
 
@@ -31,7 +31,7 @@ export const useConcreteLab = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as unknown as ConcreteLab;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["concrete_labour"] });
@@ -53,7 +53,7 @@ export const useConcreteLab = () => {
         .single();
 
       if (error) throw error;
-      return data;
+      return data as unknown as ConcreteLab;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["concrete_labour"] });
