@@ -41,7 +41,8 @@ export const ConcreteLabRow = ({
 
   return (
     <TableRow>
-      <TableCell>{isEditing ? (
+      <TableCell>
+        {isEditing ? (
           <Input
             value={editedType}
             onChange={(e) => setEditedType(e.target.value)}
@@ -72,41 +73,43 @@ export const ConcreteLabRow = ({
           formatCurrency(lab.margin)
         )}
       </TableCell>
-      <TableCell className="flex justify-end gap-2">
-        {isEditing ? (
-          <>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={handleCancel}
-            >
-              <X className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleSave}
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-          </>
-        ) : (
-          <>
-            <Button
-              size="sm"
-              variant="ghost"
-              onClick={() => onDelete(lab.id)}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => setIsEditing(true)}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-          </>
-        )}
+      <TableCell>
+        <div className="flex justify-end gap-2">
+          {isEditing ? (
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleCancel}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSave}
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => onDelete(lab.id)}
+              >
+                <Trash className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setIsEditing(true)}
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+            </>
+          )}
+        </div>
       </TableCell>
     </TableRow>
   );

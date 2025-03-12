@@ -64,21 +64,23 @@ export const AddConcreteLabRow = ({
           onChange={(e) => setMargin(e.target.value)}
         />
       </TableCell>
-      <TableCell className="flex justify-end gap-2">
-        <Button
-          size="sm"
-          variant="ghost"
-          onClick={onCancel}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-        <Button
-          size="sm"
-          onClick={handleAdd}
-          disabled={!type}
-        >
-          <Check className="h-4 w-4" />
-        </Button>
+      <TableCell>
+        <div className="flex justify-end gap-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={onCancel}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+          <Button
+            size="sm"
+            onClick={handleAdd}
+            disabled={!type}
+          >
+            <Check className="h-4 w-4" />
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );
