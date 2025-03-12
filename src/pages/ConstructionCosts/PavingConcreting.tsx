@@ -2,7 +2,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { Construction, Grid, HardHat } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -12,45 +11,10 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PavingCostsTable } from "./components/PavingCostsTable";
-import { PavingCost } from "@/types/paving-cost";
+import { usePavingCosts } from "./hooks/usePavingCosts";
 
 const PavingConcreting = () => {
-  // Hardcoded paving costs data as requested
-  const pavingCosts: PavingCost[] = [
-    { 
-      id: "1", 
-      name: "Paver", 
-      category1: 99, 
-      category2: 114, 
-      category3: 137, 
-      category4: 137, 
-      display_order: 1,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    { 
-      id: "2", 
-      name: "Wastage", 
-      category1: 13, 
-      category2: 13, 
-      category3: 13, 
-      category4: 13, 
-      display_order: 2,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    },
-    { 
-      id: "3", 
-      name: "Margin", 
-      category1: 100, 
-      category2: 100, 
-      category3: 100, 
-      category4: 100, 
-      display_order: 3,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
-    }
-  ];
+  const { pavingCosts, isLoading, updatePavingCost } = usePavingCosts();
 
   return (
     <DashboardLayout>
@@ -98,7 +62,11 @@ const PavingConcreting = () => {
                 <CardDescription>Set up and manage paving costs for pool installations</CardDescription>
               </CardHeader>
               <CardContent>
-                <PavingCostsTable pavingCosts={pavingCosts} />
+                <PavingCostsTable 
+                  pavingCosts={pavingCosts} 
+                  isLoading={isLoading}
+                  onUpdate={updatePavingCost}
+                />
               </CardContent>
             </Card>
           </TabsContent>
