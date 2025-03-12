@@ -5,12 +5,12 @@ export const PoolCleanersTableHeader = () => {
   return (
     <TableHeader>
       <TableRow>
-        <TableHead>Model Number</TableHead>
-        <TableHead>Name</TableHead>
-        <TableHead className="text-right">RRP ($)</TableHead>
-        <TableHead className="text-right">Cost Price ($)</TableHead>
-        <TableHead className="text-right">Margin (%)</TableHead>
-        <TableHead className="w-[100px]">Actions</TableHead>
+        <TableHead className="w-[15%]">Model #</TableHead>
+        <TableHead className="w-[30%]">Name</TableHead>
+        <TableHead className="w-[15%] text-right">RRP</TableHead>
+        <TableHead className="w-[15%] text-right">Cost Price</TableHead>
+        <TableHead className="w-[15%] text-right">Margin %</TableHead>
+        <TableHead className="w-[10%]"></TableHead>
       </TableRow>
     </TableHeader>
   );
