@@ -1,11 +1,12 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Scissors, Ruler, Truck } from "lucide-react";
+import { Layers, Scissors, Ruler, Truck, Fence } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
 import { ConcretePump } from "./components/ConcretePump";
+import { UnderFenceConcreteStripsTable } from "./components/UnderFenceConcreteStripsTable";
 
 const ExtraPaving = () => {
   return (
@@ -33,6 +34,21 @@ const ExtraPaving = () => {
             </CardHeader>
             <CardContent>
               <ExtraPavingCostsTable />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Fence className="h-5 w-5 text-primary" />
+                <CardTitle>Under Fence Concrete Strips</CardTitle>
+              </div>
+              <CardDescription>
+                Configure and manage under fence concrete strip costs and margins
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <UnderFenceConcreteStripsTable />
             </CardContent>
           </Card>
 

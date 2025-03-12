@@ -982,6 +982,36 @@ export type Database = {
         }
         Relationships: []
       }
+      under_fence_concrete_strips: {
+        Row: {
+          cost: number
+          created_at: string
+          display_order: number
+          id: string
+          margin: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          display_order: number
+          id?: string
+          margin: number
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          margin?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       water_features: {
         Row: {
           created_at: string
