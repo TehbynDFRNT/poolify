@@ -1,12 +1,13 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Scissors, Ruler, Truck, Fence } from "lucide-react";
+import { Layers, Scissors, Ruler, Truck, Fence, HardHat } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
 import { ConcretePump } from "./components/ConcretePump";
 import { UnderFenceConcreteStripsTable } from "./components/UnderFenceConcreteStripsTable";
+import { ConcreteLabTable } from "./components/ConcreteLabTable";
 
 const ExtraPaving = () => {
   return (
@@ -51,6 +52,10 @@ const ExtraPaving = () => {
               <UnderFenceConcreteStripsTable />
             </CardContent>
           </Card>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <ConcreteLabTable />
+          </div>
 
           <Card>
             <CardHeader>
