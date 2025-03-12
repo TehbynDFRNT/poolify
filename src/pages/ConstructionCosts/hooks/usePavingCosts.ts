@@ -31,16 +31,11 @@ export const usePavingCosts = () => {
     }
   };
 
-  const updatePavingCost = async (id: string, field: string, value: number) => {
+  const updatePavingCost = async (id: string, updates: Partial<PavingCost>) => {
     try {
-      // Validate that the field is one of the category fields
-      if (!['category1', 'category2', 'category3', 'category4'].includes(field)) {
-        throw new Error("Invalid field name");
-      }
-
       const { error } = await supabase
         .from("paving_costs")
-        .update({ [field]: value })
+        .update(updates)
         .eq("id", id);
 
       if (error) {
@@ -50,7 +45,7 @@ export const usePavingCosts = () => {
       // Update local state
       setPavingCosts(prevCosts => 
         prevCosts ? prevCosts.map(cost => 
-          cost.id === id ? { ...cost, [field]: value } : cost
+          cost.id === id ? { ...cost, ...updates } : cost
         ) : null
       );
 
