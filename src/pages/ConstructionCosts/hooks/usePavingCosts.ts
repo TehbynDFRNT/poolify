@@ -132,6 +132,32 @@ export const usePavingCosts = () => {
     }));
   };
 
+  // Delete all paving costs data from the table
+  const deleteAllPavingCosts = async () => {
+    try {
+      console.log("Deleting all paving costs");
+      
+      // Delete all paving costs
+      const { error } = await supabase
+        .from("paving_costs")
+        .delete()
+        .neq("id", "00000000-0000-0000-0000-000000000000");
+      
+      if (error) {
+        console.error("Error deleting paving costs:", error);
+        toast.error("Failed to delete paving costs");
+        throw error;
+      }
+      
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
+      toast.success("All paving costs deleted successfully");
+    } catch (error) {
+      console.error("Error deleting paving costs:", error);
+      toast.error("Failed to delete paving costs");
+    }
+  };
+
   // Clear all existing data and reinitialize with default values
   const initializeDefaultValues = async () => {
     try {
@@ -174,6 +200,7 @@ export const usePavingCosts = () => {
     handleValueChange,
     updatePavingCostMutation,
     addPavingCostMutation,
-    initializeDefaultValues
+    initializeDefaultValues,
+    deleteAllPavingCosts
   };
 };
