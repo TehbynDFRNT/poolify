@@ -11,9 +11,47 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useEffect } from "react";
+import { PavingCostsTable } from "./components/PavingCostsTable";
+import { PavingCost } from "@/types/paving-cost";
 
 const PavingConcreting = () => {
+  // Hardcoded paving costs data as requested
+  const pavingCosts: PavingCost[] = [
+    { 
+      id: "1", 
+      name: "Paver", 
+      category1: 99, 
+      category2: 114, 
+      category3: 137, 
+      category4: 137, 
+      display_order: 1,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "2", 
+      name: "Wastage", 
+      category1: 13, 
+      category2: 13, 
+      category3: 13, 
+      category4: 13, 
+      display_order: 2,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    },
+    { 
+      id: "3", 
+      name: "Margin", 
+      category1: 100, 
+      category2: 100, 
+      category3: 100, 
+      category4: 100, 
+      display_order: 3,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ];
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto p-6">
@@ -60,11 +98,7 @@ const PavingConcreting = () => {
                 <CardDescription>Set up and manage paving costs for pool installations</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-10">
-                  <Grid className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">No paving costs defined</p>
-                  <p className="text-sm text-gray-400 mt-1">Add paving costs to get started</p>
-                </div>
+                <PavingCostsTable pavingCosts={pavingCosts} />
               </CardContent>
             </Card>
           </TabsContent>
