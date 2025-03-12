@@ -30,17 +30,14 @@ const PavingConcreting = () => {
 
   // Initialize default values if the table is empty
   useEffect(() => {
-    // Call initialization function when component mounts
     const initialize = async () => {
-      if (pavingCosts && pavingCosts.length === 0) {
+      if (!isLoading && (!pavingCosts || pavingCosts.length === 0)) {
         console.log("Table is empty, initializing default values");
         await initializeDefaultValues();
       }
     };
     
-    if (!isLoading) {
-      initialize();
-    }
+    initialize();
   }, [pavingCosts, isLoading, initializeDefaultValues]);
 
   return (
@@ -73,7 +70,6 @@ const PavingConcreting = () => {
           </div>
           <Button 
             onClick={() => initializeDefaultValues()}
-            disabled={isLoading || (pavingCosts && pavingCosts.length > 0)}
           >
             Reset to Default Values
           </Button>

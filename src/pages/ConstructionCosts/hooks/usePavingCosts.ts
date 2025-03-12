@@ -132,11 +132,14 @@ export const usePavingCosts = () => {
     }));
   };
 
-  // Initialize the database with default values if empty
+  // Clear all existing data and reinitialize with default values
   const initializeDefaultValues = async () => {
-    // Ensure we only initialize if the table is truly empty
-    if (Array.isArray(pavingCosts) && pavingCosts.length === 0) {
+    try {
       console.log("Initializing default paving costs");
+      
+      // First delete all existing paving costs to prevent duplicates
+      await supabase.from("paving_costs").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+      
       const defaultCosts = [
         { name: "Paver", category1: 99, category2: 114, category3: 137, category4: 137, display_order: 1 },
         { name: "Wastage", category1: 13, category2: 13, category3: 13, category4: 13, display_order: 2 },
@@ -150,6 +153,13 @@ export const usePavingCosts = () => {
           console.error(`Failed to initialize ${cost.name}:`, error);
         }
       }
+      
+      // Refresh the data
+      queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
+      toast.success("Paving costs reset to default values");
+    } catch (error) {
+      console.error("Error initializing default values:", error);
+      toast.error("Failed to reset paving costs");
     }
   };
 
