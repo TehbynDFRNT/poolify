@@ -8,7 +8,6 @@ import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
 import { ConcreteLabourCostsTable } from "./components/ConcreteLabourCostsTable";
 import { ConcretePump } from "./components/ConcretePump";
 import { UnderFenceConcreteStripsTable } from "./components/UnderFenceConcreteStripsTable";
-import { ConcreteLabTable } from "./components/ConcreteLabTable";
 
 const ExtraPaving = () => {
   return (
@@ -96,10 +95,6 @@ const ExtraPaving = () => {
               <ConcreteLabourCostsTable />
             </CardContent>
           </Card>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <ConcreteLabTable />
-          </div>
 
           <ConcretePump />
         </div>
