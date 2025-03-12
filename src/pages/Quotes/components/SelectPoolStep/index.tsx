@@ -140,6 +140,24 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
     },
   });
 
+  // Fetch margin data
+  const { data: marginData } = useQuery({
+    queryKey: ["pool-margin", selectedPoolId],
+    queryFn: async () => {
+      if (!selectedPoolId) return null;
+      
+      const { data, error } = await supabase
+        .from("pool_margins")
+        .select("margin_percentage")
+        .eq("pool_id", selectedPoolId)
+        .maybeSingle();
+      
+      if (error && error.code !== 'PGRST116') throw error;
+      return data ? data.margin_percentage : 0;
+    },
+    enabled: !!selectedPoolId,
+  });
+
   const handlePoolSelect = (poolId: string) => {
     setSelectedPoolId(poolId);
   };
@@ -197,13 +215,24 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
     // Excavation cost
     const excavationCost = excavationDetails ? calculateGrandTotal(excavationDetails) : 0;
     
+    // Calculate the grand total
+    const total = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost;
+    
+    // Calculate margin, RRP and actual margin
+    const marginPercentage = marginData || 0;
+    const rrp = marginPercentage >= 100 ? 0 : total / (1 - marginPercentage / 100);
+    const actualMargin = rrp - total;
+    
     return {
       basePrice,
       filtrationCost,
       fixedCostsTotal,
       individualCostsTotal,
       excavationCost,
-      total: basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost
+      total,
+      marginPercentage,
+      rrp,
+      actualMargin
     };
   };
 
@@ -300,8 +329,26 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
                       </div>
                     )}
                     <div className="border-t pt-2 mt-2 flex justify-between">
-                      <span className="font-medium">Total Pool Cost</span>
+                      <span className="font-medium">Total Cost</span>
                       <span className="font-medium text-primary">{formatCurrency(costs.total)}</span>
+                    </div>
+                    
+                    {/* Margin Information - New Section */}
+                    <div className="border-t pt-4 mt-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                          <div className="text-sm text-muted-foreground">Margin %</div>
+                          <div className="text-sm font-medium">{costs.marginPercentage.toFixed(2)}%</div>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                          <div className="text-sm text-muted-foreground">RRP</div>
+                          <div className="text-sm font-medium text-primary">{formatCurrency(costs.rrp)}</div>
+                        </div>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                          <div className="text-sm text-muted-foreground">Actual Margin</div>
+                          <div className="text-sm font-medium text-primary">{formatCurrency(costs.actualMargin)}</div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
