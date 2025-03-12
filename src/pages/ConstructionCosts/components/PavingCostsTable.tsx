@@ -37,10 +37,10 @@ export function PavingCostsTable({
     (acc, cost) => {
       const isEditing = editingId === cost.id;
       return {
-        category1: acc.category1 + (isEditing ? (editingValues.category1 || 0) : cost.category1),
-        category2: acc.category2 + (isEditing ? (editingValues.category2 || 0) : cost.category2),
-        category3: acc.category3 + (isEditing ? (editingValues.category3 || 0) : cost.category3),
-        category4: acc.category4 + (isEditing ? (editingValues.category4 || 0) : cost.category4),
+        category1: acc.category1 + (isEditing ? (editingValues.category1 ?? cost.category1) : cost.category1),
+        category2: acc.category2 + (isEditing ? (editingValues.category2 ?? cost.category2) : cost.category2),
+        category3: acc.category3 + (isEditing ? (editingValues.category3 ?? cost.category3) : cost.category3),
+        category4: acc.category4 + (isEditing ? (editingValues.category4 ?? cost.category4) : cost.category4),
       };
     },
     { category1: 0, category2: 0, category3: 0, category4: 0 }
@@ -132,7 +132,7 @@ export function PavingCostsTable({
         </TableBody>
         <TableFooter>
           <TableRow>
-            <TableCell className="font-medium">Total</TableCell>
+            <TableCell className="font-medium">Cat Total</TableCell>
             <TableCell>{formatCurrency(totals.category1)}</TableCell>
             <TableCell>{formatCurrency(totals.category2)}</TableCell>
             <TableCell>{formatCurrency(totals.category3)}</TableCell>
