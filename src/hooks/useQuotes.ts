@@ -1,11 +1,13 @@
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
 import { toast } from "sonner";
 
 export const useQuotes = () => {
-  return useQuery({
+  const queryClient = useQueryClient();
+  
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["quotes"],
     queryFn: async () => {
       // First, fetch the quotes
@@ -50,4 +52,36 @@ export const useQuotes = () => {
       }
     }
   });
+
+  const deleteQuoteMutation = useMutation({
+    mutationFn: async (quoteId: string) => {
+      const { error } = await supabase
+        .from("quotes")
+        .delete()
+        .eq("id", quoteId);
+      
+      if (error) {
+        console.error("Error deleting quote:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch quotes after successful deletion
+      queryClient.invalidateQueries({ queryKey: ["quotes"] });
+      toast.success("Quote deleted successfully");
+    },
+    onError: (error) => {
+      console.error("Error in delete mutation:", error);
+      toast.error("Failed to delete quote");
+    }
+  });
+
+  return {
+    data,
+    isLoading,
+    error,
+    refetch,
+    deleteQuote: deleteQuoteMutation.mutate,
+    isDeletingQuote: deleteQuoteMutation.isPending
+  };
 };

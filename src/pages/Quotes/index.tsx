@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link, useNavigate } from "react-router-dom";
-import { PlusCircle, FileText } from "lucide-react";
+import { PlusCircle, FileText, Trash2 } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -21,10 +21,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { useState } from "react";
 
 const Quotes = () => {
   const navigate = useNavigate();
-  const { data: quotes, isLoading, error, refetch } = useQuotes();
+  const { 
+    data: quotes, 
+    isLoading, 
+    error, 
+    refetch, 
+    deleteQuote, 
+    isDeletingQuote 
+  } = useQuotes();
+  
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [quoteToDelete, setQuoteToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (quoteId: string) => {
+    setQuoteToDelete(quoteId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (quoteToDelete) {
+      deleteQuote(quoteToDelete);
+      setDeleteDialogOpen(false);
+      setQuoteToDelete(null);
+    }
+  };
 
   const renderQuotesTable = () => {
     if (isLoading) {
@@ -105,13 +137,21 @@ const Quotes = () => {
                   formatCurrency(quote.pool.buy_price_inc_gst) : 
                   '—'}
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="text-right flex justify-end gap-2">
                 <Button 
                   variant="outline" 
                   size="sm"
                   onClick={() => navigate(`/quotes/${quote.id}`)}
                 >
                   View
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  onClick={() => handleDeleteClick(quote.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
                 </Button>
               </TableCell>
             </TableRow>
@@ -160,6 +200,29 @@ const Quotes = () => {
           </CardContent>
         </Card>
       </div>
+
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Quote</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this quote? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex space-x-2 justify-end">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={confirmDelete}
+              disabled={isDeletingQuote}
+            >
+              {isDeletingQuote ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </DashboardLayout>
   );
 };
