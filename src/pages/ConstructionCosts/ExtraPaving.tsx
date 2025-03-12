@@ -16,7 +16,7 @@ const ExtraPaving = () => {
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -30,23 +30,6 @@ const ExtraPaving = () => {
             <CardContent>
               <div className="h-40 flex items-center justify-center border border-dashed rounded-md">
                 <p className="text-gray-500">Extra paving cost management coming soon</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Layers className="h-5 w-5 text-primary" />
-                <CardTitle>Paving Types</CardTitle>
-              </div>
-              <CardDescription>
-                Manage different types of paving and their associated costs
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-40 flex items-center justify-center border border-dashed rounded-md">
-                <p className="text-gray-500">Paving types management coming soon</p>
               </div>
             </CardContent>
           </Card>
