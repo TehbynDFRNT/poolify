@@ -70,8 +70,32 @@ export const deleteAllPavingCosts = async (): Promise<void> => {
   }
 };
 
+// Check if default costs already exist
+export const checkIfCostsExist = async (): Promise<boolean> => {
+  const { data, error } = await supabase
+    .from("paving_costs")
+    .select("name")
+    .limit(1);
+  
+  if (error) {
+    console.error("Error checking if costs exist:", error);
+    throw error;
+  }
+  
+  return data && data.length > 0;
+};
+
 // Helper to create default paving costs
 export const createDefaultPavingCosts = async (): Promise<void> => {
+  // First check if any costs already exist
+  const costsExist = await checkIfCostsExist();
+  
+  // If costs already exist, don't create defaults
+  if (costsExist) {
+    console.log("Paving costs already exist, skipping initialization");
+    return;
+  }
+  
   const defaultCosts = [
     { name: "Paver", category1: 99, category2: 114, category3: 137, category4: 137, display_order: 1 },
     { name: "Wastage", category1: 13, category2: 13, category3: 13, category4: 13, display_order: 2 },
