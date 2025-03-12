@@ -1,5 +1,5 @@
 
-import DashboardLayout from "@/components/DashboardLayout";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { BarChart4 } from "lucide-react";
