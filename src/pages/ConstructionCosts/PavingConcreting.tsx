@@ -12,7 +12,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PavingCostsTable } from "./components/PavingCostsTable";
 import { usePavingCosts } from "./hooks/usePavingCosts";
-import { Button } from "@/components/ui/button";
 
 const PavingConcreting = () => {
   const {
@@ -24,7 +23,6 @@ const PavingConcreting = () => {
     handleSave,
     handleCancel,
     handleValueChange,
-    deleteAllPavingCosts
   } = usePavingCosts();
 
   return (
@@ -55,12 +53,6 @@ const PavingConcreting = () => {
             <h1 className="text-2xl font-semibold text-gray-900">Paving & Concreting</h1>
             <p className="text-gray-500 mt-1">Manage paving and concrete costs</p>
           </div>
-          <Button 
-            variant="destructive" 
-            onClick={deleteAllPavingCosts}
-          >
-            Delete All Data
-          </Button>
         </div>
         
         <Tabs defaultValue="paving" className="w-full">
