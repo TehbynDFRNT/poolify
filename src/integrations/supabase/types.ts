@@ -1106,26 +1106,35 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          display_order: number | null
           id: string
+          margin: number
           name: string
           power_requirement: number | null
           price: number
+          updated_at: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
           id?: string
+          margin?: number
           name: string
           power_requirement?: number | null
           price: number
+          updated_at?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
+          display_order?: number | null
           id?: string
+          margin?: number
           name?: string
           power_requirement?: number | null
           price?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
