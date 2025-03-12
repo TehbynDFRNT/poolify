@@ -1,10 +1,11 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Scissors, Ruler } from "lucide-react";
+import { Layers, Scissors, Ruler, Truck } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
+import { ConcretePump } from "./components/ConcretePump";
 
 const ExtraPaving = () => {
   return (
@@ -64,6 +65,8 @@ const ExtraPaving = () => {
               <ConcreteCostsTable />
             </CardContent>
           </Card>
+
+          <ConcretePump />
         </div>
       </div>
     </DashboardLayout>
