@@ -16,7 +16,6 @@ const customerInfoSchema = z.object({
   owner2_phone: z.string().optional(),
   home_address: z.string().min(1, "Home address is required"),
   site_address: z.string().min(1, "Site address is required"),
-  desired_timeline: z.string().min(1, "Timeline is required"),
   resident_homeowner: z.boolean().optional(),
 });
 
@@ -195,24 +194,6 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
             />
             {errors.site_address && (
               <p className="text-sm text-red-500">{errors.site_address}</p>
-            )}
-          </div>
-        </div>
-
-        {/* Timeline */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="desired_timeline">Desired Timeline</Label>
-            <Input
-              id="desired_timeline"
-              name="desired_timeline"
-              placeholder="e.g., Summer 2023, ASAP, 3 months"
-              value={quoteData.desired_timeline || ''}
-              onChange={handleChange}
-              className={errors.desired_timeline ? 'border-red-500' : ''}
-            />
-            {errors.desired_timeline && (
-              <p className="text-sm text-red-500">{errors.desired_timeline}</p>
             )}
           </div>
         </div>

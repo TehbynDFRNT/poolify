@@ -9,7 +9,6 @@ export interface Quote {
   owner2_phone?: string;
   home_address: string;
   site_address: string;
-  desired_timeline: string;
   pool_id?: string;
   status: 'draft' | 'pending' | 'approved' | 'declined';
   created_at: string;
@@ -26,7 +25,6 @@ export interface QuoteInsert {
   owner2_phone?: string;
   home_address: string;
   site_address: string;
-  desired_timeline: string;
   pool_id?: string;
   status: 'draft' | 'pending' | 'approved' | 'declined';
   resident_homeowner?: boolean;

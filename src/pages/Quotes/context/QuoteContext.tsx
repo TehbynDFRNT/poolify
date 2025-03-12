@@ -17,7 +17,6 @@ const initialQuoteData: Partial<QuoteInsert> = {
   owner2_phone: '',
   home_address: '',
   site_address: '',
-  desired_timeline: '',
   status: 'draft',
   resident_homeowner: false
 };
