@@ -12,7 +12,7 @@ export const useConcreteLab = () => {
     queryKey: ["concrete_labour"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("concrete_labour")
+        .from("concrete_labour" as any)
         .select("*")
         .order("display_order");
 
@@ -25,7 +25,7 @@ export const useConcreteLab = () => {
   const addMutation = useMutation({
     mutationFn: async (newLab: ConcreteLabInsert) => {
       const { data, error } = await supabase
-        .from("concrete_labour")
+        .from("concrete_labour" as any)
         .insert(newLab)
         .select()
         .single();
@@ -46,7 +46,7 @@ export const useConcreteLab = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<ConcreteLab> }) => {
       const { data, error } = await supabase
-        .from("concrete_labour")
+        .from("concrete_labour" as any)
         .update(updates)
         .eq("id", id)
         .select()
@@ -68,7 +68,7 @@ export const useConcreteLab = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("concrete_labour")
+        .from("concrete_labour" as any)
         .delete()
         .eq("id", id);
 

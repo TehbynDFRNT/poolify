@@ -96,6 +96,36 @@ export type Database = {
         }
         Relationships: []
       }
+      concrete_labour: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          margin: number
+          price: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          margin: number
+          price: number
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          margin?: number
+          price?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       concrete_pump: {
         Row: {
           created_at: string
