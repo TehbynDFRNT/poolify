@@ -20,8 +20,8 @@ export const ConcreteLabourCostRow = ({ cost, onUpdate, onDelete }: ConcreteLabo
     setIsEditing(true);
     setEditValues({
       description: cost.description,
-      concrete_cost: cost.concrete_cost,
-      dust_cost: cost.dust_cost,
+      cost: cost.cost,
+      margin: cost.margin,
     });
   };
 
@@ -31,16 +31,8 @@ export const ConcreteLabourCostRow = ({ cost, onUpdate, onDelete }: ConcreteLabo
   };
 
   const handleSave = () => {
-    if (!editValues.description) {
-      return;
-    }
-    
-    // Calculate the total before saving
-    const concreteCost = editValues.concrete_cost !== undefined ? editValues.concrete_cost : cost.concrete_cost;
-    const dustCost = editValues.dust_cost !== undefined ? editValues.dust_cost : cost.dust_cost;
-    const totalCost = concreteCost + dustCost;
-    
-    onUpdate(cost.id, { ...editValues, total_cost: totalCost });
+    if (!editValues.description) return;
+    onUpdate(cost.id, editValues);
     setIsEditing(false);
     setEditValues({});
   };
@@ -62,48 +54,26 @@ export const ConcreteLabourCostRow = ({ cost, onUpdate, onDelete }: ConcreteLabo
         {isEditing ? (
           <Input 
             type="number"
-            value={editValues.concrete_cost || ''} 
-            onChange={(e) => {
-              const concrete_cost = parseFloat(e.target.value);
-              const dust_cost = editValues.dust_cost !== undefined ? editValues.dust_cost : cost.dust_cost;
-              setEditValues({ 
-                ...editValues, 
-                concrete_cost,
-                total_cost: concrete_cost + dust_cost 
-              });
-            }}
+            value={editValues.cost || ''} 
+            onChange={(e) => setEditValues({ ...editValues, cost: parseFloat(e.target.value) })}
             className="max-w-[100px]"
             step="0.01"
           />
         ) : (
-          formatCurrency(cost.concrete_cost)
+          formatCurrency(cost.cost)
         )}
       </TableCell>
       <TableCell>
         {isEditing ? (
           <Input 
             type="number"
-            value={editValues.dust_cost || ''} 
-            onChange={(e) => {
-              const dust_cost = parseFloat(e.target.value);
-              const concrete_cost = editValues.concrete_cost !== undefined ? editValues.concrete_cost : cost.concrete_cost;
-              setEditValues({ 
-                ...editValues, 
-                dust_cost,
-                total_cost: concrete_cost + dust_cost 
-              });
-            }}
+            value={editValues.margin || ''} 
+            onChange={(e) => setEditValues({ ...editValues, margin: parseFloat(e.target.value) })}
             className="max-w-[100px]"
             step="0.01"
           />
         ) : (
-          formatCurrency(cost.dust_cost)
-        )}
-      </TableCell>
-      <TableCell className="font-medium">
-        {formatCurrency(
-          (editValues.concrete_cost !== undefined ? editValues.concrete_cost : cost.concrete_cost) +
-          (editValues.dust_cost !== undefined ? editValues.dust_cost : cost.dust_cost)
+          cost.margin
         )}
       </TableCell>
       <TableCell className="w-[150px]">

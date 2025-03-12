@@ -26,19 +26,13 @@ export const ConcreteLabourCostsTable = () => {
     deleteMutation.mutate(id);
   };
 
-  // Get next display order for new items
   const getNextDisplayOrder = () => {
     if (!concreteLabourCosts?.length) return 1;
     return Math.max(...concreteLabourCosts.map(cost => cost.display_order)) + 1;
   };
 
-  if (isLoading) {
-    return <div>Loading concrete labour costs...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading data: {(error as Error).message}</div>;
-  }
+  if (isLoading) return <div>Loading concrete labour costs...</div>;
+  if (error) return <div>Error loading data: {(error as Error).message}</div>;
 
   return (
     <div className="space-y-4">
@@ -58,9 +52,8 @@ export const ConcreteLabourCostsTable = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Description</TableHead>
-              <TableHead>Concrete ($/m)</TableHead>
-              <TableHead>Dust ($/m)</TableHead>
-              <TableHead>Total ($/m)</TableHead>
+              <TableHead>Cost</TableHead>
+              <TableHead>Margin</TableHead>
               <TableHead className="w-[150px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -82,7 +75,7 @@ export const ConcreteLabourCostsTable = () => {
             ))}
             {concreteLabourCosts?.length === 0 && !isAdding && (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
                   No concrete labour costs defined. Click "Add New Concrete Labour Cost" to create one.
                 </TableCell>
               </TableRow>
