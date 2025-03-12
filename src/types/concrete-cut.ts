@@ -5,4 +5,5 @@ export interface ConcreteCut {
   price: number;
   margin?: number;
   created_at: string;
+  category?: string;
 }

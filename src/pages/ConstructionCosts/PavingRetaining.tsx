@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -13,6 +12,7 @@ import { Construction } from "lucide-react";
 import { PavingPricesTable } from "./components/PavingPricesTable";
 import { PavingAdditionalCostsTable } from "./components/PavingAdditionalCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
+import { UnderFenceConcreteTable } from "./components/UnderFenceConcreteTable";
 import type { PavingPrice } from "@/types/paving-price";
 import type { PavingAdditionalCost } from "@/types/paving-additional-cost";
 import type { ConcreteCut } from "@/types/concrete-cut";
@@ -78,7 +78,52 @@ const PavingRetaining = () => {
     },
   });
 
-  const isLoading = isPricesLoading || isCostsLoading || isCutsLoading;
+  const { data: underFenceConcrete, isLoading: isUnderFenceLoading } = useQuery({
+    queryKey: ["under-fence-concrete"],
+    queryFn: async () => {
+      // First, check if we already have data
+      const { data: existingData, error: checkError } = await supabase
+        .from("concrete_cuts")
+        .select("*")
+        .eq("category", "under_fence");
+
+      if (checkError) {
+        throw checkError;
+      }
+
+      // If we don't have any data, insert the default values
+      if (!existingData || existingData.length === 0) {
+        const defaultValues = [
+          { type: "Plain Concrete", price: 150, margin: 35, category: "under_fence" },
+          { type: "Paved Concrete", price: 220, margin: 60, category: "under_fence" }
+        ];
+
+        const { error: insertError } = await supabase
+          .from("concrete_cuts")
+          .insert(defaultValues);
+
+        if (insertError) {
+          throw insertError;
+        }
+
+        // Fetch the newly inserted data
+        const { data: newData, error: fetchError } = await supabase
+          .from("concrete_cuts")
+          .select("*")
+          .eq("category", "under_fence");
+
+        if (fetchError) {
+          throw fetchError;
+        }
+
+        return newData as ConcreteCut[];
+      }
+
+      return existingData as ConcreteCut[];
+    },
+  });
+
+  const isLoading = isPricesLoading || isCostsLoading || isCutsLoading || isUnderFenceLoading;
 
   return (
     <DashboardLayout>
@@ -120,6 +165,7 @@ const PavingRetaining = () => {
               {pavingPrices && <PavingPricesTable prices={pavingPrices} />}
               {additionalCosts && <PavingAdditionalCostsTable costs={additionalCosts} />}
               {concreteCuts && <ConcreteCutsTable cuts={concreteCuts} />}
+              {underFenceConcrete && <UnderFenceConcreteTable cuts={underFenceConcrete} />}
             </>
           )}
         </div>

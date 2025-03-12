@@ -15,14 +15,12 @@ import { supabase } from "@/integrations/supabase/client";
 import type { ConcreteCut } from "@/types/concrete-cut";
 import { useToast } from "@/hooks/use-toast";
 
-interface ConcreteCutsTableProps {
+interface UnderFenceConcreteTableProps {
   cuts: ConcreteCut[];
 }
 
-export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps) => {
-  // Filter out any cuts that have the "under_fence" category
-  const filteredCuts = initialCuts.filter(cut => cut.category !== "under_fence");
-  const [cuts, setCuts] = useState(filteredCuts);
+export const UnderFenceConcreteTable = ({ cuts: initialCuts }: UnderFenceConcreteTableProps) => {
+  const [cuts, setCuts] = useState(initialCuts);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState<{
     type: string;
@@ -107,16 +105,16 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating concrete cut:', error);
+      console.error('Error updating under fence concrete:', error);
       toast({
         title: "Error",
-        description: "Failed to update concrete cut. Please try again.",
+        description: "Failed to update under fence concrete. Please try again.",
         variant: "destructive"
       });
     } else {
       toast({
         title: "Success",
-        description: "Concrete cut updated successfully",
+        description: "Under fence concrete updated successfully",
       });
     }
 
@@ -130,12 +128,12 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
 
   return (
     <div className="mt-8">
-      <h3 className="text-lg font-medium text-gray-900 mb-4">Concrete Cuts</h3>
+      <h3 className="text-lg font-medium text-gray-900 mb-4">Under Fence Concrete Strip L/M</h3>
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead className="text-left">Type</TableHead>
-            <TableHead className="text-right">Price</TableHead>
+            <TableHead className="text-right">Cost</TableHead>
             <TableHead className="text-right">Margin</TableHead>
             <TableHead className="w-[100px]"></TableHead>
           </TableRow>
