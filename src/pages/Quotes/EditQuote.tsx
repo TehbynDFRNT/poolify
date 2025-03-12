@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "./context/QuoteContext";
 import { toast } from "sonner";
+import { Quote } from "@/types/quote";
 
 const EditQuoteContent = () => {
   const { quoteId } = useParams();
@@ -60,6 +61,15 @@ const EditQuoteContent = () => {
           return;
         }
 
+        // Ensure the status is a valid enum value
+        const validStatus: Quote['status'] = 
+          quoteData.status === 'draft' || 
+          quoteData.status === 'pending' || 
+          quoteData.status === 'approved' || 
+          quoteData.status === 'declined' 
+            ? quoteData.status 
+            : 'draft'; // Default to 'draft' if invalid
+
         // Update the quote context with the fetched data
         updateQuoteData({
           id: quoteData.id,
@@ -72,7 +82,7 @@ const EditQuoteContent = () => {
           home_address: quoteData.home_address,
           site_address: quoteData.site_address,
           pool_id: quoteData.pool_id,
-          status: quoteData.status,
+          status: validStatus,
           resident_homeowner: quoteData.resident_homeowner,
         });
 
