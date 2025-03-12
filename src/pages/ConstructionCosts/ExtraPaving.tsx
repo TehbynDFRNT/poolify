@@ -2,6 +2,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Layers } from "lucide-react";
+import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 
 const ExtraPaving = () => {
   return (
@@ -16,7 +17,7 @@ const ExtraPaving = () => {
           </div>
         </div>
 
-        <div className="grid">
+        <div className="grid gap-6">
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -28,9 +29,7 @@ const ExtraPaving = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="h-40 flex items-center justify-center border border-dashed rounded-md">
-                <p className="text-gray-500">Extra paving cost management coming soon</p>
-              </div>
+              <ExtraPavingCostsTable />
             </CardContent>
           </Card>
         </div>
