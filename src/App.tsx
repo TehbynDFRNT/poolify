@@ -20,6 +20,8 @@ import PoolIndividualCosts from "@/pages/ConstructionCosts/PoolIndividualCosts";
 import ExtraPaving from "@/pages/ConstructionCosts/ExtraPaving";
 import WaterFeature from "@/pages/ConstructionCosts/WaterFeature";
 import AddOns from "@/pages/AddOns";
+import Quotes from "@/pages/Quotes";
+import CreateQuote from "@/pages/Quotes/CreateQuote";
 
 function App() {
   return (
@@ -43,6 +45,8 @@ function App() {
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/price-builder" element={<PriceBuilder />} />
         <Route path="/price-builder/:poolId" element={<PoolPricing />} />
+        <Route path="/quotes" element={<Quotes />} />
+        <Route path="/quotes/new" element={<CreateQuote />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />

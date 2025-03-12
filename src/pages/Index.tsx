@@ -8,6 +8,7 @@ import {
   Filter,
   Users,
   PlusCircle,
+  FileText,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -49,6 +50,12 @@ const Index = () => {
       description: "Set up pricing calculations and formulas",
       icon: <Calculator className="w-6 h-6 text-primary" />,
       link: "/price-builder",
+    },
+    {
+      title: "Quotes",
+      description: "Create and manage customer quotes",
+      icon: <FileText className="w-6 h-6 text-primary" />,
+      link: "/quotes",
     },
   ];
 
