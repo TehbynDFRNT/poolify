@@ -126,6 +126,36 @@ export type Database = {
         }
         Relationships: []
       }
+      concrete_labour_costs: {
+        Row: {
+          cost: number
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          margin: number
+          updated_at: string | null
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          description: string
+          display_order: number
+          id?: string
+          margin: number
+          updated_at?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          margin?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       concrete_pump: {
         Row: {
           created_at: string
