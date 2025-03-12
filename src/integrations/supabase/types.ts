@@ -455,6 +455,57 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_blankets: {
+        Row: {
+          blanket_description: string
+          blanket_margin: number
+          blanket_rrp: number
+          blanket_sku: string
+          blanket_trade: number
+          created_at: string
+          heatpump_description: string
+          heatpump_margin: number
+          heatpump_rrp: number
+          heatpump_sku: string
+          heatpump_trade: number
+          id: string
+          pool_model: string
+          pool_range: string
+        }
+        Insert: {
+          blanket_description: string
+          blanket_margin?: number
+          blanket_rrp?: number
+          blanket_sku: string
+          blanket_trade?: number
+          created_at?: string
+          heatpump_description: string
+          heatpump_margin?: number
+          heatpump_rrp?: number
+          heatpump_sku: string
+          heatpump_trade?: number
+          id?: string
+          pool_model: string
+          pool_range: string
+        }
+        Update: {
+          blanket_description?: string
+          blanket_margin?: number
+          blanket_rrp?: number
+          blanket_sku?: string
+          blanket_trade?: number
+          created_at?: string
+          heatpump_description?: string
+          heatpump_margin?: number
+          heatpump_rrp?: number
+          heatpump_sku?: string
+          heatpump_trade?: number
+          id?: string
+          pool_model?: string
+          pool_range?: string
+        }
+        Relationships: []
+      }
       pool_cleaners: {
         Row: {
           created_at: string
