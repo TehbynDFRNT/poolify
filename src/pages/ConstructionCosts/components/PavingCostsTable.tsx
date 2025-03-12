@@ -133,10 +133,10 @@ export function PavingCostsTable({
         <TableFooter>
           <TableRow>
             <TableCell className="font-medium">Total</TableCell>
-            <TableCell className="text-right">{formatCurrency(totals.category1)}</TableCell>
-            <TableCell className="text-right">{formatCurrency(totals.category2)}</TableCell>
-            <TableCell className="text-right">{formatCurrency(totals.category3)}</TableCell>
-            <TableCell className="text-right">{formatCurrency(totals.category4)}</TableCell>
+            <TableCell>{formatCurrency(totals.category1)}</TableCell>
+            <TableCell>{formatCurrency(totals.category2)}</TableCell>
+            <TableCell>{formatCurrency(totals.category3)}</TableCell>
+            <TableCell>{formatCurrency(totals.category4)}</TableCell>
             <TableCell></TableCell>
           </TableRow>
         </TableFooter>

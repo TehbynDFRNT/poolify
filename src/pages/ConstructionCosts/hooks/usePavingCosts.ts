@@ -134,7 +134,9 @@ export const usePavingCosts = () => {
 
   // Initialize the database with default values if empty
   const initializeDefaultValues = async () => {
-    if (pavingCosts && pavingCosts.length === 0) {
+    // Ensure we only initialize if the table is truly empty
+    if (Array.isArray(pavingCosts) && pavingCosts.length === 0) {
+      console.log("Initializing default paving costs");
       const defaultCosts = [
         { name: "Paver", category1: 99, category2: 114, category3: 137, category4: 137, display_order: 1 },
         { name: "Wastage", category1: 13, category2: 13, category3: 13, category4: 13, display_order: 2 },

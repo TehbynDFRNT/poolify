@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PavingCostsTable } from "./components/PavingCostsTable";
 import { useEffect } from "react";
 import { usePavingCosts } from "./hooks/usePavingCosts";
+import { Button } from "@/components/ui/button";
 
 const PavingConcreting = () => {
   const {
@@ -29,10 +30,18 @@ const PavingConcreting = () => {
 
   // Initialize default values if the table is empty
   useEffect(() => {
-    if (pavingCosts && pavingCosts.length === 0) {
-      initializeDefaultValues();
+    // Call initialization function when component mounts
+    const initialize = async () => {
+      if (pavingCosts && pavingCosts.length === 0) {
+        console.log("Table is empty, initializing default values");
+        await initializeDefaultValues();
+      }
+    };
+    
+    if (!isLoading) {
+      initialize();
     }
-  }, [pavingCosts, initializeDefaultValues]);
+  }, [pavingCosts, isLoading, initializeDefaultValues]);
 
   return (
     <DashboardLayout>
@@ -62,6 +71,12 @@ const PavingConcreting = () => {
             <h1 className="text-2xl font-semibold text-gray-900">Paving & Concreting</h1>
             <p className="text-gray-500 mt-1">Manage paving and concrete costs</p>
           </div>
+          <Button 
+            onClick={() => initializeDefaultValues()}
+            disabled={isLoading || (pavingCosts && pavingCosts.length > 0)}
+          >
+            Reset to Default Values
+          </Button>
         </div>
         
         <Tabs defaultValue="paving" className="w-full">
