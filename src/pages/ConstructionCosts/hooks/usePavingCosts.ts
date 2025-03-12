@@ -29,6 +29,30 @@ export const usePavingCosts = () => {
     }
   };
 
+  const updatePavingCost = async (id: string, updates: Partial<PavingCost>) => {
+    try {
+      const { error } = await supabase
+        .from("paving_costs")
+        .update(updates)
+        .eq("id", id);
+
+      if (error) {
+        throw error;
+      }
+
+      setPavingCosts((prevCosts) => 
+        prevCosts ? prevCosts.map(cost => 
+          cost.id === id ? { ...cost, ...updates } : cost
+        ) : null
+      );
+      
+      toast.success("Paving cost updated successfully");
+    } catch (error) {
+      console.error("Error updating paving cost:", error);
+      toast.error("Failed to update paving cost");
+    }
+  };
+
   useEffect(() => {
     fetchPavingCosts();
   }, []);
@@ -36,6 +60,7 @@ export const usePavingCosts = () => {
   return {
     pavingCosts,
     isLoading,
-    refetch: fetchPavingCosts
+    refetch: fetchPavingCosts,
+    updatePavingCost
   };
 };
