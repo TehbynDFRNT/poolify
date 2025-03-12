@@ -67,7 +67,7 @@ const ConstructionCosts = () => {
           </Link>
 
           <Link 
-            to="/construction-costs/paving-retaining" 
+            to="/construction-costs/paving-concreting" 
             className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
           >
             <div className="flex items-center justify-between">
