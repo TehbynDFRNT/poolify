@@ -31,6 +31,12 @@ export const PoolCleanerRow = ({
   onDelete,
 }: PoolCleanerRowProps) => {
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+  
+  // Calculate margin amount
+  const marginAmount = calculateMarginAmount(
+    editValues.price !== undefined ? editValues.price : cleaner.price,
+    editValues.cost_price !== undefined ? editValues.cost_price : cleaner.cost_price
+  );
 
   return (
     <>
@@ -102,6 +108,9 @@ export const PoolCleanerRow = ({
             step="1"
           />
         </TableCell>
+        <TableCell className="text-right">
+          {formatCurrency(marginAmount)}
+        </TableCell>
         <TableCell className="flex items-center gap-2">
           <Button
             variant="ghost"
@@ -123,7 +132,7 @@ export const PoolCleanerRow = ({
       </TableRow>
       {isDescriptionOpen && cleaner.description && (
         <TableRow className="bg-muted/30">
-          <TableCell colSpan={6} className="p-4">
+          <TableCell colSpan={7} className="p-4">
             <div className="bg-white rounded-md p-3 text-sm text-muted-foreground">
               <strong className="text-foreground">Description:</strong> {cleaner.description}
             </div>
@@ -143,7 +152,7 @@ export const PoolCleanerRow = ({
       )}
       {editingCells.description && (
         <TableRow className="bg-muted/30">
-          <TableCell colSpan={6} className="p-4">
+          <TableCell colSpan={7} className="p-4">
             <div className="flex flex-col gap-2 bg-white rounded-md p-3">
               <textarea
                 className="w-full h-24 p-2 border rounded text-sm"
@@ -177,3 +186,9 @@ export const PoolCleanerRow = ({
     </>
   );
 };
+
+// Helper function to calculate margin amount
+function calculateMarginAmount(price: number, costPrice: number): number {
+  if (!price || !costPrice) return 0;
+  return price - costPrice;
+}
