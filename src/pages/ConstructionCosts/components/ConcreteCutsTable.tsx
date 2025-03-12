@@ -6,6 +6,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
+  TableFooter,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,25 +23,59 @@ interface ConcreteCutsTableProps {
 export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps) => {
   const [cuts, setCuts] = useState(initialCuts);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingValue, setEditingValue] = useState<string>("");
+  const [editingValues, setEditingValues] = useState<{
+    type: string;
+    price: string;
+    margin: string;
+  }>({
+    type: "",
+    price: "",
+    margin: "",
+  });
   const { toast } = useToast();
 
   const handleEdit = (cut: ConcreteCut) => {
     setEditingId(cut.id);
-    setEditingValue(cut.price.toString());
+    setEditingValues({
+      type: cut.type,
+      price: cut.price.toString(),
+      margin: cut.margin?.toString() || "0",
+    });
   };
 
   const handleCancel = () => {
     setEditingId(null);
-    setEditingValue("");
+    setEditingValues({
+      type: "",
+      price: "",
+      margin: "",
+    });
+  };
+
+  const handleChange = (field: keyof typeof editingValues, value: string) => {
+    setEditingValues((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleSave = async (id: string) => {
-    const numericValue = parseFloat(editingValue);
-    if (isNaN(numericValue)) {
+    const numericPrice = parseFloat(editingValues.price);
+    const numericMargin = parseFloat(editingValues.margin);
+    
+    if (isNaN(numericPrice)) {
       toast({
         title: "Invalid input",
-        description: "Please enter a valid number",
+        description: "Please enter a valid number for price",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (isNaN(numericMargin)) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter a valid number for margin",
         variant: "destructive"
       });
       return;
@@ -50,7 +85,12 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
     setCuts(currentCuts =>
       currentCuts.map(cut =>
         cut.id === id
-          ? { ...cut, price: numericValue }
+          ? { 
+              ...cut, 
+              type: editingValues.type,
+              price: numericPrice,
+              margin: numericMargin
+            }
           : cut
       )
     );
@@ -58,26 +98,43 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
     // Update database
     const { error } = await supabase
       .from('concrete_cuts')
-      .update({ price: numericValue })
+      .update({ 
+        type: editingValues.type,
+        price: numericPrice,
+        margin: numericMargin
+      })
       .eq('id', id);
 
     if (error) {
-      console.error('Error updating price:', error);
+      console.error('Error updating concrete cut:', error);
       toast({
         title: "Error",
-        description: "Failed to update price. Please try again.",
+        description: "Failed to update concrete cut. Please try again.",
         variant: "destructive"
       });
     } else {
       toast({
         title: "Success",
-        description: "Price updated successfully",
+        description: "Concrete cut updated successfully",
       });
     }
 
     setEditingId(null);
-    setEditingValue("");
+    setEditingValues({
+      type: "",
+      price: "",
+      margin: "",
+    });
   };
+
+  // Calculate total price
+  const totalPrice = cuts.reduce((sum, cut) => sum + cut.price, 0);
+  
+  // Calculate total margin if available
+  const totalMargin = cuts.reduce((sum, cut) => {
+    const margin = cut.margin || 0;
+    return sum + margin;
+  }, 0);
 
   return (
     <div className="mt-8">
@@ -87,25 +144,49 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
           <TableRow>
             <TableHead className="text-left">Type</TableHead>
             <TableHead className="text-right">Price</TableHead>
+            <TableHead className="text-right">Margin</TableHead>
             <TableHead className="w-[100px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {cuts.map((cut) => (
             <TableRow key={cut.id}>
-              <TableCell className="font-medium text-left">{cut.type}</TableCell>
+              <TableCell className="font-medium text-left">
+                {editingId === cut.id ? (
+                  <Input
+                    type="text"
+                    value={editingValues.type}
+                    onChange={(e) => handleChange("type", e.target.value)}
+                    className="w-full"
+                  />
+                ) : (
+                  cut.type
+                )}
+              </TableCell>
               <TableCell className="text-right">
                 {editingId === cut.id ? (
                   <Input
                     type="number"
-                    value={editingValue}
-                    onChange={(e) => setEditingValue(e.target.value)}
+                    value={editingValues.price}
+                    onChange={(e) => handleChange("price", e.target.value)}
                     className="w-32 ml-auto"
                     step="0.01"
-                    autoFocus
                   />
                 ) : (
                   formatCurrency(cut.price)
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                {editingId === cut.id ? (
+                  <Input
+                    type="number"
+                    value={editingValues.margin}
+                    onChange={(e) => handleChange("margin", e.target.value)}
+                    className="w-32 ml-auto"
+                    step="0.01"
+                  />
+                ) : (
+                  formatCurrency(cut.margin || 0)
                 )}
               </TableCell>
               <TableCell className="text-right">
@@ -138,6 +219,14 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
             </TableRow>
           ))}
         </TableBody>
+        <TableFooter>
+          <TableRow>
+            <TableCell className="font-medium">Total</TableCell>
+            <TableCell className="text-right font-medium">{formatCurrency(totalPrice)}</TableCell>
+            <TableCell className="text-right font-medium">{formatCurrency(totalMargin)}</TableCell>
+            <TableCell></TableCell>
+          </TableRow>
+        </TableFooter>
       </Table>
     </div>
   );
