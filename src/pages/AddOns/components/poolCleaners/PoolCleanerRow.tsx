@@ -32,11 +32,15 @@ export const PoolCleanerRow = ({
 }: PoolCleanerRowProps) => {
   const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
   
+  // Get current price and cost price values (from edit values if being edited, otherwise from cleaner)
+  const currentPrice = editValues.price !== undefined ? editValues.price : cleaner.price;
+  const currentCostPrice = editValues.cost_price !== undefined ? editValues.cost_price : cleaner.cost_price;
+  
   // Calculate margin amount
-  const marginAmount = calculateMarginAmount(
-    editValues.price !== undefined ? editValues.price : cleaner.price,
-    editValues.cost_price !== undefined ? editValues.cost_price : cleaner.cost_price
-  );
+  const marginAmount = calculateMarginAmount(currentPrice, currentCostPrice);
+  
+  // Calculate margin percentage
+  const marginPercentage = calculateMarginPercentage(currentPrice, currentCostPrice);
 
   return (
     <>
@@ -94,19 +98,7 @@ export const PoolCleanerRow = ({
           />
         </TableCell>
         <TableCell className="text-right">
-          <EditableCell
-            value={editValues.margin || cleaner.margin}
-            isEditing={editingCells.margin || false}
-            onEdit={() => onEditStart("margin", cleaner.margin)}
-            onSave={() => onEditSave("margin")}
-            onCancel={() => onEditCancel("margin")}
-            onChange={(value) => onEditChange("margin", value)}
-            onKeyDown={(e) => onEditKeyDown(e, "margin")}
-            type="number"
-            align="right"
-            format={(v) => `${v}%`}
-            step="1"
-          />
+          {`${marginPercentage}%`}
         </TableCell>
         <TableCell className="text-right">
           {formatCurrency(marginAmount)}
@@ -191,4 +183,12 @@ export const PoolCleanerRow = ({
 function calculateMarginAmount(price: number, costPrice: number): number {
   if (!price || !costPrice) return 0;
   return price - costPrice;
+}
+
+// Helper function to calculate margin percentage
+function calculateMarginPercentage(price: number, costPrice: number): number {
+  if (!price || !costPrice || price <= 0) return 0;
+  const marginAmount = price - costPrice;
+  const marginPercentage = Math.round((marginAmount / price) * 100);
+  return marginPercentage;
 }

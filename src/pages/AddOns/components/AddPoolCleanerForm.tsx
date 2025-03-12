@@ -26,7 +26,6 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
     name: "",
     price: "",
     cost_price: "",
-    margin: "30", // Default margin
     description: "",
   });
 
@@ -41,12 +40,18 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
     }
 
     try {
+      // Calculate margin based on price and cost price
+      const price = parseFloat(formData.price);
+      const costPrice = parseFloat(formData.cost_price);
+      const marginAmount = price - costPrice;
+      const margin = Math.round((marginAmount / price) * 100);
+
       addPoolCleaner({
         model_number: formData.model_number,
         name: formData.name,
-        price: parseFloat(formData.price),
-        cost_price: parseFloat(formData.cost_price),
-        margin: parseFloat(formData.margin || "30"),
+        price: price,
+        cost_price: costPrice,
+        margin: margin, // Send calculated margin
         description: formData.description || undefined,
       });
 
@@ -56,7 +61,6 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
         name: "",
         price: "",
         cost_price: "",
-        margin: "30",
         description: "",
       });
       onOpenChange(false);
@@ -125,18 +129,6 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
               value={formData.cost_price}
               onChange={handleChange}
               required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="margin">Margin (%)</Label>
-            <Input
-              id="margin"
-              name="margin"
-              type="number"
-              step="1"
-              value={formData.margin}
-              onChange={handleChange}
             />
           </div>
 
