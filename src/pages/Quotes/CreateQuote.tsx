@@ -24,7 +24,7 @@ const CreateQuote = () => {
 
   const steps = [
     { id: 1, name: "Customer Info" },
-    { id: 2, name: "Select Pool" },
+    { id: 2, name: "Select Base Pool" },
     { id: 3, name: "Add Features" },
     { id: 4, name: "Cost Summary" },
     { id: 5, name: "Preview Quote" },
