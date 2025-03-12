@@ -12,7 +12,7 @@ export const useConcreteLabourCosts = () => {
     queryFn: async () => {
       // Use a generic approach to work with any table
       const { data, error } = await supabase
-        .from("concrete_labour_costs")
+        .from("concrete_labour")
         .select("*")
         .order("display_order", { ascending: true }) as { data: ConcreteLabourCost[] | null, error: any };
 
@@ -28,7 +28,7 @@ export const useConcreteLabourCosts = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<ConcreteLabourCost> }) => {
       const { error } = await supabase
-        .from("concrete_labour_costs")
+        .from("concrete_labour")
         .update(updates)
         .eq("id", id) as { data: any, error: any };
 
@@ -47,7 +47,7 @@ export const useConcreteLabourCosts = () => {
   const addMutation = useMutation({
     mutationFn: async (cost: ConcreteLabourCostInsert) => {
       const { error } = await supabase
-        .from("concrete_labour_costs")
+        .from("concrete_labour")
         .insert([cost]) as { data: any, error: any };
 
       if (error) throw error;
@@ -65,7 +65,7 @@ export const useConcreteLabourCosts = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from("concrete_labour_costs")
+        .from("concrete_labour")
         .delete()
         .eq("id", id) as { data: any, error: any };
 

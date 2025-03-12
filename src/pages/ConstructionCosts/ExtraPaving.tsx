@@ -52,11 +52,6 @@ const ExtraPaving = () => {
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <ConcreteLabTable />
-            <ConcreteLabourCostsTable />
-          </div>
-
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
@@ -86,6 +81,25 @@ const ExtraPaving = () => {
               <ConcreteCostsTable />
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <HardHat className="h-5 w-5 text-primary" />
+                <CardTitle>Concrete Labour Costs</CardTitle>
+              </div>
+              <CardDescription>
+                Configure and manage prices for concrete labour costs
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ConcreteLabourCostsTable />
+            </CardContent>
+          </Card>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <ConcreteLabTable />
+          </div>
 
           <ConcretePump />
         </div>

@@ -3,7 +3,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useConcreteLabourCosts } from "../hooks/useConcreteLabourCosts";
 import { ConcreteLabourCostRow } from "./ConcreteLabourCostRow";
 import { AddConcreteLabourCostRow } from "./AddConcreteLabourCostRow";
@@ -42,24 +41,19 @@ export const ConcreteLabourCostsTable = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>Concrete Labour Costs</CardTitle>
-            <CardDescription>Configure and manage prices for concrete labour costs</CardDescription>
-          </div>
-          <Button 
-            onClick={() => setIsAdding(true)} 
-            disabled={isAdding}
-            size="sm"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add New
-          </Button>
-        </div>
-      </CardHeader>
-      <CardContent>
+    <div className="space-y-4">
+      <div className="flex justify-end">
+        <Button 
+          onClick={() => setIsAdding(true)} 
+          disabled={isAdding}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          Add New Concrete Labour Cost
+        </Button>
+      </div>
+      
+      <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
@@ -89,13 +83,13 @@ export const ConcreteLabourCostsTable = () => {
             {concreteLabourCosts?.length === 0 && !isAdding && (
               <TableRow>
                 <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                  No concrete labour costs defined. Click "Add New" to create one.
+                  No concrete labour costs defined. Click "Add New Concrete Labour Cost" to create one.
                 </TableCell>
               </TableRow>
             )}
           </TableBody>
         </Table>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
