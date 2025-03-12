@@ -27,6 +27,12 @@ export const ConcreteLabTable = () => {
     deleteMutation.mutate(id);
   };
 
+  // Get next display order for new items
+  const getNextDisplayOrder = () => {
+    if (!concreteLab?.length) return 1;
+    return Math.max(...concreteLab.map(lab => lab.display_order)) + 1;
+  };
+
   if (isLoading) {
     return <div>Loading concrete labour...</div>;
   }
@@ -34,12 +40,6 @@ export const ConcreteLabTable = () => {
   if (error) {
     return <div>Error loading data: {(error as Error).message}</div>;
   }
-
-  // Get next display order for new items
-  const getNextDisplayOrder = () => {
-    if (!concreteLab?.length) return 1;
-    return Math.max(...concreteLab.map(lab => lab.display_order)) + 1;
-  };
 
   return (
     <Card>
