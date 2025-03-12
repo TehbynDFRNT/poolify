@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -11,8 +12,10 @@ import {
 import { Construction } from "lucide-react";
 import { PavingPricesTable } from "./components/PavingPricesTable";
 import { PavingAdditionalCostsTable } from "./components/PavingAdditionalCostsTable";
+import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import type { PavingPrice } from "@/types/paving-price";
 import type { PavingAdditionalCost } from "@/types/paving-additional-cost";
+import type { ConcreteCut } from "@/types/concrete-cut";
 
 const PavingRetaining = () => {
   const { data: pavingPrices, isLoading: isPricesLoading } = useQuery({
@@ -47,7 +50,23 @@ const PavingRetaining = () => {
     },
   });
 
-  const isLoading = isPricesLoading || isCostsLoading;
+  const { data: concreteCuts, isLoading: isCutsLoading } = useQuery({
+    queryKey: ["concrete-cuts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("concrete_cuts")
+        .select("*")
+        .order("type");
+
+      if (error) {
+        throw error;
+      }
+
+      return data as ConcreteCut[];
+    },
+  });
+
+  const isLoading = isPricesLoading || isCostsLoading || isCutsLoading;
 
   return (
     <DashboardLayout>
@@ -88,6 +107,7 @@ const PavingRetaining = () => {
             <>
               {pavingPrices && <PavingPricesTable prices={pavingPrices} />}
               {additionalCosts && <PavingAdditionalCostsTable costs={additionalCosts} />}
+              {concreteCuts && <ConcreteCutsTable cuts={concreteCuts} />}
             </>
           )}
         </div>
