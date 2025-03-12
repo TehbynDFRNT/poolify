@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -55,7 +56,8 @@ const PavingRetaining = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("concrete_cuts")
-        .select("*");
+        .select("*")
+        .is("category", null);
 
       if (error) {
         throw error;
