@@ -95,7 +95,7 @@ export const PavingCostsTable: React.FC<PavingCostsTableProps> = ({
               <TableHead>Category 2</TableHead>
               <TableHead>Category 3</TableHead>
               <TableHead>Category 4</TableHead>
-              <TableHead className="w-[80px]"></TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -106,7 +106,7 @@ export const PavingCostsTable: React.FC<PavingCostsTableProps> = ({
                 <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-16" /></TableCell>
                 <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                <TableCell><Skeleton className="h-5 w-8" /></TableCell>
+                <TableCell><Skeleton className="h-5 w-6" /></TableCell>
               </TableRow>
             ))}
             <TableRow className="font-semibold bg-muted/50">
@@ -151,7 +151,7 @@ export const PavingCostsTable: React.FC<PavingCostsTableProps> = ({
               <TableHead>Category 2</TableHead>
               <TableHead>Category 3</TableHead>
               <TableHead>Category 4</TableHead>
-              <TableHead className="w-[80px]"></TableHead>
+              <TableHead className="w-[50px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -172,6 +172,7 @@ export const PavingCostsTable: React.FC<PavingCostsTableProps> = ({
                         className="h-8 w-8"
                       >
                         <Pencil className="h-4 w-4" />
+                        <span className="sr-only">Edit {cost.name}</span>
                       </Button>
                     </DialogTrigger>
                     <DialogContent>
