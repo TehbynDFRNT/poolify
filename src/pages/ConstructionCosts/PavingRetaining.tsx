@@ -55,14 +55,26 @@ const PavingRetaining = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("concrete_cuts")
-        .select("*")
-        .order("type");
+        .select("*");
 
       if (error) {
         throw error;
       }
 
-      return data as ConcreteCut[];
+      // Custom sort order: 1/4 Pool, 1/2 Pool, 3/4 Pool, Full Pool, then any others like Diagonal Cuts
+      const sortOrder = {
+        "1/4 Pool": 1,
+        "1/2 Pool": 2,
+        "3/4 Pool": 3,
+        "Full Pool": 4,
+        "Diagonal Cuts": 5
+      };
+
+      return (data as ConcreteCut[]).sort((a, b) => {
+        const orderA = sortOrder[a.type] || 99; // Default high number for unknown types
+        const orderB = sortOrder[b.type] || 99;
+        return orderA - orderB;
+      });
     },
   });
 
