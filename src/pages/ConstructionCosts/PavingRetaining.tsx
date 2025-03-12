@@ -67,7 +67,7 @@ const PavingRetaining = () => {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <Link to="/paving-retaining" className="transition-colors hover:text-foreground">
-                Paving & Retaining
+                Paving
               </Link>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -75,8 +75,8 @@ const PavingRetaining = () => {
 
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Paving & Retaining</h1>
-            <p className="text-gray-500 mt-1">Manage paving and retaining wall specifications</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Paving</h1>
+            <p className="text-gray-500 mt-1">Manage paving specifications and pricing</p>
           </div>
           <Construction className="h-6 w-6 text-gray-500" />
         </div>
