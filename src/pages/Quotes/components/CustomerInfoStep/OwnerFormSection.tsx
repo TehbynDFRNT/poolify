@@ -2,10 +2,11 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
+import { CustomerInfoFormData } from "./customerInfoSchema";
 
 interface OwnerFormSectionProps {
   ownerNumber: 1 | 2;
-  errors: Record<string, string>;
+  errors: Partial<Record<keyof CustomerInfoFormData, string>>;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
