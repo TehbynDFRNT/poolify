@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { type PavingCost } from "../types/pavingCosts";
@@ -16,23 +16,6 @@ export const usePavingCosts = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingValues, setEditingValues] = useState<Record<string, number>>({});
   const queryClient = useQueryClient();
-
-  // Delete all paving costs on component mount
-  useEffect(() => {
-    const deleteData = async () => {
-      try {
-        await deleteAllPavingCosts();
-        queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
-        toast.success("All paving costs have been cleared");
-      } catch (error) {
-        console.error("Error deleting paving costs:", error);
-        toast.error("Failed to delete paving costs");
-      }
-    };
-    
-    // Execute deletion on mount
-    deleteData();
-  }, [queryClient]);
 
   // Fetch paving costs
   const { data: pavingCosts, isLoading } = useQuery({
