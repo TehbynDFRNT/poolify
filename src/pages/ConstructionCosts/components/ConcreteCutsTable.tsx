@@ -6,7 +6,6 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableFooter,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -127,15 +126,6 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
     });
   };
 
-  // Calculate total price
-  const totalPrice = cuts.reduce((sum, cut) => sum + cut.price, 0);
-  
-  // Calculate total margin if available
-  const totalMargin = cuts.reduce((sum, cut) => {
-    const margin = cut.margin || 0;
-    return sum + margin;
-  }, 0);
-
   return (
     <div className="mt-8">
       <h3 className="text-lg font-medium text-gray-900 mb-4">Concrete Cuts</h3>
@@ -219,14 +209,6 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
             </TableRow>
           ))}
         </TableBody>
-        <TableFooter>
-          <TableRow>
-            <TableCell className="font-medium">Total</TableCell>
-            <TableCell className="text-right font-medium">{formatCurrency(totalPrice)}</TableCell>
-            <TableCell className="text-right font-medium">{formatCurrency(totalMargin)}</TableCell>
-            <TableCell></TableCell>
-          </TableRow>
-        </TableFooter>
       </Table>
     </div>
   );
