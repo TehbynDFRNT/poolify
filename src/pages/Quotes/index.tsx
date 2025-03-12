@@ -24,7 +24,7 @@ import {
 
 const Quotes = () => {
   const navigate = useNavigate();
-  const { data: quotes, isLoading, error } = useQuotes();
+  const { data: quotes, isLoading, error, refetch } = useQuotes();
 
   const renderQuotesTable = () => {
     if (isLoading) {
@@ -40,8 +40,11 @@ const Quotes = () => {
 
     if (error) {
       return (
-        <div className="text-center py-8 text-red-500">
-          <p>Error loading quotes. Please try again.</p>
+        <div className="text-center py-8">
+          <p className="text-red-500 mb-4">Error loading quotes. Please try again.</p>
+          <Button onClick={() => refetch()} variant="outline">
+            Retry
+          </Button>
         </div>
       );
     }
@@ -162,4 +165,3 @@ const Quotes = () => {
 };
 
 export default Quotes;
-

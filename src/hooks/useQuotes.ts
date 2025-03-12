@@ -8,20 +8,40 @@ export const useQuotes = () => {
   return useQuery({
     queryKey: ["quotes"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First, fetch the quotes
+      const { data: quotesData, error: quotesError } = await supabase
         .from("quotes")
-        .select(`
-          *,
-          pool:pool_specifications(*)
-        `)
+        .select("*")
         .order("created_at", { ascending: false });
 
-      if (error) {
-        console.error("Error fetching quotes:", error);
-        throw error;
+      if (quotesError) {
+        console.error("Error fetching quotes:", quotesError);
+        throw quotesError;
       }
 
-      return data as (Quote & { pool: any | null })[];
+      // For quotes with pool_id, fetch the pool details separately
+      const quotesWithPools = await Promise.all(
+        (quotesData || []).map(async (quote) => {
+          if (quote.pool_id) {
+            const { data: poolData, error: poolError } = await supabase
+              .from("pool_specifications")
+              .select("*")
+              .eq("id", quote.pool_id)
+              .single();
+
+            if (poolError) {
+              console.error(`Error fetching pool for quote ${quote.id}:`, poolError);
+              return { ...quote, pool: null };
+            }
+
+            return { ...quote, pool: poolData };
+          }
+          return { ...quote, pool: null };
+        })
+      );
+
+      console.log("Quotes with pools:", quotesWithPools);
+      return quotesWithPools as (Quote & { pool: any | null })[];
     },
     meta: {
       onError: (error) => {
