@@ -7,8 +7,7 @@ import {
   fetchPavingCosts,
   updatePavingCost,
   addPavingCost,
-  deleteAllPavingCosts,
-  resetPavingCostsToDefault
+  deleteAllPavingCosts
 } from "../services/pavingCostsService";
 
 export type { PavingCost } from "../types/pavingCosts";
@@ -109,22 +108,6 @@ export const usePavingCosts = () => {
     }
   };
 
-  // Reset all existing data with default values (exactly 3 rows)
-  const initializeDefaultValues = async () => {
-    try {
-      console.log("Resetting paving costs to default values");
-      
-      await resetPavingCostsToDefault();
-      
-      // Refresh the data
-      queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
-      toast.success("Paving costs reset to default values");
-    } catch (error) {
-      console.error("Error resetting default values:", error);
-      toast.error("Failed to reset paving costs");
-    }
-  };
-
   return {
     pavingCosts,
     isLoading,
@@ -136,7 +119,6 @@ export const usePavingCosts = () => {
     handleValueChange,
     updatePavingCostMutation,
     addPavingCostMutation,
-    initializeDefaultValues,
     deleteAllPavingCosts: deleteAllPavingCostsHandler
   };
 };

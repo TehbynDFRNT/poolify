@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { Construction, Grid, HardHat, RefreshCw } from "lucide-react";
+import { Construction, Grid, HardHat } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -10,9 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { PavingCostsTable } from "./components/PavingCostsTable";
-import { useEffect } from "react";
 import { usePavingCosts } from "./hooks/usePavingCosts";
 
 const PavingConcreting = () => {
@@ -25,21 +23,7 @@ const PavingConcreting = () => {
     handleSave,
     handleCancel,
     handleValueChange,
-    initializeDefaultValues,
-    deleteAllPavingCosts
   } = usePavingCosts();
-
-  // Initialize default values if the table is empty
-  useEffect(() => {
-    const initialize = async () => {
-      if (!isLoading && (!pavingCosts || pavingCosts.length === 0)) {
-        console.log("Table is empty, initializing default values");
-        await initializeDefaultValues();
-      }
-    };
-    
-    initialize();
-  }, [pavingCosts, isLoading, initializeDefaultValues]);
 
   return (
     <DashboardLayout>
@@ -69,14 +53,6 @@ const PavingConcreting = () => {
             <h1 className="text-2xl font-semibold text-gray-900">Paving & Concreting</h1>
             <p className="text-gray-500 mt-1">Manage paving and concrete costs</p>
           </div>
-          <Button 
-            variant="outline" 
-            className="flex items-center gap-2"
-            onClick={initializeDefaultValues}
-          >
-            <RefreshCw className="h-4 w-4" />
-            Reset to Default
-          </Button>
         </div>
         
         <Tabs defaultValue="paving" className="w-full">
