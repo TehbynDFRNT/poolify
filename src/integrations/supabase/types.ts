@@ -509,6 +509,7 @@ export type Database = {
       pool_cleaners: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           margin: number
           model_number: string
@@ -517,6 +518,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           margin: number
           model_number: string
@@ -525,6 +527,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           margin?: number
           model_number?: string

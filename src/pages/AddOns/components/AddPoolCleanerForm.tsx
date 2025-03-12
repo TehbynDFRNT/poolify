@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
     price: "",
     cost_price: "",
     margin: "30", // Default margin
+    description: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -45,6 +47,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
         price: parseFloat(formData.price),
         cost_price: parseFloat(formData.cost_price),
         margin: parseFloat(formData.margin || "30"),
+        description: formData.description || undefined,
       });
 
       // Reset form and close dialog
@@ -54,6 +57,7 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
         price: "",
         cost_price: "",
         margin: "30",
+        description: "",
       });
       onOpenChange(false);
     } catch (error) {
@@ -64,14 +68,14 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Add New Pool Cleaner</DialogTitle>
         </DialogHeader>
@@ -136,7 +140,19 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              name="description"
+              value={formData.description}
+              onChange={handleChange}
+              rows={4}
+              placeholder="Add a description of the pool cleaner"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
