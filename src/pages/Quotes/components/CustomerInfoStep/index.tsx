@@ -4,6 +4,7 @@ import { OwnerFormSection } from "./OwnerFormSection";
 import { AddressFormSection } from "./AddressFormSection";
 import { ResidentHomeownerCheckbox } from "./ResidentHomeownerCheckbox";
 import { useCustomerInfoForm } from "./useCustomerInfoForm";
+import { useQuoteContext } from "../../context/QuoteContext";
 
 interface CustomerInfoStepProps {
   onNext: () => void;
@@ -11,6 +12,7 @@ interface CustomerInfoStepProps {
 }
 
 export const CustomerInfoStep = ({ onNext, isEditing = false }: CustomerInfoStepProps) => {
+  const { quoteData } = useQuoteContext();
   const { 
     errors, 
     isSubmitting, 

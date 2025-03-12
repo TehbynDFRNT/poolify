@@ -14,7 +14,7 @@ export const ResidentHomeownerCheckbox = ({ onCheckedChange }: ResidentHomeowner
     <div className="flex items-center space-x-2">
       <Checkbox 
         id="resident_homeowner"
-        checked={quoteData.resident_homeowner || false}
+        checked={Boolean(quoteData.resident_homeowner)}
         onCheckedChange={onCheckedChange}
       />
       <Label htmlFor="resident_homeowner" className="text-sm font-normal">

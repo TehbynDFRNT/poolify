@@ -26,6 +26,7 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
   };
 
   const handleCheckboxChange = (checked: boolean) => {
+    console.log("Checkbox changed to:", checked);
     updateQuoteData({ resident_homeowner: checked });
   };
 
@@ -49,7 +50,7 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
         owner2_name: quoteData.owner2_name,
         owner2_email: quoteData.owner2_email,
         owner2_phone: quoteData.owner2_phone,
-        resident_homeowner: quoteData.resident_homeowner,
+        resident_homeowner: Boolean(quoteData.resident_homeowner),
       };
       
       console.log("Saving quote data:", dataToSave);
@@ -120,4 +121,3 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
     handleSubmit
   };
 };
-
