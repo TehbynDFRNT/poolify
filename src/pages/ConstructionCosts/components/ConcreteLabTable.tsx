@@ -45,17 +45,19 @@ export const ConcreteLabTable = () => {
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle>Concrete Labour</CardTitle>
+          <div>
+            <CardTitle>Concrete Labour</CardTitle>
+            <CardDescription>Concrete labour costs per meter</CardDescription>
+          </div>
           <Button 
             onClick={() => setIsAdding(true)} 
             disabled={isAdding}
-            className="flex items-center gap-2"
+            size="sm"
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-2" />
             Add New
           </Button>
         </div>
-        <CardDescription>Concrete labour costs per meter</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -64,7 +66,7 @@ export const ConcreteLabTable = () => {
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Price per L/M</TableHead>
               <TableHead className="text-right">Margin</TableHead>
-              <TableHead className="text-right w-[150px]">Actions</TableHead>
+              <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
