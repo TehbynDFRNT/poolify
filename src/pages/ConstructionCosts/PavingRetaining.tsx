@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -67,7 +66,7 @@ const PavingRetaining = () => {
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <Link to="/paving-retaining" className="transition-colors hover:text-foreground">
-                Paving
+                Paving & Concreting
               </Link>
             </BreadcrumbItem>
           </BreadcrumbList>
@@ -75,8 +74,8 @@ const PavingRetaining = () => {
 
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Paving</h1>
-            <p className="text-gray-500 mt-1">Manage paving specifications and pricing</p>
+            <h1 className="text-2xl font-semibold text-gray-900">Paving & Concreting</h1>
+            <p className="text-gray-500 mt-1">Manage paving and concrete specifications and pricing</p>
           </div>
           <Construction className="h-6 w-6 text-gray-500" />
         </div>
