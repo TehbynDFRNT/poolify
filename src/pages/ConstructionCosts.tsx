@@ -2,7 +2,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { BarChart4 } from "lucide-react";
+import { BarChart4, Construction, Building, Hammer, Wrench } from "lucide-react";
 
 const ConstructionCosts = () => {
   return (
@@ -21,7 +21,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8" />
+              <Construction className="h-8 w-8 text-primary" />
               <span>Excavation Costs</span>
             </Button>
           </Link>
@@ -31,7 +31,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8" />
+              <Building className="h-8 w-8 text-primary" />
               <span>Fixed Costs</span>
             </Button>
           </Link>
@@ -41,7 +41,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8" />
+              <Wrench className="h-8 w-8 text-primary" />
               <span>Retaining Walls</span>
             </Button>
           </Link>
@@ -51,7 +51,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8" />
+              <Construction className="h-8 w-8 text-primary" />
               <span>Bobcat Costs</span>
             </Button>
           </Link>
@@ -61,7 +61,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8" />
+              <Hammer className="h-8 w-8 text-primary" />
               <span>Crane Costs</span>
             </Button>
           </Link>
@@ -71,7 +71,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8" />
+              <BarChart4 className="h-8 w-8 text-primary" />
               <span>Pool Individual Costs</span>
             </Button>
           </Link>
