@@ -7,6 +7,7 @@ import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
 import { ConcreteLabourCostsTable } from "./components/ConcreteLabourCostsTable";
 import { ConcretePump } from "./components/ConcretePump";
 import { UnderFenceConcreteStripsTable } from "./components/UnderFenceConcreteStripsTable";
+import { ExtraConcretingTable } from "./components/ExtraConcretingTable";
 
 const ExtraPaving = () => {
   return (
@@ -108,9 +109,7 @@ const ExtraPaving = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center justify-center h-40 border border-dashed rounded-md bg-muted/20">
-                <p className="text-muted-foreground">Extra concreting content will be added here</p>
-              </div>
+              <ExtraConcretingTable />
             </CardContent>
           </Card>
         </div>
