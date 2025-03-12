@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { BarChart4, Construction, Building, Hammer, Wrench } from "lucide-react";
+import { BarChart4, Construction, Building, Hammer, Wrench, Layers } from "lucide-react";
 
 const ConstructionCosts = () => {
   return (
@@ -54,6 +54,13 @@ const ConstructionCosts = () => {
             <div className="p-6 rounded-lg border border-gray-200 hover:border-primary transition-colors flex flex-col items-center justify-center">
               <BarChart4 className="h-6 w-6 text-primary mb-3" />
               <span className="font-medium">Pool Individual Costs</span>
+            </div>
+          </Link>
+
+          <Link to="/construction-costs/extra-paving" className="block">
+            <div className="p-6 rounded-lg border border-gray-200 hover:border-primary transition-colors flex flex-col items-center justify-center">
+              <Layers className="h-6 w-6 text-primary mb-3" />
+              <span className="font-medium">Extra Paving</span>
             </div>
           </Link>
         </div>
