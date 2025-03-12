@@ -11,54 +11,28 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PavingCostsTable } from "./components/PavingCostsTable";
-import { useState } from "react";
+import { useEffect } from "react";
+import { usePavingCosts } from "./hooks/usePavingCosts";
 
 const PavingConcreting = () => {
-  // Initial paving cost data based on the provided table
-  const [pavingCosts, setPavingCosts] = useState([
-    { 
-      id: "paver", 
-      name: "Paver", 
-      category1: 99, 
-      category2: 114, 
-      category3: 137, 
-      category4: 137 
-    },
-    { 
-      id: "wastage", 
-      name: "Wastage", 
-      category1: 13, 
-      category2: 13, 
-      category3: 13, 
-      category4: 13 
-    },
-    { 
-      id: "margin", 
-      name: "Margin", 
-      category1: 100, 
-      category2: 100, 
-      category3: 100, 
-      category4: 100 
+  const {
+    pavingCosts,
+    isLoading,
+    editingId,
+    editingValues,
+    handleEdit,
+    handleSave,
+    handleCancel,
+    handleValueChange,
+    initializeDefaultValues
+  } = usePavingCosts();
+
+  // Initialize default values if the table is empty
+  useEffect(() => {
+    if (pavingCosts && pavingCosts.length === 0) {
+      initializeDefaultValues();
     }
-  ]);
-
-  // Calculate totals for each category
-  const totals = {
-    category1: pavingCosts.reduce((sum, item) => sum + item.category1, 0),
-    category2: pavingCosts.reduce((sum, item) => sum + item.category2, 0),
-    category3: pavingCosts.reduce((sum, item) => sum + item.category3, 0),
-    category4: pavingCosts.reduce((sum, item) => sum + item.category4, 0)
-  };
-
-  // Handle editing paving costs
-  const handleCostUpdate = (id: string, category: string, value: number) => {
-    setPavingCosts(prev => prev.map(cost => {
-      if (cost.id === id) {
-        return { ...cost, [category]: value };
-      }
-      return cost;
-    }));
-  };
+  }, [pavingCosts, initializeDefaultValues]);
 
   return (
     <DashboardLayout>
@@ -106,11 +80,19 @@ const PavingConcreting = () => {
                 <CardDescription>Set up and manage paving costs for pool installations</CardDescription>
               </CardHeader>
               <CardContent>
-                <PavingCostsTable 
-                  pavingCosts={pavingCosts} 
-                  totals={totals}
-                  onUpdate={handleCostUpdate}
-                />
+                {isLoading ? (
+                  <div className="text-center py-6">Loading paving costs...</div>
+                ) : (
+                  <PavingCostsTable 
+                    pavingCosts={pavingCosts || []}
+                    editingId={editingId}
+                    editingValues={editingValues}
+                    onEdit={handleEdit}
+                    onSave={handleSave}
+                    onCancel={handleCancel}
+                    onValueChange={handleValueChange}
+                  />
+                )}
               </CardContent>
             </Card>
           </TabsContent>

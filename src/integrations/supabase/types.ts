@@ -404,6 +404,42 @@ export type Database = {
         }
         Relationships: []
       }
+      paving_costs: {
+        Row: {
+          category1: number
+          category2: number
+          category3: number
+          category4: number
+          created_at: string
+          display_order: number
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category1?: number
+          category2?: number
+          category3?: number
+          category4?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category1?: number
+          category2?: number
+          category3?: number
+          category4?: number
+          created_at?: string
+          display_order?: number
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pool_blankets: {
         Row: {
           blanket_description: string

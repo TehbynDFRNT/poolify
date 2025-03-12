@@ -1,5 +1,4 @@
 
-import { useState } from "react";
 import {
   Table,
   TableHeader,
@@ -9,74 +8,43 @@ import {
   TableCell,
   TableFooter,
 } from "@/components/ui/table";
-import { EditableCell } from "@/components/filtration/components/EditableCell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
-
-interface PavingCost {
-  id: string;
-  name: string;
-  category1: number;
-  category2: number;
-  category3: number;
-  category4: number;
-}
+import type { PavingCost } from "../hooks/usePavingCosts";
 
 interface PavingCostsTableProps {
   pavingCosts: PavingCost[];
-  totals: {
-    category1: number;
-    category2: number;
-    category3: number;
-    category4: number;
-  };
-  onUpdate: (id: string, category: string, value: number) => void;
+  editingId: string | null;
+  editingValues: Record<string, number>;
+  onEdit: (id: string, cost: PavingCost) => void;
+  onSave: (id: string) => void;
+  onCancel: () => void;
+  onValueChange: (category: string, value: number) => void;
 }
 
-export function PavingCostsTable({ pavingCosts, totals, onUpdate }: PavingCostsTableProps) {
-  const [editingCell, setEditingCell] = useState<{
-    id: string;
-    category: string;
-    value: string;
-  } | null>(null);
-
-  const handleEdit = (id: string, category: string, value: number) => {
-    setEditingCell({
-      id,
-      category,
-      value: value.toString(),
-    });
-  };
-
-  const handleChange = (value: string) => {
-    if (editingCell) {
-      setEditingCell({
-        ...editingCell,
-        value,
-      });
-    }
-  };
-
-  const handleSave = () => {
-    if (editingCell) {
-      const value = parseFloat(editingCell.value);
-      if (!isNaN(value)) {
-        onUpdate(editingCell.id, editingCell.category, value);
-      }
-      setEditingCell(null);
-    }
-  };
-
-  const handleCancel = () => {
-    setEditingCell(null);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleSave();
-    } else if (e.key === "Escape") {
-      handleCancel();
-    }
-  };
+export function PavingCostsTable({
+  pavingCosts,
+  editingId,
+  editingValues,
+  onEdit,
+  onSave,
+  onCancel,
+  onValueChange,
+}: PavingCostsTableProps) {
+  // Calculate totals for each category
+  const totals = pavingCosts.reduce(
+    (acc, cost) => {
+      const isEditing = editingId === cost.id;
+      return {
+        category1: acc.category1 + (isEditing ? (editingValues.category1 || 0) : cost.category1),
+        category2: acc.category2 + (isEditing ? (editingValues.category2 || 0) : cost.category2),
+        category3: acc.category3 + (isEditing ? (editingValues.category3 || 0) : cost.category3),
+        category4: acc.category4 + (isEditing ? (editingValues.category4 || 0) : cost.category4),
+      };
+    },
+    { category1: 0, category2: 0, category3: 0, category4: 0 }
+  );
 
   return (
     <div className="overflow-x-auto">
@@ -88,6 +56,7 @@ export function PavingCostsTable({ pavingCosts, totals, onUpdate }: PavingCostsT
             <TableHead>Category 2</TableHead>
             <TableHead>Category 3</TableHead>
             <TableHead>Category 4</TableHead>
+            <TableHead className="w-[120px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -95,75 +64,80 @@ export function PavingCostsTable({ pavingCosts, totals, onUpdate }: PavingCostsT
             <TableRow key={cost.id}>
               <TableCell className="font-medium">{cost.name}</TableCell>
               <TableCell>
-                <EditableCell
-                  value={cost.category1}
-                  isEditing={editingCell?.id === cost.id && editingCell?.category === "category1"}
-                  onEdit={() => handleEdit(cost.id, "category1", cost.category1)}
-                  onSave={handleSave}
-                  onCancel={handleCancel}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                  step="0.01"
-                />
+                {editingId === cost.id ? (
+                  <Input
+                    type="number"
+                    value={editingValues.category1 ?? cost.category1}
+                    onChange={(e) => onValueChange("category1", parseFloat(e.target.value) || 0)}
+                    className="w-24"
+                    step="0.01"
+                  />
+                ) : (
+                  formatCurrency(cost.category1)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={cost.category2}
-                  isEditing={editingCell?.id === cost.id && editingCell?.category === "category2"}
-                  onEdit={() => handleEdit(cost.id, "category2", cost.category2)}
-                  onSave={handleSave}
-                  onCancel={handleCancel}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                  step="0.01"
-                />
+                {editingId === cost.id ? (
+                  <Input
+                    type="number"
+                    value={editingValues.category2 ?? cost.category2}
+                    onChange={(e) => onValueChange("category2", parseFloat(e.target.value) || 0)}
+                    className="w-24"
+                    step="0.01"
+                  />
+                ) : (
+                  formatCurrency(cost.category2)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={cost.category3}
-                  isEditing={editingCell?.id === cost.id && editingCell?.category === "category3"}
-                  onEdit={() => handleEdit(cost.id, "category3", cost.category3)}
-                  onSave={handleSave}
-                  onCancel={handleCancel}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                  step="0.01"
-                />
+                {editingId === cost.id ? (
+                  <Input
+                    type="number"
+                    value={editingValues.category3 ?? cost.category3}
+                    onChange={(e) => onValueChange("category3", parseFloat(e.target.value) || 0)}
+                    className="w-24"
+                    step="0.01"
+                  />
+                ) : (
+                  formatCurrency(cost.category3)
+                )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  value={cost.category4}
-                  isEditing={editingCell?.id === cost.id && editingCell?.category === "category4"}
-                  onEdit={() => handleEdit(cost.id, "category4", cost.category4)}
-                  onSave={handleSave}
-                  onCancel={handleCancel}
-                  onChange={handleChange}
-                  onKeyDown={handleKeyDown}
-                  type="number"
-                  align="right"
-                  format={formatCurrency}
-                  step="0.01"
-                />
+                {editingId === cost.id ? (
+                  <Input
+                    type="number"
+                    value={editingValues.category4 ?? cost.category4}
+                    onChange={(e) => onValueChange("category4", parseFloat(e.target.value) || 0)}
+                    className="w-24"
+                    step="0.01"
+                  />
+                ) : (
+                  formatCurrency(cost.category4)
+                )}
+              </TableCell>
+              <TableCell>
+                {editingId === cost.id ? (
+                  <div className="flex space-x-2">
+                    <Button size="sm" onClick={() => onCancel()}>Cancel</Button>
+                    <Button size="sm" onClick={() => onSave(cost.id)}>Save</Button>
+                  </div>
+                ) : (
+                  <Button size="sm" variant="outline" onClick={() => onEdit(cost.id, cost)}>
+                    Edit
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
         <TableFooter>
           <TableRow>
-            <TableCell className="font-medium">Cat Total</TableCell>
+            <TableCell className="font-medium">Total</TableCell>
             <TableCell className="text-right">{formatCurrency(totals.category1)}</TableCell>
             <TableCell className="text-right">{formatCurrency(totals.category2)}</TableCell>
             <TableCell className="text-right">{formatCurrency(totals.category3)}</TableCell>
             <TableCell className="text-right">{formatCurrency(totals.category4)}</TableCell>
+            <TableCell></TableCell>
           </TableRow>
         </TableFooter>
       </Table>
