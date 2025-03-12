@@ -8,8 +8,8 @@ interface PoolBlanketsActionsProps {
 
 export const PoolBlanketsActions = ({ onAddNew }: PoolBlanketsActionsProps) => {
   return (
-    <div className="flex justify-between items-center">
-      <h2 className="text-lg font-semibold">Pool Blankets & Heat Pumps</h2>
+    <div className="flex justify-between items-center mb-4">
+      <h2 className="text-xl font-semibold">Pool Blankets & Heat Pumps</h2>
       <Button
         onClick={onAddNew}
         className="flex items-center gap-2"
