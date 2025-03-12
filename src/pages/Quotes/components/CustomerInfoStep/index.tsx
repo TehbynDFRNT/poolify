@@ -54,13 +54,24 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
     e.preventDefault();
     
     try {
+      // Validate the form data
       customerInfoSchema.parse(quoteData);
       setIsSubmitting(true);
       
-      // Set status to draft
+      // Ensure we have the required fields with proper types for Supabase
       const dataToSave = {
-        ...quoteData,
-        status: 'draft' as const
+        customer_name: quoteData.customer_name || "",
+        customer_email: quoteData.customer_email || "",
+        customer_phone: quoteData.customer_phone || "",
+        home_address: quoteData.home_address || "",
+        site_address: quoteData.site_address || "",
+        status: 'draft' as const,
+        // Optional fields
+        owner2_name: quoteData.owner2_name,
+        owner2_email: quoteData.owner2_email,
+        owner2_phone: quoteData.owner2_phone,
+        resident_homeowner: quoteData.resident_homeowner,
+        pool_id: quoteData.pool_id
       };
       
       // Insert quote data into Supabase
