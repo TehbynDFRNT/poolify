@@ -16,11 +16,8 @@ const customerInfoSchema = z.object({
   owner2_phone: z.string().optional(),
   home_address: z.string().min(1, "Home address is required"),
   site_address: z.string().min(1, "Site address is required"),
-  installation_area: z.string().min(1, "Installation area is required"),
-  proposal_name: z.string().optional(),
-  resident_homeowner: z.boolean().optional(),
-  location: z.string().min(1, "Location is required"),
   desired_timeline: z.string().min(1, "Timeline is required"),
+  resident_homeowner: z.boolean().optional(),
 });
 
 type CustomerInfoFormData = z.infer<typeof customerInfoSchema>;
@@ -202,48 +199,8 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
           </div>
         </div>
 
-        {/* Project Information */}
+        {/* Timeline */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="proposal_name">Proposal Name</Label>
-            <Input
-              id="proposal_name"
-              name="proposal_name"
-              value={quoteData.proposal_name || ''}
-              onChange={handleChange}
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="installation_area">Installation Area</Label>
-            <Input
-              id="installation_area"
-              name="installation_area"
-              value={quoteData.installation_area || ''}
-              onChange={handleChange}
-              className={errors.installation_area ? 'border-red-500' : ''}
-            />
-            {errors.installation_area && (
-              <p className="text-sm text-red-500">{errors.installation_area}</p>
-            )}
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="location">Project Location</Label>
-            <Input
-              id="location"
-              name="location"
-              value={quoteData.location || ''}
-              onChange={handleChange}
-              className={errors.location ? 'border-red-500' : ''}
-            />
-            {errors.location && (
-              <p className="text-sm text-red-500">{errors.location}</p>
-            )}
-          </div>
-          
           <div className="space-y-2">
             <Label htmlFor="desired_timeline">Desired Timeline</Label>
             <Input

@@ -9,15 +9,12 @@ export interface Quote {
   owner2_phone?: string;
   home_address: string;
   site_address: string;
-  installation_area: string;
-  proposal_name?: string;
-  resident_homeowner?: boolean;
-  location: string;
   desired_timeline: string;
   pool_id?: string;
   status: 'draft' | 'pending' | 'approved' | 'declined';
   created_at: string;
   updated_at?: string;
+  resident_homeowner?: boolean;
 }
 
 export interface QuoteInsert {
@@ -29,11 +26,8 @@ export interface QuoteInsert {
   owner2_phone?: string;
   home_address: string;
   site_address: string;
-  installation_area: string;
-  proposal_name?: string;
-  resident_homeowner?: boolean;
-  location: string;
   desired_timeline: string;
   pool_id?: string;
   status: 'draft' | 'pending' | 'approved' | 'declined';
+  resident_homeowner?: boolean;
 }

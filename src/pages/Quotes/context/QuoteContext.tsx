@@ -17,12 +17,9 @@ const initialQuoteData: Partial<QuoteInsert> = {
   owner2_phone: '',
   home_address: '',
   site_address: '',
-  installation_area: '',
-  proposal_name: '',
-  resident_homeowner: false,
-  location: '',
   desired_timeline: '',
-  status: 'draft'
+  status: 'draft',
+  resident_homeowner: false
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
