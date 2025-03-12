@@ -74,19 +74,47 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
         pool_id: quoteData.pool_id
       };
       
-      // Insert quote data into Supabase
-      const { error } = await supabase
+      // Check if a quote with this customer email already exists
+      const { data: existingQuotes, error: fetchError } = await supabase
         .from('quotes')
-        .insert(dataToSave);
-        
-      if (error) {
-        toast.error('Failed to save quote information');
-        console.error('Error saving quote:', error);
-        setIsSubmitting(false);
-        return;
+        .select('id')
+        .eq('customer_email', dataToSave.customer_email)
+        .eq('status', 'draft')
+        .order('created_at', { ascending: false })
+        .limit(1);
+      
+      if (fetchError) {
+        throw fetchError;
       }
       
-      toast.success('Quote information saved');
+      let saveResult;
+      
+      if (existingQuotes && existingQuotes.length > 0) {
+        // Update the existing quote
+        const quoteId = existingQuotes[0].id;
+        saveResult = await supabase
+          .from('quotes')
+          .update(dataToSave)
+          .eq('id', quoteId);
+        
+        if (saveResult.error) {
+          throw saveResult.error;
+        }
+        
+        toast.success('Quote information updated');
+      } else {
+        // Insert a new quote
+        saveResult = await supabase
+          .from('quotes')
+          .insert(dataToSave);
+          
+        if (saveResult.error) {
+          throw saveResult.error;
+        }
+        
+        toast.success('New quote created');
+      }
+      
       setIsSubmitting(false);
       onNext();
     } catch (error) {
@@ -98,7 +126,11 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
           }
         });
         setErrors(newErrors);
+      } else {
+        toast.error('Failed to save quote information');
+        console.error('Error saving quote:', error);
       }
+      setIsSubmitting(false);
     }
   };
 
