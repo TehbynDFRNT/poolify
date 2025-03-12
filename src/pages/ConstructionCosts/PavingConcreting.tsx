@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { Construction, Grid, HardHat, Trash2 } from "lucide-react";
+import { Construction, Grid, HardHat } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -13,7 +13,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PavingCostsTable } from "./components/PavingCostsTable";
 import { useEffect } from "react";
 import { usePavingCosts } from "./hooks/usePavingCosts";
-import { Button } from "@/components/ui/button";
 
 const PavingConcreting = () => {
   const {
@@ -25,8 +24,7 @@ const PavingConcreting = () => {
     handleSave,
     handleCancel,
     handleValueChange,
-    initializeDefaultValues,
-    deleteAllPavingCosts
+    initializeDefaultValues
   } = usePavingCosts();
 
   // Initialize default values if the table is empty
@@ -68,20 +66,6 @@ const PavingConcreting = () => {
           <div>
             <h1 className="text-2xl font-semibold text-gray-900">Paving & Concreting</h1>
             <p className="text-gray-500 mt-1">Manage paving and concrete costs</p>
-          </div>
-          <div className="flex space-x-4">
-            <Button 
-              variant="destructive"
-              onClick={() => deleteAllPavingCosts()}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete All Data
-            </Button>
-            <Button 
-              onClick={() => initializeDefaultValues()}
-            >
-              Reset to Default Values
-            </Button>
           </div>
         </div>
         
