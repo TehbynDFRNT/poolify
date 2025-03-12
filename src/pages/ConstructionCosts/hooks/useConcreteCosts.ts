@@ -10,10 +10,11 @@ export const useConcreteCosts = () => {
   const { data: concreteCosts, isLoading, error } = useQuery({
     queryKey: ["concrete-costs"],
     queryFn: async () => {
+      // Use a generic approach to work with any table
       const { data, error } = await supabase
         .from("concrete_costs")
         .select("*")
-        .order("display_order", { ascending: true });
+        .order("display_order", { ascending: true }) as { data: ConcreteCost[] | null, error: any };
 
       if (error) {
         console.error("Error fetching concrete costs:", error);
@@ -29,7 +30,7 @@ export const useConcreteCosts = () => {
       const { error } = await supabase
         .from("concrete_costs")
         .update(updates)
-        .eq("id", id);
+        .eq("id", id) as { data: any, error: any };
 
       if (error) throw error;
     },
@@ -47,7 +48,7 @@ export const useConcreteCosts = () => {
     mutationFn: async (cost: ConcreteCostInsert) => {
       const { error } = await supabase
         .from("concrete_costs")
-        .insert([cost]);
+        .insert([cost]) as { data: any, error: any };
 
       if (error) throw error;
     },
@@ -66,7 +67,7 @@ export const useConcreteCosts = () => {
       const { error } = await supabase
         .from("concrete_costs")
         .delete()
-        .eq("id", id);
+        .eq("id", id) as { data: any, error: any };
 
       if (error) throw error;
     },

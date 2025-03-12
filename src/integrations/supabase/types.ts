@@ -36,6 +36,39 @@ export type Database = {
         }
         Relationships: []
       }
+      concrete_costs: {
+        Row: {
+          concrete_cost: number
+          created_at: string
+          description: string
+          display_order: number
+          dust_cost: number
+          id: string
+          total_cost: number
+          updated_at: string | null
+        }
+        Insert: {
+          concrete_cost: number
+          created_at?: string
+          description: string
+          display_order: number
+          dust_cost: number
+          id?: string
+          total_cost: number
+          updated_at?: string | null
+        }
+        Update: {
+          concrete_cost?: number
+          created_at?: string
+          description?: string
+          display_order?: number
+          dust_cost?: number
+          id?: string
+          total_cost?: number
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       concrete_cuts: {
         Row: {
           created_at: string
