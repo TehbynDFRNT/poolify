@@ -7,7 +7,6 @@ import { Plus } from "lucide-react";
 import { useUnderFenceConcreteStrips } from "../hooks/useUnderFenceConcreteStrips";
 import { UnderFenceConcreteStripRow } from "./UnderFenceConcreteStripRow";
 import { AddUnderFenceConcreteStripRow } from "./AddUnderFenceConcreteStripRow";
-import { formatCurrency } from "@/utils/format";
 import type { UnderFenceConcreteStripInsert } from "@/types/under-fence-concrete-strip";
 
 export const UnderFenceConcreteStripsTable = () => {
@@ -50,10 +49,6 @@ export const UnderFenceConcreteStripsTable = () => {
   if (error) {
     return <div>Error loading data: {(error as Error).message}</div>;
   }
-
-  // Calculate total margins
-  const totalCost = underFenceConcreteStrips?.reduce((sum, strip) => sum + strip.cost, 0) || 0;
-  const totalMargin = underFenceConcreteStrips?.reduce((sum, strip) => sum + strip.margin, 0) || 0;
 
   return (
     <Card>
@@ -108,12 +103,6 @@ export const UnderFenceConcreteStripsTable = () => {
                 </TableCell>
               </TableRow>
             )}
-            <TableRow className="bg-muted/50 font-medium">
-              <TableCell>Total</TableCell>
-              <TableCell>{formatCurrency(totalCost)}</TableCell>
-              <TableCell>{formatCurrency(totalMargin)}</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </CardContent>

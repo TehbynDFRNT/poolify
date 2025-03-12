@@ -7,7 +7,6 @@ import { ConcreteCutRow } from "./ConcreteCutRow";
 import { AddConcreteCutRow } from "./AddConcreteCutRow";
 import { useConcreteCuts } from "../hooks/useConcreteCuts";
 import { ConcreteCut, ConcreteCutInsert } from "@/types/concrete-cut";
-import { formatCurrency } from "@/utils/format";
 
 export const ConcreteCutsTable = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -40,11 +39,6 @@ export const ConcreteCutsTable = () => {
     if (!concreteCuts?.length) return 1;
     return Math.max(...concreteCuts.map(cut => cut.display_order)) + 1;
   };
-
-  // Calculate grand total of all cuts
-  const grandTotal = concreteCuts?.reduce((sum, cut) => {
-    return sum + cut.price;
-  }, 0) || 0;
 
   return (
     <div className="space-y-4">
@@ -91,11 +85,6 @@ export const ConcreteCutsTable = () => {
                 </TableCell>
               </TableRow>
             )}
-            <TableRow className="bg-muted/50">
-              <TableCell className="font-bold">Grand Total</TableCell>
-              <TableCell className="font-bold">{formatCurrency(grandTotal)}</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </div>

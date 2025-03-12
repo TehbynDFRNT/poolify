@@ -7,7 +7,6 @@ import { ExtraPavingCostRow } from "./ExtraPavingCostRow";
 import { AddExtraPavingCostRow } from "./AddExtraPavingCostRow";
 import { useExtraPavingCosts } from "../hooks/useExtraPavingCosts";
 import { ExtraPavingCost, ExtraPavingCostInsert } from "@/types/extra-paving-cost";
-import { formatCurrency } from "@/utils/format";
 
 export const ExtraPavingCostsTable = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -40,11 +39,6 @@ export const ExtraPavingCostsTable = () => {
     if (!extraPavingCosts?.length) return 1;
     return Math.max(...extraPavingCosts.map(cost => cost.display_order)) + 1;
   };
-
-  // Calculate grand total of all categories
-  const grandTotal = extraPavingCosts?.reduce((sum, cost) => {
-    return sum + cost.paver_cost + cost.wastage_cost + cost.margin_cost;
-  }, 0) || 0;
 
   return (
     <div className="space-y-4">
@@ -94,12 +88,6 @@ export const ExtraPavingCostsTable = () => {
                 </TableCell>
               </TableRow>
             )}
-            <TableRow className="bg-muted/50">
-              <TableCell className="font-bold">Grand Total</TableCell>
-              <TableCell colSpan={3}></TableCell>
-              <TableCell className="font-bold">{formatCurrency(grandTotal)}</TableCell>
-              <TableCell></TableCell>
-            </TableRow>
           </TableBody>
         </Table>
       </div>
