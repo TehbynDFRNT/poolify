@@ -14,6 +14,7 @@ import { useState } from "react";
 import { QuoteProvider } from "@/pages/Quotes/context/QuoteContext";
 import { CustomerInfoStep } from "@/pages/Quotes/components/CustomerInfoStep";
 import { SelectPoolStep } from "@/pages/Quotes/components/SelectPoolStep";
+import { AddFeaturesStep } from "@/pages/Quotes/components/AddFeaturesStep";
 import { cn } from "@/lib/utils";
 
 const CreateQuote = () => {
@@ -114,6 +115,7 @@ const CreateQuote = () => {
             <CardContent>
               {currentStep === 1 && <CustomerInfoStep onNext={() => setCurrentStep(2)} />}
               {currentStep === 2 && <SelectPoolStep onNext={() => setCurrentStep(3)} onPrevious={() => setCurrentStep(1)} />}
+              {currentStep === 3 && <AddFeaturesStep onNext={() => setCurrentStep(4)} onPrevious={() => setCurrentStep(2)} />}
               {/* We'll add more step components in the next iterations */}
             </CardContent>
           </Card>
