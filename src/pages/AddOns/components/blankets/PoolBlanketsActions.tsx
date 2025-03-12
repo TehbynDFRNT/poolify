@@ -11,14 +11,14 @@ export const PoolBlanketsActions = ({ onAddNew }: PoolBlanketsActionsProps) => {
     <div className="flex justify-between items-center mb-6">
       <div>
         <h2 className="text-2xl font-semibold">Pool Blankets & Heat Pumps</h2>
-        <p className="text-muted-foreground">Manage your pool blankets and heat pump combinations</p>
+        <p className="text-muted-foreground">Manage pool blankets, rollers and heat pump combinations</p>
       </div>
       <Button
         onClick={onAddNew}
         className="flex items-center gap-2"
       >
         <Plus className="h-4 w-4" />
-        Add New Blanket
+        Add New Combination
       </Button>
     </div>
   );
