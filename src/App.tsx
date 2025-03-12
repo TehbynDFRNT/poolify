@@ -17,7 +17,6 @@ import CraneCosts from "@/pages/ConstructionCosts/CraneCosts";
 import Excavation from "@/pages/ConstructionCosts/Excavation";
 import FixedCosts from "@/pages/ConstructionCosts/FixedCosts";
 import PoolIndividualCosts from "@/pages/ConstructionCosts/PoolIndividualCosts";
-import PavingConcreting from "@/pages/ConstructionCosts/PavingConcreting";
 import AddOns from "@/pages/AddOns";
 
 function App() {
@@ -32,7 +31,6 @@ function App() {
         <Route path="/construction-costs/crane-costs" element={<CraneCosts />} />
         <Route path="/construction-costs/excavation" element={<Excavation />} />
         <Route path="/construction-costs/fixed-costs" element={<FixedCosts />} />
-        <Route path="/construction-costs/paving-concreting" element={<PavingConcreting />} />
         <Route path="/construction-costs/pool-individual-costs" element={<PoolIndividualCosts />} />
         <Route path="/third-party-costs" element={<ThirdPartyCosts />} />
         <Route path="/third-party-costs/electrical" element={<Electrical />} />
