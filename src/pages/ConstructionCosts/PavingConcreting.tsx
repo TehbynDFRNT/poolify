@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { Construction, Grid, Concrete } from "lucide-react";
+import { Construction, Grid, HardHat } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -71,7 +71,7 @@ const PavingConcreting = () => {
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Concrete className="h-5 w-5 text-primary" />
+                  <HardHat className="h-5 w-5 text-primary" />
                   <CardTitle>Concrete Costs</CardTitle>
                 </div>
                 <CardDescription>Set up and manage concrete costs for pool installations</CardDescription>
