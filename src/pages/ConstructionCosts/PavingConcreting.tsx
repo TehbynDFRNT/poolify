@@ -10,8 +10,56 @@ import {
 } from "@/components/ui/breadcrumb";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PavingCostsTable } from "./components/PavingCostsTable";
+import { useState } from "react";
 
 const PavingConcreting = () => {
+  // Initial paving cost data based on the provided table
+  const [pavingCosts, setPavingCosts] = useState([
+    { 
+      id: "paver", 
+      name: "Paver", 
+      category1: 99, 
+      category2: 114, 
+      category3: 137, 
+      category4: 137 
+    },
+    { 
+      id: "wastage", 
+      name: "Wastage", 
+      category1: 13, 
+      category2: 13, 
+      category3: 13, 
+      category4: 13 
+    },
+    { 
+      id: "margin", 
+      name: "Margin", 
+      category1: 100, 
+      category2: 100, 
+      category3: 100, 
+      category4: 100 
+    }
+  ]);
+
+  // Calculate totals for each category
+  const totals = {
+    category1: pavingCosts.reduce((sum, item) => sum + item.category1, 0),
+    category2: pavingCosts.reduce((sum, item) => sum + item.category2, 0),
+    category3: pavingCosts.reduce((sum, item) => sum + item.category3, 0),
+    category4: pavingCosts.reduce((sum, item) => sum + item.category4, 0)
+  };
+
+  // Handle editing paving costs
+  const handleCostUpdate = (id: string, category: string, value: number) => {
+    setPavingCosts(prev => prev.map(cost => {
+      if (cost.id === id) {
+        return { ...cost, [category]: value };
+      }
+      return cost;
+    }));
+  };
+
   return (
     <DashboardLayout>
       <div className="max-w-7xl mx-auto p-6">
@@ -58,11 +106,11 @@ const PavingConcreting = () => {
                 <CardDescription>Set up and manage paving costs for pool installations</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-10">
-                  <Construction className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <p className="text-gray-500">No paving costs defined yet</p>
-                  <p className="text-sm text-gray-400 mt-1">Add paving costs to get started</p>
-                </div>
+                <PavingCostsTable 
+                  pavingCosts={pavingCosts} 
+                  totals={totals}
+                  onUpdate={handleCostUpdate}
+                />
               </CardContent>
             </Card>
           </TabsContent>
