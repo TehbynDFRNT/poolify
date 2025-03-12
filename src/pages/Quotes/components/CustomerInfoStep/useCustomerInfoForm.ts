@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { z } from "zod"; // Add the missing import
+import { z } from "zod";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -34,8 +34,17 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
     e.preventDefault();
     
     try {
+      // Prepare the data for validation
+      const dataToValidate = {
+        ...quoteData,
+        // Ensure owner2 fields are properly handled as optional
+        owner2_name: quoteData.owner2_name || undefined,
+        owner2_email: quoteData.owner2_email || undefined,
+        owner2_phone: quoteData.owner2_phone || undefined,
+      };
+      
       // Validate the form data
-      customerInfoSchema.parse(quoteData);
+      customerInfoSchema.parse(dataToValidate);
       setIsSubmitting(true);
       
       // Ensure we have the required fields with proper types for Supabase
@@ -46,10 +55,10 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
         home_address: quoteData.home_address || "",
         site_address: quoteData.site_address || "",
         status: 'draft' as const,
-        // Optional fields
-        owner2_name: quoteData.owner2_name,
-        owner2_email: quoteData.owner2_email,
-        owner2_phone: quoteData.owner2_phone,
+        // Optional fields - only include if they have values
+        owner2_name: quoteData.owner2_name || null,
+        owner2_email: quoteData.owner2_email || null,
+        owner2_phone: quoteData.owner2_phone || null,
         resident_homeowner: Boolean(quoteData.resident_homeowner),
       };
       
