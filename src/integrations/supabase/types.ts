@@ -150,6 +150,39 @@ export type Database = {
         }
         Relationships: []
       }
+      extra_paving_costs: {
+        Row: {
+          category: string
+          created_at: string
+          display_order: number
+          id: string
+          margin_cost: number
+          paver_cost: number
+          updated_at: string
+          wastage_cost: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          margin_cost?: number
+          paver_cost?: number
+          updated_at?: string
+          wastage_cost?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          display_order?: number
+          id?: string
+          margin_cost?: number
+          paver_cost?: number
+          updated_at?: string
+          wastage_cost?: number
+        }
+        Relationships: []
+      }
       fencing_costs: {
         Row: {
           category: string | null
