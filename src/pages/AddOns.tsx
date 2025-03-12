@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Scroll, Bath } from "lucide-react";
 import { PoolCleanersTable } from "./AddOns/components/PoolCleanersTable";
+import { PoolBlanketsTable } from "./AddOns/components/blankets/PoolBlanketsTable";
 
 const AddOns = () => {
   return (
@@ -25,18 +26,11 @@ const AddOns = () => {
               <CardHeader>
                 <div className="flex items-center gap-2">
                   <Scroll className="h-5 w-5 text-primary" />
-                  <CardTitle>Blankets and Rollers</CardTitle>
+                  <CardTitle>Blankets, Rollers & Heat Pumps</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="bg-gray-50 p-6 rounded-md text-center">
-                  <p className="text-lg text-muted-foreground mb-4">
-                    Manage pool blankets, covers, and roller systems.
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    This section will be expanded with pricing options, specifications, and configuration settings for various pool blankets and roller systems.
-                  </p>
-                </div>
+                <PoolBlanketsTable />
               </CardContent>
             </Card>
           </TabsContent>
