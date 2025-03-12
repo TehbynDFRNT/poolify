@@ -291,6 +291,36 @@ export type Database = {
         }
         Relationships: []
       }
+      extra_concreting: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          margin: number
+          price: number
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_order: number
+          id?: string
+          margin?: number
+          price?: number
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          margin?: number
+          price?: number
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       extra_paving_costs: {
         Row: {
           category: string

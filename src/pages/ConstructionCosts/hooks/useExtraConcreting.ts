@@ -13,7 +13,7 @@ export const useExtraConcreting = () => {
       const { data, error } = await supabase
         .from("extra_concreting")
         .select("*")
-        .order("display_order", { ascending: true }) as { data: ExtraConcreting[] | null, error: any };
+        .order("display_order", { ascending: true });
 
       if (error) {
         console.error("Error fetching extra concreting data:", error);
@@ -29,7 +29,7 @@ export const useExtraConcreting = () => {
       const { error } = await supabase
         .from("extra_concreting")
         .update(updates)
-        .eq("id", id) as { data: any, error: any };
+        .eq("id", id);
 
       if (error) throw error;
     },
@@ -47,7 +47,7 @@ export const useExtraConcreting = () => {
     mutationFn: async (item: ExtraConcretingInsert) => {
       const { error } = await supabase
         .from("extra_concreting")
-        .insert([item]) as { data: any, error: any };
+        .insert([item]);
 
       if (error) throw error;
     },
@@ -66,7 +66,7 @@ export const useExtraConcreting = () => {
       const { error } = await supabase
         .from("extra_concreting")
         .delete()
-        .eq("id", id) as { data: any, error: any };
+        .eq("id", id);
 
       if (error) throw error;
     },
