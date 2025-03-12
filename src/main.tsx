@@ -18,8 +18,6 @@ const root = createRoot(document.getElementById("root")!);
 
 root.render(
   <BrowserRouter>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <App />
   </BrowserRouter>
 );
