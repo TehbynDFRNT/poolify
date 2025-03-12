@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -34,6 +34,13 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
     calculateTotalCosts
   } = usePoolSelectionData(selectedPoolId);
 
+  // Check if we have a quote ID from the previous step
+  useEffect(() => {
+    if (!quoteData.id) {
+      toast.error("No quote ID found. Please complete the customer information step first.");
+    }
+  }, [quoteData.id]);
+
   const handlePoolSelect = (poolId: string) => {
     setSelectedPoolId(poolId);
   };
@@ -46,33 +53,36 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
       return;
     }
 
+    if (!quoteData.id) {
+      toast.error("No quote ID found. Please complete the customer information step first.");
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
       // Update the quote context
       updateQuoteData({ pool_id: selectedPoolId });
       
-      // If we have a quote ID from the context, update the record in Supabase
-      if (quoteData.id) {
-        const { error } = await supabase
-          .from('quotes')
-          .update({ pool_id: selectedPoolId })
-          .eq('id', quoteData.id);
-        
-        if (error) {
-          throw error;
-        }
-        
-        toast.success("Pool selection saved to quote");
-      } else {
-        toast.warning("Quote ID not found, cannot save pool selection");
+      console.log("Updating quote with ID:", quoteData.id, "with pool ID:", selectedPoolId);
+      
+      // Update the record in Supabase
+      const { error } = await supabase
+        .from('quotes')
+        .update({ pool_id: selectedPoolId })
+        .eq('id', quoteData.id);
+      
+      if (error) {
+        console.error("Error updating quote with pool:", error);
+        throw error;
       }
       
+      toast.success("Pool selection saved to quote");
+      setIsSubmitting(false);
       onNext();
     } catch (error) {
       console.error("Error saving pool selection:", error);
       toast.error("Failed to save pool selection");
-    } finally {
       setIsSubmitting(false);
     }
   };

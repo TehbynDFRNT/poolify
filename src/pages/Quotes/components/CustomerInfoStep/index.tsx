@@ -71,10 +71,11 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
         owner2_email: quoteData.owner2_email,
         owner2_phone: quoteData.owner2_phone,
         resident_homeowner: quoteData.resident_homeowner,
-        pool_id: quoteData.pool_id
       };
       
-      // Always create a new quote (don't update existing ones)
+      console.log("Saving quote data:", dataToSave);
+      
+      // Always create a new quote to allow multiple quotes per customer
       const { data, error } = await supabase
         .from('quotes')
         .insert(dataToSave)
@@ -82,17 +83,21 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
         .single();
         
       if (error) {
+        console.error("Error saving quote:", error);
         throw error;
       }
       
       // Update the quote ID in the context
       if (data) {
+        console.log("Quote created with ID:", data.id);
         updateQuoteData({ id: data.id });
+        toast.success('New quote created successfully');
+        // Only proceed to next step after successful save
+        setIsSubmitting(false);
+        onNext();
+      } else {
+        throw new Error("No data returned from quote creation");
       }
-      
-      toast.success('New quote created');
-      setIsSubmitting(false);
-      onNext();
     } catch (error) {
       if (error instanceof z.ZodError) {
         const newErrors: Partial<Record<keyof CustomerInfoFormData, string>> = {};
