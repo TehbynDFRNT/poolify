@@ -48,7 +48,8 @@ export const usePavingCosts = () => {
           cost.id === id ? { ...cost, ...updates } : cost
         ) : null
       );
-
+      
+      toast.success("Paving cost updated successfully");
       return Promise.resolve();
     } catch (error) {
       console.error("Error updating paving cost:", error);

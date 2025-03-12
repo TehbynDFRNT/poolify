@@ -22,7 +22,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 
 interface PavingCostsTableProps {
@@ -79,11 +78,9 @@ export const PavingCostsTable: React.FC<PavingCostsTableProps> = ({
       };
       
       await onUpdate(selectedCost.id, updates);
-      toast.success(`Updated ${selectedCost.name} costs`);
       setSelectedCost(null);
     } catch (error) {
       console.error("Failed to update value:", error);
-      toast.error("Failed to update costs");
     }
   };
 
