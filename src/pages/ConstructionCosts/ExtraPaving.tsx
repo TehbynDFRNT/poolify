@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Cut } from "lucide-react";
+import { Layers, Scissors } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 
@@ -37,7 +37,7 @@ const ExtraPaving = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
-                <Cut className="h-5 w-5 text-primary" />
+                <Scissors className="h-5 w-5 text-primary" />
                 <CardTitle>Concrete Cuts</CardTitle>
               </div>
               <CardDescription>
