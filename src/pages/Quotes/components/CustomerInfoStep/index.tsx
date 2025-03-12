@@ -6,6 +6,8 @@ import { z } from "zod";
 import { OwnerFormSection } from "./OwnerFormSection";
 import { AddressFormSection } from "./AddressFormSection";
 import { ResidentHomeownerCheckbox } from "./ResidentHomeownerCheckbox";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const customerInfoSchema = z.object({
   customer_name: z.string().min(1, "Customer name is required"),
@@ -28,6 +30,7 @@ interface CustomerInfoStepProps {
 export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const [errors, setErrors] = useState<Partial<Record<keyof CustomerInfoFormData, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -47,11 +50,33 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
     updateQuoteData({ resident_homeowner: checked });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
       customerInfoSchema.parse(quoteData);
+      setIsSubmitting(true);
+      
+      // Set status to draft
+      const dataToSave = {
+        ...quoteData,
+        status: 'draft' as const
+      };
+      
+      // Insert quote data into Supabase
+      const { error } = await supabase
+        .from('quotes')
+        .insert(dataToSave);
+        
+      if (error) {
+        toast.error('Failed to save quote information');
+        console.error('Error saving quote:', error);
+        setIsSubmitting(false);
+        return;
+      }
+      
+      toast.success('Quote information saved');
+      setIsSubmitting(false);
       onNext();
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -92,8 +117,8 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit">
-          Continue
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : 'Continue'}
         </Button>
       </div>
     </form>

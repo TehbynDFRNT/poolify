@@ -1018,6 +1018,57 @@ export type Database = {
         }
         Relationships: []
       }
+      quotes: {
+        Row: {
+          created_at: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          home_address: string
+          id: string
+          owner2_email: string | null
+          owner2_name: string | null
+          owner2_phone: string | null
+          pool_id: string | null
+          resident_homeowner: boolean | null
+          site_address: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          home_address: string
+          id?: string
+          owner2_email?: string | null
+          owner2_name?: string | null
+          owner2_phone?: string | null
+          pool_id?: string | null
+          resident_homeowner?: boolean | null
+          site_address: string
+          status: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          home_address?: string
+          id?: string
+          owner2_email?: string | null
+          owner2_name?: string | null
+          owner2_phone?: string | null
+          pool_id?: string | null
+          resident_homeowner?: boolean | null
+          site_address?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       retaining_walls: {
         Row: {
           created_at: string
