@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/utils/format";
 import { useState } from "react";
@@ -21,15 +22,29 @@ interface ConcreteCutsTableProps {
 export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps) => {
   const [cuts, setCuts] = useState(initialCuts);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
   const { toast } = useToast();
 
-  const handleCellClick = (id: string) => {
-    setEditingId(id);
+  const handleEdit = (cut: ConcreteCut) => {
+    setEditingId(cut.id);
+    setEditingValue(cut.price.toString());
   };
 
-  const handlePriceChange = async (id: string, value: string) => {
-    const numericValue = parseFloat(value);
-    if (isNaN(numericValue)) return;
+  const handleCancel = () => {
+    setEditingId(null);
+    setEditingValue("");
+  };
+
+  const handleSave = async (id: string) => {
+    const numericValue = parseFloat(editingValue);
+    if (isNaN(numericValue)) {
+      toast({
+        title: "Invalid input",
+        description: "Please enter a valid number",
+        variant: "destructive"
+      });
+      return;
+    }
     
     // Update local state
     setCuts(currentCuts =>
@@ -61,36 +76,7 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
     }
 
     setEditingId(null);
-  };
-
-  const renderCell = (cut: ConcreteCut) => {
-    const isEditing = editingId === cut.id;
-
-    if (isEditing) {
-      return (
-        <Input
-          type="number"
-          defaultValue={cut.price.toString()}
-          className="w-32"
-          autoFocus
-          onBlur={(e) => handlePriceChange(cut.id, e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              handlePriceChange(cut.id, (e.target as HTMLInputElement).value);
-            }
-          }}
-        />
-      );
-    }
-
-    return (
-      <div
-        className="cursor-pointer hover:bg-gray-100 p-1 rounded"
-        onClick={() => handleCellClick(cut.id)}
-      >
-        {formatCurrency(cut.price)}
-      </div>
-    );
+    setEditingValue("");
   };
 
   return (
@@ -101,13 +87,54 @@ export const ConcreteCutsTable = ({ cuts: initialCuts }: ConcreteCutsTableProps)
           <TableRow>
             <TableHead className="text-left">Type</TableHead>
             <TableHead className="text-right">Price</TableHead>
+            <TableHead className="w-[100px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {cuts.map((cut) => (
             <TableRow key={cut.id}>
               <TableCell className="font-medium text-left">{cut.type}</TableCell>
-              <TableCell className="text-right">{renderCell(cut)}</TableCell>
+              <TableCell className="text-right">
+                {editingId === cut.id ? (
+                  <Input
+                    type="number"
+                    value={editingValue}
+                    onChange={(e) => setEditingValue(e.target.value)}
+                    className="w-32 ml-auto"
+                    step="0.01"
+                    autoFocus
+                  />
+                ) : (
+                  formatCurrency(cut.price)
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                {editingId === cut.id ? (
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={handleCancel}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleSave(cut.id)}
+                    >
+                      Save
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleEdit(cut)}
+                  >
+                    Edit
+                  </Button>
+                )}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
