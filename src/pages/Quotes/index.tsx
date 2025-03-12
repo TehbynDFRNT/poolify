@@ -58,6 +58,11 @@ const Quotes = () => {
     }
   };
 
+  const handleEditQuote = (quoteId: string) => {
+    // Navigate to the edit quote page with the quote ID
+    navigate(`/quotes/edit/${quoteId}`);
+  };
+
   const renderQuotesTable = () => {
     if (isLoading) {
       return (
@@ -141,9 +146,9 @@ const Quotes = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => navigate(`/quotes/${quote.id}`)}
+                  onClick={() => handleEditQuote(quote.id)}
                 >
-                  View
+                  Edit
                 </Button>
                 <Button 
                   variant="outline" 

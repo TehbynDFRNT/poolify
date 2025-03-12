@@ -25,9 +25,10 @@ type CustomerInfoFormData = z.infer<typeof customerInfoSchema>;
 
 interface CustomerInfoStepProps {
   onNext: () => void;
+  isEditing?: boolean;
 }
 
-export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
+export const CustomerInfoStep = ({ onNext, isEditing = false }: CustomerInfoStepProps) => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const [errors, setErrors] = useState<Partial<Record<keyof CustomerInfoFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -75,28 +76,45 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
       
       console.log("Saving quote data:", dataToSave);
       
-      // Always create a new quote to allow multiple quotes per customer
-      const { data, error } = await supabase
-        .from('quotes')
-        .insert(dataToSave)
-        .select('id')
-        .single();
+      if (isEditing && quoteData.id) {
+        // Update existing quote
+        const { error } = await supabase
+          .from('quotes')
+          .update(dataToSave)
+          .eq('id', quoteData.id);
+          
+        if (error) {
+          console.error("Error updating quote:", error);
+          throw error;
+        }
         
-      if (error) {
-        console.error("Error saving quote:", error);
-        throw error;
-      }
-      
-      // Update the quote ID in the context
-      if (data) {
-        console.log("Quote created with ID:", data.id);
-        updateQuoteData({ id: data.id });
-        toast.success('New quote created successfully');
-        // Only proceed to next step after successful save
+        toast.success('Quote updated successfully');
         setIsSubmitting(false);
         onNext();
       } else {
-        throw new Error("No data returned from quote creation");
+        // Create a new quote
+        const { data, error } = await supabase
+          .from('quotes')
+          .insert(dataToSave)
+          .select('id')
+          .single();
+          
+        if (error) {
+          console.error("Error saving quote:", error);
+          throw error;
+        }
+        
+        // Update the quote ID in the context
+        if (data) {
+          console.log("Quote created with ID:", data.id);
+          updateQuoteData({ id: data.id });
+          toast.success('New quote created successfully');
+          // Only proceed to next step after successful save
+          setIsSubmitting(false);
+          onNext();
+        } else {
+          throw new Error("No data returned from quote creation");
+        }
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -108,7 +126,7 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
         });
         setErrors(newErrors);
       } else {
-        toast.error('Failed to save quote information');
+        toast.error(isEditing ? 'Failed to update quote information' : 'Failed to save quote information');
         console.error('Error saving quote:', error);
       }
       setIsSubmitting(false);
