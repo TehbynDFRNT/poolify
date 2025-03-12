@@ -5,6 +5,7 @@ import { Layers, Scissors, Ruler, Truck, Fence, HardHat } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
+import { ConcreteLabourCostsTable } from "./components/ConcreteLabourCostsTable";
 import { ConcretePump } from "./components/ConcretePump";
 import { UnderFenceConcreteStripsTable } from "./components/UnderFenceConcreteStripsTable";
 import { ConcreteLabTable } from "./components/ConcreteLabTable";
@@ -14,12 +15,10 @@ const ExtraPaving = () => {
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold">Extra Paving</h1>
-            <p className="text-gray-500 mt-1">
-              Manage additional paving costs for pool installations
-            </p>
-          </div>
+          <h1 className="text-2xl font-bold">Extra Paving</h1>
+          <p className="text-gray-500 mt-1">
+            Manage additional paving costs for pool installations
+          </p>
         </div>
 
         <div className="grid gap-6">
@@ -55,6 +54,7 @@ const ExtraPaving = () => {
 
           <div className="grid md:grid-cols-2 gap-6">
             <ConcreteLabTable />
+            <ConcreteLabourCostsTable />
           </div>
 
           <Card>
