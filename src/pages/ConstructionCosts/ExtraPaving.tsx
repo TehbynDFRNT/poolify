@@ -1,7 +1,6 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Scissors, Ruler, Truck, Fence, HardHat } from "lucide-react";
+import { Layers, Scissors, Ruler, Truck, Fence, HardHat, Shovel } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
@@ -97,6 +96,23 @@ const ExtraPaving = () => {
           </Card>
 
           <ConcretePump />
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Shovel className="h-5 w-5 text-primary" />
+                <CardTitle>Extra Concreting</CardTitle>
+              </div>
+              <CardDescription>
+                Configure and manage costs for additional concrete requirements
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-center h-40 border border-dashed rounded-md bg-muted/20">
+                <p className="text-muted-foreground">Extra concreting content will be added here</p>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </DashboardLayout>
