@@ -64,9 +64,9 @@ export const ConcreteLabTable = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Type</TableHead>
-              <TableHead className="text-right">Price per L/M</TableHead>
-              <TableHead className="text-right">Margin</TableHead>
-              <TableHead className="text-right w-[100px]">Actions</TableHead>
+              <TableHead>Price per L/M</TableHead>
+              <TableHead>Margin</TableHead>
+              <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
