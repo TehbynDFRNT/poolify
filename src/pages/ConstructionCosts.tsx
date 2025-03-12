@@ -21,7 +21,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <Construction className="h-8 w-8 text-primary" />
+              <Construction className="h-10 w-10 text-primary" />
               <span>Excavation Costs</span>
             </Button>
           </Link>
@@ -31,7 +31,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <Building className="h-8 w-8 text-primary" />
+              <Building className="h-10 w-10 text-primary" />
               <span>Fixed Costs</span>
             </Button>
           </Link>
@@ -41,7 +41,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <Wrench className="h-8 w-8 text-primary" />
+              <Wrench className="h-10 w-10 text-primary" />
               <span>Retaining Walls</span>
             </Button>
           </Link>
@@ -51,7 +51,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <Construction className="h-8 w-8 text-primary" />
+              <Construction className="h-10 w-10 text-primary" />
               <span>Bobcat Costs</span>
             </Button>
           </Link>
@@ -61,7 +61,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <Hammer className="h-8 w-8 text-primary" />
+              <Hammer className="h-10 w-10 text-primary" />
               <span>Crane Costs</span>
             </Button>
           </Link>
@@ -71,7 +71,7 @@ const ConstructionCosts = () => {
               variant="outline"
               className="w-full h-32 border border-gray-200 hover:border-primary flex flex-col space-y-3 items-center justify-center"
             >
-              <BarChart4 className="h-8 w-8 text-primary" />
+              <BarChart4 className="h-10 w-10 text-primary" />
               <span>Pool Individual Costs</span>
             </Button>
           </Link>
