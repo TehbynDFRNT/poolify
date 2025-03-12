@@ -62,7 +62,7 @@ export const deleteAllPavingCosts = async (): Promise<void> => {
   const { error } = await supabase
     .from("paving_costs")
     .delete()
-    .neq("id", "00000000-0000-0000-0000-000000000000");
+    .neq("id", "00000000-0000-0000-0000-000000000000"); // Dummy condition to delete all
   
   if (error) {
     console.error("Error deleting paving costs:", error);
@@ -70,44 +70,36 @@ export const deleteAllPavingCosts = async (): Promise<void> => {
   }
 };
 
-// Check if specific default costs already exist
-export const checkIfDefaultsExist = async (): Promise<string[]> => {
-  const defaultNames = ["Paver", "Wastage", "Margin"];
-  
-  const { data, error } = await supabase
-    .from("paving_costs")
-    .select("name")
-    .in("name", defaultNames);
-  
-  if (error) {
-    console.error("Error checking if defaults exist:", error);
-    throw error;
-  }
-  
-  return data ? data.map(item => item.name) : [];
-};
-
 // Helper to create default paving costs
 export const createDefaultPavingCosts = async (): Promise<void> => {
-  // First check which defaults already exist
-  const existingDefaults = await checkIfDefaultsExist();
-  
-  // Define the defaults we need
+  // Define our 3 default costs (should be exactly 3)
   const defaultCosts = [
     { name: "Paver", category1: 99, category2: 114, category3: 137, category4: 137, display_order: 1 },
     { name: "Wastage", category1: 13, category2: 13, category3: 13, category4: 13, display_order: 2 },
     { name: "Margin", category1: 100, category2: 100, category3: 100, category4: 100, display_order: 3 }
   ];
 
-  // Only insert defaults that don't already exist
+  // Insert all default costs
   for (const cost of defaultCosts) {
-    if (!existingDefaults.includes(cost.name)) {
-      try {
-        await addPavingCost(cost);
-      } catch (error) {
-        console.error(`Failed to initialize ${cost.name}:`, error);
-        throw error;
-      }
+    try {
+      await addPavingCost(cost);
+    } catch (error) {
+      console.error(`Failed to initialize ${cost.name}:`, error);
+      throw error;
     }
+  }
+};
+
+// Reset all paving costs to default
+export const resetPavingCostsToDefault = async (): Promise<void> => {
+  try {
+    // Step 1: Delete all existing data
+    await deleteAllPavingCosts();
+    
+    // Step 2: Create the default values
+    await createDefaultPavingCosts();
+  } catch (error) {
+    console.error("Error resetting paving costs:", error);
+    throw error;
   }
 };

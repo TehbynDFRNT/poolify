@@ -8,7 +8,7 @@ import {
   updatePavingCost,
   addPavingCost,
   deleteAllPavingCosts,
-  createDefaultPavingCosts
+  resetPavingCostsToDefault
 } from "../services/pavingCostsService";
 
 export type { PavingCost } from "../types/pavingCosts";
@@ -109,21 +109,18 @@ export const usePavingCosts = () => {
     }
   };
 
-  // Clear all existing data and reinitialize with default values
+  // Reset all existing data with default values (exactly 3 rows)
   const initializeDefaultValues = async () => {
     try {
-      console.log("Initializing default paving costs");
+      console.log("Resetting paving costs to default values");
       
-      // First delete all existing paving costs to prevent duplicates
-      await deleteAllPavingCosts();
-      
-      await createDefaultPavingCosts();
+      await resetPavingCostsToDefault();
       
       // Refresh the data
       queryClient.invalidateQueries({ queryKey: ["paving-costs"] });
       toast.success("Paving costs reset to default values");
     } catch (error) {
-      console.error("Error initializing default values:", error);
+      console.error("Error resetting default values:", error);
       toast.error("Failed to reset paving costs");
     }
   };
