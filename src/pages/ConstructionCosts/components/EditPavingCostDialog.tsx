@@ -11,17 +11,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
 import { PavingCost } from "@/types/paving-cost";
 
 interface EditPavingCostDialogProps {
   cost: PavingCost;
   onUpdate: (id: string, updates: Partial<PavingCost>) => Promise<void>;
+  children: React.ReactNode;
 }
 
 export const EditPavingCostDialog: React.FC<EditPavingCostDialogProps> = ({ 
   cost, 
-  onUpdate 
+  onUpdate,
+  children
 }) => {
   const [formValues, setFormValues] = useState<{
     category1: string;
@@ -61,14 +62,7 @@ export const EditPavingCostDialog: React.FC<EditPavingCostDialogProps> = ({
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8"
-        >
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit {cost.name}</span>
-        </Button>
+        {children}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
