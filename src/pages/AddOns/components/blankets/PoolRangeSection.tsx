@@ -21,28 +21,30 @@ export const PoolRangeSection = ({
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
-    <div className="mb-6 border rounded-lg shadow-sm overflow-hidden">
-      <div
-        className="flex items-center justify-between bg-white p-4 border-b cursor-pointer"
+    <div className="mb-6 rounded-xl overflow-hidden border shadow">
+      <div 
+        className="flex items-center justify-between p-4 cursor-pointer bg-gradient-to-r from-primary/10 to-transparent"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h2 className="text-lg font-medium flex items-center">
+        <h2 className="text-lg font-semibold flex items-center">
           <span className="h-3 w-3 rounded-full bg-primary mr-2"></span>
           {range} Range
-          <span className="ml-2 text-sm text-muted-foreground">({blankets.length} items)</span>
+          <span className="ml-2 text-sm text-muted-foreground font-normal">
+            ({blankets.length} model{blankets.length !== 1 ? 's' : ''})
+          </span>
         </h2>
-        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+        <Button variant="ghost" size="icon" className="h-8 w-8">
           {isExpanded ? (
-            <ChevronUp className="h-5 w-5" />
+            <ChevronUp className="h-4 w-4" />
           ) : (
-            <ChevronDown className="h-5 w-5" />
+            <ChevronDown className="h-4 w-4" />
           )}
         </Button>
       </div>
 
       {isExpanded && (
-        <div className="bg-gray-50 p-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="p-4 bg-card">
+          <div className="grid grid-cols-1 gap-4">
             {blankets.map((blanket) => (
               <PoolBlanketCard
                 key={blanket.id}
