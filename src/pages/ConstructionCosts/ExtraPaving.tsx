@@ -1,9 +1,10 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Scissors } from "lucide-react";
+import { Layers, Scissors, Ruler } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
+import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
 
 const ExtraPaving = () => {
   return (
@@ -46,6 +47,21 @@ const ExtraPaving = () => {
             </CardHeader>
             <CardContent>
               <ConcreteCutsTable />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Ruler className="h-5 w-5 text-primary" />
+                <CardTitle>Concrete Costs</CardTitle>
+              </div>
+              <CardDescription>
+                Configure and manage prices for concrete and dust per meter
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ConcreteCostsTable />
             </CardContent>
           </Card>
         </div>
