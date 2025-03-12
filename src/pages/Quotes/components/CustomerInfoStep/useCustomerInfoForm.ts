@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { z } from "zod"; // Add the missing import
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -119,3 +120,4 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
     handleSubmit
   };
 };
+
