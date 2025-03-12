@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -21,7 +21,6 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const [selectedPoolId, setSelectedPoolId] = useState<string>(quoteData.pool_id || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [quoteId, setQuoteId] = useState<string | null>(null);
   
   const { 
     pools,
@@ -34,31 +33,6 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
     error,
     calculateTotalCosts
   } = usePoolSelectionData(selectedPoolId);
-
-  // Fetch the quote ID if we don't have it
-  useEffect(() => {
-    const fetchQuoteId = async () => {
-      if (!quoteData.customer_email) return;
-      
-      const { data, error } = await supabase
-        .from('quotes')
-        .select('id')
-        .eq('customer_email', quoteData.customer_email)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      
-      if (error) {
-        console.error("Error fetching quote:", error);
-        return;
-      }
-      
-      if (data && data.length > 0) {
-        setQuoteId(data[0].id);
-      }
-    };
-    
-    fetchQuoteId();
-  }, [quoteData.customer_email]);
 
   const handlePoolSelect = (poolId: string) => {
     setSelectedPoolId(poolId);
@@ -78,12 +52,12 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
       // Update the quote context
       updateQuoteData({ pool_id: selectedPoolId });
       
-      // If we have a quote ID, update the record in Supabase
-      if (quoteId) {
+      // If we have a quote ID from the context, update the record in Supabase
+      if (quoteData.id) {
         const { error } = await supabase
           .from('quotes')
           .update({ pool_id: selectedPoolId })
-          .eq('id', quoteId);
+          .eq('id', quoteData.id);
         
         if (error) {
           throw error;
@@ -91,7 +65,7 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
         
         toast.success("Pool selection saved to quote");
       } else {
-        toast.warning("Quote not found, cannot save pool selection");
+        toast.warning("Quote ID not found, cannot save pool selection");
       }
       
       onNext();

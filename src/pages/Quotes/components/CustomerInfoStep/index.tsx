@@ -74,47 +74,23 @@ export const CustomerInfoStep = ({ onNext }: CustomerInfoStepProps) => {
         pool_id: quoteData.pool_id
       };
       
-      // Check if a quote with this customer email already exists
-      const { data: existingQuotes, error: fetchError } = await supabase
+      // Always create a new quote (don't update existing ones)
+      const { data, error } = await supabase
         .from('quotes')
+        .insert(dataToSave)
         .select('id')
-        .eq('customer_email', dataToSave.customer_email)
-        .eq('status', 'draft')
-        .order('created_at', { ascending: false })
-        .limit(1);
-      
-      if (fetchError) {
-        throw fetchError;
+        .single();
+        
+      if (error) {
+        throw error;
       }
       
-      let saveResult;
-      
-      if (existingQuotes && existingQuotes.length > 0) {
-        // Update the existing quote
-        const quoteId = existingQuotes[0].id;
-        saveResult = await supabase
-          .from('quotes')
-          .update(dataToSave)
-          .eq('id', quoteId);
-        
-        if (saveResult.error) {
-          throw saveResult.error;
-        }
-        
-        toast.success('Quote information updated');
-      } else {
-        // Insert a new quote
-        saveResult = await supabase
-          .from('quotes')
-          .insert(dataToSave);
-          
-        if (saveResult.error) {
-          throw saveResult.error;
-        }
-        
-        toast.success('New quote created');
+      // Update the quote ID in the context
+      if (data) {
+        updateQuoteData({ id: data.id });
       }
       
+      toast.success('New quote created');
       setIsSubmitting(false);
       onNext();
     } catch (error) {
