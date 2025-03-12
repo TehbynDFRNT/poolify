@@ -57,7 +57,7 @@ const PavingRetaining = () => {
       const { data, error } = await supabase
         .from("concrete_cuts")
         .select("*")
-        .eq("category", null);  // Changed from .is() to .eq() to fix the TypeScript error
+        .eq("category", null);  // Using .eq() to query for NULL values
 
       if (error) {
         throw error;

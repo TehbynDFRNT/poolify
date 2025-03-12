@@ -38,18 +38,21 @@ export type Database = {
       }
       concrete_cuts: {
         Row: {
+          category: string | null
           created_at: string
           id: string
           price: number
           type: string
         }
         Insert: {
+          category?: string | null
           created_at?: string
           id?: string
           price?: number
           type: string
         }
         Update: {
+          category?: string | null
           created_at?: string
           id?: string
           price?: number
