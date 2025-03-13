@@ -56,7 +56,7 @@ const CraneCosts = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <Link to="/crane-costs" className="transition-colors hover:text-foreground">
+              <Link to="/construction-costs/crane" className="transition-colors hover:text-foreground">
                 Crane & Traffic Control Costs
               </Link>
             </BreadcrumbItem>

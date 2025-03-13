@@ -36,14 +36,14 @@ const ConstructionCosts = () => {
             </div>
           </Link>
 
-          <Link to="/construction-costs/bobcat-costs" className="block">
+          <Link to="/construction-costs/bobcat" className="block">
             <div className="p-6 rounded-lg border border-gray-200 hover:border-primary transition-colors flex flex-col items-center justify-center">
               <Construction className="h-6 w-6 text-primary mb-3" />
               <span className="font-medium">Bobcat Costs</span>
             </div>
           </Link>
 
-          <Link to="/construction-costs/crane-costs" className="block">
+          <Link to="/construction-costs/crane" className="block">
             <div className="p-6 rounded-lg border border-gray-200 hover:border-primary transition-colors flex flex-col items-center justify-center">
               <Hammer className="h-6 w-6 text-primary mb-3" />
               <span className="font-medium">Crane Costs</span>
