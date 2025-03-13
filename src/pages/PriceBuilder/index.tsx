@@ -93,7 +93,8 @@ const PriceBuilder = () => {
                               e.stopPropagation();
                               return;
                             }
-                            navigate(`/price-builder/${pool.id}`);
+                            // Fix the navigation path to match the route defined in App.tsx
+                            navigate(`/price-builder/pool/${pool.id}`);
                           }}
                         >
                           <TableCell className="font-medium">{pool.range}</TableCell>
