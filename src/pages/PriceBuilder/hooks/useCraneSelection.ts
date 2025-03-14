@@ -36,47 +36,21 @@ export const useCraneSelection = (poolId?: string) => {
       if (!poolId) return null;
       
       try {
-        // Use a type assertion to bypass TypeScript's type checking
+        // Use a more generic approach with direct table access
         const { data, error } = await supabase
-          .rpc('get_crane_selection_for_pool', { pool_id_param: poolId }) as {
-            data: CraneSelection | null;
-            error: any;
-          };
-
-        // Fallback if RPC doesn't exist yet
-        if (error && error.code === 'PGRST116') {
-          // Use type assertion for the fallback query too
-          const result = await supabase.from('pool_crane_selections' as any)
-            .select('crane_id')
-            .eq('pool_id', poolId)
-            .maybeSingle() as {
-              data: { crane_id: string } | null;
-              error: any;
-            };
+          .from('pool_crane_selections')
+          .select('crane_id')
+          .eq('pool_id', poolId)
+          .maybeSingle();
             
-          const rawData = result.data;
-          const rawError = result.error;
-            
-          if (rawError && rawError.code !== 'PGRST116') {
-            console.error('Error fetching crane selection:', rawError);
-            return null;
-          }
-          
-          // Safely return either null or the correctly typed object
-          if (rawData && typeof rawData === 'object' && 'crane_id' in rawData) {
-            return { pool_id: poolId, crane_id: rawData.crane_id } as CraneSelection;
-          }
-          return null;
-        }
-        
-        if (error) {
+        if (error && error.code !== 'PGRST116') {
           console.error('Error fetching crane selection:', error);
           return null;
         }
         
-        // Safely handle RPC result
-        if (data && typeof data === 'object' && 'crane_id' in data && 'pool_id' in data) {
-          return data as CraneSelection;
+        // Safely return either null or the correctly typed object
+        if (data && typeof data === 'object' && 'crane_id' in data) {
+          return { pool_id: poolId, crane_id: data.crane_id } as CraneSelection;
         }
         return null;
       } catch (error) {
@@ -113,15 +87,10 @@ export const useCraneSelection = (poolId?: string) => {
 
       try {
         // Check if there's an existing selection
-        const countResult = await supabase.from('pool_crane_selections' as any)
+        const { count, error: countError } = await supabase
+          .from('pool_crane_selections')
           .select('*', { count: 'exact', head: true })
-          .eq('pool_id', poolId) as {
-            count: number | null;
-            error: any;
-          };
-          
-        const count = countResult.count;
-        const countError = countResult.error;
+          .eq('pool_id', poolId);
           
         if (countError) {
           console.error('Error checking existing crane selection:', countError);
@@ -129,52 +98,20 @@ export const useCraneSelection = (poolId?: string) => {
         }
 
         if (count && count > 0) {
-          // Update existing selection using RPC if available
+          // Update existing selection
           const { error } = await supabase
-            .rpc('update_crane_selection', { 
-              p_pool_id: poolId, 
-              p_crane_id: selectedCraneId 
-            }) as {
-              data: any;
-              error: any;
-            };
-
-          // Fallback if RPC doesn't exist
-          if (error && error.code === 'PGRST116') {
-            // Use more generic approach with type assertion
-            const result = await supabase.from('pool_crane_selections' as any)
-              .update({ crane_id: selectedCraneId })
-              .eq('pool_id', poolId) as {
-                error: any;
-              };
+            .from('pool_crane_selections')
+            .update({ crane_id: selectedCraneId })
+            .eq('pool_id', poolId);
               
-            if (result.error) throw result.error;
-          } else if (error) {
-            throw error;
-          }
+          if (error) throw error;
         } else {
-          // Insert new selection using RPC if available
+          // Insert new selection
           const { error } = await supabase
-            .rpc('insert_crane_selection', { 
-              p_pool_id: poolId, 
-              p_crane_id: selectedCraneId 
-            }) as {
-              data: any;
-              error: any;
-            };
-
-          // Fallback if RPC doesn't exist
-          if (error && error.code === 'PGRST116') {
-            // Use more generic approach with type assertion
-            const result = await supabase.from('pool_crane_selections' as any)
-              .insert({ pool_id: poolId, crane_id: selectedCraneId }) as {
-                error: any;
-              };
+            .from('pool_crane_selections')
+            .insert({ pool_id: poolId, crane_id: selectedCraneId });
               
-            if (result.error) throw result.error;
-          } else if (error) {
-            throw error;
-          }
+          if (error) throw error;
         }
 
         // Invalidate the queries to refresh the data
