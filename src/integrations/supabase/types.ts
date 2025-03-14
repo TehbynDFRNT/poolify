@@ -745,6 +745,45 @@ export type Database = {
           },
         ]
       }
+      pool_crane_selections: {
+        Row: {
+          crane_id: string
+          created_at: string
+          id: string
+          pool_id: string
+          updated_at: string
+        }
+        Insert: {
+          crane_id: string
+          created_at?: string
+          id?: string
+          pool_id: string
+          updated_at?: string
+        }
+        Update: {
+          crane_id?: string
+          created_at?: string
+          id?: string
+          pool_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_crane_selections_crane_id_fkey"
+            columns: ["crane_id"]
+            isOneToOne: false
+            referencedRelation: "crane_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_crane_selections_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_dig_type_matches: {
         Row: {
           created_at: string
