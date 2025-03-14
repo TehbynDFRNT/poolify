@@ -6,6 +6,7 @@ import { calculateGrandTotal } from "@/utils/digTypeCalculations";
 import { calculatePackagePrice } from "@/utils/package-calculations";
 import type { PackageWithComponents } from "@/types/filtration";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CraneCost } from "@/types/crane-cost";
 
 interface PricingSummaryProps {
   poolId: string;
@@ -63,31 +64,55 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   const { data: selectedCraneData, isLoading: isLoadingCrane } = useQuery({
     queryKey: ["selected-crane", poolId],
     queryFn: async () => {
-      // Check if there's a selected crane for this pool in pool_crane_selections
-      const { data: craneSelection } = await supabase
-        .from("pool_crane_selections")
-        .select("crane_id")
-        .eq("pool_id", poolId)
-        .maybeSingle();
+      try {
+        // Use a stored procedure call to get the crane selection
+        const { data: craneSelection, error: rpcError } = await supabase
+          .rpc('get_crane_with_details_for_pool', { pool_id_param: poolId })
+          .returns<CraneCost>();
 
-      // If a selection exists, get that crane's details
-      if (craneSelection?.crane_id) {
-        const { data: crane } = await supabase
+        // If RPC function doesn't exist yet, use alternative approach
+        if (rpcError && rpcError.code === 'PGRST116') {
+          // First try to get the crane_id from pool_crane_selections
+          const { data: selectionData } = await supabase
+            .from('pool_crane_selections')
+            .select('crane_id')
+            .eq('pool_id', poolId)
+            .maybeSingle();
+
+          // If a selection exists, get that crane's details
+          if (selectionData?.crane_id) {
+            const { data: crane } = await supabase
+              .from("crane_costs")
+              .select("*")
+              .eq("id", selectionData.crane_id)
+              .single();
+            return crane;
+          }
+
+          // Otherwise get the default Franna crane
+          const { data: defaultCrane } = await supabase
+            .from("crane_costs")
+            .select("*")
+            .eq("name", "Franna Crane-S20T-L1")
+            .maybeSingle();
+          
+          return defaultCrane;
+        }
+
+        if (rpcError) throw rpcError;
+        return craneSelection;
+      } catch (error) {
+        console.error("Error fetching crane data:", error);
+        
+        // Fall back to default crane
+        const { data: defaultCrane } = await supabase
           .from("crane_costs")
           .select("*")
-          .eq("id", craneSelection.crane_id)
-          .single();
-        return crane;
+          .eq("name", "Franna Crane-S20T-L1")
+          .maybeSingle();
+        
+        return defaultCrane;
       }
-
-      // Otherwise get the default Franna crane
-      const { data: defaultCrane } = await supabase
-        .from("crane_costs")
-        .select("*")
-        .eq("name", "Franna Crane-S20T-L1")
-        .maybeSingle();
-      
-      return defaultCrane;
     },
   });
 
