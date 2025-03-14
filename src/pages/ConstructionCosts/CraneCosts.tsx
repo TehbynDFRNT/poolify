@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { Construction } from "lucide-react";
+import { Construction, Info } from "lucide-react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -12,6 +12,8 @@ import { CostSection } from "./components/CostSection";
 import { AddCraneCostForm } from "./components/AddCraneCostForm";
 import { AddTrafficControlCostForm } from "./components/AddTrafficControlCostForm";
 import { useCosts } from "./hooks/useCosts";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const CraneCosts = () => {
   const {
@@ -39,6 +41,11 @@ const CraneCosts = () => {
     handleCancel: handleCancelTraffic,
     setEditingPrice: setTrafficEditingPrice,
   } = useCosts("traffic_control_costs", "traffic-control-costs");
+
+  // Find the Franna crane in the list
+  const frannaCrane = craneCosts?.find(cost => 
+    cost.name.toLowerCase().includes('franna')
+  );
 
   return (
     <DashboardLayout>
@@ -71,6 +78,18 @@ const CraneCosts = () => {
           <Construction className="h-6 w-6 text-gray-500" />
         </div>
 
+        <Card className="mb-8 bg-muted/30 border-dashed">
+          <CardContent className="flex items-start p-4 gap-3">
+            <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm text-muted-foreground">
+                The <strong>Franna Crane ({frannaCrane ? `$${frannaCrane.price}` : 'loading...'}) is used as the default</strong> crane type in all pool pricing calculations. 
+                Other crane types listed below are considered options that can be selected for specific projects as needed.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="space-y-8">
           <CostSection
             title="Crane Hire Costs"
@@ -86,6 +105,9 @@ const CraneCosts = () => {
             onCancel={handleCancelCrane}
             onPriceChange={setCraneEditingPrice}
             AddForm={AddCraneCostForm}
+            renderExtra={(cost) => cost.name.toLowerCase().includes('franna') ? (
+              <Badge variant="outline" className="ml-2 text-primary border-primary">Default</Badge>
+            ) : null}
           />
 
           <CostSection

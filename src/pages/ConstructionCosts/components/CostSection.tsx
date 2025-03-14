@@ -18,6 +18,7 @@ interface CostSectionProps {
   onCancel: () => void;
   onPriceChange: (value: string) => void;
   AddForm: React.ComponentType<{ onSuccess: () => void }>;
+  renderExtra?: (cost: CraneCost | TrafficControlCost) => React.ReactNode;
 }
 
 export const CostSection = ({
@@ -34,6 +35,7 @@ export const CostSection = ({
   onCancel,
   onPriceChange,
   AddForm,
+  renderExtra,
 }: CostSectionProps) => {
   return (
     <div className="bg-white p-6 rounded-lg border border-gray-200 shadow-sm">
@@ -65,6 +67,7 @@ export const CostSection = ({
           onCancel={onCancel}
           onPriceChange={onPriceChange}
           nameLabel={nameLabel}
+          renderExtra={renderExtra}
         />
       )}
     </div>

@@ -23,6 +23,7 @@ interface CostTableProps {
   onCancel: () => void;
   onPriceChange: (value: string) => void;
   nameLabel: string;
+  renderExtra?: (cost: CraneCost | TrafficControlCost) => React.ReactNode;
 }
 
 export const CostTable = ({
@@ -34,6 +35,7 @@ export const CostTable = ({
   onCancel,
   onPriceChange,
   nameLabel,
+  renderExtra,
 }: CostTableProps) => {
   // Calculate the total of all prices
   const total = costs.reduce((sum, cost) => {
@@ -57,7 +59,12 @@ export const CostTable = ({
       <TableBody>
         {costs.map((cost) => (
           <TableRow key={cost.id}>
-            <TableCell>{cost.name}</TableCell>
+            <TableCell>
+              <div className="flex items-center">
+                {cost.name}
+                {renderExtra && renderExtra(cost)}
+              </div>
+            </TableCell>
             <TableCell className="text-right">
               {editingId === cost.id ? (
                 <Input
