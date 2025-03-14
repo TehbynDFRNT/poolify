@@ -74,7 +74,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
         if (rpcError && rpcError.code === 'PGRST116') {
           // First try to get the crane_id from pool_crane_selections
           const { data: selectionData } = await supabase
-            .from('pool_crane_selections')
+            .from('pool_crane_selections' as any)
             .select('crane_id')
             .eq('pool_id', poolId)
             .maybeSingle();
