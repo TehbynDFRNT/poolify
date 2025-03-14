@@ -38,14 +38,13 @@ export const useCraneSelection = (poolId?: string) => {
       try {
         // Use RPC function to get crane selection to bypass type checking
         const { data, error } = await supabase
-          .rpc('get_crane_selection_for_pool', { pool_id_param: poolId })
-          .returns<CraneSelection | null>();
+          .rpc('get_crane_selection_for_pool', { pool_id_param: poolId });
 
         // Fallback if RPC doesn't exist yet
         if (error && error.code === 'PGRST116') {
-          // Type assertion to bypass TypeScript checks
+          // Use type assertion to cast the table name
           const { data: rawData, error: rawError } = await supabase
-            .from('pool_crane_selections' as any)
+            .from('pool_crane_selections' as unknown as any)
             .select('crane_id')
             .eq('pool_id', poolId)
             .maybeSingle();
@@ -63,7 +62,7 @@ export const useCraneSelection = (poolId?: string) => {
           return null;
         }
         
-        return data;
+        return data as CraneSelection;
       } catch (error) {
         console.error('Error in crane selection query:', error);
         return null;
@@ -99,7 +98,7 @@ export const useCraneSelection = (poolId?: string) => {
       try {
         // Check if there's an existing selection using a workaround for type checking
         const { count, error: countError } = await supabase
-          .from('pool_crane_selections' as any)
+          .from('pool_crane_selections' as unknown as any)
           .select('*', { count: 'exact', head: true })
           .eq('pool_id', poolId);
           
@@ -119,7 +118,7 @@ export const useCraneSelection = (poolId?: string) => {
           // Fallback if RPC doesn't exist
           if (error && error.code === 'PGRST116') {
             const { error: updateError } = await supabase
-              .from('pool_crane_selections' as any)
+              .from('pool_crane_selections' as unknown as any)
               .update({ crane_id: selectedCraneId })
               .eq('pool_id', poolId);
               
@@ -138,7 +137,7 @@ export const useCraneSelection = (poolId?: string) => {
           // Fallback if RPC doesn't exist
           if (error && error.code === 'PGRST116') {
             const { error: insertError } = await supabase
-              .from('pool_crane_selections' as any)
+              .from('pool_crane_selections' as unknown as any)
               .insert({ pool_id: poolId, crane_id: selectedCraneId });
               
             if (insertError) throw insertError;

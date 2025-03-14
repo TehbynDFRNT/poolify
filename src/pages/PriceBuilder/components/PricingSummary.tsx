@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,26 +68,25 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
       try {
         // Use a stored procedure call to get the crane selection
         const { data: craneSelection, error: rpcError } = await supabase
-          .rpc('get_crane_with_details_for_pool', { pool_id_param: poolId })
-          .returns<CraneCost>();
+          .rpc('get_crane_with_details_for_pool', { pool_id_param: poolId });
 
         // If RPC function doesn't exist yet, use alternative approach
         if (rpcError && rpcError.code === 'PGRST116') {
           // First try to get the crane_id from pool_crane_selections
           const { data: selectionData } = await supabase
-            .from('pool_crane_selections' as any)
+            .from('pool_crane_selections' as unknown as any)
             .select('crane_id')
             .eq('pool_id', poolId)
             .maybeSingle();
 
           // If a selection exists, get that crane's details
-          if (selectionData?.crane_id) {
+          if (selectionData && selectionData.crane_id) {
             const { data: crane } = await supabase
               .from("crane_costs")
               .select("*")
               .eq("id", selectionData.crane_id)
               .single();
-            return crane;
+            return crane as CraneCost;
           }
 
           // Otherwise get the default Franna crane
@@ -96,11 +96,11 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
             .eq("name", "Franna Crane-S20T-L1")
             .maybeSingle();
           
-          return defaultCrane;
+          return defaultCrane as CraneCost;
         }
 
         if (rpcError) throw rpcError;
-        return craneSelection;
+        return craneSelection as CraneCost;
       } catch (error) {
         console.error("Error fetching crane data:", error);
         
@@ -111,7 +111,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
           .eq("name", "Franna Crane-S20T-L1")
           .maybeSingle();
         
-        return defaultCrane;
+        return defaultCrane as CraneCost;
       }
     },
   });
