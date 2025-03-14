@@ -74,13 +74,13 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
         if (rpcError && rpcError.code === 'PGRST116') {
           // First try to get the crane_id from pool_crane_selections
           const { data: selectionData } = await supabase
-            .from('pool_crane_selections' as unknown as any)
+            .from('pool_crane_selections' as never)
             .select('crane_id')
             .eq('pool_id', poolId)
             .maybeSingle();
 
           // If a selection exists, get that crane's details
-          if (selectionData && selectionData.crane_id) {
+          if (selectionData && typeof selectionData === 'object' && 'crane_id' in selectionData) {
             const { data: crane } = await supabase
               .from("crane_costs")
               .select("*")
