@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Construction } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCraneSelection } from '../hooks/useCraneSelection';
+import { useCraneSelection } from '../hooks/crane';
 import { CraneDisplay } from './CraneSelection/CraneDisplay';
 import { CraneSelectionForm } from './CraneSelection/CraneSelectionForm';
 
