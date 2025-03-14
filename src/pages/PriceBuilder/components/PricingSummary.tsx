@@ -72,12 +72,13 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
 
         // If RPC function doesn't exist yet, use alternative approach
         if (rpcError && rpcError.code === 'PGRST116') {
-          // First try to get the crane_id from pool_crane_selections
-          const { data: selectionData } = await supabase
-            .from('pool_crane_selections' as never)
+          // First try to get the crane_id from pool_crane_selections using generic approach
+          const result = await supabase.from('pool_crane_selections')
             .select('crane_id')
             .eq('pool_id', poolId)
             .maybeSingle();
+          
+          const selectionData = result.data;
 
           // If a selection exists, get that crane's details
           if (selectionData && typeof selectionData === 'object' && 'crane_id' in selectionData) {
