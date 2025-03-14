@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { Construction, Info } from "lucide-react";
@@ -42,9 +41,9 @@ const CraneCosts = () => {
     setEditingPrice: setTrafficEditingPrice,
   } = useCosts("traffic_control_costs", "traffic-control-costs");
 
-  // Find the Franna crane in the list
+  // Find the specific Franna crane in the list
   const frannaCrane = craneCosts?.find(cost => 
-    cost.name.toLowerCase().includes('franna')
+    cost.name === "Franna Crane-S20T-L1"
   );
 
   return (
@@ -83,7 +82,7 @@ const CraneCosts = () => {
             <Info className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
             <div>
               <p className="text-sm text-muted-foreground">
-                The <strong>Franna Crane ({frannaCrane ? `$${frannaCrane.price}` : 'loading...'}) is used as the default</strong> crane type in all pool pricing calculations. 
+                The <strong>Franna Crane-S20T-L1 ({frannaCrane ? `$${frannaCrane.price}` : 'loading...'}) is used as the default</strong> crane type in all pool pricing calculations. 
                 Other crane types listed below are considered options that can be selected for specific projects as needed.
               </p>
             </div>
@@ -105,7 +104,7 @@ const CraneCosts = () => {
             onCancel={handleCancelCrane}
             onPriceChange={setCraneEditingPrice}
             AddForm={AddCraneCostForm}
-            renderExtra={(cost) => cost.name.toLowerCase().includes('franna') ? (
+            renderExtra={(cost) => cost.name === "Franna Crane-S20T-L1" ? (
               <Badge variant="outline" className="ml-2 text-primary border-primary">Default</Badge>
             ) : null}
           />
