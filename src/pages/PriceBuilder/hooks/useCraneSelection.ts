@@ -43,7 +43,7 @@ export const useCraneSelection = (poolId?: string) => {
 
         // Fallback if RPC doesn't exist yet
         if (error && error.code === 'PGRST116') {
-          // Use a direct query as a fallback, using any to bypass type checking
+          // Type assertion to bypass TypeScript checks
           const { data: rawData, error: rawError } = await supabase
             .from('pool_crane_selections' as any)
             .select('crane_id')
