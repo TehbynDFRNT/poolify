@@ -1,11 +1,11 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Construction, Check, X, Pencil } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Select, 
   SelectContent, 
@@ -24,9 +24,10 @@ interface CraneNeededSectionProps {
 export const CraneNeededSection = ({ poolId }: CraneNeededSectionProps) => {
   const [selectedCraneId, setSelectedCraneId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const queryClient = useQueryClient();
 
   // Fetch all crane costs data
-  const { data: craneCosts, isLoading } = useQuery({
+  const { data: craneCosts, isLoading: isLoadingCraneCosts } = useQuery({
     queryKey: ["crane-costs", "default"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -39,10 +40,37 @@ export const CraneNeededSection = ({ poolId }: CraneNeededSectionProps) => {
     },
   });
 
+  // Fetch the existing crane selection for this pool
+  const { data: craneSelection, isLoading: isLoadingSelection } = useQuery({
+    queryKey: ["crane-selection", poolId],
+    queryFn: async () => {
+      if (!poolId) return null;
+      
+      const { data, error } = await supabase
+        .from("pool_crane_selections")
+        .select("crane_id")
+        .eq("pool_id", poolId)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      return data;
+    },
+    enabled: !!poolId,
+  });
+
   // Find the specific Franna crane in the list for the default option
   const frannaCrane = craneCosts?.find(cost => 
     cost.name === "Franna Crane-S20T-L1"
   );
+
+  // Set the selected crane ID from the fetched selection or default to Franna
+  useEffect(() => {
+    if (craneSelection?.crane_id) {
+      setSelectedCraneId(craneSelection.crane_id);
+    } else if (frannaCrane?.id && !selectedCraneId) {
+      setSelectedCraneId(frannaCrane.id);
+    }
+  }, [craneSelection, frannaCrane, selectedCraneId]);
 
   // Get the currently selected crane or default to Franna
   const selectedCrane = selectedCraneId 
@@ -54,14 +82,68 @@ export const CraneNeededSection = ({ poolId }: CraneNeededSectionProps) => {
     setSelectedCraneId(craneId);
   };
 
+  // Mutation to save crane selection
+  const saveCraneMutation = useMutation({
+    mutationFn: async () => {
+      if (!poolId || !selectedCraneId) return;
+
+      // Check if there's an existing selection
+      const { data: existingSelection } = await supabase
+        .from("pool_crane_selections")
+        .select("id")
+        .eq("pool_id", poolId)
+        .maybeSingle();
+
+      if (existingSelection) {
+        // Update existing selection
+        const { error } = await supabase
+          .from("pool_crane_selections")
+          .update({ crane_id: selectedCraneId })
+          .eq("pool_id", poolId);
+
+        if (error) throw error;
+      } else {
+        // Insert new selection
+        const { error } = await supabase
+          .from("pool_crane_selections")
+          .insert({ pool_id: poolId, crane_id: selectedCraneId });
+
+        if (error) throw error;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate the queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ["crane-selection", poolId] });
+      queryClient.invalidateQueries({ queryKey: ["selected-crane", poolId] });
+      toast.success("Crane selection updated");
+      setIsEditing(false);
+    },
+    onError: (error) => {
+      console.error("Error saving crane selection:", error);
+      toast.error("Failed to update crane selection");
+    }
+  });
+
   const handleSave = () => {
-    setIsEditing(false);
-    toast.success("Crane selection updated");
+    if (poolId) {
+      saveCraneMutation.mutate();
+    } else {
+      setIsEditing(false);
+      toast.success("Crane selection updated");
+    }
   };
 
   const handleCancel = () => {
+    // Reset to the last saved value
+    if (craneSelection?.crane_id) {
+      setSelectedCraneId(craneSelection.crane_id);
+    } else if (frannaCrane?.id) {
+      setSelectedCraneId(frannaCrane.id);
+    }
     setIsEditing(false);
   };
+
+  const isLoading = isLoadingCraneCosts || isLoadingSelection;
 
   return (
     <Card className="bg-white shadow-sm">

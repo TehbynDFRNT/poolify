@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -60,6 +59,38 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
     },
   });
 
+  // Fetch selected crane for this pool
+  const { data: selectedCraneData, isLoading: isLoadingCrane } = useQuery({
+    queryKey: ["selected-crane", poolId],
+    queryFn: async () => {
+      // Check if there's a selected crane for this pool in pool_crane_selections
+      const { data: craneSelection } = await supabase
+        .from("pool_crane_selections")
+        .select("crane_id")
+        .eq("pool_id", poolId)
+        .maybeSingle();
+
+      // If a selection exists, get that crane's details
+      if (craneSelection?.crane_id) {
+        const { data: crane } = await supabase
+          .from("crane_costs")
+          .select("*")
+          .eq("id", craneSelection.crane_id)
+          .single();
+        return crane;
+      }
+
+      // Otherwise get the default Franna crane
+      const { data: defaultCrane } = await supabase
+        .from("crane_costs")
+        .select("*")
+        .eq("name", "Franna Crane-S20T-L1")
+        .maybeSingle();
+      
+      return defaultCrane;
+    },
+  });
+
   // Fetch margin data
   const { data: marginData, isLoading: isLoadingMargin } = useQuery({
     queryKey: ["pool-margin", poolId],
@@ -75,7 +106,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
     },
   });
 
-  const isLoading = isLoadingFixed || isLoadingIndividual || isLoadingExcavation || isLoadingMargin;
+  const isLoading = isLoadingFixed || isLoadingIndividual || isLoadingExcavation || isLoadingMargin || isLoadingCrane;
 
   if (isLoading) {
     return (
@@ -108,12 +139,15 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   
   const filtrationTotal = filtrationPackage ? calculatePackagePrice(filtrationPackage) : 0;
 
+  const craneCost = selectedCraneData?.price || 0;
+
   const costBreakdown = [
     { name: "Pool Base Price", value: poolBasePrice },
     { name: "Filtration Package", value: filtrationTotal },
     { name: "Fixed Costs", value: fixedCostsTotal },
     { name: "Individual Costs", value: individualCostsTotal },
     { name: "Excavation Costs", value: excavationTotal },
+    { name: "Crane Costs", value: craneCost },
   ];
 
   const grandTotal = costBreakdown.reduce((sum, item) => sum + item.value, 0);
