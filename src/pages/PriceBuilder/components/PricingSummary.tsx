@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -66,17 +65,23 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
     queryKey: ["selected-crane", poolId],
     queryFn: async () => {
       try {
-        // Use a stored procedure call to get the crane selection
+        // Use a type assertion to bypass TypeScript's type checking
         const { data: craneSelection, error: rpcError } = await supabase
-          .rpc('get_crane_with_details_for_pool', { pool_id_param: poolId });
+          .rpc('get_crane_with_details_for_pool', { pool_id_param: poolId }) as {
+            data: CraneCost | null;
+            error: any;
+          };
 
         // If RPC function doesn't exist yet, use alternative approach
         if (rpcError && rpcError.code === 'PGRST116') {
           // First try to get the crane_id from pool_crane_selections using generic approach
-          const result = await supabase.from('pool_crane_selections')
+          const result = await supabase.from('pool_crane_selections' as any)
             .select('crane_id')
             .eq('pool_id', poolId)
-            .maybeSingle();
+            .maybeSingle() as {
+              data: { crane_id: string } | null;
+              error: any;
+            };
           
           const selectionData = result.data;
 
