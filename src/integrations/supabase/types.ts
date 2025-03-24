@@ -1061,12 +1061,14 @@ export type Database = {
         Row: {
           crane_id: string | null
           created_at: string
+          custom_requirements_json: string | null
           customer_email: string
           customer_name: string
           customer_phone: string
           excavation_type: string | null
           home_address: string
           id: string
+          micro_dig_notes: string | null
           optional_addons_cost: number | null
           owner2_email: string | null
           owner2_name: string | null
@@ -1083,12 +1085,14 @@ export type Database = {
         Insert: {
           crane_id?: string | null
           created_at?: string
+          custom_requirements_json?: string | null
           customer_email: string
           customer_name: string
           customer_phone: string
           excavation_type?: string | null
           home_address: string
           id?: string
+          micro_dig_notes?: string | null
           optional_addons_cost?: number | null
           owner2_email?: string | null
           owner2_name?: string | null
@@ -1105,12 +1109,14 @@ export type Database = {
         Update: {
           crane_id?: string | null
           created_at?: string
+          custom_requirements_json?: string | null
           customer_email?: string
           customer_name?: string
           customer_phone?: string
           excavation_type?: string | null
           home_address?: string
           id?: string
+          micro_dig_notes?: string | null
           optional_addons_cost?: number | null
           owner2_email?: string | null
           owner2_name?: string | null

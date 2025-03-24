@@ -1,13 +1,20 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { CustomRequirement } from "../types";
 import { UseCustomRequirementsReturn } from "./types";
 
-export const useCustomRequirements = (): UseCustomRequirementsReturn => {
-  const [customRequirements, setCustomRequirements] = useState<CustomRequirement[]>([
-    { id: crypto.randomUUID(), description: "", price: 0 }
-  ]);
+export const useCustomRequirements = (initialRequirements?: CustomRequirement[]): UseCustomRequirementsReturn => {
+  const [customRequirements, setCustomRequirements] = useState<CustomRequirement[]>(
+    initialRequirements || [{ id: crypto.randomUUID(), description: "", price: 0 }]
+  );
+
+  // Initialize from database data if provided
+  useEffect(() => {
+    if (initialRequirements && initialRequirements.length > 0) {
+      setCustomRequirements(initialRequirements);
+    }
+  }, [initialRequirements]);
 
   const addCustomRequirement = () => {
     setCustomRequirements([

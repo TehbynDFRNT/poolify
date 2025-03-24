@@ -93,6 +93,12 @@ const EditQuoteContent = () => {
         site_requirements_cost: quoteData.site_requirements_cost || 0,
         optional_addons_cost: quoteData.optional_addons_cost || 0,
         total_cost: quoteData.total_cost || 0,
+        
+        // Load custom requirements and micro dig data
+        custom_requirements_json: quoteData.custom_requirements_json || '',
+        micro_dig_required: quoteData.micro_dig_required || false,
+        micro_dig_price: quoteData.micro_dig_price || 0,
+        micro_dig_notes: quoteData.micro_dig_notes || ''
       });
 
       setIsLoading(false);

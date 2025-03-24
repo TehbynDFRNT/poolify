@@ -7,9 +7,15 @@ import { useCustomRequirements } from "./useCustomRequirements";
 import { useMicroDig } from "./useMicroDig";
 import { calculateAddonsCost } from "./utils/costCalculations";
 import { useAddonsPersistence } from "./useAddonsPersistence";
+import { CustomRequirement } from "../types";
 
 export const useOptionalAddons = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
+  
+  // Parse custom requirements from context if available
+  const initialCustomRequirements = quoteData.custom_requirements_json 
+    ? JSON.parse(quoteData.custom_requirements_json as string) 
+    : undefined;
   
   // Standard addons
   const { 
@@ -18,15 +24,15 @@ export const useOptionalAddons = () => {
     updateQuantity 
   } = useStandardAddons();
   
-  // Custom requirements
+  // Custom requirements with initialization from context
   const { 
     customRequirements, 
     addCustomRequirement, 
     removeCustomRequirement, 
     updateCustomRequirement 
-  } = useCustomRequirements();
+  } = useCustomRequirements(initialCustomRequirements);
   
-  // Micro dig
+  // Micro dig with initialization from context
   const { 
     microDigRequired, 
     setMicroDigRequired, 
@@ -35,6 +41,21 @@ export const useOptionalAddons = () => {
     microDigNotes, 
     setMicroDigNotes 
   } = useMicroDig();
+
+  // Initialize micro dig values from context if available
+  useEffect(() => {
+    if (quoteData.micro_dig_required !== undefined) {
+      setMicroDigRequired(quoteData.micro_dig_required);
+    }
+    
+    if (quoteData.micro_dig_price !== undefined) {
+      setMicroDigPrice(quoteData.micro_dig_price);
+    }
+    
+    if (quoteData.micro_dig_notes) {
+      setMicroDigNotes(quoteData.micro_dig_notes);
+    }
+  }, [quoteData.id]); // Only run once when the quote ID is loaded
 
   // Calculate total cost function for both UI and persistence
   const calculateTotalCost = () => {
