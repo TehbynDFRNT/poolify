@@ -72,25 +72,29 @@ const EditQuoteContent = () => {
           ? quoteData.status 
           : 'draft';
 
+      // Since the database schema might not have the fields we're looking for,
+      // we need to add them with default values if they're missing
       updateQuoteData({
         id: quoteData.id,
         customer_name: quoteData.customer_name,
         customer_email: quoteData.customer_email,
         customer_phone: quoteData.customer_phone,
-        owner2_name: quoteData.owner2_name,
-        owner2_email: quoteData.owner2_email,
-        owner2_phone: quoteData.owner2_phone,
+        owner2_name: quoteData.owner2_name || '',
+        owner2_email: quoteData.owner2_email || '',
+        owner2_phone: quoteData.owner2_phone || '',
         home_address: quoteData.home_address,
         site_address: quoteData.site_address,
-        pool_id: quoteData.pool_id,
+        pool_id: quoteData.pool_id || '',
         status: validStatus,
-        resident_homeowner: quoteData.resident_homeowner,
-        crane_id: quoteData.crane_id,
-        excavation_type: quoteData.excavation_type,
-        traffic_control_id: quoteData.traffic_control_id,
-        site_requirements_cost: quoteData.site_requirements_cost,
-        optional_addons_cost: quoteData.optional_addons_cost,
-        total_cost: quoteData.total_cost,
+        resident_homeowner: quoteData.resident_homeowner || false,
+        
+        // Add these properties with default values if they don't exist in the database
+        crane_id: quoteData.crane_id || '',
+        excavation_type: quoteData.excavation_type || '',
+        traffic_control_id: quoteData.traffic_control_id || 'none',
+        site_requirements_cost: quoteData.site_requirements_cost || 0,
+        optional_addons_cost: quoteData.optional_addons_cost || 0,
+        total_cost: quoteData.total_cost || 0,
       });
 
       setIsLoading(false);
