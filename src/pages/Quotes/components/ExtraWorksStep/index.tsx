@@ -2,6 +2,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useQuoteContext } from "../../context/QuoteContext";
+import { ExtraPavingSection } from "./components/ExtraPavingSection";
+import { formatCurrency } from "@/utils/format";
 
 interface ExtraWorksStepProps {
   onNext: () => void;
@@ -9,28 +12,19 @@ interface ExtraWorksStepProps {
 }
 
 export const ExtraWorksStep = ({ onNext, onPrevious }: ExtraWorksStepProps) => {
+  const { quoteData } = useQuoteContext();
+  
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground mb-6">
         Add extra works such as paving, concreting, retaining walls, and water features to your quote.
       </p>
       
-      {/* Placeholder content */}
-      <div className="space-y-4">
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-2">Extra Paving</h3>
-            <p className="text-muted-foreground mb-4">
-              Additional paving options around the pool area.
-            </p>
-            <div className="rounded-lg border border-dashed p-6 text-center">
-              <p className="text-muted-foreground">
-                Extra paving options will be available in a future update.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
+      {/* Extra Paving Section */}
+      <ExtraPavingSection />
+      
+      {/* Placeholder sections for future development */}
+      <div className="space-y-4 mt-8">
         <Card>
           <CardContent className="pt-6">
             <h3 className="text-lg font-semibold mb-2">Extra Concreting</h3>
@@ -78,7 +72,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: ExtraWorksStepProps) => {
       <div className="bg-muted/50 p-4 rounded-md border mt-6">
         <div className="flex justify-between items-center">
           <span className="font-medium">Total Extra Works Cost:</span>
-          <span className="text-lg font-bold">$0.00</span>
+          <span className="text-lg font-bold">{formatCurrency(quoteData.extra_works_cost || 0)}</span>
         </div>
       </div>
 
