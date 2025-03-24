@@ -1069,6 +1069,8 @@ export type Database = {
           home_address: string
           id: string
           micro_dig_notes: string | null
+          micro_dig_price: number
+          micro_dig_required: boolean
           optional_addons_cost: number | null
           owner2_email: string | null
           owner2_name: string | null
@@ -1093,6 +1095,8 @@ export type Database = {
           home_address: string
           id?: string
           micro_dig_notes?: string | null
+          micro_dig_price?: number
+          micro_dig_required?: boolean
           optional_addons_cost?: number | null
           owner2_email?: string | null
           owner2_name?: string | null
@@ -1117,6 +1121,8 @@ export type Database = {
           home_address?: string
           id?: string
           micro_dig_notes?: string | null
+          micro_dig_price?: number
+          micro_dig_required?: boolean
           optional_addons_cost?: number | null
           owner2_email?: string | null
           owner2_name?: string | null

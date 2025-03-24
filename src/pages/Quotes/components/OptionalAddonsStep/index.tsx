@@ -4,26 +4,14 @@ import { Save } from "lucide-react";
 import { OptionalAddonsStepProps } from "./types";
 import { useOptionalAddons } from "./hooks/useOptionalAddons";
 import { StandardAddons } from "./components/StandardAddons";
-import { CustomRequirements } from "./components/CustomRequirements";
-import { MicroDigSection } from "./components/MicroDigSection";
 import { CostSummary } from "./components/CostSummary";
 
 export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepProps) => {
   const {
     addons,
-    customRequirements,
-    microDigRequired,
-    setMicroDigRequired,
-    microDigPrice,
-    setMicroDigPrice,
-    microDigNotes,
-    setMicroDigNotes,
     isSubmitting,
     toggleAddon,
     updateQuantity,
-    addCustomRequirement,
-    removeCustomRequirement,
-    updateCustomRequirement,
     calculateAddonsCost,
     saveAddons
   } = useOptionalAddons();
@@ -47,24 +35,6 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
         addons={addons}
         toggleAddon={toggleAddon}
         updateQuantity={updateQuantity}
-      />
-      
-      {/* Custom Requirements Section */}
-      <CustomRequirements 
-        requirements={customRequirements}
-        addRequirement={addCustomRequirement}
-        removeRequirement={removeCustomRequirement}
-        updateRequirement={updateCustomRequirement}
-      />
-      
-      {/* Micro Dig Section */}
-      <MicroDigSection 
-        required={microDigRequired}
-        setRequired={setMicroDigRequired}
-        price={microDigPrice}
-        setPrice={setMicroDigPrice}
-        notes={microDigNotes}
-        setNotes={setMicroDigNotes}
       />
 
       {/* Cost Summary */}

@@ -2,24 +2,15 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { CustomRequirement } from "../types";
 
 interface UseAddonsPersistenceProps {
   quoteId: string | undefined;
   calculateTotalCost: () => number;
-  customRequirements: CustomRequirement[];
-  microDigRequired: boolean;
-  microDigPrice: number;
-  microDigNotes: string;
 }
 
 export const useAddonsPersistence = ({
   quoteId,
-  calculateTotalCost,
-  customRequirements,
-  microDigRequired,
-  microDigPrice,
-  microDigNotes
+  calculateTotalCost
 }: UseAddonsPersistenceProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -34,11 +25,7 @@ export const useAddonsPersistence = ({
     try {
       // Store as JSON strings for the custom fields
       const dataToSave = {
-        optional_addons_cost: calculateTotalCost(),
-        custom_requirements_json: JSON.stringify(customRequirements),
-        micro_dig_required: microDigRequired,
-        micro_dig_price: microDigPrice,
-        micro_dig_notes: microDigNotes
+        optional_addons_cost: calculateTotalCost()
       };
       
       // Update the record in Supabase
