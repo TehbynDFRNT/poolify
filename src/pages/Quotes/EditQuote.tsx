@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
@@ -97,9 +96,9 @@ const EditQuoteContent = () => {
         optional_addons_cost: quoteData.optional_addons_cost || 0,
         total_cost: quoteData.total_cost || 0,
         
-        // Custom requirements and micro dig data
+        // Custom requirements and micro dig data - ensuring we have type-safe defaults
         custom_requirements_json: quoteData.custom_requirements_json || '',
-        micro_dig_required: quoteData.micro_dig_required || false,
+        micro_dig_required: quoteData.micro_dig_required === true,
         micro_dig_price: quoteData.micro_dig_price || 0,
         micro_dig_notes: quoteData.micro_dig_notes || ''
       });
