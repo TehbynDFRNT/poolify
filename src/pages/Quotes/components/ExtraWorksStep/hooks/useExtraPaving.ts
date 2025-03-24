@@ -10,12 +10,16 @@ export interface PavingSelection {
   categoryId: string;
   meters: number;
   cost: number;
+  materialMargin?: number;
+  labourMargin?: number;
+  totalMargin?: number;
 }
 
 export const useExtraPaving = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const [pavingSelections, setPavingSelections] = useState<PavingSelection[]>([]);
   const [totalCost, setTotalCost] = useState(0);
+  const [totalMargin, setTotalMargin] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Load extra paving categories from the database
@@ -60,7 +64,10 @@ export const useExtraPaving = () => {
       const newSelection: PavingSelection = {
         categoryId: pavingCategories[0].id,
         meters: 0,
-        cost: 0
+        cost: 0,
+        materialMargin: 0,
+        labourMargin: 0,
+        totalMargin: 0
       };
       setPavingSelections([...pavingSelections, newSelection]);
     }
@@ -88,6 +95,11 @@ export const useExtraPaving = () => {
         
         // Calculate final cost
         updatedSelections[index].cost = totalPerMeter * updatedSelections[index].meters;
+        
+        // Calculate margins
+        updatedSelections[index].materialMargin = category.margin_cost * updatedSelections[index].meters;
+        updatedSelections[index].labourMargin = laborMargin * updatedSelections[index].meters;
+        updatedSelections[index].totalMargin = updatedSelections[index].materialMargin + updatedSelections[index].labourMargin;
       }
     }
     
@@ -101,10 +113,13 @@ export const useExtraPaving = () => {
     setPavingSelections(updatedSelections);
   };
 
-  // Calculate total cost whenever selections change
+  // Calculate total cost and margin whenever selections change
   useEffect(() => {
     const newTotalCost = pavingSelections.reduce((acc, selection) => acc + selection.cost, 0);
+    const newTotalMargin = pavingSelections.reduce((acc, selection) => acc + (selection.totalMargin || 0), 0);
+    
     setTotalCost(newTotalCost);
+    setTotalMargin(newTotalMargin);
     
     // Update the parent container with the cost for aggregation
     if (containerRef.current) {
@@ -121,6 +136,7 @@ export const useExtraPaving = () => {
     setPavingSelections,
     isLoading,
     totalCost,
+    totalMargin,
     addPavingSelection,
     updatePavingSelection,
     removePavingSelection,

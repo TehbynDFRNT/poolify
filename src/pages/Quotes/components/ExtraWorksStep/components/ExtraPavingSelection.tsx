@@ -174,6 +174,10 @@ export const ExtraPavingSelection = ({
                     <span>Labour Margin:</span>
                     <span>{formatCurrency(labourMarginValue * selection.meters)}</span>
                   </div>
+                  <div className="flex justify-between text-primary">
+                    <span>Total Margin:</span>
+                    <span>{formatCurrency(selection.totalMargin || 0)}</span>
+                  </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
                     <span>Total Cost:</span>
                     <span>{formatCurrency(selection.cost)}</span>

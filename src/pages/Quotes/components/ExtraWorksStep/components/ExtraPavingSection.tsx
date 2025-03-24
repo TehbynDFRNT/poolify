@@ -12,6 +12,7 @@ export const ExtraPavingSection = () => {
     pavingSelections,
     isLoading,
     totalCost,
+    totalMargin,
     addPavingSelection,
     updatePavingSelection,
     removePavingSelection,
@@ -37,8 +38,13 @@ export const ExtraPavingSection = () => {
           <Grid2x2 className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold">Extra Paving</h3>
         </div>
-        <div className="text-lg font-bold">
-          Total: {formatCurrency(totalCost)}
+        <div className="flex flex-col items-end">
+          <div className="text-sm text-primary">
+            Total Margin: {formatCurrency(totalMargin)}
+          </div>
+          <div className="text-lg font-bold">
+            Total: {formatCurrency(totalCost)}
+          </div>
         </div>
       </div>
       
