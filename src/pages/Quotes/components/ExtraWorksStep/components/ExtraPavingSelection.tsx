@@ -9,7 +9,7 @@ import { Trash, ChevronDown, ChevronUp } from "lucide-react";
 import { PavingSelection } from "../hooks/useExtraPaving";
 import { formatCurrency } from "@/utils/format";
 import { useState } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface ExtraPavingSelectionProps {
   selection: PavingSelection;
@@ -73,33 +73,21 @@ export const ExtraPavingSelection = ({
           </div>
           
           <div className="md:col-span-2">
-            <Accordion type="single" collapsible className="border-none">
-              <AccordionItem value="cost-breakdown" className="border-none">
-                <div className="flex flex-col">
-                  <div className="flex items-center">
-                    <Label className="flex-1">Cost per meter</Label>
-                    <AccordionTrigger className="p-0 h-5 hover:no-underline">
-                      <span className="sr-only">Toggle details</span>
-                    </AccordionTrigger>
-                  </div>
-                  <div className="mt-2 font-medium">{formatCurrency(costPerMeter)}</div>
-                </div>
-                <AccordionContent className="pt-2 pb-0">
-                  <div className="text-sm border-t pt-2 space-y-1">
-                    <div className="grid grid-cols-2 gap-1">
-                      <span className="text-muted-foreground">Paver Cost:</span>
-                      <span className="text-right">{formatCurrency(selectedCategory?.paver_cost || 0)}</span>
-                      
-                      <span className="text-muted-foreground">Wastage Cost:</span>
-                      <span className="text-right">{formatCurrency(selectedCategory?.wastage_cost || 0)}</span>
-                      
-                      <span className="text-muted-foreground">Margin/Labour:</span>
-                      <span className="text-right">{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <Label className="flex items-center">
+              Cost per meter
+              <Collapsible 
+                open={isDetailsOpen} 
+                onOpenChange={setIsDetailsOpen}
+                className="w-full"
+              >
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 ml-1">
+                    {isDetailsOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                  </Button>
+                </CollapsibleTrigger>
+              </Collapsible>
+            </Label>
+            <div className="mt-2 font-medium">{formatCurrency(costPerMeter)}</div>
           </div>
           
           <div className="md:col-span-2">
@@ -119,6 +107,75 @@ export const ExtraPavingSelection = ({
             </Button>
           </div>
         </div>
+        
+        <Collapsible open={isDetailsOpen} className="mt-4">
+          <CollapsibleContent>
+            <div className="bg-muted/30 p-3 rounded-md border">
+              <h4 className="text-sm font-semibold mb-2">Cost Breakdown</h4>
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Per Meter</p>
+                  <div className="flex justify-between">
+                    <span>Paver Cost:</span>
+                    <span>{formatCurrency(selectedCategory?.paver_cost || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Wastage Cost:</span>
+                    <span>{formatCurrency(selectedCategory?.wastage_cost || 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Margin/Labour:</span>
+                    <span>{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t font-medium">
+                    <span>Total Per Meter:</span>
+                    <span>{formatCurrency(costPerMeter)}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Total ({selection.meters} meters)</p>
+                  <div className="flex justify-between">
+                    <span>Paver Cost:</span>
+                    <span>{formatCurrency((selectedCategory?.paver_cost || 0) * selection.meters)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Wastage Cost:</span>
+                    <span>{formatCurrency((selectedCategory?.wastage_cost || 0) * selection.meters)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Margin/Labour:</span>
+                    <span>{formatCurrency((selectedCategory?.margin_cost || 0) * selection.meters)}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t font-medium">
+                    <span>Total Cost:</span>
+                    <span>{formatCurrency(selection.cost)}</span>
+                  </div>
+                </div>
+                
+                <div className="space-y-1">
+                  <p className="text-muted-foreground">Percentages</p>
+                  <div className="flex justify-between">
+                    <span>Paver:</span>
+                    <span>{Math.round((selectedCategory?.paver_cost || 0) / costPerMeter * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Wastage:</span>
+                    <span>{Math.round((selectedCategory?.wastage_cost || 0) / costPerMeter * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Margin/Labour:</span>
+                    <span>{Math.round((selectedCategory?.margin_cost || 0) / costPerMeter * 100)}%</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t font-medium">
+                    <span>Total:</span>
+                    <span>100%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </CardContent>
     </Card>
   );
