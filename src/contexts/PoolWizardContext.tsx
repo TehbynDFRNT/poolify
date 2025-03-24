@@ -162,16 +162,25 @@ export const PoolWizardProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Get form values
       const values = form.getValues();
       
+      // Ensure required values have valid defaults if not set
+      const poolData = {
+        ...values,
+        width: values.width || 0,
+        length: values.length || 0,
+        depth_shallow: values.depth_shallow || 0,
+        depth_deep: values.depth_deep || 0,
+      };
+      
       // 1. Create the pool record
-      const { data: poolData, error: poolError } = await supabase
+      const { data: insertedPool, error: poolError } = await supabase
         .from("pool_specifications")
-        .insert([values])
+        .insert(poolData)
         .select()
         .single();
         
       if (poolError) throw poolError;
       
-      const poolId = poolData.id;
+      const poolId = insertedPool.id;
       
       // 2. Create pool costs record
       const poolCostsData = {
