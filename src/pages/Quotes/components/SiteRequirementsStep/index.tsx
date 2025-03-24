@@ -201,14 +201,14 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
                 <div>
                   <Label htmlFor="traffic-control">Traffic Control Level</Label>
                   <Select 
-                    value={quoteData.traffic_control_id || ""} 
+                    value={quoteData.traffic_control_id || "none"} 
                     onValueChange={handleTrafficControlChange}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select if traffic control is needed" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">None Required</SelectItem>
+                      <SelectItem value="none">None Required</SelectItem>
                       {trafficControlCosts?.map(tc => (
                         <SelectItem key={tc.id} value={tc.id}>
                           {tc.name} - ${tc.price.toFixed(2)}
@@ -218,7 +218,7 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
                   </Select>
                 </div>
                 
-                {quoteData.traffic_control_id && (
+                {quoteData.traffic_control_id && quoteData.traffic_control_id !== "none" && (
                   <div className="text-sm text-muted-foreground">
                     <p>Cost: ${trafficControlCosts?.find(tc => tc.id === quoteData.traffic_control_id)?.price.toFixed(2)}</p>
                   </div>
