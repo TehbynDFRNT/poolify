@@ -1,170 +1,148 @@
 
-import { useState, useEffect } from "react";
+import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { useQuoteContext } from "../../context/QuoteContext";
-import { ExtraPavingSection } from "./components/ExtraPavingSection";
-import { ExtraConcretingSection } from "./components/ExtraConcretingSection";
-import { formatCurrency } from "@/utils/format";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "@/hooks/use-toast";
+import { useQuoteContext } from '../../context/QuoteContext';
+import { ExtraPavingSection } from './components/ExtraPavingSection';
+import { ExtraConcretingSection } from './components/ExtraConcretingSection';
+import { useExtraPaving } from './hooks/useExtraPaving';
+import { useExtraConcreting } from './hooks/useExtraConcreting';
+import { ExtraWorks } from '@/types/extra-works';
+import { useNavigate } from 'react-router-dom';
 
-interface ExtraWorksStepProps {
-  onNext: () => void;
-  onPrevious: () => void;
-}
-
-export const ExtraWorksStep = ({ onNext, onPrevious }: ExtraWorksStepProps) => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
-  const { toast } = useToast();
+const ExtraWorksStep = () => {
   const navigate = useNavigate();
-  const { quoteId } = useParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [totalExtraWorksCost, setTotalExtraWorksCost] = useState(quoteData.extra_works_cost || 0);
-
-  // Update total extra works cost
-  const updateTotalCost = () => {
-    const pavingCost = document.querySelector('[data-paving-cost]')?.getAttribute('data-cost') || 0;
-    const concretingCost = document.querySelector('[data-concreting-cost]')?.getAttribute('data-cost') || 0;
-    
-    const total = Number(pavingCost) + Number(concretingCost);
-    setTotalExtraWorksCost(total);
-    updateQuoteData({ extra_works_cost: total });
-  };
-
-  useEffect(() => {
-    updateTotalCost();
-  }, []);
-
-  const handleSave = async (andContinue = false) => {
-    if (!quoteId) {
-      toast({
-        title: "Error",
-        description: "Quote ID is missing",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    try {
-      const { error } = await supabase
-        .from("quotes")
-        .update({
-          extra_works_cost: totalExtraWorksCost
-        })
-        .eq("id", quoteId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Extra works details saved successfully",
-      });
-
-      if (andContinue) {
-        onNext();
-      }
-    } catch (error) {
-      console.error("Error saving extra works:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save extra works details",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { 
+    pavingSelections, 
+    updatePavingSelection, 
+    addPavingSelection, 
+    removePavingSelection, 
+    calculatePavingTotalCost,
+    setPavingSelections 
+  } = useExtraPaving();
   
+  const {
+    concretingSelections,
+    updateConcretingSelection,
+    addConcretingSelection,
+    removeConcretingSelection,
+    calculateConcretingTotalCost,
+    setConcretingSelections
+  } = useExtraConcreting();
+
+  // Calculate total cost for all extra works
+  const totalExtraWorksCost = calculatePavingTotalCost() + calculateConcretingTotalCost();
+
+  // Initialize from saved data if it exists
+  useEffect(() => {
+    if (quoteData.custom_requirements_json) {
+      try {
+        const extraWorksData = JSON.parse(quoteData.custom_requirements_json) as ExtraWorks;
+        if (extraWorksData.pavingSelections) {
+          setPavingSelections(extraWorksData.pavingSelections);
+        }
+        if (extraWorksData.concretingSelections) {
+          setConcretingSelections(extraWorksData.concretingSelections);
+        }
+      } catch (error) {
+        console.error("Error parsing saved extra works data:", error);
+      }
+    }
+  }, [quoteData.custom_requirements_json, setPavingSelections, setConcretingSelections]);
+
+  const saveExtraWorks = (navigateNext = false) => {
+    const extraWorksData: ExtraWorks = {
+      pavingSelections,
+      concretingSelections,
+      retainingWallSelections: [],
+      waterFeatureSelections: [],
+      totalCost: totalExtraWorksCost
+    };
+
+    updateQuoteData({
+      custom_requirements_json: JSON.stringify(extraWorksData),
+      extra_works_cost: totalExtraWorksCost
+    });
+
+    toast({
+      title: "Extra works saved",
+      description: "Your extra works selections have been saved.",
+    });
+
+    if (navigateNext) {
+      navigate('/quotes/new/optional-addons');
+    }
+  };
+
   return (
-    <div className="space-y-6">
-      <p className="text-muted-foreground mb-6">
-        Add extra works such as paving, concreting, retaining walls, and water features to your quote.
-      </p>
-      
-      {/* Extra Paving Section */}
-      <div data-paving-cost="0" className="mb-6">
-        <ExtraPavingSection />
-      </div>
-      
-      {/* Concrete Labour Section */}
-      <div data-concreting-cost="0" className="mb-6">
-        <ExtraConcretingSection />
-      </div>
-      
-      {/* Placeholder sections for future development */}
-      <div className="space-y-4 mt-8">
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-2">Retaining Walls</h3>
-            <p className="text-muted-foreground mb-4">
-              Retaining wall options for your pool installation.
-            </p>
-            <div className="rounded-lg border border-dashed p-6 text-center">
-              <p className="text-muted-foreground">
-                Retaining wall options will be available in a future update.
-              </p>
+    <div className="w-full max-w-5xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Extra Works</CardTitle>
+          <CardDescription>Add additional paving, concreting, retaining walls, or water features</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="paving" className="w-full mb-6">
+            <TabsList className="mb-4">
+              <TabsTrigger value="paving">Extra Paving</TabsTrigger>
+              <TabsTrigger value="concreting">Concrete Labour</TabsTrigger>
+              <TabsTrigger value="retaining" disabled>Retaining Walls</TabsTrigger>
+              <TabsTrigger value="water" disabled>Water Features</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="paving">
+              <ExtraPavingSection 
+                selections={pavingSelections}
+                onAdd={addPavingSelection}
+                onUpdate={updatePavingSelection}
+                onRemove={removePavingSelection}
+                totalCost={calculatePavingTotalCost()}
+              />
+            </TabsContent>
+            
+            <TabsContent value="concreting">
+              <ExtraConcretingSection
+                selections={concretingSelections}
+                onAdd={addConcretingSelection}
+                onUpdate={updateConcretingSelection}
+                onRemove={removeConcretingSelection}
+                totalCost={calculateConcretingTotalCost()}
+              />
+            </TabsContent>
+            
+            <TabsContent value="retaining">
+              <div className="p-8 text-center text-muted-foreground">
+                Retaining walls feature coming soon
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="water">
+              <div className="p-8 text-center text-muted-foreground">
+                Water features coming soon
+              </div>
+            </TabsContent>
+          </Tabs>
+
+          <div className="flex justify-between items-center pt-4 border-t">
+            <div className="text-lg font-medium">
+              Total Extra Works Cost: <span className="font-semibold">${totalExtraWorksCost.toFixed(2)}</span>
             </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent className="pt-6">
-            <h3 className="text-lg font-semibold mb-2">Water Features</h3>
-            <p className="text-muted-foreground mb-4">
-              Enhance your pool with water features and decorative elements.
-            </p>
-            <div className="rounded-lg border border-dashed p-6 text-center">
-              <p className="text-muted-foreground">
-                Water feature options will be available in a future update.
-              </p>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={() => saveExtraWorks(false)}>
+                Save
+              </Button>
+              <Button onClick={() => saveExtraWorks(true)}>
+                Save & Continue
+              </Button>
             </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Cost Summary */}
-      <div className="bg-muted/50 p-4 rounded-md border mt-6">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Total Extra Works Cost:</span>
-          <span className="text-lg font-bold">{formatCurrency(totalExtraWorksCost)}</span>
-        </div>
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between mt-6">
-        <Button 
-          type="button" 
-          variant="outline"
-          onClick={onPrevious}
-          disabled={isLoading}
-        >
-          Back
-        </Button>
-        
-        <div className="flex gap-2">
-          <Button 
-            type="button"
-            variant="outline"
-            onClick={() => handleSave(false)}
-            disabled={isLoading}
-          >
-            Save
-          </Button>
-          
-          <Button 
-            type="button"
-            onClick={() => handleSave(true)}
-            disabled={isLoading}
-          >
-            Save & Continue
-          </Button>
-        </div>
-      </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
+
+export default ExtraWorksStep;
