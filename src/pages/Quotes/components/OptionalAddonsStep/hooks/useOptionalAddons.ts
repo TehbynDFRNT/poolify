@@ -150,7 +150,9 @@ export const useOptionalAddons = () => {
     }));
   };
 
-  const saveAddons = async (continueToNext: boolean) => {
+  // Fixed: Changed the continueToNext parameter from a boolean to a function,
+  // and properly handled the case where it's not provided
+  const saveAddons = async (continueToNext?: () => void) => {
     if (!quoteData.id) {
       toast.error("No quote ID found. Please complete the previous steps first.");
       return;
@@ -181,7 +183,11 @@ export const useOptionalAddons = () => {
       
       toast.success("Optional addons saved");
       setIsSubmitting(false);
-      if (continueToNext) continueToNext();
+      
+      // Fixed: Only call continueToNext if it's provided and it's a function
+      if (continueToNext && typeof continueToNext === 'function') {
+        continueToNext();
+      }
     } catch (error) {
       console.error("Error saving optional addons:", error);
       toast.error("Failed to save optional addons");

@@ -29,12 +29,11 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
   } = useOptionalAddons();
 
   const handleSaveOnly = async () => {
-    await saveAddons(false);
+    await saveAddons();
   };
 
   const handleSaveAndContinue = async () => {
-    await saveAddons(true);
-    onNext();
+    await saveAddons(onNext);
   };
 
   return (
