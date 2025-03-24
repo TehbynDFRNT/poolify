@@ -8,12 +8,6 @@ export interface Addon {
   quantity: number;
 }
 
-export interface CustomRequirement {
-  id: string;
-  description: string;
-  price: number;
-}
-
 export interface OptionalAddonsStepProps {
   onNext: () => void;
   onPrevious: () => void;
