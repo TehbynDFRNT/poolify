@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { OptionalAddonsStepProps } from "./types";
+import { CostSummary } from "./components/CostSummary";
 
 export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepProps) => {
   return (
@@ -21,13 +22,8 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
         </p>
       </div>
 
-      {/* Placeholder Cost Summary */}
-      <div className="bg-muted/50 p-4 rounded-md border mt-6">
-        <div className="flex justify-between items-center">
-          <span className="font-medium">Total Add-ons Cost (placeholder):</span>
-          <span className="text-lg font-bold">$0.00</span>
-        </div>
-      </div>
+      {/* Cost Summary */}
+      <CostSummary totalCost={0} />
 
       {/* Navigation */}
       <div className="flex justify-between mt-6">

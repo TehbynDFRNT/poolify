@@ -1,7 +1,10 @@
+
 import { useState } from "react";
 import { Addon } from "../types";
 import { UseStandardAddonsReturn } from "./types";
 
+// Define placeholder addons but don't use them in the final implementation 
+// since this is just a placeholder component
 const DEFAULT_ADDONS: Addon[] = [
   {
     id: "pool-cleaner",
@@ -45,7 +48,7 @@ const DEFAULT_ADDONS: Addon[] = [
   }
 ];
 
-export const useStandardAddons = () => {
+export const useStandardAddons = (): UseStandardAddonsReturn => {
   return {
     addons: [],
     toggleAddon: () => {},
