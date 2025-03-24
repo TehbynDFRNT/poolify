@@ -112,7 +112,7 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
     updateQuoteData({ 
       optional_addons_cost: totalCost,
       // Store additional data in context for future use
-      custom_requirements: customRequirements,
+      custom_requirements_json: JSON.stringify(customRequirements),
       micro_dig_required: microDigRequired,
       micro_dig_price: microDigPrice,
       micro_dig_notes: microDigNotes
