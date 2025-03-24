@@ -5,7 +5,11 @@ export interface ExtraWorks {
     meters: number;
     cost: number;
   }[];
-  concretingSelections: any[]; // To be implemented in the future
+  concretingSelections: {
+    typeId: string;
+    quantity: number;
+    cost: number;
+  }[];
   retainingWallSelections: any[]; // To be implemented in the future
   waterFeatureSelections: any[]; // To be implemented in the future
   totalCost: number;

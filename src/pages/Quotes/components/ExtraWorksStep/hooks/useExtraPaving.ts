@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
@@ -15,6 +15,7 @@ export const useExtraPaving = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const [pavingSelections, setPavingSelections] = useState<PavingSelection[]>([]);
   const [totalCost, setTotalCost] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Load extra paving categories from the database
   const { data: pavingCategories, isLoading } = useQuery({
@@ -75,10 +76,10 @@ export const useExtraPaving = () => {
     const newTotalCost = pavingSelections.reduce((acc, selection) => acc + selection.cost, 0);
     setTotalCost(newTotalCost);
     
-    // Update the quote data with the new extra works cost
-    updateQuoteData({ 
-      extra_works_cost: newTotalCost 
-    });
+    // Update the parent container with the cost for aggregation
+    if (containerRef.current) {
+      containerRef.current.setAttribute('data-cost', newTotalCost.toString());
+    }
   }, [pavingSelections]);
 
   return {
@@ -88,6 +89,7 @@ export const useExtraPaving = () => {
     totalCost,
     addPavingSelection,
     updatePavingSelection,
-    removePavingSelection
+    removePavingSelection,
+    containerRef
   };
 };

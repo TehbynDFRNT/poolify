@@ -1,71 +1,70 @@
 
 import { Button } from "@/components/ui/button";
-import { useExtraPaving } from "../hooks/useExtraPaving";
-import { ExtraPavingSelection } from "./ExtraPavingSelection";
-import { Grid2x2, Plus } from "lucide-react";
+import { useExtraConcreting } from "../hooks/useExtraConcreting";
+import { ExtraConcretingSelection } from "./ExtraConcretingSelection";
+import { HardHat, Plus } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 
-export const ExtraPavingSection = () => {
+export const ExtraConcretingSection = () => {
   const {
-    pavingCategories,
-    pavingSelections,
+    concretingTypes,
+    concretingSelections,
     isLoading,
     totalCost,
-    addPavingSelection,
-    updatePavingSelection,
-    removePavingSelection,
-    containerRef
-  } = useExtraPaving();
+    addConcretingSelection,
+    updateConcretingSelection,
+    removeConcretingSelection
+  } = useExtraConcreting();
 
   if (isLoading) {
-    return <div className="py-4">Loading paving categories...</div>;
+    return <div className="py-4">Loading concrete labour types...</div>;
   }
 
-  if (!pavingCategories || pavingCategories.length === 0) {
+  if (!concretingTypes || concretingTypes.length === 0) {
     return (
       <div className="py-4 text-muted-foreground">
-        No paving categories available. Please add categories in the Extra Paving section.
+        No concrete labour types available. Please add types in the Extra Paving section.
       </div>
     );
   }
 
   return (
-    <div className="space-y-4" ref={containerRef} data-paving-cost={totalCost}>
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Grid2x2 className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">Extra Paving</h3>
+          <HardHat className="h-5 w-5 text-primary" />
+          <h3 className="text-lg font-semibold">Concrete Labour</h3>
         </div>
         <div className="text-lg font-bold">
           Total: {formatCurrency(totalCost)}
         </div>
       </div>
       
-      {pavingSelections.length === 0 ? (
+      {concretingSelections.length === 0 ? (
         <div className="py-4 text-center border border-dashed rounded-md">
           <p className="text-muted-foreground mb-4">
-            No paving selections added yet.
+            No concrete labour selections added yet.
           </p>
           <Button 
             type="button" 
             variant="outline" 
-            onClick={addPavingSelection}
+            onClick={addConcretingSelection}
             className="flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Add Paving
+            Add Concrete Labour
           </Button>
         </div>
       ) : (
         <>
-          {pavingSelections.map((selection, index) => (
-            <ExtraPavingSelection
+          {concretingSelections.map((selection, index) => (
+            <ExtraConcretingSelection
               key={index}
               selection={selection}
               index={index}
-              categories={pavingCategories}
-              onUpdate={updatePavingSelection}
-              onRemove={removePavingSelection}
+              concretingTypes={concretingTypes}
+              onUpdate={updateConcretingSelection}
+              onRemove={removeConcretingSelection}
             />
           ))}
           
@@ -73,11 +72,11 @@ export const ExtraPavingSection = () => {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={addPavingSelection}
+              onClick={addConcretingSelection}
               className="flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
-              Add More Paving
+              Add More Concrete Labour
             </Button>
           </div>
         </>
