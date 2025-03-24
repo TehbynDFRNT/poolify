@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
@@ -8,7 +9,7 @@ import { QuoteProvider } from "@/pages/Quotes/context/QuoteContext";
 import { CustomerInfoStep } from "@/pages/Quotes/components/CustomerInfoStep";
 import { SelectPoolStep } from "@/pages/Quotes/components/SelectPoolStep";
 import { SiteRequirementsStep } from "@/pages/Quotes/components/SiteRequirementsStep";
-import ExtraWorksStep from "@/pages/Quotes/components/ExtraWorksStep";
+import { ExtraWorksStep } from "@/pages/Quotes/components/ExtraWorksStep";
 import { OptionalAddonsStep } from "@/pages/Quotes/components/OptionalAddonsStep";
 import { CostSummaryStep } from "@/pages/Quotes/components/CostSummaryStep";
 import { PreviewQuoteStep } from "@/pages/Quotes/components/PreviewQuoteStep";

@@ -12,7 +12,7 @@ import { useExtraConcreting } from './hooks/useExtraConcreting';
 import { ExtraWorks } from '@/types/extra-works';
 import { useNavigate } from 'react-router-dom';
 
-const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
+export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
   const navigate = useNavigate();
   const { quoteData, updateQuoteData } = useQuoteContext();
   const { 
@@ -67,10 +67,7 @@ const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPreviou
       extra_works_cost: totalExtraWorksCost
     });
 
-    toast({
-      title: "Extra works saved",
-      description: "Your extra works selections have been saved.",
-    });
+    toast.success("Extra works saved");
 
     if (navigateNext) {
       if (onNext) {
@@ -142,6 +139,5 @@ const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPreviou
   );
 };
 
-// Explicitly add named export alongside default export
-export { ExtraWorksStep };
+// Default export
 export default ExtraWorksStep;
