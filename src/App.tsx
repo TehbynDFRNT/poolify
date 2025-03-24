@@ -24,6 +24,7 @@ import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
 import Quotes from "@/pages/Quotes";
 import CreateQuote from "@/pages/Quotes/CreateQuote";
 import EditQuote from "@/pages/Quotes/EditQuote";
+import PoolCreationWizard from "@/pages/PoolCreationWizard";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -41,6 +42,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/pool-specifications" element={<PoolSpecifications />} />
+        <Route path="/pool-creation-wizard" element={<PoolCreationWizard />} />
         <Route path="/filtration-systems" element={<FiltrationSystems />} />
         <Route path="/construction-costs" element={<ConstructionCosts />} />
         <Route path="/construction-costs/excavation" element={<Excavation />} />

@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Wand2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { Pool } from "@/types/pool";
 import AddPoolForm from "@/components/pools/AddPoolForm";
@@ -109,10 +109,23 @@ const PoolSpecifications = () => {
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Pool Specifications</CardTitle>
-          <Button onClick={() => setShowForm(!showForm)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Pool
-          </Button>
+          <div className="flex space-x-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowForm(!showForm)}
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Add Pool
+            </Button>
+            <Button
+              as={Link}
+              to="/pool-creation-wizard"
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              Wizard
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {showForm && <AddPoolForm />}
