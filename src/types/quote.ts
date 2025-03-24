@@ -14,6 +14,15 @@ export interface Quote {
   created_at: string;
   updated_at?: string;
   resident_homeowner?: boolean;
+  
+  // Additional fields for site requirements
+  crane_id?: string;
+  excavation_type?: string;
+  
+  // Additional fields for tracking addons and pricing
+  site_requirements_cost?: number;
+  optional_addons_cost?: number;
+  total_cost?: number;
 }
 
 export interface QuoteInsert {
@@ -28,4 +37,9 @@ export interface QuoteInsert {
   pool_id?: string;
   status: 'draft' | 'pending' | 'approved' | 'declined';
   resident_homeowner?: boolean;
+  crane_id?: string;
+  excavation_type?: string;
+  site_requirements_cost?: number;
+  optional_addons_cost?: number;
+  total_cost?: number;
 }

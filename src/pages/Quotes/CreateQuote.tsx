@@ -14,20 +14,25 @@ import { useState } from "react";
 import { QuoteProvider } from "@/pages/Quotes/context/QuoteContext";
 import { CustomerInfoStep } from "@/pages/Quotes/components/CustomerInfoStep";
 import { SelectPoolStep } from "@/pages/Quotes/components/SelectPoolStep";
-import { AddFeaturesStep } from "@/pages/Quotes/components/AddFeaturesStep";
+import { SiteRequirementsStep } from "@/pages/Quotes/components/SiteRequirementsStep";
+import { OptionalAddonsStep } from "@/pages/Quotes/components/OptionalAddonsStep";
+import { CostSummaryStep } from "@/pages/Quotes/components/CostSummaryStep";
+import { PreviewQuoteStep } from "@/pages/Quotes/components/PreviewQuoteStep";
+import { QuoteProgressSteps } from "./components/QuoteProgressSteps";
 import { cn } from "@/lib/utils";
 
 const CreateQuote = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 5;
+  const totalSteps = 6;
 
   const steps = [
     { id: 1, name: "Customer Info" },
-    { id: 2, name: "Select Base Pool" },
-    { id: 3, name: "Add Features" },
-    { id: 4, name: "Cost Summary" },
-    { id: 5, name: "Preview Quote" },
+    { id: 2, name: "Base Pool" },
+    { id: 3, name: "Site Requirements" },
+    { id: 4, name: "Optional Add-ons" },
+    { id: 5, name: "Cost Summary" },
+    { id: 6, name: "Preview Quote" },
   ];
 
   const handleStepClick = (stepId: number) => {
@@ -74,38 +79,11 @@ const CreateQuote = () => {
           </Button>
         </div>
 
-        {/* Progress steps */}
-        <div className="mb-8">
-          <div className="flex items-center">
-            {steps.map((step, idx) => (
-              <div key={step.id} className="flex items-center">
-                <button
-                  type="button"
-                  onClick={() => handleStepClick(step.id)}
-                  className={cn(
-                    "flex items-center focus:outline-none",
-                    // If step is not accessible (future step), make it look disabled
-                    step.id > currentStep ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:opacity-80"
-                  )}
-                  disabled={step.id > currentStep}
-                  aria-current={currentStep === step.id ? "step" : undefined}
-                >
-                  <div className={`flex-shrink-0 h-8 w-8 rounded-full flex items-center justify-center ${
-                    currentStep >= step.id ? 'bg-primary text-white' : 'bg-gray-200 text-gray-600'
-                  }`}>
-                    {step.id}
-                  </div>
-                  <div className={`ml-2 text-sm ${currentStep >= step.id ? 'text-gray-900' : 'text-gray-500'}`}>
-                    {step.name}
-                  </div>
-                </button>
-                {idx < steps.length - 1 && (
-                  <div className={`flex-grow mx-2 h-0.5 ${currentStep > step.id ? 'bg-primary' : 'bg-gray-200'}`} style={{width: '2rem'}}></div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        <QuoteProgressSteps 
+          steps={steps}
+          currentStep={currentStep}
+          onStepClick={handleStepClick}
+        />
 
         <QuoteProvider>
           <Card className="mb-6">
@@ -115,8 +93,10 @@ const CreateQuote = () => {
             <CardContent>
               {currentStep === 1 && <CustomerInfoStep onNext={() => setCurrentStep(2)} />}
               {currentStep === 2 && <SelectPoolStep onNext={() => setCurrentStep(3)} onPrevious={() => setCurrentStep(1)} />}
-              {currentStep === 3 && <AddFeaturesStep onNext={() => setCurrentStep(4)} onPrevious={() => setCurrentStep(2)} />}
-              {/* We'll add more step components in the next iterations */}
+              {currentStep === 3 && <SiteRequirementsStep onNext={() => setCurrentStep(4)} onPrevious={() => setCurrentStep(2)} />}
+              {currentStep === 4 && <OptionalAddonsStep onNext={() => setCurrentStep(5)} onPrevious={() => setCurrentStep(3)} />}
+              {currentStep === 5 && <CostSummaryStep onNext={() => setCurrentStep(6)} onPrevious={() => setCurrentStep(4)} />}
+              {currentStep === 6 && <PreviewQuoteStep onPrevious={() => setCurrentStep(5)} />}
             </CardContent>
           </Card>
         </QuoteProvider>

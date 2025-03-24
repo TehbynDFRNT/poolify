@@ -18,7 +18,16 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string } = {
   home_address: '',
   site_address: '',
   status: 'draft',
-  resident_homeowner: false
+  resident_homeowner: false,
+  
+  // Site requirements
+  crane_id: '',
+  excavation_type: '',
+  
+  // Cost tracking
+  site_requirements_cost: 0,
+  optional_addons_cost: 0,
+  total_cost: 0
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
