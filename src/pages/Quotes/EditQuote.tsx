@@ -87,15 +87,17 @@ const EditQuoteContent = () => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // All these fields now exist in the database
+        // Site requirements fields
         crane_id: quoteData.crane_id || '',
         excavation_type: quoteData.excavation_type || '',
         traffic_control_id: quoteData.traffic_control_id || 'none',
         site_requirements_cost: quoteData.site_requirements_cost || 0,
+        
+        // Optional addons
         optional_addons_cost: quoteData.optional_addons_cost || 0,
         total_cost: quoteData.total_cost || 0,
         
-        // Load custom requirements and micro dig data
+        // Custom requirements and micro dig data
         custom_requirements_json: quoteData.custom_requirements_json || '',
         micro_dig_required: quoteData.micro_dig_required || false,
         micro_dig_price: quoteData.micro_dig_price || 0,

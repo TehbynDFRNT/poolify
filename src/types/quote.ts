@@ -15,7 +15,7 @@ export interface Quote {
   updated_at?: string;
   resident_homeowner?: boolean;
   
-  // These fields now exist in the database schema
+  // Site requirements fields
   crane_id?: string;
   excavation_type?: string;
   traffic_control_id?: string;
@@ -23,7 +23,7 @@ export interface Quote {
   optional_addons_cost?: number;
   total_cost?: number;
   
-  // New fields for custom requirements and micro dig
+  // Custom requirements and micro dig fields
   custom_requirements_json?: string;
   micro_dig_required?: boolean;
   micro_dig_price?: number;

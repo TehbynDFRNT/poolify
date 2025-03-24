@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 
@@ -28,7 +27,13 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string } = {
   // Cost tracking (adding as 0 defaults)
   site_requirements_cost: 0,
   optional_addons_cost: 0,
-  total_cost: 0
+  total_cost: 0,
+  
+  // Custom requirements and micro dig (adding as empty defaults)
+  custom_requirements_json: '',
+  micro_dig_required: false,
+  micro_dig_price: 0,
+  micro_dig_notes: ''
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
