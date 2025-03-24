@@ -1,19 +1,18 @@
 
-import { Button } from "@/components/ui/button";
-import { useQuoteContext } from "../../context/QuoteContext";
 import { useState, useEffect } from "react";
+import { useQuoteContext } from "../../context/QuoteContext";
 import { toast } from "sonner";
-import { CraneSelector } from "./components/CraneSelector";
-import { TrafficControlSelector } from "./components/TrafficControlSelector";
-import { CustomSiteRequirements } from "./components/CustomSiteRequirements";
-import { MicroDigSection } from "./components/MicroDigSection";
 import { NoPoolWarning } from "./components/NoPoolWarning";
 import { CostSummary } from "./components/CostSummary";
 import { useSiteRequirementsCost } from "./hooks/useSiteRequirementsCost";
 import { useCustomSiteRequirements } from "./hooks/useCustomSiteRequirements";
 import { useMicroDig } from "./hooks/useMicroDig";
-import { supabase } from "@/integrations/supabase/client";
-import { Save } from "lucide-react";
+import { saveRequirements } from "./services/siteRequirementsService";
+import { SiteRequirementsSection } from "./components/SiteRequirementsSection";
+import { CustomSiteRequirements } from "./components/CustomSiteRequirements";
+import { MicroDigSection } from "./components/MicroDigSection";
+import { FormHeader } from "./components/FormHeader";
+import { FormActions } from "./components/FormActions";
 
 interface SiteRequirementsStepProps {
   onNext: () => void;
@@ -70,7 +69,7 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     return totalCost;
   };
 
-  const saveRequirements = async (continueToNext: boolean) => {
+  const handleSaveRequirements = async (continueToNext: boolean) => {
     if (!quoteData.id) {
       toast.error("No quote ID found. Please complete the previous steps first.");
       return;
@@ -78,33 +77,17 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
 
     setIsSubmitting(true);
     
-    try {
-      const totalCost = calculateTotalCost();
-      
-      // Data to save to database
-      const dataToSave = {
-        crane_id: quoteData.crane_id || null,
-        traffic_control_id: quoteData.traffic_control_id || 'none',
-        site_requirements_cost: totalCost,
-        custom_requirements_json: JSON.stringify(customRequirements),
-        micro_dig_required: microDigRequired,
-        micro_dig_price: microDigPrice,
-        micro_dig_notes: microDigNotes
-      };
-      
-      console.log("Saving site requirements:", dataToSave);
-      
-      // Update the record in Supabase
-      const { error } = await supabase
-        .from('quotes')
-        .update(dataToSave)
-        .eq('id', quoteData.id);
-      
-      if (error) {
-        console.error("Error updating site requirements:", error);
-        throw error;
-      }
-      
+    const { success, totalCost } = await saveRequirements({
+      quoteId: quoteData.id,
+      craneId: quoteData.crane_id || null,
+      trafficControlId: quoteData.traffic_control_id || 'none',
+      customRequirements,
+      microDigRequired,
+      microDigPrice,
+      microDigNotes
+    });
+    
+    if (success) {
       // Update context with the latest values
       updateQuoteData({
         site_requirements_cost: totalCost,
@@ -114,44 +97,36 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
         micro_dig_notes: microDigNotes
       });
       
-      toast.success("Site requirements saved");
       setIsSubmitting(false);
       
       if (continueToNext) onNext();
-    } catch (error) {
-      console.error("Error saving site requirements:", error);
-      toast.error("Failed to save site requirements");
+    } else {
       setIsSubmitting(false);
     }
   };
 
   const handleSaveOnly = async () => {
-    await saveRequirements(false);
+    await handleSaveRequirements(false);
   };
 
   const handleSaveAndContinue = async () => {
-    await saveRequirements(true);
+    await handleSaveRequirements(true);
   };
 
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground">
+      <FormHeader>
         Configure the required site modifications for installing this pool (non-optional items needed for installation).
-      </p>
+      </FormHeader>
       
       {!quoteData.pool_id && <NoPoolWarning />}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <CraneSelector 
-          craneId={quoteData.crane_id} 
-          onCraneChange={handleCraneChange} 
-        />
-        
-        <TrafficControlSelector 
-          trafficControlId={quoteData.traffic_control_id} 
-          onTrafficControlChange={handleTrafficControlChange} 
-        />
-      </div>
+      <SiteRequirementsSection
+        craneId={quoteData.crane_id}
+        onCraneChange={handleCraneChange}
+        trafficControlId={quoteData.traffic_control_id}
+        onTrafficControlChange={handleTrafficControlChange}
+      />
       
       {/* Custom Site Requirements Section */}
       <CustomSiteRequirements 
@@ -173,34 +148,12 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
 
       <CostSummary siteRequirementsCost={calculateTotalCost()} />
 
-      <div className="flex justify-between">
-        <Button 
-          type="button" 
-          variant="outline"
-          onClick={onPrevious}
-        >
-          Back
-        </Button>
-        
-        <div className="space-x-2">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleSaveOnly}
-            disabled={isSubmitting}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-          <Button 
-            type="button"
-            onClick={handleSaveAndContinue}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? 'Saving...' : 'Save & Continue'}
-          </Button>
-        </div>
-      </div>
+      <FormActions
+        onPrevious={onPrevious}
+        onSaveOnly={handleSaveOnly}
+        onSaveAndContinue={handleSaveAndContinue}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 };
