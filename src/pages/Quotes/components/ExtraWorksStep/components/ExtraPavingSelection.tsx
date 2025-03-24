@@ -112,7 +112,7 @@ export const ExtraPavingSelection = ({
           <CollapsibleContent>
             <div className="bg-muted/30 p-3 rounded-md border">
               <h4 className="text-sm font-semibold mb-2">Cost Breakdown</h4>
-              <div className="grid grid-cols-3 gap-2 text-sm">
+              <div className="grid grid-cols-2 gap-4 text-sm">
                 <div className="space-y-1">
                   <p className="text-muted-foreground">Per Meter</p>
                   <div className="flex justify-between">
@@ -150,26 +150,6 @@ export const ExtraPavingSelection = ({
                   <div className="flex justify-between pt-1 border-t font-medium">
                     <span>Total Cost:</span>
                     <span>{formatCurrency(selection.cost)}</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <p className="text-muted-foreground">Percentages</p>
-                  <div className="flex justify-between">
-                    <span>Paver:</span>
-                    <span>{Math.round((selectedCategory?.paver_cost || 0) / costPerMeter * 100)}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Wastage:</span>
-                    <span>{Math.round((selectedCategory?.wastage_cost || 0) / costPerMeter * 100)}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Margin/Labour:</span>
-                    <span>{Math.round((selectedCategory?.margin_cost || 0) / costPerMeter * 100)}%</span>
-                  </div>
-                  <div className="flex justify-between pt-1 border-t font-medium">
-                    <span>Total:</span>
-                    <span>100%</span>
                   </div>
                 </div>
               </div>
