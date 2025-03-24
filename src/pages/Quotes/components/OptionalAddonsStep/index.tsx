@@ -30,10 +30,8 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
     setIsSubmitting(true);
     
     try {
-      // Only update columns that actually exist in the database
-      // We're updating using a generic object rather than the typed interface
-      // to avoid TypeScript errors while keeping the code functioning
-      const dataToSave: Record<string, any> = {
+      // These fields now exist in the database, so we can use type-safe updates
+      const dataToSave = {
         optional_addons_cost: quoteData.optional_addons_cost || 0
       };
       

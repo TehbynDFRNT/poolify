@@ -71,8 +71,7 @@ const EditQuoteContent = () => {
           ? quoteData.status 
           : 'draft';
 
-      // Update the context with the quote data, using || for potentially missing fields
-      // instead of assuming they exist in the database schema
+      // Now we can safely use all fields from the database since they exist
       updateQuoteData({
         id: quoteData.id,
         customer_name: quoteData.customer_name,
@@ -87,7 +86,7 @@ const EditQuoteContent = () => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Handle potentially missing fields with default values
+        // All these fields now exist in the database
         crane_id: quoteData.crane_id || '',
         excavation_type: quoteData.excavation_type || '',
         traffic_control_id: quoteData.traffic_control_id || 'none',

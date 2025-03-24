@@ -1059,54 +1059,87 @@ export type Database = {
       }
       quotes: {
         Row: {
+          crane_id: string | null
           created_at: string
           customer_email: string
           customer_name: string
           customer_phone: string
+          excavation_type: string | null
           home_address: string
           id: string
+          optional_addons_cost: number | null
           owner2_email: string | null
           owner2_name: string | null
           owner2_phone: string | null
           pool_id: string | null
           resident_homeowner: boolean | null
           site_address: string
+          site_requirements_cost: number | null
           status: string
+          total_cost: number | null
+          traffic_control_id: string | null
           updated_at: string
         }
         Insert: {
+          crane_id?: string | null
           created_at?: string
           customer_email: string
           customer_name: string
           customer_phone: string
+          excavation_type?: string | null
           home_address: string
           id?: string
+          optional_addons_cost?: number | null
           owner2_email?: string | null
           owner2_name?: string | null
           owner2_phone?: string | null
           pool_id?: string | null
           resident_homeowner?: boolean | null
           site_address: string
+          site_requirements_cost?: number | null
           status: string
+          total_cost?: number | null
+          traffic_control_id?: string | null
           updated_at?: string
         }
         Update: {
+          crane_id?: string | null
           created_at?: string
           customer_email?: string
           customer_name?: string
           customer_phone?: string
+          excavation_type?: string | null
           home_address?: string
           id?: string
+          optional_addons_cost?: number | null
           owner2_email?: string | null
           owner2_name?: string | null
           owner2_phone?: string | null
           pool_id?: string | null
           resident_homeowner?: boolean | null
           site_address?: string
+          site_requirements_cost?: number | null
           status?: string
+          total_cost?: number | null
+          traffic_control_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quotes_crane_id_fkey"
+            columns: ["crane_id"]
+            isOneToOne: false
+            referencedRelation: "crane_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotes_traffic_control_id_fkey"
+            columns: ["traffic_control_id"]
+            isOneToOne: false
+            referencedRelation: "traffic_control_costs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       retaining_walls: {
         Row: {

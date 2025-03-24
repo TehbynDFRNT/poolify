@@ -15,7 +15,7 @@ export interface Quote {
   updated_at?: string;
   resident_homeowner?: boolean;
   
-  // These fields will be added to the type but might not exist in the database
+  // These fields now exist in the database schema
   crane_id?: string;
   excavation_type?: string;
   traffic_control_id?: string;
