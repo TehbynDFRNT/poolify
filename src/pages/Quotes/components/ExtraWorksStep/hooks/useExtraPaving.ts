@@ -75,17 +75,16 @@ export const useExtraPaving = () => {
     if (updates.meters !== undefined || updates.categoryId !== undefined) {
       const category = pavingCategories?.find(cat => cat.id === updatedSelections[index].categoryId);
       
-      if (category) {
+      if (category && concreteLabourCosts && concreteLabourCosts.length > 0) {
         // Get the standard paving costs
         const pavingPerMeter = category.paver_cost + category.wastage_cost + category.margin_cost;
         
-        // Get the labor cost - assume we have at least one labor cost
-        const laborCost = concreteLabourCosts && concreteLabourCosts.length > 0 
-          ? concreteLabourCosts[0].cost + concreteLabourCosts[0].margin 
-          : 0;
+        // Get the labor cost - using the first labour cost in the list
+        const laborCost = concreteLabourCosts[0].cost;
+        const laborMargin = concreteLabourCosts[0].margin;
         
-        // Calculate total per meter including labor
-        const totalPerMeter = pavingPerMeter + laborCost;
+        // Calculate total per meter including labor cost and margin
+        const totalPerMeter = pavingPerMeter + laborCost + laborMargin;
         
         // Calculate final cost
         updatedSelections[index].cost = totalPerMeter * updatedSelections[index].meters;

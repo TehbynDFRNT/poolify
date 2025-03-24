@@ -34,7 +34,8 @@ export const ExtraPavingSelection = ({
   
   // Get default labor cost (first one in the list)
   const defaultLabourCost = labourCosts && labourCosts.length > 0 ? labourCosts[0] : null;
-  const labourCostValue = defaultLabourCost ? defaultLabourCost.cost + defaultLabourCost.margin : 0;
+  const labourCostValue = defaultLabourCost ? defaultLabourCost.cost : 0;
+  const labourMarginValue = defaultLabourCost ? defaultLabourCost.margin : 0;
   
   // Calculate material cost per meter
   const materialCostPerMeter = selectedCategory
@@ -42,7 +43,7 @@ export const ExtraPavingSelection = ({
     : 0;
     
   // Calculate total cost per meter including labor
-  const costPerMeter = materialCostPerMeter + labourCostValue;
+  const costPerMeter = materialCostPerMeter + labourCostValue + labourMarginValue;
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -141,6 +142,10 @@ export const ExtraPavingSelection = ({
                     <span>Labour Cost:</span>
                     <span>{formatCurrency(labourCostValue)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Labour Margin:</span>
+                    <span>{formatCurrency(labourMarginValue)}</span>
+                  </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
                     <span>Total Per Meter:</span>
                     <span>{formatCurrency(costPerMeter)}</span>
@@ -164,6 +169,10 @@ export const ExtraPavingSelection = ({
                   <div className="flex justify-between">
                     <span>Labour Cost:</span>
                     <span>{formatCurrency(labourCostValue * selection.meters)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Labour Margin:</span>
+                    <span>{formatCurrency(labourMarginValue * selection.meters)}</span>
                   </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
                     <span>Total Cost:</span>
