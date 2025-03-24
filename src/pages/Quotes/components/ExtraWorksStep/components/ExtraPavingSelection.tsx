@@ -27,16 +27,21 @@ export const ExtraPavingSelection = ({
   // Find the selected category
   const selectedCategory = categories.find(cat => cat.id === selection.categoryId);
   
-  // Calculate cost per meter
-  const costPerMeter = selectedCategory
-    ? selectedCategory.paver_cost + selectedCategory.wastage_cost + selectedCategory.margin_cost
+  // Calculate cost per meter (paving supply)
+  const pavingSupplyCost = selectedCategory
+    ? selectedCategory.paver_cost + selectedCategory.wastage_cost
+    : 0;
+    
+  // Calculate lay/labour cost
+  const layLabourCost = selectedCategory
+    ? selectedCategory.margin_cost
     : 0;
 
   return (
     <Card className="mb-4">
       <CardContent className="pt-6">
         <div className="grid gap-4 md:grid-cols-12">
-          <div className="md:col-span-5">
+          <div className="md:col-span-4">
             <Label htmlFor={`paving-category-${index}`}>Paving Category</Label>
             <Select
               value={selection.categoryId}
@@ -69,11 +74,16 @@ export const ExtraPavingSelection = ({
           </div>
           
           <div className="md:col-span-2">
-            <Label>Cost per meter</Label>
-            <div className="mt-2 font-medium">{formatCurrency(costPerMeter)}</div>
+            <Label>Paving Supply</Label>
+            <div className="mt-2 font-medium">{formatCurrency(pavingSupplyCost)}</div>
           </div>
           
           <div className="md:col-span-2">
+            <Label>Lay / Labour</Label>
+            <div className="mt-2 font-medium">{formatCurrency(layLabourCost)}</div>
+          </div>
+          
+          <div className="md:col-span-1">
             <Label>Total Cost</Label>
             <div className="mt-2 font-bold">{formatCurrency(selection.cost)}</div>
           </div>
