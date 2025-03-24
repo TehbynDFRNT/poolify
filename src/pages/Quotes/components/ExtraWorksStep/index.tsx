@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useQuoteContext } from '../../context/QuoteContext';
 import { ExtraPavingSection } from './components/ExtraPavingSection';
 import { ExtraConcretingSection } from './components/ExtraConcretingSection';
@@ -17,20 +17,20 @@ const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPreviou
   const { quoteData, updateQuoteData } = useQuoteContext();
   const { 
     pavingSelections, 
+    setPavingSelections,
     updatePavingSelection, 
     addPavingSelection, 
     removePavingSelection, 
-    totalCost: pavingTotalCost,
-    setPavingSelections 
+    totalCost: pavingTotalCost 
   } = useExtraPaving();
   
   const {
     concretingSelections,
+    setConcretingSelections,
     updateConcretingSelection,
     addConcretingSelection,
     removeConcretingSelection,
-    totalCost: concretingTotalCost,
-    setConcretingSelections
+    totalCost: concretingTotalCost
   } = useExtraConcreting();
 
   // Calculate total cost for all extra works
@@ -142,4 +142,6 @@ const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPreviou
   );
 };
 
+// Explicitly add named export alongside default export
+export { ExtraWorksStep };
 export default ExtraWorksStep;
