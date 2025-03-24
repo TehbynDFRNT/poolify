@@ -1,6 +1,7 @@
 
 import React from "react";
-import { usePoolWizard, WizardStep } from "@/contexts/pool-wizard/PoolWizardContext";
+import { usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
+import { WizardStep } from "@/contexts/pool-wizard/types";
 import { Check, CircleDashed } from "lucide-react";
 import { cn } from "@/lib/utils";
 
