@@ -10,6 +10,7 @@ import { useExtraPaving } from './hooks/useExtraPaving';
 import { useExtraConcreting } from './hooks/useExtraConcreting';
 import { ExtraWorks } from '@/types/extra-works';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
   const navigate = useNavigate();
@@ -20,7 +21,8 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     updatePavingSelection, 
     addPavingSelection, 
     removePavingSelection, 
-    totalCost: pavingTotalCost 
+    totalCost: pavingTotalCost,
+    totalMargin: pavingTotalMargin
   } = useExtraPaving();
   
   const {
@@ -52,28 +54,63 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     }
   }, [quoteData.custom_requirements_json, setPavingSelections, setConcretingSelections]);
 
-  const saveExtraWorks = (navigateNext = false) => {
+  const saveExtraWorks = async (navigateNext = false) => {
+    if (!quoteData.id) {
+      toast.error("Quote ID is missing. Cannot save data.");
+      return;
+    }
+
+    // Prepare the extra works data
     const extraWorksData: ExtraWorks = {
-      pavingSelections,
+      pavingSelections: pavingSelections.map(selection => ({
+        categoryId: selection.categoryId,
+        meters: selection.meters,
+        cost: selection.cost,
+        materialMargin: selection.materialMargin || 0,
+        labourMargin: selection.labourMargin || 0,
+        totalMargin: selection.totalMargin || 0
+      })),
       concretingSelections,
       retainingWallSelections: [],
       waterFeatureSelections: [],
-      totalCost: totalExtraWorksCost
+      totalCost: totalExtraWorksCost,
+      totalMargin: pavingTotalMargin
     };
 
-    updateQuoteData({
-      custom_requirements_json: JSON.stringify(extraWorksData),
-      extra_works_cost: totalExtraWorksCost
-    });
+    try {
+      // Update the quote in the database
+      const { error } = await supabase
+        .from('quotes')
+        .update({ 
+          custom_requirements_json: JSON.stringify(extraWorksData),
+          extra_works_cost: totalExtraWorksCost
+        })
+        .eq('id', quoteData.id);
 
-    toast.success("Extra works saved");
-
-    if (navigateNext) {
-      if (onNext) {
-        onNext();
-      } else {
-        navigate('/quotes/new/optional-addons');
+      if (error) {
+        console.error("Error saving extra works data:", error);
+        toast.error("Failed to save extra works data");
+        return;
       }
+
+      // Update local state
+      updateQuoteData({
+        custom_requirements_json: JSON.stringify(extraWorksData),
+        extra_works_cost: totalExtraWorksCost
+      });
+
+      toast.success("Extra works saved");
+
+      if (navigateNext) {
+        if (onNext) {
+          onNext();
+        } else {
+          navigate('/quotes/new/optional-addons');
+        }
+      }
+    } catch (error) {
+      console.error("Error in saveExtraWorks:", error);
+      toast.error("Error saving extra works data");
     }
   };
 

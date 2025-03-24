@@ -124,6 +124,7 @@ export const useExtraPaving = () => {
     // Update the parent container with the cost for aggregation
     if (containerRef.current) {
       containerRef.current.setAttribute('data-cost', newTotalCost.toString());
+      containerRef.current.setAttribute('data-margin', newTotalMargin.toString());
     }
   }, [pavingSelections]);
 

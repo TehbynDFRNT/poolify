@@ -4,6 +4,9 @@ export interface ExtraWorks {
     categoryId: string;
     meters: number;
     cost: number;
+    materialMargin?: number;
+    labourMargin?: number;
+    totalMargin?: number;
   }[];
   concretingSelections: {
     typeId: string;
@@ -13,4 +16,5 @@ export interface ExtraWorks {
   retainingWallSelections: any[]; // To be implemented in the future
   waterFeatureSelections: any[]; // To be implemented in the future
   totalCost: number;
+  totalMargin?: number;
 }
