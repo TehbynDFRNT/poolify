@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
+import { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 
 export interface PavingSelection {
   categoryId: string;
@@ -18,7 +19,7 @@ export const useExtraPaving = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Load extra paving categories from the database
-  const { data: pavingCategories, isLoading } = useQuery({
+  const { data: pavingCategories, isLoading: isLoadingPaving } = useQuery({
     queryKey: ["extra-paving-categories"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,6 +33,24 @@ export const useExtraPaving = () => {
       }
 
       return data as ExtraPavingCost[];
+    },
+  });
+
+  // Load concrete labour costs from the database
+  const { data: concreteLabourCosts, isLoading: isLoadingLabour } = useQuery({
+    queryKey: ["concrete-labour-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("concrete_labour_costs")
+        .select("*")
+        .order("display_order", { ascending: true });
+
+      if (error) {
+        console.error("Error fetching concrete labour costs:", error);
+        throw error;
+      }
+
+      return data as ConcreteLabourCost[];
     },
   });
 
@@ -55,8 +74,20 @@ export const useExtraPaving = () => {
     // Recalculate cost if meters or category changed
     if (updates.meters !== undefined || updates.categoryId !== undefined) {
       const category = pavingCategories?.find(cat => cat.id === updatedSelections[index].categoryId);
+      
       if (category) {
-        const totalPerMeter = category.paver_cost + category.wastage_cost + category.margin_cost;
+        // Get the standard paving costs
+        const pavingPerMeter = category.paver_cost + category.wastage_cost + category.margin_cost;
+        
+        // Get the labor cost - assume we have at least one labor cost
+        const laborCost = concreteLabourCosts && concreteLabourCosts.length > 0 
+          ? concreteLabourCosts[0].cost + concreteLabourCosts[0].margin 
+          : 0;
+        
+        // Calculate total per meter including labor
+        const totalPerMeter = pavingPerMeter + laborCost;
+        
+        // Calculate final cost
         updatedSelections[index].cost = totalPerMeter * updatedSelections[index].meters;
       }
     }
@@ -82,8 +113,11 @@ export const useExtraPaving = () => {
     }
   }, [pavingSelections]);
 
+  const isLoading = isLoadingPaving || isLoadingLabour;
+
   return {
     pavingCategories,
+    concreteLabourCosts,
     pavingSelections,
     setPavingSelections,
     isLoading,

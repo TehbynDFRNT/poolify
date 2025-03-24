@@ -8,6 +8,7 @@ import { formatCurrency } from "@/utils/format";
 export const ExtraPavingSection = () => {
   const {
     pavingCategories,
+    concreteLabourCosts,
     pavingSelections,
     isLoading,
     totalCost,
@@ -64,6 +65,7 @@ export const ExtraPavingSection = () => {
               selection={selection}
               index={index}
               categories={pavingCategories}
+              labourCosts={concreteLabourCosts}
               onUpdate={updatePavingSelection}
               onRemove={removePavingSelection}
             />

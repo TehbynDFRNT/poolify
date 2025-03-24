@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
+import { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 import { Trash, ChevronDown, ChevronUp } from "lucide-react";
 import { PavingSelection } from "../hooks/useExtraPaving";
 import { formatCurrency } from "@/utils/format";
@@ -15,6 +16,7 @@ interface ExtraPavingSelectionProps {
   selection: PavingSelection;
   index: number;
   categories: ExtraPavingCost[];
+  labourCosts?: ConcreteLabourCost[];
   onUpdate: (index: number, updates: Partial<PavingSelection>) => void;
   onRemove: (index: number) => void;
 }
@@ -23,16 +25,24 @@ export const ExtraPavingSelection = ({
   selection,
   index,
   categories,
+  labourCosts = [],
   onUpdate,
   onRemove
 }: ExtraPavingSelectionProps) => {
   // Find the selected category
   const selectedCategory = categories.find(cat => cat.id === selection.categoryId);
   
-  // Calculate cost per meter
-  const costPerMeter = selectedCategory
+  // Get default labor cost (first one in the list)
+  const defaultLabourCost = labourCosts && labourCosts.length > 0 ? labourCosts[0] : null;
+  const labourCostValue = defaultLabourCost ? defaultLabourCost.cost + defaultLabourCost.margin : 0;
+  
+  // Calculate material cost per meter
+  const materialCostPerMeter = selectedCategory
     ? selectedCategory.paver_cost + selectedCategory.wastage_cost + selectedCategory.margin_cost
     : 0;
+    
+  // Calculate total cost per meter including labor
+  const costPerMeter = materialCostPerMeter + labourCostValue;
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
@@ -127,6 +137,10 @@ export const ExtraPavingSelection = ({
                     <span>Margin:</span>
                     <span>{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
                   </div>
+                  <div className="flex justify-between">
+                    <span>Labour Cost:</span>
+                    <span>{formatCurrency(labourCostValue)}</span>
+                  </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
                     <span>Total Per Meter:</span>
                     <span>{formatCurrency(costPerMeter)}</span>
@@ -146,6 +160,10 @@ export const ExtraPavingSelection = ({
                   <div className="flex justify-between">
                     <span>Margin:</span>
                     <span>{formatCurrency((selectedCategory?.margin_cost || 0) * selection.meters)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Labour Cost:</span>
+                    <span>{formatCurrency(labourCostValue * selection.meters)}</span>
                   </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
                     <span>Total Cost:</span>
