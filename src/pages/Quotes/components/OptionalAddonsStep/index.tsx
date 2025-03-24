@@ -4,11 +4,12 @@ import { useQuoteContext } from "../../context/QuoteContext";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Save, Plus, Minus } from "lucide-react";
+import { Save, Plus, Minus, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface OptionalAddonsStepProps {
   onNext: () => void;
@@ -23,6 +24,12 @@ interface Addon {
   price: number;
   selected: boolean;
   quantity: number;
+}
+
+interface CustomRequirement {
+  id: string;
+  description: string;
+  price: number;
 }
 
 export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepProps) => {
@@ -70,25 +77,50 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
       quantity: 1
     }
   ]);
+  
+  // Dynamic custom requirements
+  const [customRequirements, setCustomRequirements] = useState<CustomRequirement[]>([
+    { id: crypto.randomUUID(), description: "", price: 0 }
+  ]);
+  
+  // Micro dig section
+  const [microDigRequired, setMicroDigRequired] = useState(false);
+  const [microDigPrice, setMicroDigPrice] = useState(0);
+  const [microDigNotes, setMicroDigNotes] = useState("");
 
-  // Calculate total addons cost
+  // Calculate total addons cost including custom requirements and micro dig
   const calculateAddonsCost = () => {
-    return addons.reduce((total, addon) => {
+    const standardAddonsCost = addons.reduce((total, addon) => {
       if (addon.selected) {
         return total + (addon.price * addon.quantity);
       }
       return total;
     }, 0);
+    
+    const customRequirementsCost = customRequirements.reduce((total, requirement) => {
+      return total + (Number(requirement.price) || 0);
+    }, 0);
+    
+    const microDigCost = microDigRequired ? Number(microDigPrice) : 0;
+    
+    return standardAddonsCost + customRequirementsCost + microDigCost;
   };
 
-  // Update total when addons change
+  // Update total when values change
   useEffect(() => {
     const totalCost = calculateAddonsCost();
-    updateQuoteData({ optional_addons_cost: totalCost });
-  }, [addons]);
+    updateQuoteData({ 
+      optional_addons_cost: totalCost,
+      // Store additional data in context for future use
+      custom_requirements: customRequirements,
+      micro_dig_required: microDigRequired,
+      micro_dig_price: microDigPrice,
+      micro_dig_notes: microDigNotes
+    });
+  }, [addons, customRequirements, microDigRequired, microDigPrice]);
 
+  // Show warning but don't block progress if no pool is selected
   useEffect(() => {
-    // Show warning but don't block progress if no pool is selected
     if (!quoteData.pool_id) {
       toast.warning("No pool selected. You can continue, but the quote will be incomplete.");
     }
@@ -115,6 +147,34 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
     }));
   };
 
+  // Handle custom requirements changes
+  const addCustomRequirement = () => {
+    setCustomRequirements([
+      ...customRequirements, 
+      { id: crypto.randomUUID(), description: "", price: 0 }
+    ]);
+  };
+
+  const removeCustomRequirement = (id: string) => {
+    if (customRequirements.length > 1) {
+      setCustomRequirements(customRequirements.filter(req => req.id !== id));
+    } else {
+      toast.info("You must have at least one custom requirement field");
+    }
+  };
+
+  const updateCustomRequirement = (id: string, field: 'description' | 'price', value: string) => {
+    setCustomRequirements(customRequirements.map(req => {
+      if (req.id === id) {
+        return { 
+          ...req, 
+          [field]: field === 'price' ? Number(value) || 0 : value 
+        };
+      }
+      return req;
+    }));
+  };
+
   const saveAddons = async (continueToNext: boolean) => {
     if (!quoteData.id) {
       toast.error("No quote ID found. Please complete the previous steps first.");
@@ -124,9 +184,13 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
     setIsSubmitting(true);
     
     try {
-      // These fields now exist in the database, so we can use type-safe updates
+      // Store as JSON strings for the custom fields
       const dataToSave = {
-        optional_addons_cost: calculateAddonsCost()
+        optional_addons_cost: calculateAddonsCost(),
+        custom_requirements_json: JSON.stringify(customRequirements),
+        micro_dig_required: microDigRequired,
+        micro_dig_price: microDigPrice,
+        micro_dig_notes: microDigNotes
       };
       
       // Update the record in Supabase
@@ -232,6 +296,118 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
           </Card>
         ))}
       </div>
+      
+      {/* Custom Requirements Section */}
+      <div className="space-y-3">
+        <div className="flex justify-between items-center">
+          <h3 className="text-lg font-medium">Custom Site Requirements</h3>
+          <Button 
+            type="button" 
+            size="sm" 
+            onClick={addCustomRequirement}
+            variant="outline"
+          >
+            <Plus className="h-4 w-4 mr-1" /> Add Requirement
+          </Button>
+        </div>
+        
+        {customRequirements.map((req, index) => (
+          <Card key={req.id}>
+            <CardContent className="p-4">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="md:col-span-3">
+                  <Label htmlFor={`req-desc-${req.id}`} className="mb-1 block">Description</Label>
+                  <Input
+                    id={`req-desc-${req.id}`}
+                    value={req.description}
+                    onChange={(e) => updateCustomRequirement(req.id, 'description', e.target.value)}
+                    placeholder="Enter requirement description"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`req-price-${req.id}`} className="mb-1 block">Price ($)</Label>
+                  <div className="flex">
+                    <Input
+                      id={`req-price-${req.id}`}
+                      type="number"
+                      value={req.price || ''}
+                      onChange={(e) => updateCustomRequirement(req.id, 'price', e.target.value)}
+                      placeholder="0.00"
+                      className="flex-1"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="ml-1"
+                      onClick={() => removeCustomRequirement(req.id)}
+                    >
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {/* Micro Dig Section */}
+      <Card className={`transition-all ${microDigRequired ? 'border-primary' : ''}`}>
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-start space-x-3">
+            <div className="pt-1">
+              <Checkbox 
+                id="micro-dig-required" 
+                checked={microDigRequired}
+                onCheckedChange={() => setMicroDigRequired(!microDigRequired)}
+              />
+            </div>
+            <div className="flex-1">
+              <Label 
+                htmlFor="micro-dig-required" 
+                className="font-medium cursor-pointer"
+              >
+                Micro Dig Required
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Special excavation requirements using micro equipment
+              </p>
+            </div>
+          </div>
+          
+          {microDigRequired && (
+            <div className="pl-7 space-y-3">
+              <div>
+                <Label htmlFor="micro-dig-price" className="mb-1 block">
+                  Price ($)
+                </Label>
+                <Input
+                  id="micro-dig-price"
+                  type="number"
+                  value={microDigPrice || ''}
+                  onChange={(e) => setMicroDigPrice(Number(e.target.value) || 0)}
+                  placeholder="0.00"
+                  className="max-w-xs"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="micro-dig-notes" className="mb-1 block">
+                  Notes and Requirements
+                </Label>
+                <Textarea
+                  id="micro-dig-notes"
+                  value={microDigNotes}
+                  onChange={(e) => setMicroDigNotes(e.target.value)}
+                  placeholder="Enter detailed requirements for the micro dig..."
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="bg-muted/50">
         <CardContent className="p-4">

@@ -22,6 +22,12 @@ export interface Quote {
   site_requirements_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;
+  
+  // New fields for custom requirements and micro dig
+  custom_requirements_json?: string;
+  micro_dig_required?: boolean;
+  micro_dig_price?: number;
+  micro_dig_notes?: string;
 }
 
 export interface QuoteInsert {
@@ -42,4 +48,8 @@ export interface QuoteInsert {
   site_requirements_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;
+  custom_requirements_json?: string;
+  micro_dig_required?: boolean;
+  micro_dig_price?: number;
+  micro_dig_notes?: string;
 }
