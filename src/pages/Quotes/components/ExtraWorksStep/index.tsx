@@ -12,7 +12,7 @@ import { useExtraConcreting } from './hooks/useExtraConcreting';
 import { ExtraWorks } from '@/types/extra-works';
 import { useNavigate } from 'react-router-dom';
 
-const ExtraWorksStep = () => {
+const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
   const navigate = useNavigate();
   const { quoteData, updateQuoteData } = useQuoteContext();
   const { 
@@ -20,7 +20,7 @@ const ExtraWorksStep = () => {
     updatePavingSelection, 
     addPavingSelection, 
     removePavingSelection, 
-    calculatePavingTotalCost,
+    totalCost: pavingTotalCost,
     setPavingSelections 
   } = useExtraPaving();
   
@@ -29,12 +29,12 @@ const ExtraWorksStep = () => {
     updateConcretingSelection,
     addConcretingSelection,
     removeConcretingSelection,
-    calculateConcretingTotalCost,
+    totalCost: concretingTotalCost,
     setConcretingSelections
   } = useExtraConcreting();
 
   // Calculate total cost for all extra works
-  const totalExtraWorksCost = calculatePavingTotalCost() + calculateConcretingTotalCost();
+  const totalExtraWorksCost = pavingTotalCost + concretingTotalCost;
 
   // Initialize from saved data if it exists
   useEffect(() => {
@@ -73,7 +73,11 @@ const ExtraWorksStep = () => {
     });
 
     if (navigateNext) {
-      navigate('/quotes/new/optional-addons');
+      if (onNext) {
+        onNext();
+      } else {
+        navigate('/quotes/new/optional-addons');
+      }
     }
   };
 
@@ -94,23 +98,11 @@ const ExtraWorksStep = () => {
             </TabsList>
             
             <TabsContent value="paving">
-              <ExtraPavingSection 
-                selections={pavingSelections}
-                onAdd={addPavingSelection}
-                onUpdate={updatePavingSelection}
-                onRemove={removePavingSelection}
-                totalCost={calculatePavingTotalCost()}
-              />
+              <ExtraPavingSection />
             </TabsContent>
             
             <TabsContent value="concreting">
-              <ExtraConcretingSection
-                selections={concretingSelections}
-                onAdd={addConcretingSelection}
-                onUpdate={updateConcretingSelection}
-                onRemove={removeConcretingSelection}
-                totalCost={calculateConcretingTotalCost()}
-              />
+              <ExtraConcretingSection />
             </TabsContent>
             
             <TabsContent value="retaining">
@@ -131,11 +123,16 @@ const ExtraWorksStep = () => {
               Total Extra Works Cost: <span className="font-semibold">${totalExtraWorksCost.toFixed(2)}</span>
             </div>
             <div className="flex space-x-2">
+              {onPrevious && (
+                <Button variant="outline" onClick={onPrevious}>
+                  Previous
+                </Button>
+              )}
               <Button variant="outline" onClick={() => saveExtraWorks(false)}>
                 Save
               </Button>
               <Button onClick={() => saveExtraWorks(true)}>
-                Save & Continue
+                {onNext ? "Save & Continue" : "Save & Continue"}
               </Button>
             </div>
           </div>

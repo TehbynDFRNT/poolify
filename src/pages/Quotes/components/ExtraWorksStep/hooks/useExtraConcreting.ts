@@ -72,13 +72,12 @@ export const useExtraConcreting = () => {
   useEffect(() => {
     const newTotalCost = concretingSelections.reduce((acc, selection) => acc + selection.cost, 0);
     setTotalCost(newTotalCost);
-    
-    // We'll update the total extra works cost in the parent component
   }, [concretingSelections]);
 
   return {
     concretingTypes,
     concretingSelections,
+    setConcretingSelections,
     isLoading,
     totalCost,
     addConcretingSelection,

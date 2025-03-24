@@ -85,6 +85,7 @@ export const useExtraPaving = () => {
   return {
     pavingCategories,
     pavingSelections,
+    setPavingSelections,
     isLoading,
     totalCost,
     addPavingSelection,
