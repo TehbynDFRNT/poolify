@@ -8,7 +8,9 @@ import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 
 export const useSiteRequirementsCost = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
-  const [siteRequirementsCost, setSiteRequirementsCost] = useState<number>(0);
+  const [siteRequirementsCost, setSiteRequirementsCost] = useState<number>(
+    quoteData.site_requirements_cost || 0
+  );
 
   // Fetch crane costs
   const { data: craneCosts } = useQuery({
@@ -53,6 +55,8 @@ export const useSiteRequirementsCost = () => {
 
   // Calculate additional cost if a non-default crane is selected
   useEffect(() => {
+    if (!craneCosts || !trafficControlCosts) return;
+    
     let totalCost = 0;
     
     // Calculate crane cost difference if not using default
@@ -76,11 +80,11 @@ export const useSiteRequirementsCost = () => {
     
     setSiteRequirementsCost(totalCost);
     
-    // Update quote data with the site requirements cost
-    updateQuoteData({ 
-      site_requirements_cost: totalCost 
-    });
-  }, [quoteData.crane_id, quoteData.traffic_control_id, craneCosts, trafficControlCosts, defaultCrane, updateQuoteData]);
+    // Only update the quote data if the cost has changed
+    if (totalCost !== quoteData.site_requirements_cost) {
+      updateQuoteData({ site_requirements_cost: totalCost });
+    }
+  }, [quoteData.crane_id, quoteData.traffic_control_id, craneCosts, trafficControlCosts, defaultCrane]);
 
   return {
     siteRequirementsCost,
