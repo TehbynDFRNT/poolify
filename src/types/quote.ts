@@ -18,6 +18,7 @@ export interface Quote {
   // Additional fields for site requirements
   crane_id?: string;
   excavation_type?: string;
+  traffic_control_id?: string;
   
   // Additional fields for tracking addons and pricing
   site_requirements_cost?: number;
@@ -39,6 +40,7 @@ export interface QuoteInsert {
   resident_homeowner?: boolean;
   crane_id?: string;
   excavation_type?: string;
+  traffic_control_id?: string;
   site_requirements_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;

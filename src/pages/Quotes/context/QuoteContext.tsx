@@ -23,6 +23,7 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string } = {
   // Site requirements
   crane_id: '',
   excavation_type: '',
+  traffic_control_id: '',
   
   // Cost tracking
   site_requirements_cost: 0,
