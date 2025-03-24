@@ -1,6 +1,5 @@
-
 import React from "react";
-import { usePoolWizard } from "@/contexts/PoolWizardContext";
+import { usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";

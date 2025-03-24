@@ -1,6 +1,5 @@
-
 import React from "react";
-import { usePoolWizard } from "@/contexts/PoolWizardContext";
+import { usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,

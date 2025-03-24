@@ -1,6 +1,6 @@
 
 import React from "react";
-import { usePoolWizard } from "@/contexts/PoolWizardContext";
+import { usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
 import PoolIdentificationSection from "./basic-info/PoolIdentificationSection";
 import DimensionsSection from "./basic-info/DimensionsSection";
 import CalculatedValuesSection from "./basic-info/CalculatedValuesSection";

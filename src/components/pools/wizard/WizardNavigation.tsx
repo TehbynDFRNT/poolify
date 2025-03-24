@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { usePoolWizard } from "@/contexts/PoolWizardContext";
+import { usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 
 const WizardNavigation: React.FC = () => {

@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from "react";
-import { usePoolWizard } from "@/contexts/PoolWizardContext";
+import { usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";

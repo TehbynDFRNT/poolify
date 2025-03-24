@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PoolWizardProvider, WizardStep, usePoolWizard } from "@/contexts/PoolWizardContext";
+import { PoolWizardProvider, WizardStep, usePoolWizard } from "@/contexts/pool-wizard/PoolWizardContext";
 import BasicInfoStep from "./steps/BasicInfoStep";
 import PoolCostsStep from "./steps/PoolCostsStep";
 import ExcavationStep from "./steps/ExcavationStep";
