@@ -5,9 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
-import { Trash } from "lucide-react";
+import { Trash, Info } from "lucide-react";
 import { PavingSelection } from "../hooks/useExtraPaving";
 import { formatCurrency } from "@/utils/format";
+import { useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 interface ExtraPavingSelectionProps {
   selection: PavingSelection;
@@ -69,7 +71,38 @@ export const ExtraPavingSelection = ({
           </div>
           
           <div className="md:col-span-2">
-            <Label>Cost per meter</Label>
+            <div className="flex items-center gap-1">
+              <Label>Cost per meter</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground">
+                    <Info className="h-3 w-3" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-64">
+                  <div className="space-y-2">
+                    <h4 className="font-semibold">Cost Breakdown</h4>
+                    <div className="text-sm grid grid-cols-2 gap-1">
+                      <span>Paver Cost:</span>
+                      <span className="text-right">{formatCurrency(selectedCategory?.paver_cost || 0)}</span>
+                      
+                      <span>Wastage Cost:</span>
+                      <span className="text-right">{formatCurrency(selectedCategory?.wastage_cost || 0)}</span>
+                      
+                      <span>Margin/Labour:</span>
+                      <span className="text-right">{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
+                      
+                      <div className="col-span-2 border-t mt-1 pt-1">
+                        <div className="flex justify-between font-medium">
+                          <span>Total Per Meter:</span>
+                          <span>{formatCurrency(costPerMeter)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
             <div className="mt-2 font-medium">{formatCurrency(costPerMeter)}</div>
           </div>
           
