@@ -118,9 +118,9 @@ const PoolSpecifications = () => {
               Add Pool
             </Button>
             <Button
-              as={Link}
-              to="/pool-creation-wizard"
+              variant="default"
               className="bg-blue-600 hover:bg-blue-700"
+              onClick={() => window.location.href = "/pool-creation-wizard"}
             >
               <Wand2 className="mr-2 h-4 w-4" />
               Wizard

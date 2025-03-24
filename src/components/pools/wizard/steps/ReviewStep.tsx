@@ -6,7 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/utils/format";
 import { useFormContext } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
-import { Calculator, Construction, Target, Truck, Water } from "lucide-react";
+import { Calculator, Construction, Target, Truck, Droplets } from "lucide-react";
 
 const ReviewStep: React.FC = () => {
   const { 
@@ -56,7 +56,7 @@ const ReviewStep: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <div className="flex items-center text-muted-foreground">
-                <Water className="h-4 w-4 mr-2" />
+                <Droplets className="h-4 w-4 mr-2" />
                 <span>Pool Dimensions</span>
               </div>
               <div className="pl-6 space-y-1">
