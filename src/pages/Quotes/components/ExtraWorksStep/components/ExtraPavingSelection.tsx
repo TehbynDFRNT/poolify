@@ -124,7 +124,7 @@ export const ExtraPavingSelection = ({
                     <span>{formatCurrency(selectedCategory?.wastage_cost || 0)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Margin/Labour:</span>
+                    <span>Margin:</span>
                     <span>{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
                   </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
@@ -144,7 +144,7 @@ export const ExtraPavingSelection = ({
                     <span>{formatCurrency((selectedCategory?.wastage_cost || 0) * selection.meters)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Margin/Labour:</span>
+                    <span>Margin:</span>
                     <span>{formatCurrency((selectedCategory?.margin_cost || 0) * selection.meters)}</span>
                   </div>
                   <div className="flex justify-between pt-1 border-t font-medium">
