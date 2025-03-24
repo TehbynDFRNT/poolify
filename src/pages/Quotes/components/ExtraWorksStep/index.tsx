@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { useQuoteContext } from '../../context/QuoteContext';
 import { ExtraPavingSection } from './components/ExtraPavingSection';
@@ -86,36 +85,39 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
           <CardDescription>Add additional paving, concreting, retaining walls, or water features</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="paving" className="w-full mb-6">
-            <TabsList className="mb-4">
-              <TabsTrigger value="paving">Extra Paving</TabsTrigger>
-              <TabsTrigger value="concreting">Concrete Labour</TabsTrigger>
-              <TabsTrigger value="retaining" disabled>Retaining Walls</TabsTrigger>
-              <TabsTrigger value="water" disabled>Water Features</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="paving">
+          <div className="space-y-8">
+            {/* Extra Paving Section */}
+            <section className="border rounded-lg p-4">
               <ExtraPavingSection />
-            </TabsContent>
+            </section>
             
-            <TabsContent value="concreting">
+            {/* Concrete Labour Section */}
+            <section className="border rounded-lg p-4">
               <ExtraConcretingSection />
-            </TabsContent>
+            </section>
             
-            <TabsContent value="retaining">
+            {/* Retaining Walls Section (Coming Soon) */}
+            <section className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Retaining Walls</h3>
+              </div>
               <div className="p-8 text-center text-muted-foreground">
                 Retaining walls feature coming soon
               </div>
-            </TabsContent>
+            </section>
             
-            <TabsContent value="water">
+            {/* Water Features Section (Coming Soon) */}
+            <section className="border rounded-lg p-4">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">Water Features</h3>
+              </div>
               <div className="p-8 text-center text-muted-foreground">
                 Water features coming soon
               </div>
-            </TabsContent>
-          </Tabs>
+            </section>
+          </div>
 
-          <div className="flex justify-between items-center pt-4 border-t">
+          <div className="flex justify-between items-center pt-6 mt-8 border-t">
             <div className="text-lg font-medium">
               Total Extra Works Cost: <span className="font-semibold">${totalExtraWorksCost.toFixed(2)}</span>
             </div>
