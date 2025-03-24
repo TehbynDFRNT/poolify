@@ -20,6 +20,7 @@ export interface Quote {
   excavation_type?: string;
   traffic_control_id?: string;
   site_requirements_cost?: number;
+  extra_works_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;
   
@@ -46,6 +47,7 @@ export interface QuoteInsert {
   excavation_type?: string;
   traffic_control_id?: string;
   site_requirements_cost?: number;
+  extra_works_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;
   custom_requirements_json?: string;
