@@ -1,4 +1,3 @@
-
 import { Addon } from "../types";
 
 export interface AddonsState {

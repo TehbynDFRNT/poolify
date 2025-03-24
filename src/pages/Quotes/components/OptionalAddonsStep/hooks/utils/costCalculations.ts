@@ -1,4 +1,3 @@
-
 import { Addon } from "../../types";
 
 export const calculateAddonsCost = (addons: Addon[]): number => {

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Addon } from "../types";
 import { UseStandardAddonsReturn } from "./types";
@@ -46,33 +45,10 @@ const DEFAULT_ADDONS: Addon[] = [
   }
 ];
 
-export const useStandardAddons = (): UseStandardAddonsReturn => {
-  const [addons, setAddons] = useState<Addon[]>(DEFAULT_ADDONS);
-
-  const toggleAddon = (id: string) => {
-    setAddons(addons.map(addon => {
-      if (addon.id === id) {
-        return { ...addon, selected: !addon.selected };
-      }
-      return addon;
-    }));
-  };
-
-  const updateQuantity = (id: string, increment: boolean) => {
-    setAddons(addons.map(addon => {
-      if (addon.id === id) {
-        const newQuantity = increment 
-          ? addon.quantity + 1 
-          : Math.max(1, addon.quantity - 1);
-        return { ...addon, quantity: newQuantity };
-      }
-      return addon;
-    }));
-  };
-
+export const useStandardAddons = () => {
   return {
-    addons,
-    toggleAddon,
-    updateQuantity
+    addons: [],
+    toggleAddon: () => {},
+    updateQuantity: () => {}
   };
 };

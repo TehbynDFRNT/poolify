@@ -2,10 +2,10 @@
 import { Card, CardContent } from "@/components/ui/card";
 
 interface CostSummaryProps {
-  totalCost: number;
+  totalCost?: number;
 }
 
-export const CostSummary = ({ totalCost }: CostSummaryProps) => {
+export const CostSummary = ({ totalCost = 0 }: CostSummaryProps) => {
   return (
     <Card className="bg-muted/50">
       <CardContent className="p-4">

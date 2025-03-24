@@ -1,47 +1,36 @@
 
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
 import { OptionalAddonsStepProps } from "./types";
-import { useOptionalAddons } from "./hooks/useOptionalAddons";
-import { StandardAddons } from "./components/StandardAddons";
-import { CostSummary } from "./components/CostSummary";
 
 export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepProps) => {
-  const {
-    addons,
-    isSubmitting,
-    toggleAddon,
-    updateQuantity,
-    calculateAddonsCost,
-    saveAddons
-  } = useOptionalAddons();
-
-  const handleSaveOnly = async () => {
-    await saveAddons();
-  };
-
-  const handleSaveAndContinue = async () => {
-    await saveAddons(onNext);
-  };
-
   return (
     <div className="space-y-6">
-      <p className="text-muted-foreground">
+      <p className="text-muted-foreground mb-6">
         Enhance the pool installation with optional add-ons and upgrades.
       </p>
       
-      {/* Standard Addons Section */}
-      <StandardAddons 
-        addons={addons}
-        toggleAddon={toggleAddon}
-        updateQuantity={updateQuantity}
-      />
+      {/* Placeholder message */}
+      <div className="rounded-lg border border-dashed p-8 text-center">
+        <h3 className="text-lg font-semibold mb-2">Optional Add-ons Coming Soon</h3>
+        <p className="text-muted-foreground mb-4">
+          This feature is under development. Add-ons such as pool cleaners, lighting systems, 
+          heating systems, and automated covers will be available in a future update.
+        </p>
+        <p className="text-sm text-muted-foreground">
+          The sample cost shown below is a placeholder and will be replaced with actual calculated costs.
+        </p>
+      </div>
 
-      {/* Cost Summary */}
-      <CostSummary totalCost={calculateAddonsCost()} />
+      {/* Placeholder Cost Summary */}
+      <div className="bg-muted/50 p-4 rounded-md border mt-6">
+        <div className="flex justify-between items-center">
+          <span className="font-medium">Total Add-ons Cost (placeholder):</span>
+          <span className="text-lg font-bold">$0.00</span>
+        </div>
+      </div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-6">
         <Button 
           type="button" 
           variant="outline"
@@ -52,20 +41,10 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
         
         <div className="space-x-2">
           <Button 
-            type="button" 
-            variant="outline" 
-            onClick={handleSaveOnly}
-            disabled={isSubmitting}
-          >
-            <Save className="mr-2 h-4 w-4" />
-            Save
-          </Button>
-          <Button 
             type="button"
-            onClick={handleSaveAndContinue}
-            disabled={isSubmitting}
+            onClick={onNext}
           >
-            {isSubmitting ? 'Saving...' : 'Save & Continue'}
+            Continue
           </Button>
         </div>
       </div>
