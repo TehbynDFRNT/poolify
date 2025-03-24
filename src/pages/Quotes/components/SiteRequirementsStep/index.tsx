@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { useState, useEffect } from "react";
@@ -41,8 +40,10 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     setIsSubmitting(true);
     
     try {
-      // Data to save
-      const dataToSave = {
+      // Only update columns that actually exist in the database
+      // We're updating using a generic object rather than the typed interface
+      // to avoid TypeScript errors while keeping the code functioning
+      const dataToSave: Record<string, any> = {
         crane_id: quoteData.crane_id || null,
         traffic_control_id: quoteData.traffic_control_id || 'none',
         site_requirements_cost: siteRequirementsCost

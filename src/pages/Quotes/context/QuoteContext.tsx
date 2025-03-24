@@ -20,12 +20,12 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string } = {
   status: 'draft',
   resident_homeowner: false,
   
-  // Site requirements
+  // Site requirements (adding as empty defaults)
   crane_id: '',
   excavation_type: '',
   traffic_control_id: 'none',
   
-  // Cost tracking
+  // Cost tracking (adding as 0 defaults)
   site_requirements_cost: 0,
   optional_addons_cost: 0,
   total_cost: 0

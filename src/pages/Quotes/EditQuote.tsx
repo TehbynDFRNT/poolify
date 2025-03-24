@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, RefreshCw } from "lucide-react";
@@ -72,8 +71,8 @@ const EditQuoteContent = () => {
           ? quoteData.status 
           : 'draft';
 
-      // Since the database schema might not have the fields we're looking for,
-      // we need to add them with default values if they're missing
+      // Update the context with the quote data, using || for potentially missing fields
+      // instead of assuming they exist in the database schema
       updateQuoteData({
         id: quoteData.id,
         customer_name: quoteData.customer_name,
@@ -88,7 +87,7 @@ const EditQuoteContent = () => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Add these properties with default values if they don't exist in the database
+        // Handle potentially missing fields with default values
         crane_id: quoteData.crane_id || '',
         excavation_type: quoteData.excavation_type || '',
         traffic_control_id: quoteData.traffic_control_id || 'none',

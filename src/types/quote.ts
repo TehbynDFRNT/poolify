@@ -15,12 +15,10 @@ export interface Quote {
   updated_at?: string;
   resident_homeowner?: boolean;
   
-  // Additional fields for site requirements
+  // These fields will be added to the type but might not exist in the database
   crane_id?: string;
   excavation_type?: string;
   traffic_control_id?: string;
-  
-  // Additional fields for tracking addons and pricing
   site_requirements_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;
