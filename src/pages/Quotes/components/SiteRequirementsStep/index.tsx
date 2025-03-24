@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { toast } from "sonner";
 import { NoPoolWarning } from "./components/NoPoolWarning";
@@ -7,7 +7,7 @@ import { CostSummary } from "./components/CostSummary";
 import { useSiteRequirementsCost } from "./hooks/useSiteRequirementsCost";
 import { useCustomSiteRequirements } from "./hooks/useCustomSiteRequirements";
 import { useMicroDig } from "./hooks/useMicroDig";
-import { saveRequirements } from "./services/siteRequirementsService";
+import { useFormSubmission } from "./hooks/useFormSubmission";
 import { SiteRequirementsSection } from "./components/SiteRequirementsSection";
 import { CustomSiteRequirements } from "./components/CustomSiteRequirements";
 import { MicroDigSection } from "./components/MicroDigSection";
@@ -20,8 +20,7 @@ interface SiteRequirementsStepProps {
 }
 
 export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsStepProps) => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { quoteData } = useQuoteContext();
   
   // Custom hooks for different sections
   const { 
@@ -46,6 +45,9 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     setMicroDigNotes
   } = useMicroDig();
 
+  // Form submission hook
+  const { isSubmitting, handleSaveRequirements } = useFormSubmission({ onNext });
+
   // Show warning but don't block progress if no pool is selected
   useEffect(() => {
     if (!quoteData.pool_id) {
@@ -69,48 +71,26 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     return totalCost;
   };
 
-  const handleSaveRequirements = async (continueToNext: boolean) => {
-    if (!quoteData.id) {
-      toast.error("No quote ID found. Please complete the previous steps first.");
-      return;
-    }
-
-    setIsSubmitting(true);
-    
-    const { success, totalCost } = await saveRequirements({
-      quoteId: quoteData.id,
-      craneId: quoteData.crane_id || null,
-      trafficControlId: quoteData.traffic_control_id || 'none',
+  const handleSaveOnly = async () => {
+    await handleSaveRequirements(false, {
+      craneId: quoteData.crane_id,
+      trafficControlId: quoteData.traffic_control_id,
       customRequirements,
       microDigRequired,
       microDigPrice,
       microDigNotes
     });
-    
-    if (success) {
-      // Update context with the latest values
-      updateQuoteData({
-        site_requirements_cost: totalCost,
-        custom_requirements_json: JSON.stringify(customRequirements),
-        micro_dig_required: microDigRequired,
-        micro_dig_price: microDigPrice,
-        micro_dig_notes: microDigNotes
-      });
-      
-      setIsSubmitting(false);
-      
-      if (continueToNext) onNext();
-    } else {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSaveOnly = async () => {
-    await handleSaveRequirements(false);
   };
 
   const handleSaveAndContinue = async () => {
-    await handleSaveRequirements(true);
+    await handleSaveRequirements(true, {
+      craneId: quoteData.crane_id,
+      trafficControlId: quoteData.traffic_control_id,
+      customRequirements,
+      microDigRequired,
+      microDigPrice,
+      microDigNotes
+    });
   };
 
   return (
