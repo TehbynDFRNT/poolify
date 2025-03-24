@@ -1,7 +1,7 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { useNavigate, useParams } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState, useEffect } from "react";
@@ -19,6 +19,7 @@ import { QuoteProgressSteps } from "./components/QuoteProgressSteps";
 import { QuoteLoadingState } from "./components/QuoteLoadingState";
 import { QuoteErrorState } from "./components/QuoteErrorState";
 import type { Quote } from "@/types/quote";
+import { toast } from "sonner";
 
 const steps = [
   { id: 1, name: "Customer Info" },
@@ -37,62 +38,77 @@ const EditQuoteContent = () => {
   const { updateQuoteData } = useQuoteContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
-    const fetchQuoteData = async () => {
-      if (!quoteId) {
-        setError("No quote ID provided");
+  const fetchQuoteData = async () => {
+    if (!quoteId) {
+      setError("No quote ID provided");
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data: quoteData, error: quoteError } = await supabase
+        .from("quotes")
+        .select("*")
+        .eq("id", quoteId)
+        .single();
+
+      if (quoteError) {
+        console.error("Error fetching quote:", quoteError);
+        setError("Error loading quote data. Please try again.");
         setIsLoading(false);
         return;
       }
 
-      try {
-        const { data: quoteData, error: quoteError } = await supabase
-          .from("quotes")
-          .select("*")
-          .eq("id", quoteId)
-          .single();
+      const validStatus: Quote['status'] = 
+        quoteData.status === 'draft' || 
+        quoteData.status === 'pending' || 
+        quoteData.status === 'approved' || 
+        quoteData.status === 'declined' 
+          ? quoteData.status 
+          : 'draft';
 
-        if (quoteError) {
-          console.error("Error fetching quote:", quoteError);
-          setError("Error loading quote data");
-          setIsLoading(false);
-          return;
-        }
+      updateQuoteData({
+        id: quoteData.id,
+        customer_name: quoteData.customer_name,
+        customer_email: quoteData.customer_email,
+        customer_phone: quoteData.customer_phone,
+        owner2_name: quoteData.owner2_name,
+        owner2_email: quoteData.owner2_email,
+        owner2_phone: quoteData.owner2_phone,
+        home_address: quoteData.home_address,
+        site_address: quoteData.site_address,
+        pool_id: quoteData.pool_id,
+        status: validStatus,
+        resident_homeowner: quoteData.resident_homeowner,
+        crane_id: quoteData.crane_id,
+        excavation_type: quoteData.excavation_type,
+        traffic_control_id: quoteData.traffic_control_id,
+        site_requirements_cost: quoteData.site_requirements_cost,
+        optional_addons_cost: quoteData.optional_addons_cost,
+        total_cost: quoteData.total_cost,
+      });
 
-        const validStatus: Quote['status'] = 
-          quoteData.status === 'draft' || 
-          quoteData.status === 'pending' || 
-          quoteData.status === 'approved' || 
-          quoteData.status === 'declined' 
-            ? quoteData.status 
-            : 'draft';
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Error in fetchQuoteData:", err);
+      setError("Failed to load quote data. Network error or server unavailable.");
+      setIsLoading(false);
+    }
+  };
 
-        updateQuoteData({
-          id: quoteData.id,
-          customer_name: quoteData.customer_name,
-          customer_email: quoteData.customer_email,
-          customer_phone: quoteData.customer_phone,
-          owner2_name: quoteData.owner2_name,
-          owner2_email: quoteData.owner2_email,
-          owner2_phone: quoteData.owner2_phone,
-          home_address: quoteData.home_address,
-          site_address: quoteData.site_address,
-          pool_id: quoteData.pool_id,
-          status: validStatus,
-          resident_homeowner: quoteData.resident_homeowner,
-        });
-
-        setIsLoading(false);
-      } catch (err) {
-        console.error("Error in fetchQuoteData:", err);
-        setError("Failed to load quote data");
-        setIsLoading(false);
-      }
-    };
-
+  useEffect(() => {
     fetchQuoteData();
-  }, [quoteId, updateQuoteData]);
+  }, [quoteId, retryCount]);
+
+  const handleRetry = () => {
+    toast.info("Retrying connection...");
+    setRetryCount(prev => prev + 1);
+  };
 
   const handleStepClick = (stepId: number) => {
     if (stepId <= currentStep) {
@@ -105,7 +121,12 @@ const EditQuoteContent = () => {
   }
 
   if (error) {
-    return <QuoteErrorState error={error} />;
+    return (
+      <QuoteErrorState 
+        error={error} 
+        onRetry={handleRetry}
+      />
+    );
   }
 
   return (
