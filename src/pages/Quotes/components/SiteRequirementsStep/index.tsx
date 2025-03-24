@@ -13,9 +13,9 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
   const { quoteData } = useQuoteContext();
 
   useEffect(() => {
-    // Check if we have a pool selected from the previous step
+    // Show warning but don't block progress if no pool is selected
     if (!quoteData.pool_id) {
-      toast.error("Please select a pool before configuring site requirements");
+      toast.warning("No pool selected. You can continue, but the quote will be incomplete.");
     }
   }, [quoteData.pool_id]);
 

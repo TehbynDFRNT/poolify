@@ -14,8 +14,9 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
   const { quoteData } = useQuoteContext();
 
   useEffect(() => {
+    // Show warning but don't block progress
     if (!quoteData.pool_id) {
-      toast.error("Please complete the previous steps first");
+      toast.warning("No pool selected. You can continue, but the quote will be incomplete.");
     }
   }, [quoteData.pool_id]);
 
