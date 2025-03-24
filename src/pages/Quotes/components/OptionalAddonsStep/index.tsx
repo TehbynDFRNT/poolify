@@ -1,8 +1,10 @@
 
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Save } from "lucide-react";
 
 interface OptionalAddonsStepProps {
   onNext: () => void;
@@ -10,7 +12,8 @@ interface OptionalAddonsStepProps {
 }
 
 export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepProps) => {
-  const { quoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData } = useQuoteContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Show warning but don't block progress if no pool is selected
@@ -18,6 +21,49 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
       toast.warning("No pool selected. You can continue, but the quote will be incomplete.");
     }
   }, [quoteData.pool_id]);
+
+  const saveAddons = async (continueToNext: boolean) => {
+    if (!quoteData.id) {
+      toast.error("No quote ID found. Please complete the previous steps first.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Data to save - for now this is a placeholder since we don't have real optional addons yet
+      const dataToSave = {
+        optional_addons_cost: quoteData.optional_addons_cost || 0
+      };
+      
+      // Update the record in Supabase
+      const { error } = await supabase
+        .from('quotes')
+        .update(dataToSave)
+        .eq('id', quoteData.id);
+      
+      if (error) {
+        console.error("Error updating optional addons:", error);
+        throw error;
+      }
+      
+      toast.success("Optional addons saved");
+      setIsSubmitting(false);
+      if (continueToNext) onNext();
+    } catch (error) {
+      console.error("Error saving optional addons:", error);
+      toast.error("Failed to save optional addons");
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveOnly = async () => {
+    await saveAddons(false);
+  };
+
+  const handleSaveAndContinue = async () => {
+    await saveAddons(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -40,9 +86,25 @@ export const OptionalAddonsStep = ({ onNext, onPrevious }: OptionalAddonsStepPro
         >
           Back
         </Button>
-        <Button onClick={onNext}>
-          Continue
-        </Button>
+        
+        <div className="space-x-2">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleSaveOnly}
+            disabled={isSubmitting}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
+          <Button 
+            type="button"
+            onClick={handleSaveAndContinue}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save & Continue'}
+          </Button>
+        </div>
       </div>
     </div>
   );

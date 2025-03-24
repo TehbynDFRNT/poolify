@@ -5,6 +5,7 @@ import { AddressFormSection } from "./AddressFormSection";
 import { ResidentHomeownerCheckbox } from "./ResidentHomeownerCheckbox";
 import { useCustomerInfoForm } from "./useCustomerInfoForm";
 import { useQuoteContext } from "../../context/QuoteContext";
+import { Save } from "lucide-react";
 
 interface CustomerInfoStepProps {
   onNext: () => void;
@@ -18,7 +19,8 @@ export const CustomerInfoStep = ({ onNext, isEditing = false }: CustomerInfoStep
     isSubmitting, 
     handleChange, 
     handleCheckboxChange, 
-    handleSubmit 
+    handleSubmit,
+    handleSaveOnly
   } = useCustomerInfoForm(onNext, isEditing);
 
   return (
@@ -46,9 +48,18 @@ export const CustomerInfoStep = ({ onNext, isEditing = false }: CustomerInfoStep
         />
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-between">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={handleSaveOnly}
+          disabled={isSubmitting}
+        >
+          <Save className="mr-2 h-4 w-4" />
+          Save
+        </Button>
         <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : 'Continue'}
+          {isSubmitting ? 'Saving...' : 'Save & Continue'}
         </Button>
       </div>
     </form>

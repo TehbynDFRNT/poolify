@@ -39,11 +39,10 @@ export const PreviewQuoteStep = ({ onPrevious }: PreviewQuoteStepProps) => {
       if (error) throw error;
       
       toast.success("Quote saved as draft");
-      navigate("/quotes");
+      setIsSubmitting(false);
     } catch (error) {
       console.error("Error saving draft:", error);
       toast.error("Failed to save draft");
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -68,7 +67,6 @@ export const PreviewQuoteStep = ({ onPrevious }: PreviewQuoteStepProps) => {
     } catch (error) {
       console.error("Error sending quote:", error);
       toast.error("Failed to send quote");
-    } finally {
       setIsSubmitting(false);
     }
   };

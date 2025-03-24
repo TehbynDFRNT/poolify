@@ -11,6 +11,7 @@ import { CostSummary } from "./components/CostSummary";
 import { FiltrationPackageDetails } from "./components/FiltrationPackageDetails";
 import { IndividualPoolCosts } from "./components/IndividualPoolCosts";
 import { supabase } from "@/integrations/supabase/client";
+import { Save } from "lucide-react";
 
 interface SelectPoolStepProps {
   onNext: () => void;
@@ -45,9 +46,7 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
     setSelectedPoolId(poolId);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const savePoolSelection = async (continueToNext: boolean) => {
     if (!selectedPoolId) {
       toast.error("Please select a pool to continue");
       return;
@@ -79,12 +78,21 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
       
       toast.success("Pool selection saved to quote");
       setIsSubmitting(false);
-      onNext();
+      if (continueToNext) onNext();
     } catch (error) {
       console.error("Error saving pool selection:", error);
       toast.error("Failed to save pool selection");
       setIsSubmitting(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await savePoolSelection(true);
+  };
+
+  const handleSaveOnly = async () => {
+    await savePoolSelection(false);
   };
 
   if (isLoading) {
@@ -159,9 +167,20 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
         >
           Back
         </Button>
-        <Button type="submit" disabled={isSubmitting || !selectedPoolId}>
-          {isSubmitting ? 'Saving...' : 'Continue'}
-        </Button>
+        <div className="space-x-2">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleSaveOnly}
+            disabled={isSubmitting || !selectedPoolId}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
+          <Button type="submit" disabled={isSubmitting || !selectedPoolId}>
+            {isSubmitting ? 'Saving...' : 'Save & Continue'}
+          </Button>
+        </div>
       </div>
     </form>
   );

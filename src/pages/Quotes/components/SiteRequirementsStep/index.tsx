@@ -1,13 +1,15 @@
 
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { CraneSelector } from "./components/CraneSelector";
 import { TrafficControlSelector } from "./components/TrafficControlSelector";
 import { NoPoolWarning } from "./components/NoPoolWarning";
 import { CostSummary } from "./components/CostSummary";
 import { useSiteRequirementsCost } from "./hooks/useSiteRequirementsCost";
+import { supabase } from "@/integrations/supabase/client";
+import { Save } from "lucide-react";
 
 interface SiteRequirementsStepProps {
   onNext: () => void;
@@ -15,7 +17,8 @@ interface SiteRequirementsStepProps {
 }
 
 export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsStepProps) => {
-  const { quoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData } = useQuoteContext();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { 
     siteRequirementsCost, 
     handleCraneChange, 
@@ -28,6 +31,53 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
       toast.warning("No pool selected. You can continue, but the quote will be incomplete.");
     }
   }, [quoteData.pool_id]);
+
+  const saveRequirements = async (continueToNext: boolean) => {
+    if (!quoteData.id) {
+      toast.error("No quote ID found. Please complete the previous steps first.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    
+    try {
+      // Data to save
+      const dataToSave = {
+        crane_id: quoteData.crane_id || null,
+        traffic_control_id: quoteData.traffic_control_id || 'none',
+        site_requirements_cost: siteRequirementsCost
+      };
+      
+      console.log("Saving site requirements:", dataToSave);
+      
+      // Update the record in Supabase
+      const { error } = await supabase
+        .from('quotes')
+        .update(dataToSave)
+        .eq('id', quoteData.id);
+      
+      if (error) {
+        console.error("Error updating site requirements:", error);
+        throw error;
+      }
+      
+      toast.success("Site requirements saved");
+      setIsSubmitting(false);
+      if (continueToNext) onNext();
+    } catch (error) {
+      console.error("Error saving site requirements:", error);
+      toast.error("Failed to save site requirements");
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveOnly = async () => {
+    await saveRequirements(false);
+  };
+
+  const handleSaveAndContinue = async () => {
+    await saveRequirements(true);
+  };
 
   return (
     <div className="space-y-6">
@@ -59,9 +109,25 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
         >
           Back
         </Button>
-        <Button onClick={onNext}>
-          Continue
-        </Button>
+        
+        <div className="space-x-2">
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleSaveOnly}
+            disabled={isSubmitting}
+          >
+            <Save className="mr-2 h-4 w-4" />
+            Save
+          </Button>
+          <Button 
+            type="button"
+            onClick={handleSaveAndContinue}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Saving...' : 'Save & Continue'}
+          </Button>
+        </div>
       </div>
     </div>
   );

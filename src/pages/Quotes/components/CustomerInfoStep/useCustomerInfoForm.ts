@@ -30,9 +30,7 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
     updateQuoteData({ resident_homeowner: checked });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const saveData = async (continueToNext: boolean) => {
     try {
       // Prepare the data for validation
       const dataToValidate = {
@@ -78,7 +76,7 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
         
         toast.success('Quote updated successfully');
         setIsSubmitting(false);
-        onNext();
+        if (continueToNext) onNext();
       } else {
         // Create a new quote
         const { data, error } = await supabase
@@ -99,7 +97,7 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
           toast.success('New quote created successfully');
           // Only proceed to next step after successful save
           setIsSubmitting(false);
-          onNext();
+          if (continueToNext) onNext();
         } else {
           throw new Error("No data returned from quote creation");
         }
@@ -121,12 +119,22 @@ export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
     }
   };
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await saveData(true);
+  };
+
+  const handleSaveOnly = async () => {
+    await saveData(false);
+  };
+
   return {
     quoteData,
     errors,
     isSubmitting,
     handleChange,
     handleCheckboxChange,
-    handleSubmit
+    handleSubmit,
+    handleSaveOnly
   };
 };
