@@ -40,6 +40,11 @@ const ReviewStep: React.FC = () => {
     coping_lay: 0
   };
   
+  // Format dimensions with 2 decimal places
+  const formatDimension = (value: number) => {
+    return value.toFixed(2);
+  };
+  
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
@@ -62,15 +67,15 @@ const ReviewStep: React.FC = () => {
               <div className="pl-6 space-y-1">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Length:</span>
-                  <span>{values.length} m</span>
+                  <span>{formatDimension(values.length)} m</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Width:</span>
-                  <span>{values.width} m</span>
+                  <span>{formatDimension(values.width)} m</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Depth:</span>
-                  <span>{values.depth_shallow} - {values.depth_deep} m</span>
+                  <span>{formatDimension(values.depth_shallow)} - {formatDimension(values.depth_deep)} m</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Volume:</span>

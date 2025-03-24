@@ -41,6 +41,25 @@ export const EditableCell = ({
       );
     }
 
+    // Special handling for dimension fields
+    if (field.includes("length") || field.includes("width") || field.includes("depth")) {
+      return (
+        <Input
+          value={value ?? pool[field] ?? ""}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (/^[0-9]*\.?[0-9]*$/.test(newValue) || newValue === '') {
+              onValueChange(newValue === '' ? null : Number(newValue));
+            }
+          }}
+          type="text"
+          inputMode="decimal"
+          placeholder="0.00"
+          className="w-full"
+        />
+      );
+    }
+
     return (
       <Input
         value={value ?? pool[field] ?? ""}
@@ -58,16 +77,16 @@ export const EditableCell = ({
     }
     if (typeof value === "number") {
       if (field.includes("length") || field.includes("width") || field.includes("depth")) {
-        return `${value}m`;
+        return `${value.toFixed(2)}m`;
       }
       if (field.includes("kg")) {
         return `${value}kg`;
       }
       if (field === "volume_liters") {
-        return `${value}L`;
+        return `${value.toLocaleString()}L`;
       }
       if (field === "waterline_l_m") {
-        return `${value}L/m`;
+        return `${value.toFixed(2)}L/m`;
       }
       return value;
     }

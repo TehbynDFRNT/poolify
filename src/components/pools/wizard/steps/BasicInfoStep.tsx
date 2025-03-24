@@ -69,6 +69,22 @@ const BasicInfoStep: React.FC = () => {
     }
   }, [length, width, depthShallow, depthDeep, setValue]);
 
+  // Handle dimension input with clean decimal format
+  const handleDimensionChange = (e: React.ChangeEvent<HTMLInputElement>, field: any) => {
+    const value = e.target.value;
+    
+    // Allow only numbers and a single decimal point
+    if (/^[0-9]*\.?[0-9]*$/.test(value) || value === '') {
+      field.onChange(value === '' ? '' : Number(value));
+    }
+  };
+
+  // Format number to display with 2 decimal places
+  const formatDimension = (value: number | undefined) => {
+    if (value === undefined || value === null) return '';
+    return value.toFixed(2);
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -121,12 +137,17 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Length (m)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Pool length" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  type="text" 
+                  inputMode="decimal"
+                  placeholder="0.00" 
+                  value={formatDimension(field.value)}
+                  onChange={(e) => handleDimensionChange(e, field)}
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                m
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -140,12 +161,17 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Width (m)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Pool width" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  type="text" 
+                  inputMode="decimal"
+                  placeholder="0.00" 
+                  value={formatDimension(field.value)}
+                  onChange={(e) => handleDimensionChange(e, field)}
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                m
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -161,12 +187,17 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Shallow Depth (m)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Shallow depth" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  type="text" 
+                  inputMode="decimal"
+                  placeholder="0.00" 
+                  value={formatDimension(field.value)}
+                  onChange={(e) => handleDimensionChange(e, field)}
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                m
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -180,12 +211,17 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Deep Depth (m)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Deep depth" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  type="text" 
+                  inputMode="decimal"
+                  placeholder="0.00" 
+                  value={formatDimension(field.value)}
+                  onChange={(e) => handleDimensionChange(e, field)}
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                m
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -201,13 +237,16 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Volume (Liters)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
+                  type="text" 
                   placeholder="Calculated automatically" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  value={field.value ? Math.round(field.value).toLocaleString() : ''}
                   disabled
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                L
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -221,13 +260,16 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Waterline (L/m)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
+                  type="text" 
                   placeholder="Calculated automatically" 
-                  {...field}
-                  onChange={(e) => field.onChange(Number(e.target.value))}
+                  value={field.value ? field.value.toFixed(2) : ''}
                   disabled
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                L/m
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -243,14 +285,22 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Weight (kg)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Pool weight" 
-                  {...field}
-                  onChange={(e) => 
-                    field.onChange(e.target.value ? Number(e.target.value) : null)
-                  }
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0" 
+                  value={field.value || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[0-9]*$/.test(value) || value === '') {
+                      field.onChange(value === '' ? null : Number(value));
+                    }
+                  }}
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                kg
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -264,14 +314,22 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Salt Volume (Bags)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Salt volume" 
-                  {...field}
-                  onChange={(e) => 
-                    field.onChange(e.target.value ? Number(e.target.value) : null)
-                  }
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0" 
+                  value={field.value || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (/^[0-9]*$/.test(value) || value === '') {
+                      field.onChange(value === '' ? null : Number(value));
+                    }
+                  }}
+                  className="text-right pr-10 relative"
                 />
               </FormControl>
+              <div className="absolute right-3 top-[38px] text-muted-foreground pointer-events-none">
+                bags
+              </div>
               <FormMessage />
             </FormItem>
           )}
@@ -287,12 +345,16 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Buy Price (Ex GST)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Price excluding GST" 
-                  {...field}
-                  onChange={(e) => 
-                    field.onChange(e.target.value ? Number(e.target.value) : null)
-                  }
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="$0.00" 
+                  value={field.value ? `$${field.value.toFixed(2)}` : ''}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/[^0-9.]/g, '');
+                    if (/^[0-9]*\.?[0-9]*$/.test(value) || value === '') {
+                      field.onChange(value === '' ? null : Number(value));
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />
@@ -308,12 +370,16 @@ const BasicInfoStep: React.FC = () => {
               <FormLabel>Buy Price (Inc GST)</FormLabel>
               <FormControl>
                 <Input 
-                  type="number" 
-                  placeholder="Price including GST" 
-                  {...field}
-                  onChange={(e) => 
-                    field.onChange(e.target.value ? Number(e.target.value) : null)
-                  }
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="$0.00" 
+                  value={field.value ? `$${field.value.toFixed(2)}` : ''}
+                  onChange={(e) => {
+                    let value = e.target.value.replace(/[^0-9.]/g, '');
+                    if (/^[0-9]*\.?[0-9]*$/.test(value) || value === '') {
+                      field.onChange(value === '' ? null : Number(value));
+                    }
+                  }}
                 />
               </FormControl>
               <FormMessage />
