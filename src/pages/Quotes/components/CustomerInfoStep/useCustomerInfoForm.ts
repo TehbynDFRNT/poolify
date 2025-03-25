@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "../../context/QuoteContext";
-import { customerInfoSchema } from "./customerInfoSchema";
+import { customerInfoSchema, CustomerInfoFormErrors } from "./customerInfoSchema";
 
 type CustomerInfoValues = z.infer<typeof customerInfoSchema>;
 
@@ -146,8 +146,17 @@ export const useCustomerInfoForm = ({ onNext, isEditing = false }: UseCustomerIn
     form.handleSubmit(saveData)();
   };
 
-  // Get form errors
-  const errors = form.formState.errors;
+  // Convert react-hook-form errors to the format our components expect
+  const formErrors = form.formState.errors;
+  const errors: CustomerInfoFormErrors = {};
+  
+  // Map through the errors to extract just the message string
+  Object.keys(formErrors).forEach(key => {
+    const fieldKey = key as keyof CustomerInfoFormData;
+    if (formErrors[fieldKey]) {
+      errors[fieldKey] = formErrors[fieldKey]?.message;
+    }
+  });
 
   return {
     form,

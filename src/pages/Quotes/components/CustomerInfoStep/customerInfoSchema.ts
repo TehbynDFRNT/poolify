@@ -14,3 +14,8 @@ export const customerInfoSchema = z.object({
 });
 
 export type CustomerInfoFormData = z.infer<typeof customerInfoSchema>;
+
+// Define a more specific error type that matches FieldErrors from react-hook-form
+export type CustomerInfoFormErrors = {
+  [K in keyof CustomerInfoFormData]?: string;
+};
