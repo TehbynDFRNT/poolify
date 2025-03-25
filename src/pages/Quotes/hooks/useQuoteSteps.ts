@@ -93,6 +93,20 @@ export const useQuoteSteps = (quoteId?: string) => {
           ? quoteData.status 
           : 'draft';
 
+      // Get the pool data to access buy_price_inc_gst as the base_pool_cost
+      let poolData = null;
+      if (quoteData.pool_id) {
+        const { data: pool, error: poolError } = await supabase
+          .from("pool_specifications")
+          .select("buy_price_inc_gst")
+          .eq("id", quoteData.pool_id)
+          .single();
+          
+        if (!poolError && pool) {
+          poolData = pool;
+        }
+      }
+
       updateQuoteData({
         id: quoteData.id,
         customer_name: quoteData.customer_name,
@@ -107,8 +121,8 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Base pool cost - ensure this is always a number
-        base_pool_cost: Number(quoteData.base_pool_cost || 0),
+        // Base pool cost - use the pool's buy_price_inc_gst as the base_pool_cost
+        base_pool_cost: poolData ? Number(poolData.buy_price_inc_gst || 0) : 0,
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',
