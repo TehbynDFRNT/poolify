@@ -102,7 +102,7 @@ export const usePriceBuilderData = () => {
     },
   });
 
-  // Fetch crane selections
+  // Fetch crane selections with improved error handling
   const { data: craneSelections, isLoading: isLoadingCranes } = useQuery({
     queryKey: ["pool-crane-selections"],
     queryFn: async () => {
@@ -119,7 +119,9 @@ export const usePriceBuilderData = () => {
         // Create a Map of pool_id to crane cost
         const craneMap = new Map();
         data?.forEach(selection => {
-          craneMap.set(selection.pool_id, selection.crane);
+          if (selection.crane) {
+            craneMap.set(selection.pool_id, selection.crane);
+          }
         });
 
         return craneMap;

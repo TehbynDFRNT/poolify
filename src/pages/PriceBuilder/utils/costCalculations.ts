@@ -16,7 +16,7 @@ export const calculateCosts = (
   
   const individualCosts = poolCosts?.get(pool.id);
   const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
-    if (key !== 'id' && typeof value === 'number') {
+    if (key !== 'id' && key !== 'pool_id' && typeof value === 'number') {
       return sum + value;
     }
     return sum;
@@ -24,10 +24,10 @@ export const calculateCosts = (
   
   const excavationCost = excavationDetails?.get(pool.id) ? calculateGrandTotal(excavationDetails.get(pool.id)) : 0;
   
-  // Add crane cost to the calculation - ensure it's properly handled
+  // Consistent handling of crane cost
   let craneCost = 0;
   if (craneSelection?.get(pool.id)?.price) {
-    craneCost = craneSelection.get(pool.id).price;
+    craneCost = Number(craneSelection.get(pool.id).price);
   }
   
   const totalCost = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost + craneCost;

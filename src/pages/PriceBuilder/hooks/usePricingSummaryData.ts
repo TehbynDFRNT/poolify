@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CraneCost } from "@/types/crane-cost";
@@ -60,7 +61,7 @@ export const useSelectedCrane = (poolId: string) => {
     queryKey: ["selected-crane", poolId],
     queryFn: async () => {
       try {
-        // First try to get the crane_id from pool_crane_selections
+        // First try to get the crane from pool_crane_selections with crane details included
         const { data: selection, error: selectionError } = await supabase
           .from('pool_crane_selections')
           .select('crane:crane_costs(*)')

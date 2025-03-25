@@ -22,7 +22,7 @@ interface PricingSummaryProps {
 }
 
 export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: PricingSummaryProps) => {
-  // Use our new hooks to fetch the necessary data
+  // Use our hooks to fetch the necessary data
   const { data: fixedCosts, isLoading: isLoadingFixed } = useFixedCosts();
   const { data: individualCosts, isLoading: isLoadingIndividual } = useIndividualCosts(poolId);
   const { data: excavationDetails, isLoading: isLoadingExcavation } = useExcavationDetails(poolId);
@@ -37,11 +37,10 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
 
   // Calculate totals
   const fixedCostsTotal = fixedCosts?.reduce((sum, cost) => sum + cost.price, 0) || 0;
-  console.log("Fixed costs total:", fixedCostsTotal);
   
   const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
-    // Skip the id field and only add numeric values
-    if (key !== 'id' && typeof value === 'number') {
+    // Skip the id and pool_id fields and only add numeric values
+    if (key !== 'id' && key !== 'pool_id' && typeof value === 'number') {
       return sum + value;
     }
     return sum;
@@ -51,7 +50,8 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   
   const filtrationTotal = filtrationPackage ? calculatePackagePrice(filtrationPackage) : 0;
 
-  const craneCost = selectedCraneData?.price || 0;
+  // Ensure crane cost is properly handled
+  const craneCost = selectedCraneData?.price ? Number(selectedCraneData.price) : 0;
 
   const costBreakdownItems = [
     { name: "Pool Base Price", value: poolBasePrice },
