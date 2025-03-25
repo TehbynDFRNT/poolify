@@ -39,17 +39,8 @@ export const ExtraPavingSelector = ({
     } else if (activeSelection && !selections.find(s => s.pavingId === activeSelection.pavingId)) {
       // If active selection was removed, set to first available one
       setActiveSelection(selections[0]);
-    } else if (activeSelection) {
-      // Update active selection with latest data from selections
-      const updatedSelection = selections.find(s => s.pavingId === activeSelection.pavingId);
-      if (updatedSelection && updatedSelection.meters !== activeSelection.meters) {
-        setActiveSelection(updatedSelection);
-      }
     }
   }, [selections, activeSelection]);
-
-  // Calculate total meters
-  const totalMeters = selections.reduce((total, selection) => total + selection.meters, 0);
 
   return (
     <Card className="border border-gray-200">
@@ -97,15 +88,13 @@ export const ExtraPavingSelector = ({
                     </Button>
                   </div>
                   <div className="text-lg font-semibold">
-                    ${activeSelection.meters > 0 
-                        ? (activeSelection.totalCost / activeSelection.meters).toFixed(2) 
-                        : "0.00"}
+                    ${((activeSelection.totalCost || 0) / (activeSelection.meters || 1)).toFixed(2)}
                   </div>
                   <div className="mt-1 font-medium">
                     Total Cost
                   </div>
                   <div className="text-lg font-semibold">
-                    ${activeSelection.totalCost.toFixed(2)}
+                    ${activeSelection?.totalCost.toFixed(2) || "0.00"}
                   </div>
                 </div>
               )}
@@ -121,14 +110,10 @@ export const ExtraPavingSelector = ({
               <h4 className="font-medium text-gray-700 mb-2">Total Summary</h4>
               <div className="grid grid-cols-2">
                 <div>Cost Per Meter:</div>
-                <div className="text-right">
-                  ${totalMeters > 0 
-                      ? (totalCost / totalMeters).toFixed(2) 
-                      : "0.00"}
-                </div>
+                <div className="text-right">${((totalCost || 0) / (activeSelection?.meters || 1)).toFixed(2)}</div>
                 
                 <div>Total Meters:</div>
-                <div className="text-right">{totalMeters.toFixed(2)}</div>
+                <div className="text-right">{activeSelection?.meters || 0}</div>
                 
                 <div>Total Margin:</div>
                 <div className="text-right text-green-600">${totalMargin.toFixed(2)}</div>

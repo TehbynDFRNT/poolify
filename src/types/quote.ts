@@ -28,10 +28,6 @@ export interface Quote {
   micro_dig_required: boolean;
   micro_dig_price: number;
   micro_dig_notes?: string;
-  
-  // Pricing fields
-  web_price?: number;
-  rrp?: number;
 }
 
 export interface QuoteInsert {
@@ -56,6 +52,4 @@ export interface QuoteInsert {
   micro_dig_required: boolean;
   micro_dig_price: number;
   micro_dig_notes?: string;
-  web_price?: number;
-  rrp?: number;
 }

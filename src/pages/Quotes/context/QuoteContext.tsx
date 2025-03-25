@@ -34,11 +34,7 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   // Micro dig (adding as empty defaults)
   micro_dig_required: false,
   micro_dig_price: 0,
-  micro_dig_notes: '',
-  
-  // Pricing fields (adding as 0 defaults)
-  web_price: 0,
-  rrp: 0
+  micro_dig_notes: ''
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);

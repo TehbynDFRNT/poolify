@@ -27,8 +27,7 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
           salt_bags: 0,
           coping_supply: 0,
           beam: 0,
-          coping_lay: 0,
-          misc: 0
+          coping_lay: 0
         };
       }
 
@@ -44,13 +43,9 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
     { name: "Coping Supply", value: costs?.coping_supply || 0 },
     { name: "Beam", value: costs?.beam || 0 },
     { name: "Coping Lay", value: costs?.coping_lay || 0 },
-    { name: "Misc", value: costs?.misc || 0 },
   ];
 
   const total = costItems.reduce((sum, item) => sum + item.value, 0);
-  
-  // Filter out zero value cost items for display
-  const nonZeroCostItems = costItems.filter(item => item.value > 0);
 
   return (
     <Card className="bg-white shadow-sm">
@@ -58,41 +53,30 @@ export const PoolIndividualCostsDetails = ({ poolId }: PoolIndividualCostsDetail
         <CardTitle className="text-lg font-semibold">Pool Individual Costs</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading ? (
-          <div className="space-y-4">
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-20 w-full" />
-          </div>
-        ) : nonZeroCostItems.length > 0 ? (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {nonZeroCostItems.map((item, index) => (
-                <div
-                  key={index}
-                  className="bg-muted/50 rounded-lg p-4 space-y-2"
-                >
-                  <div className="text-sm text-muted-foreground">
-                    {item.name}
-                  </div>
-                  <div className="text-sm font-medium">
-                    {formatCurrency(item.value)}
-                  </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {costItems.map((item, index) => (
+              <div
+                key={index}
+                className="bg-muted/50 rounded-lg p-4 space-y-2"
+              >
+                <div className="text-sm text-muted-foreground">
+                  {item.name}
                 </div>
-              ))}
-            </div>
+                <div className="text-sm font-medium">
+                  {formatCurrency(item.value)}
+                </div>
+              </div>
+            ))}
+          </div>
 
-            <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg mt-6">
-              <span className="text-sm text-muted-foreground">Total Individual Costs</span>
-              <span className="text-sm font-medium text-primary">
-                {formatCurrency(total)}
-              </span>
-            </div>
+          <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg mt-6">
+            <span className="text-sm text-muted-foreground">Total Individual Costs</span>
+            <span className="text-sm font-medium text-primary">
+              {formatCurrency(total)}
+            </span>
           </div>
-        ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            No individual costs set for this pool
-          </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   );

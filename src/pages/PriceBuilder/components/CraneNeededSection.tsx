@@ -6,7 +6,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useCraneSelection } from '../hooks/crane';
 import { CraneDisplay } from './CraneSelection/CraneDisplay';
 import { CraneSelectionForm } from './CraneSelection/CraneSelectionForm';
-import { formatCurrency } from "@/utils/format";
 
 interface CraneNeededSectionProps {
   poolId?: string;
@@ -77,15 +76,6 @@ export const CraneNeededSection = ({ poolId }: CraneNeededSectionProps) => {
                 onClick={() => setIsEditing(true)} 
               />
             )}
-            
-            <div className="mt-4">
-              <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
-                <span className="text-sm text-muted-foreground">Crane Cost</span>
-                <span className="text-sm font-medium text-primary">
-                  {formatCurrency(selectedCrane?.price || 0)}
-                </span>
-              </div>
-            </div>
             
             <p className="text-sm text-muted-foreground mt-2">
               {selectedCrane?.name === "Franna Crane-S20T-L1" 

@@ -1,16 +1,7 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-// Helper function to calculate excavation total
-export const calculateExcavationTotal = (excavationDetails: any) => {
-  if (!excavationDetails) return 0;
-  
-  return (
-    excavationDetails.excavation_hourly_rate * excavationDetails.excavation_hours +
-    excavationDetails.truck_hourly_rate * excavationDetails.truck_hours * excavationDetails.truck_quantity
-  );
-};
+import { CraneCost } from "@/types/crane-cost";
+import { calculateGrandTotal } from "@/utils/digTypeCalculations";
 
 // Hook to fetch fixed costs
 export const useFixedCosts = () => {
@@ -23,36 +14,33 @@ export const useFixedCosts = () => {
         .order("display_order");
 
       if (error) throw error;
-      console.info("Fixed costs total:", data?.reduce((sum, cost) => sum + cost.price, 0));
       return data;
     },
   });
 };
 
-// Hook to fetch individual costs for a specific pool
+// Hook to fetch individual costs for a pool
 export const useIndividualCosts = (poolId: string) => {
   return useQuery({
     queryKey: ["pool-costs", poolId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: poolCosts } = await supabase
         .from("pool_costs")
         .select("*")
         .eq("pool_id", poolId)
         .maybeSingle();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data;
+
+      return poolCosts;
     },
-    enabled: !!poolId,
   });
 };
 
-// Hook to fetch excavation details for a specific pool
+// Hook to fetch excavation details for a pool
 export const useExcavationDetails = (poolId: string) => {
   return useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: match } = await supabase
         .from("pool_dig_type_matches")
         .select(`
           dig_type_id,
@@ -60,51 +48,67 @@ export const useExcavationDetails = (poolId: string) => {
         `)
         .eq("pool_id", poolId)
         .maybeSingle();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data?.dig_type;
+
+      return match;
     },
-    enabled: !!poolId,
   });
 };
 
-// Hook to fetch selected crane data for a specific pool
+// Hook to fetch selected crane for a pool
 export const useSelectedCrane = (poolId: string) => {
   return useQuery({
-    queryKey: ["pool-crane", poolId],
+    queryKey: ["selected-crane", poolId],
     queryFn: async () => {
-      // First try to get selected crane from pool_crane_selections
-      const { data: selection, error: selectionError } = await supabase
-        .from("pool_crane_selections")
-        .select(`
-          crane_id,
-          crane:crane_costs (*)
-        `)
-        .eq("pool_id", poolId)
-        .maybeSingle();
-      
-      if (selectionError && selectionError.code !== 'PGRST116') throw selectionError;
-      
-      // If there's a selected crane, return it
-      if (selection?.crane) {
-        return selection.crane;
+      try {
+        // First try to get the crane_id from pool_crane_selections
+        const { data: selection, error: selectionError } = await supabase
+          .from('pool_crane_selections')
+          .select('crane_id')
+          .eq('pool_id', poolId)
+          .maybeSingle();
+        
+        if (selectionError && selectionError.code !== 'PGRST116') {
+          throw selectionError;
+        }
+
+        // If a selection exists, get that crane's details
+        if (selection && 'crane_id' in selection) {
+          const { data: crane, error: craneError } = await supabase
+            .from("crane_costs")
+            .select("*")
+            .eq("id", selection.crane_id)
+            .single();
+            
+          if (craneError) throw craneError;
+          return crane as CraneCost;
+        }
+
+        // Otherwise get the default Franna crane
+        const { data: defaultCrane, error: defaultError } = await supabase
+          .from("crane_costs")
+          .select("*")
+          .eq("name", "Franna Crane-S20T-L1")
+          .maybeSingle();
+        
+        if (defaultError) throw defaultError;
+        return defaultCrane as CraneCost;
+      } catch (error) {
+        console.error("Error fetching crane data:", error);
+        
+        // Fall back to default crane
+        const { data: defaultCrane } = await supabase
+          .from("crane_costs")
+          .select("*")
+          .eq("name", "Franna Crane-S20T-L1")
+          .maybeSingle();
+        
+        return defaultCrane as CraneCost;
       }
-      
-      // If no selection found, return the default Franna Crane
-      const { data: defaultCrane, error: craneError } = await supabase
-        .from("crane_costs")
-        .select("*")
-        .eq("name", "Franna Crane-S20T-L1")
-        .maybeSingle();
-      
-      if (craneError) throw craneError;
-      return defaultCrane;
     },
-    enabled: !!poolId,
   });
 };
 
-// Hook to fetch margin data for a specific pool
+// Hook to fetch margin data for a pool
 export const useMarginData = (poolId: string) => {
   return useQuery({
     queryKey: ["pool-margin", poolId],
@@ -118,6 +122,10 @@ export const useMarginData = (poolId: string) => {
       if (error && error.code !== 'PGRST116') throw error;
       return data ? data.margin_percentage : 0;
     },
-    enabled: !!poolId,
   });
+};
+
+// Helper function to calculate excavation total
+export const calculateExcavationTotal = (excavationDetails: any) => {
+  return excavationDetails?.dig_type ? calculateGrandTotal(excavationDetails.dig_type) : 0;
 };

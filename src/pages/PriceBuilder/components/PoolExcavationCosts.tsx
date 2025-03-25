@@ -14,7 +14,7 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
   const { data: excavationDetails, isLoading } = useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
-      const { data: match, error } = await supabase
+      const { data: match } = await supabase
         .from("pool_dig_type_matches")
         .select(`
           dig_type_id,
@@ -23,7 +23,6 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
         .eq("pool_id", poolId)
         .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') throw error;
       return match;
     },
   });
@@ -36,7 +35,8 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
       <CardContent>
         {isLoading ? (
           <div className="space-y-4">
-            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-4 w-24" />
+            <Skeleton className="h-4 w-16" />
           </div>
         ) : excavationDetails?.dig_type ? (
           <div className="space-y-4">
@@ -46,23 +46,6 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
                 {excavationDetails.dig_type.name}
               </span>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex flex-col space-y-2 bg-muted/50 rounded-lg p-4">
-                <span className="text-sm text-muted-foreground">Excavation</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(excavationDetails.dig_type.excavation_hourly_rate * excavationDetails.dig_type.excavation_hours)}
-                </span>
-              </div>
-              
-              <div className="flex flex-col space-y-2 bg-muted/50 rounded-lg p-4">
-                <span className="text-sm text-muted-foreground">Truck</span>
-                <span className="text-sm font-medium">
-                  {formatCurrency(excavationDetails.dig_type.truck_hourly_rate * excavationDetails.dig_type.truck_hours * excavationDetails.dig_type.truck_quantity)}
-                </span>
-              </div>
-            </div>
-            
             <div className="flex justify-between items-center p-4 bg-muted/50 rounded-lg">
               <span className="text-sm text-muted-foreground">Total Excavation Cost</span>
               <span className="text-sm font-medium text-primary">
@@ -71,7 +54,7 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
             </div>
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground bg-muted/50 rounded-lg">
+          <div className="text-sm text-muted-foreground text-center p-8 bg-muted/50 rounded-lg">
             No excavation costs set for this pool
           </div>
         )}
@@ -79,3 +62,4 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
     </Card>
   );
 };
+
