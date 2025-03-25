@@ -26,11 +26,14 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       setIsLoading(true);
       try {
         const selections = await fetchPavingSelections(quoteId);
+        console.log("Fetched selections:", selections);
         setPavingSelections(selections);
         
         // Calculate total cost
         const total = calculateTotalCost(selections);
         setTotalCost(total);
+      } catch (error) {
+        console.error("Error loading paving selections:", error);
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +52,8 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     // Check if this paving type is already selected
     const existingSelection = pavingSelections.find(s => s.pavingId === pavingId);
     if (existingSelection) {
-      toast.error("This paving type is already selected");
+      // Don't show an error, this may be normal behavior when selecting from dropdown
+      console.log("This paving type is already selected");
       return;
     }
 
@@ -83,12 +87,6 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
   // Update meters for a selection
   const updateSelectionMeters = (pavingId: string, meters: number) => {
-    // Ensure meters is valid
-    if (meters < 0) {
-      toast.error("Meters cannot be negative");
-      return;
-    }
-
     console.log(`Updating selection meters: pavingId=${pavingId}, meters=${meters}`);
 
     const updatedSelections = pavingSelections.map(selection => {
@@ -97,6 +95,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
           ...selection,
           meters: meters
         };
+        
         // Recalculate the total cost
         updatedSelection.totalCost = calculateSelectionCost(updatedSelection);
         console.log(`Updated selection: meters=${updatedSelection.meters}, totalCost=${updatedSelection.totalCost}`);

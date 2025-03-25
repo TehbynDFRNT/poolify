@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -30,17 +29,32 @@ export const ExtraPavingSelector = ({
   const { extraPavingCosts, isLoading } = useExtraPavingCosts();
   const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(null);
 
+  // Set active selection when selections change
   useEffect(() => {
-    // Set active selection to the first one if available and none selected
-    if (selections.length > 0 && !activeSelection) {
-      setActiveSelection(selections[0]);
-    } else if (selections.length === 0) {
+    if (selections.length > 0) {
+      const current = activeSelection 
+        ? selections.find(s => s.pavingId === activeSelection.pavingId) 
+        : null;
+      
+      if (current) {
+        // Update the active selection if it still exists
+        setActiveSelection(current);
+      } else {
+        // Otherwise set to the first selection
+        setActiveSelection(selections[0]);
+      }
+    } else {
       setActiveSelection(null);
-    } else if (activeSelection && !selections.find(s => s.pavingId === activeSelection.pavingId)) {
-      // If active selection was removed, set to first available one
-      setActiveSelection(selections[0]);
     }
-  }, [selections, activeSelection]);
+  }, [selections]);
+
+  // Manually change the active selection
+  const handleSelectionChange = (pavingId: string) => {
+    const selection = selections.find(s => s.pavingId === pavingId);
+    if (selection) {
+      setActiveSelection(selection);
+    }
+  };
 
   // Calculate cost per meter for the active selection
   const getCostPerMeter = () => {
@@ -61,10 +75,6 @@ export const ExtraPavingSelector = ({
       return sum + meters;
     }, 0);
   };
-
-  console.log("Active selection:", activeSelection);
-  console.log("All selections:", selections);
-  console.log("Total meters:", getTotalMeters());
 
   return (
     <Card className="border border-gray-200">
@@ -94,6 +104,7 @@ export const ExtraPavingSelector = ({
                 isLoading={isLoading}
                 onAdd={onAdd}
                 onUpdate={onUpdate}
+                onSelectionChange={handleSelectionChange}
               />
             </div>
             

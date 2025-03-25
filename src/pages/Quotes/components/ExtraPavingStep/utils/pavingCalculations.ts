@@ -22,6 +22,8 @@ export const calculateSelectionCost = (selection: PavingSelection): number => {
 
 // Calculate total margin across all selections
 export const calculateTotalMargin = (selections: PavingSelection[]): number => {
+  if (!selections || selections.length === 0) return 0;
+  
   return selections.reduce((sum, selection) => {
     // Ensure meters is a valid number
     const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
@@ -34,6 +36,8 @@ export const calculateTotalMargin = (selections: PavingSelection[]): number => {
 
 // Calculate total cost across all selections
 export const calculateTotalCost = (selections: PavingSelection[]): number => {
+  if (!selections || selections.length === 0) return 0;
+  
   return selections.reduce((sum, selection) => {
     // Calculate cost for this selection
     const cost = calculateSelectionCost(selection);

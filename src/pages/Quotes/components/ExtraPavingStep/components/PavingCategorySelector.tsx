@@ -13,6 +13,7 @@ interface PavingCategorySelectorProps {
   isLoading: boolean;
   onAdd: (pavingId: string) => void;
   onUpdate: (pavingId: string, meters: number) => void;
+  onSelectionChange?: (pavingId: string) => void;
 }
 
 export const PavingCategorySelector = ({
@@ -22,8 +23,27 @@ export const PavingCategorySelector = ({
   quoteId,
   isLoading,
   onAdd,
-  onUpdate
+  onUpdate,
+  onSelectionChange
 }: PavingCategorySelectorProps) => {
+  // Handler for when a value in the select dropdown changes
+  const handleSelectChange = (value: string) => {
+    if (!value) return;
+    
+    // Check if this paving type is already selected
+    const existingSelection = selections.find(s => s.pavingId === value);
+    
+    if (existingSelection) {
+      // If it exists, just switch to it
+      if (onSelectionChange) {
+        onSelectionChange(value);
+      }
+    } else {
+      // If it doesn't exist, add it
+      onAdd(value);
+    }
+  };
+
   return (
     <div className="grid grid-cols-2 gap-4">
       <div>
@@ -32,11 +52,7 @@ export const PavingCategorySelector = ({
         </Label>
         <Select
           value={activeSelection?.pavingId || ""}
-          onValueChange={(value) => {
-            if (value && !selections.find(s => s.pavingId === value)) {
-              onAdd(value);
-            }
-          }}
+          onValueChange={handleSelectChange}
           disabled={isLoading || !quoteId}
         >
           <SelectTrigger id="paving-category" className="mt-2">
@@ -71,8 +87,9 @@ export const PavingCategorySelector = ({
           placeholder="Enter meters"
           onChange={(e) => {
             if (activeSelection) {
-              const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
-              onUpdate(activeSelection.pavingId, isNaN(value) ? 0 : value);
+              const inputValue = e.target.value;
+              const value = inputValue === "" ? 0 : parseFloat(inputValue);
+              onUpdate(activeSelection.pavingId, value);
             }
           }}
           disabled={!activeSelection}

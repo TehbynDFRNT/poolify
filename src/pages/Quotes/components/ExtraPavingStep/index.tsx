@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
 import { ExtraPavingSelector } from "./components/ExtraPavingSelector";
@@ -19,9 +19,17 @@ interface ExtraPavingStepProps {
 export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) => {
   const { quoteData } = useQuoteContext();
   const [isPumpRequired, setIsPumpRequired] = useState(quoteData.concrete_pump_required || false);
-  const [concreteCuts, setConcreteCuts] = useState<ConcreteCutSelection[]>(
-    quoteData.concrete_cuts && quoteData.concrete_cuts !== "" ? JSON.parse(quoteData.concrete_cuts) : []
-  );
+  const [concreteCuts, setConcreteCuts] = useState<ConcreteCutSelection[]>(() => {
+    try {
+      if (quoteData.concrete_cuts && quoteData.concrete_cuts.trim() !== "") {
+        const parsed = JSON.parse(quoteData.concrete_cuts);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+    } catch (e) {
+      console.error("Error parsing concrete cuts:", e);
+    }
+    return [];
+  });
   
   const { 
     pavingSelections, 
@@ -36,6 +44,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
 
   // Calculate concrete cuts total cost
   const calculateConcreteCutsCost = () => {
+    if (!concreteCuts || concreteCuts.length === 0) return 0;
+    
     return concreteCuts.reduce((total, cut) => {
       const price = isNaN(cut.price) ? 0 : cut.price;
       const quantity = isNaN(cut.quantity) ? 0 : cut.quantity;
@@ -80,10 +90,6 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       concreteCutsCost: calculateConcreteCutsCost()
     });
   };
-
-  console.log("Paving selections:", pavingSelections);
-  console.log("Paving total cost:", pavingTotalCost);
-  console.log("Total cost:", calculateTotalCost());
 
   return (
     <div className="space-y-6">
