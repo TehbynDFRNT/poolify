@@ -1,6 +1,5 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useQuoteContext } from '../../context/QuoteContext';
@@ -9,6 +8,7 @@ import { useExtraPaving } from './hooks/useExtraPaving';
 import { ExtraWorks } from '@/types/extra-works';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { FormActions } from './components/FormActions';
 
 export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
   const navigate = useNavigate();
@@ -119,6 +119,9 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     }
   };
 
+  const handleSaveOnly = () => saveExtraWorks(false);
+  const handleSaveAndContinue = () => saveExtraWorks(true);
+
   return (
     <div className="w-full max-w-5xl mx-auto">
       <Card>
@@ -133,24 +136,13 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
             </section>
           </div>
 
-          <div className="flex justify-between items-center pt-6 mt-8 border-t">
-            <div className="text-lg font-medium">
-              Total Extra Works Cost: <span className="font-semibold">${pavingTotalCost.toFixed(2)}</span>
-            </div>
-            <div className="flex space-x-2">
-              {onPrevious && (
-                <Button variant="outline" onClick={onPrevious} disabled={isSaving}>
-                  Previous
-                </Button>
-              )}
-              <Button variant="outline" onClick={() => saveExtraWorks(false)} disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save"}
-              </Button>
-              <Button onClick={() => saveExtraWorks(true)} disabled={isSaving}>
-                {isSaving ? "Saving..." : (onNext ? "Save & Continue" : "Save & Continue")}
-              </Button>
-            </div>
-          </div>
+          <FormActions 
+            onPrevious={onPrevious}
+            onSaveOnly={handleSaveOnly}
+            onSaveAndContinue={handleSaveAndContinue}
+            isSaving={isSaving}
+            totalCost={pavingTotalCost}
+          />
         </CardContent>
       </Card>
     </div>
