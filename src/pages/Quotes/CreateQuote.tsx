@@ -20,7 +20,6 @@ import { OptionalAddonsStep } from "@/pages/Quotes/components/OptionalAddonsStep
 import { CostSummaryStep } from "@/pages/Quotes/components/CostSummaryStep";
 import { PreviewQuoteStep } from "@/pages/Quotes/components/PreviewQuoteStep";
 import { QuoteProgressSteps } from "./components/QuoteProgressSteps";
-import { cn } from "@/lib/utils";
 
 const CreateQuote = () => {
   const navigate = useNavigate();

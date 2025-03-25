@@ -41,6 +41,8 @@ const EditQuoteContent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [retryCount, setRetryCount] = useState(0);
+  // Add this state to track if data has been loaded
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   const fetchQuoteData = async () => {
     if (!quoteId) {
@@ -105,6 +107,7 @@ const EditQuoteContent = () => {
         micro_dig_notes: quoteData.micro_dig_notes || ''
       });
 
+      setDataLoaded(true); // Mark that data has been loaded
       setIsLoading(false);
     } catch (err) {
       console.error("Error in fetchQuoteData:", err);
@@ -122,8 +125,9 @@ const EditQuoteContent = () => {
     setRetryCount(prev => prev + 1);
   };
 
+  // Modify the handleStepClick function to not reset to step 1 when clicking
   const handleStepClick = (stepId: number) => {
-    if (stepId <= currentStep) {
+    if (dataLoaded) { // Only allow navigation if data is loaded
       setCurrentStep(stepId);
     }
   };
