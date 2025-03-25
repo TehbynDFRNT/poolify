@@ -29,10 +29,17 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       setIsLoading(true);
       try {
         const selections = await fetchPavingSelections(quoteId);
-        setPavingSelections(selections);
+        
+        // Ensure all selections have properly initialized meters
+        const validatedSelections = selections.map(selection => ({
+          ...selection,
+          meters: typeof selection.meters === 'number' ? selection.meters : 0
+        }));
+        
+        setPavingSelections(validatedSelections);
         
         // Calculate total cost
-        const total = calculateTotalCost(selections);
+        const total = calculateTotalCost(validatedSelections);
         setTotalCost(total);
       } finally {
         setIsLoading(false);
@@ -71,7 +78,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       paverCost: pavingData.paver_cost,
       wastageCost: pavingData.wastage_cost,
       marginCost: pavingData.margin_cost,
-      meters: 0, // Start with 0 meters
+      meters: 0,
       totalCost: 0
     };
 
@@ -86,10 +93,18 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
   // Update meters for a selection
   const updateSelectionMeters = (pavingId: string, meters: number) => {
+    // Guard against invalid input
+    if (isNaN(meters)) {
+      console.warn("Invalid meters value:", meters);
+      return;
+    }
+    
     if (meters < 0) {
       toast.error("Meters cannot be negative");
       return;
     }
+
+    console.log(`Updating meters for ${pavingId} to ${meters}`);
 
     const updatedSelections = pavingSelections.map(selection => {
       if (selection.pavingId === pavingId) {
