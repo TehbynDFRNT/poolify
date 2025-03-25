@@ -78,12 +78,11 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     };
 
     try {
-      // Update the quote in the database
+      // Update only the custom_requirements_json field without trying to update extra_works_cost
       const { error } = await supabase
         .from('quotes')
         .update({ 
-          custom_requirements_json: JSON.stringify(extraWorksData),
-          extra_works_cost: totalExtraWorksCost
+          custom_requirements_json: JSON.stringify(extraWorksData)
         })
         .eq('id', quoteData.id);
 
@@ -95,8 +94,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
 
       // Update local state
       updateQuoteData({
-        custom_requirements_json: JSON.stringify(extraWorksData),
-        extra_works_cost: totalExtraWorksCost
+        custom_requirements_json: JSON.stringify(extraWorksData)
       });
 
       toast.success("Extra works saved");

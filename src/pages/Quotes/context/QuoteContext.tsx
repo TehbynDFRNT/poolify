@@ -3,12 +3,12 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 
 type QuoteContextType = {
-  quoteData: Partial<QuoteInsert> & { id?: string; extra_works_cost?: number };
-  updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; extra_works_cost?: number }) => void;
+  quoteData: Partial<QuoteInsert> & { id?: string; };
+  updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; }) => void;
   resetQuoteData: () => void;
 };
 
-const initialQuoteData: Partial<QuoteInsert> & { id?: string; extra_works_cost?: number } = {
+const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   customer_name: '',
   customer_email: '',
   customer_phone: '',
@@ -27,7 +27,6 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; extra_works_cost?:
   
   // Cost tracking (adding as 0 defaults)
   site_requirements_cost: 0,
-  extra_works_cost: 0,
   optional_addons_cost: 0,
   total_cost: 0,
   
@@ -41,9 +40,9 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; extra_works_cost?:
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
 
 export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [quoteData, setQuoteData] = useState<Partial<QuoteInsert> & { id?: string; extra_works_cost?: number }>(initialQuoteData);
+  const [quoteData, setQuoteData] = useState<Partial<QuoteInsert> & { id?: string; }>(initialQuoteData);
 
-  const updateQuoteData = (data: Partial<QuoteInsert> & { id?: string; extra_works_cost?: number }) => {
+  const updateQuoteData = (data: Partial<QuoteInsert> & { id?: string; }) => {
     setQuoteData(prev => ({ ...prev, ...data }));
   };
 
