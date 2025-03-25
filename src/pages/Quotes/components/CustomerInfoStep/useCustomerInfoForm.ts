@@ -1,140 +1,143 @@
 
 import { useState } from "react";
 import { z } from "zod";
-import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
-import { supabase } from "@/integrations/supabase/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { customerInfoSchema, CustomerInfoFormData } from "./customerInfoSchema";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuoteContext } from "../../context/QuoteContext";
+import { customerInfoSchema } from "./customerInfoSchema";
 
-export const useCustomerInfoForm = (onNext: () => void, isEditing = false) => {
+type CustomerInfoValues = z.infer<typeof customerInfoSchema>;
+
+interface UseCustomerInfoFormProps {
+  onNext?: () => void;
+  isEditing?: boolean;
+}
+
+export const useCustomerInfoForm = ({ onNext, isEditing = false }: UseCustomerInfoFormProps) => {
   const { quoteData, updateQuoteData } = useQuoteContext();
-  const [errors, setErrors] = useState<Partial<Record<keyof CustomerInfoFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSecondOwner, setShowSecondOwner] = useState(
+    !!(quoteData.owner2_name || quoteData.owner2_email || quoteData.owner2_phone)
+  );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    updateQuoteData({ [name]: value });
+  const form = useForm<CustomerInfoValues>({
+    resolver: zodResolver(customerInfoSchema),
+    defaultValues: {
+      customer_name: quoteData.customer_name || "",
+      customer_email: quoteData.customer_email || "",
+      customer_phone: quoteData.customer_phone || "",
+      owner2_name: quoteData.owner2_name || "",
+      owner2_email: quoteData.owner2_email || "",
+      owner2_phone: quoteData.owner2_phone || "",
+      home_address: quoteData.home_address || "",
+      site_address: quoteData.site_address || "",
+      resident_homeowner: quoteData.resident_homeowner || false,
+    },
+  });
+
+  const toggleSecondOwner = () => {
+    setShowSecondOwner(!showSecondOwner);
     
-    // Clear error when field is edited
-    if (errors[name as keyof CustomerInfoFormData]) {
-      setErrors(prev => {
-        const updated = { ...prev };
-        delete updated[name as keyof CustomerInfoFormData];
-        return updated;
-      });
+    // Clear second owner fields if toggling off
+    if (showSecondOwner) {
+      form.setValue("owner2_name", "");
+      form.setValue("owner2_email", "");
+      form.setValue("owner2_phone", "");
     }
   };
 
-  const handleCheckboxChange = (checked: boolean) => {
-    console.log("Checkbox changed to:", checked);
-    updateQuoteData({ resident_homeowner: checked });
-  };
+  const saveData = async (data: CustomerInfoValues) => {
+    setIsSubmitting(true);
 
-  const saveData = async (continueToNext: boolean) => {
     try {
-      // Prepare the data for validation
-      const dataToValidate = {
-        ...quoteData,
-        // Ensure owner2 fields are properly handled as optional
-        owner2_name: quoteData.owner2_name || undefined,
-        owner2_email: quoteData.owner2_email || undefined,
-        owner2_phone: quoteData.owner2_phone || undefined,
-      };
-      
-      // Validate the form data
-      customerInfoSchema.parse(dataToValidate);
-      setIsSubmitting(true);
-      
-      // Ensure we have the required fields with proper types for Supabase
-      const dataToSave = {
-        customer_name: quoteData.customer_name || "",
-        customer_email: quoteData.customer_email || "",
-        customer_phone: quoteData.customer_phone || "",
-        home_address: quoteData.home_address || "",
-        site_address: quoteData.site_address || "",
-        status: 'draft' as const,
-        // Optional fields - only include if they have values
-        owner2_name: quoteData.owner2_name || null,
-        owner2_email: quoteData.owner2_email || null,
-        owner2_phone: quoteData.owner2_phone || null,
-        resident_homeowner: Boolean(quoteData.resident_homeowner),
-      };
-      
-      console.log("Saving quote data:", dataToSave);
-      
+      // Update the context with form data
+      updateQuoteData({
+        customer_name: data.customer_name,
+        customer_email: data.customer_email,
+        customer_phone: data.customer_phone,
+        owner2_name: data.owner2_name,
+        owner2_email: data.owner2_email,
+        owner2_phone: data.owner2_phone,
+        home_address: data.home_address,
+        site_address: data.site_address,
+        resident_homeowner: data.resident_homeowner,
+      });
+
       if (isEditing && quoteData.id) {
         // Update existing quote
         const { error } = await supabase
           .from('quotes')
-          .update(dataToSave)
+          .update({
+            customer_name: data.customer_name,
+            customer_email: data.customer_email,
+            customer_phone: data.customer_phone,
+            owner2_name: data.owner2_name || null,
+            owner2_email: data.owner2_email || null,
+            owner2_phone: data.owner2_phone || null,
+            home_address: data.home_address,
+            site_address: data.site_address,
+            resident_homeowner: data.resident_homeowner,
+          })
           .eq('id', quoteData.id);
-          
+
         if (error) {
           console.error("Error updating quote:", error);
           throw error;
         }
-        
-        toast.success('Quote updated successfully');
-        setIsSubmitting(false);
-        if (continueToNext) onNext();
+
+        toast.success("Quote updated successfully");
       } else {
-        // Create a new quote
-        const { data, error } = await supabase
+        // Create new quote
+        const { data: quoteResponse, error } = await supabase
           .from('quotes')
-          .insert(dataToSave)
+          .insert({
+            customer_name: data.customer_name,
+            customer_email: data.customer_email,
+            customer_phone: data.customer_phone,
+            owner2_name: data.owner2_name || null,
+            owner2_email: data.owner2_email || null,
+            owner2_phone: data.owner2_phone || null,
+            home_address: data.home_address,
+            site_address: data.site_address,
+            status: 'draft',
+            resident_homeowner: data.resident_homeowner,
+            micro_dig_required: false,
+            micro_dig_price: 0,
+          })
           .select('id')
           .single();
-          
+
         if (error) {
-          console.error("Error saving quote:", error);
+          console.error("Error creating quote:", error);
           throw error;
         }
-        
-        // Update the quote ID in the context
-        if (data) {
-          console.log("Quote created with ID:", data.id);
-          updateQuoteData({ id: data.id });
-          toast.success('New quote created successfully');
-          // Only proceed to next step after successful save
-          setIsSubmitting(false);
-          if (continueToNext) onNext();
-        } else {
-          throw new Error("No data returned from quote creation");
-        }
+
+        // Update context with the new quote ID
+        updateQuoteData({ id: quoteResponse.id });
+        toast.success("Quote created successfully");
       }
+
+      setIsSubmitting(false);
+      if (onNext) onNext();
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: Partial<Record<keyof CustomerInfoFormData, string>> = {};
-        error.errors.forEach((err) => {
-          if (err.path[0]) {
-            newErrors[err.path[0] as keyof CustomerInfoFormData] = err.message;
-          }
-        });
-        setErrors(newErrors);
-      } else {
-        toast.error(isEditing ? 'Failed to update quote information' : 'Failed to save quote information');
-        console.error('Error saving quote:', error);
-      }
+      console.error("Error saving quote:", error);
+      toast.error("Failed to save customer information");
       setIsSubmitting(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await saveData(true);
-  };
-
-  const handleSaveOnly = async () => {
-    await saveData(false);
+    form.handleSubmit(saveData)();
   };
 
   return {
-    quoteData,
-    errors,
+    form,
     isSubmitting,
-    handleChange,
-    handleCheckboxChange,
+    showSecondOwner,
+    toggleSecondOwner,
     handleSubmit,
-    handleSaveOnly
   };
 };

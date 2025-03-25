@@ -1,40 +1,45 @@
 
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { toast } from "sonner";
 
-export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
+interface ExtraWorksStepProps {
+  onNext: () => void;
+  onPrevious: () => void;
+}
+
+export const ExtraWorksStep = ({ onNext, onPrevious }: ExtraWorksStepProps) => {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    toast.info("Extra Works functionality is coming soon");
+    onNext();
+  };
+
   return (
-    <div className="w-full max-w-5xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Extra Works</CardTitle>
-          <CardDescription>This section has been reset and is being rebuilt</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-8">
-            <p>The Extra Works functionality is currently unavailable and is being rebuilt.</p>
-          </div>
-
-          <div className="flex justify-between items-center pt-6 mt-8 border-t">
-            <div></div>
-            <div className="flex space-x-2">
-              {onPrevious && (
-                <Button variant="outline" onClick={onPrevious}>
-                  Previous
-                </Button>
-              )}
-              <Button 
-                onClick={onNext}
-              >
-                Continue
-              </Button>
-            </div>
+        <CardContent className="pt-6 flex items-center justify-center min-h-[300px]">
+          <div className="text-center space-y-4">
+            <h3 className="text-lg font-medium">Extra Works Coming Soon</h3>
+            <p className="text-muted-foreground max-w-md">
+              This feature is currently under development. You will be able to add additional works and services here in a future update.
+            </p>
           </div>
         </CardContent>
       </Card>
-    </div>
+
+      <div className="flex justify-between">
+        <Button 
+          type="button" 
+          variant="outline"
+          onClick={onPrevious}
+        >
+          Back
+        </Button>
+        <Button type="submit">
+          Continue
+        </Button>
+      </div>
+    </form>
   );
 };
-
-export default ExtraWorksStep;
