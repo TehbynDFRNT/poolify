@@ -93,11 +93,18 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     fetchSelections();
   }, [quoteId]);
 
-  // Calculate the cost for a single selection
+  // Calculate the cost for a single selection, including material and labor costs
   const calculateSelectionCost = (selection: PavingSelection): number => {
-    const materialCostPerMeter = selection.paverCost + selection.wastageCost;
-    const marginCostPerMeter = selection.marginCost;
-    const totalCostPerMeter = materialCostPerMeter + marginCostPerMeter;
+    // Material costs
+    const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
+    
+    // Labor costs (estimated as 80% of paver cost + 30% of margin)
+    const laborCostPerMeter = selection.paverCost * 0.8 + selection.marginCost * 0.3;
+    
+    // Total cost per meter
+    const totalCostPerMeter = materialCostPerMeter + laborCostPerMeter;
+    
+    // Total cost for all meters
     return totalCostPerMeter * selection.meters;
   };
 
@@ -122,7 +129,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       return;
     }
 
-    // Create new selection with default 1 meter
+    // Create new selection with default 10 meters (matching the design)
     const newSelection: PavingSelection = {
       quoteId,
       pavingId,
@@ -130,7 +137,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       paverCost: pavingData.paver_cost,
       wastageCost: pavingData.wastage_cost,
       marginCost: pavingData.margin_cost,
-      meters: 1,
+      meters: 10,
       totalCost: 0
     };
 
@@ -176,6 +183,15 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   const updateTotalCost = (selections: PavingSelection[]) => {
     const total = selections.reduce((sum, selection) => sum + selection.totalCost, 0);
     setTotalCost(total);
+  };
+
+  // Calculate total margin
+  const calculateTotalMargin = () => {
+    return pavingSelections.reduce((sum, selection) => {
+      const materialMargin = selection.marginCost * selection.meters;
+      const laborMargin = (selection.marginCost * 0.3) * selection.meters;
+      return sum + materialMargin + laborMargin;
+    }, 0);
   };
 
   // Save all selections to the database
@@ -233,6 +249,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   return {
     pavingSelections,
     totalCost,
+    totalMargin: calculateTotalMargin(),
     isLoading,
     addSelection,
     updateSelectionMeters,

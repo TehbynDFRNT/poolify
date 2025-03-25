@@ -1,12 +1,9 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
 import { ExtraPavingSelector } from "./components/ExtraPavingSelector";
-import { ExtraPavingCostSummary } from "./components/ExtraPavingCostSummary";
 import { useExtraPavingQuote } from "./hooks/useExtraPavingQuote";
 import { NoPoolWarning } from "../SiteRequirementsStep/components/NoPoolWarning";
 import { toast } from "sonner";
@@ -45,7 +42,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   return (
     <div className="space-y-6">
       <FormHeader>
-        Configure extra paving requirements for this pool installation.
+        Add additional paving to your quote
       </FormHeader>
       
       {!quoteData.pool_id && <NoPoolWarning />}
@@ -56,11 +53,6 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onAdd={addSelection}
         onUpdate={updateSelectionMeters}
         onRemove={removeSelection}
-      />
-
-      <ExtraPavingCostSummary 
-        totalCost={totalCost} 
-        selections={pavingSelections} 
       />
 
       {/* Navigation */}
