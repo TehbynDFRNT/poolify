@@ -7,7 +7,8 @@ export const calculateCosts = (
   margin: number,
   fixedCosts: any[] | undefined,
   poolCosts: Map<any, any> | undefined,
-  excavationDetails: Map<any, any> | undefined
+  excavationDetails: Map<any, any> | undefined,
+  craneSelection?: Map<string, any> | undefined
 ) => {
   const basePrice = pool.buy_price_inc_gst || 0;
   const filtrationCost = pool.default_filtration_package ? calculatePackagePrice(pool.default_filtration_package) : 0;
@@ -23,7 +24,10 @@ export const calculateCosts = (
   
   const excavationCost = excavationDetails?.get(pool.id) ? calculateGrandTotal(excavationDetails.get(pool.id)) : 0;
   
-  const totalCost = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost;
+  // Add crane cost to the calculation
+  const craneCost = craneSelection?.get(pool.id)?.price || 0;
+  
+  const totalCost = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost + craneCost;
   
   // Convert margin to RRP
   // If we want a margin of M%, then:
@@ -42,6 +46,7 @@ export const calculateCosts = (
     fixedCostsTotal,
     individualCostsTotal,
     excavationCost,
+    craneCost,
     total: totalCost,
     rrp
   };

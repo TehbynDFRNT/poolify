@@ -102,13 +102,37 @@ export const usePriceBuilderData = () => {
     },
   });
 
-  const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation;
+  // Fetch crane selections
+  const { data: craneSelections, isLoading: isLoadingCranes } = useQuery({
+    queryKey: ["pool-crane-selections"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_crane_selections")
+        .select(`
+          pool_id,
+          crane:crane_costs (*)
+        `);
+
+      if (error) throw error;
+
+      // Create a Map of pool_id to crane cost
+      const craneMap = new Map();
+      data?.forEach(selection => {
+        craneMap.set(selection.pool_id, selection.crane);
+      });
+
+      return craneMap;
+    },
+  });
+
+  const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation || isLoadingCranes;
 
   return {
     pools,
     fixedCosts,
     poolCosts,
     excavationDetails,
+    craneSelections,
     isLoading
   };
 };

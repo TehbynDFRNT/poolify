@@ -26,7 +26,7 @@ import { MarginEditorCell } from "./components/MarginEditorCell";
 
 const PriceBuilder = () => {
   const navigate = useNavigate();
-  const { pools, fixedCosts, poolCosts, excavationDetails, isLoading } = usePriceBuilderData();
+  const { pools, fixedCosts, poolCosts, excavationDetails, craneSelections, isLoading } = usePriceBuilderData();
   const {
     margins,
     editingId,
@@ -71,6 +71,7 @@ const PriceBuilder = () => {
                       <TableHead className="text-right">Fixed Costs</TableHead>
                       <TableHead className="text-right">Individual Costs</TableHead>
                       <TableHead className="text-right">Excavation</TableHead>
+                      <TableHead className="text-right">Crane</TableHead>
                       <TableHead className="text-right">True Cost</TableHead>
                       <TableHead className="text-right">Margin %</TableHead>
                       <TableHead className="text-right">RRP</TableHead>
@@ -79,7 +80,7 @@ const PriceBuilder = () => {
                   </TableHeader>
                   <TableBody>
                     {pools?.map((pool) => {
-                      const costs = calculateCosts(pool, margins[pool.id] || 0, fixedCosts, poolCosts, excavationDetails);
+                      const costs = calculateCosts(pool, margins[pool.id] || 0, fixedCosts, poolCosts, excavationDetails, craneSelections);
                       const actualMargin = costs.rrp - costs.total;
                       return (
                         <TableRow 
@@ -104,6 +105,7 @@ const PriceBuilder = () => {
                           <TableCell className="text-right">{formatCurrency(costs.fixedCostsTotal)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(costs.individualCostsTotal)}</TableCell>
                           <TableCell className="text-right">{formatCurrency(costs.excavationCost)}</TableCell>
+                          <TableCell className="text-right">{formatCurrency(costs.craneCost)}</TableCell>
                           <TableCell className="text-right font-medium">{formatCurrency(costs.total)}</TableCell>
                           <TableCell className="margin-cell" onClick={e => e.stopPropagation()}>
                             <MarginEditorCell

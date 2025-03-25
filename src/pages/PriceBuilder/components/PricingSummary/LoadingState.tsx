@@ -10,9 +10,25 @@ export const PricingSummaryLoadingState = () => {
         <CardTitle className="text-lg font-semibold">Cost Price Summary</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          <Skeleton className="h-24 w-full" />
-          <Skeleton className="h-24 w-full" />
+        <div className="space-y-6">
+          {/* Cost breakdown items loading state */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {[...Array(6)].map((_, index) => (
+              <Skeleton key={index} className="h-24 w-full" />
+            ))}
+          </div>
+          
+          {/* Total cost loading state */}
+          <Skeleton className="h-16 w-full mt-6" />
+          
+          {/* Margin display loading state */}
+          <div className="space-y-4 mt-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {[...Array(3)].map((_, index) => (
+                <Skeleton key={index} className="h-24 w-full" />
+              ))}
+            </div>
+          </div>
         </div>
       </CardContent>
     </Card>
