@@ -36,7 +36,11 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
 
   // Calculate concrete cuts total cost
   const calculateConcreteCutsCost = () => {
-    return concreteCuts.reduce((total, cut) => total + (cut.price * cut.quantity), 0);
+    return concreteCuts.reduce((total, cut) => {
+      const price = isNaN(cut.price) ? 0 : cut.price;
+      const quantity = isNaN(cut.quantity) ? 0 : cut.quantity;
+      return total + (price * quantity);
+    }, 0);
   };
 
   // Calculate the overall total cost
@@ -90,8 +94,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onAdd={addSelection}
         onUpdate={updateSelectionMeters}
         onRemove={removeSelection}
-        totalCost={pavingTotalCost}
-        totalMargin={totalMargin}
+        totalCost={pavingTotalCost || 0}
+        totalMargin={totalMargin || 0}
       />
 
       <ConcretePumpSelector 
@@ -110,7 +114,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>Extra Paving:</span>
-            <span>${pavingTotalCost.toFixed(2)}</span>
+            <span>${(pavingTotalCost || 0).toFixed(2)}</span>
           </div>
           
           {isPumpRequired && quoteData.concrete_pump_price > 0 && (

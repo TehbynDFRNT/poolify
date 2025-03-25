@@ -83,14 +83,14 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
   // Update meters for a selection
   const updateSelectionMeters = (pavingId: string, meters: number) => {
-    if (meters < 0) {
-      toast.error("Meters cannot be negative");
-      return;
-    }
-
     // Ensure meters is a valid number
     if (isNaN(meters)) {
       meters = 0;
+    }
+
+    if (meters < 0) {
+      toast.error("Meters cannot be negative");
+      return;
     }
 
     const updatedSelections = pavingSelections.map(selection => {

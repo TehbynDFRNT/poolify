@@ -35,7 +35,8 @@ export const calculateTotalMargin = (selections: PavingSelection[]): number => {
 // Calculate total cost across all selections
 export const calculateTotalCost = (selections: PavingSelection[]): number => {
   return selections.reduce((sum, selection) => {
-    const cost = isNaN(selection.totalCost) ? 0 : selection.totalCost;
+    // Calculate cost for this selection
+    const cost = calculateSelectionCost(selection);
     return sum + cost;
   }, 0);
 };

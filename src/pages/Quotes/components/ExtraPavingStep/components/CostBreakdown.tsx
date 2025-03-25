@@ -14,9 +14,12 @@ export const CostBreakdown = ({ activeSelection }: CostBreakdownProps) => {
   const laborMargin = 30;
   const totalLabourCost = laborCost + laborMargin;
   
+  // Ensure meters is a valid number
+  const meters = isNaN(activeSelection.meters) ? 0 : activeSelection.meters;
+  
   // Total costs for all meters
-  const totalMaterialCostAll = totalMaterialCost * activeSelection.meters;
-  const totalLabourCostAll = totalLabourCost * activeSelection.meters;
+  const totalMaterialCostAll = totalMaterialCost * meters;
+  const totalLabourCostAll = totalLabourCost * meters;
   
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
