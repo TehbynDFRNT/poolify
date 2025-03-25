@@ -138,7 +138,7 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Web price and RRP
+        // Web price and RRP - use the values from the database or fallback to calculated values
         web_price: Number(quoteData.web_price || poolWebPrice),
         rrp: Number(quoteData.rrp || poolRRP), // Use RRP from DB if available, otherwise calculated value
         
