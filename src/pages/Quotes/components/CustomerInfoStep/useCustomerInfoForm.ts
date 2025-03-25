@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "../../context/QuoteContext";
-import { customerInfoSchema, CustomerInfoFormErrors } from "./customerInfoSchema";
+import { customerInfoSchema, CustomerInfoFormData, CustomerInfoFormErrors } from "./customerInfoSchema";
 
 type CustomerInfoValues = z.infer<typeof customerInfoSchema>;
 
