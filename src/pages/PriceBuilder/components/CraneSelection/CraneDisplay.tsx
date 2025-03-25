@@ -10,6 +10,9 @@ interface CraneDisplayProps {
 }
 
 export const CraneDisplay = ({ selectedCrane, onClick }: CraneDisplayProps) => {
+  // Convert to number and handle possible non-numeric values
+  const cranePrice = selectedCrane?.price ? Number(selectedCrane.price) : 0;
+  
   return (
     <div 
       className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted/70 cursor-pointer group"
@@ -25,7 +28,7 @@ export const CraneDisplay = ({ selectedCrane, onClick }: CraneDisplayProps) => {
       </div>
       <div className="flex items-center gap-3">
         <span className="font-medium">
-          ${selectedCrane?.price.toFixed(2) || "N/A"}
+          ${cranePrice.toFixed(2)}
         </span>
         <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100 text-muted-foreground" />
       </div>

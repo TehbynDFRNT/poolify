@@ -40,7 +40,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   
   const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
     // Skip the id and pool_id fields and only add numeric values
-    if (key !== 'id' && key !== 'pool_id' && typeof value === 'number') {
+    if (key !== 'id' && key !== 'pool_id' && key !== 'created_at' && key !== 'updated_at' && typeof value === 'number') {
       return sum + value;
     }
     return sum;

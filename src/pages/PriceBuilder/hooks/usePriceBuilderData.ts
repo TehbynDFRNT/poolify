@@ -102,6 +102,23 @@ export const usePriceBuilderData = () => {
     },
   });
 
+  // Fetch all crane costs first
+  const { data: allCraneCosts, isLoading: isLoadingAllCraneCosts } = useQuery({
+    queryKey: ["all-crane-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("crane_costs")
+        .select("*")
+        .order("display_order");
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Find the default Franna crane
+  const defaultCrane = allCraneCosts?.find(crane => crane.name === "Franna Crane-S20T-L1");
+
   // Fetch crane selections with improved error handling
   const { data: craneSelections, isLoading: isLoadingCranes } = useQuery({
     queryKey: ["pool-crane-selections"],
@@ -118,6 +135,16 @@ export const usePriceBuilderData = () => {
 
         // Create a Map of pool_id to crane cost
         const craneMap = new Map();
+        
+        // If we have pool data but no crane selections yet, we should add default cranes
+        if (pools && defaultCrane) {
+          pools.forEach(pool => {
+            // Default to Franna Crane if no selection exists
+            craneMap.set(pool.id, defaultCrane);
+          });
+        }
+        
+        // Then overlay any specific selections from the database
         data?.forEach(selection => {
           if (selection.crane) {
             craneMap.set(selection.pool_id, selection.crane);
@@ -127,12 +154,21 @@ export const usePriceBuilderData = () => {
         return craneMap;
       } catch (error) {
         console.error("Error fetching crane selections:", error);
-        return new Map();
+        
+        // Still provide default cranes if the query fails
+        const craneMap = new Map();
+        if (pools && defaultCrane) {
+          pools.forEach(pool => {
+            craneMap.set(pool.id, defaultCrane);
+          });
+        }
+        return craneMap;
       }
     },
+    enabled: !!pools && !!allCraneCosts,
   });
 
-  const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation || isLoadingCranes;
+  const isLoading = isLoadingPools || isLoadingFixed || isLoadingCosts || isLoadingExcavation || isLoadingCranes || isLoadingAllCraneCosts;
 
   return {
     pools,

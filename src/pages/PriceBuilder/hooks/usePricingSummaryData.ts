@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { CraneCost } from "@/types/crane-cost";
@@ -57,6 +56,23 @@ export const useExcavationDetails = (poolId: string) => {
 
 // Hook to fetch selected crane for a pool
 export const useSelectedCrane = (poolId: string) => {
+  // First fetch all cranes to get the default
+  const { data: allCranes } = useQuery({
+    queryKey: ["all-crane-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("crane_costs")
+        .select("*")
+        .order("display_order");
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  // Get the default Franna crane
+  const defaultCrane = allCranes?.find(crane => crane.name === "Franna Crane-S20T-L1");
+
   return useQuery({
     queryKey: ["selected-crane", poolId],
     queryFn: async () => {
@@ -77,28 +93,39 @@ export const useSelectedCrane = (poolId: string) => {
           return selection.crane as CraneCost;
         }
 
-        // Otherwise get the default Franna crane
-        const { data: defaultCrane, error: defaultError } = await supabase
+        // Return the default Franna crane if available and no selection exists
+        if (defaultCrane) {
+          return defaultCrane as CraneCost;
+        }
+
+        // Otherwise get the default Franna crane from the database
+        const { data: defaultCraneFromDB, error: defaultError } = await supabase
           .from("crane_costs")
           .select("*")
           .eq("name", "Franna Crane-S20T-L1")
           .maybeSingle();
         
         if (defaultError) throw defaultError;
-        return defaultCrane as CraneCost;
+        return defaultCraneFromDB as CraneCost;
       } catch (error) {
         console.error("Error fetching crane data:", error);
         
-        // Fall back to default crane
-        const { data: defaultCrane } = await supabase
+        // Fall back to default crane from our query if available
+        if (defaultCrane) {
+          return defaultCrane as CraneCost;
+        }
+        
+        // Last resort, query for the default crane directly
+        const { data: defaultCraneFromDB } = await supabase
           .from("crane_costs")
           .select("*")
           .eq("name", "Franna Crane-S20T-L1")
           .maybeSingle();
         
-        return defaultCrane as CraneCost;
+        return defaultCraneFromDB as CraneCost;
       }
     },
+    enabled: !!poolId,
   });
 };
 

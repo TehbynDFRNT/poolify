@@ -16,7 +16,7 @@ export const calculateCosts = (
   
   const individualCosts = poolCosts?.get(pool.id);
   const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
-    if (key !== 'id' && key !== 'pool_id' && typeof value === 'number') {
+    if (key !== 'id' && key !== 'pool_id' && key !== 'created_at' && key !== 'updated_at' && typeof value === 'number') {
       return sum + value;
     }
     return sum;
