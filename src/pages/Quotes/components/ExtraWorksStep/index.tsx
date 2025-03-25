@@ -17,39 +17,32 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
   const { 
     pavingSelections, 
     setPavingSelections,
-    updatePavingSelection, 
-    addPavingSelection, 
-    removePavingSelection, 
     totalCost: pavingTotalCost,
-    totalMargin: pavingTotalMargin
+    totalMargin: pavingTotalMargin,
+    loadSavedSelections
   } = useExtraPaving();
   
   // This is the total cost that will be displayed and saved to the database
   const totalExtraWorksCost = pavingTotalCost;
 
+  // Load saved data when component mounts
   useEffect(() => {
-    if (quoteData.custom_requirements_json) {
-      try {
-        const extraWorksData = JSON.parse(quoteData.custom_requirements_json) as ExtraWorks;
-        if (extraWorksData.pavingSelections) {
-          setPavingSelections(extraWorksData.pavingSelections);
-        }
-      } catch (error) {
-        console.error("Error parsing saved extra works data:", error);
-      }
+    if (quoteData.id) {
+      loadSavedSelections(quoteData.custom_requirements_json);
     }
-  }, [quoteData.custom_requirements_json, setPavingSelections]);
+  }, [quoteData.id, quoteData.custom_requirements_json, loadSavedSelections]);
 
   // Update the quote data whenever the total cost changes
   useEffect(() => {
     console.log("Total extra works cost updated to:", totalExtraWorksCost);
+    
     // Don't trigger an update if there's no quoteId or if we're currently saving
-    if (quoteData.id && !isSaving && quoteData.extra_works_cost !== totalExtraWorksCost) {
+    if (quoteData.id && !isSaving) {
       updateQuoteData({
         extra_works_cost: totalExtraWorksCost
       });
     }
-  }, [totalExtraWorksCost, quoteData.id, isSaving]);
+  }, [totalExtraWorksCost, quoteData.id, isSaving, updateQuoteData]);
 
   const saveExtraWorks = async (navigateNext = false) => {
     if (!quoteData.id) {

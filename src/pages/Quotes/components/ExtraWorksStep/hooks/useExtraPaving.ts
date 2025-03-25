@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
@@ -58,20 +58,26 @@ export const useExtraPaving = () => {
     },
   });
 
-  // Initialize from saved data if it exists
-  useEffect(() => {
-    if (quoteData.custom_requirements_json) {
-      try {
-        const extraWorksData = JSON.parse(quoteData.custom_requirements_json);
-        if (extraWorksData.pavingSelections && extraWorksData.pavingSelections.length > 0) {
-          console.log("Initializing from saved paving selections:", extraWorksData.pavingSelections);
-          setPavingSelections(extraWorksData.pavingSelections);
-        }
-      } catch (error) {
-        console.error("Error parsing saved paving selections:", error);
-      }
+  // Load saved paving selections
+  const loadSavedSelections = useCallback((customRequirementsJson?: string) => {
+    if (!customRequirementsJson) {
+      setPavingSelections([]);
+      return;
     }
-  }, [quoteData.custom_requirements_json]);
+    
+    try {
+      const extraWorksData = JSON.parse(customRequirementsJson);
+      if (extraWorksData.pavingSelections && extraWorksData.pavingSelections.length > 0) {
+        console.log("Loading saved paving selections:", extraWorksData.pavingSelections);
+        setPavingSelections(extraWorksData.pavingSelections);
+      } else {
+        setPavingSelections([]);
+      }
+    } catch (error) {
+      console.error("Error parsing saved paving selections:", error);
+      setPavingSelections([]);
+    }
+  }, []);
 
   // Add a new paving selection
   const addPavingSelection = () => {
@@ -88,7 +94,7 @@ export const useExtraPaving = () => {
     }
   };
 
-  // Update a paving selection
+  // Update a paving selection and recalculate costs
   const updatePavingSelection = (index: number, updates: Partial<PavingSelection>) => {
     const updatedSelections = [...pavingSelections];
     updatedSelections[index] = { ...updatedSelections[index], ...updates };
@@ -111,10 +117,10 @@ export const useExtraPaving = () => {
         // Calculate final cost based on meters
         const meters = updatedSelections[index].meters;
         
-        // Calculate final cost
+        // Calculate final cost with proper number formatting
         updatedSelections[index].cost = Number((totalPerMeter * meters).toFixed(2));
         
-        // Calculate margins
+        // Calculate margins with proper number formatting
         updatedSelections[index].materialMargin = Number((category.margin_cost * meters).toFixed(2));
         updatedSelections[index].labourMargin = Number((laborMargin * meters).toFixed(2));
         updatedSelections[index].totalMargin = Number((
@@ -172,6 +178,7 @@ export const useExtraPaving = () => {
     addPavingSelection,
     updatePavingSelection,
     removePavingSelection,
-    containerRef
+    containerRef,
+    loadSavedSelections
   };
 };
