@@ -1,5 +1,5 @@
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { usePavingSelections } from "./usePavingSelections";
 import type { PavingSelection } from "./usePavingSelections";
 
@@ -9,6 +9,7 @@ import type { PavingSelection } from "./usePavingSelections";
  */
 export const useExtraPaving = () => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [extraWorksRef, setExtraWorksRef] = useState<React.RefObject<any> | null>(null);
   
   const { 
     pavingCategories,
@@ -40,7 +41,9 @@ export const useExtraPaving = () => {
     updatePavingSelection,
     removePavingSelection,
     containerRef,
-    loadSavedSelections
+    loadSavedSelections,
+    setExtraWorksRef,
+    extraWorksRef
   };
 };
 
