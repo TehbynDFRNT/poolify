@@ -3,12 +3,12 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 
 type QuoteContextType = {
-  quoteData: Partial<QuoteInsert> & { id?: string; web_price: number; rrp: number; };
-  updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; web_price?: number; rrp?: number; }) => void;
+  quoteData: Partial<QuoteInsert> & { id?: string; };
+  updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; }) => void;
   resetQuoteData: () => void;
 };
 
-const initialQuoteData: Partial<QuoteInsert> & { id?: string; web_price: number; rrp: number; } = {
+const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   customer_name: '',
   customer_email: '',
   customer_phone: '',
@@ -20,9 +20,8 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; web_price: number;
   status: 'draft',
   resident_homeowner: false,
   
-  // Base pool cost and RRP
-  web_price: 0,
-  rrp: 0,
+  // Base pool cost
+  base_pool_cost: 0,
   
   // Site requirements (adding as empty defaults)
   crane_id: '',
@@ -44,9 +43,9 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; web_price: number;
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
 
 export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [quoteData, setQuoteData] = useState<Partial<QuoteInsert> & { id?: string; web_price: number; rrp: number; }>(initialQuoteData);
+  const [quoteData, setQuoteData] = useState<Partial<QuoteInsert> & { id?: string; }>(initialQuoteData);
 
-  const updateQuoteData = (data: Partial<QuoteInsert> & { id?: string; web_price?: number; rrp?: number; }) => {
+  const updateQuoteData = (data: Partial<QuoteInsert> & { id?: string; }) => {
     setQuoteData(prev => ({ ...prev, ...data }));
   };
 

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "../context/QuoteContext";
@@ -6,7 +5,7 @@ import { toast } from "sonner";
 
 export const QUOTE_STEPS = [
   { id: 1, name: "Customer Info" },
-  { id: 2, name: "Web Price" },  // Changed from "Base Pool" to "Web Price"
+  { id: 2, name: "Base Pool" },
   { id: 3, name: "Site Requirements" },
   { id: 4, name: "Extra Paving" },
   { id: 5, name: "Optional Add-ons" },
@@ -93,37 +92,6 @@ export const useQuoteSteps = (quoteId?: string) => {
           ? quoteData.status 
           : 'draft';
 
-      // Get the pool data and calculate RRP
-      let poolWebPrice = 0;
-      let poolRRP = 0;
-      
-      if (quoteData.pool_id) {
-        const { data: poolData, error: poolError } = await supabase
-          .from("pool_specifications")
-          .select("*")
-          .eq("id", quoteData.pool_id)
-          .single();
-          
-        if (!poolError && poolData) {
-          // Get margin percentage for this pool
-          const { data: marginData, error: marginError } = await supabase
-            .from("pool_margins")
-            .select("margin_percentage")
-            .eq("pool_id", quoteData.pool_id)
-            .maybeSingle();
-          
-          const marginPercentage = marginData ? marginData.margin_percentage : 0;
-          
-          // Use base price from database
-          poolWebPrice = Number(poolData.buy_price_inc_gst || 0);
-          
-          // Calculate RRP - this should be the value displayed in the Cost Summary component
-          if (marginPercentage < 100) {
-            poolRRP = poolWebPrice / (1 - marginPercentage / 100);
-          }
-        }
-      }
-
       updateQuoteData({
         id: quoteData.id,
         customer_name: quoteData.customer_name,
@@ -138,26 +106,25 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Web price and RRP - use the values from the database or fallback to calculated values
-        web_price: Number(quoteData.web_price || poolWebPrice),
-        rrp: Number(quoteData.rrp || poolRRP), // Use RRP from DB if available, otherwise calculated value
+        // Base pool cost
+        base_pool_cost: quoteData.base_pool_cost || 0,
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',
         excavation_type: quoteData.excavation_type || '',
         traffic_control_id: quoteData.traffic_control_id || 'none',
-        site_requirements_cost: Number(quoteData.site_requirements_cost || 0),
+        site_requirements_cost: quoteData.site_requirements_cost || 0,
         
         // Extra paving
-        extra_paving_cost: Number(quoteData.extra_paving_cost || 0),
+        extra_paving_cost: quoteData.extra_paving_cost || 0,
         
         // Optional addons
-        optional_addons_cost: Number(quoteData.optional_addons_cost || 0),
-        total_cost: Number(quoteData.total_cost || 0),
+        optional_addons_cost: quoteData.optional_addons_cost || 0,
+        total_cost: quoteData.total_cost || 0,
         
         // Micro dig data
         micro_dig_required: quoteData.micro_dig_required === true,
-        micro_dig_price: Number(quoteData.micro_dig_price || 0),
+        micro_dig_price: quoteData.micro_dig_price || 0,
         micro_dig_notes: quoteData.micro_dig_notes || ''
       });
 

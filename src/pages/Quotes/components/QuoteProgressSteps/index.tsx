@@ -18,20 +18,35 @@ export const QuoteProgressSteps = ({ steps, currentStep, onStepClick }: QuotePro
   const { quoteData } = useQuoteContext();
   
   // Function to get cost for each step
-  const getStepCost = (stepId: number): number => {
+  const getStepCost = (stepId: number): { value: number | undefined; label: string } => {
     switch (stepId) {
-      case 2: // Web Price
-        return quoteData.rrp || 0;
+      case 2: // Base Pool
+        return { 
+          value: quoteData.pool_id ? quoteData.base_pool_cost : undefined,
+          label: "Base Pool"
+        };
       case 3: // Site Requirements
-        return quoteData.site_requirements_cost || 0;
+        return { 
+          value: quoteData.site_requirements_cost,
+          label: "Site Requirements"
+        };
       case 4: // Extra Paving
-        return quoteData.extra_paving_cost || 0;
+        return { 
+          value: quoteData.extra_paving_cost,
+          label: "Extra Paving"
+        };
       case 5: // Optional Add-ons
-        return quoteData.optional_addons_cost || 0;
+        return { 
+          value: quoteData.optional_addons_cost,
+          label: "Add-ons"
+        };
       case 6: // Cost Summary
-        return quoteData.total_cost || 0;
+        return { 
+          value: quoteData.total_cost,
+          label: "Total"
+        };
       default:
-        return 0;
+        return { value: undefined, label: "" };
     }
   };
 
@@ -68,9 +83,9 @@ export const QuoteProgressSteps = ({ steps, currentStep, onStepClick }: QuotePro
                 )}
               </div>
               
-              {step.id >= 2 && (
+              {stepCost.value !== undefined && (
                 <div className="text-xs mt-1 font-medium text-gray-600">
-                  {formatCurrency(stepCost)}
+                  {stepCost.label}: {formatCurrency(stepCost.value)}
                 </div>
               )}
             </div>

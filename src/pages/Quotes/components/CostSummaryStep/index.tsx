@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Save } from "lucide-react";
-import { formatCurrency } from "@/utils/format";
 
 interface CostSummaryStepProps {
   onNext: () => void;
@@ -38,7 +37,7 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
         (quoteData.site_requirements_cost || 0) + 
         (quoteData.optional_addons_cost || 0) +
         (quoteData.extra_paving_cost || 0)
-        // Web Price (RRP) would be added here in the final client-facing quote
+        // Base pool cost would be added here in the future
       );
       
       // Update the context with the calculated total
@@ -88,24 +87,24 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
         <CardContent className="pt-6">
           <div className="space-y-4">
             <div className="flex justify-between py-2 border-b">
-              <span className="font-medium">Web Price</span>
-              <span>{formatCurrency(quoteData.rrp || 0)}</span>
+              <span className="font-medium">Base Pool Cost</span>
+              <span>$XX,XXX</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Site Requirements</span>
-              <span>{formatCurrency(quoteData.site_requirements_cost || 0)}</span>
+              <span>${quoteData.site_requirements_cost ? quoteData.site_requirements_cost.toFixed(2) : "0.00"}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Extra Paving</span>
-              <span>{formatCurrency(quoteData.extra_paving_cost || 0)}</span>
+              <span>${quoteData.extra_paving_cost ? quoteData.extra_paving_cost.toFixed(2) : "0.00"}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Optional Add-ons</span>
-              <span>{formatCurrency(quoteData.optional_addons_cost || 0)}</span>
+              <span>${quoteData.optional_addons_cost ? quoteData.optional_addons_cost.toFixed(2) : "0.00"}</span>
             </div>
             <div className="flex justify-between py-2 font-bold text-lg">
               <span>Total Cost</span>
-              <span>{formatCurrency(quoteData.total_cost || 0)}</span>
+              <span>${quoteData.total_cost ? quoteData.total_cost.toFixed(2) : "XX,XXX"}</span>
             </div>
           </div>
         </CardContent>
