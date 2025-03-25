@@ -33,6 +33,54 @@ export const saveRequirements = async ({
     // Calculate total cost including custom requirements and micro dig
     let totalCost = 0;
     
+    // Fetch bobcat cost if selected
+    if (bobcatId && bobcatId !== 'none') {
+      const { data: bobcatData } = await supabase
+        .from('bobcat_costs')
+        .select('price')
+        .eq('id', bobcatId)
+        .single();
+      
+      if (bobcatData) {
+        totalCost += bobcatData.price;
+      }
+    }
+    
+    // Fetch crane costs for comparison if crane selected
+    if (craneId) {
+      // Find the default crane (Franna)
+      const { data: defaultCrane } = await supabase
+        .from('crane_costs')
+        .select('price')
+        .eq('name', 'Franna Crane-S20T-L1')
+        .single();
+      
+      // Get selected crane
+      const { data: selectedCrane } = await supabase
+        .from('crane_costs')
+        .select('price')
+        .eq('id', craneId)
+        .single();
+      
+      if (defaultCrane && selectedCrane && selectedCrane.price !== defaultCrane.price) {
+        // Add only the difference in price between selected crane and default
+        totalCost += selectedCrane.price - defaultCrane.price;
+      }
+    }
+    
+    // Fetch traffic control cost if selected
+    if (trafficControlId && trafficControlId !== 'none') {
+      const { data: trafficControlData } = await supabase
+        .from('traffic_control_costs')
+        .select('price')
+        .eq('id', trafficControlId)
+        .single();
+      
+      if (trafficControlData) {
+        totalCost += trafficControlData.price;
+      }
+    }
+    
     // Add custom requirements costs
     totalCost += customRequirements.reduce((sum, req) => sum + (req.price || 0), 0);
     
@@ -40,6 +88,16 @@ export const saveRequirements = async ({
     if (microDigRequired) {
       totalCost += microDigPrice;
     }
+    
+    console.log("Saving site requirements:", {
+      crane_id: craneId,
+      traffic_control_id: trafficControlId === 'none' ? null : trafficControlId,
+      bobcat_id: bobcatId === 'none' ? null : bobcatId,
+      site_requirements_cost: totalCost,
+      micro_dig_required: microDigRequired,
+      micro_dig_price: microDigPrice,
+      micro_dig_notes: microDigNotes
+    });
     
     // Data to save to database
     const dataToSave = {
@@ -51,8 +109,6 @@ export const saveRequirements = async ({
       micro_dig_price: microDigPrice,
       micro_dig_notes: microDigNotes
     };
-    
-    console.log("Saving site requirements:", dataToSave);
     
     // Update the record in Supabase
     const { error } = await supabase

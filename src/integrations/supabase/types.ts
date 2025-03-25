@@ -1104,6 +1104,7 @@ export type Database = {
       }
       quotes: {
         Row: {
+          bobcat_id: string | null
           crane_id: string | null
           created_at: string
           customer_email: string
@@ -1132,6 +1133,7 @@ export type Database = {
           web_price: number | null
         }
         Insert: {
+          bobcat_id?: string | null
           crane_id?: string | null
           created_at?: string
           customer_email: string
@@ -1160,6 +1162,7 @@ export type Database = {
           web_price?: number | null
         }
         Update: {
+          bobcat_id?: string | null
           crane_id?: string | null
           created_at?: string
           customer_email?: string
@@ -1188,6 +1191,13 @@ export type Database = {
           web_price?: number | null
         }
         Relationships: [
+          {
+            foreignKeyName: "quotes_bobcat_id_fkey"
+            columns: ["bobcat_id"]
+            isOneToOne: false
+            referencedRelation: "bobcat_costs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "quotes_crane_id_fkey"
             columns: ["crane_id"]

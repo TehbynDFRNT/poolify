@@ -43,6 +43,25 @@ export const useSiteRequirementsCost = () => {
     }
   });
   
+  // Fetch bobcat costs
+  const { data: bobcatCosts } = useQuery({
+    queryKey: ["bobcat-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("bobcat_costs")
+        .select("*")
+        .order("size_category")
+        .order("display_order");
+      
+      if (error) {
+        console.error("Error fetching bobcat costs:", error);
+        return [];
+      }
+      
+      return data;
+    }
+  });
+  
   // Calculate total site requirements cost
   useEffect(() => {
     let totalCost = 0;
@@ -71,8 +90,18 @@ export const useSiteRequirementsCost = () => {
       }
     }
     
+    // Add bobcat cost if selected
+    if (bobcatCosts && quoteData.bobcat_id && quoteData.bobcat_id !== 'none') {
+      const selectedBobcat = bobcatCosts.find(
+        bc => bc.id === quoteData.bobcat_id
+      );
+      if (selectedBobcat) {
+        totalCost += selectedBobcat.price;
+      }
+    }
+    
     setSiteRequirementsCost(totalCost);
-  }, [craneCosts, trafficControlCosts, quoteData.crane_id, quoteData.traffic_control_id]);
+  }, [craneCosts, trafficControlCosts, bobcatCosts, quoteData.crane_id, quoteData.traffic_control_id, quoteData.bobcat_id]);
   
   // Handlers
   const handleCraneChange = (craneId: string) => {
