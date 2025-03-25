@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { useState, useEffect } from "react";
@@ -34,6 +35,7 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
       // Calculate total cost from components
       const totalCost = (
         (quoteData.site_requirements_cost || 0) + 
+        (quoteData.extra_works_cost || 0) +
         (quoteData.optional_addons_cost || 0)
         // Base pool cost would be added here in the future
       );
@@ -92,6 +94,10 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Site Requirements</span>
               <span>${quoteData.site_requirements_cost ? quoteData.site_requirements_cost.toFixed(2) : "0.00"}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b">
+              <span className="font-medium">Extra Works</span>
+              <span>${quoteData.extra_works_cost ? quoteData.extra_works_cost.toFixed(2) : "0.00"}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Optional Add-ons</span>

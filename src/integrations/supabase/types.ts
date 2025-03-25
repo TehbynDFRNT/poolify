@@ -1066,6 +1066,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           excavation_type: string | null
+          extra_works_cost: number | null
           home_address: string
           id: string
           micro_dig_notes: string | null
@@ -1092,6 +1093,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           excavation_type?: string | null
+          extra_works_cost?: number | null
           home_address: string
           id?: string
           micro_dig_notes?: string | null
@@ -1118,6 +1120,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           excavation_type?: string | null
+          extra_works_cost?: number | null
           home_address?: string
           id?: string
           micro_dig_notes?: string | null
