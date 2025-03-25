@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { CustomSiteRequirement } from "../types";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 
@@ -8,20 +8,6 @@ export const useCustomSiteRequirements = () => {
   const [customRequirements, setCustomRequirements] = useState<CustomSiteRequirement[]>([
     { id: crypto.randomUUID(), description: "", price: 0 }
   ]);
-
-  // Initialize from database data if provided
-  useEffect(() => {
-    if (quoteData.custom_requirements_json) {
-      try {
-        const parsedRequirements = JSON.parse(quoteData.custom_requirements_json);
-        if (Array.isArray(parsedRequirements) && parsedRequirements.length > 0) {
-          setCustomRequirements(parsedRequirements);
-        }
-      } catch (error) {
-        console.error("Error parsing custom requirements JSON:", error);
-      }
-    }
-  }, [quoteData.custom_requirements_json]);
 
   const addCustomRequirement = () => {
     setCustomRequirements([

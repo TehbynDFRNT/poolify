@@ -52,7 +52,6 @@ export const useFormSubmission = ({ onNext }: UseFormSubmissionParams) => {
       // Update context with the latest values
       updateQuoteData({
         site_requirements_cost: totalCost,
-        custom_requirements_json: JSON.stringify(customRequirements),
         micro_dig_required: microDigRequired,
         micro_dig_price: microDigPrice,
         micro_dig_notes: microDigNotes

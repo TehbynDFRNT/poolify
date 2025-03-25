@@ -44,7 +44,6 @@ export const saveRequirements = async ({
       crane_id: craneId,
       traffic_control_id: trafficControlId || 'none',
       site_requirements_cost: totalCost,
-      custom_requirements_json: JSON.stringify(customRequirements),
       micro_dig_required: microDigRequired,
       micro_dig_price: microDigPrice,
       micro_dig_notes: microDigNotes
