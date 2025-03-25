@@ -11,16 +11,18 @@ interface QuoteStepContentProps {
   currentStep: number;
   onNext: () => void;
   onPrevious: () => void;
+  isEditing?: boolean;
 }
 
 export const QuoteStepContent = ({ 
   currentStep, 
   onNext, 
-  onPrevious 
+  onPrevious,
+  isEditing = false
 }: QuoteStepContentProps) => {
   switch (currentStep) {
     case 1:
-      return <CustomerInfoStep onNext={onNext} isEditing={true} />;
+      return <CustomerInfoStep onNext={onNext} isEditing={isEditing} />;
     case 2:
       return <SelectPoolStep onNext={onNext} onPrevious={onPrevious} />;
     case 3:

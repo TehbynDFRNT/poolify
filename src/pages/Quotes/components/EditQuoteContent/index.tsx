@@ -64,7 +64,8 @@ export const EditQuoteContent = () => {
             <QuoteStepContent 
               currentStep={currentStep} 
               onNext={nextStep} 
-              onPrevious={previousStep} 
+              onPrevious={previousStep}
+              isEditing={true}
             />
           </CardContent>
         </Card>
