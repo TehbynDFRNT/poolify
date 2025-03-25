@@ -135,7 +135,7 @@ export const useQuoteSteps = (quoteId?: string) => {
         resident_homeowner: quoteData.resident_homeowner || false,
         
         // Base pool cost - use the RRP instead of buy_price_inc_gst
-        base_pool_cost: poolRRP > 0 ? poolRRP : Number(quoteData.base_pool_cost || 0),
+        base_pool_cost: poolRRP > 0 ? poolRRP : 0,
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',

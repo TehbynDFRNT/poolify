@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Save } from "lucide-react";
+import { formatCurrency } from "@/utils/format";
 
 interface CostSummaryStepProps {
   onNext: () => void;
@@ -88,23 +89,23 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
           <div className="space-y-4">
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Base Pool Cost</span>
-              <span>$XX,XXX</span>
+              <span>{formatCurrency(quoteData.base_pool_cost || 0)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Site Requirements</span>
-              <span>${quoteData.site_requirements_cost ? quoteData.site_requirements_cost.toFixed(2) : "0.00"}</span>
+              <span>{formatCurrency(quoteData.site_requirements_cost || 0)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Extra Paving</span>
-              <span>${quoteData.extra_paving_cost ? quoteData.extra_paving_cost.toFixed(2) : "0.00"}</span>
+              <span>{formatCurrency(quoteData.extra_paving_cost || 0)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Optional Add-ons</span>
-              <span>${quoteData.optional_addons_cost ? quoteData.optional_addons_cost.toFixed(2) : "0.00"}</span>
+              <span>{formatCurrency(quoteData.optional_addons_cost || 0)}</span>
             </div>
             <div className="flex justify-between py-2 font-bold text-lg">
               <span>Total Cost</span>
-              <span>${quoteData.total_cost ? quoteData.total_cost.toFixed(2) : "XX,XXX"}</span>
+              <span>{formatCurrency(quoteData.total_cost || 0)}</span>
             </div>
           </div>
         </CardContent>
