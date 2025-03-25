@@ -42,7 +42,7 @@ export const saveRequirements = async ({
     // Data to save to database
     const dataToSave = {
       crane_id: craneId,
-      traffic_control_id: trafficControlId || 'none',
+      traffic_control_id: trafficControlId === 'none' ? null : trafficControlId,
       site_requirements_cost: totalCost,
       micro_dig_required: microDigRequired,
       micro_dig_price: microDigPrice,

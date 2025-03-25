@@ -1,18 +1,14 @@
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { CraneCost } from "@/types/crane-cost";
-import { TrafficControlCost } from "@/types/traffic-control-cost";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 
 export const useSiteRequirementsCost = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
-  const [siteRequirementsCost, setSiteRequirementsCost] = useState<number>(
-    quoteData.site_requirements_cost || 0
-  );
-
-  // Fetch crane costs
+  const [siteRequirementsCost, setSiteRequirementsCost] = useState(0);
+  
+  // Fetch crane costs and traffic control costs
   const { data: craneCosts } = useQuery({
     queryKey: ["crane-costs"],
     queryFn: async () => {
@@ -26,11 +22,10 @@ export const useSiteRequirementsCost = () => {
         return [];
       }
       
-      return data as CraneCost[];
+      return data;
     }
   });
-
-  // Fetch traffic control costs
+  
   const { data: trafficControlCosts } = useQuery({
     queryKey: ["traffic-control-costs"],
     queryFn: async () => {
@@ -44,32 +39,30 @@ export const useSiteRequirementsCost = () => {
         return [];
       }
       
-      return data as TrafficControlCost[];
+      return data;
     }
   });
-
-  // Find default Franna crane for comparison
-  const defaultCrane = craneCosts?.find(crane => 
-    crane.name === "Franna Crane-S20T-L1"
-  );
-
-  // Calculate additional cost if a non-default crane is selected
+  
+  // Calculate total site requirements cost
   useEffect(() => {
-    if (!craneCosts || !trafficControlCosts) return;
-    
     let totalCost = 0;
     
-    // Calculate crane cost difference if not using default
-    if (quoteData.crane_id && defaultCrane && craneCosts) {
+    // Find default Franna crane for comparison if selected crane is different
+    const defaultCrane = craneCosts?.find(crane => 
+      crane.name === "Franna Crane-S20T-L1"
+    );
+    
+    // Add crane cost (if not the default crane)
+    if (craneCosts && quoteData.crane_id && defaultCrane) {
       const selectedCrane = craneCosts.find(crane => crane.id === quoteData.crane_id);
       if (selectedCrane && selectedCrane.id !== defaultCrane.id) {
-        // Only add the difference in cost between selected crane and default
+        // Only add the difference in price between selected crane and default
         totalCost += selectedCrane.price - defaultCrane.price;
       }
     }
     
     // Add traffic control cost if selected
-    if (quoteData.traffic_control_id && quoteData.traffic_control_id !== "none" && trafficControlCosts) {
+    if (trafficControlCosts && quoteData.traffic_control_id && quoteData.traffic_control_id !== 'none') {
       const selectedTrafficControl = trafficControlCosts.find(
         tc => tc.id === quoteData.traffic_control_id
       );
@@ -79,20 +72,20 @@ export const useSiteRequirementsCost = () => {
     }
     
     setSiteRequirementsCost(totalCost);
-    
-    // Only update the quote data if the cost has changed
-    if (totalCost !== quoteData.site_requirements_cost) {
-      updateQuoteData({ site_requirements_cost: totalCost });
-    }
-  }, [quoteData.crane_id, quoteData.traffic_control_id, craneCosts, trafficControlCosts, defaultCrane]);
-
+  }, [craneCosts, trafficControlCosts, quoteData.crane_id, quoteData.traffic_control_id]);
+  
+  // Handlers
+  const handleCraneChange = (craneId: string) => {
+    updateQuoteData({ crane_id: craneId });
+  };
+  
+  const handleTrafficControlChange = (trafficControlId: string) => {
+    updateQuoteData({ traffic_control_id: trafficControlId });
+  };
+  
   return {
     siteRequirementsCost,
-    handleCraneChange: (craneId: string) => {
-      updateQuoteData({ crane_id: craneId });
-    },
-    handleTrafficControlChange: (trafficControlId: string) => {
-      updateQuoteData({ traffic_control_id: trafficControlId });
-    }
+    handleCraneChange,
+    handleTrafficControlChange
   };
 };
