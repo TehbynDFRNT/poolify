@@ -8,7 +8,6 @@ import { QuoteProvider } from "@/pages/Quotes/context/QuoteContext";
 import { CustomerInfoStep } from "@/pages/Quotes/components/CustomerInfoStep";
 import { SelectPoolStep } from "@/pages/Quotes/components/SelectPoolStep";
 import { SiteRequirementsStep } from "@/pages/Quotes/components/SiteRequirementsStep";
-import { ExtraWorksStep } from "@/pages/Quotes/components/ExtraWorksStep";
 import { OptionalAddonsStep } from "@/pages/Quotes/components/OptionalAddonsStep";
 import { CostSummaryStep } from "@/pages/Quotes/components/CostSummaryStep";
 import { PreviewQuoteStep } from "@/pages/Quotes/components/PreviewQuoteStep";
@@ -25,17 +24,16 @@ const steps = [
   { id: 1, name: "Customer Info" },
   { id: 2, name: "Base Pool" },
   { id: 3, name: "Site Requirements" },
-  { id: 4, name: "Extra Works" },
-  { id: 5, name: "Optional Add-ons" },
-  { id: 6, name: "Cost Summary" },
-  { id: 7, name: "Preview Quote" },
+  { id: 4, name: "Optional Add-ons" },
+  { id: 5, name: "Cost Summary" },
+  { id: 6, name: "Preview Quote" },
 ];
 
 const EditQuoteContent = () => {
   const { quoteId } = useParams();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 7;
+  const totalSteps = 6;
   const { updateQuoteData } = useQuoteContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -170,10 +168,9 @@ const EditQuoteContent = () => {
             {currentStep === 1 && <CustomerInfoStep onNext={() => setCurrentStep(2)} isEditing={true} />}
             {currentStep === 2 && <SelectPoolStep onNext={() => setCurrentStep(3)} onPrevious={() => setCurrentStep(1)} />}
             {currentStep === 3 && <SiteRequirementsStep onNext={() => setCurrentStep(4)} onPrevious={() => setCurrentStep(2)} />}
-            {currentStep === 4 && <ExtraWorksStep onNext={() => setCurrentStep(5)} onPrevious={() => setCurrentStep(3)} />}
-            {currentStep === 5 && <OptionalAddonsStep onNext={() => setCurrentStep(6)} onPrevious={() => setCurrentStep(4)} />}
-            {currentStep === 6 && <CostSummaryStep onNext={() => setCurrentStep(7)} onPrevious={() => setCurrentStep(5)} />}
-            {currentStep === 7 && <PreviewQuoteStep onPrevious={() => setCurrentStep(6)} />}
+            {currentStep === 4 && <OptionalAddonsStep onNext={() => setCurrentStep(5)} onPrevious={() => setCurrentStep(3)} />}
+            {currentStep === 5 && <CostSummaryStep onNext={() => setCurrentStep(6)} onPrevious={() => setCurrentStep(4)} />}
+            {currentStep === 6 && <PreviewQuoteStep onPrevious={() => setCurrentStep(5)} />}
           </CardContent>
         </Card>
       </div>
