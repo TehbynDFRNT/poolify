@@ -56,6 +56,11 @@ export const ExtraPavingSelection = ({
   const handleMetersChange = (value: number) => {
     onUpdate(index, { meters: value });
   };
+  
+  // Toggle details section
+  const handleToggleDetails = () => {
+    setIsDetailsOpen(prev => !prev);
+  };
 
   return (
     <Card className="mb-4">
@@ -83,6 +88,7 @@ export const ExtraPavingSelection = ({
               isDetailsOpen={isDetailsOpen}
               costPerMeter={costPerMeter}
               totalCost={selection.cost || 0}
+              onToggleDetails={handleToggleDetails}
             />
           </div>
           
