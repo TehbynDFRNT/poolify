@@ -8,7 +8,7 @@ export const fetchPavingSelections = async (quoteId: string): Promise<PavingSele
   try {
     const { data, error } = await supabase
       .from('quote_extra_pavings')
-      .select('*')
+      .select('*, extra_paving_costs!inner(category, paver_cost, wastage_cost, margin_cost)')
       .eq('quote_id', quoteId);
 
     if (error) {
@@ -20,10 +20,10 @@ export const fetchPavingSelections = async (quoteId: string): Promise<PavingSele
     return data.map(item => ({
       quoteId: item.quote_id,
       pavingId: item.paving_id,
-      pavingCategory: item.paving_category || "",
-      paverCost: item.paver_cost || 0,
-      wastageCost: item.wastage_cost || 0,
-      marginCost: item.margin_cost || 0,
+      pavingCategory: item.extra_paving_costs.category,
+      paverCost: item.extra_paving_costs.paver_cost,
+      wastageCost: item.extra_paving_costs.wastage_cost,
+      marginCost: item.extra_paving_costs.margin_cost,
       meters: item.meters || 0,
       totalCost: item.total_cost || 0
     }));
@@ -58,10 +58,6 @@ export const savePavingSelections = async (
       const selectionsToInsert = selections.map(selection => ({
         quote_id: quoteId,
         paving_id: selection.pavingId,
-        paving_category: selection.pavingCategory,
-        paver_cost: selection.paverCost,
-        wastage_cost: selection.wastageCost,
-        margin_cost: selection.marginCost,
         meters: selection.meters,
         total_cost: selection.totalCost
       }));

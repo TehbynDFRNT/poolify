@@ -8,18 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ConcreteCut } from "@/types/concrete-cut";
-
-interface ConcreteCut {
-  id: string;
-  cut_type: string;
-  price: number;
-  quantity: number;
-}
+import { ConcreteCutSelection } from "../types";
 
 interface ConcreteCutsSelectorProps {
-  selectedCuts: ConcreteCut[];
-  onUpdateCuts: (cuts: ConcreteCut[]) => void;
+  selectedCuts: ConcreteCutSelection[];
+  onUpdateCuts: (cuts: ConcreteCutSelection[]) => void;
 }
 
 export const ConcreteCutsSelector = ({ 
@@ -29,7 +22,7 @@ export const ConcreteCutsSelector = ({
   const { concreteCuts, isLoading } = useConcreteCuts();
   
   // Add a concrete cut with quantity 1
-  const handleAddCut = (cut: ConcreteCut) => {
+  const handleAddCut = (cut: { id: string; cut_type: string; price: number }) => {
     const existingCut = selectedCuts.find(c => c.id === cut.id);
     
     if (existingCut) {
@@ -40,7 +33,12 @@ export const ConcreteCutsSelector = ({
       onUpdateCuts(updatedCuts);
     } else {
       // Add new cut with quantity 1
-      onUpdateCuts([...selectedCuts, { ...cut, quantity: 1 }]);
+      onUpdateCuts([...selectedCuts, { 
+        id: cut.id, 
+        cut_type: cut.cut_type, 
+        price: cut.price, 
+        quantity: 1 
+      }]);
     }
   };
   
