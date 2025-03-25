@@ -24,8 +24,11 @@ export const calculateCosts = (
   
   const excavationCost = excavationDetails?.get(pool.id) ? calculateGrandTotal(excavationDetails.get(pool.id)) : 0;
   
-  // Add crane cost to the calculation
-  const craneCost = craneSelection?.get(pool.id)?.price || 0;
+  // Add crane cost to the calculation - ensure it's properly handled
+  let craneCost = 0;
+  if (craneSelection?.get(pool.id)?.price) {
+    craneCost = craneSelection.get(pool.id).price;
+  }
   
   const totalCost = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost + craneCost;
   

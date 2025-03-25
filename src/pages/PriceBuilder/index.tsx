@@ -94,7 +94,6 @@ const PriceBuilder = () => {
                               e.stopPropagation();
                               return;
                             }
-                            // Fix the navigation path to match the route defined in App.tsx
                             navigate(`/price-builder/pool/${pool.id}`);
                           }}
                         >

@@ -37,6 +37,7 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
 
   // Calculate totals
   const fixedCostsTotal = fixedCosts?.reduce((sum, cost) => sum + cost.price, 0) || 0;
+  console.log("Fixed costs total:", fixedCostsTotal);
   
   const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
     // Skip the id field and only add numeric values

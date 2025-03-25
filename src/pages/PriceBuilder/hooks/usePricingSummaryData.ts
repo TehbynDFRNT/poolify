@@ -63,7 +63,7 @@ export const useSelectedCrane = (poolId: string) => {
         // First try to get the crane_id from pool_crane_selections
         const { data: selection, error: selectionError } = await supabase
           .from('pool_crane_selections')
-          .select('crane_id')
+          .select('crane:crane_costs(*)')
           .eq('pool_id', poolId)
           .maybeSingle();
         
@@ -71,16 +71,9 @@ export const useSelectedCrane = (poolId: string) => {
           throw selectionError;
         }
 
-        // If a selection exists, get that crane's details
-        if (selection && 'crane_id' in selection) {
-          const { data: crane, error: craneError } = await supabase
-            .from("crane_costs")
-            .select("*")
-            .eq("id", selection.crane_id)
-            .single();
-            
-          if (craneError) throw craneError;
-          return crane as CraneCost;
+        // If a selection exists, return the crane details
+        if (selection && selection.crane) {
+          return selection.crane as CraneCost;
         }
 
         // Otherwise get the default Franna crane

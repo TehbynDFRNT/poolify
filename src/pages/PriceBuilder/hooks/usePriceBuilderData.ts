@@ -106,22 +106,27 @@ export const usePriceBuilderData = () => {
   const { data: craneSelections, isLoading: isLoadingCranes } = useQuery({
     queryKey: ["pool-crane-selections"],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pool_crane_selections")
-        .select(`
-          pool_id,
-          crane:crane_costs (*)
-        `);
+      try {
+        const { data, error } = await supabase
+          .from("pool_crane_selections")
+          .select(`
+            pool_id,
+            crane:crane_costs (*)
+          `);
 
-      if (error) throw error;
+        if (error) throw error;
 
-      // Create a Map of pool_id to crane cost
-      const craneMap = new Map();
-      data?.forEach(selection => {
-        craneMap.set(selection.pool_id, selection.crane);
-      });
+        // Create a Map of pool_id to crane cost
+        const craneMap = new Map();
+        data?.forEach(selection => {
+          craneMap.set(selection.pool_id, selection.crane);
+        });
 
-      return craneMap;
+        return craneMap;
+      } catch (error) {
+        console.error("Error fetching crane selections:", error);
+        return new Map();
+      }
     },
   });
 
