@@ -12,6 +12,11 @@ interface AddressFormSectionProps {
 export const AddressFormSection = ({ errors, onChange }: AddressFormSectionProps) => {
   const { quoteData } = useQuoteContext();
 
+  // Make sure quoteData exists before accessing properties
+  if (!quoteData) {
+    return <div>Loading address information...</div>;
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">

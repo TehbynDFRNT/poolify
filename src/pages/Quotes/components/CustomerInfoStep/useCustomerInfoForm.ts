@@ -128,10 +128,26 @@ export const useCustomerInfoForm = ({ onNext, isEditing = false }: UseCustomerIn
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    form.setValue(name as any, value);
+  };
+
+  const handleCheckboxChange = (checked: boolean) => {
+    form.setValue("resident_homeowner", checked);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     form.handleSubmit(saveData)();
   };
+
+  const handleSaveOnly = () => {
+    form.handleSubmit(saveData)();
+  };
+
+  // Get form errors
+  const errors = form.formState.errors;
 
   return {
     form,
@@ -139,5 +155,9 @@ export const useCustomerInfoForm = ({ onNext, isEditing = false }: UseCustomerIn
     showSecondOwner,
     toggleSecondOwner,
     handleSubmit,
+    handleSaveOnly,
+    handleChange,
+    handleCheckboxChange,
+    errors
   };
 };

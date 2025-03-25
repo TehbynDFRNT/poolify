@@ -4,7 +4,6 @@ import { OwnerFormSection } from "./OwnerFormSection";
 import { AddressFormSection } from "./AddressFormSection";
 import { ResidentHomeownerCheckbox } from "./ResidentHomeownerCheckbox";
 import { useCustomerInfoForm } from "./useCustomerInfoForm";
-import { useQuoteContext } from "../../context/QuoteContext";
 import { Save } from "lucide-react";
 
 interface CustomerInfoStepProps {
@@ -13,7 +12,6 @@ interface CustomerInfoStepProps {
 }
 
 export const CustomerInfoStep = ({ onNext, isEditing = false }: CustomerInfoStepProps) => {
-  const { quoteData } = useQuoteContext();
   const { 
     errors, 
     isSubmitting, 
@@ -21,7 +19,7 @@ export const CustomerInfoStep = ({ onNext, isEditing = false }: CustomerInfoStep
     handleCheckboxChange, 
     handleSubmit,
     handleSaveOnly
-  } = useCustomerInfoForm(onNext, isEditing);
+  } = useCustomerInfoForm({ onNext, isEditing });
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

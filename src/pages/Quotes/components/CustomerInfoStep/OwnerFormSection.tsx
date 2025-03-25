@@ -17,6 +17,11 @@ export const OwnerFormSection = ({
 }: OwnerFormSectionProps) => {
   const { quoteData } = useQuoteContext();
   
+  // Make sure quoteData exists before accessing properties
+  if (!quoteData) {
+    return <div>Loading owner information...</div>;
+  }
+  
   const prefix = ownerNumber === 1 ? 'customer' : 'owner2';
   const required = ownerNumber === 1;
   const title = `Owner ${ownerNumber}${ownerNumber === 2 ? ' (Optional)' : ''}`;

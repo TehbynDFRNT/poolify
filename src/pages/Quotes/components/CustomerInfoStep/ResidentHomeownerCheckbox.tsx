@@ -10,6 +10,11 @@ interface ResidentHomeownerCheckboxProps {
 export const ResidentHomeownerCheckbox = ({ onCheckedChange }: ResidentHomeownerCheckboxProps) => {
   const { quoteData } = useQuoteContext();
 
+  // Make sure quoteData exists before accessing properties
+  if (!quoteData) {
+    return null;
+  }
+
   return (
     <div className="flex items-center space-x-2">
       <Checkbox 
