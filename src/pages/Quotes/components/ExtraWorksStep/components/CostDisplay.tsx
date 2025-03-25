@@ -3,7 +3,6 @@ import { formatCurrency } from "@/utils/format";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronUp } from "lucide-react";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface CostDisplayProps {
   isDetailsOpen: boolean;
@@ -23,23 +22,15 @@ export const CostDisplay = ({
       <div>
         <Label className="flex items-center">
           Cost per meter
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="h-5 w-5 ml-1"
-                  onClick={onToggleDetails}
-                >
-                  {isDetailsOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                {isDetailsOpen ? "Hide cost details" : "Show cost details"}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-5 w-5 ml-1"
+            onClick={onToggleDetails}
+            aria-label={isDetailsOpen ? "Hide cost details" : "Show cost details"}
+          >
+            {isDetailsOpen ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+          </Button>
         </Label>
         <div className="mt-2 font-medium">{formatCurrency(costPerMeter)}</div>
       </div>

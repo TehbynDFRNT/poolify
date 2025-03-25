@@ -39,7 +39,7 @@ export const ExtraPavingSection = () => {
           <h3 className="text-lg font-semibold">Extra Paving</h3>
         </div>
         <div className="flex flex-col items-end">
-          <div className="text-sm text-primary">
+          <div className="text-sm text-green-600">
             Total Margin: {formatCurrency(totalMargin)}
           </div>
           <div className="text-lg font-bold">
