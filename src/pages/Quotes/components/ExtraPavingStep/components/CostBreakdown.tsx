@@ -6,10 +6,16 @@ interface CostBreakdownProps {
 }
 
 export const CostBreakdown = ({ activeSelection }: CostBreakdownProps) => {
+  // Material costs per meter
   const totalMaterialCost = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
-  const totalMaterialCostAll = totalMaterialCost * activeSelection.meters;
   
-  const totalLabourCost = 100 + 30; // Labour cost + margin
+  // Fixed labour costs per meter
+  const laborCost = 100;
+  const laborMargin = 30;
+  const totalLabourCost = laborCost + laborMargin;
+  
+  // Total costs for all meters
+  const totalMaterialCostAll = totalMaterialCost * activeSelection.meters;
   const totalLabourCostAll = totalLabourCost * activeSelection.meters;
   
   return (
@@ -42,13 +48,13 @@ export const CostBreakdown = ({ activeSelection }: CostBreakdownProps) => {
         <h4 className="font-medium mb-2">Labour (per meter)</h4>
         <div className="grid grid-cols-2 gap-y-1">
           <div>Labour Cost:</div>
-          <div className="text-right">$100.00</div>
+          <div className="text-right">${laborCost.toFixed(2)}</div>
           
           <div>Labour Margin:</div>
-          <div className="text-right text-green-600">$30.00</div>
+          <div className="text-right text-green-600">${laborMargin.toFixed(2)}</div>
           
           <div className="border-t pt-1 mt-1 font-medium">Total Labour Cost (per m):</div>
-          <div className="text-right border-t pt-1 mt-1 font-medium">$130.00</div>
+          <div className="text-right border-t pt-1 mt-1 font-medium">${totalLabourCost.toFixed(2)}</div>
           
           <div className="font-medium">Total Labour Cost:</div>
           <div className="text-right font-medium">${totalLabourCostAll.toFixed(2)}</div>

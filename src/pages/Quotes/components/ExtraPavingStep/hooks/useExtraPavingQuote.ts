@@ -88,6 +88,11 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       return;
     }
 
+    // Ensure meters is a valid number
+    if (isNaN(meters)) {
+      meters = 0;
+    }
+
     const updatedSelections = pavingSelections.map(selection => {
       if (selection.pavingId === pavingId) {
         const updatedSelection = {

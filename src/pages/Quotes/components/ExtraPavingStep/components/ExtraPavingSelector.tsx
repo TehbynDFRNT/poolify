@@ -42,6 +42,17 @@ export const ExtraPavingSelector = ({
     }
   }, [selections, activeSelection]);
 
+  // Calculate cost per meter for the active selection
+  const getCostPerMeter = () => {
+    if (!activeSelection || activeSelection.meters <= 0) return 0;
+    return activeSelection.totalCost / activeSelection.meters;
+  };
+
+  // Calculate total meters across all selections
+  const getTotalMeters = () => {
+    return selections.reduce((sum, selection) => sum + selection.meters, 0);
+  };
+
   return (
     <Card className="border border-gray-200">
       <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
@@ -88,7 +99,7 @@ export const ExtraPavingSelector = ({
                     </Button>
                   </div>
                   <div className="text-lg font-semibold">
-                    ${((activeSelection.totalCost || 0) / (activeSelection.meters || 1)).toFixed(2)}
+                    ${getCostPerMeter().toFixed(2)}
                   </div>
                   <div className="mt-1 font-medium">
                     Total Cost
@@ -110,10 +121,10 @@ export const ExtraPavingSelector = ({
               <h4 className="font-medium text-gray-700 mb-2">Total Summary</h4>
               <div className="grid grid-cols-2">
                 <div>Cost Per Meter:</div>
-                <div className="text-right">${((totalCost || 0) / (activeSelection?.meters || 1)).toFixed(2)}</div>
+                <div className="text-right">${getTotalMeters() > 0 ? (totalCost / getTotalMeters()).toFixed(2) : "0.00"}</div>
                 
                 <div>Total Meters:</div>
-                <div className="text-right">{activeSelection?.meters || 0}</div>
+                <div className="text-right">{getTotalMeters().toFixed(1)}</div>
                 
                 <div>Total Margin:</div>
                 <div className="text-right text-green-600">${totalMargin.toFixed(2)}</div>

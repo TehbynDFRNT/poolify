@@ -41,7 +41,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
 
   // Calculate the overall total cost
   const calculateTotalCost = () => {
-    let total = pavingTotalCost;
+    let total = pavingTotalCost || 0;
     
     // Add concrete pump cost if required
     if (isPumpRequired && quoteData.concrete_pump_price) {
@@ -113,7 +113,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
             <span>${pavingTotalCost.toFixed(2)}</span>
           </div>
           
-          {isPumpRequired && quoteData.concrete_pump_price && (
+          {isPumpRequired && quoteData.concrete_pump_price > 0 && (
             <div className="flex justify-between">
               <span>Concrete Pump:</span>
               <span>${quoteData.concrete_pump_price.toFixed(2)}</span>
