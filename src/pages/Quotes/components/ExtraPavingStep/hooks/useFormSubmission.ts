@@ -54,9 +54,14 @@ export const useFormSubmission = ({ onNext }: UseFormSubmissionParams) => {
         concreteCutsCost
       );
       
+      // Calculate total extra paving cost including concrete cuts and pump
+      const totalExtraPavingCost = pavingTotalCost + 
+        (isPumpRequired ? pumpPrice : 0) + 
+        concreteCutsCost;
+      
       // Update context with the latest values
       updateQuoteData({
-        extra_paving_cost: pavingTotalCost,
+        extra_paving_cost: totalExtraPavingCost,
         concrete_pump_required: isPumpRequired,
         concrete_pump_price: pumpPrice,
         concrete_cuts: JSON.stringify(concreteCuts),

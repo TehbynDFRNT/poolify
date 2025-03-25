@@ -100,6 +100,13 @@ export const saveConcretePumpAndCuts = async (
   cutsCost: number
 ) => {
   try {
+    console.log("Saving concrete pump and cuts:", {
+      pumpRequired,
+      pumpPrice,
+      concreteCuts,
+      cutsCost
+    });
+
     // Update the quote with concrete pump and cuts information
     const { error: updateError } = await supabase
       .from('quotes')

@@ -53,6 +53,14 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     }, 0);
   };
 
+  // Get concrete pump cost when required
+  const getConcretePumpCost = () => {
+    if (isPumpRequired && quoteData.concrete_pump_price) {
+      return quoteData.concrete_pump_price;
+    }
+    return 0;
+  };
+
   // Calculate the overall total cost
   const calculateTotalCost = () => {
     const pavingCost = isNaN(pavingTotalCost) ? 0 : pavingTotalCost;
