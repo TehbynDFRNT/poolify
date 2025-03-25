@@ -98,11 +98,12 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     // Material costs
     const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
     
-    // Labor costs (estimated as 80% of paver cost + 30% of margin)
-    const laborCostPerMeter = selection.paverCost * 0.8 + selection.marginCost * 0.3;
+    // Fixed labor costs
+    const laborCostPerMeter = 100; // Fixed labor cost of $100
+    const laborMarginPerMeter = 30;  // Fixed labor margin of $30
     
     // Total cost per meter
-    const totalCostPerMeter = materialCostPerMeter + laborCostPerMeter;
+    const totalCostPerMeter = materialCostPerMeter + laborCostPerMeter + laborMarginPerMeter;
     
     // Total cost for all meters
     return totalCostPerMeter * selection.meters;
@@ -189,7 +190,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   const calculateTotalMargin = () => {
     return pavingSelections.reduce((sum, selection) => {
       const materialMargin = selection.marginCost * selection.meters;
-      const laborMargin = (selection.marginCost * 0.3) * selection.meters;
+      const laborMargin = 30 * selection.meters; // Fixed labor margin of $30 per meter
       return sum + materialMargin + laborMargin;
     }, 0);
   };

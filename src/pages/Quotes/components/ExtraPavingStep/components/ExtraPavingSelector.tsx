@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,7 +13,6 @@ import {
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 interface ExtraPavingSelectorProps {
@@ -208,19 +206,19 @@ export const ExtraPavingSelector = ({
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Labour Cost:</span>
-                    <span>${(activeSelection.paverCost * 0.8).toFixed(2)}</span>
+                    <span>$100.00</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Labour Margin:</span>
-                    <span className="text-green-600">${(activeSelection.marginCost * 0.3).toFixed(2)}</span>
+                    <span className="text-green-600">$30.00</span>
                   </div>
                   <div className="flex justify-between font-medium">
                     <span>Total Labour Cost (per m):</span>
-                    <span>${(activeSelection.paverCost * 0.8 + activeSelection.marginCost * 0.3).toFixed(2)}</span>
+                    <span>$130.00</span>
                   </div>
                   <div className="flex justify-between border-t pt-2 mt-2">
                     <span>Total Labour Cost:</span>
-                    <span>${((activeSelection.paverCost * 0.8 + activeSelection.marginCost * 0.3) * activeSelection.meters).toFixed(2)}</span>
+                    <span>${(130 * activeSelection.meters).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -231,7 +229,7 @@ export const ExtraPavingSelector = ({
               <div className="grid grid-cols-2 gap-2">
                 <div className="flex justify-between">
                   <span>Cost Per Meter:</span>
-                  <span className="font-semibold">${((activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost) + (activeSelection.paverCost * 0.8 + activeSelection.marginCost * 0.3)).toFixed(2)}</span>
+                  <span className="font-semibold">${((activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost) + 130).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total Meters:</span>
@@ -239,7 +237,7 @@ export const ExtraPavingSelector = ({
                 </div>
                 <div className="flex justify-between">
                   <span>Total Margin:</span>
-                  <span className="font-semibold text-green-600">${((activeSelection.marginCost + activeSelection.marginCost * 0.3) * activeSelection.meters).toFixed(2)}</span>
+                  <span className="font-semibold text-green-600">${((activeSelection.marginCost + 30) * activeSelection.meters).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Total Cost:</span>
