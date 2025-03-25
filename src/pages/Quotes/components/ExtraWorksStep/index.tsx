@@ -42,8 +42,8 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     setIsSaving(true);
 
     try {
-      // Create a deep copy of the paving selections to prevent any reference issues
-      const pavingSelectionsCopy = pavingSelections.map(selection => ({
+      // Create a deep copy of the current paving selections
+      const currentPavingSelections = pavingSelections.map(selection => ({
         categoryId: selection.categoryId,
         meters: selection.meters,
         cost: selection.cost,
@@ -52,18 +52,21 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         totalMargin: selection.totalMargin || 0
       }));
 
-      // Only proceed with saving if there's actual data (or if we're explicitly clearing data)
+      // Make sure we're using the current totalCost value
+      const currentTotalCost = pavingTotalCost;
+
+      // Create the extra works data object with the current values
       const extraWorksData: ExtraWorks = {
-        pavingSelections: pavingSelectionsCopy,
+        pavingSelections: currentPavingSelections,
         concretingSelections: [],
         retainingWallSelections: [],
         waterFeatureSelections: [],
-        totalCost: totalExtraWorksCost,
+        totalCost: currentTotalCost,
         totalMargin: pavingTotalMargin
       };
 
-      console.log("Saving extra works with total cost:", totalExtraWorksCost);
-      console.log("Saving paving selections:", pavingSelectionsCopy);
+      console.log("Saving extra works with total cost:", currentTotalCost);
+      console.log("Saving paving selections:", currentPavingSelections);
       
       // Stringify the data here so we can log it and verify it's correct
       const jsonData = JSON.stringify(extraWorksData);
@@ -73,7 +76,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         .from('quotes')
         .update({ 
           custom_requirements_json: jsonData,
-          extra_works_cost: totalExtraWorksCost
+          extra_works_cost: currentTotalCost
         })
         .eq('id', quoteData.id);
 
@@ -87,7 +90,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       // Update the local context with the new values
       updateQuoteData({
         custom_requirements_json: jsonData,
-        extra_works_cost: totalExtraWorksCost
+        extra_works_cost: currentTotalCost
       });
 
       toast.success("Extra works saved");
