@@ -113,8 +113,12 @@ export const useQuoteSteps = (quoteId?: string) => {
         traffic_control_id: quoteData.traffic_control_id || 'none',
         site_requirements_cost: quoteData.site_requirements_cost || 0,
         
-        // Extra paving
+        // Extra paving and concrete
         extra_paving_cost: quoteData.extra_paving_cost || 0,
+        concrete_pump_required: quoteData.concrete_pump_required || false,
+        concrete_pump_price: quoteData.concrete_pump_price || 0,
+        concrete_cuts: quoteData.concrete_cuts || '',
+        concrete_cuts_cost: quoteData.concrete_cuts_cost || 0,
         
         // Optional addons
         optional_addons_cost: quoteData.optional_addons_cost || 0,

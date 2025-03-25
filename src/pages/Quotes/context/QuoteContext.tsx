@@ -31,6 +31,12 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   optional_addons_cost: 0,
   total_cost: 0,
   
+  // Concrete related fields
+  concrete_pump_required: false,
+  concrete_pump_price: 0,
+  concrete_cuts: '',
+  concrete_cuts_cost: 0,
+  
   // Micro dig (adding as empty defaults)
   micro_dig_required: false,
   micro_dig_price: 0,
