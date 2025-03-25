@@ -83,29 +83,29 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
   // Update meters for a selection
   const updateSelectionMeters = (pavingId: string, meters: number) => {
-    // Ensure meters is a valid number
-    if (isNaN(meters)) {
-      meters = 0;
-    }
-
+    // Ensure meters is valid
     if (meters < 0) {
       toast.error("Meters cannot be negative");
       return;
     }
 
+    console.log(`Updating selection meters: pavingId=${pavingId}, meters=${meters}`);
+
     const updatedSelections = pavingSelections.map(selection => {
       if (selection.pavingId === pavingId) {
         const updatedSelection = {
           ...selection,
-          meters
+          meters: meters
         };
         // Recalculate the total cost
         updatedSelection.totalCost = calculateSelectionCost(updatedSelection);
+        console.log(`Updated selection: meters=${updatedSelection.meters}, totalCost=${updatedSelection.totalCost}`);
         return updatedSelection;
       }
       return selection;
     });
 
+    console.log("Updated selections:", updatedSelections);
     setPavingSelections(updatedSelections);
     updateTotalCost(updatedSelections);
   };
@@ -120,6 +120,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   // Update the total cost
   const updateTotalCost = (selections: PavingSelection[]) => {
     const total = calculateTotalCost(selections);
+    console.log(`Total cost calculated: ${total}`);
     setTotalCost(total);
   };
 

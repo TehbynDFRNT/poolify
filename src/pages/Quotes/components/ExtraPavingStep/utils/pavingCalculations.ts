@@ -8,7 +8,7 @@ const LABOR_MARGIN_PER_METER = 30;
 // Calculate the cost for a single selection, including material and labor costs
 export const calculateSelectionCost = (selection: PavingSelection): number => {
   // Ensure meters is a valid number
-  const meters = isNaN(selection.meters) ? 0 : selection.meters;
+  const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
   
   // Material costs
   const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
@@ -24,7 +24,7 @@ export const calculateSelectionCost = (selection: PavingSelection): number => {
 export const calculateTotalMargin = (selections: PavingSelection[]): number => {
   return selections.reduce((sum, selection) => {
     // Ensure meters is a valid number
-    const meters = isNaN(selection.meters) ? 0 : selection.meters;
+    const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
     
     const materialMargin = selection.marginCost * meters;
     const laborMargin = LABOR_MARGIN_PER_METER * meters; 

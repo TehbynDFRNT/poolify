@@ -15,7 +15,7 @@ export const CostBreakdown = ({ activeSelection }: CostBreakdownProps) => {
   const totalLabourCost = laborCost + laborMargin;
   
   // Ensure meters is a valid number
-  const meters = isNaN(activeSelection.meters) ? 0 : activeSelection.meters;
+  const meters = activeSelection.meters === undefined || isNaN(activeSelection.meters) ? 0 : activeSelection.meters;
   
   // Total costs for all meters
   const totalMaterialCostAll = totalMaterialCost * meters;

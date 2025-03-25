@@ -57,10 +57,14 @@ export const ExtraPavingSelector = ({
   // Calculate total meters across all selections
   const getTotalMeters = () => {
     return selections.reduce((sum, selection) => {
-      const meters = isNaN(selection.meters) ? 0 : selection.meters;
+      const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
       return sum + meters;
     }, 0);
   };
+
+  console.log("Active selection:", activeSelection);
+  console.log("All selections:", selections);
+  console.log("Total meters:", getTotalMeters());
 
   return (
     <Card className="border border-gray-200">
@@ -114,7 +118,7 @@ export const ExtraPavingSelector = ({
                     Total Cost
                   </div>
                   <div className="text-lg font-semibold">
-                    ${(activeSelection?.totalCost || 0).toFixed(2)}
+                    ${activeSelection.totalCost.toFixed(2)}
                   </div>
                 </div>
               )}

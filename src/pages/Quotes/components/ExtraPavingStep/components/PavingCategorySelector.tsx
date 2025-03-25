@@ -63,19 +63,16 @@ export const PavingCategorySelector = ({
         </Label>
         <Input
           id="meters"
-          type="text"
-          inputMode="decimal"
+          type="number"
+          step="0.1"
+          min="0"
           className="mt-2"
-          value={activeSelection?.meters === 0 ? "0" : activeSelection?.meters?.toString() || ""}
+          value={activeSelection?.meters ?? ""}
           placeholder="Enter meters"
           onChange={(e) => {
             if (activeSelection) {
-              const inputValue = e.target.value;
-              // Allow empty input, decimal points, and numbers
-              if (inputValue === "" || /^[0-9]*\.?[0-9]*$/.test(inputValue)) {
-                const value = inputValue === "" ? 0 : parseFloat(inputValue);
-                onUpdate(activeSelection.pavingId, value);
-              }
+              const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+              onUpdate(activeSelection.pavingId, isNaN(value) ? 0 : value);
             }
           }}
           disabled={!activeSelection}

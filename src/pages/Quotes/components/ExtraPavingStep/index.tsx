@@ -20,7 +20,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   const { quoteData } = useQuoteContext();
   const [isPumpRequired, setIsPumpRequired] = useState(quoteData.concrete_pump_required || false);
   const [concreteCuts, setConcreteCuts] = useState<ConcreteCutSelection[]>(
-    quoteData.concrete_cuts ? JSON.parse(quoteData.concrete_cuts) : []
+    quoteData.concrete_cuts && quoteData.concrete_cuts !== "" ? JSON.parse(quoteData.concrete_cuts) : []
   );
   
   const { 
@@ -45,7 +45,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
 
   // Calculate the overall total cost
   const calculateTotalCost = () => {
-    let total = pavingTotalCost || 0;
+    const pavingCost = isNaN(pavingTotalCost) ? 0 : pavingTotalCost;
+    let total = pavingCost;
     
     // Add concrete pump cost if required
     if (isPumpRequired && quoteData.concrete_pump_price) {
@@ -80,6 +81,10 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     });
   };
 
+  console.log("Paving selections:", pavingSelections);
+  console.log("Paving total cost:", pavingTotalCost);
+  console.log("Total cost:", calculateTotalCost());
+
   return (
     <div className="space-y-6">
       <FormHeader>
@@ -95,7 +100,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdate={updateSelectionMeters}
         onRemove={removeSelection}
         totalCost={pavingTotalCost || 0}
-        totalMargin={totalMargin || 0}
+        totalMargin={totalMargin ||.0}
       />
 
       <ConcretePumpSelector 
