@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
 import { ExtraPavingSelector } from "./components/ExtraPavingSelector";
@@ -9,7 +8,8 @@ import { ConcreteCutsSelector } from "./components/ConcreteCutsSelector";
 import { useExtraPavingQuote } from "./hooks";
 import { NoPoolWarning } from "../SiteRequirementsStep/components/NoPoolWarning";
 import { ConcreteCutSelection } from "./types";
-import { toast } from "sonner";
+import { FormActions } from "../SiteRequirementsStep/components/FormActions";
+import { useFormSubmission } from "./hooks/useFormSubmission";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -18,7 +18,6 @@ interface ExtraPavingStepProps {
 
 export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) => {
   const { quoteData } = useQuoteContext();
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isPumpRequired, setIsPumpRequired] = useState(quoteData.concrete_pump_required || false);
   const [concreteCuts, setConcreteCuts] = useState<ConcreteCutSelection[]>(
     quoteData.concrete_cuts ? JSON.parse(quoteData.concrete_cuts) : []
@@ -30,10 +29,10 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     updateSelectionMeters, 
     removeSelection,
     totalCost: pavingTotalCost,
-    totalMargin,
-    saveSelections,
-    addConcretePumpAndCuts
+    totalMargin
   } = useExtraPavingQuote(quoteData.id);
+
+  const { isSubmitting, handleSaveExtraPaving } = useFormSubmission({ onNext });
 
   // Calculate concrete cuts total cost
   const calculateConcreteCutsCost = () => {
@@ -55,23 +54,26 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     return total;
   };
 
+  const handleSaveOnly = async () => {
+    await handleSaveExtraPaving(false, {
+      pavingSelections,
+      pavingTotalCost,
+      isPumpRequired,
+      pumpPrice: quoteData.concrete_pump_price || 0,
+      concreteCuts,
+      concreteCutsCost: calculateConcreteCutsCost()
+    });
+  };
+
   const handleSaveAndContinue = async () => {
-    setIsSubmitting(true);
-    try {
-      // First save the paving selections
-      await saveSelections();
-      
-      // Then save the concrete pump and cuts selections
-      await addConcretePumpAndCuts(isPumpRequired, concreteCuts);
-      
-      toast.success("Extra paving selections saved");
-      onNext();
-    } catch (error) {
-      toast.error("Failed to save extra paving selections");
-      console.error("Error saving extra paving selections:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await handleSaveExtraPaving(true, {
+      pavingSelections,
+      pavingTotalCost,
+      isPumpRequired,
+      pumpPrice: quoteData.concrete_pump_price || 0,
+      concreteCuts,
+      concreteCutsCost: calculateConcreteCutsCost()
+    });
   };
 
   return (
@@ -132,26 +134,13 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between mt-6">
-        <Button 
-          type="button" 
-          variant="outline"
-          onClick={onPrevious}
-        >
-          Back
-        </Button>
-        
-        <div className="space-x-2">
-          <Button 
-            type="button"
-            onClick={handleSaveAndContinue}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Saving..." : "Continue"}
-          </Button>
-        </div>
-      </div>
+      {/* Navigation using FormActions component */}
+      <FormActions
+        onPrevious={onPrevious}
+        onSaveOnly={handleSaveOnly}
+        onSaveAndContinue={handleSaveAndContinue}
+        isSubmitting={isSubmitting}
+      />
     </div>
   );
 };

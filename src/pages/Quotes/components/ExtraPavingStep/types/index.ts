@@ -16,10 +16,3 @@ export interface ConcreteCutSelection {
   price: number;
   quantity: number;
 }
-
-export interface ExtraPavingData {
-  pavingSelections: PavingSelection[];
-  concretePumpRequired: boolean;
-  concreteCuts: ConcreteCutSelection[];
-  totalCost: number;
-}

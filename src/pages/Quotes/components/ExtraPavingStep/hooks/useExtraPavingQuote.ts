@@ -3,18 +3,13 @@ import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcretePump } from "@/pages/ConstructionCosts/hooks/useConcretePump";
 import { toast } from "sonner";
-import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
-import { PavingSelection, ConcreteCutSelection } from "../types";
+import { PavingSelection } from "../types";
 import { 
   calculateSelectionCost, 
   calculateTotalMargin, 
   calculateTotalCost 
 } from "../utils/pavingCalculations";
-import { 
-  fetchPavingSelections, 
-  savePavingSelections,
-  saveConcretePumpAndCuts
-} from "../services/pavingService";
+import { fetchPavingSelections } from "../services/pavingService";
 
 export const useExtraPavingQuote = (quoteId?: string) => {
   const [pavingSelections, setPavingSelections] = useState<PavingSelection[]>([]);
@@ -22,7 +17,6 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const { extraPavingCosts } = useExtraPavingCosts();
   const { concretePump } = useConcretePump();
-  const { updateQuoteData } = useQuoteContext();
 
   // Fetch existing selections for this quote
   useEffect(() => {
@@ -123,67 +117,6 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     setTotalCost(total);
   };
 
-  // Save all selections to the database
-  const saveSelections = async () => {
-    if (!quoteId) {
-      toast.error("No quote ID available. Cannot save paving selections.");
-      return;
-    }
-
-    try {
-      await savePavingSelections(quoteId, pavingSelections, totalCost);
-      
-      // Update the context with the new total
-      updateQuoteData({ 
-        extra_paving_cost: totalCost 
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Error saving paving selections:", error);
-      throw error;
-    }
-  };
-
-  // Save concrete pump and cuts
-  const addConcretePumpAndCuts = async (isPumpRequired: boolean, concreteCuts: ConcreteCutSelection[]) => {
-    if (!quoteId) {
-      toast.error("No quote ID available. Cannot save concrete selections.");
-      return;
-    }
-
-    try {
-      // Calculate the total cost of concrete cuts
-      const cutsCost = concreteCuts.reduce((total, cut) => 
-        total + (cut.price * cut.quantity), 0
-      );
-      
-      // Get the concrete pump price
-      const pumpPrice = isPumpRequired && concretePump ? concretePump.price : 0;
-      
-      await saveConcretePumpAndCuts(
-        quoteId, 
-        isPumpRequired, 
-        pumpPrice, 
-        concreteCuts, 
-        cutsCost
-      );
-      
-      // Update the quote context
-      updateQuoteData({
-        concrete_pump_required: isPumpRequired,
-        concrete_pump_price: pumpPrice,
-        concrete_cuts: JSON.stringify(concreteCuts),
-        concrete_cuts_cost: cutsCost
-      });
-
-      return true;
-    } catch (error) {
-      console.error("Error saving concrete pump and cuts:", error);
-      throw error;
-    }
-  };
-
   return {
     pavingSelections,
     totalCost,
@@ -191,8 +124,6 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     isLoading,
     addSelection,
     updateSelectionMeters,
-    removeSelection,
-    saveSelections,
-    addConcretePumpAndCuts
+    removeSelection
   };
 };
