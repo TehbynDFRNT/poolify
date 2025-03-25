@@ -59,7 +59,9 @@ export const QuoteProgressSteps = ({ steps, currentStep, onStepClick }: QuotePro
                   }`}>
                     {step.id}
                   </div>
-                  {/* Remove the step name text to only show numbers and prices */}
+                  <div className={`ml-2 text-sm ${currentStep >= step.id ? 'text-gray-900' : 'text-gray-500'}`}>
+                    {step.name}
+                  </div>
                 </button>
                 {idx < steps.length - 1 && (
                   <div className={`flex-grow mx-2 h-0.5 ${currentStep > step.id ? 'bg-primary' : 'bg-gray-200'}`} style={{width: '2rem'}}></div>
