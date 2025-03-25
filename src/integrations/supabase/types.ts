@@ -1105,6 +1105,10 @@ export type Database = {
       quotes: {
         Row: {
           bobcat_id: string | null
+          concrete_cuts: string | null
+          concrete_cuts_cost: number | null
+          concrete_pump_price: number | null
+          concrete_pump_required: boolean | null
           crane_id: string | null
           created_at: string
           customer_email: string
@@ -1134,6 +1138,10 @@ export type Database = {
         }
         Insert: {
           bobcat_id?: string | null
+          concrete_cuts?: string | null
+          concrete_cuts_cost?: number | null
+          concrete_pump_price?: number | null
+          concrete_pump_required?: boolean | null
           crane_id?: string | null
           created_at?: string
           customer_email: string
@@ -1163,6 +1171,10 @@ export type Database = {
         }
         Update: {
           bobcat_id?: string | null
+          concrete_cuts?: string | null
+          concrete_cuts_cost?: number | null
+          concrete_pump_price?: number | null
+          concrete_pump_required?: boolean | null
           crane_id?: string | null
           created_at?: string
           customer_email?: string
