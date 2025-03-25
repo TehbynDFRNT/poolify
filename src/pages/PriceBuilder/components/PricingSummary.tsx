@@ -40,13 +40,13 @@ export const PricingSummary = ({ poolId, poolBasePrice, filtrationPackage }: Pri
   
   const individualCostsTotal = individualCosts ? Object.entries(individualCosts).reduce((sum, [key, value]) => {
     // Skip the id field and only add numeric values
-    if (key !== 'id' && typeof value === 'number') {
+    if (key !== 'id' && key !== 'pool_id' && key !== 'created_at' && key !== 'updated_at' && typeof value === 'number') {
       return sum + value;
     }
     return sum;
   }, 0) : 0;
   
-  const excavationTotal = calculateExcavationTotal(excavationDetails);
+  const excavationTotal = excavationDetails ? calculateExcavationTotal(excavationDetails) : 0;
   
   const filtrationTotal = filtrationPackage ? calculatePackagePrice(filtrationPackage) : 0;
 

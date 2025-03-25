@@ -55,6 +55,7 @@ export const useExcavationDetails = (poolId: string) => {
       const { data, error } = await supabase
         .from("pool_dig_type_matches")
         .select(`
+          dig_type_id,
           dig_type:dig_types (*)
         `)
         .eq("pool_id", poolId)
@@ -72,16 +73,32 @@ export const useSelectedCrane = (poolId: string) => {
   return useQuery({
     queryKey: ["pool-crane", poolId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First try to get selected crane from pool_crane_selections
+      const { data: selection, error: selectionError } = await supabase
         .from("pool_crane_selections")
         .select(`
+          crane_id,
           crane:crane_costs (*)
         `)
         .eq("pool_id", poolId)
         .maybeSingle();
       
-      if (error && error.code !== 'PGRST116') throw error;
-      return data?.crane;
+      if (selectionError && selectionError.code !== 'PGRST116') throw selectionError;
+      
+      // If there's a selected crane, return it
+      if (selection?.crane) {
+        return selection.crane;
+      }
+      
+      // If no selection found, return the default Franna Crane
+      const { data: defaultCrane, error: craneError } = await supabase
+        .from("crane_costs")
+        .select("*")
+        .eq("name", "Franna Crane-S20T-L1")
+        .maybeSingle();
+      
+      if (craneError) throw craneError;
+      return defaultCrane;
     },
     enabled: !!poolId,
   });

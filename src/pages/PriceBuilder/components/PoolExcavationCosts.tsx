@@ -14,7 +14,7 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
   const { data: excavationDetails, isLoading } = useQuery({
     queryKey: ["pool-excavation", poolId],
     queryFn: async () => {
-      const { data: match } = await supabase
+      const { data: match, error } = await supabase
         .from("pool_dig_type_matches")
         .select(`
           dig_type_id,
@@ -23,6 +23,7 @@ export const PoolExcavationCosts = ({ poolId }: PoolExcavationCostsProps) => {
         .eq("pool_id", poolId)
         .maybeSingle();
 
+      if (error && error.code !== 'PGRST116') throw error;
       return match;
     },
   });
