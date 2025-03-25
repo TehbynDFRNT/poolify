@@ -96,7 +96,8 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         return;
       }
 
-      // Update the local context with the new values
+      // Update the local context with the new values - this is the key fix
+      // Always update the context after successful save, regardless of navigation
       updateQuoteData({
         custom_requirements_json: jsonData,
         extra_works_cost: currentTotalCost
