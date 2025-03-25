@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "../context/QuoteContext";
@@ -151,21 +152,9 @@ export const useQuoteSteps = (quoteId?: string) => {
     ...state,
     steps: QUOTE_STEPS,
     totalSteps: QUOTE_STEPS.length,
-    setCurrentStep: (step: number) => {
-      if (state.dataLoaded) {
-        setState(prev => ({ ...prev, currentStep: step }));
-      }
-    },
-    nextStep: () => {
-      if (state.currentStep < QUOTE_STEPS.length) {
-        setState(prev => ({ ...prev, currentStep: prev.currentStep + 1 }));
-      }
-    },
-    previousStep: () => {
-      if (state.currentStep > 1) {
-        setState(prev => ({ ...prev, currentStep: prev.currentStep - 1 }));
-      }
-    },
+    setCurrentStep,
+    nextStep,
+    previousStep,
     handleRetry
   };
 };
