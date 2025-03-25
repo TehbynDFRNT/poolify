@@ -16,33 +16,22 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
   const [isSaving, setIsSaving] = useState(false);
   const { 
     pavingSelections, 
-    setPavingSelections,
     totalCost: pavingTotalCost,
     totalMargin: pavingTotalMargin,
-    loadSavedSelections
   } = useExtraPaving();
   
   // This is the total cost that will be displayed and saved to the database
   const totalExtraWorksCost = pavingTotalCost;
 
-  // Load saved data when component mounts
+  // Update the quote data whenever the total cost changes but only if it's different
   useEffect(() => {
-    if (quoteData.id) {
-      loadSavedSelections(quoteData.custom_requirements_json);
-    }
-  }, [quoteData.id, quoteData.custom_requirements_json, loadSavedSelections]);
-
-  // Update the quote data whenever the total cost changes
-  useEffect(() => {
-    console.log("Total extra works cost updated to:", totalExtraWorksCost);
-    
-    // Don't trigger an update if there's no quoteId or if we're currently saving
-    if (quoteData.id && !isSaving) {
+    if (quoteData.id && !isSaving && totalExtraWorksCost !== quoteData.extra_works_cost) {
+      console.log("Updating quote extra_works_cost to:", totalExtraWorksCost);
       updateQuoteData({
         extra_works_cost: totalExtraWorksCost
       });
     }
-  }, [totalExtraWorksCost, quoteData.id, isSaving, updateQuoteData]);
+  }, [totalExtraWorksCost, quoteData.id, quoteData.extra_works_cost, isSaving, updateQuoteData]);
 
   const saveExtraWorks = async (navigateNext = false) => {
     if (!quoteData.id) {
@@ -70,6 +59,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
 
     try {
       console.log("Saving extra works with total cost:", totalExtraWorksCost);
+      console.log("Saving paving selections:", pavingSelections);
       
       const { error } = await supabase
         .from('quotes')
@@ -86,6 +76,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         return;
       }
 
+      // Update the local context with the new values
       updateQuoteData({
         custom_requirements_json: JSON.stringify(extraWorksData),
         extra_works_cost: totalExtraWorksCost

@@ -67,7 +67,7 @@ export const useExtraPaving = () => {
     
     try {
       const extraWorksData = JSON.parse(customRequirementsJson);
-      if (extraWorksData.pavingSelections && extraWorksData.pavingSelections.length > 0) {
+      if (extraWorksData.pavingSelections && Array.isArray(extraWorksData.pavingSelections) && extraWorksData.pavingSelections.length > 0) {
         console.log("Loading saved paving selections:", extraWorksData.pavingSelections);
         setPavingSelections(extraWorksData.pavingSelections);
       } else {
@@ -164,6 +164,13 @@ export const useExtraPaving = () => {
       containerRef.current.setAttribute('data-margin', newTotalMargin.toString());
     }
   }, [pavingSelections]);
+
+  // Load saved data when component mounts or customRequirements changes
+  useEffect(() => {
+    if (quoteData.custom_requirements_json) {
+      loadSavedSelections(quoteData.custom_requirements_json);
+    }
+  }, [quoteData.custom_requirements_json, loadSavedSelections]);
 
   const isLoading = isLoadingPaving || isLoadingLabour;
 
