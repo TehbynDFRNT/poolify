@@ -9,7 +9,7 @@ import { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 import { Trash, ChevronDown, ChevronUp } from "lucide-react";
 import { PavingSelection } from "../hooks/useExtraPaving";
 import { formatCurrency } from "@/utils/format";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface ExtraPavingSelectionProps {
@@ -46,6 +46,27 @@ export const ExtraPavingSelection = ({
   const costPerMeter = materialCostPerMeter + labourCostValue + labourMarginValue;
 
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [metersValue, setMetersValue] = useState(selection.meters.toString());
+
+  // Update the actual selection when input is committed
+  const handleMetersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMetersValue(e.target.value);
+  };
+
+  const handleMetersBlur = () => {
+    const value = parseFloat(metersValue);
+    if (!isNaN(value)) {
+      onUpdate(index, { meters: value });
+    } else {
+      // Reset to the current value if invalid input
+      setMetersValue(selection.meters.toString());
+    }
+  };
+
+  // Synchronize the input value with selection when it changes from outside
+  useEffect(() => {
+    setMetersValue(selection.meters.toString());
+  }, [selection.meters]);
 
   return (
     <Card className="mb-4">
@@ -77,8 +98,9 @@ export const ExtraPavingSelection = ({
               type="number"
               min="0"
               step="0.5"
-              value={selection.meters || ""}
-              onChange={(e) => onUpdate(index, { meters: parseFloat(e.target.value) || 0 })}
+              value={metersValue}
+              onChange={handleMetersChange}
+              onBlur={handleMetersBlur}
               className="mt-1"
             />
           </div>

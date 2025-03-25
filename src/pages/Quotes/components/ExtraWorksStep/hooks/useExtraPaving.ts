@@ -93,13 +93,25 @@ export const useExtraPaving = () => {
         // Calculate total per meter including labor cost and margin
         const totalPerMeter = pavingPerMeter + laborCost + laborMargin;
         
+        // Calculate final cost based on meters
+        const meters = updatedSelections[index].meters;
+        
         // Calculate final cost
-        updatedSelections[index].cost = totalPerMeter * updatedSelections[index].meters;
+        updatedSelections[index].cost = totalPerMeter * meters;
         
         // Calculate margins
-        updatedSelections[index].materialMargin = category.margin_cost * updatedSelections[index].meters;
-        updatedSelections[index].labourMargin = laborMargin * updatedSelections[index].meters;
-        updatedSelections[index].totalMargin = updatedSelections[index].materialMargin + updatedSelections[index].labourMargin;
+        updatedSelections[index].materialMargin = category.margin_cost * meters;
+        updatedSelections[index].labourMargin = laborMargin * meters;
+        updatedSelections[index].totalMargin = 
+          (updatedSelections[index].materialMargin || 0) + 
+          (updatedSelections[index].labourMargin || 0);
+          
+        console.log(
+          `Updated paving selection ${index}:`, 
+          `meters=${meters}`, 
+          `totalPerMeter=${totalPerMeter}`, 
+          `totalCost=${updatedSelections[index].cost}`
+        );
       }
     }
     
@@ -117,6 +129,9 @@ export const useExtraPaving = () => {
   useEffect(() => {
     const newTotalCost = pavingSelections.reduce((acc, selection) => acc + selection.cost, 0);
     const newTotalMargin = pavingSelections.reduce((acc, selection) => acc + (selection.totalMargin || 0), 0);
+    
+    console.log("Paving selections changed, new total cost:", newTotalCost);
+    console.log("Selections:", pavingSelections);
     
     setTotalCost(newTotalCost);
     setTotalMargin(newTotalMargin);

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; onPrevious?: () => void }) => {
   const navigate = useNavigate();
   const { quoteData, updateQuoteData } = useQuoteContext();
+  const [isSaving, setIsSaving] = useState(false);
   const { 
     pavingSelections, 
     setPavingSelections,
@@ -60,6 +61,8 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       return;
     }
 
+    setIsSaving(true);
+
     // Prepare the extra works data
     const extraWorksData: ExtraWorks = {
       pavingSelections: pavingSelections.map(selection => ({
@@ -78,6 +81,8 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     };
 
     try {
+      console.log("Saving extra works with total cost:", totalExtraWorksCost);
+      
       // Update both the custom_requirements_json field and the extra_works_cost field
       const { error } = await supabase
         .from('quotes')
@@ -91,6 +96,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       if (error) {
         console.error("Error saving extra works data:", error);
         toast.error("Failed to save extra works data");
+        setIsSaving(false);
         return;
       }
 
@@ -107,6 +113,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       });
 
       toast.success("Extra works saved");
+      setIsSaving(false);
 
       if (navigateNext) {
         if (onNext) {
@@ -118,6 +125,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     } catch (error) {
       console.error("Error in saveExtraWorks:", error);
       toast.error("Error saving extra works data");
+      setIsSaving(false);
     }
   };
 
@@ -167,15 +175,15 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
             </div>
             <div className="flex space-x-2">
               {onPrevious && (
-                <Button variant="outline" onClick={onPrevious}>
+                <Button variant="outline" onClick={onPrevious} disabled={isSaving}>
                   Previous
                 </Button>
               )}
-              <Button variant="outline" onClick={() => saveExtraWorks(false)}>
-                Save
+              <Button variant="outline" onClick={() => saveExtraWorks(false)} disabled={isSaving}>
+                {isSaving ? "Saving..." : "Save"}
               </Button>
-              <Button onClick={() => saveExtraWorks(true)}>
-                {onNext ? "Save & Continue" : "Save & Continue"}
+              <Button onClick={() => saveExtraWorks(true)} disabled={isSaving}>
+                {isSaving ? "Saving..." : (onNext ? "Save & Continue" : "Save & Continue")}
               </Button>
             </div>
           </div>
