@@ -32,7 +32,7 @@ export const ExtraPavingSection = () => {
   }
 
   return (
-    <div className="space-y-4" ref={containerRef} data-paving-cost={totalCost}>
+    <div className="space-y-4" ref={containerRef} data-paving-cost={totalCost} data-paving-margin={totalMargin}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Grid2x2 className="h-5 w-5 text-primary" />

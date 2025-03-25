@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -23,6 +24,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     totalMargin: pavingTotalMargin
   } = useExtraPaving();
   
+  // This is the total cost that will be displayed and saved to the database
   const totalExtraWorksCost = pavingTotalCost;
 
   useEffect(() => {
@@ -37,6 +39,17 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       }
     }
   }, [quoteData.custom_requirements_json, setPavingSelections]);
+
+  // Update the quote data whenever the total cost changes
+  useEffect(() => {
+    console.log("Total extra works cost updated to:", totalExtraWorksCost);
+    // Don't trigger an update if there's no quoteId or if we're currently saving
+    if (quoteData.id && !isSaving && quoteData.extra_works_cost !== totalExtraWorksCost) {
+      updateQuoteData({
+        extra_works_cost: totalExtraWorksCost
+      });
+    }
+  }, [totalExtraWorksCost, quoteData.id, isSaving]);
 
   const saveExtraWorks = async (navigateNext = false) => {
     if (!quoteData.id) {

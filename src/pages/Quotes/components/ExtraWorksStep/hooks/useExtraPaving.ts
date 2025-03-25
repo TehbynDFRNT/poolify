@@ -16,7 +16,7 @@ export interface PavingSelection {
 }
 
 export const useExtraPaving = () => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { quoteData } = useQuoteContext();
   const [pavingSelections, setPavingSelections] = useState<PavingSelection[]>([]);
   const [totalCost, setTotalCost] = useState(0);
   const [totalMargin, setTotalMargin] = useState(0);
@@ -112,14 +112,15 @@ export const useExtraPaving = () => {
         const meters = updatedSelections[index].meters;
         
         // Calculate final cost
-        updatedSelections[index].cost = totalPerMeter * meters;
+        updatedSelections[index].cost = Number((totalPerMeter * meters).toFixed(2));
         
         // Calculate margins
-        updatedSelections[index].materialMargin = category.margin_cost * meters;
-        updatedSelections[index].labourMargin = laborMargin * meters;
-        updatedSelections[index].totalMargin = 
+        updatedSelections[index].materialMargin = Number((category.margin_cost * meters).toFixed(2));
+        updatedSelections[index].labourMargin = Number((laborMargin * meters).toFixed(2));
+        updatedSelections[index].totalMargin = Number((
           (updatedSelections[index].materialMargin || 0) + 
-          (updatedSelections[index].labourMargin || 0);
+          (updatedSelections[index].labourMargin || 0)
+        ).toFixed(2));
           
         console.log(
           `Updated paving selection ${index}:`, 
