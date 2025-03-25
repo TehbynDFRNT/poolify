@@ -44,13 +44,22 @@ export const ExtraPavingSelector = ({
 
   // Calculate cost per meter for the active selection
   const getCostPerMeter = () => {
-    if (!activeSelection || activeSelection.meters <= 0) return 0;
-    return activeSelection.totalCost / activeSelection.meters;
+    if (!activeSelection) return 0;
+    
+    // Material costs
+    const materialCostPerMeter = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
+    // Labour costs
+    const laborCostPerMeter = 100 + 30; // Fixed labour costs
+    
+    return materialCostPerMeter + laborCostPerMeter;
   };
 
   // Calculate total meters across all selections
   const getTotalMeters = () => {
-    return selections.reduce((sum, selection) => sum + selection.meters, 0);
+    return selections.reduce((sum, selection) => {
+      const meters = isNaN(selection.meters) ? 0 : selection.meters;
+      return sum + meters;
+    }, 0);
   };
 
   return (
@@ -105,7 +114,7 @@ export const ExtraPavingSelector = ({
                     Total Cost
                   </div>
                   <div className="text-lg font-semibold">
-                    ${activeSelection?.totalCost.toFixed(2) || "0.00"}
+                    ${(activeSelection?.totalCost || 0).toFixed(2)}
                   </div>
                 </div>
               )}

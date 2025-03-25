@@ -99,6 +99,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
           ...selection,
           meters
         };
+        // Recalculate the total cost
         updatedSelection.totalCost = calculateSelectionCost(updatedSelection);
         return updatedSelection;
       }
