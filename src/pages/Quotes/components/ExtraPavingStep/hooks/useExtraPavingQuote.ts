@@ -63,7 +63,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       return;
     }
 
-    // Create new selection with default 10 meters (matching the design)
+    // Create new selection with empty meters that the user will fill in
     const newSelection: PavingSelection = {
       quoteId,
       pavingId,
@@ -71,7 +71,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       paverCost: pavingData.paver_cost,
       wastageCost: pavingData.wastage_cost,
       marginCost: pavingData.margin_cost,
-      meters: 10,
+      meters: 0, // Start with 0 meters instead of 10
       totalCost: 0
     };
 
