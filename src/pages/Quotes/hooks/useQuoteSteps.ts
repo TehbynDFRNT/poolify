@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "../context/QuoteContext";
@@ -106,6 +105,9 @@ export const useQuoteSteps = (quoteId?: string) => {
         pool_id: quoteData.pool_id || '',
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
+        
+        // Base pool cost
+        base_pool_cost: quoteData.base_pool_cost || 0,
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',
