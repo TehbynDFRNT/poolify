@@ -46,13 +46,25 @@ export const usePavingSelections = () => {
         const validSelections = extraWorksData.pavingSelections.filter((selection: any) => {
           return selection && 
                  typeof selection.categoryId === 'string' && 
-                 typeof selection.meters === 'number' && 
-                 typeof selection.cost === 'number';
+                 typeof selection.meters === 'number';
         });
         
         if (validSelections.length > 0) {
           console.log("Valid selections to set:", validSelections);
-          setPavingSelections(validSelections);
+          
+          // Calculate costs for each valid selection to make sure all values are set
+          const calculatedSelections = validSelections.map((selection: PavingSelection) => {
+            if (pavingCategories && pavingCategories.length > 0) {
+              return calculatePavingCosts(
+                selection,
+                pavingCategories,
+                concreteLabourCosts
+              );
+            }
+            return selection;
+          });
+          
+          setPavingSelections(calculatedSelections);
         } else {
           console.log("No valid selections found after filtering");
           setPavingSelections([]);
@@ -65,7 +77,7 @@ export const usePavingSelections = () => {
       console.error("Error parsing saved paving selections:", error);
       setPavingSelections([]);
     }
-  }, []);
+  }, [pavingCategories, concreteLabourCosts]);
 
   // Add a new paving selection
   const addPavingSelection = () => {
@@ -104,10 +116,19 @@ export const usePavingSelections = () => {
           pavingCategories,
           concreteLabourCosts
         );
+        
+        // Log the update for debugging
+        console.log(`Updated paving selection: meters=${updatedSelections[index].meters} totalPerMeter=${costPerMeter(updatedSelections[index])} totalCost=${updatedSelections[index].cost}`);
       }
       
       return updatedSelections;
     });
+  };
+
+  // Helper function to calculate cost per meter
+  const costPerMeter = (selection: PavingSelection): number => {
+    if (selection.meters <= 0) return 0;
+    return selection.cost / selection.meters;
   };
 
   // Remove a paving selection
@@ -128,11 +149,11 @@ export const usePavingSelections = () => {
 
   // Load saved data when component mounts or customRequirements changes
   useEffect(() => {
-    if (quoteData.custom_requirements_json && !initialLoadDone) {
+    if (quoteData.custom_requirements_json && !initialLoadDone && pavingCategories && pavingCategories.length > 0) {
       loadSavedSelections(quoteData.custom_requirements_json);
       setInitialLoadDone(true);
     }
-  }, [quoteData.custom_requirements_json, loadSavedSelections, initialLoadDone]);
+  }, [quoteData.custom_requirements_json, loadSavedSelections, initialLoadDone, pavingCategories]);
 
   return {
     pavingCategories,
