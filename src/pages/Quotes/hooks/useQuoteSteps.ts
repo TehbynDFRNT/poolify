@@ -93,17 +93,30 @@ export const useQuoteSteps = (quoteId?: string) => {
           ? quoteData.status 
           : 'draft';
 
-      // Get the pool data to access buy_price_inc_gst as the base_pool_cost
-      let poolData = null;
+      // Get the pool data and calculate RRP
+      let poolRRP = 0;
       if (quoteData.pool_id) {
-        const { data: pool, error: poolError } = await supabase
+        const { data: poolData, error: poolError } = await supabase
           .from("pool_specifications")
-          .select("buy_price_inc_gst")
+          .select("*")
           .eq("id", quoteData.pool_id)
           .single();
           
-        if (!poolError && pool) {
-          poolData = pool;
+        if (!poolError && poolData) {
+          // Get margin percentage for this pool
+          const { data: marginData, error: marginError } = await supabase
+            .from("pool_margins")
+            .select("margin_percentage")
+            .eq("pool_id", quoteData.pool_id)
+            .maybeSingle();
+          
+          const marginPercentage = marginData ? marginData.margin_percentage : 0;
+          const totalCost = Number(poolData.buy_price_inc_gst || 0);
+          
+          // Calculate RRP
+          if (marginPercentage < 100) {
+            poolRRP = totalCost / (1 - marginPercentage / 100);
+          }
         }
       }
 
@@ -121,8 +134,8 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Base pool cost - use the pool's buy_price_inc_gst as the base_pool_cost
-        base_pool_cost: poolData ? Number(poolData.buy_price_inc_gst || 0) : 0,
+        // Base pool cost - use the RRP instead of buy_price_inc_gst
+        base_pool_cost: poolRRP > 0 ? poolRRP : Number(quoteData.base_pool_cost || 0),
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',
