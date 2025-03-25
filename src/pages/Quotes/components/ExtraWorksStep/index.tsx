@@ -42,41 +42,38 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     setIsSaving(true);
 
     try {
-      // Create a deep copy of the current paving selections
-      const currentPavingSelections = pavingSelections.map(selection => ({
-        categoryId: selection.categoryId,
-        meters: selection.meters,
-        cost: selection.cost,
-        materialMargin: selection.materialMargin || 0,
-        labourMargin: selection.labourMargin || 0,
-        totalMargin: selection.totalMargin || 0
-      }));
-
-      // Make sure we're using the current totalCost value
-      const currentTotalCost = pavingTotalCost;
-
+      // Get the latest state directly from the component props
+      // This ensures we're using the most up-to-date values
+      console.log("Current paving selections at time of save:", pavingSelections);
+      console.log("Current total cost at time of save:", pavingTotalCost);
+      
       // Create the extra works data object with the current values
       const extraWorksData: ExtraWorks = {
-        pavingSelections: currentPavingSelections,
+        pavingSelections: pavingSelections.map(selection => ({
+          categoryId: selection.categoryId,
+          meters: selection.meters,
+          cost: selection.cost,
+          materialMargin: selection.materialMargin || 0,
+          labourMargin: selection.labourMargin || 0,
+          totalMargin: selection.totalMargin || 0
+        })),
         concretingSelections: [],
         retainingWallSelections: [],
         waterFeatureSelections: [],
-        totalCost: currentTotalCost,
+        totalCost: pavingTotalCost,
         totalMargin: pavingTotalMargin
       };
-
-      console.log("Saving extra works with total cost:", currentTotalCost);
-      console.log("Saving paving selections:", currentPavingSelections);
       
       // Stringify the data here so we can log it and verify it's correct
       const jsonData = JSON.stringify(extraWorksData);
-      console.log("Stringified data:", jsonData);
+      console.log("About to save to database - stringified data:", jsonData);
+      console.log("About to save to database - total cost:", pavingTotalCost);
       
       const { error } = await supabase
         .from('quotes')
         .update({ 
           custom_requirements_json: jsonData,
-          extra_works_cost: currentTotalCost
+          extra_works_cost: pavingTotalCost
         })
         .eq('id', quoteData.id);
 
@@ -90,7 +87,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       // Update the local context with the new values
       updateQuoteData({
         custom_requirements_json: jsonData,
-        extra_works_cost: currentTotalCost
+        extra_works_cost: pavingTotalCost
       });
 
       toast.success("Extra works saved");
