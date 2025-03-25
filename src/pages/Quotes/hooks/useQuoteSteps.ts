@@ -106,25 +106,25 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Base pool cost
-        base_pool_cost: quoteData.base_pool_cost || 0,
+        // Base pool cost - ensure this is always a number
+        base_pool_cost: Number(quoteData.base_pool_cost || 0),
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',
         excavation_type: quoteData.excavation_type || '',
         traffic_control_id: quoteData.traffic_control_id || 'none',
-        site_requirements_cost: quoteData.site_requirements_cost || 0,
+        site_requirements_cost: Number(quoteData.site_requirements_cost || 0),
         
         // Extra paving
-        extra_paving_cost: quoteData.extra_paving_cost || 0,
+        extra_paving_cost: Number(quoteData.extra_paving_cost || 0),
         
         // Optional addons
-        optional_addons_cost: quoteData.optional_addons_cost || 0,
-        total_cost: quoteData.total_cost || 0,
+        optional_addons_cost: Number(quoteData.optional_addons_cost || 0),
+        total_cost: Number(quoteData.total_cost || 0),
         
         // Micro dig data
         micro_dig_required: quoteData.micro_dig_required === true,
-        micro_dig_price: quoteData.micro_dig_price || 0,
+        micro_dig_price: Number(quoteData.micro_dig_price || 0),
         micro_dig_notes: quoteData.micro_dig_notes || ''
       });
 
@@ -151,9 +151,21 @@ export const useQuoteSteps = (quoteId?: string) => {
     ...state,
     steps: QUOTE_STEPS,
     totalSteps: QUOTE_STEPS.length,
-    setCurrentStep,
-    nextStep,
-    previousStep,
+    setCurrentStep: (step: number) => {
+      if (state.dataLoaded) {
+        setState(prev => ({ ...prev, currentStep: step }));
+      }
+    },
+    nextStep: () => {
+      if (state.currentStep < QUOTE_STEPS.length) {
+        setState(prev => ({ ...prev, currentStep: prev.currentStep + 1 }));
+      }
+    },
+    previousStep: () => {
+      if (state.currentStep > 1) {
+        setState(prev => ({ ...prev, currentStep: prev.currentStep - 1 }));
+      }
+    },
     handleRetry
   };
 };
