@@ -41,6 +41,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
 
     setIsSaving(true);
 
+    // Only proceed with saving if there's actual data (or if we're explicitly clearing data)
     const extraWorksData: ExtraWorks = {
       pavingSelections: pavingSelections.map(selection => ({
         categoryId: selection.categoryId,
@@ -61,10 +62,14 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
       console.log("Saving extra works with total cost:", totalExtraWorksCost);
       console.log("Saving paving selections:", pavingSelections);
       
+      // Stringify the data here so we can log it and verify it's correct
+      const jsonData = JSON.stringify(extraWorksData);
+      console.log("Stringified data:", jsonData);
+      
       const { error } = await supabase
         .from('quotes')
         .update({ 
-          custom_requirements_json: JSON.stringify(extraWorksData),
+          custom_requirements_json: jsonData,
           extra_works_cost: totalExtraWorksCost
         })
         .eq('id', quoteData.id);
@@ -78,7 +83,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
 
       // Update the local context with the new values
       updateQuoteData({
-        custom_requirements_json: JSON.stringify(extraWorksData),
+        custom_requirements_json: jsonData,
         extra_works_cost: totalExtraWorksCost
       });
 

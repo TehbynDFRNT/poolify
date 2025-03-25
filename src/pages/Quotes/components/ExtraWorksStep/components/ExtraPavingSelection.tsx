@@ -49,11 +49,12 @@ export const ExtraPavingSelection = ({
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [metersValue, setMetersValue] = useState(selection.meters.toString());
 
-  // Update the actual selection when input is committed
+  // Update the input field when user types
   const handleMetersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMetersValue(e.target.value);
   };
 
+  // Only update the actual selection when input is committed (on blur)
   const handleMetersBlur = () => {
     const value = parseFloat(metersValue);
     if (!isNaN(value)) {
@@ -61,6 +62,13 @@ export const ExtraPavingSelection = ({
     } else {
       // Reset to the current value if invalid input
       setMetersValue(selection.meters.toString());
+    }
+  };
+
+  // Also update on Enter key press
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.currentTarget.blur(); // Trigger blur to commit the change
     }
   };
 
@@ -102,6 +110,7 @@ export const ExtraPavingSelection = ({
               value={metersValue}
               onChange={handleMetersChange}
               onBlur={handleMetersBlur}
+              onKeyDown={handleKeyDown}
               className="mt-1"
             />
           </div>
@@ -126,7 +135,7 @@ export const ExtraPavingSelection = ({
           
           <div className="md:col-span-2">
             <Label>Total Cost</Label>
-            <div className="mt-2 font-bold">{formatCurrency(selection.cost)}</div>
+            <div className="mt-2 font-bold">{formatCurrency(selection.cost || 0)}</div>
           </div>
           
           <div className="md:col-span-1 flex items-end">
@@ -150,8 +159,8 @@ export const ExtraPavingSelection = ({
               labourMarginValue={labourMarginValue}
               costPerMeter={costPerMeter}
               meters={selection.meters}
-              totalCost={selection.cost}
-              totalMargin={selection.totalMargin}
+              totalCost={selection.cost || 0}
+              totalMargin={selection.totalMargin || 0}
             />
           </CollapsibleContent>
         </Collapsible>

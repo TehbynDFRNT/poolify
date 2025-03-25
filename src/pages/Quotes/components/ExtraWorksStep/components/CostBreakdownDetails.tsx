@@ -1,16 +1,15 @@
 
 import { formatCurrency } from "@/utils/format";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
-import { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 
 interface CostBreakdownDetailsProps {
-  selectedCategory?: ExtraPavingCost;
+  selectedCategory: ExtraPavingCost | undefined;
   labourCostValue: number;
   labourMarginValue: number;
   costPerMeter: number;
   meters: number;
   totalCost: number;
-  totalMargin?: number;
+  totalMargin: number;
 }
 
 export const CostBreakdownDetails = ({
@@ -20,69 +19,72 @@ export const CostBreakdownDetails = ({
   costPerMeter,
   meters,
   totalCost,
-  totalMargin = 0
+  totalMargin
 }: CostBreakdownDetailsProps) => {
+  // Safely calculate material costs
+  const paverCost = selectedCategory ? selectedCategory.paver_cost : 0;
+  const wastageCost = selectedCategory ? selectedCategory.wastage_cost : 0;
+  const materialMarginCost = selectedCategory ? selectedCategory.margin_cost : 0;
+  
+  const totalMaterialCost = paverCost + wastageCost;
+  
+  // Calculate based on meters
+  const totalPaverCost = parseFloat((paverCost * meters).toFixed(2));
+  const totalWastageCost = parseFloat((wastageCost * meters).toFixed(2));
+  const totalMaterialMargin = parseFloat((materialMarginCost * meters).toFixed(2));
+  const totalLabourCost = parseFloat((labourCostValue * meters).toFixed(2));
+  const totalLabourMargin = parseFloat((labourMarginValue * meters).toFixed(2));
+  
   return (
-    <div className="bg-muted/30 p-3 rounded-md border">
-      <h4 className="text-sm font-semibold mb-2">Cost Breakdown</h4>
-      <div className="grid grid-cols-2 gap-4 text-sm">
-        <div className="space-y-1">
-          <p className="text-muted-foreground">Per Meter</p>
-          <div className="flex justify-between">
-            <span>Paver Cost:</span>
-            <span>{formatCurrency(selectedCategory?.paver_cost || 0)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Wastage Cost:</span>
-            <span>{formatCurrency(selectedCategory?.wastage_cost || 0)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Margin:</span>
-            <span>{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Labour Cost:</span>
-            <span>{formatCurrency(labourCostValue)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Labour Margin:</span>
-            <span>{formatCurrency(labourMarginValue)}</span>
-          </div>
-          <div className="flex justify-between pt-1 border-t font-medium">
-            <span>Total Per Meter:</span>
-            <span>{formatCurrency(costPerMeter)}</span>
+    <div className="bg-muted p-4 rounded-md text-sm">
+      <h4 className="font-medium mb-2">Cost Breakdown</h4>
+      <div className="space-y-3">
+        <div>
+          <h5 className="font-medium">Per Meter Costs:</h5>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            <div>Paver cost:</div>
+            <div className="text-right">{formatCurrency(paverCost)}</div>
+            
+            <div>Wastage cost:</div>
+            <div className="text-right">{formatCurrency(wastageCost)}</div>
+            
+            <div>Material margin:</div>
+            <div className="text-right">{formatCurrency(materialMarginCost)}</div>
+            
+            <div>Labour cost:</div>
+            <div className="text-right">{formatCurrency(labourCostValue)}</div>
+            
+            <div>Labour margin:</div>
+            <div className="text-right">{formatCurrency(labourMarginValue)}</div>
+            
+            <div className="font-medium">Total per meter:</div>
+            <div className="text-right font-medium">{formatCurrency(costPerMeter)}</div>
           </div>
         </div>
         
-        <div className="space-y-1">
-          <p className="text-muted-foreground">Total ({meters} meters)</p>
-          <div className="flex justify-between">
-            <span>Paver Cost:</span>
-            <span>{formatCurrency((selectedCategory?.paver_cost || 0) * meters)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Wastage Cost:</span>
-            <span>{formatCurrency((selectedCategory?.wastage_cost || 0) * meters)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Margin:</span>
-            <span>{formatCurrency((selectedCategory?.margin_cost || 0) * meters)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Labour Cost:</span>
-            <span>{formatCurrency(labourCostValue * meters)}</span>
-          </div>
-          <div className="flex justify-between">
-            <span>Labour Margin:</span>
-            <span>{formatCurrency(labourMarginValue * meters)}</span>
-          </div>
-          <div className="flex justify-between text-primary">
-            <span>Total Margin:</span>
-            <span>{formatCurrency(totalMargin)}</span>
-          </div>
-          <div className="flex justify-between pt-1 border-t font-medium">
-            <span>Total Cost:</span>
-            <span>{formatCurrency(totalCost)}</span>
+        <div>
+          <h5 className="font-medium">Total Costs ({meters} meters):</h5>
+          <div className="grid grid-cols-2 gap-2 mt-1">
+            <div>Paver cost:</div>
+            <div className="text-right">{formatCurrency(totalPaverCost)}</div>
+            
+            <div>Wastage cost:</div>
+            <div className="text-right">{formatCurrency(totalWastageCost)}</div>
+            
+            <div>Material margin:</div>
+            <div className="text-right">{formatCurrency(totalMaterialMargin)}</div>
+            
+            <div>Labour cost:</div>
+            <div className="text-right">{formatCurrency(totalLabourCost)}</div>
+            
+            <div>Labour margin:</div>
+            <div className="text-right">{formatCurrency(totalLabourMargin)}</div>
+            
+            <div className="font-medium">Total margin:</div>
+            <div className="text-right font-medium">{formatCurrency(totalMargin)}</div>
+            
+            <div className="font-medium border-t pt-1">Total cost:</div>
+            <div className="text-right font-medium border-t pt-1">{formatCurrency(totalCost)}</div>
           </div>
         </div>
       </div>
