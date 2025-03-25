@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ConcreteCutSelection } from "../types";
+import { ConcreteCut as ConcreteCutType } from "@/types/concrete-cut";
 
 interface ConcreteCutsSelectorProps {
   selectedCuts: ConcreteCutSelection[];
@@ -22,7 +23,7 @@ export const ConcreteCutsSelector = ({
   const { concreteCuts, isLoading } = useConcreteCuts();
   
   // Add a concrete cut with quantity 1
-  const handleAddCut = (cut: { id: string; cut_type: string; price: number }) => {
+  const handleAddCut = (cut: ConcreteCutType) => {
     const existingCut = selectedCuts.find(c => c.id === cut.id);
     
     if (existingCut) {
