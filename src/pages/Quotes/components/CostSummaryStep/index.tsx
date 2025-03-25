@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Save } from "lucide-react";
+import { formatCurrency } from "@/utils/format";
 
 interface CostSummaryStepProps {
   onNext: () => void;
@@ -45,7 +46,9 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
       
       // These fields now exist in the database, so we can use type-safe updates
       const dataToSave = {
-        total_cost: totalCost
+        total_cost: totalCost,
+        web_price: quoteData.web_price || 0,
+        rrp: quoteData.rrp || 0
       };
       
       // Update the record in Supabase
@@ -77,6 +80,11 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
     await saveCostSummary(true);
   };
 
+  // Format values for display
+  const formattedWebPrice = quoteData.web_price ? formatCurrency(quoteData.web_price) : "$XX,XXX";
+  const formattedRRP = quoteData.rrp ? formatCurrency(quoteData.rrp) : "$XX,XXX";
+  const formattedTotalCost = quoteData.total_cost ? formatCurrency(quoteData.total_cost) : "$XX,XXX";
+
   return (
     <div className="space-y-6">
       <p className="text-muted-foreground">
@@ -88,7 +96,7 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
           <div className="space-y-4">
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Base Pool Cost</span>
-              <span>$XX,XXX</span>
+              <span>{formattedWebPrice}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Site Requirements</span>
@@ -104,7 +112,16 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
             </div>
             <div className="flex justify-between py-2 font-bold text-lg">
               <span>Total Cost</span>
-              <span>${quoteData.total_cost ? quoteData.total_cost.toFixed(2) : "XX,XXX"}</span>
+              <span>{formattedTotalCost}</span>
+            </div>
+            
+            <div className="mt-6 pt-4 border-t">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                  <div className="text-sm text-muted-foreground">Recommended Retail Price</div>
+                  <div className="text-sm font-medium text-primary">{formattedRRP}</div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>

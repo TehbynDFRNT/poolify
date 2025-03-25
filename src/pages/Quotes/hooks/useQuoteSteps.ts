@@ -123,7 +123,11 @@ export const useQuoteSteps = (quoteId?: string) => {
         // Micro dig data
         micro_dig_required: quoteData.micro_dig_required === true,
         micro_dig_price: quoteData.micro_dig_price || 0,
-        micro_dig_notes: quoteData.micro_dig_notes || ''
+        micro_dig_notes: quoteData.micro_dig_notes || '',
+        
+        // Pricing fields
+        web_price: quoteData.web_price || 0,
+        rrp: quoteData.rrp || 0
       });
 
       setState(prev => ({ 
