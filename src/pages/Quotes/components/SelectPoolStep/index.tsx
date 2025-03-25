@@ -30,6 +30,7 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
     filtrationPackage,
     poolCosts,
     excavationDetails,
+    selectedCrane,
     isLoading,
     error,
     calculateTotalCosts
@@ -147,6 +148,7 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
                 costs={costs} 
                 excavationName={excavationDetails?.name} 
                 filtrationDisplayOrder={filtrationPackage?.display_order}
+                craneName={selectedCrane?.name}
               />
             )}
 

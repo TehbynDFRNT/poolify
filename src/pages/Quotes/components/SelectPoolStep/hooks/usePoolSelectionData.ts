@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -115,6 +114,55 @@ export const usePoolSelectionData = (selectedPoolId: string) => {
     enabled: !!selectedPoolId,
   });
 
+  // Fetch all crane costs and Franna default
+  const { data: craneCosts } = useQuery({
+    queryKey: ["crane-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("crane_costs")
+        .select("*")
+        .order("display_order");
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Find the default Franna crane
+  const defaultCrane = craneCosts?.find(crane => crane.name === "Franna Crane-S20T-L1");
+
+  // Fetch crane selection for the selected pool
+  const { data: selectedCrane } = useQuery({
+    queryKey: ["crane-selection", selectedPoolId],
+    queryFn: async () => {
+      if (!selectedPoolId) return null;
+      
+      try {
+        const { data, error } = await supabase
+          .from("pool_crane_selections")
+          .select(`
+            crane:crane_costs (*)
+          `)
+          .eq('pool_id', selectedPoolId)
+          .maybeSingle();
+        
+        if (error && error.code !== 'PGRST116') throw error;
+        
+        // If we have a crane selection, return the crane details
+        if (data?.crane) {
+          return data.crane;
+        }
+        
+        // Otherwise return the default crane
+        return defaultCrane;
+      } catch (error) {
+        console.error('Error fetching crane selection:', error);
+        return defaultCrane;
+      }
+    },
+    enabled: !!selectedPoolId && !!craneCosts,
+  });
+
   // Fetch fixed costs
   const { data: fixedCosts } = useQuery({
     queryKey: ["fixed-costs"],
@@ -166,8 +214,11 @@ export const usePoolSelectionData = (selectedPoolId: string) => {
     // Excavation cost
     const excavationCost = excavationDetails ? calculateGrandTotal(excavationDetails) : 0;
     
+    // Crane cost - ensure we convert to number
+    const craneCost = selectedCrane ? Number(selectedCrane.price) || 0 : 0;
+    
     // Calculate the grand total
-    const total = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost;
+    const total = basePrice + filtrationCost + fixedCostsTotal + individualCostsTotal + excavationCost + craneCost;
     
     // Calculate margin, RRP and actual margin
     const marginPercentage = marginData || 0;
@@ -180,6 +231,7 @@ export const usePoolSelectionData = (selectedPoolId: string) => {
       fixedCostsTotal,
       individualCostsTotal,
       excavationCost,
+      craneCost,
       total,
       marginPercentage,
       rrp,
@@ -203,6 +255,7 @@ export const usePoolSelectionData = (selectedPoolId: string) => {
     filtrationPackage,
     poolCosts,
     excavationDetails,
+    selectedCrane,
     fixedCosts,
     marginData,
     isLoading,

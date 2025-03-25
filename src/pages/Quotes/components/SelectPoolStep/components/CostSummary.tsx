@@ -9,6 +9,7 @@ interface CostSummaryProps {
     fixedCostsTotal: number;
     individualCostsTotal: number;
     excavationCost: number;
+    craneCost: number;
     total: number;
     marginPercentage: number;
     rrp: number;
@@ -16,9 +17,10 @@ interface CostSummaryProps {
   };
   excavationName?: string;
   filtrationDisplayOrder?: number;
+  craneName?: string;
 }
 
-export const CostSummary = ({ costs, excavationName, filtrationDisplayOrder }: CostSummaryProps) => {
+export const CostSummary = ({ costs, excavationName, filtrationDisplayOrder, craneName }: CostSummaryProps) => {
   return (
     <Card>
       <CardContent className="pt-6">
@@ -46,6 +48,12 @@ export const CostSummary = ({ costs, excavationName, filtrationDisplayOrder }: C
             <div className="flex justify-between">
               <span className="text-sm">Excavation {excavationName ? `(${excavationName})` : ''}</span>
               <span className="text-sm font-medium">{formatCurrency(costs.excavationCost)}</span>
+            </div>
+          )}
+          {costs.craneCost > 0 && (
+            <div className="flex justify-between">
+              <span className="text-sm">Crane {craneName ? `(${craneName})` : ''}</span>
+              <span className="text-sm font-medium">{formatCurrency(costs.craneCost)}</span>
             </div>
           )}
           <div className="border-t pt-2 mt-2 flex justify-between">
