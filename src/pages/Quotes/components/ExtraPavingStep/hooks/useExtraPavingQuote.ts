@@ -71,11 +71,11 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       paverCost: pavingData.paver_cost,
       wastageCost: pavingData.wastage_cost,
       marginCost: pavingData.margin_cost,
-      meters: 0, // Start with 0 meters instead of 10
+      meters: 0, // Start with 0 meters
       totalCost: 0
     };
 
-    // Calculate the total cost
+    // Calculate the total cost (will be 0 with 0 meters)
     newSelection.totalCost = calculateSelectionCost(newSelection);
 
     // Add to state

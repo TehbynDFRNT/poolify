@@ -67,11 +67,12 @@ export const PavingCategorySelector = ({
           className="mt-2"
           min="0"
           step="0.5"
-          value={activeSelection?.meters || ""}
+          value={activeSelection?.meters ?? ""}
           placeholder="Enter meters"
           onChange={(e) => {
             if (activeSelection) {
-              onUpdate(activeSelection.pavingId, parseFloat(e.target.value) || 0);
+              const value = e.target.value === "" ? 0 : parseFloat(e.target.value);
+              onUpdate(activeSelection.pavingId, value);
             }
           }}
           disabled={!activeSelection}
