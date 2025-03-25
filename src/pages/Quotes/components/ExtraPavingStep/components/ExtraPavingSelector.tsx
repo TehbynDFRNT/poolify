@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -28,6 +29,17 @@ export const ExtraPavingSelector = ({
 }: ExtraPavingSelectorProps) => {
   const { extraPavingCosts, isLoading } = useExtraPavingCosts();
   const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(null);
+
+  // For debugging
+  useEffect(() => {
+    console.log("All selections:", selections);
+    console.log("Total meters:", getTotalMeters());
+    
+    // Log each selection's details
+    selections.forEach(s => {
+      console.log(`Selection ${s.pavingCategory}: ${s.meters} meters, total cost: ${s.totalCost}`);
+    });
+  }, [selections]);
 
   // Set active selection when selections change
   useEffect(() => {

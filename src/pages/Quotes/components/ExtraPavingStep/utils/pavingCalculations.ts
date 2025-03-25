@@ -38,9 +38,22 @@ export const calculateTotalMargin = (selections: PavingSelection[]): number => {
 export const calculateTotalCost = (selections: PavingSelection[]): number => {
   if (!selections || selections.length === 0) return 0;
   
-  return selections.reduce((sum, selection) => {
+  const total = selections.reduce((sum, selection) => {
     // Calculate cost for this selection
     const cost = calculateSelectionCost(selection);
     return sum + cost;
   }, 0);
+  
+  console.log("Total cost calculated:", total);
+  return total;
+};
+
+// For debugging: Get a detailed breakdown of all selections
+export const getSelectionsDebugInfo = (selections: PavingSelection[]): string => {
+  if (!selections || selections.length === 0) return "No selections";
+  
+  return selections.map(selection => {
+    const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
+    return `${selection.pavingCategory}: ${meters} meters, totalCost: ${selection.totalCost}`;
+  }).join("; ");
 };

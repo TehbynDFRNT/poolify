@@ -7,7 +7,8 @@ import { PavingSelection } from "../types";
 import { 
   calculateSelectionCost, 
   calculateTotalMargin, 
-  calculateTotalCost 
+  calculateTotalCost,
+  getSelectionsDebugInfo
 } from "../utils/pavingCalculations";
 import { fetchPavingSelections } from "../services/pavingService";
 
@@ -27,11 +28,22 @@ export const useExtraPavingQuote = (quoteId?: string) => {
       try {
         const selections = await fetchPavingSelections(quoteId);
         console.log("Fetched selections:", selections);
-        setPavingSelections(selections);
+        
+        // Ensure all number fields are properly parsed as numbers
+        const parsedSelections = selections.map(selection => ({
+          ...selection,
+          meters: selection.meters === undefined || isNaN(selection.meters) ? 0 : Number(selection.meters),
+          totalCost: selection.totalCost === undefined || isNaN(selection.totalCost) ? 0 : Number(selection.totalCost)
+        }));
+        
+        setPavingSelections(parsedSelections);
         
         // Calculate total cost
-        const total = calculateTotalCost(selections);
+        const total = calculateTotalCost(parsedSelections);
         setTotalCost(total);
+        
+        console.log("Paving selections:", parsedSelections);
+        console.log("Paving total cost:", total);
       } catch (error) {
         console.error("Error loading paving selections:", error);
       } finally {
@@ -41,6 +53,12 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
     loadSelections();
   }, [quoteId]);
+
+  // Log selections after update for debugging
+  useEffect(() => {
+    console.log("Current paving selections:", pavingSelections);
+    console.log("Selection details:", getSelectionsDebugInfo(pavingSelections));
+  }, [pavingSelections]);
 
   // Add a new paving selection
   const addSelection = async (pavingId: string) => {
@@ -83,6 +101,9 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     const updatedSelections = [...pavingSelections, newSelection];
     setPavingSelections(updatedSelections);
     updateTotalCost(updatedSelections);
+    
+    console.log("Added new selection:", newSelection);
+    console.log("Total cost after adding:", calculateTotalCost(updatedSelections));
   };
 
   // Update meters for a selection
@@ -112,6 +133,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   // Remove a selection
   const removeSelection = (pavingId: string) => {
     const updatedSelections = pavingSelections.filter(selection => selection.pavingId !== pavingId);
+    console.log("After removal:", updatedSelections);
     setPavingSelections(updatedSelections);
     updateTotalCost(updatedSelections);
   };

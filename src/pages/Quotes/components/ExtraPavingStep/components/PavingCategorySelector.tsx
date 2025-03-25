@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
 import { PavingSelection } from "../types";
+import { useEffect } from "react";
 
 interface PavingCategorySelectorProps {
   extraPavingCosts?: ExtraPavingCost[];
@@ -26,6 +27,11 @@ export const PavingCategorySelector = ({
   onUpdate,
   onSelectionChange
 }: PavingCategorySelectorProps) => {
+  // Log active selection change for debugging
+  useEffect(() => {
+    console.log("Active selection:", activeSelection);
+  }, [activeSelection]);
+
   // Handler for when a value in the select dropdown changes
   const handleSelectChange = (value: string) => {
     if (!value) return;
@@ -42,6 +48,23 @@ export const PavingCategorySelector = ({
       // If it doesn't exist, add it
       onAdd(value);
     }
+  };
+
+  const handleMetersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!activeSelection) return;
+    
+    // Get value from input
+    const inputValue = e.target.value;
+    
+    // Convert to number (default to 0 if empty)
+    let numericValue = 0;
+    if (inputValue !== "") {
+      numericValue = parseFloat(inputValue);
+      if (isNaN(numericValue)) numericValue = 0;
+    }
+    
+    // Update with the numeric value
+    onUpdate(activeSelection.pavingId, numericValue);
   };
 
   return (
@@ -85,13 +108,7 @@ export const PavingCategorySelector = ({
           className="mt-2"
           value={activeSelection?.meters ?? ""}
           placeholder="Enter meters"
-          onChange={(e) => {
-            if (activeSelection) {
-              const inputValue = e.target.value;
-              const value = inputValue === "" ? 0 : parseFloat(inputValue);
-              onUpdate(activeSelection.pavingId, value);
-            }
-          }}
+          onChange={handleMetersChange}
           disabled={!activeSelection}
         />
       </div>
