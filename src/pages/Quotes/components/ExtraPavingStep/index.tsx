@@ -22,6 +22,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     updateSelectionMeters, 
     removeSelection,
     totalCost,
+    totalMargin,
     saveSelections
   } = useExtraPavingQuote(quoteData.id);
 
@@ -53,6 +54,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onAdd={addSelection}
         onUpdate={updateSelectionMeters}
         onRemove={removeSelection}
+        totalCost={totalCost}
+        totalMargin={totalMargin}
       />
 
       {/* Navigation */}

@@ -1,3 +1,4 @@
+
 import { SelectContent, SelectItem, SelectTrigger, SelectValue, Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -24,8 +25,8 @@ export const PavingCategorySelector = ({
   onUpdate
 }: PavingCategorySelectorProps) => {
   return (
-    <div className="grid grid-cols-12 gap-6">
-      <div className="col-span-5">
+    <div className="grid grid-cols-2 gap-4">
+      <div>
         <Label htmlFor="paving-category" className="text-gray-700 font-medium">
           Paving Category
         </Label>
@@ -34,8 +35,6 @@ export const PavingCategorySelector = ({
           onValueChange={(value) => {
             if (value && !selections.find(s => s.pavingId === value)) {
               onAdd(value);
-            } else {
-              // Setting active selection is handled in the parent component
             }
           }}
           disabled={isLoading || !quoteId}
@@ -58,7 +57,7 @@ export const PavingCategorySelector = ({
         </Select>
       </div>
       
-      <div className="col-span-4">
+      <div>
         <Label htmlFor="meters" className="text-gray-700 font-medium">
           Meters
         </Label>
