@@ -31,8 +31,7 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   optional_addons_cost: 0,
   total_cost: 0,
   
-  // Custom requirements and micro dig (adding as empty defaults)
-  custom_requirements_json: '',
+  // Micro dig (adding as empty defaults)
   micro_dig_required: false,
   micro_dig_price: 0,
   micro_dig_notes: ''

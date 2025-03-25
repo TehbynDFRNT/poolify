@@ -24,8 +24,7 @@ export interface Quote {
   optional_addons_cost?: number;
   total_cost?: number;
   
-  // Custom requirements and micro dig fields
-  custom_requirements_json?: string;
+  // Micro dig fields
   micro_dig_required: boolean;
   micro_dig_price: number;
   micro_dig_notes?: string;
@@ -50,7 +49,6 @@ export interface QuoteInsert {
   extra_works_cost?: number;
   optional_addons_cost?: number;
   total_cost?: number;
-  custom_requirements_json?: string;
   micro_dig_required: boolean;
   micro_dig_price: number;
   micro_dig_notes?: string;
