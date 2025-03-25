@@ -18,6 +18,7 @@ export const useFormSubmission = ({ onNext }: UseFormSubmissionParams) => {
     {
       craneId,
       trafficControlId,
+      bobcatId,
       customRequirements,
       microDigRequired,
       microDigPrice,
@@ -25,6 +26,7 @@ export const useFormSubmission = ({ onNext }: UseFormSubmissionParams) => {
     }: {
       craneId: string | undefined;
       trafficControlId: string | undefined;
+      bobcatId: string | undefined;
       customRequirements: CustomSiteRequirement[];
       microDigRequired: boolean;
       microDigPrice: number;
@@ -42,6 +44,7 @@ export const useFormSubmission = ({ onNext }: UseFormSubmissionParams) => {
       quoteId: quoteData.id,
       craneId: craneId || null,
       trafficControlId: trafficControlId || 'none',
+      bobcatId: bobcatId,
       customRequirements,
       microDigRequired,
       microDigPrice,
