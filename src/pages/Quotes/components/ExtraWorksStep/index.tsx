@@ -1,13 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useQuoteContext } from '../../context/QuoteContext';
 import { ExtraPavingSection } from './components/ExtraPavingSection';
-import { ExtraConcretingSection } from './components/ExtraConcretingSection';
 import { useExtraPaving } from './hooks/useExtraPaving';
-import { useExtraConcreting } from './hooks/useExtraConcreting';
 import { ExtraWorks } from '@/types/extra-works';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,19 +23,8 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     totalMargin: pavingTotalMargin
   } = useExtraPaving();
   
-  const {
-    concretingSelections,
-    setConcretingSelections,
-    updateConcretingSelection,
-    addConcretingSelection,
-    removeConcretingSelection,
-    totalCost: concretingTotalCost
-  } = useExtraConcreting();
+  const totalExtraWorksCost = pavingTotalCost;
 
-  // Calculate total cost for all extra works
-  const totalExtraWorksCost = pavingTotalCost + concretingTotalCost;
-
-  // Initialize from saved data if it exists
   useEffect(() => {
     if (quoteData.custom_requirements_json) {
       try {
@@ -46,14 +32,11 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         if (extraWorksData.pavingSelections) {
           setPavingSelections(extraWorksData.pavingSelections);
         }
-        if (extraWorksData.concretingSelections) {
-          setConcretingSelections(extraWorksData.concretingSelections);
-        }
       } catch (error) {
         console.error("Error parsing saved extra works data:", error);
       }
     }
-  }, [quoteData.custom_requirements_json, setPavingSelections, setConcretingSelections]);
+  }, [quoteData.custom_requirements_json, setPavingSelections]);
 
   const saveExtraWorks = async (navigateNext = false) => {
     if (!quoteData.id) {
@@ -63,7 +46,6 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
 
     setIsSaving(true);
 
-    // Prepare the extra works data
     const extraWorksData: ExtraWorks = {
       pavingSelections: pavingSelections.map(selection => ({
         categoryId: selection.categoryId,
@@ -73,7 +55,7 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         labourMargin: selection.labourMargin || 0,
         totalMargin: selection.totalMargin || 0
       })),
-      concretingSelections,
+      concretingSelections: [],
       retainingWallSelections: [],
       waterFeatureSelections: [],
       totalCost: totalExtraWorksCost,
@@ -83,7 +65,6 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     try {
       console.log("Saving extra works with total cost:", totalExtraWorksCost);
       
-      // Update both the custom_requirements_json field and the extra_works_cost field
       const { error } = await supabase
         .from('quotes')
         .update({ 
@@ -99,7 +80,6 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
         return;
       }
 
-      // Update local state
       updateQuoteData({
         custom_requirements_json: JSON.stringify(extraWorksData),
         extra_works_cost: totalExtraWorksCost
@@ -126,39 +106,13 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
     <div className="w-full max-w-5xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Extra Works</CardTitle>
-          <CardDescription>Add additional paving, concreting, retaining walls, or water features</CardDescription>
+          <CardTitle>Extra Paving</CardTitle>
+          <CardDescription>Add additional paving to your quote</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
-            {/* Extra Paving Section */}
             <section className="border rounded-lg p-4">
               <ExtraPavingSection />
-            </section>
-            
-            {/* Concrete Labour Section */}
-            <section className="border rounded-lg p-4">
-              <ExtraConcretingSection />
-            </section>
-            
-            {/* Retaining Walls Section (Coming Soon) */}
-            <section className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Retaining Walls</h3>
-              </div>
-              <div className="p-8 text-center text-muted-foreground">
-                Retaining walls feature coming soon
-              </div>
-            </section>
-            
-            {/* Water Features Section (Coming Soon) */}
-            <section className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold">Water Features</h3>
-              </div>
-              <div className="p-8 text-center text-muted-foreground">
-                Water features coming soon
-              </div>
             </section>
           </div>
 
@@ -186,5 +140,4 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
   );
 };
 
-// Default export
 export default ExtraWorksStep;
