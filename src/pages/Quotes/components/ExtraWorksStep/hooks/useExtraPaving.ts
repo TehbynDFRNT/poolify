@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { usePavingSelections } from "./usePavingSelections";
 import type { PavingSelection } from "./usePavingSelections";
 
@@ -25,10 +25,12 @@ export const useExtraPaving = () => {
   } = usePavingSelections();
 
   // Update container attributes for external access to cost data
-  if (containerRef.current) {
-    containerRef.current.setAttribute('data-cost', totalCost.toString());
-    containerRef.current.setAttribute('data-margin', totalMargin.toString());
-  }
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.setAttribute('data-cost', totalCost.toString());
+      containerRef.current.setAttribute('data-margin', totalMargin.toString());
+    }
+  }, [totalCost, totalMargin]);
 
   return {
     pavingCategories,
