@@ -1,7 +1,6 @@
-
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
-import { PavingSelection } from "../hooks/useExtraPavingQuote";
+import { PavingSelection } from "../types";
 
 interface PavingCostSummaryProps {
   activeSelection: PavingSelection | null;

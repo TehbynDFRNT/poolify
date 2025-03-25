@@ -1,6 +1,5 @@
-
 import { cn } from "@/lib/utils";
-import { PavingSelection } from "../hooks/useExtraPavingQuote";
+import { PavingSelection } from "../types";
 
 interface AvailablePavingListProps {
   selections: PavingSelection[];

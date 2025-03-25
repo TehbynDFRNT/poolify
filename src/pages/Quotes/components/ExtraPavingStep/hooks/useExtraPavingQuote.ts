@@ -1,21 +1,18 @@
 
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { toast } from "sonner";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
-
-export interface PavingSelection {
-  id?: string;
-  quoteId: string;
-  pavingId: string;
-  pavingCategory: string;
-  paverCost: number;
-  wastageCost: number;
-  marginCost: number;
-  meters: number;
-  totalCost: number;
-}
+import { PavingSelection } from "../types";
+import { 
+  calculateSelectionCost, 
+  calculateTotalMargin, 
+  calculateTotalCost 
+} from "../utils/pavingCalculations";
+import { 
+  fetchPavingSelections, 
+  savePavingSelections 
+} from "../services/pavingService";
 
 export const useExtraPavingQuote = (quoteId?: string) => {
   const [pavingSelections, setPavingSelections] = useState<PavingSelection[]>([]);
@@ -28,86 +25,22 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   useEffect(() => {
     if (!quoteId) return;
 
-    const fetchSelections = async () => {
+    const loadSelections = async () => {
       setIsLoading(true);
       try {
-        // First get the selections
-        const { data: selectionsData, error: selectionsError } = await supabase
-          .from("quote_extra_pavings")
-          .select("*")
-          .eq("quote_id", quoteId);
-
-        if (selectionsError) {
-          throw selectionsError;
-        }
-
-        if (!selectionsData?.length) {
-          setPavingSelections([]);
-          setIsLoading(false);
-          return;
-        }
-
-        // Then get the extra paving cost details for each selection
-        const selectionPromises = selectionsData.map(async (selection) => {
-          const { data: pavingData, error: pavingError } = await supabase
-            .from("extra_paving_costs")
-            .select("*")
-            .eq("id", selection.paving_id)
-            .single();
-
-          if (pavingError) {
-            console.error("Error fetching paving details:", pavingError);
-            return null;
-          }
-
-          return {
-            id: selection.id,
-            quoteId: selection.quote_id,
-            pavingId: selection.paving_id,
-            pavingCategory: pavingData.category,
-            paverCost: pavingData.paver_cost,
-            wastageCost: pavingData.wastage_cost,
-            marginCost: pavingData.margin_cost,
-            meters: selection.meters,
-            totalCost: selection.total_cost
-          };
-        });
-
-        const resolvedSelections = await Promise.all(selectionPromises);
-        const validSelections = resolvedSelections.filter(Boolean) as PavingSelection[];
-        
-        setPavingSelections(validSelections);
+        const selections = await fetchPavingSelections(quoteId);
+        setPavingSelections(selections);
         
         // Calculate total cost
-        const total = validSelections.reduce((sum, selection) => sum + (selection.totalCost || 0), 0);
+        const total = calculateTotalCost(selections);
         setTotalCost(total);
-        
-      } catch (error) {
-        console.error("Error fetching extra paving selections:", error);
-        toast.error("Failed to load extra paving data");
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchSelections();
+    loadSelections();
   }, [quoteId]);
-
-  // Calculate the cost for a single selection, including material and labor costs
-  const calculateSelectionCost = (selection: PavingSelection): number => {
-    // Material costs
-    const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
-    
-    // Fixed labor costs
-    const laborCostPerMeter = 100; // Fixed labor cost of $100
-    const laborMarginPerMeter = 30;  // Fixed labor margin of $30
-    
-    // Total cost per meter
-    const totalCostPerMeter = materialCostPerMeter + laborCostPerMeter + laborMarginPerMeter;
-    
-    // Total cost for all meters
-    return totalCostPerMeter * selection.meters;
-  };
 
   // Add a new paving selection
   const addSelection = async (pavingId: string) => {
@@ -146,8 +79,9 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     newSelection.totalCost = calculateSelectionCost(newSelection);
 
     // Add to state
-    setPavingSelections(prev => [...prev, newSelection]);
-    updateTotalCost([...pavingSelections, newSelection]);
+    const updatedSelections = [...pavingSelections, newSelection];
+    setPavingSelections(updatedSelections);
+    updateTotalCost(updatedSelections);
   };
 
   // Update meters for a selection
@@ -182,17 +116,8 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
   // Update the total cost
   const updateTotalCost = (selections: PavingSelection[]) => {
-    const total = selections.reduce((sum, selection) => sum + selection.totalCost, 0);
+    const total = calculateTotalCost(selections);
     setTotalCost(total);
-  };
-
-  // Calculate total margin
-  const calculateTotalMargin = () => {
-    return pavingSelections.reduce((sum, selection) => {
-      const materialMargin = selection.marginCost * selection.meters;
-      const laborMargin = 30 * selection.meters; // Fixed labor margin of $30 per meter
-      return sum + materialMargin + laborMargin;
-    }, 0);
   };
 
   // Save all selections to the database
@@ -203,38 +128,8 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     }
 
     try {
-      // First, delete any existing selections
-      const { error: deleteError } = await supabase
-        .from("quote_extra_pavings")
-        .delete()
-        .eq("quote_id", quoteId);
-
-      if (deleteError) throw deleteError;
-
-      // Insert new selections if there are any
-      if (pavingSelections.length > 0) {
-        const selectionsToInsert = pavingSelections.map(selection => ({
-          quote_id: quoteId,
-          paving_id: selection.pavingId,
-          meters: selection.meters,
-          total_cost: selection.totalCost
-        }));
-
-        const { error: insertError } = await supabase
-          .from("quote_extra_pavings")
-          .insert(selectionsToInsert);
-
-        if (insertError) throw insertError;
-      }
-
-      // Update the total cost in the quote
-      const { error: updateError } = await supabase
-        .from("quotes")
-        .update({ extra_paving_cost: totalCost })
-        .eq("id", quoteId);
-
-      if (updateError) throw updateError;
-
+      await savePavingSelections(quoteId, pavingSelections, totalCost);
+      
       // Update the context with the new total
       updateQuoteData({ 
         extra_paving_cost: totalCost 
@@ -250,7 +145,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   return {
     pavingSelections,
     totalCost,
-    totalMargin: calculateTotalMargin(),
+    totalMargin: calculateTotalMargin(pavingSelections),
     isLoading,
     addSelection,
     updateSelectionMeters,

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PavingSelection } from "../hooks/useExtraPavingQuote";
+import { PavingSelection } from "../types";
 import { PavingCategorySelector } from "./PavingCategorySelector";
 import { PavingCostSummary } from "./PavingCostSummary";
 import { CostBreakdown } from "./CostBreakdown";

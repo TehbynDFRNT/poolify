@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
 import { ExtraPavingSelector } from "./components/ExtraPavingSelector";
-import { useExtraPavingQuote } from "./hooks/useExtraPavingQuote";
+import { useExtraPavingQuote } from "./hooks";
 import { NoPoolWarning } from "../SiteRequirementsStep/components/NoPoolWarning";
 import { toast } from "sonner";
 

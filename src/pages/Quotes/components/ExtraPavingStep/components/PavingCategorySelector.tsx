@@ -1,9 +1,8 @@
-
 import { SelectContent, SelectItem, SelectTrigger, SelectValue, Select } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
-import { PavingSelection } from "../hooks/useExtraPavingQuote";
+import { PavingSelection } from "../types";
 
 interface PavingCategorySelectorProps {
   extraPavingCosts?: ExtraPavingCost[];
