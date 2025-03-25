@@ -35,7 +35,8 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
       // Calculate total cost from components
       const totalCost = (
         (quoteData.site_requirements_cost || 0) + 
-        (quoteData.optional_addons_cost || 0)
+        (quoteData.optional_addons_cost || 0) +
+        (quoteData.extra_paving_cost || 0)
         // Base pool cost would be added here in the future
       );
       
@@ -82,7 +83,6 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
         Review the complete cost breakdown for this quote.
       </p>
       
-      {/* This will be implemented with the actual cost summary components */}
       <Card>
         <CardContent className="pt-6">
           <div className="space-y-4">
@@ -95,8 +95,8 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
               <span>${quoteData.site_requirements_cost ? quoteData.site_requirements_cost.toFixed(2) : "0.00"}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
-              <span className="font-medium">Extra Works</span>
-              <span>$0.00</span>
+              <span className="font-medium">Extra Paving</span>
+              <span>${quoteData.extra_paving_cost ? quoteData.extra_paving_cost.toFixed(2) : "0.00"}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Optional Add-ons</span>

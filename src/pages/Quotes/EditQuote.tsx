@@ -97,6 +97,9 @@ const EditQuoteContent = () => {
         traffic_control_id: quoteData.traffic_control_id || 'none',
         site_requirements_cost: quoteData.site_requirements_cost || 0,
         
+        // Extra paving
+        extra_paving_cost: quoteData.extra_paving_cost || 0,
+        
         // Optional addons
         optional_addons_cost: quoteData.optional_addons_cost || 0,
         total_cost: quoteData.total_cost || 0,

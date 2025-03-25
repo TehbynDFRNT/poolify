@@ -1057,6 +1057,51 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_extra_pavings: {
+        Row: {
+          created_at: string
+          id: string
+          meters: number
+          paving_id: string
+          quote_id: string
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meters?: number
+          paving_id: string
+          quote_id: string
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meters?: number
+          paving_id?: string
+          quote_id?: string
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_extra_pavings_paving_id_fkey"
+            columns: ["paving_id"]
+            isOneToOne: false
+            referencedRelation: "extra_paving_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_extra_pavings_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       quotes: {
         Row: {
           crane_id: string | null
@@ -1065,6 +1110,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           excavation_type: string | null
+          extra_paving_cost: number | null
           home_address: string
           id: string
           micro_dig_notes: string | null
@@ -1090,6 +1136,7 @@ export type Database = {
           customer_name: string
           customer_phone: string
           excavation_type?: string | null
+          extra_paving_cost?: number | null
           home_address: string
           id?: string
           micro_dig_notes?: string | null
@@ -1115,6 +1162,7 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           excavation_type?: string | null
+          extra_paving_cost?: number | null
           home_address?: string
           id?: string
           micro_dig_notes?: string | null
