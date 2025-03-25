@@ -94,7 +94,7 @@ export const useQuoteSteps = (quoteId?: string) => {
           : 'draft';
 
       // Get the pool data and calculate RRP
-      let poolBaseCost = 0;
+      let poolWebPrice = 0;
       let poolRRP = 0;
       
       if (quoteData.pool_id) {
@@ -115,12 +115,11 @@ export const useQuoteSteps = (quoteId?: string) => {
           const marginPercentage = marginData ? marginData.margin_percentage : 0;
           
           // Use base price from database
-          poolBaseCost = Number(poolData.buy_price_inc_gst || 0);
+          poolWebPrice = Number(poolData.buy_price_inc_gst || 0);
           
           // Calculate RRP - this should be the value displayed in the Cost Summary component
-          // in the second image (around $58,700)
           if (marginPercentage < 100) {
-            poolRRP = poolBaseCost / (1 - marginPercentage / 100);
+            poolRRP = poolWebPrice / (1 - marginPercentage / 100);
           }
         }
       }
@@ -139,9 +138,9 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Base pool cost and RRP
-        base_pool_cost: poolBaseCost,
-        rrp: quoteData.rrp || poolRRP, // Use RRP from DB if available, otherwise calculated value
+        // Web price and RRP
+        web_price: Number(quoteData.web_price || poolWebPrice),
+        rrp: Number(quoteData.rrp || poolRRP), // Use RRP from DB if available, otherwise calculated value
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',

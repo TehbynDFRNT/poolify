@@ -20,7 +20,7 @@ export const QuoteProgressSteps = ({ steps, currentStep, onStepClick }: QuotePro
   // Function to get cost for each step
   const getStepCost = (stepId: number): number => {
     switch (stepId) {
-      case 2: // Web Price (formerly Base Pool)
+      case 2: // Web Price
         return quoteData.rrp || 0;
       case 3: // Site Requirements
         return quoteData.site_requirements_cost || 0;
