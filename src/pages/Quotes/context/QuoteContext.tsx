@@ -20,9 +20,6 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   status: 'draft',
   resident_homeowner: false,
   
-  // Base pool cost
-  base_pool_cost: 0,
-  
   // Site requirements (adding as empty defaults)
   crane_id: '',
   excavation_type: '',
