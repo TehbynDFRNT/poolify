@@ -11,6 +11,7 @@ import { PavingSelection } from "../hooks/useExtraPaving";
 import { formatCurrency } from "@/utils/format";
 import { useState, useEffect } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { CostBreakdownDetails } from "./CostBreakdownDetails";
 
 interface ExtraPavingSelectionProps {
   selection: PavingSelection;
@@ -143,70 +144,15 @@ export const ExtraPavingSelection = ({
         
         <Collapsible open={isDetailsOpen} className="mt-4">
           <CollapsibleContent>
-            <div className="bg-muted/30 p-3 rounded-md border">
-              <h4 className="text-sm font-semibold mb-2">Cost Breakdown</h4>
-              <div className="grid grid-cols-2 gap-4 text-sm">
-                <div className="space-y-1">
-                  <p className="text-muted-foreground">Per Meter</p>
-                  <div className="flex justify-between">
-                    <span>Paver Cost:</span>
-                    <span>{formatCurrency(selectedCategory?.paver_cost || 0)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Wastage Cost:</span>
-                    <span>{formatCurrency(selectedCategory?.wastage_cost || 0)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Margin:</span>
-                    <span>{formatCurrency(selectedCategory?.margin_cost || 0)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Labour Cost:</span>
-                    <span>{formatCurrency(labourCostValue)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Labour Margin:</span>
-                    <span>{formatCurrency(labourMarginValue)}</span>
-                  </div>
-                  <div className="flex justify-between pt-1 border-t font-medium">
-                    <span>Total Per Meter:</span>
-                    <span>{formatCurrency(costPerMeter)}</span>
-                  </div>
-                </div>
-                
-                <div className="space-y-1">
-                  <p className="text-muted-foreground">Total ({selection.meters} meters)</p>
-                  <div className="flex justify-between">
-                    <span>Paver Cost:</span>
-                    <span>{formatCurrency((selectedCategory?.paver_cost || 0) * selection.meters)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Wastage Cost:</span>
-                    <span>{formatCurrency((selectedCategory?.wastage_cost || 0) * selection.meters)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Margin:</span>
-                    <span>{formatCurrency((selectedCategory?.margin_cost || 0) * selection.meters)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Labour Cost:</span>
-                    <span>{formatCurrency(labourCostValue * selection.meters)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Labour Margin:</span>
-                    <span>{formatCurrency(labourMarginValue * selection.meters)}</span>
-                  </div>
-                  <div className="flex justify-between text-primary">
-                    <span>Total Margin:</span>
-                    <span>{formatCurrency(selection.totalMargin || 0)}</span>
-                  </div>
-                  <div className="flex justify-between pt-1 border-t font-medium">
-                    <span>Total Cost:</span>
-                    <span>{formatCurrency(selection.cost)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <CostBreakdownDetails
+              selectedCategory={selectedCategory}
+              labourCostValue={labourCostValue}
+              labourMarginValue={labourMarginValue}
+              costPerMeter={costPerMeter}
+              meters={selection.meters}
+              totalCost={selection.cost}
+              totalMargin={selection.totalMargin}
+            />
           </CollapsibleContent>
         </Collapsible>
       </CardContent>
