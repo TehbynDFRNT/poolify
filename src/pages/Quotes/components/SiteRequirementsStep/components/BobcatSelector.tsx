@@ -48,6 +48,11 @@ export const BobcatSelector = ({ bobcatId, onBobcatChange }: BobcatSelectorProps
     return acc;
   }, {} as Record<string, BobcatCost[]>);
 
+  // Find the selected bobcat to display its cost
+  const selectedBobcat = bobcatId && bobcatId !== "none" 
+    ? bobcatCosts?.find(b => b.id === bobcatId) 
+    : null;
+
   return (
     <Card>
       <CardHeader className="pb-3">
@@ -87,9 +92,9 @@ export const BobcatSelector = ({ bobcatId, onBobcatChange }: BobcatSelectorProps
                 </Select>
               </div>
               
-              {bobcatId && bobcatId !== "none" && (
+              {selectedBobcat && (
                 <div className="text-sm text-muted-foreground">
-                  <p>Cost: ${bobcatCosts?.find(b => b.id === bobcatId)?.price.toFixed(2)}</p>
+                  <p>Cost: ${selectedBobcat.price.toFixed(2)}</p>
                 </div>
               )}
               

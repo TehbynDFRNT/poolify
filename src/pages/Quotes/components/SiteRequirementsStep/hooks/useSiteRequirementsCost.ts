@@ -112,9 +112,14 @@ export const useSiteRequirementsCost = () => {
     updateQuoteData({ traffic_control_id: trafficControlId });
   };
   
+  const handleBobcatChange = (bobcatId: string) => {
+    updateQuoteData({ bobcat_id: bobcatId === "none" ? undefined : bobcatId });
+  };
+  
   return {
     siteRequirementsCost,
     handleCraneChange,
-    handleTrafficControlChange
+    handleTrafficControlChange,
+    handleBobcatChange
   };
 };
