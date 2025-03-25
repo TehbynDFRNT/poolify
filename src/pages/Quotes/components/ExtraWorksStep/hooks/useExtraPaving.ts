@@ -58,6 +58,21 @@ export const useExtraPaving = () => {
     },
   });
 
+  // Initialize from saved data if it exists
+  useEffect(() => {
+    if (quoteData.custom_requirements_json) {
+      try {
+        const extraWorksData = JSON.parse(quoteData.custom_requirements_json);
+        if (extraWorksData.pavingSelections && extraWorksData.pavingSelections.length > 0) {
+          console.log("Initializing from saved paving selections:", extraWorksData.pavingSelections);
+          setPavingSelections(extraWorksData.pavingSelections);
+        }
+      } catch (error) {
+        console.error("Error parsing saved paving selections:", error);
+      }
+    }
+  }, [quoteData.custom_requirements_json]);
+
   // Add a new paving selection
   const addPavingSelection = () => {
     if (pavingCategories && pavingCategories.length > 0) {
