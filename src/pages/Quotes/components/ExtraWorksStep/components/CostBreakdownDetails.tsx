@@ -1,7 +1,6 @@
 
-import { formatCurrency } from "@/utils/format";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { formatCurrency } from "@/utils/format";
 
 interface CostBreakdownDetailsProps {
   selectedCategory: ExtraPavingCost | undefined;
@@ -22,90 +21,101 @@ export const CostBreakdownDetails = ({
   totalCost,
   totalMargin
 }: CostBreakdownDetailsProps) => {
-  // Safely calculate material costs
-  const paverCost = selectedCategory ? selectedCategory.paver_cost : 0;
-  const wastageCost = selectedCategory ? selectedCategory.wastage_cost : 0;
-  const materialMarginCost = selectedCategory ? selectedCategory.margin_cost : 0;
-  
-  // Calculate based on meters
-  const totalPaverCost = parseFloat((paverCost * meters).toFixed(2));
-  const totalWastageCost = parseFloat((wastageCost * meters).toFixed(2));
-  const totalMaterialMargin = parseFloat((materialMarginCost * meters).toFixed(2));
-  const totalLabourCost = parseFloat((labourCostValue * meters).toFixed(2));
-  const totalLabourMargin = parseFloat((labourMarginValue * meters).toFixed(2));
-  
-  return (
-    <div className="bg-slate-50 p-4 rounded-md text-sm">
-      <h4 className="font-medium mb-3">Cost Breakdown</h4>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h5 className="font-medium mb-2">Per Meter Costs:</h5>
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell>Paver cost:</TableCell>
-                <TableCell className="text-right">{formatCurrency(paverCost)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Wastage cost:</TableCell>
-                <TableCell className="text-right">{formatCurrency(wastageCost)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Material margin:</TableCell>
-                <TableCell className="text-right">{formatCurrency(materialMarginCost)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Labour cost:</TableCell>
-                <TableCell className="text-right">{formatCurrency(labourCostValue)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Labour margin:</TableCell>
-                <TableCell className="text-right">{formatCurrency(labourMarginValue)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Total per meter:</TableCell>
-                <TableCell className="text-right font-medium">{formatCurrency(costPerMeter)}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
+  if (!selectedCategory) {
+    return <div className="text-muted-foreground">No category selected</div>;
+  }
 
-        <div>
-          <h5 className="font-medium mb-2">Total Costs ({meters} meters):</h5>
-          <Table>
-            <TableBody>
-              <TableRow>
-                <TableCell>Paver cost:</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalPaverCost)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Wastage cost:</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalWastageCost)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Material margin:</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalMaterialMargin)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Labour cost:</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalLabourCost)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Labour margin:</TableCell>
-                <TableCell className="text-right">{formatCurrency(totalLabourMargin)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium">Total margin:</TableCell>
-                <TableCell className="text-right font-medium">{formatCurrency(totalMargin)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell className="font-medium border-t">Total cost:</TableCell>
-                <TableCell className="text-right font-medium border-t">{formatCurrency(totalCost)}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
+  return (
+    <div className="pt-2 space-y-4">
+      <h4 className="text-md font-medium mb-2">Cost Breakdown</h4>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Materials Breakdown */}
+        <div className="bg-slate-50 p-4 rounded-md">
+          <h5 className="font-medium text-sm mb-2">Materials (per meter)</h5>
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="py-1">Paver Cost:</td>
+                <td className="text-right">{formatCurrency(selectedCategory.paver_cost)}</td>
+              </tr>
+              <tr>
+                <td className="py-1">Wastage Cost:</td>
+                <td className="text-right">{formatCurrency(selectedCategory.wastage_cost)}</td>
+              </tr>
+              <tr>
+                <td className="py-1">Material Margin:</td>
+                <td className="text-right text-green-600">{formatCurrency(selectedCategory.margin_cost)}</td>
+              </tr>
+              <tr className="border-t">
+                <td className="py-1 font-medium">Total Material Cost (per m):</td>
+                <td className="text-right font-medium">
+                  {formatCurrency(selectedCategory.paver_cost + selectedCategory.wastage_cost + selectedCategory.margin_cost)}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-1">Total Materials Cost:</td>
+                <td className="text-right">
+                  {formatCurrency((selectedCategory.paver_cost + selectedCategory.wastage_cost + selectedCategory.margin_cost) * meters)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+        
+        {/* Labour Breakdown */}
+        <div className="bg-slate-50 p-4 rounded-md">
+          <h5 className="font-medium text-sm mb-2">Labour (per meter)</h5>
+          <table className="w-full text-sm">
+            <tbody>
+              <tr>
+                <td className="py-1">Labour Cost:</td>
+                <td className="text-right">{formatCurrency(labourCostValue)}</td>
+              </tr>
+              <tr>
+                <td className="py-1">Labour Margin:</td>
+                <td className="text-right text-green-600">{formatCurrency(labourMarginValue)}</td>
+              </tr>
+              <tr className="border-t">
+                <td className="py-1 font-medium">Total Labour Cost (per m):</td>
+                <td className="text-right font-medium">
+                  {formatCurrency(labourCostValue + labourMarginValue)}
+                </td>
+              </tr>
+              <tr>
+                <td className="py-1">Total Labour Cost:</td>
+                <td className="text-right">
+                  {formatCurrency((labourCostValue + labourMarginValue) * meters)}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      {/* Total Summary */}
+      <div className="bg-slate-100 p-4 rounded-md">
+        <h5 className="font-medium mb-2">Total Summary</h5>
+        <table className="w-full">
+          <tbody>
+            <tr>
+              <td>Cost Per Meter:</td>
+              <td className="text-right">{formatCurrency(costPerMeter)}</td>
+            </tr>
+            <tr>
+              <td>Total Meters:</td>
+              <td className="text-right">{meters}</td>
+            </tr>
+            <tr>
+              <td>Total Margin:</td>
+              <td className="text-right text-green-600">{formatCurrency(totalMargin)}</td>
+            </tr>
+            <tr className="border-t">
+              <td className="font-medium">Total Cost:</td>
+              <td className="text-right font-medium">{formatCurrency(totalCost)}</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );

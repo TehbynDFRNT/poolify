@@ -149,11 +149,16 @@ export const usePavingSelections = () => {
 
   // Load saved data when component mounts or customRequirements changes
   useEffect(() => {
-    if (quoteData.custom_requirements_json && !initialLoadDone && pavingCategories && pavingCategories.length > 0) {
+    // Only try to load saved data if we have paving categories and customRequirements
+    if (quoteData.custom_requirements_json && pavingCategories && pavingCategories.length > 0) {
+      console.log("Loading saved custom_requirements_json:", quoteData.custom_requirements_json);
+      // We'll attempt to load the data regardless of initialLoadDone to ensure we always have the latest data
       loadSavedSelections(quoteData.custom_requirements_json);
-      setInitialLoadDone(true);
+      if (!initialLoadDone) {
+        setInitialLoadDone(true);
+      }
     }
-  }, [quoteData.custom_requirements_json, loadSavedSelections, initialLoadDone, pavingCategories]);
+  }, [quoteData.custom_requirements_json, pavingCategories, loadSavedSelections, initialLoadDone]);
 
   return {
     pavingCategories,
