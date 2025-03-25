@@ -7,6 +7,7 @@ import { CostSummary } from "./components/CostSummary";
 import { useSiteRequirementsCost } from "./hooks/useSiteRequirementsCost";
 import { useCustomSiteRequirements } from "./hooks/useCustomSiteRequirements";
 import { useMicroDig } from "./hooks/useMicroDig";
+import { useBobcat } from "./hooks/useBobcat";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 import { SiteRequirementsSection } from "./components/SiteRequirementsSection";
 import { CustomSiteRequirements } from "./components/CustomSiteRequirements";
@@ -45,6 +46,11 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     setMicroDigNotes
   } = useMicroDig();
 
+  const {
+    bobcatId,
+    handleBobcatChange
+  } = useBobcat();
+
   // Form submission hook
   const { isSubmitting, handleSaveRequirements } = useFormSubmission({ onNext });
 
@@ -75,6 +81,7 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     await handleSaveRequirements(false, {
       craneId: quoteData.crane_id,
       trafficControlId: quoteData.traffic_control_id,
+      bobcatId: bobcatId,
       customRequirements,
       microDigRequired,
       microDigPrice,
@@ -86,6 +93,7 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
     await handleSaveRequirements(true, {
       craneId: quoteData.crane_id,
       trafficControlId: quoteData.traffic_control_id,
+      bobcatId: bobcatId,
       customRequirements,
       microDigRequired,
       microDigPrice,
@@ -106,6 +114,8 @@ export const SiteRequirementsStep = ({ onNext, onPrevious }: SiteRequirementsSte
         onCraneChange={handleCraneChange}
         trafficControlId={quoteData.traffic_control_id}
         onTrafficControlChange={handleTrafficControlChange}
+        bobcatId={bobcatId}
+        onBobcatChange={handleBobcatChange}
       />
       
       {/* Custom Site Requirements Section */}

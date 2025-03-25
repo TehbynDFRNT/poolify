@@ -19,6 +19,7 @@ export interface Quote {
   crane_id?: string;
   excavation_type?: string;
   traffic_control_id?: string;
+  bobcat_id?: string;
   site_requirements_cost?: number;
   extra_paving_cost?: number;
   optional_addons_cost?: number;
@@ -45,6 +46,7 @@ export interface QuoteInsert {
   crane_id?: string;
   excavation_type?: string;
   traffic_control_id?: string;
+  bobcat_id?: string;
   site_requirements_cost?: number;
   extra_paving_cost?: number;
   optional_addons_cost?: number;

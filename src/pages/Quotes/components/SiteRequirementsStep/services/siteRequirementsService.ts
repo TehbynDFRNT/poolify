@@ -7,6 +7,7 @@ interface SaveRequirementsParams {
   quoteId: string;
   craneId: string | null;
   trafficControlId: string;
+  bobcatId: string | undefined;
   customRequirements: CustomSiteRequirement[];
   microDigRequired: boolean;
   microDigPrice: number;
@@ -17,6 +18,7 @@ export const saveRequirements = async ({
   quoteId,
   craneId,
   trafficControlId,
+  bobcatId,
   customRequirements,
   microDigRequired,
   microDigPrice,
@@ -43,6 +45,7 @@ export const saveRequirements = async ({
     const dataToSave = {
       crane_id: craneId,
       traffic_control_id: trafficControlId === 'none' ? null : trafficControlId,
+      bobcat_id: bobcatId === 'none' ? null : bobcatId,
       site_requirements_cost: totalCost,
       micro_dig_required: microDigRequired,
       micro_dig_price: microDigPrice,
