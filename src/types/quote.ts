@@ -15,8 +15,9 @@ export interface Quote {
   updated_at?: string;
   resident_homeowner?: boolean;
   
-  // Base pool cost
+  // Cost fields
   base_pool_cost: number;
+  rrp: number;
   
   // Site requirements fields
   crane_id?: string;
@@ -46,6 +47,7 @@ export interface QuoteInsert {
   status: 'draft' | 'pending' | 'approved' | 'declined';
   resident_homeowner?: boolean;
   base_pool_cost: number;
+  rrp: number;
   crane_id?: string;
   excavation_type?: string;
   traffic_control_id?: string;

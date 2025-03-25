@@ -63,21 +63,24 @@ export const SelectPoolStep = ({ onNext, onPrevious }: SelectPoolStepProps) => {
       // Calculate costs
       const costs = calculateTotalCosts();
       const basePoolCost = costs ? costs.basePrice : 0;
+      const rrp = costs ? costs.rrp : 0;
       
       // Update the quote context
       updateQuoteData({ 
         pool_id: selectedPoolId,
-        base_pool_cost: basePoolCost
+        base_pool_cost: basePoolCost,
+        rrp: rrp  // Store the RRP value
       });
       
-      console.log("Updating quote with ID:", quoteData.id, "with pool ID:", selectedPoolId);
+      console.log("Updating quote with ID:", quoteData.id, "with pool ID:", selectedPoolId, "RRP:", rrp);
       
-      // Update the record in Supabase
+      // Update the record in Supabase - now we save both base_pool_cost and rrp
       const { error } = await supabase
         .from('quotes')
         .update({ 
           pool_id: selectedPoolId,
-          base_pool_cost: basePoolCost
+          base_pool_cost: basePoolCost,
+          rrp: rrp  // Store the RRP in the database
         })
         .eq('id', quoteData.id);
       

@@ -61,7 +61,7 @@ export const CostSummary = ({ costs, excavationName, filtrationDisplayOrder }: C
                 <div className="text-sm font-medium">{costs.marginPercentage.toFixed(2)}%</div>
               </div>
               <div className="bg-muted/50 rounded-lg p-3 space-y-1">
-                <div className="text-sm text-muted-foreground">RRP</div>
+                <div className="text-sm text-muted-foreground">Web Price</div>
                 <div className="text-sm font-medium text-primary">{formatCurrency(costs.rrp)}</div>
               </div>
               <div className="bg-muted/50 rounded-lg p-3 space-y-1">

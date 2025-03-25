@@ -38,7 +38,7 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
         (quoteData.site_requirements_cost || 0) + 
         (quoteData.optional_addons_cost || 0) +
         (quoteData.extra_paving_cost || 0)
-        // Base pool cost would be added here in the future
+        // Web Price (RRP) would be added here in the final client-facing quote
       );
       
       // Update the context with the calculated total
@@ -88,8 +88,8 @@ export const CostSummaryStep = ({ onNext, onPrevious }: CostSummaryStepProps) =>
         <CardContent className="pt-6">
           <div className="space-y-4">
             <div className="flex justify-between py-2 border-b">
-              <span className="font-medium">Base Pool Cost</span>
-              <span>{formatCurrency(quoteData.base_pool_cost || 0)}</span>
+              <span className="font-medium">Web Price</span>
+              <span>{formatCurrency(quoteData.rrp || 0)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="font-medium">Site Requirements</span>

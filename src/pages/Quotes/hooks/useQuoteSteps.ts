@@ -6,7 +6,7 @@ import { toast } from "sonner";
 
 export const QUOTE_STEPS = [
   { id: 1, name: "Customer Info" },
-  { id: 2, name: "Base Pool" },
+  { id: 2, name: "Web Price" },  // Changed from "Base Pool" to "Web Price"
   { id: 3, name: "Site Requirements" },
   { id: 4, name: "Extra Paving" },
   { id: 5, name: "Optional Add-ons" },
@@ -94,7 +94,9 @@ export const useQuoteSteps = (quoteId?: string) => {
           : 'draft';
 
       // Get the pool data and calculate RRP
+      let poolBaseCost = 0;
       let poolRRP = 0;
+      
       if (quoteData.pool_id) {
         const { data: poolData, error: poolError } = await supabase
           .from("pool_specifications")
@@ -111,11 +113,14 @@ export const useQuoteSteps = (quoteId?: string) => {
             .maybeSingle();
           
           const marginPercentage = marginData ? marginData.margin_percentage : 0;
-          const totalCost = Number(poolData.buy_price_inc_gst || 0);
           
-          // Calculate RRP
+          // Use base price from database
+          poolBaseCost = Number(poolData.buy_price_inc_gst || 0);
+          
+          // Calculate RRP - this should be the value displayed in the Cost Summary component
+          // in the second image (around $58,700)
           if (marginPercentage < 100) {
-            poolRRP = totalCost / (1 - marginPercentage / 100);
+            poolRRP = poolBaseCost / (1 - marginPercentage / 100);
           }
         }
       }
@@ -134,8 +139,9 @@ export const useQuoteSteps = (quoteId?: string) => {
         status: validStatus,
         resident_homeowner: quoteData.resident_homeowner || false,
         
-        // Base pool cost - use the RRP instead of buy_price_inc_gst
-        base_pool_cost: poolRRP > 0 ? poolRRP : 0,
+        // Base pool cost and RRP
+        base_pool_cost: poolBaseCost,
+        rrp: quoteData.rrp || poolRRP, // Use RRP from DB if available, otherwise calculated value
         
         // Site requirements fields
         crane_id: quoteData.crane_id || '',
