@@ -1122,12 +1122,14 @@ export type Database = {
           owner2_phone: string | null
           pool_id: string | null
           resident_homeowner: boolean | null
+          rrp: number | null
           site_address: string
           site_requirements_cost: number | null
           status: string
           total_cost: number | null
           traffic_control_id: string | null
           updated_at: string
+          web_price: number | null
         }
         Insert: {
           crane_id?: string | null
@@ -1148,12 +1150,14 @@ export type Database = {
           owner2_phone?: string | null
           pool_id?: string | null
           resident_homeowner?: boolean | null
+          rrp?: number | null
           site_address: string
           site_requirements_cost?: number | null
           status: string
           total_cost?: number | null
           traffic_control_id?: string | null
           updated_at?: string
+          web_price?: number | null
         }
         Update: {
           crane_id?: string | null
@@ -1174,12 +1178,14 @@ export type Database = {
           owner2_phone?: string | null
           pool_id?: string | null
           resident_homeowner?: boolean | null
+          rrp?: number | null
           site_address?: string
           site_requirements_cost?: number | null
           status?: string
           total_cost?: number | null
           traffic_control_id?: string | null
           updated_at?: string
+          web_price?: number | null
         }
         Relationships: [
           {

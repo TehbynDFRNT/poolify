@@ -125,9 +125,9 @@ export const useQuoteSteps = (quoteId?: string) => {
         micro_dig_price: quoteData.micro_dig_price || 0,
         micro_dig_notes: quoteData.micro_dig_notes || '',
         
-        // Pricing fields
-        web_price: quoteData.web_price || 0,
-        rrp: quoteData.rrp || 0
+        // Pricing fields - now added to database
+        web_price: quoteData.web_price !== undefined ? quoteData.web_price : 0,
+        rrp: quoteData.rrp !== undefined ? quoteData.rrp : 0
       });
 
       setState(prev => ({ 
