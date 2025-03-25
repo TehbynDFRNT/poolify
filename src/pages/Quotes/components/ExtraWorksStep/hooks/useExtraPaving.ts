@@ -61,7 +61,7 @@ export const useExtraPaving = () => {
 
   // Load saved paving selections
   const loadSavedSelections = useCallback((customRequirementsJson?: string) => {
-    if (!customRequirementsJson) {
+    if (!customRequirementsJson || customRequirementsJson === '') {
       console.log("No custom requirements JSON to load");
       return;
     }
@@ -85,8 +85,14 @@ export const useExtraPaving = () => {
                  typeof selection.cost === 'number';
         });
         
-        setPavingSelections(validSelections);
-        initialLoadDone.current = true;
+        if (validSelections.length > 0) {
+          console.log("Valid selections to set:", validSelections);
+          setPavingSelections(validSelections);
+          initialLoadDone.current = true;
+        } else {
+          console.log("No valid selections found after filtering");
+          setPavingSelections([]);
+        }
       } else {
         console.log("No valid paving selections found in saved data");
         setPavingSelections([]);
@@ -114,55 +120,59 @@ export const useExtraPaving = () => {
 
   // Update a paving selection and recalculate costs
   const updatePavingSelection = (index: number, updates: Partial<PavingSelection>) => {
-    const updatedSelections = [...pavingSelections];
-    
-    // Ensure index is valid
-    if (index < 0 || index >= updatedSelections.length) {
-      console.error(`Invalid selection index: ${index}`);
-      return;
-    }
-    
-    updatedSelections[index] = { ...updatedSelections[index], ...updates };
-    
-    // Recalculate cost if meters or category changed
-    if (updates.meters !== undefined || updates.categoryId !== undefined) {
-      const category = pavingCategories?.find(cat => cat.id === updatedSelections[index].categoryId);
+    setPavingSelections(prevSelections => {
+      // Create a new array to trigger state update
+      const updatedSelections = [...prevSelections];
       
-      if (category && concreteLabourCosts && concreteLabourCosts.length > 0) {
-        // Get the standard paving costs
-        const pavingPerMeter = category.paver_cost + category.wastage_cost + category.margin_cost;
-        
-        // Get the labor cost - using the first labour cost in the list
-        const laborCost = concreteLabourCosts[0].cost;
-        const laborMargin = concreteLabourCosts[0].margin;
-        
-        // Calculate total per meter including labor cost and margin
-        const totalPerMeter = pavingPerMeter + laborCost + laborMargin;
-        
-        // Calculate final cost based on meters
-        const meters = updatedSelections[index].meters;
-        
-        // Calculate final cost with proper number formatting
-        updatedSelections[index].cost = parseFloat((totalPerMeter * meters).toFixed(2));
-        
-        // Calculate margins with proper number formatting
-        updatedSelections[index].materialMargin = parseFloat((category.margin_cost * meters).toFixed(2));
-        updatedSelections[index].labourMargin = parseFloat((laborMargin * meters).toFixed(2));
-        updatedSelections[index].totalMargin = parseFloat((
-          (updatedSelections[index].materialMargin || 0) + 
-          (updatedSelections[index].labourMargin || 0)
-        ).toFixed(2));
-          
-        console.log(
-          `Updated paving selection ${index}:`, 
-          `meters=${meters}`, 
-          `totalPerMeter=${totalPerMeter}`, 
-          `totalCost=${updatedSelections[index].cost}`
-        );
+      // Ensure index is valid
+      if (index < 0 || index >= updatedSelections.length) {
+        console.error(`Invalid selection index: ${index}`);
+        return prevSelections;
       }
-    }
-    
-    setPavingSelections(updatedSelections);
+      
+      // Update the selection with new values
+      updatedSelections[index] = { ...updatedSelections[index], ...updates };
+      
+      // Recalculate cost if meters or category changed
+      if (updates.meters !== undefined || updates.categoryId !== undefined) {
+        const category = pavingCategories?.find(cat => cat.id === updatedSelections[index].categoryId);
+        
+        if (category && concreteLabourCosts && concreteLabourCosts.length > 0) {
+          // Get the standard paving costs
+          const pavingPerMeter = category.paver_cost + category.wastage_cost + category.margin_cost;
+          
+          // Get the labor cost - using the first labour cost in the list
+          const laborCost = concreteLabourCosts[0].cost;
+          const laborMargin = concreteLabourCosts[0].margin;
+          
+          // Calculate total per meter including labor cost and margin
+          const totalPerMeter = pavingPerMeter + laborCost + laborMargin;
+          
+          // Calculate final cost based on meters
+          const meters = updatedSelections[index].meters;
+          
+          // Calculate final cost with proper number formatting
+          updatedSelections[index].cost = parseFloat((totalPerMeter * meters).toFixed(2));
+          
+          // Calculate margins with proper number formatting
+          updatedSelections[index].materialMargin = parseFloat((category.margin_cost * meters).toFixed(2));
+          updatedSelections[index].labourMargin = parseFloat((laborMargin * meters).toFixed(2));
+          updatedSelections[index].totalMargin = parseFloat((
+            (updatedSelections[index].materialMargin || 0) + 
+            (updatedSelections[index].labourMargin || 0)
+          ).toFixed(2));
+            
+          console.log(
+            `Updated paving selection ${index}:`, 
+            `meters=${meters}`, 
+            `totalPerMeter=${totalPerMeter}`, 
+            `totalCost=${updatedSelections[index].cost}`
+          );
+        }
+      }
+      
+      return updatedSelections;
+    });
   };
 
   // Remove a paving selection

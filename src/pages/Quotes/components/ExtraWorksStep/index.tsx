@@ -41,26 +41,29 @@ export const ExtraWorksStep = ({ onNext, onPrevious }: { onNext?: () => void; on
 
     setIsSaving(true);
 
-    // Only proceed with saving if there's actual data (or if we're explicitly clearing data)
-    const extraWorksData: ExtraWorks = {
-      pavingSelections: pavingSelections.map(selection => ({
+    try {
+      // Create a deep copy of the paving selections to prevent any reference issues
+      const pavingSelectionsCopy = pavingSelections.map(selection => ({
         categoryId: selection.categoryId,
         meters: selection.meters,
         cost: selection.cost,
         materialMargin: selection.materialMargin || 0,
         labourMargin: selection.labourMargin || 0,
         totalMargin: selection.totalMargin || 0
-      })),
-      concretingSelections: [],
-      retainingWallSelections: [],
-      waterFeatureSelections: [],
-      totalCost: totalExtraWorksCost,
-      totalMargin: pavingTotalMargin
-    };
+      }));
 
-    try {
+      // Only proceed with saving if there's actual data (or if we're explicitly clearing data)
+      const extraWorksData: ExtraWorks = {
+        pavingSelections: pavingSelectionsCopy,
+        concretingSelections: [],
+        retainingWallSelections: [],
+        waterFeatureSelections: [],
+        totalCost: totalExtraWorksCost,
+        totalMargin: pavingTotalMargin
+      };
+
       console.log("Saving extra works with total cost:", totalExtraWorksCost);
-      console.log("Saving paving selections:", pavingSelections);
+      console.log("Saving paving selections:", pavingSelectionsCopy);
       
       // Stringify the data here so we can log it and verify it's correct
       const jsonData = JSON.stringify(extraWorksData);

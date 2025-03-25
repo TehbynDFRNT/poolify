@@ -77,6 +77,11 @@ export const ExtraPavingSelection = ({
     setMetersValue(selection.meters.toString());
   }, [selection.meters]);
 
+  // Handle category selection change
+  const handleCategoryChange = (value: string) => {
+    onUpdate(index, { categoryId: value });
+  };
+
   return (
     <Card className="mb-4">
       <CardContent className="pt-6">
@@ -85,7 +90,7 @@ export const ExtraPavingSelection = ({
             <Label htmlFor={`paving-category-${index}`}>Paving Category</Label>
             <Select
               value={selection.categoryId}
-              onValueChange={(value) => onUpdate(index, { categoryId: value })}
+              onValueChange={handleCategoryChange}
             >
               <SelectTrigger id={`paving-category-${index}`} className="mt-1">
                 <SelectValue placeholder="Select paving type" />
