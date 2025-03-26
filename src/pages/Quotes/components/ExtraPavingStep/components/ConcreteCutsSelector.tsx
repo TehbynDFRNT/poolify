@@ -70,6 +70,23 @@ export const ConcreteCutsSelector = ({
       total + (cut.price * cut.quantity), 0
     );
   };
+  
+  // Group cuts by type
+  const groupCuts = () => {
+    if (!concreteCuts) return { standardCuts: [], diagonalCuts: [] };
+    
+    const standardCuts = concreteCuts.filter(cut => 
+      !cut.cut_type.toLowerCase().includes('diagonal')
+    );
+    
+    const diagonalCuts = concreteCuts.filter(cut => 
+      cut.cut_type.toLowerCase().includes('diagonal')
+    );
+    
+    return { standardCuts, diagonalCuts };
+  };
+  
+  const { standardCuts, diagonalCuts } = groupCuts();
 
   return (
     <Card className="border border-gray-200">
@@ -90,10 +107,12 @@ export const ConcreteCutsSelector = ({
         ) : (
           <div className="space-y-6">
             {/* Available cuts to add */}
-            <div>
+            <div className="space-y-4">
               <Label className="mb-2 block">Available Concrete Cuts</Label>
+              
+              {/* Standard Cuts */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {concreteCuts?.map(cut => (
+                {standardCuts.map(cut => (
                   <Button 
                     key={cut.id} 
                     variant="outline" 
@@ -105,6 +124,25 @@ export const ConcreteCutsSelector = ({
                   </Button>
                 ))}
               </div>
+              
+              {/* Diagonal Cuts - displayed underneath */}
+              {diagonalCuts.length > 0 && (
+                <div className="mt-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {diagonalCuts.map(cut => (
+                      <Button 
+                        key={cut.id} 
+                        variant="outline" 
+                        className="justify-between"
+                        onClick={() => handleAddCut(cut)}
+                      >
+                        <span>{cut.cut_type}</span>
+                        <span className="font-bold">${cut.price.toFixed(2)}</span>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             
             {/* Selected cuts table */}
