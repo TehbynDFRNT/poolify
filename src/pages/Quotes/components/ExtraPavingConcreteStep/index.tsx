@@ -1,11 +1,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { AlertCircle } from "lucide-react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
@@ -14,6 +9,10 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useConcreteCostCalculator } from "./hooks/useConcreteCostCalculator";
 import { CostBreakdown } from "./components/CostBreakdown";
+import { PavingTypeSelector } from "./components/PavingTypeSelector";
+import { MetersInput } from "./components/MetersInput";
+import { NoPoolWarning } from "./components/NoPoolWarning";
+import { NavigationButtons } from "./components/NavigationButtons";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
@@ -135,53 +134,21 @@ export const ExtraPavingConcreteStep = ({
               <div className="py-4 text-center text-gray-500">Loading paving options...</div>
             ) : (
               <div className="space-y-6">
-                {!quoteData.pool_id && (
-                  <div className="bg-amber-50 border border-amber-200 p-4 rounded-md flex items-start">
-                    <AlertCircle className="text-amber-500 h-5 w-5 mt-0.5 mr-2 flex-shrink-0" />
-                    <p className="text-amber-800 text-sm">
-                      No pool has been selected for this quote. Some features may be limited.
-                    </p>
-                  </div>
-                )}
+                {!quoteData.pool_id && <NoPoolWarning />}
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Paving Selection */}
-                  <div>
-                    <Label htmlFor="paving-type" className="block text-gray-700 font-medium mb-1">
-                      Paving Type
-                    </Label>
-                    <Select
-                      value={selectedPavingId}
-                      onValueChange={setSelectedPavingId}
-                    >
-                      <SelectTrigger id="paving-type" className="w-full">
-                        <SelectValue placeholder="Select paving type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {extraPavingCosts?.map((paving) => (
-                          <SelectItem key={paving.id} value={paving.id}>
-                            {paving.category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  <PavingTypeSelector 
+                    selectedPavingId={selectedPavingId}
+                    extraPavingCosts={extraPavingCosts}
+                    onSelect={setSelectedPavingId}
+                  />
                   
                   {/* Metres Input */}
-                  <div>
-                    <Label htmlFor="meters" className="block text-gray-700 font-medium mb-1">
-                      Metres
-                    </Label>
-                    <Input
-                      id="meters"
-                      type="number"
-                      min="0"
-                      step="0.1"
-                      value={meters || ""}
-                      onChange={(e) => setMeters(parseFloat(e.target.value) || 0)}
-                      className="w-full"
-                    />
-                  </div>
+                  <MetersInput 
+                    meters={meters} 
+                    onChange={setMeters} 
+                  />
                 </div>
                 
                 {/* Cost Breakdown */}
@@ -200,21 +167,12 @@ export const ExtraPavingConcreteStep = ({
               </div>
             )}
             
-            <div className="flex justify-between mt-6">
-              <Button 
-                variant="outline" 
-                onClick={onPrevious}
-                disabled={isSubmitting}
-              >
-                Previous
-              </Button>
-              <Button 
-                onClick={handleSaveAndContinue}
-                disabled={isSubmitting || !hasCostData}
-              >
-                {isSubmitting ? "Saving..." : "Next"}
-              </Button>
-            </div>
+            <NavigationButtons 
+              onPrevious={onPrevious}
+              onSave={handleSaveAndContinue}
+              isSubmitting={isSubmitting}
+              isDisabled={!hasCostData}
+            />
           </div>
         </CardContent>
       </Card>
