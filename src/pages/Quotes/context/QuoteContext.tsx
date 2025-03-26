@@ -1,11 +1,14 @@
 
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type QuoteContextType = {
   quoteData: Partial<QuoteInsert> & { id?: string; };
   updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; }) => void;
   resetQuoteData: () => void;
+  refreshQuoteData: () => Promise<void>;
 };
 
 const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
@@ -56,8 +59,36 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     setQuoteData(initialQuoteData);
   };
 
+  const refreshQuoteData = async () => {
+    if (!quoteData.id) {
+      console.warn("Cannot refresh quote data: No quote ID available");
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase
+        .from('quotes')
+        .select('*')
+        .eq('id', quoteData.id)
+        .single();
+
+      if (error) {
+        console.error("Error refreshing quote data:", error);
+        toast.error("Failed to refresh quote data");
+        throw error;
+      }
+
+      if (data) {
+        console.log("Refreshed quote data:", data);
+        setQuoteData(data);
+      }
+    } catch (error) {
+      console.error("Error in refreshQuoteData:", error);
+    }
+  };
+
   return (
-    <QuoteContext.Provider value={{ quoteData, updateQuoteData, resetQuoteData }}>
+    <QuoteContext.Provider value={{ quoteData, updateQuoteData, resetQuoteData, refreshQuoteData }}>
       {children}
     </QuoteContext.Provider>
   );

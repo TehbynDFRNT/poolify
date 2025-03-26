@@ -30,7 +30,6 @@ export interface Quote {
   concrete_pump_price?: number;
   concrete_cuts?: string;
   concrete_cuts_cost?: number;
-  under_fence_strips?: string;
   under_fence_strips_cost?: number;
   optional_addons_cost?: number;
 }
@@ -63,7 +62,6 @@ export interface QuoteInsert {
   concrete_pump_price?: number;
   concrete_cuts?: string;
   concrete_cuts_cost?: number;
-  under_fence_strips?: string;
   under_fence_strips_cost?: number;
   optional_addons_cost?: number;
 }

@@ -118,7 +118,8 @@ export const saveConcretePumpAndCuts = async (
         concrete_pump_price: pumpPrice,
         concrete_cuts: JSON.stringify(concreteCuts),
         concrete_cuts_cost: cutsCost,
-        under_fence_strips: JSON.stringify(underFenceStrips),
+        // Instead of storing the entire underFenceStrips object, store just the necessary information
+        // to avoid possible database schema issues
         under_fence_strips_cost: underFenceStripsCost
       })
       .eq('id', quoteId);
