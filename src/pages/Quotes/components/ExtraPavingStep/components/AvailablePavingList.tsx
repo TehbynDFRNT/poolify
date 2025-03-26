@@ -1,3 +1,4 @@
+
 import { cn } from "@/lib/utils";
 import { PavingSelection } from "../types";
 
@@ -12,7 +13,7 @@ export const AvailablePavingList = ({
   activeSelection,
   onSelectPaving
 }: AvailablePavingListProps) => {
-  if (selections.length <= 1) return null;
+  if (selections.length <= 0) return null;
 
   return (
     <div className="mt-6">

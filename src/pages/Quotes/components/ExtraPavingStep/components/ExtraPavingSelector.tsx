@@ -9,6 +9,8 @@ import { useState } from "react";
 import { CostBreakdown } from "./CostBreakdown";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 import type { ConcreteCost } from "@/types/concrete-cost";
+import { ExtraPavingCost } from "@/types/extra-paving-cost";
+import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 
 interface ExtraPavingSelector {
   quoteId?: string;
@@ -36,6 +38,8 @@ export const ExtraPavingSelector = ({
   const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(
     selections.length > 0 ? selections[0] : null
   );
+  
+  const { extraPavingCosts, isLoading } = useExtraPavingCosts();
 
   return (
     <Card className="border border-gray-200">
@@ -50,14 +54,17 @@ export const ExtraPavingSelector = ({
             {selections.length > 0 ? (
               <>
                 <PavingCategorySelector 
+                  extraPavingCosts={extraPavingCosts}
+                  activeSelection={activeSelection}
                   selections={selections}
-                  activeSelectionId={activeSelection?.pavingId}
-                  onSelect={(id) => {
+                  quoteId={quoteId}
+                  isLoading={isLoading}
+                  onAdd={onAdd}
+                  onUpdate={onUpdate}
+                  onSelectionChange={(id) => {
                     const selection = selections.find(s => s.pavingId === id);
                     if (selection) setActiveSelection(selection);
                   }}
-                  onRemove={onRemove}
-                  onUpdate={onUpdate}
                 />
                 
                 <div className="mt-6">
@@ -78,8 +85,16 @@ export const ExtraPavingSelector = ({
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-4">Available Paving Types</h3>
               <AvailablePavingList 
-                onAdd={onAdd}
-                disabledIds={selections.map(s => s.pavingId)}
+                selections={selections}
+                activeSelection={activeSelection}
+                onSelectPaving={(selection) => {
+                  // If the selection is not already in the list, add it
+                  if (!selections.some(s => s.pavingId === selection.pavingId)) {
+                    onAdd(selection.pavingId);
+                  }
+                  // Set as active selection
+                  setActiveSelection(selection);
+                }}
               />
             </div>
             
