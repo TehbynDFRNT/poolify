@@ -154,13 +154,30 @@ export const fetchUnderFenceStrips = async (quoteId: string): Promise<UnderFence
     if (data && data.under_fence_strips_data) {
       // Check if data is already an array (already parsed JSON)
       if (Array.isArray(data.under_fence_strips_data)) {
-        return data.under_fence_strips_data as UnderFenceConcreteStripSelection[];
+        // We need to ensure the data conforms to our expected type
+        return data.under_fence_strips_data.map(item => ({
+          id: String(item.id || ''),
+          type: String(item.type || ''),
+          cost: Number(item.cost || 0),
+          margin: Number(item.margin || 0),
+          quantity: Number(item.quantity || 0)
+        })) as UnderFenceConcreteStripSelection[];
       }
       
       // If it's a string, parse it
       if (typeof data.under_fence_strips_data === 'string') {
         try {
-          return JSON.parse(data.under_fence_strips_data);
+          const parsedData = JSON.parse(data.under_fence_strips_data);
+          if (Array.isArray(parsedData)) {
+            return parsedData.map(item => ({
+              id: String(item.id || ''),
+              type: String(item.type || ''),
+              cost: Number(item.cost || 0),
+              margin: Number(item.margin || 0),
+              quantity: Number(item.quantity || 0)
+            }));
+          }
+          return [];
         } catch (e) {
           console.error("Error parsing under fence strips data:", e);
           return [];
