@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
@@ -14,6 +13,7 @@ import { useFormSubmission } from "./hooks/useFormSubmission";
 import { TotalCostSummary } from "./components/TotalCostSummary";
 import { useCostCalculation } from "./hooks/useCostCalculation";
 import { fetchUnderFenceStrips } from "./services/pavingService";
+import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -134,6 +134,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         selectedStrips={underFenceStrips}
         onUpdateStrips={setUnderFenceStrips}
       />
+      
+      {/* New Paving on Existing Concrete placeholder section */}
+      <PavingOnExistingConcrete />
 
       {/* Total Cost Summary */}
       <TotalCostSummary 
