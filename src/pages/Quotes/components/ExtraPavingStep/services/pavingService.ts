@@ -1,6 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
-import { PavingSelection, ConcreteCutSelection } from "../types";
+import { PavingSelection, ConcreteCutSelection, UnderFenceConcreteStripSelection } from "../types";
 import { toast } from "sonner";
 
 // Fetch existing paving selections for a quote
@@ -91,30 +90,36 @@ export const savePavingSelections = async (
   }
 };
 
-// Save concrete pump and cuts selections
+// Save concrete pump, cuts, and under fence strips selections
 export const saveConcretePumpAndCuts = async (
   quoteId: string,
   pumpRequired: boolean,
   pumpPrice: number,
   concreteCuts: ConcreteCutSelection[],
-  cutsCost: number
+  cutsCost: number,
+  underFenceStrips: UnderFenceConcreteStripSelection[] = [],
+  underFenceStripsCost: number = 0
 ) => {
   try {
     console.log("Saving concrete pump and cuts:", {
       pumpRequired,
       pumpPrice,
       concreteCuts,
-      cutsCost
+      cutsCost,
+      underFenceStrips,
+      underFenceStripsCost
     });
 
-    // Update the quote with concrete pump and cuts information
+    // Update the quote with concrete pump, cuts, and under fence strips information
     const { error: updateError } = await supabase
       .from('quotes')
       .update({
         concrete_pump_required: pumpRequired,
         concrete_pump_price: pumpPrice,
         concrete_cuts: JSON.stringify(concreteCuts),
-        concrete_cuts_cost: cutsCost
+        concrete_cuts_cost: cutsCost,
+        under_fence_strips: JSON.stringify(underFenceStrips),
+        under_fence_strips_cost: underFenceStripsCost
       })
       .eq('id', quoteId);
 

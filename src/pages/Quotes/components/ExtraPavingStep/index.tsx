@@ -5,9 +5,10 @@ import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
 import { ExtraPavingSelector } from "./components/ExtraPavingSelector";
 import { ConcretePumpSelector } from "./components/ConcretePumpSelector";
 import { ConcreteCutsSelector } from "./components/ConcreteCutsSelector";
+import { UnderFenceConcreteStripSelector } from "./components/UnderFenceConcreteStripSelector";
 import { useExtraPavingQuote } from "./hooks";
 import { NoPoolWarning } from "../SiteRequirementsStep/components/NoPoolWarning";
-import { ConcreteCutSelection } from "./types";
+import { ConcreteCutSelection, UnderFenceConcreteStripSelection } from "./types";
 import { FormActions } from "../SiteRequirementsStep/components/FormActions";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 
@@ -27,6 +28,18 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       }
     } catch (e) {
       console.error("Error parsing concrete cuts:", e);
+    }
+    return [];
+  });
+  
+  const [underFenceStrips, setUnderFenceStrips] = useState<UnderFenceConcreteStripSelection[]>(() => {
+    try {
+      if (quoteData.under_fence_strips && quoteData.under_fence_strips.trim() !== "") {
+        const parsed = JSON.parse(quoteData.under_fence_strips);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+    } catch (e) {
+      console.error("Error parsing under fence strips:", e);
     }
     return [];
   });
@@ -53,6 +66,17 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     }, 0);
   };
 
+  // Calculate under fence strips total cost
+  const calculateUnderFenceStripsCost = () => {
+    if (!underFenceStrips || underFenceStrips.length === 0) return 0;
+    
+    return underFenceStrips.reduce((total, strip) => {
+      const cost = isNaN(strip.cost) ? 0 : strip.cost;
+      const quantity = isNaN(strip.quantity) ? 0 : strip.quantity;
+      return total + (cost * quantity);
+    }, 0);
+  };
+
   // Get concrete pump cost when required
   const getConcretePumpCost = () => {
     if (isPumpRequired && quoteData.concrete_pump_price) {
@@ -74,6 +98,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     // Add concrete cuts cost
     total += calculateConcreteCutsCost();
     
+    // Add under fence strips cost
+    total += calculateUnderFenceStripsCost();
+    
     return total;
   };
 
@@ -84,7 +111,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       isPumpRequired,
       pumpPrice: quoteData.concrete_pump_price || 0,
       concreteCuts,
-      concreteCutsCost: calculateConcreteCutsCost()
+      concreteCutsCost: calculateConcreteCutsCost(),
+      underFenceStrips,
+      underFenceStripsCost: calculateUnderFenceStripsCost()
     });
   };
 
@@ -95,7 +124,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       isPumpRequired,
       pumpPrice: quoteData.concrete_pump_price || 0,
       concreteCuts,
-      concreteCutsCost: calculateConcreteCutsCost()
+      concreteCutsCost: calculateConcreteCutsCost(),
+      underFenceStrips,
+      underFenceStripsCost: calculateUnderFenceStripsCost()
     });
   };
 
@@ -126,6 +157,11 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         selectedCuts={concreteCuts}
         onUpdateCuts={setConcreteCuts}
       />
+      
+      <UnderFenceConcreteStripSelector
+        selectedStrips={underFenceStrips}
+        onUpdateStrips={setUnderFenceStrips}
+      />
 
       {/* Total Cost Summary */}
       <div className="bg-slate-50 p-4 rounded-md">
@@ -147,6 +183,13 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
             <div className="flex justify-between">
               <span>Concrete Cuts:</span>
               <span>${calculateConcreteCutsCost().toFixed(2)}</span>
+            </div>
+          )}
+          
+          {underFenceStrips.length > 0 && (
+            <div className="flex justify-between">
+              <span>Under Fence Concrete Strips:</span>
+              <span>${calculateUnderFenceStripsCost().toFixed(2)}</span>
             </div>
           )}
           

@@ -1,4 +1,3 @@
-
 export interface PavingSelection {
   quoteId: string;
   pavingId: string;
@@ -14,5 +13,13 @@ export interface ConcreteCutSelection {
   id: string;
   cut_type: string;
   price: number;
+  quantity: number;
+}
+
+export interface UnderFenceConcreteStripSelection {
+  id: string;
+  type: string;
+  cost: number;
+  margin: number;
   quantity: number;
 }
