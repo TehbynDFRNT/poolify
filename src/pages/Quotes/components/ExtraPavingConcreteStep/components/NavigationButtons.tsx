@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 interface NavigationButtonsProps {
   onPrevious: () => void;
   onSave: () => void;
+  onSaveAndContinue: () => void;
   isSubmitting: boolean;
   isDisabled: boolean;
 }
@@ -12,6 +13,7 @@ interface NavigationButtonsProps {
 export const NavigationButtons = ({
   onPrevious,
   onSave,
+  onSaveAndContinue,
   isSubmitting,
   isDisabled
 }: NavigationButtonsProps) => {
@@ -24,12 +26,21 @@ export const NavigationButtons = ({
       >
         Previous
       </Button>
-      <Button 
-        onClick={onSave}
-        disabled={isSubmitting || isDisabled}
-      >
-        {isSubmitting ? "Saving..." : "Next"}
-      </Button>
+      <div className="flex gap-3">
+        <Button 
+          variant="outline"
+          onClick={onSave}
+          disabled={isSubmitting || isDisabled}
+        >
+          {isSubmitting ? "Saving..." : "Save"}
+        </Button>
+        <Button 
+          onClick={onSaveAndContinue}
+          disabled={isSubmitting || isDisabled}
+        >
+          {isSubmitting ? "Saving..." : "Save & Continue"}
+        </Button>
+      </div>
     </div>
   );
 };

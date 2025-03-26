@@ -64,7 +64,7 @@ export const ExtraPavingConcreteStep = ({
     }
   }, [quoteData.concrete_cuts]);
 
-  const handleSaveAndContinue = async () => {
+  const handleSave = async () => {
     if (!selectedPavingId || meters <= 0) {
       toast.error("Please select a paving type and enter meters");
       return;
@@ -106,15 +106,21 @@ export const ExtraPavingConcreteStep = ({
         // Update local context
         updateQuoteData(updates);
         toast.success("Paving & concrete data saved");
-        
-        // Move to next step
-        onNext();
       }
     } catch (error) {
       console.error("Error in save process:", error);
       toast.error("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSaveAndContinue = async () => {
+    try {
+      await handleSave();
+      onNext();
+    } catch (error) {
+      console.error("Error in save and continue:", error);
     }
   };
 
@@ -169,7 +175,8 @@ export const ExtraPavingConcreteStep = ({
             
             <NavigationButtons 
               onPrevious={onPrevious}
-              onSave={handleSaveAndContinue}
+              onSave={handleSave}
+              onSaveAndContinue={handleSaveAndContinue}
               isSubmitting={isSubmitting}
               isDisabled={!hasCostData}
             />
