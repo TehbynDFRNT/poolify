@@ -6,6 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Truck } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 
 interface ConcretePumpSelectorProps {
   isPumpRequired: boolean;
@@ -17,6 +18,16 @@ export const ConcretePumpSelector = ({
   onTogglePump 
 }: ConcretePumpSelectorProps) => {
   const { concretePump, isLoading } = useConcretePump();
+  const { quoteData, updateQuoteData } = useQuoteContext();
+  
+  // When concrete pump is toggled, update the pump price in context
+  useEffect(() => {
+    if (isPumpRequired && concretePump) {
+      updateQuoteData({
+        concrete_pump_price: concretePump.price
+      });
+    }
+  }, [isPumpRequired, concretePump, updateQuoteData]);
   
   const handleToggle = (checked: boolean) => {
     onTogglePump(checked);
