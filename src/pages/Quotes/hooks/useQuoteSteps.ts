@@ -8,10 +8,11 @@ export const QUOTE_STEPS = [
   { id: 1, name: "Customer Info" },
   { id: 2, name: "Base Pool" },
   { id: 3, name: "Site Requirements" },
-  { id: 4, name: "Extra Paving" },
-  { id: 5, name: "Optional Add-ons" },
-  { id: 6, name: "Cost Summary" },
-  { id: 7, name: "Preview Quote" },
+  { id: 4, name: "Extra Paving & Concrete" },
+  { id: 5, name: "Extra Paving" },
+  { id: 6, name: "Optional Add-ons" },
+  { id: 7, name: "Cost Summary" },
+  { id: 8, name: "Preview Quote" },
 ];
 
 export interface QuoteStepsState {
