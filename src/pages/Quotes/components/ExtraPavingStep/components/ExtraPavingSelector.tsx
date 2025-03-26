@@ -9,7 +9,6 @@ import { useState } from "react";
 import { CostBreakdown } from "./CostBreakdown";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 import type { ConcreteCost } from "@/types/concrete-cost";
-import { ExtraPavingCost } from "@/types/extra-paving-cost";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 
 interface ExtraPavingSelectorProps {
@@ -41,6 +40,9 @@ export const ExtraPavingSelector = ({
   
   const { extraPavingCosts, isLoading } = useExtraPavingCosts();
 
+  // Get a list of already selected paving IDs to disable them in the available list
+  const selectedPavingIds = selections.map(s => s.pavingId);
+
   return (
     <Card className="border border-gray-200">
       <CardHeader className="bg-white pb-2">
@@ -67,6 +69,15 @@ export const ExtraPavingSelector = ({
                   }}
                 />
                 
+                {activeSelection && (
+                  <div className="mt-4">
+                    <PavingCostSummary 
+                      activeSelection={activeSelection}
+                      onRemove={onRemove}
+                    />
+                  </div>
+                )}
+                
                 <div className="mt-6">
                   <PavingTotalSummary totalCost={totalCost} totalMargin={totalMargin} />
                 </div>
@@ -85,8 +96,10 @@ export const ExtraPavingSelector = ({
             <div className="mb-6">
               <h3 className="text-lg font-medium mb-4">Available Paving Types</h3>
               <AvailablePavingList 
+                extraPavingCosts={extraPavingCosts}
                 selections={selections}
                 activeSelection={activeSelection}
+                disabledIds={selectedPavingIds}
                 onSelectPaving={(selection) => {
                   // If the selection is not already in the list, add it
                   if (!selections.some(s => s.pavingId === selection.pavingId)) {

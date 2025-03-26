@@ -82,14 +82,14 @@ export const PavingCategorySelector = ({
             <SelectValue placeholder="Select paving type" />
           </SelectTrigger>
           <SelectContent>
-            {extraPavingCosts?.map((option) => (
-              <SelectItem key={option.id} value={option.id}>
-                {option.category}
+            {selections.map((selection) => (
+              <SelectItem key={selection.pavingId} value={selection.pavingId}>
+                {selection.pavingCategory}
               </SelectItem>
             ))}
-            {!extraPavingCosts?.length && (
+            {!selections.length && (
               <SelectItem value="none" disabled>
-                No paving types available
+                No selections available
               </SelectItem>
             )}
           </SelectContent>
