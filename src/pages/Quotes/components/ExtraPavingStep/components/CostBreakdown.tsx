@@ -1,18 +1,27 @@
 
 import { PavingSelection } from "../types";
+import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 
 interface CostBreakdownProps {
   activeSelection: PavingSelection;
+  concreteLabourCosts?: ConcreteLabourCost[];
 }
 
-export const CostBreakdown = ({ activeSelection }: CostBreakdownProps) => {
+export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: CostBreakdownProps) => {
   // Material costs per meter
   const totalMaterialCost = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
   
-  // Fixed labour costs per meter
-  const laborCost = 100;
-  const laborMargin = 30;
-  const totalLabourCost = laborCost + laborMargin;
+  // Labor costs per meter from database
+  const laborCosts = concreteLabourCosts.reduce((total, cost) => {
+    return total + cost.cost;
+  }, 0);
+  
+  // Labor margin per meter from database
+  const laborMargin = concreteLabourCosts.reduce((total, cost) => {
+    return total + cost.margin;
+  }, 0);
+  
+  const totalLabourCost = laborCosts + laborMargin;
   
   // Ensure meters is a valid number
   const meters = activeSelection.meters === undefined || isNaN(activeSelection.meters) ? 0 : activeSelection.meters;
@@ -50,11 +59,29 @@ export const CostBreakdown = ({ activeSelection }: CostBreakdownProps) => {
       <div className="bg-slate-50 p-4 rounded-md">
         <h4 className="font-medium mb-2">Labour (per meter)</h4>
         <div className="grid grid-cols-2 gap-y-1">
-          <div>Labour Cost:</div>
-          <div className="text-right">${laborCost.toFixed(2)}</div>
+          {concreteLabourCosts.map((cost, index) => (
+            <React.Fragment key={cost.id}>
+              <div>{cost.description}:</div>
+              <div className="text-right">${cost.cost.toFixed(2)}</div>
+              
+              <div>{cost.description} Margin:</div>
+              <div className="text-right text-green-600">${cost.margin.toFixed(2)}</div>
+              
+              {index < concreteLabourCosts.length - 1 && (
+                <>
+                  <div className="border-b my-1"></div>
+                  <div className="border-b my-1"></div>
+                </>
+              )}
+            </React.Fragment>
+          ))}
           
-          <div>Labour Margin:</div>
-          <div className="text-right text-green-600">${laborMargin.toFixed(2)}</div>
+          {concreteLabourCosts.length === 0 && (
+            <>
+              <div>Concrete Labour costs not loaded</div>
+              <div className="text-right">$0.00</div>
+            </>
+          )}
           
           <div className="border-t pt-1 mt-1 font-medium">Total Labour Cost (per m):</div>
           <div className="text-right border-t pt-1 mt-1 font-medium">${totalLabourCost.toFixed(2)}</div>

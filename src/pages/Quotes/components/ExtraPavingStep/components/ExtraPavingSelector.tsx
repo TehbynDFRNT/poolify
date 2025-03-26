@@ -7,6 +7,7 @@ import { CostBreakdown } from "./CostBreakdown";
 import { PavingCategorySelector } from "./PavingCategorySelector";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 
 interface ExtraPavingSelectorProps {
   quoteId?: string;
@@ -16,6 +17,7 @@ interface ExtraPavingSelectorProps {
   onRemove: (pavingId: string) => void;
   totalCost: number;
   totalMargin: number;
+  concreteLabourCosts?: ConcreteLabourCost[];
 }
 
 export const ExtraPavingSelector = ({
@@ -25,7 +27,8 @@ export const ExtraPavingSelector = ({
   onUpdate,
   onRemove,
   totalCost,
-  totalMargin
+  totalMargin,
+  concreteLabourCosts = []
 }: ExtraPavingSelectorProps) => {
   const { extraPavingCosts, isLoading } = useExtraPavingCosts();
   const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(null);
@@ -74,10 +77,13 @@ export const ExtraPavingSelector = ({
     
     // Material costs
     const materialCostPerMeter = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
-    // Labour costs
-    const laborCostPerMeter = 100 + 30; // Fixed labour costs
     
-    return materialCostPerMeter + laborCostPerMeter;
+    // Labour costs from database
+    const laborCosts = concreteLabourCosts.reduce((total, cost) => {
+      return total + cost.cost + cost.margin;
+    }, 0);
+    
+    return materialCostPerMeter + laborCosts;
   };
 
   // Calculate total meters across all selections
@@ -149,7 +155,10 @@ export const ExtraPavingSelector = ({
           </div>
           
           {activeSelection && (
-            <CostBreakdown activeSelection={activeSelection} />
+            <CostBreakdown 
+              activeSelection={activeSelection} 
+              concreteLabourCosts={concreteLabourCosts}
+            />
           )}
           
           {selections.length > 0 && (

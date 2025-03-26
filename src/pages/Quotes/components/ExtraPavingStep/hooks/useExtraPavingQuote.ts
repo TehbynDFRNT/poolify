@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcretePump } from "@/pages/ConstructionCosts/hooks/useConcretePump";
+import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { toast } from "sonner";
 import { PavingSelection } from "../types";
 import { 
@@ -18,6 +19,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const { extraPavingCosts } = useExtraPavingCosts();
   const { concretePump } = useConcretePump();
+  const { concreteLabourCosts } = useConcreteLabourCosts();
 
   // Fetch existing selections for this quote
   useEffect(() => {
@@ -39,7 +41,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
         setPavingSelections(parsedSelections);
         
         // Calculate total cost
-        const total = calculateTotalCost(parsedSelections);
+        const total = calculateTotalCost(parsedSelections, concreteLabourCosts || []);
         setTotalCost(total);
         
         console.log("Paving selections:", parsedSelections);
@@ -52,7 +54,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     };
 
     loadSelections();
-  }, [quoteId]);
+  }, [quoteId, concreteLabourCosts]);
 
   // Log selections after update for debugging
   useEffect(() => {
@@ -95,7 +97,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     };
 
     // Calculate the total cost (will be 0 with 0 meters)
-    newSelection.totalCost = calculateSelectionCost(newSelection);
+    newSelection.totalCost = calculateSelectionCost(newSelection, concreteLabourCosts || []);
 
     // Add to state
     const updatedSelections = [...pavingSelections, newSelection];
@@ -103,7 +105,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     updateTotalCost(updatedSelections);
     
     console.log("Added new selection:", newSelection);
-    console.log("Total cost after adding:", calculateTotalCost(updatedSelections));
+    console.log("Total cost after adding:", calculateTotalCost(updatedSelections, concreteLabourCosts || []));
   };
 
   // Update meters for a selection
@@ -118,7 +120,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
         };
         
         // Recalculate the total cost
-        updatedSelection.totalCost = calculateSelectionCost(updatedSelection);
+        updatedSelection.totalCost = calculateSelectionCost(updatedSelection, concreteLabourCosts || []);
         console.log(`Updated selection: meters=${updatedSelection.meters}, totalCost=${updatedSelection.totalCost}`);
         return updatedSelection;
       }
@@ -140,7 +142,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
 
   // Update the total cost
   const updateTotalCost = (selections: PavingSelection[]) => {
-    const total = calculateTotalCost(selections);
+    const total = calculateTotalCost(selections, concreteLabourCosts || []);
     console.log(`Total cost calculated: ${total}`);
     setTotalCost(total);
   };
@@ -148,10 +150,11 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   return {
     pavingSelections,
     totalCost,
-    totalMargin: calculateTotalMargin(pavingSelections),
+    totalMargin: calculateTotalMargin(pavingSelections, concreteLabourCosts || []),
     isLoading,
     addSelection,
     updateSelectionMeters,
-    removeSelection
+    removeSelection,
+    concreteLabourCosts
   };
 };

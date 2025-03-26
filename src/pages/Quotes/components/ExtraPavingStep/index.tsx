@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
@@ -56,7 +57,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     updateSelectionMeters, 
     removeSelection,
     totalCost: pavingTotalCost,
-    totalMargin
+    totalMargin,
+    concreteLabourCosts
   } = useExtraPavingQuote(quoteData.id);
 
   const { isSubmitting, handleSaveExtraPaving } = useFormSubmission({ onNext });
@@ -117,7 +119,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdate={updateSelectionMeters}
         onRemove={removeSelection}
         totalCost={pavingTotalCost || 0}
-        totalMargin={totalMargin ||.0}
+        totalMargin={totalMargin || 0}
+        concreteLabourCosts={concreteLabourCosts}
       />
 
       <ConcretePumpSelector 
