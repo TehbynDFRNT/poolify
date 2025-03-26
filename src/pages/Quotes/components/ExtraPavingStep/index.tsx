@@ -11,6 +11,8 @@ import { NoPoolWarning } from "../SiteRequirementsStep/components/NoPoolWarning"
 import { ConcreteCutSelection, UnderFenceConcreteStripSelection } from "./types";
 import { FormActions } from "../SiteRequirementsStep/components/FormActions";
 import { useFormSubmission } from "./hooks/useFormSubmission";
+import { TotalCostSummary } from "./components/TotalCostSummary";
+import { useCostCalculation } from "./hooks/useCostCalculation";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -32,17 +34,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     return [];
   });
   
-  const [underFenceStrips, setUnderFenceStrips] = useState<UnderFenceConcreteStripSelection[]>(() => {
-    try {
-      if (quoteData.under_fence_strips && quoteData.under_fence_strips.trim() !== "") {
-        const parsed = JSON.parse(quoteData.under_fence_strips);
-        return Array.isArray(parsed) ? parsed : [];
-      }
-    } catch (e) {
-      console.error("Error parsing under fence strips:", e);
-    }
-    return [];
-  });
+  const [underFenceStrips, setUnderFenceStrips] = useState<UnderFenceConcreteStripSelection[]>([]);
   
   const { 
     pavingSelections, 
@@ -54,55 +46,21 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   } = useExtraPavingQuote(quoteData.id);
 
   const { isSubmitting, handleSaveExtraPaving } = useFormSubmission({ onNext });
+  
+  const { 
+    calculateConcreteCutsCost,
+    calculateUnderFenceStripsCost,
+    calculateTotalCost
+  } = useCostCalculation(quoteData.concrete_pump_price || 0);
 
-  // Calculate concrete cuts total cost
-  const calculateConcreteCutsCost = () => {
-    if (!concreteCuts || concreteCuts.length === 0) return 0;
-    
-    return concreteCuts.reduce((total, cut) => {
-      const price = isNaN(cut.price) ? 0 : cut.price;
-      const quantity = isNaN(cut.quantity) ? 0 : cut.quantity;
-      return total + (price * quantity);
-    }, 0);
-  };
-
-  // Calculate under fence strips total cost
-  const calculateUnderFenceStripsCost = () => {
-    if (!underFenceStrips || underFenceStrips.length === 0) return 0;
-    
-    return underFenceStrips.reduce((total, strip) => {
-      const cost = isNaN(strip.cost) ? 0 : strip.cost;
-      const quantity = isNaN(strip.quantity) ? 0 : strip.quantity;
-      return total + (cost * quantity);
-    }, 0);
-  };
-
-  // Get concrete pump cost when required
-  const getConcretePumpCost = () => {
-    if (isPumpRequired && quoteData.concrete_pump_price) {
-      return quoteData.concrete_pump_price;
-    }
-    return 0;
-  };
-
-  // Calculate the overall total cost
-  const calculateTotalCost = () => {
-    const pavingCost = isNaN(pavingTotalCost) ? 0 : pavingTotalCost;
-    let total = pavingCost;
-    
-    // Add concrete pump cost if required
-    if (isPumpRequired && quoteData.concrete_pump_price) {
-      total += quoteData.concrete_pump_price;
-    }
-    
-    // Add concrete cuts cost
-    total += calculateConcreteCutsCost();
-    
-    // Add under fence strips cost
-    total += calculateUnderFenceStripsCost();
-    
-    return total;
-  };
+  const concreteCutsCost = calculateConcreteCutsCost(concreteCuts);
+  const underFenceStripsCost = calculateUnderFenceStripsCost(underFenceStrips);
+  const totalCost = calculateTotalCost(
+    pavingTotalCost || 0, 
+    isPumpRequired, 
+    concreteCuts, 
+    underFenceStrips
+  );
 
   const handleSaveOnly = async () => {
     await handleSaveExtraPaving(false, {
@@ -111,9 +69,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       isPumpRequired,
       pumpPrice: quoteData.concrete_pump_price || 0,
       concreteCuts,
-      concreteCutsCost: calculateConcreteCutsCost(),
+      concreteCutsCost,
       underFenceStrips,
-      underFenceStripsCost: calculateUnderFenceStripsCost()
+      underFenceStripsCost
     });
   };
 
@@ -124,9 +82,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       isPumpRequired,
       pumpPrice: quoteData.concrete_pump_price || 0,
       concreteCuts,
-      concreteCutsCost: calculateConcreteCutsCost(),
+      concreteCutsCost,
       underFenceStrips,
-      underFenceStripsCost: calculateUnderFenceStripsCost()
+      underFenceStripsCost
     });
   };
 
@@ -164,41 +122,14 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       />
 
       {/* Total Cost Summary */}
-      <div className="bg-slate-50 p-4 rounded-md">
-        <h3 className="font-medium text-lg mb-2">Total Cost Summary</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span>Extra Paving:</span>
-            <span>${(pavingTotalCost || 0).toFixed(2)}</span>
-          </div>
-          
-          {isPumpRequired && quoteData.concrete_pump_price > 0 && (
-            <div className="flex justify-between">
-              <span>Concrete Pump:</span>
-              <span>${quoteData.concrete_pump_price.toFixed(2)}</span>
-            </div>
-          )}
-          
-          {concreteCuts.length > 0 && (
-            <div className="flex justify-between">
-              <span>Concrete Cuts:</span>
-              <span>${calculateConcreteCutsCost().toFixed(2)}</span>
-            </div>
-          )}
-          
-          {underFenceStrips.length > 0 && (
-            <div className="flex justify-between">
-              <span>Under Fence Concrete Strips:</span>
-              <span>${calculateUnderFenceStripsCost().toFixed(2)}</span>
-            </div>
-          )}
-          
-          <div className="flex justify-between font-bold border-t pt-2 mt-2">
-            <span>Total:</span>
-            <span>${calculateTotalCost().toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
+      <TotalCostSummary 
+        pavingTotalCost={pavingTotalCost || 0}
+        isPumpRequired={isPumpRequired}
+        pumpPrice={quoteData.concrete_pump_price || 0}
+        concreteCutsCost={concreteCutsCost}
+        underFenceStripsCost={underFenceStripsCost}
+        totalCost={totalCost}
+      />
 
       {/* Navigation using FormActions component */}
       <FormActions
