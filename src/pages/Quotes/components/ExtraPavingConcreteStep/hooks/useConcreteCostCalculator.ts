@@ -9,6 +9,7 @@ interface CostCalculation {
   totalCost: number;
   materialCost: number;
   labourCost: number;
+  marginCost: number; // Added margin cost
   pavingDetails: {
     category: string;
     paverCost: number;
@@ -37,6 +38,7 @@ export const useConcreteCostCalculator = (
     totalCost: 0,
     materialCost: 0,
     labourCost: 0,
+    marginCost: 0, // Added margin cost
     pavingDetails: {
       category: '',
       paverCost: 0,
@@ -60,6 +62,7 @@ export const useConcreteCostCalculator = (
         totalCost: 0,
         materialCost: 0,
         labourCost: 0,
+        marginCost: 0, // Added margin cost
         pavingDetails: {
           category: '',
           paverCost: 0,
@@ -105,19 +108,25 @@ export const useConcreteCostCalculator = (
     };
 
     // Calculate costs
-    const pavingCost = selectedPaving.paver_cost + selectedPaving.wastage_cost + selectedPaving.margin_cost;
+    const pavingCost = selectedPaving.paver_cost + selectedPaving.wastage_cost;
+    const pavingMargin = selectedPaving.margin_cost;
     const concreteCost = defaultConcreteCost.total_cost;
-    const laborCost = defaultLabourCost.cost + defaultLabourCost.margin;
+    const laborBaseCost = defaultLabourCost.cost;
+    const laborMargin = defaultLabourCost.margin;
     
-    const calculatedPerMeterCost = pavingCost + concreteCost + laborCost;
+    const calculatedPerMeterCost = pavingCost + pavingMargin + concreteCost + laborBaseCost + laborMargin;
     const materialTotal = (pavingCost + concreteCost) * meters;
-    const labourTotal = laborCost * meters;
+    const labourTotal = laborBaseCost * meters;
+    
+    // Calculate total margin (paving margin + labour margin)
+    const marginTotal = (pavingMargin * meters) + (laborMargin * meters);
     
     setCosts({
       perMeterCost: calculatedPerMeterCost,
       totalCost: calculatedPerMeterCost * meters,
       materialCost: materialTotal,
       labourCost: labourTotal,
+      marginCost: marginTotal, // Set margin cost
       pavingDetails,
       concreteDetails,
       labourDetails

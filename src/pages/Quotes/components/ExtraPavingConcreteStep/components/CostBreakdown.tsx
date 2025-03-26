@@ -6,6 +6,7 @@ interface CostBreakdownProps {
   materialCost: number;
   labourCost: number;
   totalCost: number;
+  marginCost: number; // Added margin cost
   pavingDetails?: {
     category?: string;
     paverCost?: number;
@@ -28,6 +29,7 @@ export const CostBreakdown = ({
   materialCost,
   labourCost,
   totalCost,
+  marginCost, // Added margin cost parameter
   pavingDetails,
   concreteDetails,
   labourDetails,
@@ -126,6 +128,10 @@ export const CostBreakdown = ({
         <div className="flex justify-between text-sm">
           <span className="text-gray-600">Labour Cost:</span>
           <span className="font-medium">${labourCost.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm text-green-600">
+          <span>Margin:</span>
+          <span className="font-medium">${marginCost.toFixed(2)}</span>
         </div>
         <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold">
           <span>Total Cost:</span>

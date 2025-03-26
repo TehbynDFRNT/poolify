@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
@@ -38,6 +37,7 @@ export const ExtraPavingConcreteStep = ({
     totalCost, 
     materialCost, 
     labourCost,
+    marginCost,
     pavingDetails,
     concreteDetails,
     labourDetails 
@@ -83,6 +83,7 @@ export const ExtraPavingConcreteStep = ({
           per_meter_cost: perMeterCost,
           material_cost: materialCost,
           labour_cost: labourCost,
+          margin_cost: marginCost,  // Add margin cost to stored data
           total_cost: totalCost,
           paving_details: pavingDetails,
           concrete_details: concreteDetails,
@@ -163,6 +164,7 @@ export const ExtraPavingConcreteStep = ({
                     perMeterCost={perMeterCost}
                     materialCost={materialCost}
                     labourCost={labourCost}
+                    marginCost={marginCost}
                     totalCost={totalCost}
                     pavingDetails={pavingDetails}
                     concreteDetails={concreteDetails}
