@@ -2,7 +2,8 @@
 import { FC } from 'react';
 
 interface TotalCostSummaryProps {
-  pavingTotalCost: number;
+  pavingTotal: number;
+  layingTotal: number;
   isPumpRequired: boolean;
   pumpPrice: number;
   concreteCutsCost: number;
@@ -11,7 +12,8 @@ interface TotalCostSummaryProps {
 }
 
 export const TotalCostSummary: FC<TotalCostSummaryProps> = ({
-  pavingTotalCost,
+  pavingTotal,
+  layingTotal,
   isPumpRequired,
   pumpPrice,
   concreteCutsCost,
@@ -23,8 +25,13 @@ export const TotalCostSummary: FC<TotalCostSummaryProps> = ({
       <h3 className="font-medium text-lg mb-2">Total Cost Summary</h3>
       <div className="space-y-2">
         <div className="flex justify-between">
-          <span>Extra Paving:</span>
-          <span>${(pavingTotalCost || 0).toFixed(2)}</span>
+          <span>Paving Materials:</span>
+          <span>${pavingTotal.toFixed(2)}</span>
+        </div>
+        
+        <div className="flex justify-between">
+          <span>Concrete Labour:</span>
+          <span>${layingTotal.toFixed(2)}</span>
         </div>
         
         {isPumpRequired && pumpPrice > 0 && (

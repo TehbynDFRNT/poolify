@@ -54,6 +54,14 @@ export const useCostCalculation = (concretePumpPrice: number = 0) => {
     // Add under fence strips cost
     total += calculateUnderFenceStripsCost(underFenceStrips);
     
+    console.log("Final total cost calculation:", {
+      pavingCost,
+      pumpCost: isPumpRequired ? concretePumpPrice : 0,
+      cutsCost: calculateConcreteCutsCost(concreteCuts),
+      stripsCost: calculateUnderFenceStripsCost(underFenceStrips),
+      total
+    });
+    
     return total;
   }, [concretePumpPrice, calculateConcreteCutsCost, calculateUnderFenceStripsCost]);
 

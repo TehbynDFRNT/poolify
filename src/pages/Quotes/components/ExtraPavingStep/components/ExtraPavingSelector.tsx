@@ -8,6 +8,7 @@ import { PavingCategorySelector } from "./PavingCategorySelector";
 import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
+import { calculatePavingAndLayingCosts } from "../utils/pavingCalculations";
 
 interface ExtraPavingSelectorProps {
   quoteId?: string;
@@ -32,18 +33,21 @@ export const ExtraPavingSelector = ({
 }: ExtraPavingSelectorProps) => {
   const { extraPavingCosts, isLoading } = useExtraPavingCosts();
   const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(null);
+  const { pavingTotal, layingTotal } = calculatePavingAndLayingCosts(selections, concreteLabourCosts);
 
   // For debugging
   useEffect(() => {
     console.log("All selections:", selections);
     console.log("Total meters:", getTotalMeters());
     console.log("Concrete labour costs:", concreteLabourCosts);
+    console.log("Paving total:", pavingTotal);
+    console.log("Laying total:", layingTotal);
     
     // Log each selection's details
     selections.forEach(s => {
       console.log(`Selection ${s.pavingCategory}: ${s.meters} meters, total cost: ${s.totalCost}`);
     });
-  }, [selections, concreteLabourCosts]);
+  }, [selections, concreteLabourCosts, pavingTotal, layingTotal]);
 
   // Set active selection when selections change
   useEffect(() => {
@@ -171,6 +175,12 @@ export const ExtraPavingSelector = ({
                 
                 <div>Total Meters:</div>
                 <div className="text-right">{getTotalMeters().toFixed(1)}</div>
+                
+                <div>Paving Materials Total:</div>
+                <div className="text-right">${pavingTotal.toFixed(2)}</div>
+                
+                <div>Concrete Labour Total:</div>
+                <div className="text-right">${layingTotal.toFixed(2)}</div>
                 
                 <div>Total Margin:</div>
                 <div className="text-right text-green-600">${totalMargin.toFixed(2)}</div>
