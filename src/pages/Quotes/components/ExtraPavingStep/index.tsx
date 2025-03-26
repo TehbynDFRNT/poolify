@@ -13,6 +13,7 @@ import { FormActions } from "../SiteRequirementsStep/components/FormActions";
 import { useFormSubmission } from "./hooks/useFormSubmission";
 import { TotalCostSummary } from "./components/TotalCostSummary";
 import { useCostCalculation } from "./hooks/useCostCalculation";
+import { fetchUnderFenceStrips } from "./services/pavingService";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -35,6 +36,19 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   });
   
   const [underFenceStrips, setUnderFenceStrips] = useState<UnderFenceConcreteStripSelection[]>([]);
+  
+  // Load under fence strips data when component mounts
+  useEffect(() => {
+    if (quoteData.id) {
+      const loadUnderFenceStrips = async () => {
+        const stripsData = await fetchUnderFenceStrips(quoteData.id);
+        if (stripsData && stripsData.length > 0) {
+          setUnderFenceStrips(stripsData);
+        }
+      };
+      loadUnderFenceStrips();
+    }
+  }, [quoteData.id]);
   
   const { 
     pavingSelections, 

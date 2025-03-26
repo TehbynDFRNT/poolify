@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { PavingSelection, ConcreteCutSelection, UnderFenceConcreteStripSelection } from "../types";
 import { toast } from "sonner";
@@ -118,8 +119,7 @@ export const saveConcretePumpAndCuts = async (
         concrete_pump_price: pumpPrice,
         concrete_cuts: JSON.stringify(concreteCuts),
         concrete_cuts_cost: cutsCost,
-        // Instead of storing the entire underFenceStrips object, store just the necessary information
-        // to avoid possible database schema issues
+        under_fence_strips_data: JSON.stringify(underFenceStrips),
         under_fence_strips_cost: underFenceStripsCost
       })
       .eq('id', quoteId);
@@ -134,5 +134,35 @@ export const saveConcretePumpAndCuts = async (
     console.error("Error in saveConcretePumpAndCuts:", error);
     toast.error("Failed to save concrete pump and cuts");
     throw error;
+  }
+};
+
+// Fetch under fence strips from quote
+export const fetchUnderFenceStrips = async (quoteId: string): Promise<UnderFenceConcreteStripSelection[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('quotes')
+      .select('under_fence_strips_data')
+      .eq('id', quoteId)
+      .single();
+
+    if (error) {
+      console.error("Error fetching under fence strips:", error);
+      return [];
+    }
+
+    if (data && data.under_fence_strips_data) {
+      try {
+        return JSON.parse(data.under_fence_strips_data);
+      } catch (e) {
+        console.error("Error parsing under fence strips data:", e);
+        return [];
+      }
+    }
+
+    return [];
+  } catch (error) {
+    console.error("Error in fetchUnderFenceStrips:", error);
+    return [];
   }
 };

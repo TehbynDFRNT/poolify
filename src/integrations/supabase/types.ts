@@ -1133,6 +1133,8 @@ export type Database = {
           status: string
           total_cost: number | null
           traffic_control_id: string | null
+          under_fence_strips_cost: number | null
+          under_fence_strips_data: Json | null
           updated_at: string
           web_price: number | null
         }
@@ -1166,6 +1168,8 @@ export type Database = {
           status: string
           total_cost?: number | null
           traffic_control_id?: string | null
+          under_fence_strips_cost?: number | null
+          under_fence_strips_data?: Json | null
           updated_at?: string
           web_price?: number | null
         }
@@ -1199,6 +1203,8 @@ export type Database = {
           status?: string
           total_cost?: number | null
           traffic_control_id?: string | null
+          under_fence_strips_cost?: number | null
+          under_fence_strips_data?: Json | null
           updated_at?: string
           web_price?: number | null
         }
