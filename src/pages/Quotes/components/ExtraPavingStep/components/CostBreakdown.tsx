@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { Fragment } from "react";
 import { PavingSelection } from "../types";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
 
@@ -61,7 +61,7 @@ export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: Cos
         <h4 className="font-medium mb-2">Labour (per meter)</h4>
         <div className="grid grid-cols-2 gap-y-1">
           {concreteLabourCosts.map((cost, index) => (
-            <React.Fragment key={cost.id}>
+            <Fragment key={cost.id}>
               <div>{cost.description}:</div>
               <div className="text-right">${cost.cost.toFixed(2)}</div>
               
@@ -69,19 +69,19 @@ export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: Cos
               <div className="text-right text-green-600">${cost.margin.toFixed(2)}</div>
               
               {index < concreteLabourCosts.length - 1 && (
-                <>
+                <Fragment>
                   <div className="border-b my-1"></div>
                   <div className="border-b my-1"></div>
-                </>
+                </Fragment>
               )}
-            </React.Fragment>
+            </Fragment>
           ))}
           
           {concreteLabourCosts.length === 0 && (
-            <>
+            <Fragment>
               <div>Concrete Labour costs not loaded</div>
               <div className="text-right">$0.00</div>
-            </>
+            </Fragment>
           )}
           
           <div className="border-t pt-1 mt-1 font-medium">Total Labour Cost (per m):</div>
