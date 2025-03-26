@@ -4,7 +4,7 @@ import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
 import { ExtraPavingSelector } from "./components/ExtraPavingSelector";
 import { ConcretePumpSelector } from "./components/ConcretePumpSelector";
-import { ConcreteCutsSelector } from "./components/ConcreteCutsSelector";
+import { ConcreteCutsSelector } from "./components/ConcreteCuts"; // Updated import path
 import { UnderFenceConcreteStripSelector } from "./components/UnderFenceConcreteStripSelector";
 import { useExtraPavingQuote } from "./hooks";
 import { NoPoolWarning } from "../SiteRequirementsStep/components/NoPoolWarning";
