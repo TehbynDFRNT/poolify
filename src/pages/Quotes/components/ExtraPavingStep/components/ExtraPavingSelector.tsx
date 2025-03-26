@@ -12,7 +12,7 @@ import type { ConcreteCost } from "@/types/concrete-cost";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 
-interface ExtraPavingSelector {
+interface ExtraPavingSelectorProps {
   quoteId?: string;
   selections: PavingSelection[];
   onAdd: (pavingId: string) => void;
@@ -34,7 +34,7 @@ export const ExtraPavingSelector = ({
   totalMargin,
   concreteLabourCosts,
   concreteCosts = []
-}: ExtraPavingSelector) => {
+}: ExtraPavingSelectorProps) => {
   const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(
     selections.length > 0 ? selections[0] : null
   );
