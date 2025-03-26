@@ -154,14 +154,14 @@ export const fetchUnderFenceStrips = async (quoteId: string): Promise<UnderFence
     if (data && data.under_fence_strips_data) {
       // Check if data is already an array (already parsed JSON)
       if (Array.isArray(data.under_fence_strips_data)) {
-        // We need to ensure the data conforms to our expected type
-        return data.under_fence_strips_data.map(item => ({
+        // Type assertion with proper mapping to ensure we have the correct structure
+        return (data.under_fence_strips_data as any[]).map(item => ({
           id: String(item.id || ''),
           type: String(item.type || ''),
           cost: Number(item.cost || 0),
           margin: Number(item.margin || 0),
           quantity: Number(item.quantity || 0)
-        })) as UnderFenceConcreteStripSelection[];
+        }));
       }
       
       // If it's a string, parse it
