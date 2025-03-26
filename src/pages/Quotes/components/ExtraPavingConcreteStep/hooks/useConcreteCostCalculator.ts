@@ -9,6 +9,20 @@ interface CostCalculation {
   totalCost: number;
   materialCost: number;
   labourCost: number;
+  pavingDetails: {
+    category: string;
+    paverCost: number;
+    wastageCost: number;
+    marginCost: number;
+  };
+  concreteDetails: {
+    concreteCost: number;
+    dustCost: number;
+  };
+  labourDetails: {
+    baseCost: number;
+    marginCost: number;
+  };
 }
 
 export const useConcreteCostCalculator = (
@@ -22,7 +36,21 @@ export const useConcreteCostCalculator = (
     perMeterCost: 0,
     totalCost: 0,
     materialCost: 0,
-    labourCost: 0
+    labourCost: 0,
+    pavingDetails: {
+      category: '',
+      paverCost: 0,
+      wastageCost: 0,
+      marginCost: 0
+    },
+    concreteDetails: {
+      concreteCost: 0,
+      dustCost: 0
+    },
+    labourDetails: {
+      baseCost: 0,
+      marginCost: 0
+    }
   });
 
   useEffect(() => {
@@ -31,7 +59,21 @@ export const useConcreteCostCalculator = (
         perMeterCost: 0,
         totalCost: 0,
         materialCost: 0,
-        labourCost: 0
+        labourCost: 0,
+        pavingDetails: {
+          category: '',
+          paverCost: 0,
+          wastageCost: 0,
+          marginCost: 0
+        },
+        concreteDetails: {
+          concreteCost: 0,
+          dustCost: 0
+        },
+        labourDetails: {
+          baseCost: 0,
+          marginCost: 0
+        }
       });
       return;
     }
@@ -41,13 +83,31 @@ export const useConcreteCostCalculator = (
     if (!selectedPaving) return;
 
     // Get default concrete and labour costs (first one for now, could be made selectable)
-    const defaultConcreteCost = concreteCosts[0] || { concrete_cost: 0, dust_cost: 0, total_cost: 0 };
-    const defaultLabourCost = concreteLabourCosts[0] || { cost: 0 };
+    const defaultConcreteCost = concreteCosts[0] || { concrete_cost: 0, dust_cost: 0, total_cost: 0, description: '' };
+    const defaultLabourCost = concreteLabourCosts[0] || { cost: 0, margin: 0, description: '' };
+
+    // Store detailed costs for breakdown
+    const pavingDetails = {
+      category: selectedPaving.category,
+      paverCost: selectedPaving.paver_cost,
+      wastageCost: selectedPaving.wastage_cost,
+      marginCost: selectedPaving.margin_cost
+    };
+    
+    const concreteDetails = {
+      concreteCost: defaultConcreteCost.concrete_cost,
+      dustCost: defaultConcreteCost.dust_cost
+    };
+    
+    const labourDetails = {
+      baseCost: defaultLabourCost.cost,
+      marginCost: defaultLabourCost.margin
+    };
 
     // Calculate costs
     const pavingCost = selectedPaving.paver_cost + selectedPaving.wastage_cost + selectedPaving.margin_cost;
     const concreteCost = defaultConcreteCost.total_cost;
-    const laborCost = defaultLabourCost.cost;
+    const laborCost = defaultLabourCost.cost + defaultLabourCost.margin;
     
     const calculatedPerMeterCost = pavingCost + concreteCost + laborCost;
     const materialTotal = (pavingCost + concreteCost) * meters;
@@ -57,7 +117,10 @@ export const useConcreteCostCalculator = (
       perMeterCost: calculatedPerMeterCost,
       totalCost: calculatedPerMeterCost * meters,
       materialCost: materialTotal,
-      labourCost: labourTotal
+      labourCost: labourTotal,
+      pavingDetails,
+      concreteDetails,
+      labourDetails
     });
   }, [selectedPavingId, meters, extraPavingCosts, concreteCosts, concreteLabourCosts]);
 

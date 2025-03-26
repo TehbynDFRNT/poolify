@@ -38,7 +38,10 @@ export const ExtraPavingConcreteStep = ({
     perMeterCost, 
     totalCost, 
     materialCost, 
-    labourCost 
+    labourCost,
+    pavingDetails,
+    concreteDetails,
+    labourDetails 
   } = useConcreteCostCalculator(
     selectedPavingId, 
     meters, 
@@ -81,7 +84,10 @@ export const ExtraPavingConcreteStep = ({
           per_meter_cost: perMeterCost,
           material_cost: materialCost,
           labour_cost: labourCost,
-          total_cost: totalCost
+          total_cost: totalCost,
+          paving_details: pavingDetails,
+          concrete_details: concreteDetails,
+          labour_details: labourDetails
         })
       };
 
@@ -185,6 +191,10 @@ export const ExtraPavingConcreteStep = ({
                     materialCost={materialCost}
                     labourCost={labourCost}
                     totalCost={totalCost}
+                    pavingDetails={pavingDetails}
+                    concreteDetails={concreteDetails}
+                    labourDetails={labourDetails}
+                    meters={meters}
                   />
                 )}
               </div>
