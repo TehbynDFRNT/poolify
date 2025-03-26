@@ -67,6 +67,34 @@ export const calculateTotalCost = (
   return total;
 };
 
+// Split calculations for paving (material) and laying (labor) for display
+export const calculatePavingAndLayingCosts = (
+  selections: PavingSelection[],
+  concreteLabourCosts: ConcreteLabourCost[]
+): { pavingTotal: number; layingTotal: number } => {
+  if (!selections || selections.length === 0) return { pavingTotal: 0, layingTotal: 0 };
+  
+  return selections.reduce((totals, selection) => {
+    // Ensure meters is a valid number
+    const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
+    
+    // Material costs (paving)
+    const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
+    const pavingCost = materialCostPerMeter * meters;
+    
+    // Labor costs (laying)
+    const laborCostPerMeter = concreteLabourCosts.reduce((total, cost) => {
+      return total + cost.cost + cost.margin;
+    }, 0);
+    const layingCost = laborCostPerMeter * meters;
+    
+    return {
+      pavingTotal: totals.pavingTotal + pavingCost,
+      layingTotal: totals.layingTotal + layingCost
+    };
+  }, { pavingTotal: 0, layingTotal: 0 });
+};
+
 // For debugging: Get a detailed breakdown of all selections
 export const getSelectionsDebugInfo = (selections: PavingSelection[]): string => {
   if (!selections || selections.length === 0) return "No selections";
