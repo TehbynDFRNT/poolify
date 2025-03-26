@@ -14,8 +14,9 @@ import { useFormSubmission } from "./hooks/useFormSubmission";
 import { TotalCostSummary } from "./components/TotalCostSummary";
 import { useCostCalculation } from "./hooks/useCostCalculation";
 import { fetchUnderFenceStrips } from "./services/pavingService";
-import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 import { calculatePavingAndLayingCosts } from "./utils/pavingCalculations";
+import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
+import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -38,6 +39,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   });
   
   const [underFenceStrips, setUnderFenceStrips] = useState<UnderFenceConcreteStripSelection[]>([]);
+  const { concreteCosts } = useConcreteCosts();
   
   // Load under fence strips data when component mounts
   useEffect(() => {
@@ -63,7 +65,11 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   } = useExtraPavingQuote(quoteData.id);
 
   // Calculate paving and laying costs separately
-  const { pavingTotal, layingTotal } = calculatePavingAndLayingCosts(pavingSelections, concreteLabourCosts);
+  const { pavingTotal, layingTotal, concreteTotal } = calculatePavingAndLayingCosts(
+    pavingSelections, 
+    concreteLabourCosts, 
+    concreteCosts || []
+  );
 
   const { isSubmitting, handleSaveExtraPaving } = useFormSubmission({ onNext });
   
@@ -85,10 +91,11 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
   // Log the breakdown for debugging
   useEffect(() => {
     console.log("Paving Material Total:", pavingTotal);
+    console.log("Concrete Material Total:", concreteTotal);
     console.log("Laying Labour Total:", layingTotal);
-    console.log("Combined Total:", pavingTotal + layingTotal);
+    console.log("Combined Total:", pavingTotal + layingTotal + concreteTotal);
     console.log("Should match pavingTotalCost:", pavingTotalCost);
-  }, [pavingTotal, layingTotal, pavingTotalCost]);
+  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost]);
 
   const handleSaveOnly = async () => {
     await handleSaveExtraPaving(false, {
@@ -133,6 +140,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         totalCost={pavingTotalCost || 0}
         totalMargin={totalMargin || 0}
         concreteLabourCosts={concreteLabourCosts}
+        concreteCosts={concreteCosts || []}
       />
 
       <ConcretePumpSelector 
@@ -157,6 +165,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       <TotalCostSummary 
         pavingTotal={pavingTotal}
         layingTotal={layingTotal}
+        concreteTotal={concreteTotal}
         isPumpRequired={isPumpRequired}
         pumpPrice={quoteData.concrete_pump_price || 0}
         concreteCutsCost={concreteCutsCost}

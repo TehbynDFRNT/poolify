@@ -2,13 +2,19 @@
 import React, { Fragment } from "react";
 import { PavingSelection } from "../types";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
+import type { ConcreteCost } from "@/types/concrete-cost";
 
 interface CostBreakdownProps {
   activeSelection: PavingSelection;
   concreteLabourCosts?: ConcreteLabourCost[];
+  concreteCosts?: ConcreteCost[];
 }
 
-export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: CostBreakdownProps) => {
+export const CostBreakdown = ({ 
+  activeSelection, 
+  concreteLabourCosts = [], 
+  concreteCosts = [] 
+}: CostBreakdownProps) => {
   // Material costs per meter (Paving)
   const totalMaterialCost = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
   
@@ -24,12 +30,20 @@ export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: Cos
   
   const totalLabourCost = laborCosts + laborMargin;
   
+  // Concrete costs per meter from database
+  const concreteMaterialCosts = concreteCosts.reduce((total, cost) => {
+    return total + cost.concrete_cost + cost.dust_cost;
+  }, 0);
+  
+  const totalConcreteCost = concreteMaterialCosts;
+  
   // Ensure meters is a valid number
   const meters = activeSelection.meters === undefined || isNaN(activeSelection.meters) ? 0 : activeSelection.meters;
   
   // Total costs for all meters
   const totalMaterialCostAll = totalMaterialCost * meters;
   const totalLabourCostAll = totalLabourCost * meters;
+  const totalConcreteCostAll = totalConcreteCost * meters;
   
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
@@ -89,6 +103,38 @@ export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: Cos
           
           <div className="font-medium">Total Labour Cost:</div>
           <div className="text-right font-medium">${totalLabourCostAll.toFixed(2)}</div>
+        </div>
+      </div>
+      
+      <div className="col-span-2 bg-slate-50 p-4 rounded-md mt-2">
+        <h4 className="font-medium mb-2">Concrete Materials (per meter)</h4>
+        <div className="grid grid-cols-2 gap-y-1">
+          {concreteCosts.map((cost, index) => (
+            <Fragment key={cost.id}>
+              <div>{cost.description}:</div>
+              <div className="text-right">${cost.total_cost.toFixed(2)}</div>
+              
+              {index < concreteCosts.length - 1 && (
+                <Fragment>
+                  <div className="border-b my-1"></div>
+                  <div className="border-b my-1"></div>
+                </Fragment>
+              )}
+            </Fragment>
+          ))}
+          
+          {concreteCosts.length === 0 && (
+            <Fragment>
+              <div>Concrete costs not loaded</div>
+              <div className="text-right">$0.00</div>
+            </Fragment>
+          )}
+          
+          <div className="border-t pt-1 mt-1 font-medium">Total Concrete Cost (per m):</div>
+          <div className="text-right border-t pt-1 mt-1 font-medium">${totalConcreteCost.toFixed(2)}</div>
+          
+          <div className="font-medium">Total Concrete Cost:</div>
+          <div className="text-right font-medium">${totalConcreteCostAll.toFixed(2)}</div>
         </div>
       </div>
     </div>

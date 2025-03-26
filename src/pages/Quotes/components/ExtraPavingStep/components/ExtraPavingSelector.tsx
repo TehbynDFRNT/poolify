@@ -1,16 +1,16 @@
 
-import { useState, useEffect } from "react";
-import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { PavingSelection } from "../types";
-import { CostBreakdown } from "./CostBreakdown";
 import { PavingCategorySelector } from "./PavingCategorySelector";
-import { Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { AvailablePavingList } from "./AvailablePavingList";
+import { PavingCostSummary } from "./PavingCostSummary";
+import { PavingTotalSummary } from "./PavingTotalSummary";
+import { useState } from "react";
+import { CostBreakdown } from "./CostBreakdown";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
-import { calculatePavingAndLayingCosts } from "../utils/pavingCalculations";
+import type { ConcreteCost } from "@/types/concrete-cost";
 
-interface ExtraPavingSelectorProps {
+interface ExtraPavingSelector {
   quoteId?: string;
   selections: PavingSelection[];
   onAdd: (pavingId: string) => void;
@@ -18,178 +18,81 @@ interface ExtraPavingSelectorProps {
   onRemove: (pavingId: string) => void;
   totalCost: number;
   totalMargin: number;
-  concreteLabourCosts?: ConcreteLabourCost[];
+  concreteLabourCosts: ConcreteLabourCost[];
+  concreteCosts?: ConcreteCost[];
 }
 
-export const ExtraPavingSelector = ({
-  quoteId,
-  selections,
-  onAdd,
-  onUpdate,
-  onRemove,
+export const ExtraPavingSelector = ({ 
+  quoteId, 
+  selections, 
+  onAdd, 
+  onUpdate, 
+  onRemove, 
   totalCost,
   totalMargin,
-  concreteLabourCosts = []
-}: ExtraPavingSelectorProps) => {
-  const { extraPavingCosts, isLoading } = useExtraPavingCosts();
-  const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(null);
-  const { pavingTotal, layingTotal } = calculatePavingAndLayingCosts(selections, concreteLabourCosts);
-
-  // For debugging
-  useEffect(() => {
-    console.log("All selections:", selections);
-    console.log("Total meters:", getTotalMeters());
-    console.log("Concrete labour costs:", concreteLabourCosts);
-    console.log("Paving total:", pavingTotal);
-    console.log("Laying total:", layingTotal);
-    
-    // Log each selection's details
-    selections.forEach(s => {
-      console.log(`Selection ${s.pavingCategory}: ${s.meters} meters, total cost: ${s.totalCost}`);
-    });
-  }, [selections, concreteLabourCosts, pavingTotal, layingTotal]);
-
-  // Set active selection when selections change
-  useEffect(() => {
-    if (selections.length > 0) {
-      const current = activeSelection 
-        ? selections.find(s => s.pavingId === activeSelection.pavingId) 
-        : null;
-      
-      if (current) {
-        // Update the active selection if it still exists
-        setActiveSelection(current);
-      } else {
-        // Otherwise set to the first selection
-        setActiveSelection(selections[0]);
-      }
-    } else {
-      setActiveSelection(null);
-    }
-  }, [selections]);
-
-  // Manually change the active selection
-  const handleSelectionChange = (pavingId: string) => {
-    const selection = selections.find(s => s.pavingId === pavingId);
-    if (selection) {
-      setActiveSelection(selection);
-    }
-  };
-
-  // Calculate cost per meter for the active selection
-  const getCostPerMeter = () => {
-    if (!activeSelection) return 0;
-    
-    // Material costs
-    const materialCostPerMeter = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
-    
-    // Labour costs from database
-    const laborCostPerMeter = concreteLabourCosts.reduce((total, cost) => {
-      return total + cost.cost + cost.margin;
-    }, 0);
-    
-    return materialCostPerMeter + laborCostPerMeter;
-  };
-
-  // Calculate total meters across all selections
-  const getTotalMeters = () => {
-    return selections.reduce((sum, selection) => {
-      const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
-      return sum + meters;
-    }, 0);
-  };
+  concreteLabourCosts,
+  concreteCosts = []
+}: ExtraPavingSelector) => {
+  const [activeSelection, setActiveSelection] = useState<PavingSelection | null>(
+    selections.length > 0 ? selections[0] : null
+  );
 
   return (
     <Card className="border border-gray-200">
-      <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-green-500 text-xl">⊞</span>
-          <h3 className="text-lg font-medium">Extra Paving</h3>
-        </div>
-        <div className="text-right">
-          <div className="text-sm text-green-600 font-medium">
-            Total Margin: ${totalMargin.toFixed(2)}
-          </div>
-          <div className="text-xl font-semibold">
-            Total: ${totalCost.toFixed(2)}
-          </div>
-        </div>
+      <CardHeader className="bg-white pb-2">
+        <h2 className="text-xl font-semibold">Extra Paving</h2>
       </CardHeader>
-      <CardContent className="p-5">
-        <div className="grid grid-cols-1 gap-6">
-          <div className="grid grid-cols-12 gap-4">
-            <div className="col-span-7">
-              <PavingCategorySelector
-                extraPavingCosts={extraPavingCosts}
-                activeSelection={activeSelection}
-                selections={selections}
-                quoteId={quoteId}
-                isLoading={isLoading}
+      <CardContent className="pt-0">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <h3 className="text-lg font-medium mb-4">Selected Paving Types</h3>
+            
+            {selections.length > 0 ? (
+              <>
+                <PavingCategorySelector 
+                  selections={selections}
+                  activeSelectionId={activeSelection?.pavingId}
+                  onSelect={(id) => {
+                    const selection = selections.find(s => s.pavingId === id);
+                    if (selection) setActiveSelection(selection);
+                  }}
+                  onRemove={onRemove}
+                  onUpdate={onUpdate}
+                />
+                
+                <div className="mt-6">
+                  <PavingTotalSummary totalCost={totalCost} totalMargin={totalMargin} />
+                </div>
+              </>
+            ) : (
+              <div className="text-center p-6 bg-gray-50 rounded-md">
+                <p className="text-gray-500">No paving types selected yet.</p>
+                <p className="text-gray-500 text-sm mt-1">
+                  Choose a paving type from the right panel to get started.
+                </p>
+              </div>
+            )}
+          </div>
+          
+          <div>
+            <div className="mb-6">
+              <h3 className="text-lg font-medium mb-4">Available Paving Types</h3>
+              <AvailablePavingList 
                 onAdd={onAdd}
-                onUpdate={onUpdate}
-                onSelectionChange={handleSelectionChange}
+                disabledIds={selections.map(s => s.pavingId)}
               />
             </div>
             
-            <div className="col-span-5">
-              {activeSelection && (
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-medium">Cost per meter</h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onRemove(activeSelection.pavingId)}
-                      className="text-red-500 hover:text-red-700 p-0 h-8"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="text-lg font-semibold">
-                    ${getCostPerMeter().toFixed(2)}
-                  </div>
-                  <div className="mt-1 font-medium">
-                    Total Cost
-                  </div>
-                  <div className="text-lg font-semibold">
-                    ${activeSelection.totalCost.toFixed(2)}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-          
-          {activeSelection && (
-            <CostBreakdown 
-              activeSelection={activeSelection} 
-              concreteLabourCosts={concreteLabourCosts}
-            />
-          )}
-          
-          {selections.length > 0 && (
-            <div className="bg-slate-50 p-4 rounded-md">
-              <h4 className="font-medium text-gray-700 mb-2">Total Summary</h4>
-              <div className="grid grid-cols-2">
-                <div>Cost Per Meter:</div>
-                <div className="text-right">${getTotalMeters() > 0 ? (totalCost / getTotalMeters()).toFixed(2) : "0.00"}</div>
-                
-                <div>Total Meters:</div>
-                <div className="text-right">{getTotalMeters().toFixed(1)}</div>
-                
-                <div>Paving Materials Total:</div>
-                <div className="text-right">${pavingTotal.toFixed(2)}</div>
-                
-                <div>Concrete Labour Total:</div>
-                <div className="text-right">${layingTotal.toFixed(2)}</div>
-                
-                <div>Total Margin:</div>
-                <div className="text-right text-green-600">${totalMargin.toFixed(2)}</div>
-                
-                <div className="font-medium">Total Cost:</div>
-                <div className="text-right font-medium">${totalCost.toFixed(2)}</div>
+            {activeSelection && (
+              <div className="mb-4">
+                <CostBreakdown 
+                  activeSelection={activeSelection} 
+                  concreteLabourCosts={concreteLabourCosts}
+                  concreteCosts={concreteCosts}
+                />
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

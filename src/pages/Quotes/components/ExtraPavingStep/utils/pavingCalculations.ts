@@ -1,11 +1,13 @@
 
 import { PavingSelection } from "../types";
 import type { ConcreteLabourCost } from "@/types/concrete-labour-cost";
+import type { ConcreteCost } from "@/types/concrete-cost";
 
 // Calculate the cost for a single selection, including material and labor costs
 export const calculateSelectionCost = (
   selection: PavingSelection, 
-  concreteLabourCosts: ConcreteLabourCost[]
+  concreteLabourCosts: ConcreteLabourCost[],
+  concreteCosts: ConcreteCost[] = []
 ): number => {
   // Ensure meters is a valid number
   const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
@@ -23,8 +25,15 @@ export const calculateSelectionCost = (
   // Total labor cost for all meters
   const totalLaborCost = laborCostPerMeter * meters;
   
-  // Total cost (material + labor)
-  return totalMaterialCost + totalLaborCost;
+  // Concrete costs from database - PER METER
+  const concreteCostPerMeter = concreteCosts.reduce((total, cost) => {
+    return total + cost.total_cost;
+  }, 0);
+  // Total concrete cost for all meters
+  const totalConcreteCost = concreteCostPerMeter * meters;
+  
+  // Total cost (material + labor + concrete)
+  return totalMaterialCost + totalLaborCost + totalConcreteCost;
 };
 
 // Calculate total margin across all selections
@@ -53,13 +62,14 @@ export const calculateTotalMargin = (
 // Calculate total cost across all selections
 export const calculateTotalCost = (
   selections: PavingSelection[], 
-  concreteLabourCosts: ConcreteLabourCost[]
+  concreteLabourCosts: ConcreteLabourCost[],
+  concreteCosts: ConcreteCost[] = []
 ): number => {
   if (!selections || selections.length === 0) return 0;
   
   const total = selections.reduce((sum, selection) => {
     // Calculate cost for this selection
-    const cost = calculateSelectionCost(selection, concreteLabourCosts);
+    const cost = calculateSelectionCost(selection, concreteLabourCosts, concreteCosts);
     return sum + cost;
   }, 0);
   
@@ -70,9 +80,10 @@ export const calculateTotalCost = (
 // Split calculations for paving (material) and laying (labor) for display
 export const calculatePavingAndLayingCosts = (
   selections: PavingSelection[],
-  concreteLabourCosts: ConcreteLabourCost[]
-): { pavingTotal: number; layingTotal: number } => {
-  if (!selections || selections.length === 0) return { pavingTotal: 0, layingTotal: 0 };
+  concreteLabourCosts: ConcreteLabourCost[],
+  concreteCosts: ConcreteCost[] = []
+): { pavingTotal: number; layingTotal: number; concreteTotal: number } => {
+  if (!selections || selections.length === 0) return { pavingTotal: 0, layingTotal: 0, concreteTotal: 0 };
   
   return selections.reduce((totals, selection) => {
     // Ensure meters is a valid number
@@ -88,18 +99,27 @@ export const calculatePavingAndLayingCosts = (
     }, 0);
     const layingCost = laborCostPerMeter * meters;
     
+    // Concrete costs - ensure we're multiplying by meters here
+    const concreteCostPerMeter = concreteCosts.reduce((total, cost) => {
+      return total + cost.total_cost;
+    }, 0);
+    const concreteMaterialCost = concreteCostPerMeter * meters;
+    
     console.log(`For ${selection.pavingCategory} with ${meters} meters:`, {
       materialCostPerMeter,
       pavingTotal: pavingCost,
       laborCostPerMeter,
-      layingTotal: layingCost
+      layingTotal: layingCost,
+      concreteCostPerMeter,
+      concreteTotal: concreteMaterialCost
     });
     
     return {
       pavingTotal: totals.pavingTotal + pavingCost,
-      layingTotal: totals.layingTotal + layingCost
+      layingTotal: totals.layingTotal + layingCost,
+      concreteTotal: totals.concreteTotal + concreteMaterialCost
     };
-  }, { pavingTotal: 0, layingTotal: 0 });
+  }, { pavingTotal: 0, layingTotal: 0, concreteTotal: 0 });
 };
 
 // For debugging: Get a detailed breakdown of all selections
