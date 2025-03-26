@@ -37,12 +37,13 @@ export const ExtraPavingSelector = ({
   useEffect(() => {
     console.log("All selections:", selections);
     console.log("Total meters:", getTotalMeters());
+    console.log("Concrete labour costs:", concreteLabourCosts);
     
     // Log each selection's details
     selections.forEach(s => {
       console.log(`Selection ${s.pavingCategory}: ${s.meters} meters, total cost: ${s.totalCost}`);
     });
-  }, [selections]);
+  }, [selections, concreteLabourCosts]);
 
   // Set active selection when selections change
   useEffect(() => {
@@ -79,11 +80,11 @@ export const ExtraPavingSelector = ({
     const materialCostPerMeter = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
     
     // Labour costs from database
-    const laborCosts = concreteLabourCosts.reduce((total, cost) => {
+    const laborCostPerMeter = concreteLabourCosts.reduce((total, cost) => {
       return total + cost.cost + cost.margin;
     }, 0);
     
-    return materialCostPerMeter + laborCosts;
+    return materialCostPerMeter + laborCostPerMeter;
   };
 
   // Calculate total meters across all selections

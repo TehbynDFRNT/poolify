@@ -31,6 +31,13 @@ export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: Cos
   const totalMaterialCostAll = totalMaterialCost * meters;
   const totalLabourCostAll = totalLabourCost * meters;
   
+  // Log for debugging
+  console.log("CostBreakdown - activeSelection:", activeSelection);
+  console.log("CostBreakdown - concreteLabourCosts:", concreteLabourCosts);
+  console.log("CostBreakdown - laborCosts:", laborCosts);
+  console.log("CostBreakdown - laborMargin:", laborMargin);
+  console.log("CostBreakdown - totalLabourCost:", totalLabourCost);
+  
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
       <div className="col-span-2 mt-2 mb-1">

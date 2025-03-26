@@ -19,7 +19,12 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
   const { extraPavingCosts } = useExtraPavingCosts();
   const { concretePump } = useConcretePump();
-  const { concreteLabourCosts } = useConcreteLabourCosts();
+  const { concreteLabourCosts, isLoading: isLoadingLabourCosts } = useConcreteLabourCosts();
+
+  // Debug concrete labour costs
+  useEffect(() => {
+    console.log("Concrete labour costs in hook:", concreteLabourCosts);
+  }, [concreteLabourCosts]);
 
   // Fetch existing selections for this quote
   useEffect(() => {
@@ -111,6 +116,7 @@ export const useExtraPavingQuote = (quoteId?: string) => {
   // Update meters for a selection
   const updateSelectionMeters = (pavingId: string, meters: number) => {
     console.log(`Updating selection meters: pavingId=${pavingId}, meters=${meters}`);
+    console.log("Current concrete labour costs:", concreteLabourCosts);
 
     const updatedSelections = pavingSelections.map(selection => {
       if (selection.pavingId === pavingId) {
@@ -151,10 +157,10 @@ export const useExtraPavingQuote = (quoteId?: string) => {
     pavingSelections,
     totalCost,
     totalMargin: calculateTotalMargin(pavingSelections, concreteLabourCosts || []),
-    isLoading,
+    isLoading: isLoading || isLoadingLabourCosts,
     addSelection,
     updateSelectionMeters,
     removeSelection,
-    concreteLabourCosts
+    concreteLabourCosts: concreteLabourCosts || []
   };
 };

@@ -16,12 +16,12 @@ export const calculateSelectionCost = (
   const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
   
   // Labor costs from database
-  const laborCosts = concreteLabourCosts.reduce((total, cost) => {
+  const laborCostPerMeter = concreteLabourCosts.reduce((total, cost) => {
     return total + cost.cost + cost.margin;
   }, 0);
   
   // Total cost per meter (material + labor)
-  const totalCostPerMeter = materialCostPerMeter + laborCosts;
+  const totalCostPerMeter = materialCostPerMeter + laborCostPerMeter;
   
   // Total cost for all meters
   return totalCostPerMeter * meters;
@@ -38,9 +38,10 @@ export const calculateTotalMargin = (
     // Ensure meters is a valid number
     const meters = selection.meters === undefined || isNaN(selection.meters) ? 0 : selection.meters;
     
+    // Material margin
     const materialMargin = selection.marginCost * meters;
     
-    // Calculate labor margin from database
+    // Labor margin
     const laborMargin = concreteLabourCosts.reduce((total, cost) => {
       return total + cost.margin;
     }, 0) * meters;
