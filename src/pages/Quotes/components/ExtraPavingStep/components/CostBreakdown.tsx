@@ -9,10 +9,10 @@ interface CostBreakdownProps {
 }
 
 export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: CostBreakdownProps) => {
-  // Material costs per meter
+  // Material costs per meter (Paving)
   const totalMaterialCost = activeSelection.paverCost + activeSelection.wastageCost + activeSelection.marginCost;
   
-  // Labor costs per meter from database
+  // Labor costs per meter from database (Laying)
   const laborCosts = concreteLabourCosts.reduce((total, cost) => {
     return total + cost.cost;
   }, 0);
@@ -30,13 +30,6 @@ export const CostBreakdown = ({ activeSelection, concreteLabourCosts = [] }: Cos
   // Total costs for all meters
   const totalMaterialCostAll = totalMaterialCost * meters;
   const totalLabourCostAll = totalLabourCost * meters;
-  
-  // Log for debugging
-  console.log("CostBreakdown - activeSelection:", activeSelection);
-  console.log("CostBreakdown - concreteLabourCosts:", concreteLabourCosts);
-  console.log("CostBreakdown - laborCosts:", laborCosts);
-  console.log("CostBreakdown - laborMargin:", laborMargin);
-  console.log("CostBreakdown - totalLabourCost:", totalLabourCost);
   
   return (
     <div className="grid grid-cols-2 gap-x-6 gap-y-2">

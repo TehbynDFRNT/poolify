@@ -14,17 +14,17 @@ export const calculateSelectionCost = (
   
   // Material costs
   const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
+  const totalMaterialCost = materialCostPerMeter * meters;
   
-  // Labor costs from database
+  // Labor costs from database - PER METER
   const laborCostPerMeter = concreteLabourCosts.reduce((total, cost) => {
     return total + cost.cost + cost.margin;
   }, 0);
+  // Total labor cost for all meters
+  const totalLaborCost = laborCostPerMeter * meters;
   
-  // Total cost per meter (material + labor)
-  const totalCostPerMeter = materialCostPerMeter + laborCostPerMeter;
-  
-  // Total cost for all meters
-  return totalCostPerMeter * meters;
+  // Total cost (material + labor)
+  return totalMaterialCost + totalLaborCost;
 };
 
 // Calculate total margin across all selections
@@ -82,11 +82,18 @@ export const calculatePavingAndLayingCosts = (
     const materialCostPerMeter = selection.paverCost + selection.wastageCost + selection.marginCost;
     const pavingCost = materialCostPerMeter * meters;
     
-    // Labor costs (laying)
+    // Labor costs (laying) - ensure we're multiplying by meters here
     const laborCostPerMeter = concreteLabourCosts.reduce((total, cost) => {
       return total + cost.cost + cost.margin;
     }, 0);
     const layingCost = laborCostPerMeter * meters;
+    
+    console.log(`For ${selection.pavingCategory} with ${meters} meters:`, {
+      materialCostPerMeter,
+      pavingTotal: pavingCost,
+      laborCostPerMeter,
+      layingTotal: layingCost
+    });
     
     return {
       pavingTotal: totals.pavingTotal + pavingCost,
