@@ -74,7 +74,7 @@ export const ExtraPavingConcreteStep = ({
       {/* Concrete Extras component */}
       <ConcreteExtras />
       
-      {/* Extra Concreting placeholder section */}
+      {/* Extra Concreting placeholder section - now positioned correctly */}
       <ExtraConcreting onChanged={markAsChanged} />
       
       {/* Paving on Existing Concrete section */}
