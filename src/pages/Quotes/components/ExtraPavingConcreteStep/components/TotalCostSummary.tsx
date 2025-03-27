@@ -4,15 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator, DollarSign } from "lucide-react";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 
 interface CostItem {
   name: string;
@@ -31,7 +22,7 @@ export const TotalCostSummary: React.FC = () => {
 
     const items: CostItem[] = [];
 
-    // 1. Extra Paving
+    // 1. Extra Paving (Main Paving Section)
     if (quoteData.selected_paving_cost && quoteData.selected_paving_cost > 0) {
       items.push({
         name: "Extra Paving",
