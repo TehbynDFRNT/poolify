@@ -40,7 +40,6 @@ export const ExtraPavingConcreteStep = ({
   
   // Reference to the PavingOnExistingConcrete component
   const pavingOnExistingConcreteRef = useRef<any>(null);
-  const concreteExtrasRef = useRef<any>(null);
   
   // Use the custom hook for cost calculations
   const { 
@@ -242,16 +241,14 @@ export const ExtraPavingConcreteStep = ({
         </CardContent>
       </Card>
       
-      {/* Paving on Existing Concrete section - NOW FIRST */}
+      {/* Paving on Existing Concrete section - FIRST */}
       <PavingOnExistingConcrete 
         ref={pavingOnExistingConcreteRef}
         onChanged={markAsChanged}
       />
       
-      {/* Concrete Extras component - NOW SECOND */}
-      <ConcreteExtras 
-        ref={concreteExtrasRef}
-      />
+      {/* Concrete Extras component - SECOND */}
+      <ConcreteExtras />
 
       {/* Centralized Navigation Buttons */}
       <div className="flex justify-between mt-6">
