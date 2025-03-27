@@ -9,6 +9,7 @@ import { MetersInput } from "./MetersInput";
 import { useQuoteContext } from "../../../context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Quote } from "@/types/quote";
 
 export const PavingOnExistingConcrete = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
@@ -107,7 +108,7 @@ export const PavingOnExistingConcrete = () => {
       };
 
       if (quoteData.id) {
-        const updates = {
+        const updates: Partial<Quote> = {
           existing_concrete_paving: JSON.stringify(pavingData),
           existing_concrete_paving_cost: totalCost
         };
