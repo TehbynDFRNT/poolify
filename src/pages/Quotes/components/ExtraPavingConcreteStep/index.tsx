@@ -6,6 +6,7 @@ import { ConcreteExtras } from "./components/ConcreteExtras";
 import { NavigationButtons } from "./components/NavigationButtons";
 import { PageHeader } from "./components/PageHeader";
 import { MainPavingSection } from "./components/MainPavingSection";
+import { ExtraConcreting } from "./components/ExtraConcreting";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
@@ -70,14 +71,17 @@ export const ExtraPavingConcreteStep = ({
         markAsChanged={markAsChanged}
       />
       
+      {/* Concrete Extras component */}
+      <ConcreteExtras />
+      
+      {/* Extra Concreting placeholder section */}
+      <ExtraConcreting onChanged={markAsChanged} />
+      
       {/* Paving on Existing Concrete section */}
       <PavingOnExistingConcrete 
         ref={pavingOnExistingConcreteRef}
         onChanged={markAsChanged}
       />
-      
-      {/* Concrete Extras component */}
-      <ConcreteExtras />
 
       {/* Navigation Buttons */}
       <NavigationButtons
