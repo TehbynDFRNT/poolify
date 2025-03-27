@@ -8,7 +8,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
 
 export const usePavingOnExistingConcrete = () => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
   
@@ -32,18 +32,30 @@ export const usePavingOnExistingConcrete = () => {
   const [marginPaverCost, setMarginPaverCost] = useState(0);
   const [labourBaseCost, setLabourBaseCost] = useState(0);
   const [labourMarginCost, setLabourMarginCost] = useState(0);
+  
+  // Debug information
+  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   // Load existing data if available
   useEffect(() => {
+    console.log("Loading existing concrete paving data:", quoteData.existing_concrete_paving);
     if (quoteData.existing_concrete_paving) {
       try {
         const savedData = JSON.parse(quoteData.existing_concrete_paving);
         if (savedData && savedData.paving_id) {
           setSelectedPavingId(savedData.paving_id);
           setMeters(savedData.meters || 0);
+          
+          // Set debug info
+          setDebugInfo({
+            loadedData: savedData,
+            quoteId: quoteData.id,
+            timestamp: new Date().toISOString()
+          });
         }
       } catch (err) {
         console.error("Failed to parse saved existing concrete paving data:", err);
+        toast.error("Error loading saved paving data");
       }
     }
   }, [quoteData.existing_concrete_paving]);
@@ -116,11 +128,20 @@ export const usePavingOnExistingConcrete = () => {
 
   const handleSave = async () => {
     if (!selectedPavingId || meters <= 0) {
-      // Don't show error if nothing is selected - this is optional
+      toast.error("Please select a paving type and enter meters");
       return;
     }
 
     setIsSubmitting(true);
+    setDebugInfo(prev => ({
+      ...prev,
+      savingAttempt: {
+        quoteId: quoteData.id,
+        selectedPavingId,
+        meters,
+        timestamp: new Date().toISOString()
+      }
+    }));
 
     try {
       // Find the selected paving for details
@@ -151,6 +172,8 @@ export const usePavingOnExistingConcrete = () => {
         }
       };
 
+      console.log("Saving paving on existing concrete data:", pavingData);
+
       if (quoteData.id) {
         const updates: Partial<Quote> = {
           existing_concrete_paving: JSON.stringify(pavingData),
@@ -165,16 +188,37 @@ export const usePavingOnExistingConcrete = () => {
 
         if (error) {
           console.error("Error saving existing concrete paving data:", error);
+          setDebugInfo(prev => ({
+            ...prev,
+            saveError: error,
+            timestamp: new Date().toISOString()
+          }));
           toast.error("Failed to save data");
           return;
         }
 
         // Update local context
         updateQuoteData(updates);
+        
+        // Refresh quote data to ensure we have the latest
+        await refreshQuoteData();
+        
+        setDebugInfo(prev => ({
+          ...prev,
+          saveSuccess: true,
+          savedData: pavingData,
+          timestamp: new Date().toISOString()
+        }));
+        
         toast.success("Paving on existing concrete data saved");
       }
     } catch (error) {
       console.error("Error in save process:", error);
+      setDebugInfo(prev => ({
+        ...prev,
+        saveError: error,
+        timestamp: new Date().toISOString()
+      }));
       toast.error("An unexpected error occurred");
     } finally {
       setIsSubmitting(false);
@@ -259,6 +303,9 @@ export const usePavingOnExistingConcrete = () => {
     setMeters,
     setShowDeleteConfirm,
     handleSave,
-    handleDelete
+    handleDelete,
+    
+    // Debug info
+    debugInfo
   };
 };

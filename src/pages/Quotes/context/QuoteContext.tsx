@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,6 +71,7 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
 
     try {
+      console.log("Refreshing quote data for ID:", quoteData.id);
       const { data, error } = await supabase
         .from('quotes')
         .select('*')

@@ -43,7 +43,10 @@ export const PavingOnExistingConcrete: React.FC = () => {
     setMeters,
     setShowDeleteConfirm,
     handleSave,
-    handleDelete
+    handleDelete,
+    
+    // Debug info
+    debugInfo
   } = usePavingOnExistingConcrete();
 
   return (
@@ -94,6 +97,16 @@ export const PavingOnExistingConcrete: React.FC = () => {
                 }}
                 meters={meters}
               />
+            )}
+
+            {/* Debug Info - Only in Development */}
+            {process.env.NODE_ENV === 'development' && debugInfo && (
+              <div className="bg-gray-100 p-3 rounded text-xs mt-2 overflow-auto">
+                <details>
+                  <summary className="cursor-pointer font-medium">Debug Info</summary>
+                  <pre className="mt-2">{JSON.stringify(debugInfo, null, 2)}</pre>
+                </details>
+              </div>
             )}
 
             {/* Action Buttons */}
