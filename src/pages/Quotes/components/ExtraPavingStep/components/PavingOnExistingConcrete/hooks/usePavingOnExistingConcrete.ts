@@ -1,27 +1,32 @@
 
 import { useState, useEffect } from "react";
-import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
+import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
-import { toast } from "sonner";
 
 export const usePavingOnExistingConcrete = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
   
+  // State for form inputs
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
+  
+  // State for form operations
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
+  
   // Cost calculations
   const [pavingCost, setPavingCost] = useState(0);
   const [labourCost, setLabourCost] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
+  const [hasCostData, setHasCostData] = useState(false);
+  const [hasExistingData, setHasExistingData] = useState(false);
 
   // Load existing data if available
   useEffect(() => {
@@ -31,6 +36,7 @@ export const usePavingOnExistingConcrete = () => {
         if (savedData && savedData.paving_id) {
           setSelectedPavingId(savedData.paving_id);
           setMeters(savedData.meters || 0);
+          setHasExistingData(true);
         }
       } catch (err) {
         console.error("Failed to parse saved existing concrete paving data:", err);
@@ -44,6 +50,7 @@ export const usePavingOnExistingConcrete = () => {
       setPavingCost(0);
       setLabourCost(0);
       setTotalCost(0);
+      setHasCostData(false);
       return;
     }
 
@@ -62,13 +69,19 @@ export const usePavingOnExistingConcrete = () => {
     setLabourCost(totalLabourCost);
 
     // Calculate total cost
-    setTotalCost(totalPavingCost + totalLabourCost);
-
+    const calculatedTotalCost = totalPavingCost + totalLabourCost;
+    setTotalCost(calculatedTotalCost);
+    setHasCostData(true);
   }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts]);
 
   const handleSave = async () => {
     if (!selectedPavingId || meters <= 0) {
-      // Don't show error if nothing is selected - this is optional
+      toast.error("Please select a paving type and enter meters");
+      return;
+    }
+
+    if (!quoteData.id) {
+      toast.error("No quote ID available");
       return;
     }
 
@@ -79,6 +92,7 @@ export const usePavingOnExistingConcrete = () => {
       const selectedPaving = extraPavingCosts?.find(p => p.id === selectedPavingId);
       if (!selectedPaving) {
         toast.error("Selected paving type not found");
+        setIsSubmitting(false);
         return;
       }
 
@@ -105,28 +119,29 @@ export const usePavingOnExistingConcrete = () => {
         labour_details: labourDetails
       };
 
-      if (quoteData.id) {
-        const updates: Partial<Quote> = {
-          existing_concrete_paving: JSON.stringify(pavingData),
-          existing_concrete_paving_cost: totalCost
-        };
+      // Create updates object for the quote
+      const updates: Partial<Quote> = {
+        existing_concrete_paving: JSON.stringify(pavingData),
+        existing_concrete_paving_cost: totalCost
+      };
 
-        // Save to database
-        const { error } = await supabase
-          .from("quotes")
-          .update(updates)
-          .eq("id", quoteData.id);
+      // Save to database
+      const { error } = await supabase
+        .from("quotes")
+        .update(updates)
+        .eq("id", quoteData.id);
 
-        if (error) {
-          console.error("Error saving existing concrete paving data:", error);
-          toast.error("Failed to save data");
-          return;
-        }
-
-        // Update local context
-        updateQuoteData(updates);
-        toast.success("Paving on existing concrete data saved");
+      if (error) {
+        console.error("Error saving existing concrete paving data:", error);
+        toast.error("Failed to save data");
+        setIsSubmitting(false);
+        return;
       }
+
+      // Update local context
+      updateQuoteData(updates);
+      setHasExistingData(true);
+      toast.success("Paving on existing concrete data saved");
     } catch (error) {
       console.error("Error in save process:", error);
       toast.error("An unexpected error occurred");
@@ -135,43 +150,43 @@ export const usePavingOnExistingConcrete = () => {
     }
   };
 
-  // Delete handler
   const handleDelete = async () => {
-    if (!quoteData.id) return;
-    
+    if (!quoteData.id) {
+      toast.error("No quote ID available");
+      return;
+    }
+
     setIsDeleting(true);
-    setShowDeleteConfirm(false);
-    
+
     try {
-      // Prepare the update to clear the data
+      // Create updates to clear the existing data
       const updates: Partial<Quote> = {
         existing_concrete_paving: null,
         existing_concrete_paving_cost: 0
       };
-      
-      // Update database
+
+      // Save to database
       const { error } = await supabase
         .from("quotes")
         .update(updates)
         .eq("id", quoteData.id);
-        
+
       if (error) {
-        console.error("Error deleting existing concrete paving data:", error);
-        toast.error("Failed to delete data");
+        console.error("Error removing existing concrete paving data:", error);
+        toast.error("Failed to remove data");
         return;
       }
-      
-      // Update local state
-      setSelectedPavingId("");
-      setMeters(0);
-      setPavingCost(0);
-      setLabourCost(0);
-      setTotalCost(0);
-      
+
       // Update local context
       updateQuoteData(updates);
-      toast.success("Paving on existing concrete data removed");
       
+      // Clear form state
+      setSelectedPavingId("");
+      setMeters(0);
+      setHasExistingData(false);
+      setShowDeleteConfirm(false);
+      
+      toast.success("Paving on existing concrete data removed");
     } catch (error) {
       console.error("Error in delete process:", error);
       toast.error("An unexpected error occurred");
@@ -181,8 +196,6 @@ export const usePavingOnExistingConcrete = () => {
   };
 
   const isLoading = isLoadingPaving || isLoadingLabour;
-  const hasCostData = selectedPavingId && meters > 0;
-  const hasExistingData = !!quoteData.existing_concrete_paving;
 
   return {
     // State

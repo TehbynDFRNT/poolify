@@ -7,10 +7,10 @@ interface CostBreakdownProps {
   totalCost: number;
 }
 
-export const CostBreakdown: React.FC<CostBreakdownProps> = ({ 
-  pavingCost, 
-  labourCost, 
-  totalCost 
+export const CostBreakdown: React.FC<CostBreakdownProps> = ({
+  pavingCost,
+  labourCost,
+  totalCost,
 }) => {
   return (
     <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
