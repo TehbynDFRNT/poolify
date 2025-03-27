@@ -1,40 +1,35 @@
 
-import React from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { usePavingOnExistingConcrete } from "./hooks/usePavingOnExistingConcrete";
+import React, { useCallback, useEffect } from "react";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { SquareDashed } from "lucide-react";
 import { PavingSelect } from "./components/PavingSelect";
 import { MetersInput } from "./components/MetersInput";
 import { CostBreakdown } from "./components/CostBreakdown";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { FormActions } from "./components/FormActions";
+import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
+import { usePavingOnExistingConcrete } from "./hooks/usePavingOnExistingConcrete";
 
 interface PavingOnExistingConcreteProps {
   onChanged?: () => void;
 }
 
-export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> = ({ onChanged }) => {
+export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> = React.memo(({ onChanged }) => {
   const {
+    // State
     selectedPavingId,
     meters,
     isSubmitting,
     isDeleting,
     showDeleteConfirm,
-    hasCostData,
-    hasExistingData,
-    isLoading,
-    perMeterRate,
     pavingCost,
     labourCost,
-    marginCost,
     totalCost,
-    paverCost,
-    wastageCost,
-    marginPaverCost,
-    labourBaseCost,
-    labourMarginCost,
+    isLoading,
+    hasCostData,
+    hasExistingData,
     extraPavingCosts,
+    
+    // Actions
     setSelectedPavingId,
     setMeters,
     setShowDeleteConfirm,
@@ -42,106 +37,86 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
     handleDelete
   } = usePavingOnExistingConcrete(onChanged);
 
-  // Auto-save changes when inputs change
-  React.useEffect(() => {
-    if (selectedPavingId && meters > 0) {
-      // We add a debounce to avoid saving too frequently
-      const timer = setTimeout(() => {
-        handleSave();
-      }, 1000); 
-      
-      return () => clearTimeout(timer);
-    }
-  }, [selectedPavingId, meters]);
+  // Memoized callbacks to prevent recreation on renders
+  const handleSelectPaving = useCallback((id: string) => {
+    setSelectedPavingId(id);
+  }, [setSelectedPavingId]);
+
+  const handleMetersChange = useCallback((value: number) => {
+    setMeters(value);
+  }, [setMeters]);
+
+  const handleOpenDeleteDialog = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, [setShowDeleteConfirm]);
+
+  const handleCloseDeleteDialog = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, [setShowDeleteConfirm]);
 
   return (
-    <Card className="border border-gray-200">
-      <CardHeader className="bg-white pb-2">
-        <h3 className="text-xl font-semibold">Paving on Existing Concrete</h3>
-        <p className="text-gray-500">Calculate costs for placing pavers on existing concrete</p>
-      </CardHeader>
-      <CardContent className="pt-0">
-        <div className="border-t mt-2 pt-4">
-          {isLoading ? (
-            <div className="space-y-4">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-24 w-full" />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <PavingSelect 
-                  selectedPavingId={selectedPavingId}
-                  pavingOptions={extraPavingCosts || []}
-                  onChange={setSelectedPavingId}
-                  disabled={isSubmitting}
-                />
-                
-                <MetersInput 
-                  meters={meters}
-                  onChange={setMeters}
-                  disabled={isSubmitting || !selectedPavingId}
-                />
-              </div>
-              
-              {hasCostData && (
-                <CostBreakdown 
-                  perMeterRate={perMeterRate}
-                  pavingCost={pavingCost}
-                  labourCost={labourCost}
-                  marginCost={marginCost}
-                  totalCost={totalCost}
-                  meters={meters}
-                  paverCost={paverCost}
-                  wastageCost={wastageCost}
-                  marginPaverCost={marginPaverCost}
-                  labourBaseCost={labourBaseCost}
-                  labourMarginCost={labourMarginCost}
-                />
-              )}
-              
-              {/* Only show Remove button */}
-              {hasExistingData && (
-                <div className="mt-4">
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setShowDeleteConfirm(true)}
-                    disabled={isSubmitting}
-                    className="flex items-center gap-1"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Remove
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
+    <Card className="border border-gray-200 mt-6">
+      <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SquareDashed className="h-5 w-5 text-blue-500" />
+          <h3 className="text-lg font-medium">Paving on Existing Concrete</h3>
         </div>
+      </CardHeader>
+      
+      <CardContent className="p-5">
+        {isLoading ? (
+          <div className="py-4 text-center text-gray-500">Loading paving options...</div>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Paving Selection */}
+              <PavingSelect 
+                selectedPavingId={selectedPavingId}
+                pavingOptions={extraPavingCosts || []}
+                onChange={handleSelectPaving}
+                disabled={isSubmitting}
+              />
+              
+              {/* Metres Input */}
+              <MetersInput 
+                meters={meters} 
+                onChange={handleMetersChange}
+                disabled={isSubmitting || !selectedPavingId}
+              />
+            </div>
+            
+            {/* Cost Breakdown */}
+            {hasCostData && (
+              <CostBreakdown 
+                pavingCost={pavingCost}
+                labourCost={labourCost}
+                totalCost={totalCost}
+              />
+            )}
+
+            {/* Action Buttons */}
+            {hasCostData && (
+              <FormActions
+                onSave={handleSave}
+                onDelete={handleOpenDeleteDialog}
+                isSubmitting={isSubmitting}
+                isDeleting={isDeleting}
+                hasExistingData={hasExistingData}
+              />
+            )}
+          </div>
+        )}
       </CardContent>
       
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Remove Paving on Existing Concrete</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to remove this paving data? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? "Removing..." : "Remove"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmDialog
+        isOpen={showDeleteConfirm}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDelete}
+        isDeleting={isDeleting}
+      />
     </Card>
   );
-};
+});
+
+PavingOnExistingConcrete.displayName = "PavingOnExistingConcrete";

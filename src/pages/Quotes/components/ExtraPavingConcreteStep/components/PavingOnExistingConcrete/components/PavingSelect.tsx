@@ -12,7 +12,7 @@ interface PavingSelectProps {
   disabled?: boolean;
 }
 
-export const PavingSelect: React.FC<PavingSelectProps> = ({
+export const PavingSelect: React.FC<PavingSelectProps> = React.memo(({
   selectedPavingId,
   pavingOptions,
   onChange,
@@ -39,4 +39,6 @@ export const PavingSelect: React.FC<PavingSelectProps> = ({
       </Select>
     </div>
   );
-};
+});
+
+PavingSelect.displayName = "PavingSelect";

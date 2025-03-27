@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React, { useEffect, useCallback } from "react";
 import { MainPavingSection } from "./components/MainPavingSection";
 import { PageHeader } from "./components/PageHeader";
 import { ConcreteExtras } from "./components/ConcreteExtras";
@@ -22,9 +22,14 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
 }) => {
   const { refreshQuoteData } = useQuoteContext();
   
-  // Ensure we have the latest data when the component mounts
+  // Fetch data only once when the component mounts
   useEffect(() => {
-    refreshQuoteData();
+    // Add a slight delay to prevent concurrent state updates 
+    const timer = setTimeout(() => {
+      refreshQuoteData();
+    }, 50);
+    
+    return () => clearTimeout(timer);
   }, [refreshQuoteData]);
   
   const {
@@ -54,21 +59,30 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
     markAsChanged
   } = useExtraPavingData(onNext);
 
+  // Memoize callbacks to prevent recreation on renders
+  const handlePavingChange = useCallback((id: string) => {
+    handleSelectedPavingChange(id);
+  }, [handleSelectedPavingChange]);
+
+  const handleMeterChange = useCallback((value: number) => {
+    handleMetersChange(value);
+  }, [handleMetersChange]);
+
+  const handleContentChanged = useCallback(() => {
+    markAsChanged();
+  }, [markAsChanged]);
+
   // Handle save all sections
-  const saveAllSections = async () => {
+  const saveAllSections = useCallback(async () => {
     try {
       // Save main paving section first
       await handleSave();
-      
-      // Save all other sections - the refreshQuoteData in handleSave above will ensure 
-      // the TotalCostSummary gets updated with all the latest data
-      
       toast.success("All extra paving and concrete data saved successfully");
     } catch (error) {
       console.error("Error saving all sections:", error);
       toast.error("Failed to save some sections. Please try again.");
     }
-  };
+  }, [handleSave]);
 
   return (
     <div className="space-y-6">
@@ -90,24 +104,24 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
         pavingDetails={pavingDetails}
         concreteDetails={concreteDetails}
         labourDetails={labourDetails}
-        onSelectedPavingChange={handleSelectedPavingChange}
-        onMetersChange={handleMetersChange}
+        onSelectedPavingChange={handlePavingChange}
+        onMetersChange={handleMeterChange}
         onRemove={handleRemoveExtraPaving}
-        markAsChanged={markAsChanged}
+        markAsChanged={handleContentChanged}
       />
 
       {/* 2. Paving on Existing Concrete */}
       <div ref={pavingOnExistingConcreteRef}>
-        <PavingOnExistingConcrete onChanged={markAsChanged} />
+        <PavingOnExistingConcrete onChanged={handleContentChanged} />
       </div>
 
       {/* 3. Extra Concreting */}
       <div ref={extraConcretingRef}>
-        <ExtraConcreting onChanged={markAsChanged} />
+        <ExtraConcreting onChanged={handleContentChanged} />
       </div>
 
       {/* 4, 5, 6. Concrete Pump, Cuts, Under Fence Strips */}
-      <ConcreteExtras onChanged={markAsChanged} />
+      <ConcreteExtras onChanged={handleContentChanged} />
 
       {/* Cost Summary - added just above the navigation buttons */}
       <TotalCostSummary />
