@@ -49,7 +49,7 @@ export const ExtraPavingConcreteStep = ({
       {/* Page header with unsaved changes indicator */}
       <PageHeader hasUnsavedChanges={hasUnsavedChanges} />
 
-      {/* Main Paving Section */}
+      {/* 1. Main Paving Section (Extra Paving) */}
       <MainPavingSection
         quoteData={quoteData}
         selectedPavingId={selectedPavingId}
@@ -71,18 +71,18 @@ export const ExtraPavingConcreteStep = ({
         markAsChanged={markAsChanged}
       />
       
-      {/* Concrete Extras component */}
-      <ConcreteExtras />
-      
-      {/* Extra Concreting placeholder section - now positioned correctly */}
-      <ExtraConcreting onChanged={markAsChanged} />
-      
-      {/* Paving on Existing Concrete section */}
+      {/* 2. Paving on Existing Concrete section */}
       <PavingOnExistingConcrete 
         ref={pavingOnExistingConcreteRef}
         onChanged={markAsChanged}
       />
 
+      {/* 3. Extra Concreting section */}
+      <ExtraConcreting onChanged={markAsChanged} />
+      
+      {/* 4-6. Concrete Extras component (contains Concrete Pump, Concrete Cuts, and Under Fence Concrete Strips) */}
+      <ConcreteExtras />
+      
       {/* Navigation Buttons */}
       <NavigationButtons
         onPrevious={onPrevious}
