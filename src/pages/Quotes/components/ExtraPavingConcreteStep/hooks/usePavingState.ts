@@ -1,9 +1,8 @@
 
 import { useState, useEffect } from "react";
-import { useQuoteContext } from "../../../context/QuoteContext";
+import { Quote } from "@/types/quote";
 
-export const usePavingState = () => {
-  const { quoteData } = useQuoteContext();
+export const usePavingState = (quoteData: Partial<Quote>) => {
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -13,25 +12,20 @@ export const usePavingState = () => {
     if (quoteData.selected_paving_id) {
       setSelectedPavingId(quoteData.selected_paving_id);
     }
-    if (quoteData.selected_paving_meters) {
-      setMeters(quoteData.selected_paving_meters);
+    
+    // Ensure meters is always a number
+    if (quoteData.selected_paving_meters !== undefined) {
+      const selectedMeters = quoteData.selected_paving_meters;
+      setMeters(typeof selectedMeters === 'number' ? selectedMeters : Number(selectedMeters));
     }
   }, [quoteData]);
-
-  const handleSelectedPavingChange = (id: string) => {
-    setSelectedPavingId(id);
-  };
-
-  const handleMetersChange = (value: number) => {
-    setMeters(value);
-  };
 
   return {
     selectedPavingId,
     meters,
     isSubmitting,
-    setIsSubmitting,
-    handleSelectedPavingChange,
-    handleMetersChange
+    setSelectedPavingId,
+    setMeters,
+    setIsSubmitting
   };
 };

@@ -1,23 +1,22 @@
 
 import React from "react";
-import { useExtraPavingData } from "./hooks/useExtraPavingData";
-import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
-import { ConcreteExtras } from "./components/ConcreteExtras";
-import { NavigationButtons } from "./components/NavigationButtons";
-import { PageHeader } from "./components/PageHeader";
 import { MainPavingSection } from "./components/MainPavingSection";
+import { PageHeader } from "./components/PageHeader";
+import { ConcreteExtras } from "./components/ConcreteExtras";
+import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 import { ExtraConcreting } from "./components/ExtraConcreting";
+import { NavigationButtons } from "./components/NavigationButtons";
+import { useExtraPavingData } from "./hooks/useExtraPavingData";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
   onPrevious: () => void;
 }
 
-export const ExtraPavingConcreteStep = ({
+export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = ({
   onNext,
-  onPrevious,
-}: ExtraPavingConcreteStepProps) => {
-  // Pass onNext to the hook
+  onPrevious
+}) => {
   const {
     quoteData,
     extraPavingCosts,
@@ -47,10 +46,8 @@ export const ExtraPavingConcreteStep = ({
 
   return (
     <div className="space-y-6">
-      {/* Page header with unsaved changes indicator */}
-      <PageHeader hasUnsavedChanges={hasUnsavedChanges} />
+      <PageHeader />
 
-      {/* 1. Main Paving Section (Extra Paving) */}
       <MainPavingSection
         quoteData={quoteData}
         selectedPavingId={selectedPavingId}
@@ -71,23 +68,17 @@ export const ExtraPavingConcreteStep = ({
         onRemove={handleRemoveExtraPaving}
         markAsChanged={markAsChanged}
       />
-      
-      {/* 2. Paving on Existing Concrete section */}
-      <PavingOnExistingConcrete 
-        ref={pavingOnExistingConcreteRef}
-        onChanged={markAsChanged}
-      />
 
-      {/* 3. Extra Concreting section */}
-      <ExtraConcreting 
-        ref={extraConcretingRef}
-        onChanged={markAsChanged} 
-      />
-      
-      {/* 4-6. Concrete Extras component (contains Concrete Pump, Concrete Cuts, and Under Fence Concrete Strips) */}
+      <div ref={pavingOnExistingConcreteRef}>
+        <PavingOnExistingConcrete onChanged={markAsChanged} />
+      </div>
+
       <ConcreteExtras onChanged={markAsChanged} />
-      
-      {/* Navigation Buttons */}
+
+      <div ref={extraConcretingRef}>
+        <ExtraConcreting onChanged={markAsChanged} />
+      </div>
+
       <NavigationButtons
         onPrevious={onPrevious}
         onSave={handleSave}
