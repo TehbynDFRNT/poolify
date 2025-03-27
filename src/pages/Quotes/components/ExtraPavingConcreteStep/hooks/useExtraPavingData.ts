@@ -65,7 +65,9 @@ export const useExtraPavingData = (onNext: () => void) => {
   useEffect(() => {
     if (quoteData.selected_paving_id) {
       setSelectedPavingId(quoteData.selected_paving_id);
-      setMeters(quoteData.selected_paving_meters || 0);
+      // Fix the type error by ensuring meters is a number
+      const selectedMeters = quoteData.selected_paving_meters || 0;
+      setMeters(typeof selectedMeters === 'number' ? selectedMeters : Number(selectedMeters));
     }
   }, [quoteData]);
   
