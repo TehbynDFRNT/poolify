@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
@@ -13,6 +14,7 @@ import { MetersInput } from "./components/MetersInput";
 import { NoPoolWarning } from "./components/NoPoolWarning";
 import { NavigationButtons } from "./components/NavigationButtons";
 import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
+import { ConcreteExtras } from "./components/ConcreteExtras";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
@@ -186,6 +188,9 @@ export const ExtraPavingConcreteStep = ({
           </div>
         </CardContent>
       </Card>
+      
+      {/* Concrete Extras placeholder section */}
+      <ConcreteExtras />
       
       {/* Paving on Existing Concrete section */}
       <PavingOnExistingConcrete />
