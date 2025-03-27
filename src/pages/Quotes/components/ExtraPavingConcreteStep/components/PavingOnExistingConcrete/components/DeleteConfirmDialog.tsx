@@ -22,29 +22,28 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  isDeleting,
+  isDeleting
 }) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Paving on Existing Concrete</AlertDialogTitle>
           <AlertDialogDescription>
-            This will remove the paving on existing concrete data from this quote.
-            This action cannot be undone.
+            Are you sure you want to remove this paving? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
+          <AlertDialogAction 
             onClick={(e) => {
               e.preventDefault();
               onConfirm();
             }}
             disabled={isDeleting}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-red-500 hover:bg-red-600"
           >
-            {isDeleting ? "Removing..." : "Remove"}
+            {isDeleting ? "Deleting..." : "Delete"}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
@@ -39,10 +39,7 @@ export const ExtraPavingConcreteStep = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Reference to the PavingOnExistingConcrete component
-  const [pavingOnExistingConcreteRef, setPavingOnExistingConcreteRef] = useState<{
-    getData: () => any;
-    hasUnsavedChanges: boolean;
-  } | null>(null);
+  const pavingOnExistingConcreteRef = useRef<any>(null);
   
   // Use the custom hook for cost calculations
   const { 
@@ -124,8 +121,8 @@ export const ExtraPavingConcreteStep = ({
       }
 
       // Then save the paving on existing concrete data
-      if (pavingOnExistingConcreteRef) {
-        const pavingOnExistingConcreteData = pavingOnExistingConcreteRef.getData();
+      if (pavingOnExistingConcreteRef.current) {
+        const pavingOnExistingConcreteData = pavingOnExistingConcreteRef.current.getData();
         if (pavingOnExistingConcreteData) {
           await pavingOnExistingConcreteData.save();
         }
@@ -232,7 +229,7 @@ export const ExtraPavingConcreteStep = ({
       
       {/* Paving on Existing Concrete section */}
       <PavingOnExistingConcrete 
-        ref={setPavingOnExistingConcreteRef}
+        ref={pavingOnExistingConcreteRef}
         onChanged={markAsChanged}
       />
 
