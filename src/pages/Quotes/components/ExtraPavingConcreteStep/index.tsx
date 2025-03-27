@@ -46,7 +46,7 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
 
   return (
     <div className="space-y-6">
-      <PageHeader />
+      <PageHeader hasUnsavedChanges={hasUnsavedChanges} />
 
       <MainPavingSection
         quoteData={quoteData}

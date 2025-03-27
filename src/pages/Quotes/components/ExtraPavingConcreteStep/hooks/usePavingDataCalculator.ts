@@ -93,8 +93,12 @@ export const usePavingDataCalculator = (selectedPavingId: string, meters: number
     // Calculate concrete costs
     let concreteCostPerMeter = 0;
     
-    if (concreteCosts.length > 0 && 'price' in concreteCosts[0]) {
-      concreteCostPerMeter = concreteCosts[0].price;
+    if (concreteCosts.length > 0) {
+      // Safe check that the property exists and is a number
+      const firstConcreteCost = concreteCosts[0];
+      if ('price' in firstConcreteCost && typeof firstConcreteCost.price === 'number') {
+        concreteCostPerMeter = firstConcreteCost.price;
+      }
     }
     
     // Calculate totals

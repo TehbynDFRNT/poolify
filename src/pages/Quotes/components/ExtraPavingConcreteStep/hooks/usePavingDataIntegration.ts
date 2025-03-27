@@ -37,13 +37,13 @@ export const usePavingDataIntegration = (onNext?: () => void) => {
     meters,
     isSubmitting,
     setIsSubmitting,
-    handleSelectedPavingChange: onSelectedPavingChange,
+    handleSelectedPavingChange: onPavingChange,
     handleMetersChange: onMetersChange
-  } = usePavingState();
+  } = usePavingState(quoteData);
 
   // Mark changes when inputs change
   const handleSelectedPavingChange = (id: string) => {
-    onSelectedPavingChange(id);
+    onPavingChange(id);
     markAsChanged();
   };
 
@@ -192,8 +192,8 @@ export const usePavingDataIntegration = (onNext?: () => void) => {
       const result = await removeExtraPaving();
       if (result) {
         // Update local state after successful removal
-        onSelectedPavingChange("");
-        onMetersChange(0);
+        handleSelectedPavingChange("");
+        handleMetersChange(0);
         await refreshQuoteData();
         markAsSaved();
         return true;

@@ -20,12 +20,23 @@ export const usePavingState = (quoteData: Partial<Quote>) => {
     }
   }, [quoteData]);
 
+  // Handler functions for paving selection and meters change
+  const handleSelectedPavingChange = (pavingId: string) => {
+    setSelectedPavingId(pavingId);
+  };
+
+  const handleMetersChange = (value: number) => {
+    setMeters(value);
+  };
+
   return {
     selectedPavingId,
     meters,
     isSubmitting,
     setSelectedPavingId,
     setMeters,
-    setIsSubmitting
+    setIsSubmitting,
+    handleSelectedPavingChange,
+    handleMetersChange
   };
 };
