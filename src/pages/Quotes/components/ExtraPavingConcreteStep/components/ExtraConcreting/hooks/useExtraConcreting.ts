@@ -44,24 +44,21 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
   // Load existing data if available
   useEffect(() => {
-    if (quoteData.extra_concreting) {
-      try {
-        let savedData;
-        if (typeof quoteData.extra_concreting === 'string') {
-          savedData = JSON.parse(quoteData.extra_concreting);
-        } else {
-          savedData = quoteData.extra_concreting;
-        }
+    // Check if there's existing data in quoteData.extra_concreting_type and quoteData.extra_concreting_meterage
+    if (quoteData.extra_concreting_type && quoteData.extra_concreting_meterage) {
+      // Find matching concreting type
+      if (extraConcretingItems) {
+        const matchingType = extraConcretingItems.find(
+          item => item.type === quoteData.extra_concreting_type
+        );
         
-        if (savedData && savedData.concreting_type) {
-          setSelectedConcretingType(savedData.concreting_type);
-          setMeters(parseFloat(savedData.meters) || 0);
+        if (matchingType) {
+          setSelectedConcretingType(matchingType.id);
+          setMeters(quoteData.extra_concreting_meterage);
         }
-      } catch (err) {
-        console.error("Failed to parse saved extra concreting data:", err);
       }
     }
-  }, [quoteData.extra_concreting]);
+  }, [quoteData, extraConcretingItems]);
 
   // Calculate costs when inputs change
   useEffect(() => {
@@ -130,26 +127,16 @@ export const useExtraConcreting = (onChanged?: () => void) => {
         return false;
       }
 
-      // Prepare the data to save
-      const concretingData = {
-        concreting_type: selectedConcretingType,
-        concreting_price: selectedConcreting.price,
-        meters: meters,
-        material_cost: concreteCost,
-        labour_cost: labourCost,
-        margin_cost: marginCost,
-        total_cost: totalCost,
-        per_meter_rate: perMeterRate
-      };
-
       if (quoteData.id) {
+        // Just save the essential fields - we'll avoid using the JSON string field for now
         const updates: Partial<Quote> = {
           extra_concreting_cost: totalCost,
           extra_concreting_type: selectedConcreting.type,
           extra_concreting_meterage: meters,
-          extra_concreting_margin: marginCost,
-          extra_concreting: JSON.stringify(concretingData)
+          extra_concreting_margin: marginCost
         };
+
+        console.log("Saving extra concreting with updates:", updates);
 
         // Save to database
         const { error } = await supabase
@@ -166,6 +153,7 @@ export const useExtraConcreting = (onChanged?: () => void) => {
         // Update local context
         updateQuoteData(updates);
         
+        toast.success("Extra concreting data saved successfully");
         return true;
       }
       return false;
@@ -185,7 +173,6 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     
     try {
       const updates: Partial<Quote> = {
-        extra_concreting: null,
         extra_concreting_cost: 0,
         extra_concreting_type: null,
         extra_concreting_meterage: 0,
@@ -241,7 +228,7 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
   const isLoading = isLoadingExtraConcreting || isLoadingConcrete || isLoadingLabour;
   const hasCostData = selectedConcretingType && meters > 0;
-  const hasExistingData = !!quoteData.extra_concreting;
+  const hasExistingData = !!(quoteData.extra_concreting_type && quoteData.extra_concreting_meterage);
 
   return {
     // State
