@@ -1,188 +1,245 @@
 
 import { useState, useEffect } from "react";
 import { useExtraConcreting as useExtraConcretingData } from "@/pages/ConstructionCosts/hooks/useExtraConcreting";
+import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
+import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { Quote } from "@/types/quote";
 
 export const useExtraConcreting = (onChanged?: () => void) => {
-  const { extraConcretingItems, isLoading } = useExtraConcretingData();
-  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { extraConcreting, isLoading: isLoadingExtraConcreting } = useExtraConcretingData();
+  const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
+  const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
   
-  const [selectedType, setSelectedType] = useState<string>("");
-  const [meterage, setMeterage] = useState<number>(0);
-  const [totalCost, setTotalCost] = useState<number>(0);
-  const [hasExistingData, setHasExistingData] = useState(false);
+  // Form state
+  const [selectedConcretingType, setSelectedConcretingType] = useState<string>("");
+  const [meters, setMeters] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Load saved data when component mounts
-  useEffect(() => {
-    if (quoteData.extra_concreting_type) {
-      setSelectedType(quoteData.extra_concreting_type);
-      setHasExistingData(true);
-    }
-    
-    if (quoteData.extra_concreting_meterage && quoteData.extra_concreting_meterage > 0) {
-      setMeterage(quoteData.extra_concreting_meterage);
-    }
-    
-    if (quoteData.extra_concreting_cost && quoteData.extra_concreting_cost > 0) {
-      setTotalCost(quoteData.extra_concreting_cost);
-    }
-  }, [quoteData]);
+  // Cost calculations
+  const [concreteCost, setConcreteCost] = useState(0);
+  const [labourCost, setLabourCost] = useState(0);
+  const [marginCost, setMarginCost] = useState(0);
+  const [totalCost, setTotalCost] = useState(0);
+  const [perMeterRate, setPerMeterRate] = useState(0);
 
-  // Calculate total cost when type or meterage changes
+  // Helper to update the parent about changes
+  const notifyChanges = () => {
+    if (onChanged) {
+      onChanged();
+    }
+  };
+
+  // Notify parent when inputs change
   useEffect(() => {
-    if (!selectedType || meterage <= 0) {
-      setTotalCost(0);
+    if (selectedConcretingType || meters > 0) {
+      notifyChanges();
+    }
+  }, [selectedConcretingType, meters]);
+
+  // Load existing data if available
+  useEffect(() => {
+    if (quoteData.extra_concreting) {
+      try {
+        const savedData = JSON.parse(quoteData.extra_concreting);
+        if (savedData && savedData.concreting_type) {
+          setSelectedConcretingType(savedData.concreting_type);
+          setMeters(savedData.meters || 0);
+        }
+      } catch (err) {
+        console.error("Failed to parse saved extra concreting data:", err);
+      }
+    }
+  }, [quoteData.extra_concreting]);
+
+  // Calculate costs when inputs change
+  useEffect(() => {
+    if (!selectedConcretingType || meters <= 0 || !extraConcreting || !concreteCosts || !concreteLabourCosts) {
+      resetAllCosts();
       return;
     }
-    
-    const selectedConcrete = extraConcretingItems?.find(item => item.id === selectedType);
-    if (selectedConcrete) {
-      const calculatedCost = selectedConcrete.price * meterage;
-      setTotalCost(calculatedCost);
-      
-      // Save changes automatically after a short delay
-      const timer = setTimeout(() => {
-        saveChanges(selectedType, meterage, calculatedCost, selectedConcrete.margin * meterage);
-      }, 1000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [selectedType, meterage, extraConcretingItems]);
 
-  // Save changes to the database
-  const saveChanges = async (
-    concreteType: string, 
-    concreteMeterage: number, 
-    concreteCost: number,
-    marginCost: number
-  ) => {
-    if (!quoteData.id) return;
+    // Find the selected concreting
+    const selectedConcreting = extraConcreting.find(c => c.id === selectedConcretingType);
+    if (!selectedConcreting) return;
     
+    // Get concrete cost
+    const concrete = concreteCosts[0]; // Assuming there is at least one concrete cost
+    if (!concrete) return;
+    
+    // Calculate base concrete cost
+    const concreteMaterialCost = (concrete.concrete_cost + concrete.dust_cost) * meters;
+    
+    // Calculate labour cost
+    let totalLabourCost = 0;
+    concreteLabourCosts.forEach(labour => {
+      totalLabourCost += (labour.cost + labour.margin) * meters;
+    });
+    
+    // Calculate concreting margin
+    const concretingMargin = selectedConcreting.margin * meters;
+    
+    // Calculate total
+    const calculatedTotalCost = concreteMaterialCost + totalLabourCost + concretingMargin;
+    
+    // Calculate per meter rate
+    const perMeterTotal = (concrete.concrete_cost + concrete.dust_cost) + 
+                          concreteLabourCosts.reduce((acc, l) => acc + l.cost + l.margin, 0) +
+                          selectedConcreting.margin;
+
+    // Update state
+    setConcreteCost(concreteMaterialCost);
+    setLabourCost(totalLabourCost);
+    setMarginCost(concretingMargin);
+    setTotalCost(calculatedTotalCost);
+    setPerMeterRate(perMeterTotal);
+    
+  }, [selectedConcretingType, meters, extraConcreting, concreteCosts, concreteLabourCosts]);
+
+  const resetAllCosts = () => {
+    setConcreteCost(0);
+    setLabourCost(0);
+    setMarginCost(0);
+    setTotalCost(0);
+    setPerMeterRate(0);
+  };
+
+  const handleSave = async () => {
+    if (!selectedConcretingType || meters <= 0) {
+      return false;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      const { error } = await supabase
-        .from("quotes")
-        .update({
-          extra_concreting_type: concreteType,
-          extra_concreting_meterage: concreteMeterage,
-          extra_concreting_cost: concreteCost,
-          extra_concreting_margin: marginCost
-        })
-        .eq("id", quoteData.id);
-      
-      if (error) {
-        console.error("Error saving extra concreting data:", error);
-        return;
+      // Find the selected concreting for details
+      const selectedConcreting = extraConcreting?.find(c => c.id === selectedConcretingType);
+      if (!selectedConcreting) {
+        toast.error("Selected concreting type not found");
+        return false;
       }
-      
-      // Update the local context
-      updateQuoteData({
-        extra_concreting_type: concreteType,
-        extra_concreting_meterage: concreteMeterage,
-        extra_concreting_cost: concreteCost,
-        extra_concreting_margin: marginCost
-      });
-      
-      setHasExistingData(true);
-      
-      // Notify parent component about changes
-      if (onChanged) onChanged();
-      
-      // Refresh to update any calculated fields
-      await refreshQuoteData();
+
+      // Prepare the data to save
+      const concretingData = {
+        concreting_type: selectedConcretingType,
+        concreting_price: selectedConcreting.price,
+        meters: meters,
+        material_cost: concreteCost,
+        labour_cost: labourCost,
+        margin_cost: marginCost,
+        total_cost: totalCost,
+        per_meter_rate: perMeterRate
+      };
+
+      if (quoteData.id) {
+        const updates: Partial<Quote> = {
+          extra_concreting: JSON.stringify(concretingData),
+          extra_concreting_cost: totalCost
+        };
+
+        // Save to database
+        const { error } = await supabase
+          .from("quotes")
+          .update(updates)
+          .eq("id", quoteData.id);
+
+        if (error) {
+          console.error("Error saving extra concreting data:", error);
+          toast.error("Failed to save data");
+          return false;
+        }
+
+        // Update local context
+        updateQuoteData(updates);
+        
+        return true;
+      }
+      return false;
     } catch (error) {
-      console.error("Failed to save extra concreting data:", error);
+      console.error("Error in save process:", error);
+      toast.error("An unexpected error occurred");
+      return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // Handle concrete type selection
-  const handleTypeChange = (value: string) => {
-    setSelectedType(value);
-    if (onChanged) onChanged();
-  };
-
-  // Handle meterage changes
-  const handleMeterageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value) || 0;
-    setMeterage(value);
-    if (onChanged) onChanged();
-  };
-
-  // Get price for selected item
-  const getSelectedPrice = (): number => {
-    const selectedConcrete = extraConcretingItems?.find(item => item.id === selectedType);
-    return selectedConcrete ? selectedConcrete.price : 0;
-  };
-  
-  // Delete extra concreting data
   const handleDelete = async () => {
     if (!quoteData.id) return;
     
     setIsDeleting(true);
     
     try {
+      const updates: Partial<Quote> = {
+        extra_concreting: null,
+        extra_concreting_cost: 0
+      };
+      
+      // Update database
       const { error } = await supabase
         .from("quotes")
-        .update({
-          extra_concreting_type: null,
-          extra_concreting_meterage: 0,
-          extra_concreting_cost: 0,
-          extra_concreting_margin: 0
-        })
+        .update(updates)
         .eq("id", quoteData.id);
       
       if (error) {
         console.error("Error removing extra concreting data:", error);
-        toast.error("Failed to remove extra concreting data");
+        toast.error("Failed to remove data");
         return;
       }
       
+      // Update local context
+      updateQuoteData(updates);
+      
       // Reset local state
-      setSelectedType("");
-      setMeterage(0);
-      setTotalCost(0);
-      setHasExistingData(false);
-      
-      // Update the context
-      updateQuoteData({
-        extra_concreting_type: null,
-        extra_concreting_meterage: 0,
-        extra_concreting_cost: 0,
-        extra_concreting_margin: 0
-      });
-      
-      // Notify parent component about changes
-      if (onChanged) onChanged();
-      
-      // Refresh to update any calculated fields
-      await refreshQuoteData();
+      setSelectedConcretingType("");
+      setMeters(0);
+      resetAllCosts();
       
       toast.success("Extra concreting data removed");
       setShowDeleteConfirm(false);
     } catch (error) {
-      console.error("Failed to remove extra concreting data:", error);
-      toast.error("An error occurred while removing extra concreting data");
+      console.error("Error in delete process:", error);
+      toast.error("An unexpected error occurred");
     } finally {
       setIsDeleting(false);
     }
   };
 
+  const isLoading = isLoadingExtraConcreting || isLoadingConcrete || isLoadingLabour;
+  const hasCostData = selectedConcretingType && meters > 0;
+  const hasExistingData = !!quoteData.extra_concreting;
+
   return {
-    selectedType,
-    meterage,
-    totalCost,
-    extraConcretingItems,
-    isLoading,
-    hasExistingData,
+    // State
+    selectedConcretingType,
+    meters,
+    isSubmitting,
     isDeleting,
     showDeleteConfirm,
+    hasCostData,
+    hasExistingData,
+    isLoading,
+    
+    // Cost breakdown data
+    perMeterRate,
+    concreteCost,
+    labourCost,
+    marginCost,
+    totalCost,
+    
+    // Dependencies
+    extraConcreting,
+    
+    // Actions
+    setSelectedConcretingType,
+    setMeters,
     setShowDeleteConfirm,
-    handleTypeChange,
-    handleMeterageChange,
-    getSelectedPrice,
+    handleSave,
     handleDelete
   };
 };

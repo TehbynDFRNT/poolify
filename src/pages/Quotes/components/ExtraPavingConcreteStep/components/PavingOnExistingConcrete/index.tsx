@@ -92,12 +92,12 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
                   labourCost={labourCost}
                   marginCost={marginCost}
                   totalCost={totalCost}
+                  meters={meters}
                   paverCost={paverCost}
                   wastageCost={wastageCost}
                   marginPaverCost={marginPaverCost}
                   labourBaseCost={labourBaseCost}
                   labourMarginCost={labourMarginCost}
-                  meters={meters}
                 />
               )}
               
