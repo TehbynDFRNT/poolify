@@ -16,6 +16,7 @@ export const ExtraPavingConcreteStep = ({
   onNext,
   onPrevious,
 }: ExtraPavingConcreteStepProps) => {
+  // Pass onNext to the hook
   const {
     quoteData,
     extraPavingCosts,
@@ -40,20 +41,7 @@ export const ExtraPavingConcreteStep = ({
     handleSaveAndContinue,
     handleRemoveExtraPaving,
     markAsChanged
-  } = useExtraPavingData();
-
-  // Modified to include onNext for the save and continue function
-  const onSaveAndContinue = async () => {
-    try {
-      await handleSave();
-      // Delay the navigation slightly to ensure state is updated
-      setTimeout(() => {
-        onNext();
-      }, 300);
-    } catch (error) {
-      console.error("Error in save and continue:", error);
-    }
-  };
+  } = useExtraPavingData(onNext);
 
   return (
     <div className="space-y-6">
@@ -95,7 +83,7 @@ export const ExtraPavingConcreteStep = ({
       <NavigationButtons
         onPrevious={onPrevious}
         onSave={handleSave}
-        onSaveAndContinue={onSaveAndContinue}
+        onSaveAndContinue={handleSaveAndContinue}
         isSubmitting={isSubmitting}
         isDisabled={false}
       />

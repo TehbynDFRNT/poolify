@@ -9,7 +9,8 @@ import { useConcreteCostCalculator } from "./useConcreteCostCalculator";
 import { usePageSaveState } from "./usePageSaveState";
 import { toast } from "sonner";
 
-export const useExtraPavingData = () => {
+// Add onNext to the parameter list
+export const useExtraPavingData = (onNext?: () => void) => {
   const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
@@ -129,9 +130,12 @@ export const useExtraPavingData = () => {
       } else {
         toast.error("Some data could not be saved. Please check and try again.");
       }
+      
+      return isSaveSuccessful;
     } catch (error) {
       console.error("Error in save process:", error);
       toast.error("An unexpected error occurred while saving");
+      return false;
     } finally {
       setIsSubmitting(false);
     }
@@ -139,11 +143,14 @@ export const useExtraPavingData = () => {
 
   const handleSaveAndContinue = async () => {
     try {
-      await handleSave();
-      // Delay the navigation slightly to ensure state is updated
-      setTimeout(() => {
-        onNext();
-      }, 300);
+      const saveResult = await handleSave();
+      // Only navigate if save was successful and onNext is provided
+      if (saveResult && onNext) {
+        // Delay the navigation slightly to ensure state is updated
+        setTimeout(() => {
+          onNext();
+        }, 300);
+      }
     } catch (error) {
       console.error("Error in save and continue:", error);
     }
