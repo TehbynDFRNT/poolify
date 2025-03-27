@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
 
 interface PavingSelectProps {
@@ -17,40 +18,22 @@ export const PavingSelect: React.FC<PavingSelectProps> = ({
   onChange,
   disabled
 }) => {
-  // Group paving options by category
-  const groupedOptions = pavingOptions.reduce((acc, option) => {
-    if (!acc[option.category]) {
-      acc[option.category] = [];
-    }
-    acc[option.category].push(option);
-    return acc;
-  }, {} as Record<string, ExtraPavingCost[]>);
-
   return (
-    <div>
-      <Label htmlFor="paving-type" className="block text-gray-700 font-medium mb-1">
-        Paving Type
-      </Label>
+    <div className="space-y-2">
+      <Label htmlFor="paving-type">Paving Type</Label>
       <Select
         value={selectedPavingId}
         onValueChange={onChange}
         disabled={disabled}
       >
-        <SelectTrigger id="paving-type" className="w-full">
+        <SelectTrigger id="paving-type">
           <SelectValue placeholder="Select paving type" />
         </SelectTrigger>
         <SelectContent>
-          {Object.entries(groupedOptions).map(([category, options]) => (
-            <SelectGroup key={category}>
-              <SelectItem value={`category-${category}`} disabled>
-                {category}
-              </SelectItem>
-              {options.map(option => (
-                <SelectItem key={option.id} value={option.id}>
-                  {category} - {option.paver_cost + option.wastage_cost + option.margin_cost}/m²
-                </SelectItem>
-              ))}
-            </SelectGroup>
+          {pavingOptions.map((paving) => (
+            <SelectItem key={paving.id} value={paving.id}>
+              {paving.category}
+            </SelectItem>
           ))}
         </SelectContent>
       </Select>

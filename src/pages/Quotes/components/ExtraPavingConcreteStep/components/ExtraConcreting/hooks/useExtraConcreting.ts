@@ -10,7 +10,7 @@ import { Quote } from "@/types/quote";
 
 export const useExtraConcreting = (onChanged?: () => void) => {
   const { quoteData, updateQuoteData } = useQuoteContext();
-  const { extraConcreting, isLoading: isLoadingExtraConcreting } = useExtraConcretingData();
+  const { extraConcretingItems, isLoading: isLoadingExtraConcreting } = useExtraConcretingData();
   const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
   
@@ -59,13 +59,13 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
   // Calculate costs when inputs change
   useEffect(() => {
-    if (!selectedConcretingType || meters <= 0 || !extraConcreting || !concreteCosts || !concreteLabourCosts) {
+    if (!selectedConcretingType || meters <= 0 || !extraConcretingItems || !concreteCosts || !concreteLabourCosts) {
       resetAllCosts();
       return;
     }
 
     // Find the selected concreting
-    const selectedConcreting = extraConcreting.find(c => c.id === selectedConcretingType);
+    const selectedConcreting = extraConcretingItems.find(c => c.id === selectedConcretingType);
     if (!selectedConcreting) return;
     
     // Get concrete cost
@@ -99,7 +99,7 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     setTotalCost(calculatedTotalCost);
     setPerMeterRate(perMeterTotal);
     
-  }, [selectedConcretingType, meters, extraConcreting, concreteCosts, concreteLabourCosts]);
+  }, [selectedConcretingType, meters, extraConcretingItems, concreteCosts, concreteLabourCosts]);
 
   const resetAllCosts = () => {
     setConcreteCost(0);
@@ -118,7 +118,7 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
     try {
       // Find the selected concreting for details
-      const selectedConcreting = extraConcreting?.find(c => c.id === selectedConcretingType);
+      const selectedConcreting = extraConcretingItems?.find(c => c.id === selectedConcretingType);
       if (!selectedConcreting) {
         toast.error("Selected concreting type not found");
         return false;
@@ -139,7 +139,10 @@ export const useExtraConcreting = (onChanged?: () => void) => {
       if (quoteData.id) {
         const updates: Partial<Quote> = {
           extra_concreting: JSON.stringify(concretingData),
-          extra_concreting_cost: totalCost
+          extra_concreting_cost: totalCost,
+          extra_concreting_type: selectedConcreting.type,
+          extra_concreting_meterage: meters,
+          extra_concreting_margin: marginCost
         };
 
         // Save to database
@@ -177,7 +180,10 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     try {
       const updates: Partial<Quote> = {
         extra_concreting: null,
-        extra_concreting_cost: 0
+        extra_concreting_cost: 0,
+        extra_concreting_type: null,
+        extra_concreting_meterage: 0,
+        extra_concreting_margin: 0
       };
       
       // Update database
@@ -210,6 +216,23 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     }
   };
 
+  // Helper function to get the price of the selected concreting option
+  const getSelectedPrice = () => {
+    if (!selectedConcretingType || !extraConcretingItems) return 0;
+    const selectedConcreting = extraConcretingItems.find(c => c.id === selectedConcretingType);
+    return selectedConcreting ? selectedConcreting.price : 0;
+  };
+
+  // Handler for type change
+  const handleTypeChange = (value: string) => {
+    setSelectedConcretingType(value);
+  };
+
+  // Handler for meterage change
+  const handleMeterageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMeters(parseFloat(e.target.value) || 0);
+  };
+
   const isLoading = isLoadingExtraConcreting || isLoadingConcrete || isLoadingLabour;
   const hasCostData = selectedConcretingType && meters > 0;
   const hasExistingData = !!quoteData.extra_concreting;
@@ -217,7 +240,9 @@ export const useExtraConcreting = (onChanged?: () => void) => {
   return {
     // State
     selectedConcretingType,
+    selectedType: selectedConcretingType, // Alias for component compatibility 
     meters,
+    meterage: meters, // Alias for component compatibility
     isSubmitting,
     isDeleting,
     showDeleteConfirm,
@@ -233,13 +258,16 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     totalCost,
     
     // Dependencies
-    extraConcreting,
+    extraConcretingItems,
     
     // Actions
     setSelectedConcretingType,
     setMeters,
     setShowDeleteConfirm,
     handleSave,
-    handleDelete
+    handleDelete,
+    handleTypeChange,
+    handleMeterageChange,
+    getSelectedPrice
   };
 };

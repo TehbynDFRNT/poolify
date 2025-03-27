@@ -29,7 +29,19 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ onChanged }) =
     showDeleteConfirm,
     setShowDeleteConfirm,
     handleDelete,
+    handleSave
   } = useExtraConcreting(onChanged);
+
+  // Auto-save changes when inputs change
+  React.useEffect(() => {
+    if (selectedType && meterage > 0) {
+      // We add a debounce to avoid saving too frequently
+      const timer = setTimeout(() => {
+        handleSave();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedType, meterage, handleSave]);
 
   return (
     <Card className="border border-gray-200">
