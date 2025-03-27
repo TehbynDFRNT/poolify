@@ -36,6 +36,7 @@ export const ExtraPavingConcreteStep = ({
     labourDetails,
     hasUnsavedChanges,
     pavingOnExistingConcreteRef,
+    extraConcretingRef,
     handleSelectedPavingChange,
     handleMetersChange,
     handleSave,
@@ -78,10 +79,13 @@ export const ExtraPavingConcreteStep = ({
       />
 
       {/* 3. Extra Concreting section */}
-      <ExtraConcreting onChanged={markAsChanged} />
+      <ExtraConcreting 
+        ref={extraConcretingRef}
+        onChanged={markAsChanged} 
+      />
       
       {/* 4-6. Concrete Extras component (contains Concrete Pump, Concrete Cuts, and Under Fence Concrete Strips) */}
-      <ConcreteExtras />
+      <ConcreteExtras onChanged={markAsChanged} />
       
       {/* Navigation Buttons */}
       <NavigationButtons

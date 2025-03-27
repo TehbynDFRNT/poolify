@@ -1,3 +1,4 @@
+
 export interface Quote {
   id: string;
   created_at: string;
@@ -31,9 +32,14 @@ export interface Quote {
   micro_dig_price?: number;
   micro_dig_notes?: string;
   excavation_type?: string;
-  // New fields for paving on existing concrete
+  // Paving on existing concrete
   existing_concrete_paving?: string;
   existing_concrete_paving_cost?: number;
+  // Extra concreting
+  extra_concreting_type?: string;
+  extra_concreting_meterage?: number;
+  extra_concreting_cost?: number;
+  extra_concreting_margin?: number;
 }
 
 export interface QuoteInsert {
@@ -67,4 +73,8 @@ export interface QuoteInsert {
   excavation_type?: string;
   existing_concrete_paving?: string;
   existing_concrete_paving_cost?: number;
+  extra_concreting_type?: string;
+  extra_concreting_meterage?: number;
+  extra_concreting_cost?: number;
+  extra_concreting_margin?: number;
 }

@@ -1,123 +1,160 @@
-
-import { useRef } from "react";
-import { useQuoteContext } from "../../../context/QuoteContext";
+import { useState } from "react";
+import { Quote } from "@/types/quote";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 
-export const useSavePavingData = () => {
-  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
-  // Reference to the PavingOnExistingConcrete component
-  const pavingOnExistingConcreteRef = useRef<any>(null);
-  
-  const saveExtraPavingData = async (
+export const useSavePavingData = (
+  quoteData: Partial<Quote>,
+  resetPavingState: () => void
+) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { refreshQuoteData, updateQuoteData } = useQuoteContext();
+
+  // Save all paving data to the database
+  const handleSaveData = async (
     selectedPavingId: string,
     meters: number,
-    costData: {
-      perMeterCost: number;
-      materialCost: number;
-      labourCost: number;
-      marginCost: number;
-      totalCost: number;
-      pavingDetails: any;
-      concreteDetails: any;
-      labourDetails: any;
-    }
+    totalCost: number,
+    marginCost: number
   ) => {
-    if (!quoteData.id) return false;
-    
-    try {
-      // Update the quote with extra paving concrete data
-      const updates = {
-        extra_paving_cost: costData.totalCost,
-        // Store selected options as JSON in existing fields
-        concrete_cuts: JSON.stringify({
-          paving_id: selectedPavingId,
-          meters: meters,
-          per_meter_cost: costData.perMeterCost,
-          material_cost: costData.materialCost,
-          labour_cost: costData.labourCost,
-          margin_cost: costData.marginCost,
-          total_cost: costData.totalCost,
-          paving_details: costData.pavingDetails,
-          concrete_details: costData.concreteDetails,
-          labour_details: costData.labourDetails
-        })
-      };
+    if (!quoteData.id) {
+      throw new Error("Quote ID is required");
+    }
 
-      // Save to database
+    setIsSubmitting(true);
+
+    try {
+      // First, update the total extra paving cost in the quote
+      const totalExtraPavingCost = calculateTotalExtraPavingCost(totalCost);
+      
       const { error } = await supabase
         .from("quotes")
-        .update(updates)
+        .update({
+          extra_paving_cost: totalExtraPavingCost,
+          selected_paving_id: selectedPavingId,
+          selected_paving_meters: meters,
+          selected_paving_cost: totalCost,
+          selected_paving_margin: marginCost,
+        })
         .eq("id", quoteData.id);
 
       if (error) {
-        console.error("Error saving paving concrete data:", error);
-        toast.error("Failed to save paving data");
-        return false;
+        throw error;
       }
-      
-      // Update local context
-      updateQuoteData(updates);
-      return true;
+
+      await refreshQuoteData();
     } catch (error) {
       console.error("Error saving extra paving data:", error);
-      return false;
+      throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
-  
-  const saveExistingConcretePavingData = async () => {
-    if (!pavingOnExistingConcreteRef.current) return true;
+
+  // Calculate the total extra paving cost (including all concrete components)
+  const calculateTotalExtraPavingCost = (extraPavingCost: number): number => {
+    // Start with the main paving cost
+    let totalCost = extraPavingCost;
+
+    // Add existing concrete paving cost
+    if (quoteData.existing_concrete_paving_cost) {
+      totalCost += quoteData.existing_concrete_paving_cost;
+    }
+
+    // Add concrete pump cost
+    if (quoteData.concrete_pump_required && quoteData.concrete_pump_price) {
+      totalCost += quoteData.concrete_pump_price;
+    }
+
+    // Add concrete cuts cost
+    if (quoteData.concrete_cuts_cost) {
+      totalCost += quoteData.concrete_cuts_cost;
+    }
+
+    // Add under fence strips cost
+    if (quoteData.under_fence_strips_cost) {
+      totalCost += quoteData.under_fence_strips_cost;
+    }
     
+    // Add extra concreting cost
+    if (quoteData.extra_concreting_cost) {
+      totalCost += quoteData.extra_concreting_cost;
+    }
+
+    return totalCost;
+  };
+
+  // Remove extra paving from quote
+  const handleRemoveExtraPaving = async () => {
+    if (!quoteData.id) {
+      throw new Error("Quote ID is required");
+    }
+
+    setIsSubmitting(true);
+
     try {
-      const pavingOnExistingConcreteData = pavingOnExistingConcreteRef.current.getData();
-      if (pavingOnExistingConcreteData) {
-        const saveResult = await pavingOnExistingConcreteRef.current.handleSave();
-        return saveResult;
+      // Calculate new total without the main paving cost
+      let newTotal = 0;
+
+      // Keep other concrete costs
+      if (quoteData.existing_concrete_paving_cost) {
+        newTotal += quoteData.existing_concrete_paving_cost;
       }
-      return true;
-    } catch (error) {
-      console.error("Error saving paving on existing concrete:", error);
-      return false;
-    }
-  };
-  
-  const removeExtraPaving = async () => {
-    if (!quoteData.id) return false;
-    
-    try {
-      // Clear the extra paving data
-      const updates = {
-        extra_paving_cost: 0,
-        concrete_cuts: ""
-      };
+
+      if (quoteData.concrete_pump_required && quoteData.concrete_pump_price) {
+        newTotal += quoteData.concrete_pump_price;
+      }
+
+      if (quoteData.concrete_cuts_cost) {
+        newTotal += quoteData.concrete_cuts_cost;
+      }
+
+      if (quoteData.under_fence_strips_cost) {
+        newTotal += quoteData.under_fence_strips_cost;
+      }
       
+      if (quoteData.extra_concreting_cost) {
+        newTotal += quoteData.extra_concreting_cost;
+      }
+
+      // Update the quote with removed extra paving
       const { error } = await supabase
         .from("quotes")
-        .update(updates)
+        .update({
+          extra_paving_cost: newTotal,
+          selected_paving_id: null,
+          selected_paving_meters: 0,
+          selected_paving_cost: 0,
+          selected_paving_margin: 0,
+        })
         .eq("id", quoteData.id);
-        
+
       if (error) {
-        console.error("Error removing extra paving data:", error);
-        toast.error("Failed to remove extra paving data");
-        return false;
+        throw error;
       }
-      
-      // Update local context
-      updateQuoteData(updates);
-      
-      return true;
+
+      // Reset local state
+      resetPavingState();
+      updateQuoteData({
+        selected_paving_id: "",
+        selected_paving_meters: 0,
+        selected_paving_cost: 0,
+        selected_paving_margin: 0,
+        extra_paving_cost: newTotal,
+      });
+
+      await refreshQuoteData();
     } catch (error) {
-      console.error("Error in remove process:", error);
-      toast.error("An unexpected error occurred");
-      return false;
+      console.error("Error removing extra paving:", error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return {
-    pavingOnExistingConcreteRef,
-    saveExtraPavingData,
-    saveExistingConcretePavingData,
-    removeExtraPaving,
-    refreshQuoteData
+    isSubmitting,
+    handleSaveData,
+    handleRemoveExtraPaving,
   };
 };
