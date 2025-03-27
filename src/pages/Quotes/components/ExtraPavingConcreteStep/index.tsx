@@ -6,6 +6,7 @@ import { ConcreteExtras } from "./components/ConcreteExtras";
 import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 import { ExtraConcreting } from "./components/ExtraConcreting";
 import { NavigationButtons } from "./components/NavigationButtons";
+import { TotalCostSummary } from "./components/TotalCostSummary";
 import { useExtraPavingData } from "./hooks/useExtraPavingData";
 
 interface ExtraPavingConcreteStepProps {
@@ -82,6 +83,9 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
 
       {/* 4, 5, 6. Concrete Pump, Cuts, Under Fence Strips */}
       <ConcreteExtras onChanged={markAsChanged} />
+
+      {/* Cost Summary - added just above the navigation buttons */}
+      <TotalCostSummary />
 
       <NavigationButtons
         onPrevious={onPrevious}
