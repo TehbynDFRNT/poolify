@@ -97,17 +97,17 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
             {/* Cost Breakdown */}
             {hasCostData && (
               <CostBreakdown 
-                perMeterRate={perMeterRate}
-                pavingCost={pavingCost}
-                labourCost={labourCost}
-                marginCost={marginCost}
-                totalCost={totalCost}
-                meters={meters}
-                paverCost={paverCost}
-                wastageCost={wastageCost}
-                marginPaverCost={marginPaverCost}
-                labourBaseCost={labourBaseCost}
-                labourMarginCost={labourMarginCost}
+                perMeterRate={perMeterRate || 0}
+                pavingCost={pavingCost || 0}
+                labourCost={labourCost || 0}
+                marginCost={marginCost || 0}
+                totalCost={totalCost || 0}
+                meters={meters || 0}
+                paverCost={paverCost || 0}
+                wastageCost={wastageCost || 0}
+                marginPaverCost={marginPaverCost || 0}
+                labourBaseCost={labourBaseCost || 0}
+                labourMarginCost={labourMarginCost || 0}
               />
             )}
 
