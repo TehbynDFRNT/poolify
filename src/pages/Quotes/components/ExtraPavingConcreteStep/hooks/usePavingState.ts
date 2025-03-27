@@ -10,18 +10,13 @@ export const usePavingState = () => {
 
   // Load data from quote if we're editing
   useEffect(() => {
-    if (quoteData.concrete_cuts) {
-      try {
-        const savedData = JSON.parse(quoteData.concrete_cuts);
-        if (savedData && savedData.paving_id) {
-          setSelectedPavingId(savedData.paving_id);
-          setMeters(savedData.meters || 0);
-        }
-      } catch (err) {
-        console.error("Failed to parse saved paving data:", err);
-      }
+    if (quoteData.selected_paving_id) {
+      setSelectedPavingId(quoteData.selected_paving_id);
     }
-  }, [quoteData.concrete_cuts]);
+    if (quoteData.selected_paving_meters) {
+      setMeters(quoteData.selected_paving_meters);
+    }
+  }, [quoteData]);
 
   const handleSelectedPavingChange = (id: string) => {
     setSelectedPavingId(id);

@@ -4,38 +4,29 @@ import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
-import { usePavingState } from "./usePavingState";
 import { useSavePavingData } from "./useSavePavingData";
 import { usePageSaveState } from "./usePageSaveState";
-import { Quote } from "@/types/quote";
-import { ExtraPavingCost } from "@/types/extra-paving-cost";
 import { toast } from "sonner";
 
 export const useExtraPavingData = (onNext: () => void) => {
   // Hooks for managing data
-  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isPavingLoading } = useExtraPavingCosts();
   const { concreteLabourCosts, isLoading: isLabourLoading } = useConcreteLabourCosts();
   const { concreteCosts, isLoading: isConcreteLoading } = useConcreteCosts();
   
   // State for paving selection
-  const {
-    selectedPavingId,
-    meters,
-    hasCostData,
-    perMeterCost,
-    materialCost,
-    labourCost,
-    marginCost,
-    totalCost,
-    pavingDetails,
-    concreteDetails,
-    labourDetails,
-    setSelectedPavingId,
-    setMeters,
-    resetPavingState,
-    calculateCosts
-  } = usePavingState(extraPavingCosts, concreteLabourCosts, concreteCosts);
+  const [selectedPavingId, setSelectedPavingId] = useState<string>("");
+  const [meters, setMeters] = useState<number>(0);
+  const [perMeterCost, setPerMeterCost] = useState<number>(0);
+  const [materialCost, setMaterialCost] = useState<number>(0);
+  const [labourCost, setLabourCost] = useState<number>(0);
+  const [marginCost, setMarginCost] = useState<number>(0);
+  const [totalCost, setTotalCost] = useState<number>(0);
+  const [pavingDetails, setPavingDetails] = useState<any>(null);
+  const [concreteDetails, setConcreteDetails] = useState<any>(null);
+  const [labourDetails, setLabourDetails] = useState<any>(null);
+  const [hasCostData, setHasCostData] = useState<boolean>(false);
   
   // Save functionality
   const {
@@ -61,26 +52,105 @@ export const useExtraPavingData = (onNext: () => void) => {
       setSelectedPavingId(quoteData.selected_paving_id);
       setMeters(quoteData.selected_paving_meters || 0);
     }
-  }, [quoteData.selected_paving_id, quoteData.selected_paving_meters, setSelectedPavingId, setMeters]);
+  }, [quoteData]);
+  
+  // Function to reset paving state
+  const resetPavingState = () => {
+    setSelectedPavingId("");
+    setMeters(0);
+    setPerMeterCost(0);
+    setMaterialCost(0);
+    setLabourCost(0);
+    setMarginCost(0);
+    setTotalCost(0);
+    setPavingDetails(null);
+    setConcreteDetails(null);
+    setLabourDetails(null);
+    setHasCostData(false);
+  };
+  
+  // Calculate costs
+  const calculateCosts = (pavingId: string, area: number) => {
+    if (!pavingId || area <= 0 || !extraPavingCosts || !concreteLabourCosts || !concreteCosts) {
+      resetPavingState();
+      return;
+    }
+    
+    const selectedPaving = extraPavingCosts.find(p => p.id === pavingId);
+    if (!selectedPaving) {
+      resetPavingState();
+      return;
+    }
+    
+    // Calculate paving costs
+    const paverCost = selectedPaving.paver_cost;
+    const wastageCost = selectedPaving.wastage_cost;
+    const marginCostPerMeter = selectedPaving.margin_cost;
+    
+    // Calculate labour costs
+    let totalLabourCost = 0;
+    let totalLabourMargin = 0;
+    
+    concreteLabourCosts.forEach(labour => {
+      totalLabourCost += labour.cost;
+      totalLabourMargin += labour.margin;
+    });
+    
+    // Calculate concrete costs
+    let concreteCostPerMeter = 0;
+    
+    if (concreteCosts.length > 0) {
+      concreteCostPerMeter = concreteCosts[0].price;
+    }
+    
+    // Calculate totals
+    const totalMaterialCost = (paverCost + wastageCost + concreteCostPerMeter) * area;
+    const totalLabour = totalLabourCost * area;
+    const totalMargin = (marginCostPerMeter + totalLabourMargin) * area;
+    const perMeterTotal = paverCost + wastageCost + concreteCostPerMeter + totalLabourCost + marginCostPerMeter + totalLabourMargin;
+    const calculatedTotalCost = totalMaterialCost + totalLabour + totalMargin;
+    
+    // Update state
+    setPerMeterCost(perMeterTotal);
+    setMaterialCost(totalMaterialCost);
+    setLabourCost(totalLabour);
+    setMarginCost(totalMargin);
+    setTotalCost(calculatedTotalCost);
+    setHasCostData(true);
+    
+    // Set details for display
+    setPavingDetails({
+      paverCost,
+      wastageCost,
+      marginCost: marginCostPerMeter
+    });
+    
+    setConcreteDetails({
+      costPerMeter: concreteCostPerMeter
+    });
+    
+    setLabourDetails({
+      baseCost: totalLabourCost,
+      marginCost: totalLabourMargin
+    });
+  };
   
   // Update costs calculation when the paving selection or meters change
   useEffect(() => {
     if (selectedPavingId && meters > 0) {
       calculateCosts(selectedPavingId, meters);
     }
-  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts, concreteCosts, calculateCosts]);
+  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts, concreteCosts]);
   
   // Handle paving selection change
   const handleSelectedPavingChange = (pavingId: string) => {
     setSelectedPavingId(pavingId);
-    updateQuoteData({ selected_paving_id: pavingId });
     markAsChanged();
   };
   
   // Handle meters change
   const handleMetersChange = (value: number) => {
     setMeters(value);
-    updateQuoteData({ selected_paving_meters: value });
     markAsChanged();
   };
   
