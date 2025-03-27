@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -59,6 +59,8 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   const [quoteData, setQuoteData] = useState<Partial<Quote>>(initialQuoteData);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { quoteId } = useParams<{ quoteId: string }>();
+  const isRefreshing = useRef(false);
+  const lastRefreshTime = useRef(0);
 
   // Load quote data when provider mounts or quoteId changes
   useEffect(() => {
@@ -69,18 +71,26 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     }
   }, [quoteId]);
 
-  const updateQuoteData = (data: Partial<Quote>) => {
+  const updateQuoteData = useCallback((data: Partial<Quote>) => {
     setQuoteData(prev => ({ ...prev, ...data }));
-  };
+  }, []);
 
-  const resetQuoteData = () => {
+  const resetQuoteData = useCallback(() => {
     setQuoteData(initialQuoteData);
-  };
+  }, []);
 
-  const refreshQuoteData = async () => {
+  const refreshQuoteData = useCallback(async () => {
+    // If already refreshing or if less than 1 second since last refresh, prevent another refresh
+    const now = Date.now();
+    if (isRefreshing.current || (now - lastRefreshTime.current < 1000)) {
+      return Promise.resolve();
+    }
+
     // If editing an existing quote
     if (quoteId) {
+      isRefreshing.current = true;
       setIsLoading(true);
+      
       try {
         console.log("Refreshing quote data for ID:", quoteId);
         const { data, error } = await supabase
@@ -99,13 +109,20 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
           console.log("Refreshed quote data:", data);
           setQuoteData(data as Partial<Quote>);
         }
+        
+        lastRefreshTime.current = Date.now();
+        return Promise.resolve();
       } catch (error) {
         console.error("Error in refreshQuoteData:", error);
+        return Promise.reject(error);
       } finally {
         setIsLoading(false);
+        isRefreshing.current = false;
       }
     }
-  };
+    
+    return Promise.resolve();
+  }, [quoteId]);
 
   return (
     <QuoteContext.Provider value={{ 

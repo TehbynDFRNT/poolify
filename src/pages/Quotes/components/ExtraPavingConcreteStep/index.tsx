@@ -1,5 +1,5 @@
 
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 import { MainPavingSection } from "./components/MainPavingSection";
 import { PageHeader } from "./components/PageHeader";
 import { ConcreteExtras } from "./components/ConcreteExtras";
@@ -21,15 +21,15 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
   onPrevious
 }) => {
   const { refreshQuoteData } = useQuoteContext();
+  const initialLoadDone = useRef(false);
   
   // Fetch data only once when the component mounts
   useEffect(() => {
-    // Add a slight delay to prevent concurrent state updates 
-    const timer = setTimeout(() => {
-      refreshQuoteData();
-    }, 50);
-    
-    return () => clearTimeout(timer);
+    if (!initialLoadDone.current) {
+      refreshQuoteData().then(() => {
+        initialLoadDone.current = true;
+      });
+    }
   }, [refreshQuoteData]);
   
   const {

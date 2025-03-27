@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { memo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { QuoteProvider } from "@/pages/Quotes/context/QuoteContext";
 import { EditQuoteContent } from "@/pages/Quotes/components/EditQuoteContent";
@@ -14,4 +14,4 @@ const EditQuote: React.FC = () => {
   );
 };
 
-export default React.memo(EditQuote);
+export default memo(EditQuote);
