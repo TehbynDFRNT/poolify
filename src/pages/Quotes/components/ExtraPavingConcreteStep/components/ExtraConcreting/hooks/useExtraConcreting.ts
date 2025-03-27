@@ -7,9 +7,10 @@ import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
+import { formatCurrency } from "@/utils/format";
 
 export const useExtraConcreting = (onChanged?: () => void) => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
   const { extraConcretingItems, isLoading: isLoadingExtraConcreting } = useExtraConcretingData();
   const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
@@ -114,6 +115,12 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
   const handleSave = async () => {
     if (!selectedConcretingType || meters <= 0) {
+      toast.error("Please select a concreting type and enter a valid area");
+      return false;
+    }
+
+    if (!quoteData.id) {
+      toast.error("No quote ID found. Please complete the previous steps first.");
       return false;
     }
 
@@ -127,36 +134,36 @@ export const useExtraConcreting = (onChanged?: () => void) => {
         return false;
       }
 
-      if (quoteData.id) {
-        // Just save the essential fields - we'll avoid using the JSON string field for now
-        const updates: Partial<Quote> = {
-          extra_concreting_cost: totalCost,
-          extra_concreting_type: selectedConcreting.type,
-          extra_concreting_meterage: meters,
-          extra_concreting_margin: marginCost
-        };
+      // Just save the essential fields - we'll avoid using the JSON string field for now
+      const updates: Partial<Quote> = {
+        extra_concreting_cost: totalCost,
+        extra_concreting_type: selectedConcreting.type,
+        extra_concreting_meterage: meters,
+        extra_concreting_margin: marginCost
+      };
 
-        console.log("Saving extra concreting with updates:", updates);
+      console.log("Saving extra concreting with updates:", updates);
 
-        // Save to database
-        const { error } = await supabase
-          .from("quotes")
-          .update(updates)
-          .eq("id", quoteData.id);
+      // Save to database
+      const { error } = await supabase
+        .from("quotes")
+        .update(updates)
+        .eq("id", quoteData.id);
 
-        if (error) {
-          console.error("Error saving extra concreting data:", error);
-          toast.error("Failed to save data");
-          return false;
-        }
-
-        // Update local context
-        updateQuoteData(updates);
-        
-        toast.success("Extra concreting data saved successfully");
-        return true;
+      if (error) {
+        console.error("Error saving extra concreting data:", error);
+        toast.error("Failed to save data");
+        return false;
       }
-      return false;
+
+      // Update local context
+      updateQuoteData(updates);
+      
+      // Refresh quote data to get updated cost totals
+      await refreshQuoteData();
+
+      toast.success("Extra concreting data saved successfully");
+      return true;
     } catch (error) {
       console.error("Error in save process:", error);
       toast.error("An unexpected error occurred");
@@ -167,7 +174,10 @@ export const useExtraConcreting = (onChanged?: () => void) => {
   };
 
   const handleDelete = async () => {
-    if (!quoteData.id) return;
+    if (!quoteData.id) {
+      toast.error("No quote ID found");
+      return;
+    }
     
     setIsDeleting(true);
     
@@ -199,6 +209,9 @@ export const useExtraConcreting = (onChanged?: () => void) => {
       setMeters(0);
       resetAllCosts();
       
+      // Refresh quote data to get updated cost totals
+      await refreshQuoteData();
+      
       toast.success("Extra concreting data removed");
       setShowDeleteConfirm(false);
     } catch (error) {
@@ -209,11 +222,16 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     }
   };
 
+  // Helper function to get the selected concreting data
+  const getSelectedConcreting = () => {
+    if (!selectedConcretingType || !extraConcretingItems) return null;
+    return extraConcretingItems.find(c => c.id === selectedConcretingType);
+  };
+
   // Helper function to get the price of the selected concreting option
   const getSelectedPrice = () => {
-    if (!selectedConcretingType || !extraConcretingItems) return 0;
-    const selectedConcreting = extraConcretingItems.find(c => c.id === selectedConcretingType);
-    return selectedConcreting ? selectedConcreting.price : 0;
+    const selected = getSelectedConcreting();
+    return selected ? selected.price : 0;
   };
 
   // Handler for type change
@@ -226,14 +244,18 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     setMeters(parseFloat(e.target.value) || 0);
   };
 
+  // Format values for display
+  const getFormattedTotal = () => formatCurrency(totalCost);
+  const getFormattedRate = () => formatCurrency(perMeterRate);
+
   const isLoading = isLoadingExtraConcreting || isLoadingConcrete || isLoadingLabour;
-  const hasCostData = selectedConcretingType && meters > 0;
-  const hasExistingData = !!(quoteData.extra_concreting_type && quoteData.extra_concreting_meterage);
+  const hasCostData = Boolean(selectedConcretingType && meters > 0);
+  const hasExistingData = Boolean(quoteData.extra_concreting_type && quoteData.extra_concreting_meterage);
 
   return {
     // State
     selectedConcretingType,
-    selectedType: selectedConcretingType, // Alias for component compatibility 
+    selectedType: selectedConcretingType, // Alias for component compatibility
     meters,
     meterage: meters, // Alias for component compatibility
     isSubmitting,
@@ -250,6 +272,10 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     marginCost,
     totalCost,
     
+    // Formatted values
+    formattedTotal: getFormattedTotal(),
+    formattedRate: getFormattedRate(),
+    
     // Dependencies
     extraConcretingItems,
     
@@ -261,6 +287,7 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     handleDelete,
     handleTypeChange,
     handleMeterageChange,
-    getSelectedPrice
+    getSelectedPrice,
+    getSelectedConcreting
   };
 };
