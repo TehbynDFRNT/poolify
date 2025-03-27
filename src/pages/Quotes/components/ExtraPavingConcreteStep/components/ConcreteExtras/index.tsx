@@ -11,13 +11,13 @@ interface ConcreteExtrasProps {
 export const ConcreteExtras: React.FC<ConcreteExtrasProps> = ({ onChanged }) => {
   return (
     <div className="space-y-6">
-      {/* Concrete Pump Section */}
+      {/* 4. Concrete Pump Section */}
       <ConcretePump onChanged={onChanged} />
 
-      {/* Concrete Cuts Section */}
+      {/* 5. Concrete Cuts Section */}
       <ConcreteCuts onChanged={onChanged} />
 
-      {/* Under Fence Concrete Strips Section */}
+      {/* 6. Under Fence Concrete Strips Section */}
       <UnderFenceConcreteStrips onChanged={onChanged} />
     </div>
   );

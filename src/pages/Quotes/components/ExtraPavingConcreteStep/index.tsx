@@ -48,6 +48,7 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
     <div className="space-y-6">
       <PageHeader hasUnsavedChanges={hasUnsavedChanges} />
 
+      {/* 1. Extra Paving */}
       <MainPavingSection
         quoteData={quoteData}
         selectedPavingId={selectedPavingId}
@@ -69,15 +70,18 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
         markAsChanged={markAsChanged}
       />
 
+      {/* 2. Paving on Existing Concrete */}
       <div ref={pavingOnExistingConcreteRef}>
         <PavingOnExistingConcrete onChanged={markAsChanged} />
       </div>
 
-      <ConcreteExtras onChanged={markAsChanged} />
-
+      {/* 3. Extra Concreting */}
       <div ref={extraConcretingRef}>
         <ExtraConcreting onChanged={markAsChanged} />
       </div>
+
+      {/* 4, 5, 6. Concrete Pump, Cuts, Under Fence Strips */}
+      <ConcreteExtras onChanged={markAsChanged} />
 
       <NavigationButtons
         onPrevious={onPrevious}
