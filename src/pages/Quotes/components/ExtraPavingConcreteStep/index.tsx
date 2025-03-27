@@ -224,14 +224,14 @@ export const ExtraPavingConcreteStep = ({
         </CardContent>
       </Card>
       
-      {/* Concrete Extras component */}
-      <ConcreteExtras />
-      
-      {/* Paving on Existing Concrete section */}
+      {/* Paving on Existing Concrete section - NOW FIRST */}
       <PavingOnExistingConcrete 
         ref={pavingOnExistingConcreteRef}
         onChanged={markAsChanged}
       />
+      
+      {/* Concrete Extras component - NOW SECOND */}
+      <ConcreteExtras />
 
       {/* Centralized Navigation Buttons */}
       <div className="flex justify-between mt-6">
