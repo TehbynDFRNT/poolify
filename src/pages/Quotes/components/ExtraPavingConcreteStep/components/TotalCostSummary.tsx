@@ -4,6 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator, DollarSign } from "lucide-react";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface CostItem {
   name: string;
