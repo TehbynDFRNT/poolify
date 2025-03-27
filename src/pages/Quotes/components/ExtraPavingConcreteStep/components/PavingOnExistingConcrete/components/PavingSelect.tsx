@@ -20,7 +20,7 @@ export const PavingSelect: React.FC<PavingSelectProps> = ({
     <div className="space-y-2">
       <Label htmlFor="paving-type">Paving Type</Label>
       <Select
-        value={selectedPavingId}
+        value={selectedPavingId || "default"}
         onValueChange={onChange}
         disabled={disabled}
       >
@@ -29,12 +29,12 @@ export const PavingSelect: React.FC<PavingSelectProps> = ({
         </SelectTrigger>
         <SelectContent>
           {pavingOptions.length === 0 ? (
-            <SelectItem value="none" disabled>
+            <SelectItem value="no-options" disabled>
               No paving options available
             </SelectItem>
           ) : (
             <>
-              <SelectItem value="" disabled>
+              <SelectItem value="default" disabled>
                 Select paving type
               </SelectItem>
               {pavingOptions.map((option) => (
