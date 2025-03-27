@@ -3,8 +3,8 @@ import React, { forwardRef, useImperativeHandle } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SquareDashed } from "lucide-react";
-import { PavingTypeSelector } from "../PavingTypeSelector";
-import { MetersInput } from "../MetersInput";
+import { PavingSelectionForm } from "./components/PavingSelectionForm";
+import { LoadingIndicator } from "./components/LoadingIndicator";
 import { CostBreakdown } from "./components/CostBreakdown";
 import { FormActions } from "./components/FormActions";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
@@ -101,23 +101,16 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
         
         <CardContent className="p-5">
           {isLoading ? (
-            <div className="py-4 text-center text-gray-500">Loading paving options...</div>
+            <LoadingIndicator />
           ) : (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Paving Selection */}
-                <PavingTypeSelector 
-                  selectedPavingId={selectedPavingId}
-                  extraPavingCosts={extraPavingCosts}
-                  onSelect={setSelectedPavingId}
-                />
-                
-                {/* Metres Input */}
-                <MetersInput 
-                  meters={meters} 
-                  onChange={setMeters} 
-                />
-              </div>
+              <PavingSelectionForm 
+                selectedPavingId={selectedPavingId}
+                meters={meters}
+                extraPavingCosts={extraPavingCosts}
+                onSelectPaving={setSelectedPavingId}
+                onChangeMeter={setMeters}
+              />
               
               {/* Cost Breakdown */}
               {hasCostData && (
