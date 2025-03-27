@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
@@ -160,7 +161,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdateStrips={setUnderFenceStrips}
       />
       
-      {/* New Paving on Existing Concrete placeholder section */}
+      {/* New Paving on Existing Concrete section */}
       <PavingOnExistingConcrete />
 
       {/* Total Cost Summary with existing concrete paving cost */}

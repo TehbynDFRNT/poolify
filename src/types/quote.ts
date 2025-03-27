@@ -47,5 +47,25 @@ export interface QuoteInsert {
   site_address: string;
   home_address: string;
   status: string;
+  pool_id?: string;
   resident_homeowner?: boolean;
+  crane_id?: string;
+  traffic_control_id?: string;
+  bobcat_id?: string;
+  site_requirements_cost?: number;
+  extra_paving_cost?: number;
+  optional_addons_cost?: number;
+  total_cost?: number;
+  concrete_pump_required?: boolean;
+  concrete_pump_price?: number;
+  concrete_cuts?: string;
+  concrete_cuts_cost?: number;
+  under_fence_strips_cost?: number;
+  under_fence_strips_data?: string;
+  micro_dig_required?: boolean;
+  micro_dig_price?: number;
+  micro_dig_notes?: string;
+  excavation_type?: string;
+  existing_concrete_paving?: string;
+  existing_concrete_paving_cost?: number;
 }

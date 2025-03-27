@@ -5,13 +5,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 type QuoteContextType = {
-  quoteData: Partial<QuoteInsert> & { id?: string; };
-  updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; }) => void;
+  quoteData: Partial<Quote>;
+  updateQuoteData: (data: Partial<Quote>) => void;
   resetQuoteData: () => void;
   refreshQuoteData: () => Promise<void>;
 };
 
-const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
+const initialQuoteData: Partial<Quote> = {
   customer_name: '',
   customer_email: '',
   customer_phone: '',
@@ -27,6 +27,7 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   crane_id: '',
   excavation_type: '',
   traffic_control_id: 'none',
+  bobcat_id: undefined,
   
   // Cost tracking (adding as 0 defaults)
   site_requirements_cost: 0,
@@ -43,15 +44,19 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   // Micro dig (adding as empty defaults)
   micro_dig_required: false,
   micro_dig_price: 0,
-  micro_dig_notes: ''
+  micro_dig_notes: '',
+  
+  // Paving on existing concrete
+  existing_concrete_paving: '',
+  existing_concrete_paving_cost: 0
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
 
 export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [quoteData, setQuoteData] = useState<Partial<QuoteInsert> & { id?: string; }>(initialQuoteData);
+  const [quoteData, setQuoteData] = useState<Partial<Quote>>(initialQuoteData);
 
-  const updateQuoteData = (data: Partial<QuoteInsert> & { id?: string; }) => {
+  const updateQuoteData = (data: Partial<Quote>) => {
     setQuoteData(prev => ({ ...prev, ...data }));
   };
 
