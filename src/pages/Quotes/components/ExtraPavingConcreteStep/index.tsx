@@ -40,6 +40,7 @@ export const ExtraPavingConcreteStep = ({
   
   // Reference to the PavingOnExistingConcrete component
   const pavingOnExistingConcreteRef = useRef<any>(null);
+  const concreteExtrasRef = useRef<any>(null);
   
   // Use the custom hook for cost calculations
   const { 
@@ -82,6 +83,8 @@ export const ExtraPavingConcreteStep = ({
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
+      let isSaveSuccessful = true;
+      
       // First save the main paving data
       if (selectedPavingId && meters > 0) {
         // Update the quote with extra paving concrete data
@@ -112,27 +115,39 @@ export const ExtraPavingConcreteStep = ({
           if (error) {
             console.error("Error saving paving concrete data:", error);
             toast.error("Failed to save paving data");
-            return;
+            isSaveSuccessful = false;
+          } else {
+            // Update local context
+            updateQuoteData(updates);
           }
-
-          // Update local context
-          updateQuoteData(updates);
         }
       }
 
       // Then save the paving on existing concrete data
       if (pavingOnExistingConcreteRef.current) {
-        const pavingOnExistingConcreteData = pavingOnExistingConcreteRef.current.getData();
-        if (pavingOnExistingConcreteData) {
-          await pavingOnExistingConcreteData.save();
+        try {
+          const pavingOnExistingConcreteData = pavingOnExistingConcreteRef.current.getData();
+          if (pavingOnExistingConcreteData) {
+            const saveResult = await pavingOnExistingConcreteRef.current.handleSave();
+            if (!saveResult) {
+              isSaveSuccessful = false;
+            }
+          }
+        } catch (error) {
+          console.error("Error saving paving on existing concrete:", error);
+          isSaveSuccessful = false;
         }
       }
       
       // Refresh the quote data to ensure we have the latest state
       await refreshQuoteData();
       
-      toast.success("All paving & concrete data saved successfully");
-      markAsSaved();
+      if (isSaveSuccessful) {
+        toast.success("All paving & concrete data saved successfully");
+        markAsSaved();
+      } else {
+        toast.error("Some data could not be saved. Please check and try again.");
+      }
     } catch (error) {
       console.error("Error in save process:", error);
       toast.error("An unexpected error occurred while saving");
@@ -144,7 +159,10 @@ export const ExtraPavingConcreteStep = ({
   const handleSaveAndContinue = async () => {
     try {
       await handleSave();
-      onNext();
+      // Delay the navigation slightly to ensure state is updated
+      setTimeout(() => {
+        onNext();
+      }, 300);
     } catch (error) {
       console.error("Error in save and continue:", error);
     }
@@ -231,7 +249,9 @@ export const ExtraPavingConcreteStep = ({
       />
       
       {/* Concrete Extras component - NOW SECOND */}
-      <ConcreteExtras />
+      <ConcreteExtras 
+        ref={concreteExtrasRef}
+      />
 
       {/* Centralized Navigation Buttons */}
       <div className="flex justify-between mt-6">

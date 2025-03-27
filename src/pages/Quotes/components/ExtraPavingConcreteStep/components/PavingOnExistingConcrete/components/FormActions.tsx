@@ -1,7 +1,7 @@
 
-import React from "react";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Save, Trash } from 'lucide-react';
 
 interface FormActionsProps {
   onSave: () => void;
@@ -16,32 +16,28 @@ export const FormActions: React.FC<FormActionsProps> = ({
   onDelete,
   isSubmitting,
   isDeleting,
-  hasExistingData,
+  hasExistingData
 }) => {
   return (
-    <div className="flex justify-between">
-      {hasExistingData && (
-        <Button 
-          variant="destructive" 
-          size="sm" 
-          onClick={onDelete}
-          disabled={isDeleting}
-          className="flex items-center gap-1"
-        >
-          <Trash2 className="h-4 w-4" /> 
-          {isDeleting ? "Removing..." : "Remove"}
-        </Button>
-      )}
+    <div className="flex justify-end gap-3">
+      <Button
+        variant="outline"
+        onClick={onDelete}
+        disabled={isSubmitting || isDeleting || !hasExistingData}
+        className="flex items-center gap-1.5 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+      >
+        <Trash className="h-4 w-4" />
+        {isDeleting ? "Removing..." : "Remove"}
+      </Button>
       
-      <div className="ml-auto">
-        <Button
-          onClick={onSave}
-          disabled={isSubmitting}
-          variant="default"
-        >
-          {isSubmitting ? "Saving..." : "Save"}
-        </Button>
-      </div>
+      <Button
+        onClick={onSave}
+        disabled={isSubmitting || isDeleting}
+        className="flex items-center gap-1.5"
+      >
+        <Save className="h-4 w-4" />
+        {isSubmitting ? "Saving..." : hasExistingData ? "Update" : "Save"}
+      </Button>
     </div>
   );
 };

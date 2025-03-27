@@ -1,10 +1,12 @@
 
-import React, { useImperativeHandle, forwardRef, useState, useEffect } from "react";
+import React, { forwardRef, useImperativeHandle } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { SquareDashed } from "lucide-react";
 import { PavingTypeSelector } from "../PavingTypeSelector";
 import { MetersInput } from "../MetersInput";
 import { CostBreakdown } from "./components/CostBreakdown";
+import { FormActions } from "./components/FormActions";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 import { usePavingOnExistingConcrete } from "./hooks/usePavingOnExistingConcrete";
 
@@ -21,25 +23,13 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
       isSubmitting,
       isDeleting,
       showDeleteConfirm,
-      hasCostData,
-      hasExistingData,
-      isLoading,
-      
-      // Cost breakdown data
-      perMeterRate,
-      materialCost,
+      pavingCost,
       labourCost,
       marginCost,
       totalCost,
-      
-      // Cost details
-      paverCost,
-      wastageCost,
-      marginPaverCost,
-      labourBaseCost,
-      labourMarginCost,
-      
-      // Dependencies
+      isLoading,
+      hasCostData,
+      hasExistingData,
       extraPavingCosts,
       
       // Actions
@@ -51,50 +41,44 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
       
       // Debug info
       debugInfo
-    } = usePavingOnExistingConcrete();
-
-    // Track local unsaved changes
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
-    // Expose methods and state to parent via ref
+    } = usePavingOnExistingConcrete(onChanged);
+    
+    // Expose methods to parent using useImperativeHandle
     useImperativeHandle(ref, () => ({
-      getData: () => ({
-        selectedPavingId,
-        meters,
-        totalCost,
-        save: async () => {
-          if (hasCostData) {
-            await handleSave();
-            setHasUnsavedChanges(false);
-          }
+      getData: () => {
+        if (!selectedPavingId || meters <= 0) {
+          return null;
         }
-      }),
-      hasUnsavedChanges
+        
+        return {
+          selectedPavingId,
+          meters,
+          pavingCost,
+          labourCost,
+          marginCost,
+          totalCost,
+          save: handleSave
+        };
+      },
+      handleSave,
+      reset: () => {
+        setSelectedPavingId("");
+        setMeters(0);
+      }
     }));
 
-    // Track changes and notify parent
-    useEffect(() => {
-      setHasUnsavedChanges(true);
-      if (onChanged) {
-        onChanged();
-      }
-    }, [selectedPavingId, meters, onChanged]);
-
-    const handlePavingChange = (id: string) => {
-      setSelectedPavingId(id);
-    };
-
-    const handleMetersChange = (value: number) => {
-      setMeters(value);
-    };
-
     return (
-      <Card className="border border-gray-200">
+      <Card className="border border-gray-200 mt-6">
         <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <SquareDashed className="h-5 w-5 text-blue-500" />
             <h3 className="text-lg font-medium">Paving on Existing Concrete</h3>
           </div>
+          {hasExistingData && (
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+              Saved
+            </Badge>
+          )}
         </CardHeader>
         
         <CardContent className="p-5">
@@ -107,45 +91,35 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
                 <PavingTypeSelector 
                   selectedPavingId={selectedPavingId}
                   extraPavingCosts={extraPavingCosts}
-                  onSelect={handlePavingChange}
+                  onSelect={setSelectedPavingId}
                 />
                 
                 {/* Metres Input */}
                 <MetersInput 
                   meters={meters} 
-                  onChange={handleMetersChange} 
+                  onChange={setMeters} 
                 />
               </div>
               
               {/* Cost Breakdown */}
               {hasCostData && (
                 <CostBreakdown 
-                  perMeterRate={perMeterRate}
-                  materialCost={materialCost}
+                  pavingCost={pavingCost}
                   labourCost={labourCost}
                   marginCost={marginCost}
                   totalCost={totalCost}
-                  pavingDetails={{
-                    paverCost,
-                    wastageCost,
-                    marginCost: marginPaverCost
-                  }}
-                  labourDetails={{
-                    baseCost: labourBaseCost,
-                    marginCost: labourMarginCost
-                  }}
-                  meters={meters}
                 />
               )}
 
-              {/* Debug Info - Only in Development */}
-              {process.env.NODE_ENV === 'development' && debugInfo && (
-                <div className="bg-gray-100 p-3 rounded text-xs mt-2 overflow-auto">
-                  <details>
-                    <summary className="cursor-pointer font-medium">Debug Info</summary>
-                    <pre className="mt-2">{JSON.stringify(debugInfo, null, 2)}</pre>
-                  </details>
-                </div>
+              {/* Action Buttons */}
+              {hasCostData && (
+                <FormActions
+                  onSave={handleSave}
+                  onDelete={() => setShowDeleteConfirm(true)}
+                  isSubmitting={isSubmitting}
+                  isDeleting={isDeleting}
+                  hasExistingData={hasExistingData}
+                />
               )}
             </div>
           )}

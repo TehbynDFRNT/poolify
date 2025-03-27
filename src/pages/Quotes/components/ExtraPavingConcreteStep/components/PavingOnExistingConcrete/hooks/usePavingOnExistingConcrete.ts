@@ -7,8 +7,8 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
 
-export const usePavingOnExistingConcrete = () => {
-  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
+export const usePavingOnExistingConcrete = (onChanged?: () => void) => {
+  const { quoteData, updateQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
   
@@ -20,7 +20,7 @@ export const usePavingOnExistingConcrete = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Cost calculations
-  const [materialCost, setMaterialCost] = useState(0);
+  const [pavingCost, setPavingCost] = useState(0);
   const [labourCost, setLabourCost] = useState(0);
   const [marginCost, setMarginCost] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
@@ -35,6 +35,20 @@ export const usePavingOnExistingConcrete = () => {
   
   // Debug information
   const [debugInfo, setDebugInfo] = useState<any>(null);
+
+  // Helper to update the parent about changes
+  const notifyChanges = () => {
+    if (onChanged) {
+      onChanged();
+    }
+  };
+
+  // Notify parent when inputs change
+  useEffect(() => {
+    if (selectedPavingId || meters > 0) {
+      notifyChanges();
+    }
+  }, [selectedPavingId, meters]);
 
   // Load existing data if available
   useEffect(() => {
@@ -55,7 +69,6 @@ export const usePavingOnExistingConcrete = () => {
         }
       } catch (err) {
         console.error("Failed to parse saved existing concrete paving data:", err);
-        toast.error("Error loading saved paving data");
       }
     }
   }, [quoteData.existing_concrete_paving]);
@@ -106,7 +119,7 @@ export const usePavingOnExistingConcrete = () => {
     const calculatedTotalCost = totalMaterialCost + totalLabourCost + totalMarginCost;
     
     // Update state
-    setMaterialCost(totalMaterialCost);
+    setPavingCost(totalMaterialCost);
     setLabourCost(totalLabourCost);
     setMarginCost(totalMarginCost);
     setTotalCost(calculatedTotalCost);
@@ -114,7 +127,7 @@ export const usePavingOnExistingConcrete = () => {
   }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts]);
 
   const resetAllCosts = () => {
-    setMaterialCost(0);
+    setPavingCost(0);
     setLabourCost(0);
     setMarginCost(0);
     setTotalCost(0);
@@ -128,8 +141,7 @@ export const usePavingOnExistingConcrete = () => {
 
   const handleSave = async () => {
     if (!selectedPavingId || meters <= 0) {
-      toast.error("Please select a paving type and enter meters");
-      return;
+      return false;
     }
 
     setIsSubmitting(true);
@@ -148,7 +160,7 @@ export const usePavingOnExistingConcrete = () => {
       const selectedPaving = extraPavingCosts?.find(p => p.id === selectedPavingId);
       if (!selectedPaving) {
         toast.error("Selected paving type not found");
-        return;
+        return false;
       }
 
       // Prepare the data to save
@@ -156,7 +168,7 @@ export const usePavingOnExistingConcrete = () => {
         paving_id: selectedPavingId,
         paving_category: selectedPaving.category,
         meters: meters,
-        material_cost: materialCost,
+        material_cost: pavingCost,
         labour_cost: labourCost,
         margin_cost: marginCost,
         total_cost: totalCost,
@@ -194,14 +206,11 @@ export const usePavingOnExistingConcrete = () => {
             timestamp: new Date().toISOString()
           }));
           toast.error("Failed to save data");
-          return;
+          return false;
         }
 
         // Update local context
         updateQuoteData(updates);
-        
-        // Refresh quote data to ensure we have the latest
-        await refreshQuoteData();
         
         setDebugInfo(prev => ({
           ...prev,
@@ -210,8 +219,9 @@ export const usePavingOnExistingConcrete = () => {
           timestamp: new Date().toISOString()
         }));
         
-        toast.success("Paving on existing concrete data saved");
+        return true;
       }
+      return false;
     } catch (error) {
       console.error("Error in save process:", error);
       setDebugInfo(prev => ({
@@ -220,6 +230,7 @@ export const usePavingOnExistingConcrete = () => {
         timestamp: new Date().toISOString()
       }));
       toast.error("An unexpected error occurred");
+      return false;
     } finally {
       setIsSubmitting(false);
     }
@@ -283,7 +294,7 @@ export const usePavingOnExistingConcrete = () => {
     
     // Cost breakdown data
     perMeterRate,
-    materialCost,
+    pavingCost,
     labourCost,
     marginCost,
     totalCost,

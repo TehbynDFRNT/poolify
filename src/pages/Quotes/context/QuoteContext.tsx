@@ -1,14 +1,16 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useParams } from 'react-router-dom';
 
 type QuoteContextType = {
   quoteData: Partial<Quote>;
   updateQuoteData: (data: Partial<Quote>) => void;
   resetQuoteData: () => void;
   refreshQuoteData: () => Promise<void>;
+  isLoading: boolean;
 };
 
 const initialQuoteData: Partial<Quote> = {
@@ -55,6 +57,17 @@ const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
 
 export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [quoteData, setQuoteData] = useState<Partial<Quote>>(initialQuoteData);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { quoteId } = useParams<{ quoteId: string }>();
+
+  // Load quote data when provider mounts or quoteId changes
+  useEffect(() => {
+    if (quoteId) {
+      refreshQuoteData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [quoteId]);
 
   const updateQuoteData = (data: Partial<Quote>) => {
     setQuoteData(prev => ({ ...prev, ...data }));
@@ -65,36 +78,43 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
   };
 
   const refreshQuoteData = async () => {
-    if (!quoteData.id) {
-      console.warn("Cannot refresh quote data: No quote ID available");
-      return;
-    }
+    // If editing an existing quote
+    if (quoteId) {
+      setIsLoading(true);
+      try {
+        console.log("Refreshing quote data for ID:", quoteId);
+        const { data, error } = await supabase
+          .from('quotes')
+          .select('*')
+          .eq('id', quoteId)
+          .single();
 
-    try {
-      console.log("Refreshing quote data for ID:", quoteData.id);
-      const { data, error } = await supabase
-        .from('quotes')
-        .select('*')
-        .eq('id', quoteData.id)
-        .single();
+        if (error) {
+          console.error("Error refreshing quote data:", error);
+          toast.error("Failed to refresh quote data");
+          throw error;
+        }
 
-      if (error) {
-        console.error("Error refreshing quote data:", error);
-        toast.error("Failed to refresh quote data");
-        throw error;
+        if (data) {
+          console.log("Refreshed quote data:", data);
+          setQuoteData(data as Partial<Quote>);
+        }
+      } catch (error) {
+        console.error("Error in refreshQuoteData:", error);
+      } finally {
+        setIsLoading(false);
       }
-
-      if (data) {
-        console.log("Refreshed quote data:", data);
-        setQuoteData(data as Partial<Quote>);
-      }
-    } catch (error) {
-      console.error("Error in refreshQuoteData:", error);
     }
   };
 
   return (
-    <QuoteContext.Provider value={{ quoteData, updateQuoteData, resetQuoteData, refreshQuoteData }}>
+    <QuoteContext.Provider value={{ 
+      quoteData, 
+      updateQuoteData, 
+      resetQuoteData, 
+      refreshQuoteData,
+      isLoading
+    }}>
       {children}
     </QuoteContext.Provider>
   );
