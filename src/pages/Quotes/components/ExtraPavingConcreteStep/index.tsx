@@ -1,7 +1,5 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
@@ -9,15 +7,12 @@ import { useQuoteContext } from "../../context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useConcreteCostCalculator } from "./hooks/useConcreteCostCalculator";
-import { CostBreakdown } from "./components/CostBreakdown";
-import { PavingTypeSelector } from "./components/PavingTypeSelector";
-import { MetersInput } from "./components/MetersInput";
-import { NoPoolWarning } from "./components/NoPoolWarning";
 import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 import { ConcreteExtras } from "./components/ConcreteExtras";
-import { Button } from "@/components/ui/button";
-import { Save, AlertCircle } from "lucide-react";
 import { usePageSaveState } from "./hooks/usePageSaveState";
+import { NavigationButtons } from "./components/NavigationButtons";
+import { PageHeader } from "./components/PageHeader";
+import { MainPavingSection } from "./components/MainPavingSection";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
@@ -183,100 +178,46 @@ export const ExtraPavingConcreteStep = ({
   return (
     <div className="space-y-6">
       {/* Page header with unsaved changes indicator */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Extra Paving & Concrete</h2>
-        {hasUnsavedChanges && (
-          <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200 flex items-center gap-1.5 px-3 py-1">
-            <AlertCircle className="h-4 w-4" />
-            Unsaved changes
-          </Badge>
-        )}
-      </div>
+      <PageHeader hasUnsavedChanges={hasUnsavedChanges} />
 
-      <Card className="border border-gray-200">
-        <CardHeader className="bg-white pb-2">
-          <h3 className="text-xl font-semibold">Extra Paving</h3>
-          <p className="text-gray-500">Calculate additional paving costs</p>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="border-t mt-2 pt-4">
-            {isLoading ? (
-              <div className="py-4 text-center text-gray-500">Loading paving options...</div>
-            ) : (
-              <div className="space-y-6">
-                {!quoteData.pool_id && <NoPoolWarning />}
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Paving Selection */}
-                  <PavingTypeSelector 
-                    selectedPavingId={selectedPavingId}
-                    extraPavingCosts={extraPavingCosts}
-                    onSelect={handleSelectedPavingChange}
-                  />
-                  
-                  {/* Metres Input */}
-                  <MetersInput 
-                    meters={meters} 
-                    onChange={handleMetersChange} 
-                  />
-                </div>
-                
-                {/* Cost Breakdown */}
-                {hasCostData && (
-                  <CostBreakdown
-                    perMeterCost={perMeterCost}
-                    materialCost={materialCost}
-                    labourCost={labourCost}
-                    marginCost={marginCost}
-                    totalCost={totalCost}
-                    pavingDetails={pavingDetails}
-                    concreteDetails={concreteDetails}
-                    labourDetails={labourDetails}
-                    meters={meters}
-                  />
-                )}
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Main Paving Section */}
+      <MainPavingSection
+        quoteData={quoteData}
+        selectedPavingId={selectedPavingId}
+        meters={meters}
+        hasCostData={hasCostData}
+        isLoading={isLoading}
+        extraPavingCosts={extraPavingCosts}
+        perMeterCost={perMeterCost}
+        materialCost={materialCost}
+        labourCost={labourCost}
+        marginCost={marginCost}
+        totalCost={totalCost}
+        pavingDetails={pavingDetails}
+        concreteDetails={concreteDetails}
+        labourDetails={labourDetails}
+        onSelectedPavingChange={handleSelectedPavingChange}
+        onMetersChange={handleMetersChange}
+        markAsChanged={markAsChanged}
+      />
       
-      {/* Paving on Existing Concrete section - FIRST */}
+      {/* Paving on Existing Concrete section */}
       <PavingOnExistingConcrete 
         ref={pavingOnExistingConcreteRef}
         onChanged={markAsChanged}
       />
       
-      {/* Concrete Extras component - SECOND */}
+      {/* Concrete Extras component */}
       <ConcreteExtras />
 
-      {/* Centralized Navigation Buttons */}
-      <div className="flex justify-between mt-6">
-        <Button 
-          variant="outline" 
-          onClick={onPrevious}
-          disabled={isSubmitting}
-        >
-          Previous
-        </Button>
-        <div className="flex gap-3">
-          <Button 
-            variant="outline"
-            onClick={handleSave}
-            disabled={isSubmitting}
-            className="flex items-center gap-2"
-          >
-            <Save className="h-4 w-4" />
-            {isSubmitting ? "Saving..." : "Save All"}
-          </Button>
-          <Button 
-            onClick={handleSaveAndContinue}
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? "Saving..." : "Save & Continue"}
-          </Button>
-        </div>
-      </div>
+      {/* Navigation Buttons */}
+      <NavigationButtons
+        onPrevious={onPrevious}
+        onSave={handleSave}
+        onSaveAndContinue={handleSaveAndContinue}
+        isSubmitting={isSubmitting}
+        isDisabled={false}
+      />
     </div>
   );
 };

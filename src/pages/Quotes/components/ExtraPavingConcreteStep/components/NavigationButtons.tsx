@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Save } from "lucide-react";
 
 interface NavigationButtonsProps {
   onPrevious: () => void;
@@ -10,13 +11,13 @@ interface NavigationButtonsProps {
   isDisabled: boolean;
 }
 
-export const NavigationButtons = ({
+export const NavigationButtons: React.FC<NavigationButtonsProps> = ({
   onPrevious,
   onSave,
   onSaveAndContinue,
   isSubmitting,
   isDisabled
-}: NavigationButtonsProps) => {
+}) => {
   return (
     <div className="flex justify-between mt-6">
       <Button 
@@ -31,8 +32,10 @@ export const NavigationButtons = ({
           variant="outline"
           onClick={onSave}
           disabled={isSubmitting || isDisabled}
+          className="flex items-center gap-2"
         >
-          {isSubmitting ? "Saving..." : "Save"}
+          <Save className="h-4 w-4" />
+          {isSubmitting ? "Saving..." : "Save All"}
         </Button>
         <Button 
           onClick={onSaveAndContinue}
