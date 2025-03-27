@@ -21,22 +21,20 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
     isSubmitting,
     isDeleting,
     showDeleteConfirm,
+    perMeterRate,
     pavingCost,
     labourCost,
     marginCost,
     totalCost,
-    perMeterRate,
-    isLoading,
-    hasCostData,
-    hasExistingData,
-    extraPavingCosts,
-    
-    // Cost details - pass these through to CostBreakdown
     paverCost,
     wastageCost,
     marginPaverCost,
     labourBaseCost,
     labourMarginCost,
+    isLoading,
+    hasCostData,
+    hasExistingData,
+    extraPavingCosts,
     
     // Actions
     setSelectedPavingId,

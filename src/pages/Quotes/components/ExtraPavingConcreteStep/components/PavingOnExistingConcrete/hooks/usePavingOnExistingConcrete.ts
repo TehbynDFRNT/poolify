@@ -1,70 +1,62 @@
+
 import { useState, useEffect } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Quote } from "@/types/quote";
 
 export const usePavingOnExistingConcrete = (onChanged?: () => void) => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { quoteData, refreshQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
   
-  // Form state
+  // UI state
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-
-  // Cost calculations
-  const [pavingCost, setPavingCost] = useState(0);
-  const [labourCost, setLabourCost] = useState(0);
-  const [marginCost, setMarginCost] = useState(0);
-  const [totalCost, setTotalCost] = useState(0);
-  const [perMeterRate, setPerMeterRate] = useState(0);
   
-  // Per metre cost details
-  const [paverCost, setPaverCost] = useState(0);
-  const [wastageCost, setWastageCost] = useState(0);
-  const [marginPaverCost, setMarginPaverCost] = useState(0);
-  const [labourBaseCost, setLabourBaseCost] = useState(0);
-  const [labourMarginCost, setLabourMarginCost] = useState(0);
+  // Cost calculation state
+  const [perMeterRate, setPerMeterRate] = useState<number>(0);
+  const [pavingCost, setPavingCost] = useState<number>(0);
+  const [labourCost, setLabourCost] = useState<number>(0);
+  const [marginCost, setMarginCost] = useState<number>(0);
+  const [totalCost, setTotalCost] = useState<number>(0);
   
-  // Debug information
-  const [debugInfo, setDebugInfo] = useState<any>(null);
-
-  // Helper to update the parent about changes
-  const notifyChanges = () => {
-    if (onChanged) {
-      onChanged();
-    }
-  };
-
-  // Notify parent when inputs change
-  useEffect(() => {
-    if (selectedPavingId || meters > 0) {
-      notifyChanges();
-    }
-  }, [selectedPavingId, meters]);
+  // Detailed cost breakdown
+  const [paverCost, setPaverCost] = useState<number>(0);
+  const [wastageCost, setWastageCost] = useState<number>(0);
+  const [marginPaverCost, setMarginPaverCost] = useState<number>(0);
+  const [labourBaseCost, setLabourBaseCost] = useState<number>(0);
+  const [labourMarginCost, setLabourMarginCost] = useState<number>(0);
 
   // Load existing data if available
   useEffect(() => {
-    console.log("Loading existing concrete paving data:", quoteData.existing_concrete_paving);
     if (quoteData.existing_concrete_paving) {
       try {
         const savedData = JSON.parse(quoteData.existing_concrete_paving);
         if (savedData && savedData.paving_id) {
           setSelectedPavingId(savedData.paving_id);
-          setMeters(savedData.meters || 0);
+          setMeters(Number(savedData.meters) || 0);
           
-          // Set debug info
-          setDebugInfo({
-            loadedData: savedData,
-            quoteId: quoteData.id,
-            timestamp: new Date().toISOString()
-          });
+          // If we have detailed costs saved, load them too
+          if (savedData.paving_details) {
+            setPaverCost(savedData.paving_details.paverCost || 0);
+            setWastageCost(savedData.paving_details.wastageCost || 0);
+            setMarginPaverCost(savedData.paving_details.marginCost || 0);
+          }
+          
+          if (savedData.labour_details && savedData.labour_details.length > 0) {
+            const baseLabourCost = savedData.labour_details.reduce((sum: number, item: any) => 
+              sum + (item.cost || 0), 0);
+            const marginLabourCost = savedData.labour_details.reduce((sum: number, item: any) => 
+              sum + (item.margin || 0), 0);
+              
+            setLabourBaseCost(baseLabourCost);
+            setLabourMarginCost(marginLabourCost);
+          }
         }
       } catch (err) {
         console.error("Failed to parse saved existing concrete paving data:", err);
@@ -75,199 +67,185 @@ export const usePavingOnExistingConcrete = (onChanged?: () => void) => {
   // Calculate costs when inputs change
   useEffect(() => {
     if (!selectedPavingId || meters <= 0 || !extraPavingCosts || !concreteLabourCosts) {
-      resetAllCosts();
+      // Reset all cost values to zero
+      setPerMeterRate(0);
+      setPavingCost(0);
+      setLabourCost(0);
+      setMarginCost(0);
+      setTotalCost(0);
       return;
     }
 
     // Find the selected paving
     const selectedPaving = extraPavingCosts.find(p => p.id === selectedPavingId);
     if (!selectedPaving) return;
-    
-    // Set individual per meter costs
-    setPaverCost(selectedPaving.paver_cost);
-    setWastageCost(selectedPaving.wastage_cost);
-    setMarginPaverCost(selectedPaving.margin_cost);
-    
-    // Calculate labour costs
-    let totalLabourBase = 0;
-    let totalLabourMargin = 0;
-    
-    concreteLabourCosts.forEach(labour => {
-      totalLabourBase += labour.cost;
-      totalLabourMargin += labour.margin;
-    });
-    
-    setLabourBaseCost(totalLabourBase);
-    setLabourMarginCost(totalLabourMargin);
-    
-    // Calculate per meter rate (NO concrete costs since it's existing concrete)
-    const perMeterTotal = selectedPaving.paver_cost + 
-                          selectedPaving.wastage_cost + 
-                          selectedPaving.margin_cost +
-                          totalLabourBase +
-                          totalLabourMargin;
-    
-    setPerMeterRate(perMeterTotal);
-    
-    // Calculate total costs
-    const totalMaterialCost = (selectedPaving.paver_cost + 
-                              selectedPaving.wastage_cost) * meters;
-    
-    const totalLabourCost = totalLabourBase * meters;
-    const totalMarginCost = (selectedPaving.margin_cost + totalLabourMargin) * meters;
-    const calculatedTotalCost = totalMaterialCost + totalLabourCost + totalMarginCost;
-    
-    // Update state
-    setPavingCost(totalMaterialCost);
-    setLabourCost(totalLabourCost);
-    setMarginCost(totalMarginCost);
-    setTotalCost(calculatedTotalCost);
-    
-  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts]);
 
-  const resetAllCosts = () => {
-    setPavingCost(0);
-    setLabourCost(0);
-    setMarginCost(0);
-    setTotalCost(0);
-    setPerMeterRate(0);
-    setPaverCost(0);
-    setWastageCost(0);
-    setMarginPaverCost(0);
-    setLabourBaseCost(0);
-    setLabourMarginCost(0);
-  };
+    // Store individual cost components
+    const paverCostValue = selectedPaving.paver_cost || 0;
+    const wastageCostValue = selectedPaving.wastage_cost || 0;
+    const marginCostValue = selectedPaving.margin_cost || 0;
+    
+    setPaverCost(paverCostValue);
+    setWastageCost(wastageCostValue);
+    setMarginPaverCost(marginCostValue);
+
+    // Calculate paving cost (paver + wastage + margin)
+    const perMeterPavingCost = paverCostValue + wastageCostValue + marginCostValue;
+    setPerMeterRate(perMeterPavingCost);
+    
+    const totalPavingCost = perMeterPavingCost * meters;
+    setPavingCost(totalPavingCost);
+
+    // Store and calculate labour costs
+    let labourRatePerMeter = 0;
+    let labourMarginPerMeter = 0;
+    
+    if (concreteLabourCosts && concreteLabourCosts.length > 0) {
+      labourRatePerMeter = concreteLabourCosts.reduce((total, cost) => 
+        total + (cost.cost || 0), 0);
+      
+      labourMarginPerMeter = concreteLabourCosts.reduce((total, cost) => 
+        total + (cost.margin || 0), 0);
+        
+      setLabourBaseCost(labourRatePerMeter);
+      setLabourMarginCost(labourMarginPerMeter);
+    }
+    
+    const totalLabourRate = labourRatePerMeter + labourMarginPerMeter;
+    const totalLabourCost = totalLabourRate * meters;
+    setLabourCost(totalLabourCost);
+
+    // Calculate total margin (from paving and labour)
+    const totalMargin = (marginCostValue * meters) + (labourMarginPerMeter * meters);
+    setMarginCost(totalMargin);
+
+    // Calculate total cost
+    const calculatedTotalCost = totalPavingCost + totalLabourCost;
+    setTotalCost(calculatedTotalCost);
+
+    // Notify parent component of changes if callback provided
+    if (onChanged) {
+      onChanged();
+    }
+  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts, onChanged]);
 
   const handleSave = async () => {
     if (!selectedPavingId || meters <= 0) {
-      return false;
+      toast.error("Please select a paving type and enter a valid area");
+      return;
+    }
+
+    if (!quoteData.id) {
+      toast.error("No quote ID found. Please complete the previous steps first.");
+      return;
     }
 
     setIsSubmitting(true);
-    setDebugInfo(prev => ({
-      ...prev,
-      savingAttempt: {
-        quoteId: quoteData.id,
-        selectedPavingId,
-        meters,
-        timestamp: new Date().toISOString()
-      }
-    }));
 
     try {
       // Find the selected paving for details
       const selectedPaving = extraPavingCosts?.find(p => p.id === selectedPavingId);
       if (!selectedPaving) {
         toast.error("Selected paving type not found");
-        return false;
+        return;
       }
+
+      // Get labour details
+      const labourDetails = concreteLabourCosts?.map(l => ({
+        description: l.description,
+        cost: l.cost,
+        margin: l.margin
+      }));
 
       // Prepare the data to save
       const pavingData = {
         paving_id: selectedPavingId,
         paving_category: selectedPaving.category,
         meters: meters,
-        material_cost: pavingCost,
+        paving_cost: pavingCost,
         labour_cost: labourCost,
         margin_cost: marginCost,
         total_cost: totalCost,
-        per_meter_rate: perMeterRate,
         paving_details: {
-          paverCost: selectedPaving.paver_cost,
-          wastageCost: selectedPaving.wastage_cost,
-          marginCost: selectedPaving.margin_cost
+          paverCost: paverCost,
+          wastageCost: wastageCost,
+          marginCost: marginPaverCost
         },
-        labour_details: {
-          baseCost: labourBaseCost,
-          marginCost: labourMarginCost
-        }
+        labour_details: labourDetails,
+        per_meter_rate: perMeterRate
       };
 
-      console.log("Saving paving on existing concrete data:", pavingData);
-
-      if (quoteData.id) {
-        const updates: Partial<Quote> = {
+      // Save to database
+      const { error } = await supabase
+        .from("quotes")
+        .update({
           existing_concrete_paving: JSON.stringify(pavingData),
           existing_concrete_paving_cost: totalCost
-        };
+        })
+        .eq("id", quoteData.id);
 
-        // Save to database
-        const { error } = await supabase
-          .from("quotes")
-          .update(updates)
-          .eq("id", quoteData.id);
-
-        if (error) {
-          console.error("Error saving existing concrete paving data:", error);
-          setDebugInfo(prev => ({
-            ...prev,
-            saveError: error,
-            timestamp: new Date().toISOString()
-          }));
-          toast.error("Failed to save data");
-          return false;
-        }
-
-        // Update local context
-        updateQuoteData(updates);
-        
-        setDebugInfo(prev => ({
-          ...prev,
-          saveSuccess: true,
-          savedData: pavingData,
-          timestamp: new Date().toISOString()
-        }));
-        
-        return true;
+      if (error) {
+        console.error("Error saving existing concrete paving data:", error);
+        toast.error("Failed to save data");
+        return;
       }
-      return false;
+
+      // Refresh quote data to get updated cost totals
+      await refreshQuoteData();
+      
+      toast.success("Paving on existing concrete data saved");
     } catch (error) {
       console.error("Error in save process:", error);
-      setDebugInfo(prev => ({
-        ...prev,
-        saveError: error,
-        timestamp: new Date().toISOString()
-      }));
       toast.error("An unexpected error occurred");
-      return false;
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (!quoteData.id) return;
-    
+    if (!quoteData.id) {
+      toast.error("No quote ID found");
+      return;
+    }
+
     setIsDeleting(true);
-    
+
     try {
-      const updates: Partial<Quote> = {
-        existing_concrete_paving: null,
-        existing_concrete_paving_cost: 0
-      };
-      
-      // Update database
+      // Update the database, removing existing concrete paving data
       const { error } = await supabase
         .from("quotes")
-        .update(updates)
+        .update({
+          existing_concrete_paving: null,
+          existing_concrete_paving_cost: 0
+        })
         .eq("id", quoteData.id);
-      
+
       if (error) {
-        console.error("Error removing existing concrete paving data:", error);
-        toast.error("Failed to remove data");
+        console.error("Error deleting existing concrete paving data:", error);
+        toast.error("Failed to delete data");
         return;
       }
-      
-      // Update local context
-      updateQuoteData(updates);
-      
+
       // Reset local state
       setSelectedPavingId("");
       setMeters(0);
-      resetAllCosts();
+      setPavingCost(0);
+      setLabourCost(0);
+      setTotalCost(0);
+      setMarginCost(0);
+      setPaverCost(0);
+      setWastageCost(0);
+      setMarginPaverCost(0);
+      setLabourBaseCost(0);
+      setLabourMarginCost(0);
+
+      // Close confirm dialog
+      setShowDeleteConfirm(false);
+      
+      // Refresh quote data to get updated cost totals
+      await refreshQuoteData();
       
       toast.success("Paving on existing concrete data removed");
-      setShowDeleteConfirm(false);
     } catch (error) {
       console.error("Error in delete process:", error);
       toast.error("An unexpected error occurred");
@@ -277,8 +255,8 @@ export const usePavingOnExistingConcrete = (onChanged?: () => void) => {
   };
 
   const isLoading = isLoadingPaving || isLoadingLabour;
-  const hasCostData = selectedPavingId && meters > 0;
-  const hasExistingData = !!quoteData.existing_concrete_paving;
+  const hasCostData = Boolean(selectedPavingId && meters > 0);
+  const hasExistingData = Boolean(quoteData.existing_concrete_paving);
 
   return {
     // State
@@ -287,25 +265,19 @@ export const usePavingOnExistingConcrete = (onChanged?: () => void) => {
     isSubmitting,
     isDeleting,
     showDeleteConfirm,
-    hasCostData,
-    hasExistingData,
-    isLoading,
-    
-    // Cost breakdown data
     perMeterRate,
     pavingCost,
     labourCost,
     marginCost,
     totalCost,
-    
-    // Cost details
     paverCost,
     wastageCost,
     marginPaverCost,
     labourBaseCost,
     labourMarginCost,
-    
-    // Dependencies
+    isLoading,
+    hasCostData,
+    hasExistingData,
     extraPavingCosts,
     
     // Actions
@@ -313,9 +285,6 @@ export const usePavingOnExistingConcrete = (onChanged?: () => void) => {
     setMeters,
     setShowDeleteConfirm,
     handleSave,
-    handleDelete,
-    
-    // Debug info
-    debugInfo
+    handleDelete
   };
 };
