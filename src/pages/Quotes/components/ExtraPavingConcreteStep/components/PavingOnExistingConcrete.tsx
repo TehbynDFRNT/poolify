@@ -200,7 +200,7 @@ export const PavingOnExistingConcrete = () => {
   const hasCostData = selectedPavingId && meters > 0;
 
   return (
-    <Card className="border border-gray-200 mt-6">
+    <Card className="border border-gray-200">
       <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <SquareDashed className="h-5 w-5 text-blue-500" />

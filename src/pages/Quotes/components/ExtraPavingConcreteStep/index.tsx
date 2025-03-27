@@ -15,13 +15,14 @@ interface ExtraPavingConcreteStepProps {
 }
 
 export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcreteStepProps) => {
-  const { quoteData } = useQuoteContext();
+  const { quoteData, refreshQuoteData } = useQuoteContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSaveOnly = async () => {
     setIsSubmitting(true);
     try {
-      // Save logic can be triggered here, but actual saving happens in PavingOnExistingConcrete component
+      // Auto-save is handled in the child components
+      await refreshQuoteData();
       toast.success("Changes saved successfully");
     } catch (error) {
       console.error("Error saving extra paving and concrete data:", error);
@@ -34,7 +35,8 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
   const handleSaveAndContinue = async () => {
     setIsSubmitting(true);
     try {
-      // Save logic can be triggered here, but actual saving happens in PavingOnExistingConcrete component
+      // Auto-save is handled in the child components
+      await refreshQuoteData();
       toast.success("Changes saved successfully");
       onNext();
     } catch (error) {
@@ -48,7 +50,7 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
   return (
     <div className="space-y-6">
       <FormHeader>
-        Add paving on existing concrete
+        Extra Paving & Concrete
       </FormHeader>
       
       {!quoteData.pool_id && <NoPoolWarning />}
