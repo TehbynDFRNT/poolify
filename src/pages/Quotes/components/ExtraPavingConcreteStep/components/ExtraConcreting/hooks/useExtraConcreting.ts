@@ -46,10 +46,16 @@ export const useExtraConcreting = (onChanged?: () => void) => {
   useEffect(() => {
     if (quoteData.extra_concreting) {
       try {
-        const savedData = JSON.parse(quoteData.extra_concreting);
+        let savedData;
+        if (typeof quoteData.extra_concreting === 'string') {
+          savedData = JSON.parse(quoteData.extra_concreting);
+        } else {
+          savedData = quoteData.extra_concreting;
+        }
+        
         if (savedData && savedData.concreting_type) {
           setSelectedConcretingType(savedData.concreting_type);
-          setMeters(savedData.meters || 0);
+          setMeters(parseFloat(savedData.meters) || 0);
         }
       } catch (err) {
         console.error("Failed to parse saved extra concreting data:", err);
@@ -138,11 +144,11 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
       if (quoteData.id) {
         const updates: Partial<Quote> = {
-          extra_concreting: JSON.stringify(concretingData),
           extra_concreting_cost: totalCost,
           extra_concreting_type: selectedConcreting.type,
           extra_concreting_meterage: meters,
-          extra_concreting_margin: marginCost
+          extra_concreting_margin: marginCost,
+          extra_concreting: JSON.stringify(concretingData)
         };
 
         // Save to database
