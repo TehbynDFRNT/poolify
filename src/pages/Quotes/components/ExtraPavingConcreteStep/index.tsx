@@ -12,6 +12,7 @@ import { PavingTypeSelector } from "./components/PavingTypeSelector";
 import { MetersInput } from "./components/MetersInput";
 import { NoPoolWarning } from "./components/NoPoolWarning";
 import { NavigationButtons } from "./components/NavigationButtons";
+import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
@@ -185,6 +186,9 @@ export const ExtraPavingConcreteStep = ({
           </div>
         </CardContent>
       </Card>
+      
+      {/* Paving on Existing Concrete section */}
+      <PavingOnExistingConcrete />
     </div>
   );
 };
