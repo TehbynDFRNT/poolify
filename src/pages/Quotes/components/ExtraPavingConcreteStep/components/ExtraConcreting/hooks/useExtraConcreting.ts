@@ -2,19 +2,25 @@
 import { useState, useEffect } from "react";
 import { useExtraConcreting as useExtraConcretingData } from "@/pages/ConstructionCosts/hooks/useExtraConcreting";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export const useExtraConcreting = (onChanged?: () => void) => {
   const { extraConcretingItems, isLoading } = useExtraConcretingData();
-  const { quoteData, updateQuoteData } = useQuoteContext();
+  const { quoteData, updateQuoteData, refreshQuoteData } = useQuoteContext();
   
   const [selectedType, setSelectedType] = useState<string>("");
   const [meterage, setMeterage] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(0);
+  const [hasExistingData, setHasExistingData] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Load saved data when component mounts
   useEffect(() => {
     if (quoteData.extra_concreting_type) {
       setSelectedType(quoteData.extra_concreting_type);
+      setHasExistingData(true);
     }
     
     if (quoteData.extra_concreting_meterage && quoteData.extra_concreting_meterage > 0) {
@@ -38,17 +44,59 @@ export const useExtraConcreting = (onChanged?: () => void) => {
       const calculatedCost = selectedConcrete.price * meterage;
       setTotalCost(calculatedCost);
       
-      // Update quote data with new calculations
+      // Save changes automatically after a short delay
+      const timer = setTimeout(() => {
+        saveChanges(selectedType, meterage, calculatedCost, selectedConcrete.margin * meterage);
+      }, 1000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [selectedType, meterage, extraConcretingItems]);
+
+  // Save changes to the database
+  const saveChanges = async (
+    concreteType: string, 
+    concreteMeterage: number, 
+    concreteCost: number,
+    marginCost: number
+  ) => {
+    if (!quoteData.id) return;
+    
+    try {
+      const { error } = await supabase
+        .from("quotes")
+        .update({
+          extra_concreting_type: concreteType,
+          extra_concreting_meterage: concreteMeterage,
+          extra_concreting_cost: concreteCost,
+          extra_concreting_margin: marginCost
+        })
+        .eq("id", quoteData.id);
+      
+      if (error) {
+        console.error("Error saving extra concreting data:", error);
+        return;
+      }
+      
+      // Update the local context
       updateQuoteData({
-        extra_concreting_type: selectedType,
-        extra_concreting_meterage: meterage,
-        extra_concreting_cost: calculatedCost,
-        extra_concreting_margin: selectedConcrete.margin * meterage
+        extra_concreting_type: concreteType,
+        extra_concreting_meterage: concreteMeterage,
+        extra_concreting_cost: concreteCost,
+        extra_concreting_margin: marginCost
       });
       
+      setHasExistingData(true);
+      
+      // Notify parent component about changes
       if (onChanged) onChanged();
+      
+      // Refresh to update any calculated fields
+      await refreshQuoteData();
+    } catch (error) {
+      console.error("Failed to save extra concreting data:", error);
     }
-  }, [selectedType, meterage, extraConcretingItems, onChanged, updateQuoteData]);
+  };
 
   // Handle concrete type selection
   const handleTypeChange = (value: string) => {
@@ -68,6 +116,59 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     const selectedConcrete = extraConcretingItems?.find(item => item.id === selectedType);
     return selectedConcrete ? selectedConcrete.price : 0;
   };
+  
+  // Delete extra concreting data
+  const handleDelete = async () => {
+    if (!quoteData.id) return;
+    
+    setIsDeleting(true);
+    
+    try {
+      const { error } = await supabase
+        .from("quotes")
+        .update({
+          extra_concreting_type: null,
+          extra_concreting_meterage: 0,
+          extra_concreting_cost: 0,
+          extra_concreting_margin: 0
+        })
+        .eq("id", quoteData.id);
+      
+      if (error) {
+        console.error("Error removing extra concreting data:", error);
+        toast.error("Failed to remove extra concreting data");
+        return;
+      }
+      
+      // Reset local state
+      setSelectedType("");
+      setMeterage(0);
+      setTotalCost(0);
+      setHasExistingData(false);
+      
+      // Update the context
+      updateQuoteData({
+        extra_concreting_type: null,
+        extra_concreting_meterage: 0,
+        extra_concreting_cost: 0,
+        extra_concreting_margin: 0
+      });
+      
+      // Notify parent component about changes
+      if (onChanged) onChanged();
+      
+      // Refresh to update any calculated fields
+      await refreshQuoteData();
+      
+      toast.success("Extra concreting data removed");
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error("Failed to remove extra concreting data:", error);
+      toast.error("An error occurred while removing extra concreting data");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return {
     selectedType,
@@ -75,8 +176,13 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     totalCost,
     extraConcretingItems,
     isLoading,
+    hasExistingData,
+    isDeleting,
+    showDeleteConfirm,
+    setShowDeleteConfirm,
     handleTypeChange,
     handleMeterageChange,
-    getSelectedPrice
+    getSelectedPrice,
+    handleDelete
   };
 };

@@ -1,7 +1,9 @@
+
 import { useState } from "react";
 import { Quote } from "@/types/quote";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
+import { toast } from "sonner";
 
 export const useSavePavingData = (
   quoteData: Partial<Quote>,
@@ -24,22 +26,44 @@ export const useSavePavingData = (
     setIsSubmitting(true);
 
     try {
-      // First, update the total extra paving cost in the quote
+      // Calculate the total extra paving cost including all concrete components
       const totalExtraPavingCost = calculateTotalExtraPavingCost(totalCost);
       
-      // Updated to avoid using fields that aren't in the database
+      // Create an update object with all necessary fields
+      const updateData: Partial<Quote> = {
+        // Main extra paving section
+        selected_paving_id: selectedPavingId || null,
+        selected_paving_meters: meters || 0,
+        selected_paving_cost: totalCost || 0,
+        selected_paving_margin: marginCost || 0,
+        
+        // Set the combined total cost
+        extra_paving_cost: totalExtraPavingCost,
+        
+        // Update the quote's total cost by adding site_requirements_cost + extra_paving_cost + optional_addons_cost
+        total_cost: (quoteData.site_requirements_cost || 0) + 
+                   totalExtraPavingCost + 
+                   (quoteData.optional_addons_cost || 0)
+      };
+
+      // Update the database
       const { error } = await supabase
         .from("quotes")
-        .update({
-          extra_paving_cost: totalExtraPavingCost,
-        })
+        .update(updateData)
         .eq("id", quoteData.id);
 
       if (error) {
+        console.error("Error saving paving data:", error);
         throw error;
       }
 
+      // Update local context with same data
+      updateQuoteData(updateData);
+      
+      // Refresh quote data to get the very latest
       await refreshQuoteData();
+      
+      return true;
     } catch (error) {
       console.error("Error saving extra paving data:", error);
       throw error;
@@ -49,13 +73,18 @@ export const useSavePavingData = (
   };
 
   // Calculate the total extra paving cost (including all concrete components)
-  const calculateTotalExtraPavingCost = (extraPavingCost: number): number => {
+  const calculateTotalExtraPavingCost = (mainPavingCost: number): number => {
     // Start with the main paving cost
-    let totalCost = extraPavingCost;
+    let totalCost = mainPavingCost || 0;
 
     // Add existing concrete paving cost
     if (quoteData.existing_concrete_paving_cost) {
       totalCost += quoteData.existing_concrete_paving_cost;
+    }
+
+    // Add extra concreting cost
+    if (quoteData.extra_concreting_cost) {
+      totalCost += quoteData.extra_concreting_cost;
     }
 
     // Add concrete pump cost
@@ -72,12 +101,9 @@ export const useSavePavingData = (
     if (quoteData.under_fence_strips_cost) {
       totalCost += quoteData.under_fence_strips_cost;
     }
-    
-    // Add extra concreting cost
-    if (quoteData.extra_concreting_cost) {
-      totalCost += quoteData.extra_concreting_cost;
-    }
 
+    console.log("Calculated total extra paving cost:", totalCost);
+    
     return totalCost;
   };
 
@@ -98,6 +124,10 @@ export const useSavePavingData = (
         newTotal += quoteData.existing_concrete_paving_cost;
       }
 
+      if (quoteData.extra_concreting_cost) {
+        newTotal += quoteData.extra_concreting_cost;
+      }
+
       if (quoteData.concrete_pump_required && quoteData.concrete_pump_price) {
         newTotal += quoteData.concrete_pump_price;
       }
@@ -109,32 +139,44 @@ export const useSavePavingData = (
       if (quoteData.under_fence_strips_cost) {
         newTotal += quoteData.under_fence_strips_cost;
       }
-      
-      if (quoteData.extra_concreting_cost) {
-        newTotal += quoteData.extra_concreting_cost;
-      }
 
-      // Update the quote with removed extra paving, avoiding problematic fields
+      const updateData: Partial<Quote> = {
+        extra_paving_cost: newTotal,
+        selected_paving_id: null,
+        selected_paving_meters: 0,
+        selected_paving_cost: 0,
+        selected_paving_margin: 0,
+        total_cost: (quoteData.site_requirements_cost || 0) + 
+                   newTotal + 
+                   (quoteData.optional_addons_cost || 0)
+      };
+
+      // Update the database
       const { error } = await supabase
         .from("quotes")
-        .update({
-          extra_paving_cost: newTotal,
-        })
+        .update(updateData)
         .eq("id", quoteData.id);
 
       if (error) {
+        console.error("Error removing extra paving:", error);
         throw error;
       }
 
       // Reset local state
       resetPavingState();
-      updateQuoteData({
-        extra_paving_cost: newTotal,
-      });
-
+      
+      // Update local context with same data
+      updateQuoteData(updateData);
+      
+      // Refresh quote data to get the very latest
       await refreshQuoteData();
+      
+      toast.success("Extra paving removed successfully");
+      
+      return true;
     } catch (error) {
       console.error("Error removing extra paving:", error);
+      toast.error("Failed to remove extra paving");
       throw error;
     } finally {
       setIsSubmitting(false);

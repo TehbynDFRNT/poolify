@@ -1,13 +1,15 @@
+
 import React, { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { PavingTypeSelector } from "./PavingTypeSelector";
 import { MetersInput } from "./MetersInput";
 import { CostBreakdown } from "./CostBreakdown";
 import { NoPoolWarning } from "./NoPoolWarning";
-import { NavigationButtons } from "./NavigationButtons";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface MainPavingSectionProps {
   quoteData: any;
@@ -111,17 +113,19 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
                 />
               )}
 
-              {/* Navigation Buttons with Remove Option */}
+              {/* Only show Remove button */}
               {hasCostData && (
-                <NavigationButtons
-                  onPrevious={() => {}}
-                  onSave={() => {}}
-                  onSaveAndContinue={() => {}}
-                  onRemove={() => setShowDeleteConfirm(true)}
-                  isSubmitting={isDeleting}
-                  isDisabled={false}
-                  showRemoveButton={true}
-                />
+                <div className="mt-4">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="flex items-center gap-1"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Remove
+                  </Button>
+                </div>
               )}
             </div>
           )}
