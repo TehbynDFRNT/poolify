@@ -28,6 +28,21 @@ export const useExtraPavingData = (onNext: () => void) => {
   const [labourDetails, setLabourDetails] = useState<any>(null);
   const [hasCostData, setHasCostData] = useState<boolean>(false);
   
+  // Function to reset paving state
+  const resetPavingState = () => {
+    setSelectedPavingId("");
+    setMeters(0);
+    setPerMeterCost(0);
+    setMaterialCost(0);
+    setLabourCost(0);
+    setMarginCost(0);
+    setTotalCost(0);
+    setPavingDetails(null);
+    setConcreteDetails(null);
+    setLabourDetails(null);
+    setHasCostData(false);
+  };
+  
   // Save functionality
   const {
     isSubmitting,
@@ -53,21 +68,6 @@ export const useExtraPavingData = (onNext: () => void) => {
       setMeters(quoteData.selected_paving_meters || 0);
     }
   }, [quoteData]);
-  
-  // Function to reset paving state
-  const resetPavingState = () => {
-    setSelectedPavingId("");
-    setMeters(0);
-    setPerMeterCost(0);
-    setMaterialCost(0);
-    setLabourCost(0);
-    setMarginCost(0);
-    setTotalCost(0);
-    setPavingDetails(null);
-    setConcreteDetails(null);
-    setLabourDetails(null);
-    setHasCostData(false);
-  };
   
   // Calculate costs
   const calculateCosts = (pavingId: string, area: number) => {
@@ -99,7 +99,7 @@ export const useExtraPavingData = (onNext: () => void) => {
     // Calculate concrete costs
     let concreteCostPerMeter = 0;
     
-    if (concreteCosts.length > 0) {
+    if (concreteCosts.length > 0 && 'price' in concreteCosts[0]) {
       concreteCostPerMeter = concreteCosts[0].price;
     }
     

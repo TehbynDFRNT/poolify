@@ -40,6 +40,11 @@ export interface Quote {
   extra_concreting_meterage?: number;
   extra_concreting_cost?: number;
   extra_concreting_margin?: number;
+  // Selected paving properties
+  selected_paving_id?: string;
+  selected_paving_meters?: number;
+  selected_paving_cost?: number;
+  selected_paving_margin?: number;
 }
 
 export interface QuoteInsert {
@@ -77,4 +82,8 @@ export interface QuoteInsert {
   extra_concreting_meterage?: number;
   extra_concreting_cost?: number;
   extra_concreting_margin?: number;
+  selected_paving_id?: string;
+  selected_paving_meters?: number;
+  selected_paving_cost?: number;
+  selected_paving_margin?: number;
 }
