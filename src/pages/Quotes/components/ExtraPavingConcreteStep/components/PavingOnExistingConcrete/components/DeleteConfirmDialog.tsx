@@ -10,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
 
 interface DeleteConfirmDialogProps {
   isOpen: boolean;
@@ -30,7 +31,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
         <AlertDialogHeader>
           <AlertDialogTitle>Delete Paving on Existing Concrete</AlertDialogTitle>
           <AlertDialogDescription>
-            Are you sure you want to remove this paving? This action cannot be undone.
+            Are you sure you want to remove this paving on existing concrete data? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -41,9 +42,10 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
               onConfirm();
             }}
             disabled={isDeleting}
-            className="bg-red-500 hover:bg-red-600"
+            className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
           >
             {isDeleting ? "Deleting..." : "Delete"}
+            {!isDeleting && <Trash2 className="h-4 w-4" />}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

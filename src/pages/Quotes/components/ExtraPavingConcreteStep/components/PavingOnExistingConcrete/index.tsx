@@ -32,15 +32,20 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
       hasExistingData,
       extraPavingCosts,
       
+      // Per meter details
+      perMeterRate,
+      paverCost,
+      wastageCost,
+      marginPaverCost,
+      labourBaseCost,
+      labourMarginCost,
+      
       // Actions
       setSelectedPavingId,
       setMeters,
       setShowDeleteConfirm,
       handleSave,
       handleDelete,
-      
-      // Debug info
-      debugInfo
     } = usePavingOnExistingConcrete(onChanged);
     
     // Expose methods to parent using useImperativeHandle
@@ -66,6 +71,19 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
         setMeters(0);
       }
     }));
+
+    // Prepare the paving details for the cost breakdown
+    const pavingDetails = {
+      paverCost,
+      wastageCost,
+      marginCost: marginPaverCost
+    };
+
+    // Prepare the labour details for the cost breakdown
+    const labourDetails = {
+      baseCost: labourBaseCost,
+      marginCost: labourMarginCost
+    };
 
     return (
       <Card className="border border-gray-200 mt-6">
@@ -108,6 +126,9 @@ export const PavingOnExistingConcrete = forwardRef<any, PavingOnExistingConcrete
                   labourCost={labourCost}
                   marginCost={marginCost}
                   totalCost={totalCost}
+                  meters={meters}
+                  pavingDetails={pavingDetails}
+                  labourDetails={labourDetails}
                 />
               )}
 
