@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { SquareDashed } from "lucide-react";
+import { SquareDashed, Calculator, ArrowRight } from "lucide-react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { PavingTypeSelector } from "./PavingTypeSelector";
@@ -10,11 +10,13 @@ import { useQuoteContext } from "../../../context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
+import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 
 export const PavingOnExistingConcrete = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
+  const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
   
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
@@ -24,6 +26,18 @@ export const PavingOnExistingConcrete = () => {
   const [pavingCost, setPavingCost] = useState(0);
   const [labourCost, setLabourCost] = useState(0);
   const [totalCost, setTotalCost] = useState(0);
+  const [materialCost, setMaterialCost] = useState(0);
+  const [marginCost, setMarginCost] = useState(0);
+  
+  // Per metre cost details
+  const [paverCost, setPaverCost] = useState(0);
+  const [wastageCost, setWastageCost] = useState(0);
+  const [marginPaverCost, setMarginPaverCost] = useState(0);
+  const [concreteCostValue, setConcreteCostValue] = useState(0);
+  const [dustCost, setDustCost] = useState(0);
+  const [labourBaseCost, setLabourBaseCost] = useState(0);
+  const [labourMarginCost, setLabourMarginCost] = useState(0);
+  const [perMeterRate, setPerMeterRate] = useState(0);
 
   // Load existing data if available
   useEffect(() => {
@@ -42,10 +56,8 @@ export const PavingOnExistingConcrete = () => {
 
   // Calculate costs when inputs change
   useEffect(() => {
-    if (!selectedPavingId || meters <= 0 || !extraPavingCosts || !concreteLabourCosts) {
-      setPavingCost(0);
-      setLabourCost(0);
-      setTotalCost(0);
+    if (!selectedPavingId || meters <= 0 || !extraPavingCosts || !concreteLabourCosts || !concreteCosts || concreteCosts.length === 0) {
+      resetAllCosts();
       return;
     }
 
@@ -53,20 +65,73 @@ export const PavingOnExistingConcrete = () => {
     const selectedPaving = extraPavingCosts.find(p => p.id === selectedPavingId);
     if (!selectedPaving) return;
 
-    // Calculate paving cost (paver + wastage + margin)
-    const perMeterPavingCost = selectedPaving.paver_cost + selectedPaving.wastage_cost + selectedPaving.margin_cost;
-    const totalPavingCost = perMeterPavingCost * meters;
-    setPavingCost(totalPavingCost);
-
-    // Calculate labour cost
-    const labourRatePerMeter = concreteLabourCosts.reduce((total, cost) => total + cost.cost + cost.margin, 0);
-    const totalLabourCost = labourRatePerMeter * meters;
+    // Get concrete costs
+    const defaultConcrete = concreteCosts[0];
+    
+    // Set individual per meter costs
+    setPaverCost(selectedPaving.paver_cost);
+    setWastageCost(selectedPaving.wastage_cost);
+    setMarginPaverCost(selectedPaving.margin_cost);
+    setConcreteCostValue(defaultConcrete.concrete_cost);
+    setDustCost(defaultConcrete.dust_cost);
+    
+    // Calculate labour costs
+    let totalLabourBase = 0;
+    let totalLabourMargin = 0;
+    
+    concreteLabourCosts.forEach(labour => {
+      totalLabourBase += labour.cost;
+      totalLabourMargin += labour.margin;
+    });
+    
+    setLabourBaseCost(totalLabourBase);
+    setLabourMarginCost(totalLabourMargin);
+    
+    // Calculate per meter rate
+    const perMeterTotal = selectedPaving.paver_cost + 
+                          selectedPaving.wastage_cost + 
+                          selectedPaving.margin_cost +
+                          defaultConcrete.concrete_cost +
+                          defaultConcrete.dust_cost +
+                          totalLabourBase +
+                          totalLabourMargin;
+    
+    setPerMeterRate(perMeterTotal);
+    
+    // Calculate total costs
+    const totalMaterialCost = (selectedPaving.paver_cost + 
+                              selectedPaving.wastage_cost + 
+                              defaultConcrete.concrete_cost + 
+                              defaultConcrete.dust_cost) * meters;
+    
+    const totalLabourCost = totalLabourBase * meters;
+    const totalMarginCost = (selectedPaving.margin_cost + totalLabourMargin) * meters;
+    const calculatedTotalCost = totalMaterialCost + totalLabourCost + totalMarginCost;
+    
+    // Update state
+    setMaterialCost(totalMaterialCost);
     setLabourCost(totalLabourCost);
+    setMarginCost(totalMarginCost);
+    setPavingCost(totalMaterialCost);
+    setTotalCost(calculatedTotalCost);
+    
+  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts, concreteCosts]);
 
-    // Calculate total cost
-    setTotalCost(totalPavingCost + totalLabourCost);
-
-  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts]);
+  const resetAllCosts = () => {
+    setPavingCost(0);
+    setLabourCost(0);
+    setTotalCost(0);
+    setMaterialCost(0);
+    setMarginCost(0);
+    setPaverCost(0);
+    setWastageCost(0);
+    setMarginPaverCost(0);
+    setConcreteCostValue(0);
+    setDustCost(0);
+    setLabourBaseCost(0);
+    setLabourMarginCost(0);
+    setPerMeterRate(0);
+  };
 
   const handleSave = async () => {
     if (!selectedPavingId || meters <= 0) {
@@ -91,20 +156,34 @@ export const PavingOnExistingConcrete = () => {
         margin: l.margin
       }));
 
+      // Get concrete details
+      const concreteDetails = concreteCosts && concreteCosts.length > 0 
+        ? {
+            concreteCost: concreteCosts[0].concrete_cost,
+            dustCost: concreteCosts[0].dust_cost
+          }
+        : { concreteCost: 0, dustCost: 0 };
+
       // Prepare the data to save
       const pavingData = {
         paving_id: selectedPavingId,
         paving_category: selectedPaving.category,
         meters: meters,
-        paving_cost: pavingCost,
+        material_cost: materialCost,
         labour_cost: labourCost,
+        margin_cost: marginCost,
         total_cost: totalCost,
+        per_meter_rate: perMeterRate,
         paving_details: {
           paverCost: selectedPaving.paver_cost,
           wastageCost: selectedPaving.wastage_cost,
           marginCost: selectedPaving.margin_cost
         },
-        labour_details: labourDetails
+        concrete_details: concreteDetails,
+        labour_details: {
+          baseCost: labourBaseCost,
+          marginCost: labourMarginCost
+        }
       };
 
       if (quoteData.id) {
@@ -137,7 +216,7 @@ export const PavingOnExistingConcrete = () => {
     }
   };
 
-  const isLoading = isLoadingPaving || isLoadingLabour;
+  const isLoading = isLoadingPaving || isLoadingLabour || isLoadingConcrete;
   const hasCostData = selectedPavingId && meters > 0;
 
   return (
@@ -170,20 +249,92 @@ export const PavingOnExistingConcrete = () => {
             
             {/* Cost Breakdown */}
             {hasCostData && (
-              <div className="bg-gray-50 p-4 rounded-md border border-gray-200">
-                <h4 className="font-medium mb-2">Cost Breakdown</h4>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Paving Total:</span>
-                    <span className="font-medium">${pavingCost.toFixed(2)}</span>
+              <div className="bg-gray-50 p-5 rounded-md border border-gray-200">
+                <div className="flex items-center mb-4">
+                  <Calculator className="h-5 w-5 text-primary mr-2" />
+                  <h3 className="font-medium">Cost Breakdown</h3>
+                </div>
+                
+                {/* Per Metre Calculation */}
+                <div className="mb-4 border-b pb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Per Metre Calculation</h4>
+                  
+                  <div className="space-y-1 mb-3">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Paver Cost:</span>
+                      <span className="font-medium">${paverCost.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Wastage Cost:</span>
+                      <span className="font-medium">${wastageCost.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Margin Cost:</span>
+                      <span className="font-medium">${marginPaverCost.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Concrete Cost:</span>
+                      <span className="font-medium">${concreteCostValue.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Dust Cost:</span>
+                      <span className="font-medium">${dustCost.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Labour Base Cost:</span>
+                      <span className="font-medium">${labourBaseCost.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">Labour Margin:</span>
+                      <span className="font-medium">${labourMarginCost.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Labour Total:</span>
+                  
+                  <div className="flex justify-between items-center mt-2 font-semibold">
+                    <span>Per Metre Rate:</span>
+                    <span>${perMeterRate.toFixed(2)}</span>
+                  </div>
+                </div>
+                
+                {/* Total Project Cost */}
+                <div className="mb-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Total Project Cost</h4>
+                  
+                  <div className="flex items-center justify-center space-x-2 mb-3 bg-gray-100 p-3 rounded-md">
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Per Metre</div>
+                      <div className="font-medium">${perMeterRate.toFixed(2)}</div>
+                    </div>
+                    <div className="text-gray-400">×</div>
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Metres</div>
+                      <div className="font-medium">{meters}</div>
+                    </div>
+                    <ArrowRight className="h-4 w-4 text-gray-400" />
+                    <div className="text-center">
+                      <div className="text-sm text-gray-600">Total Cost</div>
+                      <div className="font-bold">${totalCost.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Cost Category Breakdown */}
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Material Cost:</span>
+                    <span className="font-medium">${materialCost.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Labour Cost:</span>
                     <span className="font-medium">${labourCost.toFixed(2)}</span>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-gray-200">
-                    <span className="font-medium">Total Cost:</span>
-                    <span className="font-bold text-blue-600">${totalCost.toFixed(2)}</span>
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Margin:</span>
+                    <span className="font-medium">${marginCost.toFixed(2)}</span>
+                  </div>
+                  <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold">
+                    <span>Total Cost:</span>
+                    <span>${totalCost.toFixed(2)}</span>
                   </div>
                 </div>
               </div>
