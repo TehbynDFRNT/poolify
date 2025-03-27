@@ -21,18 +21,29 @@ export const PavingTypeSelector = ({
         Paving Type
       </Label>
       <Select
-        value={selectedPavingId}
+        value={selectedPavingId || "default"}
         onValueChange={onSelect}
       >
         <SelectTrigger id="paving-type" className="w-full">
           <SelectValue placeholder="Select paving type" />
         </SelectTrigger>
         <SelectContent>
-          {extraPavingCosts?.map((paving) => (
-            <SelectItem key={paving.id} value={paving.id}>
-              {paving.category}
+          {!extraPavingCosts || extraPavingCosts.length === 0 ? (
+            <SelectItem value="no-options" disabled>
+              No paving options available
             </SelectItem>
-          ))}
+          ) : (
+            <>
+              <SelectItem value="default" disabled>
+                Select paving type
+              </SelectItem>
+              {extraPavingCosts.map((paving) => (
+                <SelectItem key={paving.id} value={paving.id}>
+                  {paving.category}
+                </SelectItem>
+              ))}
+            </>
+          )}
         </SelectContent>
       </Select>
     </div>

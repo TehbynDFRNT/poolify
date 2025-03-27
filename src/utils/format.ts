@@ -4,11 +4,11 @@
  * @param value Number to format
  * @returns Formatted string with dollar sign and 2 decimal places
  */
-export const formatCurrency = (value: number): string => {
-  if (value === undefined || value === null || isNaN(value)) {
+export const formatCurrency = (value: number | null | undefined): string => {
+  if (value === undefined || value === null || isNaN(Number(value))) {
     return "$0.00";
   }
-  return `$${value.toFixed(2)}`;
+  return `$${Number(value).toFixed(2)}`;
 };
 
 /**
@@ -16,9 +16,9 @@ export const formatCurrency = (value: number): string => {
  * @param value Number to format
  * @returns Formatted string with 2 decimal places
  */
-export const formatNumber = (value: number): string => {
-  if (value === undefined || value === null || isNaN(value)) {
+export const formatNumber = (value: number | null | undefined): string => {
+  if (value === undefined || value === null || isNaN(Number(value))) {
     return "0.00";
   }
-  return value.toFixed(2);
+  return Number(value).toFixed(2);
 };

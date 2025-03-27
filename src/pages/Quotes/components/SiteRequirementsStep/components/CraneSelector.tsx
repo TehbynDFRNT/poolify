@@ -61,27 +61,38 @@ export const CraneSelector = ({ craneId, onCraneChange }: CraneSelectorProps) =>
               <div>
                 <Label htmlFor="crane">Select Crane Type</Label>
                 <Select 
-                  value={craneId || ""} 
+                  value={craneId || "default"} 
                   onValueChange={onCraneChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select crane type" />
                   </SelectTrigger>
                   <SelectContent>
-                    {craneCosts?.map(crane => (
-                      <SelectItem key={crane.id} value={crane.id}>
-                        {crane.name} - ${crane.price.toFixed(2)}
-                        {crane.name === "Franna Crane-S20T-L1" && " (Default)"}
+                    {!craneCosts || craneCosts.length === 0 ? (
+                      <SelectItem value="no-options" disabled>
+                        No crane options available
                       </SelectItem>
-                    ))}
+                    ) : (
+                      <>
+                        <SelectItem value="default" disabled>
+                          Select crane type
+                        </SelectItem>
+                        {craneCosts.map(crane => (
+                          <SelectItem key={crane.id} value={crane.id}>
+                            {crane.name} - ${crane.price.toFixed(2)}
+                            {crane.name === "Franna Crane-S20T-L1" && " (Default)"}
+                          </SelectItem>
+                        ))}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
               
-              {defaultCrane && craneId && defaultCrane.id !== craneId && (
+              {defaultCrane && craneId && defaultCrane.id !== craneId && craneCosts && (
                 <div className="text-sm text-muted-foreground">
                   <p>Additional cost: ${(
-                    craneCosts?.find(c => c.id === craneId)?.price - defaultCrane.price
+                    (craneCosts.find(c => c.id === craneId)?.price || 0) - (defaultCrane.price || 0)
                   ).toFixed(2)}</p>
                 </div>
               )}
