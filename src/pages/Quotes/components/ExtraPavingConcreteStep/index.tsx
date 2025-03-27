@@ -172,6 +172,48 @@ export const ExtraPavingConcreteStep = ({
     markAsChanged();
   };
 
+  const handleRemoveExtraPaving = async () => {
+    if (!quoteData.id) return;
+    
+    try {
+      setIsSubmitting(true);
+      
+      // Clear the extra paving data
+      const updates = {
+        extra_paving_cost: 0,
+        concrete_cuts: ""
+      };
+      
+      const { error } = await supabase
+        .from("quotes")
+        .update(updates)
+        .eq("id", quoteData.id);
+        
+      if (error) {
+        console.error("Error removing extra paving data:", error);
+        toast.error("Failed to remove extra paving data");
+        return false;
+      }
+      
+      // Update local state
+      updateQuoteData(updates);
+      setSelectedPavingId("");
+      setMeters(0);
+      
+      // Refresh the quote data
+      await refreshQuoteData();
+      markAsSaved();
+      
+      return true;
+    } catch (error) {
+      console.error("Error in remove process:", error);
+      toast.error("An unexpected error occurred");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const isLoading = isLoadingPaving || isLoadingConcrete || isLoadingLabour;
   const hasCostData = selectedPavingId && meters > 0;
 
@@ -198,6 +240,7 @@ export const ExtraPavingConcreteStep = ({
         labourDetails={labourDetails}
         onSelectedPavingChange={handleSelectedPavingChange}
         onMetersChange={handleMetersChange}
+        onRemove={handleRemoveExtraPaving}
         markAsChanged={markAsChanged}
       />
       

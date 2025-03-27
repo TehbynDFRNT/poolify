@@ -5,7 +5,10 @@ import { PavingTypeSelector } from "./PavingTypeSelector";
 import { MetersInput } from "./MetersInput";
 import { CostBreakdown } from "./CostBreakdown";
 import { NoPoolWarning } from "./NoPoolWarning";
+import { NavigationButtons } from "./NavigationButtons";
 import { ExtraPavingCost } from "@/types/extra-paving-cost";
+import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 interface MainPavingSectionProps {
   quoteData: any;
@@ -24,6 +27,7 @@ interface MainPavingSectionProps {
   labourDetails: any;
   onSelectedPavingChange: (id: string) => void;
   onMetersChange: (value: number) => void;
+  onRemove: () => void;
   markAsChanged: () => void;
 }
 
@@ -44,8 +48,26 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
   labourDetails,
   onSelectedPavingChange,
   onMetersChange,
+  onRemove,
   markAsChanged
 }) => {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleRemove = async () => {
+    setIsDeleting(true);
+    try {
+      await onRemove();
+      toast.success("Extra paving data removed successfully");
+    } catch (error) {
+      console.error("Error removing extra paving:", error);
+      toast.error("Failed to remove extra paving data");
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
   return (
     <Card className="border border-gray-200">
       <CardHeader className="bg-white pb-2">
@@ -89,10 +111,45 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
                   meters={meters}
                 />
               )}
+
+              {/* Navigation Buttons with Remove Option */}
+              {hasCostData && (
+                <NavigationButtons
+                  onPrevious={() => {}}
+                  onSave={() => {}}
+                  onSaveAndContinue={() => {}}
+                  onRemove={() => setShowDeleteConfirm(true)}
+                  isSubmitting={isDeleting}
+                  isDisabled={false}
+                  showRemoveButton={true}
+                />
+              )}
             </div>
           )}
         </div>
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Extra Paving</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this extra paving data? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleRemove}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
