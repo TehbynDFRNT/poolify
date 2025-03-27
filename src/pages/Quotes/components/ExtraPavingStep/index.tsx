@@ -88,6 +88,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     underFenceStrips
   );
 
+  // Get existing concrete paving cost
+  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
+
   // Log the breakdown for debugging
   useEffect(() => {
     console.log("Paving Material Total:", pavingTotal);
@@ -95,7 +98,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     console.log("Laying Labour Total:", layingTotal);
     console.log("Combined Total:", pavingTotal + layingTotal + concreteTotal);
     console.log("Should match pavingTotalCost:", pavingTotalCost);
-  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost]);
+    console.log("Existing Concrete Paving Cost:", existingConcretePavingCost);
+  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost, existingConcretePavingCost]);
 
   const handleSaveOnly = async () => {
     await handleSaveExtraPaving(false, {
@@ -122,9 +126,6 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       underFenceStripsCost
     });
   };
-
-  // Get existing concrete paving cost
-  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
 
   return (
     <div className="space-y-6">
@@ -161,7 +162,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdateStrips={setUnderFenceStrips}
       />
       
-      {/* New Paving on Existing Concrete section */}
+      {/* Paving on Existing Concrete section */}
       <PavingOnExistingConcrete />
 
       {/* Total Cost Summary with existing concrete paving cost */}

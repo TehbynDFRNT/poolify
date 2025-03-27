@@ -85,7 +85,7 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       if (data) {
         console.log("Refreshed quote data:", data);
-        setQuoteData(data);
+        setQuoteData(data as Partial<Quote>);
       }
     } catch (error) {
       console.error("Error in refreshQuoteData:", error);
