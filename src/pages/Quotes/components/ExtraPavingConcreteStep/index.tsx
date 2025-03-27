@@ -84,7 +84,7 @@ export const ExtraPavingConcreteStep = ({
           per_meter_cost: perMeterCost,
           material_cost: materialCost,
           labour_cost: labourCost,
-          margin_cost: marginCost,  // Add margin cost to stored data
+          margin_cost: marginCost,
           total_cost: totalCost,
           paving_details: pavingDetails,
           concrete_details: concreteDetails,

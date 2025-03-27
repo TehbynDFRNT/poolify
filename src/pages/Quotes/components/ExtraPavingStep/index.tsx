@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
@@ -123,6 +122,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     });
   };
 
+  // Get existing concrete paving cost
+  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
+
   return (
     <div className="space-y-6">
       <FormHeader>
@@ -161,7 +163,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
       {/* New Paving on Existing Concrete placeholder section */}
       <PavingOnExistingConcrete />
 
-      {/* Total Cost Summary */}
+      {/* Total Cost Summary with existing concrete paving cost */}
       <TotalCostSummary 
         pavingTotal={pavingTotal}
         layingTotal={layingTotal}
@@ -171,6 +173,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         concreteCutsCost={concreteCutsCost}
         underFenceStripsCost={underFenceStripsCost}
         totalCost={totalCost}
+        existingConcretePavingCost={existingConcretePavingCost}
       />
 
       {/* Navigation using FormActions component */}
