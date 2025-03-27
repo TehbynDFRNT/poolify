@@ -1,4 +1,3 @@
-
 export interface Quote {
   id: string;
   created_at: string;

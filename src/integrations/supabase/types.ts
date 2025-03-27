@@ -1115,6 +1115,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           excavation_type: string | null
+          existing_concrete_paving: string | null
+          existing_concrete_paving_cost: number | null
           extra_paving_cost: number | null
           home_address: string
           id: string
@@ -1150,6 +1152,8 @@ export type Database = {
           customer_name: string
           customer_phone: string
           excavation_type?: string | null
+          existing_concrete_paving?: string | null
+          existing_concrete_paving_cost?: number | null
           extra_paving_cost?: number | null
           home_address: string
           id?: string
@@ -1185,6 +1189,8 @@ export type Database = {
           customer_name?: string
           customer_phone?: string
           excavation_type?: string | null
+          existing_concrete_paving?: string | null
+          existing_concrete_paving_cost?: number | null
           extra_paving_cost?: number | null
           home_address?: string
           id?: string

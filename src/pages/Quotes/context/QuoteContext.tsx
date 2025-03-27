@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';

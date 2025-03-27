@@ -10,6 +10,7 @@ import { useQuoteContext } from "../../../context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
+import { formatCurrency } from "@/utils/format";
 
 export const PavingOnExistingConcrete = () => {
   const { quoteData, updateQuoteData } = useQuoteContext();
@@ -238,29 +239,29 @@ export const PavingOnExistingConcrete = () => {
                   <div className="space-y-1 mb-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Paver Cost:</span>
-                      <span className="font-medium">${paverCost.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(paverCost)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Wastage Cost:</span>
-                      <span className="font-medium">${wastageCost.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(wastageCost)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Margin Cost:</span>
-                      <span className="font-medium">${marginPaverCost.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(marginPaverCost)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Labour Base Cost:</span>
-                      <span className="font-medium">${labourBaseCost.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(labourBaseCost)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-600">Labour Margin:</span>
-                      <span className="font-medium">${labourMarginCost.toFixed(2)}</span>
+                      <span className="font-medium">{formatCurrency(labourMarginCost)}</span>
                     </div>
                   </div>
                   
                   <div className="flex justify-between items-center mt-2 font-semibold">
                     <span>Per Metre Rate:</span>
-                    <span>${perMeterRate.toFixed(2)}</span>
+                    <span>{formatCurrency(perMeterRate)}</span>
                   </div>
                 </div>
                 
@@ -271,7 +272,7 @@ export const PavingOnExistingConcrete = () => {
                   <div className="flex items-center justify-center space-x-2 mb-3 bg-gray-100 p-3 rounded-md">
                     <div className="text-center">
                       <div className="text-sm text-gray-600">Per Metre</div>
-                      <div className="font-medium">${perMeterRate.toFixed(2)}</div>
+                      <div className="font-medium">{formatCurrency(perMeterRate)}</div>
                     </div>
                     <div className="text-gray-400">×</div>
                     <div className="text-center">
@@ -281,7 +282,7 @@ export const PavingOnExistingConcrete = () => {
                     <ArrowRight className="h-4 w-4 text-gray-400" />
                     <div className="text-center">
                       <div className="text-sm text-gray-600">Total Cost</div>
-                      <div className="font-bold">${totalCost.toFixed(2)}</div>
+                      <div className="font-bold">{formatCurrency(totalCost)}</div>
                     </div>
                   </div>
                 </div>
@@ -290,19 +291,19 @@ export const PavingOnExistingConcrete = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Material Cost:</span>
-                    <span className="font-medium">${materialCost.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(materialCost)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Labour Cost:</span>
-                    <span className="font-medium">${labourCost.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(labourCost)}</span>
                   </div>
                   <div className="flex justify-between text-sm text-green-600">
                     <span>Margin:</span>
-                    <span className="font-medium">${marginCost.toFixed(2)}</span>
+                    <span className="font-medium">{formatCurrency(marginCost)}</span>
                   </div>
                   <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold">
                     <span>Total Cost:</span>
-                    <span>${totalCost.toFixed(2)}</span>
+                    <span>{formatCurrency(totalCost)}</span>
                   </div>
                 </div>
               </div>
