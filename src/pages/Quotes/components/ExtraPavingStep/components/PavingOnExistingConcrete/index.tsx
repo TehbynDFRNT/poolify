@@ -6,7 +6,7 @@ import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPav
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { PavingTypeSelector } from "@/pages/Quotes/components/ExtraPavingStep/components/PavingTypeSelector";
 import { MetersInput } from "@/pages/Quotes/components/ExtraPavingStep/components/MetersInput";
-import { useQuoteContext } from "../../../context/QuoteContext";
+import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Quote } from "@/types/quote";
