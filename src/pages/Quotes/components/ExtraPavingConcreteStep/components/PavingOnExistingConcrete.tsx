@@ -102,11 +102,6 @@ export const PavingOnExistingConcrete = () => {
     setPavingCost(totalMaterialCost);
     setTotalCost(calculatedTotalCost);
     
-    // Auto-save when values change
-    if (selectedPavingId && meters > 0) {
-      handleSave();
-    }
-    
   }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts]);
 
   const resetAllCosts = () => {
@@ -187,6 +182,7 @@ export const PavingOnExistingConcrete = () => {
 
         // Update local context
         updateQuoteData(updates);
+        toast.success("Paving on existing concrete data saved");
       }
     } catch (error) {
       console.error("Error in save process:", error);
@@ -200,7 +196,7 @@ export const PavingOnExistingConcrete = () => {
   const hasCostData = selectedPavingId && meters > 0;
 
   return (
-    <Card className="border border-gray-200">
+    <Card className="border border-gray-200 mt-6">
       <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <SquareDashed className="h-5 w-5 text-blue-500" />
@@ -309,6 +305,19 @@ export const PavingOnExistingConcrete = () => {
                     <span>${totalCost.toFixed(2)}</span>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Save Button */}
+            {hasCostData && (
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSave}
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+                >
+                  {isSubmitting ? "Saving..." : "Save"}
+                </button>
               </div>
             )}
           </div>
