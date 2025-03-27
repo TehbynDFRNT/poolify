@@ -27,14 +27,11 @@ export const useSavePavingData = (
       // First, update the total extra paving cost in the quote
       const totalExtraPavingCost = calculateTotalExtraPavingCost(totalCost);
       
+      // Updated to avoid using fields that aren't in the database
       const { error } = await supabase
         .from("quotes")
         .update({
           extra_paving_cost: totalExtraPavingCost,
-          selected_paving_id: selectedPavingId,
-          selected_paving_meters: meters,
-          selected_paving_cost: totalCost,
-          selected_paving_margin: marginCost,
         })
         .eq("id", quoteData.id);
 
@@ -117,15 +114,11 @@ export const useSavePavingData = (
         newTotal += quoteData.extra_concreting_cost;
       }
 
-      // Update the quote with removed extra paving
+      // Update the quote with removed extra paving, avoiding problematic fields
       const { error } = await supabase
         .from("quotes")
         .update({
           extra_paving_cost: newTotal,
-          selected_paving_id: null,
-          selected_paving_meters: 0,
-          selected_paving_cost: 0,
-          selected_paving_margin: 0,
         })
         .eq("id", quoteData.id);
 
@@ -136,10 +129,6 @@ export const useSavePavingData = (
       // Reset local state
       resetPavingState();
       updateQuoteData({
-        selected_paving_id: "",
-        selected_paving_meters: 0,
-        selected_paving_cost: 0,
-        selected_paving_margin: 0,
         extra_paving_cost: newTotal,
       });
 
