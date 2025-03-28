@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Quote } from "@/types/quote";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,12 +29,12 @@ export const useSavePavingData = (
       const totalExtraPavingCost = calculateTotalExtraPavingCost(totalCost);
       
       // Create an update object with all necessary fields
+      // Make sure we only include fields that exist in the database schema
       const updateData: Partial<Quote> = {
-        // Main extra paving section
+        // Main extra paving section - using the fields that exist in the database
         selected_paving_id: selectedPavingId || null,
         selected_paving_meters: meters || 0,
-        selected_paving_cost: totalCost || 0,
-        selected_paving_margin: marginCost || 0,
+        // Don't include selected_paving_cost or selected_paving_margin as they don't exist in the schema
         
         // Set the combined total cost
         extra_paving_cost: totalExtraPavingCost,
@@ -144,8 +143,7 @@ export const useSavePavingData = (
         extra_paving_cost: newTotal,
         selected_paving_id: null,
         selected_paving_meters: 0,
-        selected_paving_cost: 0,
-        selected_paving_margin: 0,
+        // Removed selected_paving_cost and selected_paving_margin as they don't exist in the schema
         total_cost: (quoteData.site_requirements_cost || 0) + 
                    newTotal + 
                    (quoteData.optional_addons_cost || 0)
