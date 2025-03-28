@@ -45,9 +45,8 @@ export const useExtraConcreting = (onChanged?: () => void) => {
 
   // Load existing data if available
   useEffect(() => {
-    // Check if there's existing data in quoteData.extra_concreting_type and quoteData.extra_concreting_meterage
+    // Check if there's existing extra_concreting_type and extra_concreting_meterage data
     if (quoteData.extra_concreting_type && quoteData.extra_concreting_meterage) {
-      // Find matching concreting type
       if (extraConcretingItems) {
         const matchingType = extraConcretingItems.find(
           item => item.type === quoteData.extra_concreting_type
@@ -134,7 +133,7 @@ export const useExtraConcreting = (onChanged?: () => void) => {
         return false;
       }
 
-      // Just save the essential fields - we'll avoid using the JSON string field for now
+      // Create update object with specific fields instead of using a JSON string
       const updates: Partial<Quote> = {
         extra_concreting_cost: totalCost,
         extra_concreting_type: selectedConcreting.type,
