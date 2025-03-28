@@ -114,6 +114,9 @@ export const useExtraPavingData = (onNext: () => void) => {
   
   const isLoading = isPavingLoading || isLabourLoading || isConcreteLoading || isCalculationLoading;
   
+  // Check if there's existing data
+  const hasExistingData = Boolean(quoteData.selected_paving_id && quoteData.selected_paving_meters);
+  
   return {
     quoteData,
     extraPavingCosts,
@@ -131,6 +134,7 @@ export const useExtraPavingData = (onNext: () => void) => {
     concreteDetails,
     labourDetails,
     hasUnsavedChanges,
+    hasExistingData,
     pavingOnExistingConcreteRef,
     extraConcretingRef,
     handleSelectedPavingChange,

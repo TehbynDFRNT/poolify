@@ -49,6 +49,7 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
     concreteDetails,
     labourDetails,
     hasUnsavedChanges,
+    hasExistingData,
     pavingOnExistingConcreteRef,
     extraConcretingRef,
     handleSelectedPavingChange,
@@ -108,6 +109,9 @@ export const ExtraPavingConcreteStep: React.FC<ExtraPavingConcreteStepProps> = (
         onMetersChange={handleMeterChange}
         onRemove={handleRemoveExtraPaving}
         markAsChanged={handleContentChanged}
+        onSave={handleSave}
+        isSubmitting={isSubmitting}
+        hasExistingData={hasExistingData}
       />
 
       {/* 2. Paving on Existing Concrete */}

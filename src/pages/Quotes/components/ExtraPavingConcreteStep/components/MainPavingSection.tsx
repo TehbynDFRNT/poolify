@@ -9,7 +9,7 @@ import { ExtraPavingCost } from "@/types/extra-paving-cost";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Save } from "lucide-react";
 
 interface MainPavingSectionProps {
   quoteData: any;
@@ -30,6 +30,9 @@ interface MainPavingSectionProps {
   onMetersChange: (value: number) => void;
   onRemove: () => void;
   markAsChanged: () => void;
+  onSave: () => void;
+  isSubmitting: boolean;
+  hasExistingData: boolean;
 }
 
 export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
@@ -50,7 +53,10 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
   onSelectedPavingChange,
   onMetersChange,
   onRemove,
-  markAsChanged
+  markAsChanged,
+  onSave,
+  isSubmitting,
+  hasExistingData
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -113,17 +119,27 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
                 />
               )}
 
-              {/* Only show Remove button */}
+              {/* Action Buttons - Add Save button */}
               {hasCostData && (
-                <div className="mt-4">
+                <div className="mt-4 flex items-center gap-2">
+                  <Button
+                    onClick={onSave}
+                    disabled={isSubmitting}
+                    className="flex items-center gap-1"
+                  >
+                    <Save className="h-4 w-4" />
+                    {isSubmitting ? "Saving..." : (hasExistingData ? "Update" : "Save")}
+                  </Button>
+                  
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => setShowDeleteConfirm(true)}
                     className="flex items-center gap-1"
+                    disabled={isSubmitting || isDeleting}
                   >
                     <Trash2 className="h-4 w-4" />
-                    Remove
+                    {isDeleting ? "Removing..." : "Remove"}
                   </Button>
                 </div>
               )}
