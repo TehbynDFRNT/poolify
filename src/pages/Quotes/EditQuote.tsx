@@ -1,10 +1,9 @@
 
-import React, { memo } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { QuoteProvider } from "@/pages/Quotes/context/QuoteContext";
 import { EditQuoteContent } from "@/pages/Quotes/components/EditQuoteContent";
 
-const EditQuote: React.FC = () => {
+const EditQuote = () => {
   return (
     <DashboardLayout>
       <QuoteProvider>
@@ -14,4 +13,4 @@ const EditQuote: React.FC = () => {
   );
 };
 
-export default memo(EditQuote);
+export default EditQuote;

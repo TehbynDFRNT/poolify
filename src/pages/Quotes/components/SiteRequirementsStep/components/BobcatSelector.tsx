@@ -78,22 +78,16 @@ export const BobcatSelector = ({ bobcatId, onBobcatChange }: BobcatSelectorProps
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">None Required</SelectItem>
-                    {!groupedBobcatCosts || Object.keys(groupedBobcatCosts).length === 0 ? (
-                      <SelectItem value="no-options" disabled>
-                        No bobcat options available
-                      </SelectItem>
-                    ) : (
-                      Object.entries(groupedBobcatCosts).map(([category, costs]) => (
-                        <div key={category} className="py-2">
-                          <div className="px-2 text-sm font-medium text-gray-500">{category}</div>
-                          {costs.map(bobcat => (
-                            <SelectItem key={bobcat.id} value={bobcat.id}>
-                              {bobcat.day_code} - ${bobcat.price.toFixed(2)}
-                            </SelectItem>
-                          ))}
-                        </div>
-                      ))
-                    )}
+                    {groupedBobcatCosts && Object.entries(groupedBobcatCosts).map(([category, costs]) => (
+                      <div key={category} className="py-2">
+                        <div className="px-2 text-sm font-medium text-gray-500">{category}</div>
+                        {costs.map(bobcat => (
+                          <SelectItem key={bobcat.id} value={bobcat.id}>
+                            {bobcat.day_code} - ${bobcat.price.toFixed(2)}
+                          </SelectItem>
+                        ))}
+                      </div>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>

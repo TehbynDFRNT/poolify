@@ -19,34 +19,23 @@ export const PoolSelector = ({
     <div className="space-y-2">
       <Label htmlFor="pool-select">Select a Pool Model</Label>
       <Select
-        value={selectedPoolId || "default"}
+        value={selectedPoolId}
         onValueChange={onSelectPool}
       >
         <SelectTrigger id="pool-select" className="w-full">
           <SelectValue placeholder="Select a pool" />
         </SelectTrigger>
         <SelectContent>
-          {Object.keys(poolsByRange).length === 0 ? (
-            <SelectItem value="no-options" disabled>
-              No pools available
-            </SelectItem>
-          ) : (
-            <>
-              <SelectItem value="default" disabled>
-                Select a pool
-              </SelectItem>
-              {Object.entries(poolsByRange).map(([range, poolsInRange]) => (
-                <div key={range} className="py-2">
-                  <div className="px-2 text-sm font-medium text-gray-500">{range}</div>
-                  {poolsInRange.map((pool) => (
-                    <SelectItem key={pool.id} value={pool.id}>
-                      {pool.name} ({pool.length}m × {pool.width}m)
-                    </SelectItem>
-                  ))}
-                </div>
+          {Object.entries(poolsByRange).map(([range, poolsInRange]) => (
+            <div key={range} className="py-2">
+              <div className="px-2 text-sm font-medium text-gray-500">{range}</div>
+              {poolsInRange.map((pool) => (
+                <SelectItem key={pool.id} value={pool.id}>
+                  {pool.name} ({pool.length}m × {pool.width}m)
+                </SelectItem>
               ))}
-            </>
-          )}
+            </div>
+          ))}
         </SelectContent>
       </Select>
     </div>

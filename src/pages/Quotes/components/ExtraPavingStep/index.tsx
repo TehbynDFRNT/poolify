@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
@@ -87,9 +88,6 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     underFenceStrips
   );
 
-  // Get existing concrete paving cost
-  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
-
   // Log the breakdown for debugging
   useEffect(() => {
     console.log("Paving Material Total:", pavingTotal);
@@ -97,8 +95,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     console.log("Laying Labour Total:", layingTotal);
     console.log("Combined Total:", pavingTotal + layingTotal + concreteTotal);
     console.log("Should match pavingTotalCost:", pavingTotalCost);
-    console.log("Existing Concrete Paving Cost:", existingConcretePavingCost);
-  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost, existingConcretePavingCost]);
+  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost]);
 
   const handleSaveOnly = async () => {
     await handleSaveExtraPaving(false, {
@@ -161,10 +158,10 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdateStrips={setUnderFenceStrips}
       />
       
-      {/* Paving on Existing Concrete section */}
+      {/* New Paving on Existing Concrete placeholder section */}
       <PavingOnExistingConcrete />
 
-      {/* Total Cost Summary with existing concrete paving cost */}
+      {/* Total Cost Summary */}
       <TotalCostSummary 
         pavingTotal={pavingTotal}
         layingTotal={layingTotal}
@@ -174,7 +171,6 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         concreteCutsCost={concreteCutsCost}
         underFenceStripsCost={underFenceStripsCost}
         totalCost={totalCost}
-        existingConcretePavingCost={existingConcretePavingCost}
       />
 
       {/* Navigation using FormActions component */}
