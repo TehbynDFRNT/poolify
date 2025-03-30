@@ -19,11 +19,13 @@ export const CostBreakdown = ({
   labourCost,
   marginCost,
   totalCost,
-  pavingDetails,
-  concreteDetails,
-  labourDetails,
+  pavingDetails = {},
+  concreteDetails = {},
+  labourDetails = {},
   meters
 }: CostBreakdownProps) => {
+  // Add default empty objects to prevent undefined errors
+  
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-medium">Cost Breakdown</h3>
@@ -34,15 +36,15 @@ export const CostBreakdown = ({
           <div className="space-y-2">
             <div className="flex justify-between">
               <span>Paver Cost:</span>
-              <span>${pavingDetails?.paver_cost.toFixed(2)}/m</span>
+              <span>${(pavingDetails?.paver_cost || 0).toFixed(2)}/m</span>
             </div>
             <div className="flex justify-between">
               <span>Wastage Cost:</span>
-              <span>${pavingDetails?.wastage_cost.toFixed(2)}/m</span>
+              <span>${(pavingDetails?.wastage_cost || 0).toFixed(2)}/m</span>
             </div>
             <div className="flex justify-between text-green-600">
               <span>Material Margin:</span>
-              <span>${pavingDetails?.margin_cost.toFixed(2)}/m</span>
+              <span>${(pavingDetails?.margin_cost || 0).toFixed(2)}/m</span>
             </div>
             <div className="border-t pt-2 mt-1">
               <div className="flex justify-between font-medium">
@@ -62,14 +64,18 @@ export const CostBreakdown = ({
           <div className="space-y-2">
             {labourDetails && Object.entries(labourDetails).map(([key, value]: [string, any]) => (
               <React.Fragment key={key}>
-                <div className="flex justify-between">
-                  <span>{value.description}:</span>
-                  <span>${value.cost.toFixed(2)}/m</span>
-                </div>
-                <div className="flex justify-between text-green-600">
-                  <span>Labour Margin:</span>
-                  <span>${value.margin.toFixed(2)}/m</span>
-                </div>
+                {value && (
+                  <>
+                    <div className="flex justify-between">
+                      <span>{value.description || 'Labour'}:</span>
+                      <span>${(value.cost || 0).toFixed(2)}/m</span>
+                    </div>
+                    <div className="flex justify-between text-green-600">
+                      <span>Labour Margin:</span>
+                      <span>${(value.margin || 0).toFixed(2)}/m</span>
+                    </div>
+                  </>
+                )}
               </React.Fragment>
             ))}
             <div className="border-t pt-2 mt-1">
