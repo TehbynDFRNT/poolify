@@ -1,7 +1,7 @@
-
 import { useState } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { ExtraPavingOnConcrete } from "../ExtraPavingStep/components/ExtraPavingOnConcrete";
+import { PavingOnExistingConcrete } from "../ExtraPavingStep/components/PavingOnExistingConcrete";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -17,8 +17,8 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
   const handleSaveOnly = async () => {
     try {
       setIsSubmitting(true);
-      // We don't need additional save logic here as the component handles its own saving
-      toast.success("Extra paving on concrete data saved");
+      // We don't need additional save logic here as the components handle their own saving
+      toast.success("Extra paving and concrete data saved");
     } catch (error) {
       console.error("Error saving:", error);
       toast.error("Failed to save");
@@ -30,8 +30,8 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
   const handleSaveAndContinue = async () => {
     try {
       setIsSubmitting(true);
-      // We don't need additional save logic here as the component handles its own saving
-      toast.success("Extra paving on concrete data saved");
+      // We don't need additional save logic here as the components handle their own saving
+      toast.success("Extra paving and concrete data saved");
       onNext();
     } catch (error) {
       console.error("Error saving:", error);
@@ -54,7 +54,13 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
         </div>
       )}
 
-      <ExtraPavingOnConcrete />
+      <div className="space-y-8">
+        {/* Keep both components - first the original one */}
+        <ExtraPavingOnConcrete />
+        
+        {/* And add the second one */}
+        <PavingOnExistingConcrete />
+      </div>
       
       <div className="flex justify-between mt-8">
         <button
