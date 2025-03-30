@@ -91,7 +91,7 @@ export const ExtraPavingOnConcrete = () => {
           .eq("id", quoteData.id);
 
         if (error) {
-          console.error("Error saving paving concrete data:", error);
+          console.error("Error saving paving data:", error);
           toast.error("Failed to save paving data");
           return;
         }
@@ -164,12 +164,24 @@ export const ExtraPavingOnConcrete = () => {
             </div>
           )}
           
-          <NavigationButtons 
-            onSave={handleSave}
-            onSaveAndContinue={handleSaveAndContinue}
-            isSubmitting={isSubmitting}
-            isDisabled={!hasCostData}
-          />
+          <div className="flex justify-end gap-3 mt-6">
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={isSubmitting || !hasCostData}
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            >
+              {isSubmitting ? "Saving..." : "Save"}
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveAndContinue}
+              disabled={isSubmitting || !hasCostData}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            >
+              {isSubmitting ? "Saving..." : "Save & Continue"}
+            </button>
+          </div>
         </div>
       </CardContent>
     </Card>
