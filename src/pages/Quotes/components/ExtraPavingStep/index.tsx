@@ -16,7 +16,7 @@ import { useCostCalculation } from "./hooks/useCostCalculation";
 import { fetchUnderFenceStrips } from "./services/pavingService";
 import { calculatePavingAndLayingCosts } from "./utils/pavingCalculations";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
-import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
+import { ExtraPavingOnConcrete } from "./components/ExtraPavingOnConcrete";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -158,8 +158,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdateStrips={setUnderFenceStrips}
       />
       
-      {/* Paving on Existing Concrete section */}
-      <PavingOnExistingConcrete />
+      {/* Extra Paving on Concrete section */}
+      <ExtraPavingOnConcrete />
 
       {/* Total Cost Summary */}
       <TotalCostSummary 
