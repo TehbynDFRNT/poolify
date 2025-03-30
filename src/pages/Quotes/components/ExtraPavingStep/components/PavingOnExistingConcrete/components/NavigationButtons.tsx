@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface NavigationButtonsProps {
   onSave: () => void;
@@ -16,20 +17,33 @@ export const NavigationButtons = ({
   isDisabled
 }: NavigationButtonsProps) => {
   return (
-    <div className="flex justify-end mt-6 gap-3">
-      <Button 
+    <div className="flex justify-end gap-3 mt-6">
+      <Button
         variant="outline"
         onClick={onSave}
         disabled={isSubmitting || isDisabled}
       >
-        {isSubmitting ? "Saving..." : "Save"}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          "Save"
+        )}
       </Button>
-      <Button 
+      <Button
         onClick={onSaveAndContinue}
         disabled={isSubmitting || isDisabled}
-        className="bg-teal-500 hover:bg-teal-600"
       >
-        {isSubmitting ? "Saving..." : "Save & Continue"}
+        {isSubmitting ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saving...
+          </>
+        ) : (
+          "Save & Continue"
+        )}
       </Button>
     </div>
   );
