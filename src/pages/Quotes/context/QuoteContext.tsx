@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';
@@ -43,7 +42,11 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   // Micro dig (adding as empty defaults)
   micro_dig_required: false,
   micro_dig_price: 0,
-  micro_dig_notes: ''
+  micro_dig_notes: '',
+  
+  // Existing concrete paving
+  existing_concrete_paving: '',
+  existing_concrete_paving_cost: 0
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);

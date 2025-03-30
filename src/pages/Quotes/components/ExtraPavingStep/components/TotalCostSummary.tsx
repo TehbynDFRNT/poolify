@@ -1,5 +1,6 @@
 
-import { FC } from 'react';
+import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
+import { formatCurrency } from "@/utils/format";
 
 interface TotalCostSummaryProps {
   pavingTotal: number;
@@ -12,75 +13,73 @@ interface TotalCostSummaryProps {
   totalCost: number;
 }
 
-export const TotalCostSummary: FC<TotalCostSummaryProps> = ({
-  pavingTotal = 0,
-  layingTotal = 0,
-  concreteTotal = 0,
-  isPumpRequired = false,
-  pumpPrice = 0,
-  concreteCutsCost = 0,
-  underFenceStripsCost = 0,
-  totalCost = 0
-}) => {
-  // Ensure all values are numbers to prevent errors with toFixed
-  const safeNumber = (value: any): number => {
-    if (value === undefined || value === null || isNaN(Number(value))) {
-      return 0;
-    }
-    return Number(value);
-  };
+export const TotalCostSummary = ({
+  pavingTotal,
+  layingTotal,
+  concreteTotal,
+  isPumpRequired,
+  pumpPrice,
+  concreteCutsCost,
+  underFenceStripsCost,
+  totalCost
+}: TotalCostSummaryProps) => {
+  const { quoteData } = useQuoteContext();
+  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
 
-  const safePavingTotal = safeNumber(pavingTotal);
-  const safeLayingTotal = safeNumber(layingTotal);
-  const safeConcreteTotal = safeNumber(concreteTotal);
-  const safePumpPrice = safeNumber(pumpPrice);
-  const safeConcreteCutsCost = safeNumber(concreteCutsCost);
-  const safeUnderFenceStripsCost = safeNumber(underFenceStripsCost);
-  const safeTotalCost = safeNumber(totalCost);
+  // Add existing concrete paving cost to the total
+  const grandTotal = totalCost + existingConcretePavingCost;
 
   return (
-    <div className="bg-slate-50 p-4 rounded-md">
-      <h3 className="font-medium text-lg mb-2">Total Cost Summary</h3>
+    <div className="bg-white border border-gray-200 rounded-md p-5">
+      <h3 className="text-lg font-medium mb-4">Total Cost Summary</h3>
+      
       <div className="space-y-2">
-        <div className="flex justify-between">
-          <span>Paving Materials:</span>
-          <span>${safePavingTotal.toFixed(2)}</span>
+        <div className="grid grid-cols-2 py-1">
+          <span className="text-gray-600">Paving Materials:</span>
+          <span className="text-right font-medium">{formatCurrency(pavingTotal)}</span>
         </div>
         
-        <div className="flex justify-between">
-          <span>Concrete Materials:</span>
-          <span>${safeConcreteTotal.toFixed(2)}</span>
+        <div className="grid grid-cols-2 py-1">
+          <span className="text-gray-600">Concrete Materials:</span>
+          <span className="text-right font-medium">{formatCurrency(concreteTotal)}</span>
         </div>
         
-        <div className="flex justify-between">
-          <span>Concrete Labour:</span>
-          <span>${safeLayingTotal.toFixed(2)}</span>
+        <div className="grid grid-cols-2 py-1">
+          <span className="text-gray-600">Labour (Laying):</span>
+          <span className="text-right font-medium">{formatCurrency(layingTotal)}</span>
         </div>
         
-        {isPumpRequired && safePumpPrice > 0 && (
-          <div className="flex justify-between">
-            <span>Concrete Pump:</span>
-            <span>${safePumpPrice.toFixed(2)}</span>
+        {isPumpRequired && (
+          <div className="grid grid-cols-2 py-1">
+            <span className="text-gray-600">Concrete Pump:</span>
+            <span className="text-right font-medium">{formatCurrency(pumpPrice)}</span>
           </div>
         )}
         
-        {safeConcreteCutsCost > 0 && (
-          <div className="flex justify-between">
-            <span>Concrete Cuts:</span>
-            <span>${safeConcreteCutsCost.toFixed(2)}</span>
+        {concreteCutsCost > 0 && (
+          <div className="grid grid-cols-2 py-1">
+            <span className="text-gray-600">Concrete Cuts:</span>
+            <span className="text-right font-medium">{formatCurrency(concreteCutsCost)}</span>
           </div>
         )}
         
-        {safeUnderFenceStripsCost > 0 && (
-          <div className="flex justify-between">
-            <span>Under Fence Concrete Strips:</span>
-            <span>${safeUnderFenceStripsCost.toFixed(2)}</span>
+        {underFenceStripsCost > 0 && (
+          <div className="grid grid-cols-2 py-1">
+            <span className="text-gray-600">Under Fence Concrete Strips:</span>
+            <span className="text-right font-medium">{formatCurrency(underFenceStripsCost)}</span>
           </div>
         )}
         
-        <div className="flex justify-between font-bold border-t pt-2 mt-2">
-          <span>Total:</span>
-          <span>${safeTotalCost.toFixed(2)}</span>
+        {existingConcretePavingCost > 0 && (
+          <div className="grid grid-cols-2 py-1">
+            <span className="text-gray-600">Paving on Existing Concrete:</span>
+            <span className="text-right font-medium">{formatCurrency(existingConcretePavingCost)}</span>
+          </div>
+        )}
+        
+        <div className="grid grid-cols-2 pt-2 mt-1 border-t border-gray-200">
+          <span className="font-semibold">Total Extra Paving Cost:</span>
+          <span className="text-right font-bold">{formatCurrency(grandTotal)}</span>
         </div>
       </div>
     </div>
