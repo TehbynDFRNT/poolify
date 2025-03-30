@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';
@@ -83,7 +84,12 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
       if (data) {
         console.log("Refreshed quote data:", data);
-        setQuoteData(data);
+        // Convert the returned data to match our expected types
+        updateQuoteData({
+          ...data,
+          // Ensure we parse any JSON fields properly if needed
+          under_fence_strips_data: data.under_fence_strips_data
+        });
       }
     } catch (error) {
       console.error("Error in refreshQuoteData:", error);

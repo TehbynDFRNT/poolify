@@ -31,7 +31,7 @@ export interface Quote {
   concrete_cuts?: string;
   concrete_cuts_cost?: number;
   under_fence_strips_cost?: number;
-  under_fence_strips_data?: string;
+  under_fence_strips_data?: any; // Changed from string to any to match Json type
   optional_addons_cost?: number;
   existing_concrete_paving?: string;
   existing_concrete_paving_cost?: number;
@@ -66,7 +66,7 @@ export interface QuoteInsert {
   concrete_cuts?: string;
   concrete_cuts_cost?: number;
   under_fence_strips_cost?: number;
-  under_fence_strips_data?: string;
+  under_fence_strips_data?: any; // Changed from string to any to match Json type
   optional_addons_cost?: number;
   existing_concrete_paving?: string;
   existing_concrete_paving_cost?: number;

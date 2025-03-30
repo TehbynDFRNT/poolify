@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuoteContext } from "../context/QuoteContext";
@@ -128,7 +127,15 @@ export const useQuoteSteps = (quoteId?: string) => {
         // Micro dig data
         micro_dig_required: quoteData.micro_dig_required === true,
         micro_dig_price: quoteData.micro_dig_price || 0,
-        micro_dig_notes: quoteData.micro_dig_notes || ''
+        micro_dig_notes: quoteData.micro_dig_notes || '',
+        
+        // Under fence strips data
+        under_fence_strips_data: quoteData.under_fence_strips_data,
+        under_fence_strips_cost: quoteData.under_fence_strips_cost || 0,
+        
+        // Existing concrete paving
+        existing_concrete_paving: quoteData.existing_concrete_paving || '',
+        existing_concrete_paving_cost: quoteData.existing_concrete_paving_cost || 0
       });
 
       setState(prev => ({ 
