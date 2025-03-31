@@ -1,29 +1,54 @@
 
-import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
-import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
-import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
+import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useConstructionCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
+import { useConcreteCostCalculator } from "@/pages/Quotes/components/ExtraPavingConcreteStep/hooks/useConcreteCostCalculator";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { useConcreteCostCalculator } from "../../hooks/useConcreteCostCalculator";
-import { CostBreakdown } from "./components/CostBreakdown";
 import { PavingTypeSelector } from "./components/PavingTypeSelector";
 import { MetersInput } from "./components/MetersInput";
-import { NavigationButtons } from "./components/NavigationButtons";
+import { CostBreakdown } from "./components/CostBreakdown";
 
-export const PavingOnExistingConcrete = () => {
-  const { quoteData, updateQuoteData } = useQuoteContext();
-  const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
-  const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
-  const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
+interface PavingOnExistingConcreteProps {
+  onCostUpdate?: (cost: number) => void;
+}
+
+export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcreteProps) => {
+  const { quoteData } = useQuoteContext();
+  const { extraPavingCosts, concreteCosts, concreteLabourCosts, isLoading } = useConstructionCosts();
   
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Use the custom hook for cost calculations
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Load saved data when component mounts
+  useEffect(() => {
+    const loadSavedData = async () => {
+      if (quoteData.id) {
+        try {
+          const { data, error } = await supabase
+            .from('quote_extra_paving_concrete')
+            .select('*')
+            .eq('quote_id', quoteData.id)
+            .eq('type', 'paving_on_existing_concrete')
+            .maybeSingle();
+
+          if (error) throw error;
+          
+          if (data) {
+            setSelectedPavingId(data.paving_id || "");
+            setMeters(data.meters || 0);
+          }
+        } catch (error) {
+          console.error("Error loading saved existing concrete paving data:", error);
+        }
+      }
+    };
+
+    loadSavedData();
+  }, [quoteData.id]);
+
+  // Calculate costs based on selections
   const { 
     perMeterCost, 
     totalCost, 
@@ -32,144 +57,117 @@ export const PavingOnExistingConcrete = () => {
     marginCost,
     pavingDetails,
     concreteDetails,
-    labourDetails 
+    labourDetails
   } = useConcreteCostCalculator(
-    selectedPavingId, 
-    meters, 
-    extraPavingCosts, 
-    concreteCosts, 
+    selectedPavingId,
+    meters,
+    extraPavingCosts,
+    concreteCosts,
     concreteLabourCosts
   );
 
-  // Load data from quote if we're editing
+  // Update parent component when cost changes
   useEffect(() => {
-    if (quoteData.existing_concrete_paving) {
+    if (onCostUpdate) {
+      onCostUpdate(totalCost);
+    }
+  }, [totalCost, onCostUpdate]);
+
+  // Save data when selections change
+  useEffect(() => {
+    const saveData = async () => {
+      if (!quoteData.id || !selectedPavingId || meters <= 0) return;
+      
+      setIsSaving(true);
       try {
-        const savedData = JSON.parse(quoteData.existing_concrete_paving);
-        if (savedData && savedData.paving_id) {
-          setSelectedPavingId(savedData.paving_id);
-          setMeters(savedData.meters || 0);
-        }
-      } catch (err) {
-        console.error("Failed to parse saved paving on concrete data:", err);
-      }
-    }
-  }, [quoteData.existing_concrete_paving]);
-
-  const handleSave = async () => {
-    if (!selectedPavingId || meters <= 0) {
-      toast.error("Please select a paving type and enter meters");
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Update the quote with extra paving on concrete data
-      const updates = {
-        existing_concrete_paving_cost: totalCost,
-        // Store selected options as JSON in existing fields
-        existing_concrete_paving: JSON.stringify({
+        // Check if record exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('quote_extra_paving_concrete')
+          .select('id')
+          .eq('quote_id', quoteData.id)
+          .eq('type', 'paving_on_existing_concrete')
+          .maybeSingle();
+          
+        if (checkError) throw checkError;
+        
+        const dataToSave = {
+          quote_id: quoteData.id,
+          type: 'paving_on_existing_concrete',
           paving_id: selectedPavingId,
-          meters: meters,
-          per_meter_cost: perMeterCost,
-          material_cost: materialCost,
-          labour_cost: labourCost,
-          margin_cost: marginCost,
-          total_cost: totalCost,
-          paving_details: pavingDetails,
-          concrete_details: concreteDetails,
-          labour_details: labourDetails
-        })
-      };
-
-      if (quoteData.id) {
-        // Save to database
-        const { error } = await supabase
-          .from("quotes")
-          .update(updates)
-          .eq("id", quoteData.id);
-
-        if (error) {
-          console.error("Error saving paving on concrete data:", error);
-          toast.error("Failed to save paving on concrete data");
-          return;
+          meters,
+          cost: totalCost,
+        };
+        
+        if (existingData) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('quote_extra_paving_concrete')
+            .update(dataToSave)
+            .eq('id', existingData.id);
+            
+          if (updateError) throw updateError;
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('quote_extra_paving_concrete')
+            .insert(dataToSave);
+            
+          if (insertError) throw insertError;
         }
-
-        // Update local context
-        updateQuoteData(updates);
-        toast.success("Paving on concrete data saved");
+      } catch (error) {
+        console.error("Error saving existing concrete paving data:", error);
+      } finally {
+        setIsSaving(false);
       }
-    } catch (error) {
-      console.error("Error in save process:", error);
-      toast.error("An unexpected error occurred");
-    } finally {
-      setIsSubmitting(false);
-    }
+    };
+    
+    saveData();
+  }, [quoteData.id, selectedPavingId, meters, totalCost]);
+
+  const handlePavingChange = (pavingId: string) => {
+    setSelectedPavingId(pavingId);
   };
 
-  const handleSaveAndContinue = async () => {
-    try {
-      await handleSave();
-      // We don't need to navigate since this is a sub-component
-    } catch (error) {
-      console.error("Error in save and continue:", error);
-    }
+  const handleMetersChange = (value: number) => {
+    setMeters(value);
   };
 
-  const isLoading = isLoadingPaving || isLoadingConcrete || isLoadingLabour;
-  const hasCostData = selectedPavingId && meters > 0;
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
-    <Card className="border border-gray-200">
-      <CardHeader className="bg-white pb-2">
-        <h2 className="text-xl font-semibold">Paving on Existing Concrete</h2>
-        <p className="text-gray-500">Calculate paving costs on existing concrete</p>
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Paving on Existing Concrete</CardTitle>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="border-t mt-2 pt-4">
-          {isLoading ? (
-            <div className="py-4 text-center text-gray-500">Loading paving options...</div>
-          ) : (
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Paving Selection */}
-                <PavingTypeSelector 
-                  selectedPavingId={selectedPavingId}
-                  extraPavingCosts={extraPavingCosts}
-                  onSelect={setSelectedPavingId}
-                />
-                
-                {/* Metres Input */}
-                <MetersInput 
-                  meters={meters} 
-                  onChange={setMeters} 
-                />
-              </div>
-              
-              {/* Cost Breakdown */}
-              {hasCostData && (
-                <CostBreakdown
-                  perMeterCost={perMeterCost}
-                  materialCost={materialCost}
-                  labourCost={labourCost}
-                  marginCost={marginCost}
-                  totalCost={totalCost}
-                  pavingDetails={pavingDetails || {}}
-                  concreteDetails={concreteDetails || {}}
-                  labourDetails={labourDetails || {}}
-                  meters={meters}
-                />
-              )}
-            </div>
-          )}
-          
-          <NavigationButtons 
-            onSave={handleSave}
-            onSaveAndContinue={handleSaveAndContinue}
-            isSubmitting={isSubmitting}
-            isDisabled={!hasCostData}
+      <CardContent>
+        <div className="space-y-6">
+          <PavingTypeSelector 
+            pavingOptions={extraPavingCosts || []}
+            selectedPavingId={selectedPavingId}
+            onPavingChange={handlePavingChange}
           />
+          
+          <MetersInput 
+            meters={meters}
+            onMetersChange={handleMetersChange}
+            disabled={!selectedPavingId}
+          />
+          
+          {selectedPavingId && meters > 0 && (
+            <CostBreakdown
+              perMeterCost={perMeterCost}
+              materialCost={materialCost}
+              labourCost={labourCost}
+              marginCost={marginCost}
+              totalCost={totalCost}
+              pavingDetails={pavingDetails || {}}
+              concreteDetails={concreteDetails || {}}
+              labourDetails={labourDetails || {}}
+              meters={meters}
+            />
+          )}
         </div>
       </CardContent>
     </Card>

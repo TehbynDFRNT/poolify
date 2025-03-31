@@ -1,9 +1,11 @@
+
 import { useState } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { ExtraPavingOnConcrete } from "../ExtraPavingStep/components/ExtraPavingOnConcrete";
 import { PavingOnExistingConcrete } from "../ExtraPavingStep/components/PavingOnExistingConcrete";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { CombinedPricingSummary } from "./components/CombinedPricingSummary";
 
 interface ExtraPavingConcreteStepProps {
   onNext: () => void;
@@ -13,6 +15,8 @@ interface ExtraPavingConcreteStepProps {
 export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcreteStepProps) => {
   const { quoteData } = useQuoteContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [extraPavingCost, setExtraPavingCost] = useState(0);
+  const [existingConcretePavingCost, setExistingConcretePavingCost] = useState(0);
 
   const handleSaveOnly = async () => {
     try {
@@ -41,6 +45,14 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
     }
   };
 
+  const handleExtraPavingCostUpdate = (cost: number) => {
+    setExtraPavingCost(cost);
+  };
+
+  const handleExistingConcretePavingCostUpdate = (cost: number) => {
+    setExistingConcretePavingCost(cost);
+  };
+
   return (
     <div className="space-y-6">
       <p className="text-gray-500 mb-6">Calculate additional paving and concrete costs</p>
@@ -54,9 +66,14 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
       )}
 
       <div className="space-y-8">
-        <ExtraPavingOnConcrete />
+        <ExtraPavingOnConcrete onCostUpdate={handleExtraPavingCostUpdate} />
         
-        <PavingOnExistingConcrete />
+        <PavingOnExistingConcrete onCostUpdate={handleExistingConcretePavingCostUpdate} />
+        
+        <CombinedPricingSummary 
+          extraPavingOnConcreteCost={extraPavingCost}
+          pavingOnExistingConcreteCost={existingConcretePavingCost}
+        />
       </div>
       
       <div className="flex justify-between mt-8">
