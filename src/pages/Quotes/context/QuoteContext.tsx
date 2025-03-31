@@ -1,17 +1,19 @@
 
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect, useCallback, useRef } from 'react';
 import { Quote, QuoteInsert } from '@/types/quote';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useParams } from 'react-router-dom';
 
 type QuoteContextType = {
-  quoteData: Partial<QuoteInsert> & { id?: string; };
-  updateQuoteData: (data: Partial<QuoteInsert> & { id?: string; }) => void;
+  quoteData: Partial<Quote>;
+  updateQuoteData: (data: Partial<Quote>) => void;
   resetQuoteData: () => void;
   refreshQuoteData: () => Promise<void>;
+  isLoading: boolean;
 };
 
-const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
+const initialQuoteData: Partial<Quote> = {
   customer_name: '',
   customer_email: '',
   customer_phone: '',
@@ -27,6 +29,7 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   crane_id: '',
   excavation_type: '',
   traffic_control_id: 'none',
+  bobcat_id: undefined,
   
   // Cost tracking (adding as 0 defaults)
   site_requirements_cost: 0,
@@ -45,7 +48,7 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
   micro_dig_price: 0,
   micro_dig_notes: '',
   
-  // Existing concrete paving
+  // Paving on existing concrete
   existing_concrete_paving: '',
   existing_concrete_paving_cost: 0
 };
@@ -53,51 +56,82 @@ const initialQuoteData: Partial<QuoteInsert> & { id?: string; } = {
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
 
 export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [quoteData, setQuoteData] = useState<Partial<QuoteInsert> & { id?: string; }>(initialQuoteData);
+  const [quoteData, setQuoteData] = useState<Partial<Quote>>(initialQuoteData);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { quoteId } = useParams<{ quoteId: string }>();
+  const isRefreshing = useRef(false);
+  const lastRefreshTime = useRef(0);
 
-  const updateQuoteData = (data: Partial<QuoteInsert> & { id?: string; }) => {
+  // Load quote data when provider mounts or quoteId changes
+  useEffect(() => {
+    if (quoteId) {
+      refreshQuoteData();
+    } else {
+      setIsLoading(false);
+    }
+  }, [quoteId]);
+
+  const updateQuoteData = useCallback((data: Partial<Quote>) => {
     setQuoteData(prev => ({ ...prev, ...data }));
-  };
+  }, []);
 
-  const resetQuoteData = () => {
+  const resetQuoteData = useCallback(() => {
     setQuoteData(initialQuoteData);
-  };
+  }, []);
 
-  const refreshQuoteData = async () => {
-    if (!quoteData.id) {
-      console.warn("Cannot refresh quote data: No quote ID available");
-      return;
+  const refreshQuoteData = useCallback(async () => {
+    // If already refreshing or if less than 1 second since last refresh, prevent another refresh
+    const now = Date.now();
+    if (isRefreshing.current || (now - lastRefreshTime.current < 1000)) {
+      return Promise.resolve();
     }
 
-    try {
-      const { data, error } = await supabase
-        .from('quotes')
-        .select('*')
-        .eq('id', quoteData.id)
-        .single();
+    // If editing an existing quote
+    if (quoteId) {
+      isRefreshing.current = true;
+      setIsLoading(true);
+      
+      try {
+        console.log("Refreshing quote data for ID:", quoteId);
+        const { data, error } = await supabase
+          .from('quotes')
+          .select('*')
+          .eq('id', quoteId)
+          .single();
 
-      if (error) {
-        console.error("Error refreshing quote data:", error);
-        toast.error("Failed to refresh quote data");
-        throw error;
-      }
+        if (error) {
+          console.error("Error refreshing quote data:", error);
+          toast.error("Failed to refresh quote data");
+          throw error;
+        }
 
-      if (data) {
-        console.log("Refreshed quote data:", data);
-        // Convert the returned data to match our expected types
-        updateQuoteData({
-          ...data,
-          // Ensure we parse any JSON fields properly if needed
-          under_fence_strips_data: data.under_fence_strips_data
-        });
+        if (data) {
+          console.log("Refreshed quote data:", data);
+          setQuoteData(data as Partial<Quote>);
+        }
+        
+        lastRefreshTime.current = Date.now();
+        return Promise.resolve();
+      } catch (error) {
+        console.error("Error in refreshQuoteData:", error);
+        return Promise.reject(error);
+      } finally {
+        setIsLoading(false);
+        isRefreshing.current = false;
       }
-    } catch (error) {
-      console.error("Error in refreshQuoteData:", error);
     }
-  };
+    
+    return Promise.resolve();
+  }, [quoteId]);
 
   return (
-    <QuoteContext.Provider value={{ quoteData, updateQuoteData, resetQuoteData, refreshQuoteData }}>
+    <QuoteContext.Provider value={{ 
+      quoteData, 
+      updateQuoteData, 
+      resetQuoteData, 
+      refreshQuoteData,
+      isLoading
+    }}>
       {children}
     </QuoteContext.Provider>
   );

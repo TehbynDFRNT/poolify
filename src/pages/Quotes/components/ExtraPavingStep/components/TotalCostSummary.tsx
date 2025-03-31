@@ -1,6 +1,4 @@
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
+import React from "react";
 
 interface TotalCostSummaryProps {
   pavingTotal: number;
@@ -11,8 +9,10 @@ interface TotalCostSummaryProps {
   concreteCutsCost: number;
   underFenceStripsCost: number;
   totalCost: number;
+  existingConcretePavingCost?: number;
 }
 
+// Add existingConcretePavingCost to props
 export const TotalCostSummary = ({
   pavingTotal,
   layingTotal,
@@ -21,65 +21,60 @@ export const TotalCostSummary = ({
   pumpPrice,
   concreteCutsCost,
   underFenceStripsCost,
-  totalCost
+  totalCost,
+  existingConcretePavingCost = 0
 }: TotalCostSummaryProps) => {
-  const { quoteData } = useQuoteContext();
-  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
-  
   return (
-    <Card className="border border-gray-200">
-      <CardHeader className="bg-white py-4 px-5">
-        <CardTitle className="text-lg font-semibold">Total Extra Paving & Concrete Cost</CardTitle>
-      </CardHeader>
-      <CardContent className="p-5">
-        <div className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Paving Materials</div>
-              <div className="font-medium">${pavingTotal.toFixed(2)}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Concrete Materials</div>
-              <div className="font-medium">${concreteTotal.toFixed(2)}</div>
-            </div>
-            <div className="bg-gray-50 p-3 rounded-md">
-              <div className="text-sm text-gray-500">Laying Labour</div>
-              <div className="font-medium">${layingTotal.toFixed(2)}</div>
-            </div>
-            {isPumpRequired && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Concrete Pump</div>
-                <div className="font-medium">${pumpPrice.toFixed(2)}</div>
-              </div>
-            )}
-            {concreteCutsCost > 0 && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Concrete Cuts</div>
-                <div className="font-medium">${concreteCutsCost.toFixed(2)}</div>
-              </div>
-            )}
-            {underFenceStripsCost > 0 && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Under Fence Concrete Strips</div>
-                <div className="font-medium">${underFenceStripsCost.toFixed(2)}</div>
-              </div>
-            )}
-            {existingConcretePavingCost > 0 && (
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-sm text-gray-500">Paving on Existing Concrete</div>
-                <div className="font-medium">${existingConcretePavingCost.toFixed(2)}</div>
-              </div>
-            )}
-          </div>
-          
-          <div className="border-t pt-3 mt-2">
-            <div className="flex justify-between items-center">
-              <div className="font-semibold">Total Cost:</div>
-              <div className="text-lg font-bold">${totalCost.toFixed(2)}</div>
-            </div>
-          </div>
+    <div className="bg-white border rounded-lg p-4 mb-6">
+      <h3 className="text-lg font-medium mb-4">Cost Summary</h3>
+      
+      <div className="space-y-2 mb-4">
+        <div className="flex justify-between">
+          <span>Paving Material:</span>
+          <span className="font-medium">${pavingTotal.toFixed(2)}</span>
         </div>
-      </CardContent>
-    </Card>
+        <div className="flex justify-between">
+          <span>Concrete Material:</span>
+          <span className="font-medium">${concreteTotal.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Labour:</span>
+          <span className="font-medium">${layingTotal.toFixed(2)}</span>
+        </div>
+        
+        {isPumpRequired && (
+          <div className="flex justify-between">
+            <span>Concrete Pump:</span>
+            <span className="font-medium">${pumpPrice.toFixed(2)}</span>
+          </div>
+        )}
+        
+        {concreteCutsCost > 0 && (
+          <div className="flex justify-between">
+            <span>Concrete Cuts:</span>
+            <span className="font-medium">${concreteCutsCost.toFixed(2)}</span>
+          </div>
+        )}
+        
+        {underFenceStripsCost > 0 && (
+          <div className="flex justify-between">
+            <span>Under Fence Concrete Strips:</span>
+            <span className="font-medium">${underFenceStripsCost.toFixed(2)}</span>
+          </div>
+        )}
+        
+        {existingConcretePavingCost > 0 && (
+          <div className="flex justify-between">
+            <span>Paving on Existing Concrete:</span>
+            <span className="font-medium">${existingConcretePavingCost.toFixed(2)}</span>
+          </div>
+        )}
+      </div>
+      
+      <div className="border-t pt-2 flex justify-between font-bold text-lg">
+        <span>Total Extra Paving Cost:</span>
+        <span>${(totalCost + existingConcretePavingCost).toFixed(2)}</span>
+      </div>
+    </div>
   );
 };

@@ -8,10 +8,9 @@ export const QUOTE_STEPS = [
   { id: 2, name: "Base Pool" },
   { id: 3, name: "Site Requirements" },
   { id: 4, name: "Extra Paving & Concrete" },
-  { id: 5, name: "Extra Paving" },
-  { id: 6, name: "Optional Add-ons" },
-  { id: 7, name: "Cost Summary" },
-  { id: 8, name: "Preview Quote" },
+  { id: 5, name: "Optional Add-ons" },
+  { id: 6, name: "Cost Summary" },
+  { id: 7, name: "Preview Quote" },
 ];
 
 export interface QuoteStepsState {
@@ -127,15 +126,7 @@ export const useQuoteSteps = (quoteId?: string) => {
         // Micro dig data
         micro_dig_required: quoteData.micro_dig_required === true,
         micro_dig_price: quoteData.micro_dig_price || 0,
-        micro_dig_notes: quoteData.micro_dig_notes || '',
-        
-        // Under fence strips data
-        under_fence_strips_data: quoteData.under_fence_strips_data,
-        under_fence_strips_cost: quoteData.under_fence_strips_cost || 0,
-        
-        // Existing concrete paving
-        existing_concrete_paving: quoteData.existing_concrete_paving || '',
-        existing_concrete_paving_cost: quoteData.existing_concrete_paving_cost || 0
+        micro_dig_notes: quoteData.micro_dig_notes || ''
       });
 
       setState(prev => ({ 

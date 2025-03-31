@@ -61,18 +61,24 @@ export const TrafficControlSelector = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None Required</SelectItem>
-                  {trafficControlCosts?.map(tc => (
-                    <SelectItem key={tc.id} value={tc.id}>
-                      {tc.name} - ${tc.price.toFixed(2)}
+                  {!trafficControlCosts || trafficControlCosts.length === 0 ? (
+                    <SelectItem value="no-options" disabled>
+                      No traffic control options available
                     </SelectItem>
-                  ))}
+                  ) : (
+                    trafficControlCosts.map(tc => (
+                      <SelectItem key={tc.id} value={tc.id}>
+                        {tc.name} - ${tc.price.toFixed(2)}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
             
-            {trafficControlId && trafficControlId !== "none" && (
+            {trafficControlId && trafficControlId !== "none" && trafficControlCosts && (
               <div className="text-sm text-muted-foreground">
-                <p>Cost: ${trafficControlCosts?.find(tc => tc.id === trafficControlId)?.price.toFixed(2)}</p>
+                <p>Cost: ${trafficControlCosts.find(tc => tc.id === trafficControlId)?.price.toFixed(2) || "0.00"}</p>
               </div>
             )}
             

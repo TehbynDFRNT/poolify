@@ -1,34 +1,34 @@
 
 import React from "react";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ExtraPavingCost } from "@/types/extra-paving-cost";
+import { Label } from "@/components/ui/label";
 
-interface PavingTypeSelectorProps {
+interface PavingSelectProps {
   selectedPavingId: string;
-  extraPavingCosts?: ExtraPavingCost[];
-  onSelect: (value: string) => void;
+  pavingOptions: Array<{ id: string; category: string }>;
+  onChange: (id: string) => void;
+  disabled?: boolean;
 }
 
-export const PavingTypeSelector = ({
+export const PavingSelect: React.FC<PavingSelectProps> = ({
   selectedPavingId,
-  extraPavingCosts,
-  onSelect
-}: PavingTypeSelectorProps) => {
+  pavingOptions,
+  onChange,
+  disabled = false
+}) => {
   return (
-    <div>
-      <Label htmlFor="paving-type" className="block text-gray-700 font-medium mb-1">
-        Paving Type
-      </Label>
+    <div className="space-y-2">
+      <Label htmlFor="paving-type">Paving Type</Label>
       <Select
         value={selectedPavingId || "default"}
-        onValueChange={onSelect}
+        onValueChange={onChange}
+        disabled={disabled}
       >
         <SelectTrigger id="paving-type" className="w-full">
           <SelectValue placeholder="Select paving type" />
         </SelectTrigger>
         <SelectContent>
-          {!extraPavingCosts || extraPavingCosts.length === 0 ? (
+          {pavingOptions.length === 0 ? (
             <SelectItem value="no-options" disabled>
               No paving options available
             </SelectItem>
@@ -37,9 +37,9 @@ export const PavingTypeSelector = ({
               <SelectItem value="default" disabled>
                 Select paving type
               </SelectItem>
-              {extraPavingCosts.map((paving) => (
-                <SelectItem key={paving.id} value={paving.id}>
-                  {paving.category}
+              {pavingOptions.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.category}
                 </SelectItem>
               ))}
             </>

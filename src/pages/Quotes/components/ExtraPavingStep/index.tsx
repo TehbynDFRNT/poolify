@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useQuoteContext } from "../../context/QuoteContext";
 import { FormHeader } from "../SiteRequirementsStep/components/FormHeader";
@@ -16,7 +15,7 @@ import { useCostCalculation } from "./hooks/useCostCalculation";
 import { fetchUnderFenceStrips } from "./services/pavingService";
 import { calculatePavingAndLayingCosts } from "./utils/pavingCalculations";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
-import { ExtraPavingOnConcrete } from "./components/ExtraPavingOnConcrete";
+import { PavingOnExistingConcrete } from "./components/PavingOnExistingConcrete";
 
 interface ExtraPavingStepProps {
   onNext: () => void;
@@ -88,6 +87,9 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     underFenceStrips
   );
 
+  // Get existing concrete paving cost
+  const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
+
   // Log the breakdown for debugging
   useEffect(() => {
     console.log("Paving Material Total:", pavingTotal);
@@ -95,7 +97,8 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
     console.log("Laying Labour Total:", layingTotal);
     console.log("Combined Total:", pavingTotal + layingTotal + concreteTotal);
     console.log("Should match pavingTotalCost:", pavingTotalCost);
-  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost]);
+    console.log("Existing Concrete Paving Cost:", existingConcretePavingCost);
+  }, [pavingTotal, layingTotal, concreteTotal, pavingTotalCost, existingConcretePavingCost]);
 
   const handleSaveOnly = async () => {
     await handleSaveExtraPaving(false, {
@@ -158,10 +161,10 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         onUpdateStrips={setUnderFenceStrips}
       />
       
-      {/* Extra Paving on Concrete section */}
-      <ExtraPavingOnConcrete />
+      {/* Paving on Existing Concrete section */}
+      <PavingOnExistingConcrete />
 
-      {/* Total Cost Summary */}
+      {/* Total Cost Summary with existing concrete paving cost */}
       <TotalCostSummary 
         pavingTotal={pavingTotal}
         layingTotal={layingTotal}
@@ -171,6 +174,7 @@ export const ExtraPavingStep = ({ onNext, onPrevious }: ExtraPavingStepProps) =>
         concreteCutsCost={concreteCutsCost}
         underFenceStripsCost={underFenceStripsCost}
         totalCost={totalCost}
+        existingConcretePavingCost={existingConcretePavingCost}
       />
 
       {/* Navigation using FormActions component */}

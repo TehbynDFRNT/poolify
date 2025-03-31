@@ -6,10 +6,9 @@ import { Input } from "@/components/ui/input";
 interface MetersInputProps {
   meters: number;
   onChange: (value: number) => void;
-  disabled?: boolean;
 }
 
-export const MetersInput = ({ meters, onChange, disabled = false }: MetersInputProps) => {
+export const MetersInput = ({ meters, onChange }: MetersInputProps) => {
   return (
     <div>
       <Label htmlFor="meters" className="block text-gray-700 font-medium mb-1">
@@ -23,7 +22,6 @@ export const MetersInput = ({ meters, onChange, disabled = false }: MetersInputP
         value={meters || ""}
         onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
         className="w-full"
-        disabled={disabled}
       />
     </div>
   );

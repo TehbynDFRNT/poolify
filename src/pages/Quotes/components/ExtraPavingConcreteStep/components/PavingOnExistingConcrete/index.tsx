@@ -1,15 +1,19 @@
 
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { SquareDashed } from "lucide-react";
-import { PavingTypeSelector } from "@/pages/Quotes/components/ExtraPavingStep/components/PavingTypeSelector";
-import { MetersInput } from "@/pages/Quotes/components/ExtraPavingStep/components/MetersInput";
+import { PavingSelect } from "./components/PavingSelect";
+import { MetersInput } from "./components/MetersInput";
 import { CostBreakdown } from "./components/CostBreakdown";
 import { FormActions } from "./components/FormActions";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 import { usePavingOnExistingConcrete } from "./hooks/usePavingOnExistingConcrete";
 
-export const PavingOnExistingConcrete: React.FC = () => {
+interface PavingOnExistingConcreteProps {
+  onChanged?: () => void;
+}
+
+export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> = React.memo(({ onChanged }) => {
   const {
     // State
     selectedPavingId,
@@ -17,9 +21,16 @@ export const PavingOnExistingConcrete: React.FC = () => {
     isSubmitting,
     isDeleting,
     showDeleteConfirm,
+    perMeterRate,
     pavingCost,
     labourCost,
+    marginCost,
     totalCost,
+    paverCost,
+    wastageCost,
+    marginPaverCost,
+    labourBaseCost,
+    labourMarginCost,
     isLoading,
     hasCostData,
     hasExistingData,
@@ -31,7 +42,24 @@ export const PavingOnExistingConcrete: React.FC = () => {
     setShowDeleteConfirm,
     handleSave,
     handleDelete
-  } = usePavingOnExistingConcrete();
+  } = usePavingOnExistingConcrete(onChanged);
+
+  // Memoized callbacks to prevent recreation on renders
+  const handleSelectPaving = useCallback((id: string) => {
+    setSelectedPavingId(id);
+  }, [setSelectedPavingId]);
+
+  const handleMetersChange = useCallback((value: number) => {
+    setMeters(value);
+  }, [setMeters]);
+
+  const handleOpenDeleteDialog = useCallback(() => {
+    setShowDeleteConfirm(true);
+  }, [setShowDeleteConfirm]);
+
+  const handleCloseDeleteDialog = useCallback(() => {
+    setShowDeleteConfirm(false);
+  }, [setShowDeleteConfirm]);
 
   return (
     <Card className="border border-gray-200 mt-6">
@@ -49,25 +77,35 @@ export const PavingOnExistingConcrete: React.FC = () => {
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Paving Selection */}
-              <PavingTypeSelector 
+              <PavingSelect 
                 selectedPavingId={selectedPavingId}
-                extraPavingCosts={extraPavingCosts}
-                onSelect={setSelectedPavingId}
+                pavingOptions={extraPavingCosts || []}
+                onChange={handleSelectPaving}
+                disabled={isSubmitting}
               />
               
               {/* Metres Input */}
               <MetersInput 
                 meters={meters} 
-                onChange={setMeters} 
+                onChange={handleMetersChange}
+                disabled={isSubmitting || !selectedPavingId}
               />
             </div>
             
             {/* Cost Breakdown */}
             {hasCostData && (
               <CostBreakdown 
-                pavingCost={pavingCost}
-                labourCost={labourCost}
-                totalCost={totalCost}
+                perMeterRate={perMeterRate || 0}
+                pavingCost={pavingCost || 0}
+                labourCost={labourCost || 0}
+                marginCost={marginCost || 0}
+                totalCost={totalCost || 0}
+                meters={meters || 0}
+                paverCost={paverCost || 0}
+                wastageCost={wastageCost || 0}
+                marginPaverCost={marginPaverCost || 0}
+                labourBaseCost={labourBaseCost || 0}
+                labourMarginCost={labourMarginCost || 0}
               />
             )}
 
@@ -75,7 +113,7 @@ export const PavingOnExistingConcrete: React.FC = () => {
             {hasCostData && (
               <FormActions
                 onSave={handleSave}
-                onDelete={() => setShowDeleteConfirm(true)}
+                onDelete={handleOpenDeleteDialog}
                 isSubmitting={isSubmitting}
                 isDeleting={isDeleting}
                 hasExistingData={hasExistingData}
@@ -88,10 +126,12 @@ export const PavingOnExistingConcrete: React.FC = () => {
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
+        onClose={handleCloseDeleteDialog}
         onConfirm={handleDelete}
         isDeleting={isDeleting}
       />
     </Card>
   );
-};
+});
+
+PavingOnExistingConcrete.displayName = "PavingOnExistingConcrete";
