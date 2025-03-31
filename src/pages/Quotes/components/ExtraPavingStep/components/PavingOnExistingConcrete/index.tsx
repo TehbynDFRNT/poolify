@@ -144,8 +144,8 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
       <CardContent>
         <div className="space-y-6">
           <PavingTypeSelector 
-            pavingOptions={extraPavingCosts || []}
             selectedPavingId={selectedPavingId}
+            pavingOptions={extraPavingCosts || []}
             onSelect={handlePavingChange}
           />
           

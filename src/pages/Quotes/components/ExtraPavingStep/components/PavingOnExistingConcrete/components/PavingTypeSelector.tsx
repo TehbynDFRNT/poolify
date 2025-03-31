@@ -6,7 +6,7 @@ import { ExtraPavingCost } from "@/types/extra-paving-cost";
 
 interface PavingTypeSelectorProps {
   selectedPavingId: string;
-  pavingOptions: ExtraPavingCost[] | undefined;
+  pavingOptions: ExtraPavingCost[];
   onSelect: (value: string) => void;
 }
 
