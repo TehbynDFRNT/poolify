@@ -4,7 +4,6 @@ import { useQuoteContext } from "../../context/QuoteContext";
 import { ExtraPavingOnConcrete } from "../ExtraPavingStep/components/ExtraPavingOnConcrete";
 import { PavingOnExistingConcrete } from "../ExtraPavingStep/components/PavingOnExistingConcrete";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { CombinedPricingSummary } from "./components/CombinedPricingSummary";
 
 interface ExtraPavingConcreteStepProps {

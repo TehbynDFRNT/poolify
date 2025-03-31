@@ -6,13 +6,13 @@ import { ExtraPavingCost } from "@/types/extra-paving-cost";
 
 interface PavingTypeSelectorProps {
   selectedPavingId: string;
-  extraPavingCosts: ExtraPavingCost[] | undefined;
+  pavingOptions: ExtraPavingCost[] | undefined;
   onSelect: (value: string) => void;
 }
 
 export const PavingTypeSelector = ({ 
   selectedPavingId, 
-  extraPavingCosts, 
+  pavingOptions, 
   onSelect 
 }: PavingTypeSelectorProps) => {
   return (
@@ -25,12 +25,12 @@ export const PavingTypeSelector = ({
           <SelectValue placeholder="Select paving type" />
         </SelectTrigger>
         <SelectContent>
-          {extraPavingCosts?.map((pavingType) => (
+          {pavingOptions?.map((pavingType) => (
             <SelectItem key={pavingType.id} value={pavingType.id}>
               {pavingType.category}
             </SelectItem>
           ))}
-          {!extraPavingCosts?.length && (
+          {!pavingOptions?.length && (
             <SelectItem value="none" disabled>
               No paving types available
             </SelectItem>

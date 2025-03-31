@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useConstructionCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
+import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 import { useConcreteCostCalculator } from "@/pages/Quotes/components/ExtraPavingConcreteStep/hooks/useConcreteCostCalculator";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +15,7 @@ interface PavingOnExistingConcreteProps {
 
 export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcreteProps) => {
   const { quoteData } = useQuoteContext();
-  const { extraPavingCosts, concreteCosts, concreteLabourCosts, isLoading } = useConstructionCosts();
+  const { extraPavingCosts, concreteCosts, concreteLabourCosts, isLoading } = useConcreteCosts();
   
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
@@ -27,7 +27,7 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
       if (quoteData.id) {
         try {
           const { data, error } = await supabase
-            .from('quote_extra_paving_concrete')
+            .from('quote_extra_pavings')
             .select('*')
             .eq('quote_id', quoteData.id)
             .eq('type', 'paving_on_existing_concrete')
@@ -82,7 +82,7 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
       try {
         // Check if record exists
         const { data: existingData, error: checkError } = await supabase
-          .from('quote_extra_paving_concrete')
+          .from('quote_extra_pavings')
           .select('id')
           .eq('quote_id', quoteData.id)
           .eq('type', 'paving_on_existing_concrete')
@@ -95,13 +95,13 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
           type: 'paving_on_existing_concrete',
           paving_id: selectedPavingId,
           meters,
-          cost: totalCost,
+          total_cost: totalCost,
         };
         
         if (existingData) {
           // Update existing record
           const { error: updateError } = await supabase
-            .from('quote_extra_paving_concrete')
+            .from('quote_extra_pavings')
             .update(dataToSave)
             .eq('id', existingData.id);
             
@@ -109,7 +109,7 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
         } else {
           // Insert new record
           const { error: insertError } = await supabase
-            .from('quote_extra_paving_concrete')
+            .from('quote_extra_pavings')
             .insert(dataToSave);
             
           if (insertError) throw insertError;
@@ -146,13 +146,12 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
           <PavingTypeSelector 
             pavingOptions={extraPavingCosts || []}
             selectedPavingId={selectedPavingId}
-            onPavingChange={handlePavingChange}
+            onSelect={handlePavingChange}
           />
           
           <MetersInput 
             meters={meters}
-            onMetersChange={handleMetersChange}
-            disabled={!selectedPavingId}
+            onChange={handleMetersChange}
           />
           
           {selectedPavingId && meters > 0 && (

@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useConstructionCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
+import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 import { PavingTypeSelector } from "@/pages/Quotes/components/ExtraPavingConcreteStep/components/PavingTypeSelector";
 import { MetersInput } from "@/pages/Quotes/components/ExtraPavingConcreteStep/components/MetersInput";
 import { CostBreakdown } from "@/pages/Quotes/components/ExtraPavingConcreteStep/components/CostBreakdown";
@@ -16,7 +16,7 @@ interface ExtraPavingOnConcreteProps {
 
 export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcreteProps) => {
   const { quoteData } = useQuoteContext();
-  const { extraPavingCosts, concreteCosts, concreteLabourCosts, isLoading } = useConstructionCosts();
+  const { concreteCosts, extraPavingCosts, concreteLabourCosts, isLoading } = useConcreteCosts();
   
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
@@ -28,7 +28,7 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
       if (quoteData.id) {
         try {
           const { data, error } = await supabase
-            .from('quote_extra_paving_concrete')
+            .from('quote_extra_pavings')
             .select('*')
             .eq('quote_id', quoteData.id)
             .eq('type', 'extra_paving_on_concrete')
@@ -83,7 +83,7 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
       try {
         // Check if record exists
         const { data: existingData, error: checkError } = await supabase
-          .from('quote_extra_paving_concrete')
+          .from('quote_extra_pavings')
           .select('id')
           .eq('quote_id', quoteData.id)
           .eq('type', 'extra_paving_on_concrete')
@@ -96,13 +96,13 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
           type: 'extra_paving_on_concrete',
           paving_id: selectedPavingId,
           meters,
-          cost: totalCost,
+          total_cost: totalCost,
         };
         
         if (existingData) {
           // Update existing record
           const { error: updateError } = await supabase
-            .from('quote_extra_paving_concrete')
+            .from('quote_extra_pavings')
             .update(dataToSave)
             .eq('id', existingData.id);
             
@@ -110,7 +110,7 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
         } else {
           // Insert new record
           const { error: insertError } = await supabase
-            .from('quote_extra_paving_concrete')
+            .from('quote_extra_pavings')
             .insert(dataToSave);
             
           if (insertError) throw insertError;
@@ -145,15 +145,14 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
       <CardContent>
         <div className="space-y-6">
           <PavingTypeSelector 
-            pavingOptions={extraPavingCosts || []}
             selectedPavingId={selectedPavingId}
-            onPavingChange={handlePavingChange}
+            extraPavingCosts={extraPavingCosts}
+            onSelect={handlePavingChange}
           />
           
           <MetersInput 
             meters={meters}
-            onMetersChange={handleMetersChange}
-            disabled={!selectedPavingId}
+            onChange={handleMetersChange}
           />
           
           {selectedPavingId && meters > 0 && (
@@ -163,9 +162,9 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
               labourCost={labourCost}
               marginCost={marginCost}
               totalCost={totalCost}
-              pavingDetails={pavingDetails}
-              concreteDetails={concreteDetails}
-              labourDetails={labourDetails}
+              pavingDetails={pavingDetails || {}}
+              concreteDetails={concreteDetails || {}}
+              labourDetails={labourDetails || {}}
               meters={meters}
             />
           )}
