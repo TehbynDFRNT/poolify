@@ -13,6 +13,15 @@ interface PavingOnExistingConcreteProps {
   onCostUpdate?: (cost: number) => void;
 }
 
+interface ExtraPavingData {
+  id?: string;
+  quote_id?: string;
+  paving_id?: string;
+  meters?: number;
+  total_cost?: number;
+  type?: string;
+}
+
 export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcreteProps) => {
   const { quoteData } = useQuoteContext();
   const { extraPavingCosts, concreteCosts, concreteLabourCosts, isLoading } = useConcreteCosts();
@@ -90,7 +99,7 @@ export const PavingOnExistingConcrete = ({ onCostUpdate }: PavingOnExistingConcr
           
         if (checkError) throw checkError;
         
-        const dataToSave = {
+        const dataToSave: ExtraPavingData = {
           quote_id: quoteData.id,
           type: 'paving_on_existing_concrete',
           paving_id: selectedPavingId,

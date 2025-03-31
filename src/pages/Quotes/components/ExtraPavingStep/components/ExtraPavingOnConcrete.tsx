@@ -2,16 +2,25 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
-import { PavingTypeSelector } from "@/pages/Quotes/components/ExtraPavingConcreteStep/components/PavingTypeSelector";
-import { MetersInput } from "@/pages/Quotes/components/ExtraPavingConcreteStep/components/MetersInput";
-import { CostBreakdown } from "@/pages/Quotes/components/ExtraPavingConcreteStep/components/CostBreakdown";
-import { useConcreteCostCalculator } from "@/pages/Quotes/components/ExtraPavingConcreteStep/hooks/useConcreteCostCalculator";
+import { PavingTypeSelector } from "./PavingOnExistingConcrete/components/PavingTypeSelector";
+import { MetersInput } from "./PavingOnExistingConcrete/components/MetersInput";
+import { CostBreakdown } from "./PavingOnExistingConcrete/components/CostBreakdown";
+import { useConcreteCostCalculator } from "@/pages/Quotes/components/ExtraPavingStep/hooks/useConcreteCostCalculator";
 import { useQuoteContext } from "@/pages/Quotes/context/QuoteContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 interface ExtraPavingOnConcreteProps {
   onCostUpdate?: (cost: number) => void;
+}
+
+interface ExtraPavingData {
+  id?: string;
+  quote_id?: string;
+  paving_id?: string;
+  meters?: number;
+  total_cost?: number;
+  type?: string;
 }
 
 export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcreteProps) => {
@@ -91,7 +100,7 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
           
         if (checkError) throw checkError;
         
-        const dataToSave = {
+        const dataToSave: ExtraPavingData = {
           quote_id: quoteData.id,
           type: 'extra_paving_on_concrete',
           paving_id: selectedPavingId,
@@ -146,7 +155,7 @@ export const ExtraPavingOnConcrete = ({ onCostUpdate }: ExtraPavingOnConcretePro
         <div className="space-y-6">
           <PavingTypeSelector 
             selectedPavingId={selectedPavingId}
-            extraPavingCosts={extraPavingCosts}
+            pavingOptions={extraPavingCosts || []}
             onSelect={handlePavingChange}
           />
           
