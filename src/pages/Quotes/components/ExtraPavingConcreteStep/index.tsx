@@ -43,7 +43,6 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
 
   return (
     <div className="space-y-6">
-      {/* Removed the duplicate h2 header that was here */}
       <p className="text-gray-500 mb-6">Calculate additional paving and concrete costs</p>
       
       {!quoteData.pool_id && (
@@ -55,10 +54,8 @@ export const ExtraPavingConcreteStep = ({ onNext, onPrevious }: ExtraPavingConcr
       )}
 
       <div className="space-y-8">
-        {/* Keep both components */}
         <ExtraPavingOnConcrete />
         
-        {/* And keep the second one */}
         <PavingOnExistingConcrete />
       </div>
       

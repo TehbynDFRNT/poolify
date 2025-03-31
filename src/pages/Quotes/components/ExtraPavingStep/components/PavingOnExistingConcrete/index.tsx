@@ -155,9 +155,9 @@ export const PavingOnExistingConcrete = () => {
                   labourCost={labourCost}
                   marginCost={marginCost}
                   totalCost={totalCost}
-                  pavingDetails={pavingDetails}
-                  concreteDetails={concreteDetails}
-                  labourDetails={labourDetails}
+                  pavingDetails={pavingDetails || {}}
+                  concreteDetails={concreteDetails || {}}
+                  labourDetails={labourDetails || {}}
                   meters={meters}
                 />
               )}

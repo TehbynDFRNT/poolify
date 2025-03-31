@@ -14,17 +14,17 @@ interface CostBreakdownProps {
 }
 
 export const CostBreakdown = ({
-  perMeterCost,
-  materialCost,
-  labourCost,
-  marginCost,
-  totalCost,
+  perMeterCost = 0,
+  materialCost = 0,
+  labourCost = 0,
+  marginCost = 0,
+  totalCost = 0,
   pavingDetails = {},
   concreteDetails = {},
   labourDetails = {},
-  meters
+  meters = 0
 }: CostBreakdownProps) => {
-  // Add default empty objects to prevent undefined errors
+  // Add default values to prevent undefined errors
   
   return (
     <div className="space-y-4">
