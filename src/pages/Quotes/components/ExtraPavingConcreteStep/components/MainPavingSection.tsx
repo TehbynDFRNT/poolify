@@ -81,6 +81,10 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
     }
   };
 
+  // Determine if we should show the saved cost in the header
+  const showHeaderCost = hasExistingData && (totalCost > 0 || quoteData.selected_paving_cost > 0);
+  const headerCostValue = hasExistingData ? (totalCost || quoteData.selected_paving_cost || 0) : 0;
+
   return (
     <Card className="border border-gray-200">
       <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
@@ -88,9 +92,9 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
           <SquareDashed className="h-5 w-5 text-blue-500" />
           <h3 className="text-lg font-medium">Extra Paving and Concrete</h3>
         </div>
-        {hasExistingData && (
+        {showHeaderCost && (
           <span className="text-green-600 text-sm font-medium">
-            ${totalCost.toFixed(2)}
+            ${headerCostValue.toFixed(2)}
           </span>
         )}
       </CardHeader>

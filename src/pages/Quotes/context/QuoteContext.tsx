@@ -113,7 +113,15 @@ export const QuoteProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
         if (data) {
           console.log("Refreshed quote data:", data);
-          setQuoteData(data as Partial<Quote>);
+          // Ensure numeric fields are properly parsed as numbers
+          const processedData = {
+            ...data,
+            selected_paving_meters: Number(data.selected_paving_meters) || 0,
+            selected_paving_cost: Number(data.selected_paving_cost) || 0,
+            selected_paving_margin: Number(data.selected_paving_margin) || 0,
+            extra_paving_cost: Number(data.extra_paving_cost) || 0
+          };
+          setQuoteData(processedData as Partial<Quote>);
         }
         
         lastRefreshTime.current = Date.now();

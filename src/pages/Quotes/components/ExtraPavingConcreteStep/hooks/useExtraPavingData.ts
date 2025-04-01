@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
@@ -40,12 +41,15 @@ export const useExtraPavingData = (onNext?: () => void) => {
     // Early return if no quote data yet
     if (!quoteData.id) return;
     
-    // Check if there's saved paving data (selected_paving_id and selected_paving_meters)
+    // Check if there's saved paving data
     if (quoteData.selected_paving_id && quoteData.selected_paving_meters) {
+      console.log("Found existing extra paving data:", quoteData.selected_paving_id, quoteData.selected_paving_meters);
       setSelectedPavingId(quoteData.selected_paving_id);
-      setMeters(quoteData.selected_paving_meters);
+      setMeters(Number(quoteData.selected_paving_meters) || 0);
       setHasExistingData(true);
-      setHasCostData(true);
+    } else {
+      console.log("No existing extra paving data found");
+      setHasExistingData(false);
     }
   }, [quoteData]);
 
@@ -110,15 +114,23 @@ export const useExtraPavingData = (onNext?: () => void) => {
     setMarginCost(totalMargin);
     setTotalCost(calculatedTotalCost);
     setHasCostData(true);
-  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts, concreteCosts]);
+    
+    // If there's data in the database but we've just calculated it now,
+    // mark as having existing data
+    if (quoteData.selected_paving_id === selectedPavingId) {
+      setHasExistingData(true);
+    }
+  }, [selectedPavingId, meters, extraPavingCosts, concreteLabourCosts, concreteCosts, quoteData.selected_paving_id]);
 
   // Mark changes when inputs change
   const handleSelectedPavingChange = useCallback((id: string) => {
+    console.log("Changing selected paving to:", id);
     setSelectedPavingId(id);
     markAsChanged();
   }, [markAsChanged]);
 
   const handleMetersChange = useCallback((value: number) => {
+    console.log("Changing meters to:", value);
     setMeters(value);
     markAsChanged();
   }, [markAsChanged]);
@@ -129,6 +141,13 @@ export const useExtraPavingData = (onNext?: () => void) => {
     if (!selectedPavingId || meters <= 0) return false;
     
     try {
+      console.log("Saving extra paving data:", { 
+        id: quoteData.id,
+        pavingId: selectedPavingId,
+        meters,
+        totalCost
+      });
+      
       const { error } = await supabase
         .from("quotes")
         .update({
@@ -141,6 +160,7 @@ export const useExtraPavingData = (onNext?: () => void) => {
         .eq("id", quoteData.id);
 
       if (error) throw error;
+      console.log("Extra paving data saved successfully");
       return true;
     } catch (error) {
       console.error("Error saving extra paving data:", error);
@@ -152,6 +172,7 @@ export const useExtraPavingData = (onNext?: () => void) => {
     if (!quoteData.id) return false;
     
     try {
+      console.log("Removing extra paving data for quote:", quoteData.id);
       const { error } = await supabase
         .from("quotes")
         .update({
@@ -164,6 +185,7 @@ export const useExtraPavingData = (onNext?: () => void) => {
         .eq("id", quoteData.id);
 
       if (error) throw error;
+      console.log("Extra paving data removed successfully");
       return true;
     } catch (error) {
       console.error("Error removing extra paving:", error);
@@ -227,6 +249,7 @@ export const useExtraPavingData = (onNext?: () => void) => {
         // Update local state after successful removal
         handleSelectedPavingChange("");
         handleMetersChange(0);
+        setHasExistingData(false);
         await refreshQuoteData();
         markAsSaved();
         return true;

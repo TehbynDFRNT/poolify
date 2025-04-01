@@ -17,6 +17,11 @@ export const usePavingState = (quoteData: any) => {
       // Ensure meters is a number
       const metersValue = Number(quoteData.selected_paving_meters) || 0;
       setMeters(metersValue);
+    } else {
+      console.log("No saved paving data found in quote");
+      // Reset state if no data is available
+      setSelectedPavingId("");
+      setMeters(0);
     }
   }, [quoteData]);
 
@@ -30,12 +35,16 @@ export const usePavingState = (quoteData: any) => {
     setMeters(value);
   }, []);
 
+  // Helper to check if we have existing data
+  const hasExistingData = Boolean(quoteData?.selected_paving_id && quoteData?.selected_paving_meters > 0);
+
   return {
     selectedPavingId,
     meters,
     isSubmitting,
     setIsSubmitting,
     handleSelectedPavingChange,
-    handleMetersChange
+    handleMetersChange,
+    hasExistingData
   };
 };
