@@ -119,6 +119,12 @@ export const useQuoteSteps = (quoteId?: string) => {
         concrete_cuts: quoteData.concrete_cuts || '',
         concrete_cuts_cost: quoteData.concrete_cuts_cost || 0,
         
+        // Selected paving properties
+        selected_paving_id: quoteData.selected_paving_id || '',
+        selected_paving_meters: Number(quoteData.selected_paving_meters) || 0,
+        selected_paving_cost: Number(quoteData.selected_paving_cost) || 0, 
+        selected_paving_margin: Number(quoteData.selected_paving_margin) || 0,
+        
         // Optional addons
         optional_addons_cost: quoteData.optional_addons_cost || 0,
         total_cost: quoteData.total_cost || 0,
@@ -126,7 +132,18 @@ export const useQuoteSteps = (quoteId?: string) => {
         // Micro dig data
         micro_dig_required: quoteData.micro_dig_required === true,
         micro_dig_price: quoteData.micro_dig_price || 0,
-        micro_dig_notes: quoteData.micro_dig_notes || ''
+        micro_dig_notes: quoteData.micro_dig_notes || '',
+        
+        // Existing concrete paving
+        existing_concrete_paving: quoteData.existing_concrete_paving || '',
+        existing_concrete_paving_cost: quoteData.existing_concrete_paving_cost || 0,
+        
+        // Extra concreting
+        extra_concreting: quoteData.extra_concreting || '',
+        extra_concreting_cost: quoteData.extra_concreting_cost || 0,
+        extra_concreting_margin: quoteData.extra_concreting_margin || 0,
+        extra_concreting_meterage: quoteData.extra_concreting_meterage || 0,
+        extra_concreting_type: quoteData.extra_concreting_type || '',
       });
 
       setState(prev => ({ 
