@@ -26,13 +26,17 @@ export const TotalCostSummary: React.FC = () => {
   const concreteCutsCost = quoteData.concrete_cuts_cost || 0;
   const underFenceStripsCost = quoteData.under_fence_strips_cost || 0;
 
-  // Important: The main paving cost already includes existing concrete paving cost,
-  // extra concreting cost, concrete pump cost, cuts cost, and under fence strips cost.
-  // We should NOT add these costs again to calculate the total.
-  // Instead, we'll display the individual costs for information purposes.
+  // Calculate the actual main paving cost (excluding the other components that might be included)
+  const mainPavingOnlyAmount = mainPavingCost - existingConcretePavingCost;
   
-  // Use the main paving cost as the total since it already includes all components
-  const totalCost = mainPavingCost;
+  // Calculate the total (we're using the sum to ensure accuracy)
+  const totalCost = 
+    (mainPavingOnlyAmount > 0 ? mainPavingOnlyAmount : 0) + 
+    existingConcretePavingCost + 
+    extraConcretingCost + 
+    concretePumpCost + 
+    concreteCutsCost + 
+    underFenceStripsCost;
 
   // Helper function to check if section should be displayed
   const shouldDisplaySection = (value: number, additionalCondition = true): boolean => {
@@ -55,11 +59,11 @@ export const TotalCostSummary: React.FC = () => {
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              {shouldDisplaySection(mainPavingCost - existingConcretePavingCost - extraConcretingCost - concretePumpCost - concreteCutsCost - underFenceStripsCost, hasPavingSelection) && (
+              {shouldDisplaySection(mainPavingOnlyAmount, hasPavingSelection) && (
                 <>
                   <div className="text-gray-600">Extra Paving and Concrete:</div>
                   <div className="text-right font-medium">
-                    {formatCurrency(mainPavingCost - existingConcretePavingCost - extraConcretingCost - concretePumpCost - concreteCutsCost - underFenceStripsCost)}
+                    {formatCurrency(mainPavingOnlyAmount)}
                   </div>
                 </>
               )}
