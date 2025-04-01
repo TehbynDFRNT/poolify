@@ -41,7 +41,7 @@ export const TotalCostSummary: React.FC = () => {
   };
 
   // Check if any valid paving data exists by looking at selection data
-  const hasPavingSelection = Boolean(quoteData.selected_paving_id && quoteData.selected_paving_meters);
+  const hasPavingSelection = Boolean(quoteData.selected_paving_id && quoteData.selected_paving_meters && quoteData.selected_paving_meters > 0);
 
   return (
     <Card className="border border-gray-200">
