@@ -133,9 +133,18 @@ export const useExtraConcreting = (onChanged?: () => void) => {
         return false;
       }
 
-      // Create update object with specific fields instead of using a JSON string
+      // Store the extra concreting data as JSON in the extra_concreting field
+      const extraConcretingData = {
+        type: selectedConcreting.type,
+        meterage: meters,
+        cost: totalCost,
+        margin: marginCost,
+        concreting_id: selectedConcretingType
+      };
+
+      // Update only the columns that actually exist in the database
       const updates: Partial<Quote> = {
-        extra_concreting_cost: totalCost,
+        extra_concreting: JSON.stringify(extraConcretingData),
         extra_concreting_type: selectedConcreting.type,
         extra_concreting_meterage: meters,
         extra_concreting_margin: marginCost
@@ -182,10 +191,10 @@ export const useExtraConcreting = (onChanged?: () => void) => {
     
     try {
       const updates: Partial<Quote> = {
-        extra_concreting_cost: 0,
+        extra_concreting: null,
         extra_concreting_type: null,
-        extra_concreting_meterage: 0,
-        extra_concreting_margin: 0
+        extra_concreting_meterage: null,
+        extra_concreting_margin: null
       };
       
       // Update database

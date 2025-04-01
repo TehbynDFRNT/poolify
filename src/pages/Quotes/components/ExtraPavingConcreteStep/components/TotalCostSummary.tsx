@@ -10,7 +10,18 @@ export const TotalCostSummary: React.FC = () => {
   // Calculate totals
   const mainPavingCost = quoteData.extra_paving_cost || 0;
   const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
-  const extraConcretingCost = quoteData.extra_concreting_cost || 0;
+  
+  // Get extra concreting cost from the existing fields
+  let extraConcretingCost = 0;
+  if (quoteData.extra_concreting && typeof quoteData.extra_concreting === 'string') {
+    try {
+      const extraConcretingData = JSON.parse(quoteData.extra_concreting);
+      extraConcretingCost = extraConcretingData.cost || 0;
+    } catch (e) {
+      console.error("Error parsing extra concreting data:", e);
+    }
+  }
+  
   const concretePumpCost = quoteData.concrete_pump_required ? (quoteData.concrete_pump_price || 0) : 0;
   const concreteCutsCost = quoteData.concrete_cuts_cost || 0;
   const underFenceStripsCost = quoteData.under_fence_strips_cost || 0;
