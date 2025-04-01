@@ -58,7 +58,7 @@ export const TotalCostSummary: React.FC = () => {
             <div className="grid grid-cols-2 gap-2">
               {shouldDisplaySection(mainPavingCost, hasPavingSelection) && (
                 <>
-                  <div className="text-gray-600">Main Extra Paving:</div>
+                  <div className="text-gray-600">Extra Paving:</div>
                   <div className="text-right font-medium">{formatCurrency(mainPavingCost)}</div>
                 </>
               )}
