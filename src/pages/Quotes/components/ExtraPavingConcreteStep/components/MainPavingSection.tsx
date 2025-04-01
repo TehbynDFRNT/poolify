@@ -80,7 +80,7 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
       <CardHeader className="bg-white py-4 px-5 flex flex-row items-center justify-between">
         <div className="flex items-center gap-2">
           <SquareDashed className="h-5 w-5 text-blue-500" />
-          <h3 className="text-lg font-medium">Extra Paving</h3>
+          <h3 className="text-lg font-medium">Extra Paving and Concrete</h3>
         </div>
       </CardHeader>
       
