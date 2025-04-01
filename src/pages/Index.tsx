@@ -2,7 +2,6 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import {
-  Calculator,
   Construction,
   Database,
   Filter,
@@ -43,12 +42,6 @@ const Index = () => {
       description: "Manage pool add-ons and optional features",
       icon: <PlusCircle className="w-6 h-6 text-primary" />,
       link: "/add-ons",
-    },
-    {
-      title: "Price Builder",
-      description: "Set up pricing calculations and formulas",
-      icon: <Calculator className="w-6 h-6 text-primary" />,
-      link: "/price-builder",
     },
   ];
 

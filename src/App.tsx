@@ -19,8 +19,6 @@ import ThirdPartyCosts from "@/pages/ThirdPartyCosts";
 import Electrical from "@/pages/ThirdPartyCosts/Electrical";
 import Fencing from "@/pages/ThirdPartyCosts/Fencing";
 import AddOns from "@/pages/AddOns";
-import PriceBuilder from "@/pages/PriceBuilder";
-import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
 import PoolCreationWizard from "@/pages/PoolCreationWizard";
 
 // Create a client
@@ -54,8 +52,6 @@ function App() {
         <Route path="/third-party-costs/electrical" element={<Electrical />} />
         <Route path="/third-party-costs/fencing" element={<Fencing />} />
         <Route path="/add-ons" element={<AddOns />} />
-        <Route path="/price-builder" element={<PriceBuilder />} />
-        <Route path="/price-builder/pool/:poolId" element={<PoolPricing />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
