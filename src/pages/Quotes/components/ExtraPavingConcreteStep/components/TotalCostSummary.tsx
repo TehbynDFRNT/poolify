@@ -35,62 +35,76 @@ export const TotalCostSummary: React.FC = () => {
     concreteCutsCost + 
     underFenceStripsCost;
 
+  // Helper function to check if section should be displayed
+  const shouldDisplaySection = (value: number, additionalCondition = true): boolean => {
+    return value > 0 && additionalCondition;
+  };
+
+  // Check if any valid paving data exists by looking at selection data
+  const hasPavingSelection = Boolean(quoteData.selected_paving_id && quoteData.selected_paving_meters);
+
   return (
     <Card className="border border-gray-200">
       <CardHeader className="bg-white py-4 px-5">
         <h3 className="text-lg font-medium">Total Paving & Concrete Cost</h3>
       </CardHeader>
       <CardContent className="p-5">
-        <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            {mainPavingCost > 0 && (
-              <>
-                <div className="text-gray-600">Main Extra Paving:</div>
-                <div className="text-right font-medium">{formatCurrency(mainPavingCost)}</div>
-              </>
-            )}
-            
-            {existingConcretePavingCost > 0 && (
-              <>
-                <div className="text-gray-600">Paving on Existing Concrete:</div>
-                <div className="text-right font-medium">{formatCurrency(existingConcretePavingCost)}</div>
-              </>
-            )}
-            
-            {extraConcretingCost > 0 && (
-              <>
-                <div className="text-gray-600">Extra Concreting:</div>
-                <div className="text-right font-medium">{formatCurrency(extraConcretingCost)}</div>
-              </>
-            )}
-            
-            {concretePumpCost > 0 && (
-              <>
-                <div className="text-gray-600">Concrete Pump:</div>
-                <div className="text-right font-medium">{formatCurrency(concretePumpCost)}</div>
-              </>
-            )}
-            
-            {concreteCutsCost > 0 && (
-              <>
-                <div className="text-gray-600">Concrete Cuts:</div>
-                <div className="text-right font-medium">{formatCurrency(concreteCutsCost)}</div>
-              </>
-            )}
-            
-            {underFenceStripsCost > 0 && (
-              <>
-                <div className="text-gray-600">Under Fence Concrete Strips:</div>
-                <div className="text-right font-medium">{formatCurrency(underFenceStripsCost)}</div>
-              </>
-            )}
-            
-            <div className="text-gray-700 font-medium pt-2 mt-2 border-t">Total:</div>
-            <div className="text-right font-bold text-lg pt-2 mt-2 border-t">
-              {formatCurrency(totalCost)}
+        {totalCost === 0 ? (
+          <div className="text-gray-500 text-center py-4">
+            No paving or concrete costs have been added yet.
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              {shouldDisplaySection(mainPavingCost, hasPavingSelection) && (
+                <>
+                  <div className="text-gray-600">Main Extra Paving:</div>
+                  <div className="text-right font-medium">{formatCurrency(mainPavingCost)}</div>
+                </>
+              )}
+              
+              {shouldDisplaySection(existingConcretePavingCost) && (
+                <>
+                  <div className="text-gray-600">Paving on Existing Concrete:</div>
+                  <div className="text-right font-medium">{formatCurrency(existingConcretePavingCost)}</div>
+                </>
+              )}
+              
+              {shouldDisplaySection(extraConcretingCost) && (
+                <>
+                  <div className="text-gray-600">Extra Concreting:</div>
+                  <div className="text-right font-medium">{formatCurrency(extraConcretingCost)}</div>
+                </>
+              )}
+              
+              {shouldDisplaySection(concretePumpCost) && (
+                <>
+                  <div className="text-gray-600">Concrete Pump:</div>
+                  <div className="text-right font-medium">{formatCurrency(concretePumpCost)}</div>
+                </>
+              )}
+              
+              {shouldDisplaySection(concreteCutsCost) && (
+                <>
+                  <div className="text-gray-600">Concrete Cuts:</div>
+                  <div className="text-right font-medium">{formatCurrency(concreteCutsCost)}</div>
+                </>
+              )}
+              
+              {shouldDisplaySection(underFenceStripsCost) && (
+                <>
+                  <div className="text-gray-600">Under Fence Concrete Strips:</div>
+                  <div className="text-right font-medium">{formatCurrency(underFenceStripsCost)}</div>
+                </>
+              )}
+              
+              <div className="text-gray-700 font-medium pt-2 mt-2 border-t">Total:</div>
+              <div className="text-right font-bold text-lg pt-2 mt-2 border-t">
+                {formatCurrency(totalCost)}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </CardContent>
     </Card>
   );
