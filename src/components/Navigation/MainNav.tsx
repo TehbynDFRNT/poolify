@@ -8,8 +8,7 @@ import {
   Construction, 
   Filter, 
   PlusCircle,
-  Users,
-  FileText
+  Users
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
 
@@ -24,7 +23,6 @@ const MainNav: React.FC = () => {
     { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems" },
     { icon: <PlusCircle className="h-5 w-5" />, label: "Add-Ons", path: "/add-ons" },
     { icon: <Calculator className="h-5 w-5" />, label: "Price Builder", path: "/price-builder" },
-    { icon: <FileText className="h-5 w-5" />, label: "Quotes", path: "/quotes" },
   ];
 
   return (

@@ -22,7 +22,6 @@ import AddOns from "@/pages/AddOns";
 import PriceBuilder from "@/pages/PriceBuilder";
 import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
 import PoolCreationWizard from "@/pages/PoolCreationWizard";
-import Quotes from "@/pages/Quotes";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -57,7 +56,6 @@ function App() {
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/price-builder" element={<PriceBuilder />} />
         <Route path="/price-builder/pool/:poolId" element={<PoolPricing />} />
-        <Route path="/quotes" element={<Quotes />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
