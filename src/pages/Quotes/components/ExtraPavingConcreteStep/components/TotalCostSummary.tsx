@@ -8,7 +8,7 @@ export const TotalCostSummary: React.FC = () => {
   const { quoteData } = useQuoteContext();
 
   // Calculate totals
-  const mainPavingCost = quoteData.extra_paving_cost || 0;
+  const mainPavingCost = quoteData.selected_paving_cost || 0;
   const existingConcretePavingCost = quoteData.existing_concrete_paving_cost || 0;
   
   // Get extra concreting cost from the existing fields
@@ -26,12 +26,9 @@ export const TotalCostSummary: React.FC = () => {
   const concreteCutsCost = quoteData.concrete_cuts_cost || 0;
   const underFenceStripsCost = quoteData.under_fence_strips_cost || 0;
 
-  // Calculate the actual main paving cost (excluding the other components that might be included)
-  const mainPavingOnlyAmount = mainPavingCost - existingConcretePavingCost;
-  
-  // Calculate the total (we're using the sum to ensure accuracy)
+  // Calculate the total
   const totalCost = 
-    (mainPavingOnlyAmount > 0 ? mainPavingOnlyAmount : 0) + 
+    mainPavingCost + 
     existingConcretePavingCost + 
     extraConcretingCost + 
     concretePumpCost + 
@@ -59,11 +56,11 @@ export const TotalCostSummary: React.FC = () => {
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              {shouldDisplaySection(mainPavingOnlyAmount, hasPavingSelection) && (
+              {shouldDisplaySection(mainPavingCost, hasPavingSelection) && (
                 <>
                   <div className="text-gray-600">Extra Paving and Concrete:</div>
                   <div className="text-right font-medium">
-                    {formatCurrency(mainPavingOnlyAmount)}
+                    {formatCurrency(mainPavingCost)}
                   </div>
                 </>
               )}
