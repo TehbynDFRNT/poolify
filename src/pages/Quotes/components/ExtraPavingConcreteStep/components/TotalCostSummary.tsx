@@ -46,7 +46,7 @@ export const TotalCostSummary: React.FC = () => {
   return (
     <Card className="border border-gray-200">
       <CardHeader className="bg-white py-4 px-5">
-        <h3 className="text-lg font-medium">Total Paving & Concrete Cost</h3>
+        <h3 className="text-lg font-medium">Summary</h3>
       </CardHeader>
       <CardContent className="p-5">
         {totalCost === 0 ? (
@@ -58,7 +58,7 @@ export const TotalCostSummary: React.FC = () => {
             <div className="grid grid-cols-2 gap-2">
               {shouldDisplaySection(mainPavingCost, hasPavingSelection) && (
                 <>
-                  <div className="text-gray-600">Extra Paving:</div>
+                  <div className="text-gray-600">Extra Paving and Concrete:</div>
                   <div className="text-right font-medium">{formatCurrency(mainPavingCost)}</div>
                 </>
               )}
