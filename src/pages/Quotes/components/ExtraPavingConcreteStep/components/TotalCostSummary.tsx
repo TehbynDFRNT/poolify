@@ -26,14 +26,13 @@ export const TotalCostSummary: React.FC = () => {
   const concreteCutsCost = quoteData.concrete_cuts_cost || 0;
   const underFenceStripsCost = quoteData.under_fence_strips_cost || 0;
 
-  // Calculate overall total
-  const totalCost = 
-    mainPavingCost + 
-    existingConcretePavingCost + 
-    extraConcretingCost + 
-    concretePumpCost + 
-    concreteCutsCost + 
-    underFenceStripsCost;
+  // Important: The main paving cost already includes existing concrete paving cost,
+  // extra concreting cost, concrete pump cost, cuts cost, and under fence strips cost.
+  // We should NOT add these costs again to calculate the total.
+  // Instead, we'll display the individual costs for information purposes.
+  
+  // Use the main paving cost as the total since it already includes all components
+  const totalCost = mainPavingCost;
 
   // Helper function to check if section should be displayed
   const shouldDisplaySection = (value: number, additionalCondition = true): boolean => {
@@ -56,10 +55,12 @@ export const TotalCostSummary: React.FC = () => {
         ) : (
           <div className="space-y-3">
             <div className="grid grid-cols-2 gap-2">
-              {shouldDisplaySection(mainPavingCost, hasPavingSelection) && (
+              {shouldDisplaySection(mainPavingCost - existingConcretePavingCost - extraConcretingCost - concretePumpCost - concreteCutsCost - underFenceStripsCost, hasPavingSelection) && (
                 <>
                   <div className="text-gray-600">Extra Paving and Concrete:</div>
-                  <div className="text-right font-medium">{formatCurrency(mainPavingCost)}</div>
+                  <div className="text-right font-medium">
+                    {formatCurrency(mainPavingCost - existingConcretePavingCost - extraConcretingCost - concretePumpCost - concreteCutsCost - underFenceStripsCost)}
+                  </div>
                 </>
               )}
               
