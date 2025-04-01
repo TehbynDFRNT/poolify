@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { PavingTypeSelector } from "./PavingTypeSelector";
 import { MetersInput } from "./MetersInput";
@@ -60,6 +60,12 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
 }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Log selected paving for debugging
+  useEffect(() => {
+    console.log("MainPavingSection: Selected paving ID =", selectedPavingId, "meters =", meters);
+    console.log("Has existing data:", hasExistingData);
+  }, [selectedPavingId, meters, hasExistingData]);
 
   const handleRemove = async () => {
     setIsDeleting(true);
@@ -82,6 +88,11 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
           <SquareDashed className="h-5 w-5 text-blue-500" />
           <h3 className="text-lg font-medium">Extra Paving and Concrete</h3>
         </div>
+        {hasExistingData && (
+          <span className="text-green-600 text-sm font-medium">
+            ${totalCost.toFixed(2)}
+          </span>
+        )}
       </CardHeader>
       
       <CardContent className="p-5">
@@ -122,17 +133,17 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
             )}
 
             {/* Action Buttons */}
-            {hasCostData && (
-              <div className="flex justify-end gap-3 mt-4">
-                <Button
-                  onClick={onSave}
-                  disabled={isSubmitting}
-                  className="bg-teal-500 hover:bg-teal-600 text-white"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  {isSubmitting ? "Saving..." : "Save"}
-                </Button>
-                
+            <div className="flex justify-end gap-3 mt-4">
+              <Button
+                onClick={onSave}
+                disabled={isSubmitting || (!hasCostData && !hasExistingData)}
+                className="bg-teal-500 hover:bg-teal-600 text-white"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {isSubmitting ? "Saving..." : "Save"}
+              </Button>
+              
+              {(hasCostData || hasExistingData) && (
                 <Button
                   variant="destructive"
                   onClick={() => setShowDeleteConfirm(true)}
@@ -141,8 +152,8 @@ export const MainPavingSection: React.FC<MainPavingSectionProps> = ({
                   <Trash2 className="h-4 w-4 mr-2" />
                   {isDeleting ? "Removing..." : "Remove"}
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         )}
       </CardContent>

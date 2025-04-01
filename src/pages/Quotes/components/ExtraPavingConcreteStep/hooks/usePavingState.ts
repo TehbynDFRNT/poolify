@@ -1,40 +1,39 @@
 
-import { useState, useEffect } from "react";
-import { Quote } from "@/types/quote";
+import { useState, useEffect, useCallback } from "react";
+import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 
-export const usePavingState = (quoteData: Partial<Quote>) => {
+export const usePavingState = (quoteData: any) => {
   const [selectedPavingId, setSelectedPavingId] = useState<string>("");
   const [meters, setMeters] = useState<number>(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const { extraPavingCosts } = useExtraPavingCosts();
 
-  // Load data from quote if we're editing
+  // Load saved paving data when the component mounts or when quoteData changes
   useEffect(() => {
-    if (quoteData.selected_paving_id) {
+    if (quoteData && quoteData.selected_paving_id) {
+      console.log("Loading saved paving data from quote:", quoteData.selected_paving_id, quoteData.selected_paving_meters);
       setSelectedPavingId(quoteData.selected_paving_id);
-    }
-    
-    // Ensure meters is always a number
-    if (quoteData.selected_paving_meters !== undefined) {
-      const selectedMeters = quoteData.selected_paving_meters;
-      setMeters(typeof selectedMeters === 'number' ? selectedMeters : Number(selectedMeters));
+      
+      // Ensure meters is a number
+      const metersValue = Number(quoteData.selected_paving_meters) || 0;
+      setMeters(metersValue);
     }
   }, [quoteData]);
 
-  // Handler functions for paving selection and meters change
-  const handleSelectedPavingChange = (pavingId: string) => {
-    setSelectedPavingId(pavingId);
-  };
+  // Handle paving type selection change
+  const handleSelectedPavingChange = useCallback((id: string) => {
+    setSelectedPavingId(id);
+  }, []);
 
-  const handleMetersChange = (value: number) => {
+  // Handle meters change
+  const handleMetersChange = useCallback((value: number) => {
     setMeters(value);
-  };
+  }, []);
 
   return {
     selectedPavingId,
     meters,
     isSubmitting,
-    setSelectedPavingId,
-    setMeters,
     setIsSubmitting,
     handleSelectedPavingChange,
     handleMetersChange

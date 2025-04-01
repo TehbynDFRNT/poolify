@@ -50,7 +50,13 @@ const initialQuoteData: Partial<Quote> = {
   
   // Paving on existing concrete
   existing_concrete_paving: '',
-  existing_concrete_paving_cost: 0
+  existing_concrete_paving_cost: 0,
+  
+  // Extra paving fields
+  selected_paving_id: '',
+  selected_paving_meters: 0,
+  selected_paving_cost: 0,
+  selected_paving_margin: 0
 };
 
 const QuoteContext = createContext<QuoteContextType | undefined>(undefined);
