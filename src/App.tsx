@@ -21,9 +21,6 @@ import Fencing from "@/pages/ThirdPartyCosts/Fencing";
 import AddOns from "@/pages/AddOns";
 import PriceBuilder from "@/pages/PriceBuilder";
 import PoolPricing from "@/pages/PriceBuilder/PoolPricing";
-import Quotes from "@/pages/Quotes";
-import CreateQuote from "@/pages/Quotes/CreateQuote";
-import EditQuote from "@/pages/Quotes/EditQuote";
 import PoolCreationWizard from "@/pages/PoolCreationWizard";
 
 // Create a client
@@ -59,9 +56,6 @@ function App() {
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/price-builder" element={<PriceBuilder />} />
         <Route path="/price-builder/pool/:poolId" element={<PoolPricing />} />
-        <Route path="/quotes" element={<Quotes />} />
-        <Route path="/quotes/new" element={<CreateQuote />} />
-        <Route path="/quotes/edit/:quoteId" element={<EditQuote />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
