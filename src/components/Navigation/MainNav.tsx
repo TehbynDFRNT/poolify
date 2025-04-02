@@ -15,27 +15,25 @@ import NavItem from "@/components/Navigation/NavItem";
 const MainNav: React.FC = () => {
   const location = useLocation();
   
-  // Define the main navigation items
+  // Define the main navigation items - all as top-level items
   const navigation = [
     { 
       icon: <Home className="h-5 w-5" />, 
       label: "Cost Builder", 
       path: "/", 
-      isParent: true,
-      subItems: [
-        { 
-          icon: <Wand2 className="h-5 w-5" />, 
-          label: "Pool Creation Wizard", 
-          path: "/pool-creation-wizard", 
-          isParent: false 
-        },
-        { 
-          icon: <Database className="h-5 w-5" />, 
-          label: "Pool Specifications", 
-          path: "/pool-specifications", 
-          isParent: false 
-        }
-      ]
+      isParent: false
+    },
+    { 
+      icon: <Wand2 className="h-5 w-5" />, 
+      label: "Pool Creation Wizard", 
+      path: "/pool-creation-wizard", 
+      isParent: false 
+    },
+    { 
+      icon: <Database className="h-5 w-5" />, 
+      label: "Pool Specifications", 
+      path: "/pool-specifications", 
+      isParent: false 
     },
     { 
       icon: <Construction className="h-5 w-5" />, 
@@ -73,28 +71,14 @@ const MainNav: React.FC = () => {
   return (
     <nav className="space-y-1">
       {navigation.map((item) => (
-        <React.Fragment key={item.path}>
-          <NavItem
-            icon={item.icon}
-            label={item.label}
-            to={item.path}
-            active={isActive(item)}
-            isParent={item.isParent}
-          />
-          
-          {/* Render sub-items if present */}
-          {item.subItems?.map((subItem) => (
-            <NavItem
-              key={subItem.path}
-              icon={subItem.icon}
-              label={subItem.label}
-              to={subItem.path}
-              active={isActive(subItem)}
-              isParent={false}
-              isSubItem={true}
-            />
-          ))}
-        </React.Fragment>
+        <NavItem
+          key={item.path}
+          icon={item.icon}
+          label={item.label}
+          to={item.path}
+          active={isActive(item)}
+          isParent={item.isParent}
+        />
       ))}
     </nav>
   );

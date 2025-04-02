@@ -32,26 +32,17 @@ const NavItem = ({
           active
             ? "bg-primary text-white"
             : "hover:bg-gray-100 text-gray-600",
-          isParent && !active 
-            ? "font-semibold" 
-            : "",
-          isSubItem 
-            ? "pl-12 mt-1 text-sm" // Increased left padding for sub-items
-            : "px-4", // Consistent padding for all main items
+          "px-4", // Consistent padding for all items
           collapsed ? "justify-center" : "space-x-3"
         )}
       >
-        <span className={cn(
-          "flex items-center justify-center",
-          isSubItem && !collapsed ? "ml-1" : ""
-        )}>
+        <span className="flex items-center justify-center">
           {icon}
         </span>
         {!collapsed && (
           <span className={cn(
-            "font-medium", 
-            isParent && !active && "text-lg",
-            isSubItem && "text-sm"
+            "font-medium",
+            active ? "text-white" : "text-gray-600"
           )}>
             {label}
           </span>
