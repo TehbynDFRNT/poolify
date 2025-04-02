@@ -8,10 +8,12 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { Button } from "@/components/ui/button";
-import { FileSpreadsheet, Plus } from "lucide-react";
+import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const PoolWorksheet = () => {
+  const { data: pools, isLoading, error } = usePoolSpecifications();
+
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8">
@@ -30,32 +32,67 @@ const PoolWorksheet = () => {
         </Breadcrumb>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Pool Worksheet</h1>
+          <h1 className="text-3xl font-bold">Pool Specifications</h1>
           <p className="text-muted-foreground mt-1">
-            Create and manage your pool-related calculations
+            A comprehensive breakdown of all pool specifications
           </p>
         </div>
         
-        <div className="flex items-center justify-center min-h-[400px]">
-          <Card className="w-full max-w-lg border-dashed">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-4">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <FileSpreadsheet className="h-8 w-8 text-primary" />
-                </div>
-              </div>
-              <CardTitle>No Worksheet Created</CardTitle>
-            </CardHeader>
-            <CardContent className="text-center space-y-4">
-              <p className="text-muted-foreground">
-                Start by creating your first worksheet to calculate pool specifications and costs
-              </p>
-              <Button className="bg-teal-500 hover:bg-teal-600">
-                <Plus className="mr-2 h-4 w-4" />
-                Create New Worksheet
-              </Button>
-            </CardContent>
-          </Card>
+        <div className="overflow-x-auto border rounded-md">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>name</TableHead>
+                <TableHead>range</TableHead>
+                <TableHead>length</TableHead>
+                <TableHead>width</TableHead>
+                <TableHead>depth_shallow</TableHead>
+                <TableHead>depth_deep</TableHead>
+                <TableHead>waterline_l_m</TableHead>
+                <TableHead>volume_liters</TableHead>
+                <TableHead>salt_volume_bags</TableHead>
+                <TableHead>salt_volume_bags_fixed</TableHead>
+                <TableHead>weight_kg</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={11} className="text-center py-4">
+                    Loading pool specifications...
+                  </TableCell>
+                </TableRow>
+              ) : error ? (
+                <TableRow>
+                  <TableCell colSpan={11} className="text-center py-4 text-red-500">
+                    Error loading pool specifications
+                  </TableCell>
+                </TableRow>
+              ) : pools && pools.length > 0 ? (
+                pools.map((pool) => (
+                  <TableRow key={pool.id}>
+                    <TableCell>{pool.name}</TableCell>
+                    <TableCell>{pool.range}</TableCell>
+                    <TableCell>{pool.length.toFixed(2)}m</TableCell>
+                    <TableCell>{pool.width.toFixed(2)}m</TableCell>
+                    <TableCell>{pool.depth_shallow.toFixed(2)}m</TableCell>
+                    <TableCell>{pool.depth_deep.toFixed(2)}m</TableCell>
+                    <TableCell>{pool.waterline_l_m?.toFixed(2)}L/m</TableCell>
+                    <TableCell>{pool.volume_liters?.toLocaleString()}L</TableCell>
+                    <TableCell>{pool.salt_volume_bags || '-'}</TableCell>
+                    <TableCell>{pool.salt_volume_bags_fixed || '-'}</TableCell>
+                    <TableCell>{pool.weight_kg ? pool.weight_kg.toLocaleString() : '-'}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={11} className="text-center py-4">
+                    No pool specifications available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
         </div>
       </div>
     </DashboardLayout>
