@@ -14,7 +14,7 @@ interface PoolSelectionFormProps {
 
 export const PoolSelectionForm: React.FC<PoolSelectionFormProps> = ({ onNext, onPrevious }) => {
   const [selectedPoolId, setSelectedPoolId] = useState<string>("");
-  const { pools, isLoading } = usePools();
+  const { data: pools, isLoading } = usePools();
 
   const handlePoolChange = (value: string) => {
     setSelectedPoolId(value);

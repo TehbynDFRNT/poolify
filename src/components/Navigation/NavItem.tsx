@@ -10,9 +10,17 @@ interface NavItemProps {
   to: string;
   active?: boolean;
   isParent?: boolean;
+  isSubItem?: boolean;
 }
 
-const NavItem = ({ icon, label, to, active, isParent = false }: NavItemProps) => {
+const NavItem = ({ 
+  icon, 
+  label, 
+  to, 
+  active, 
+  isParent = false,
+  isSubItem = false 
+}: NavItemProps) => {
   const sidebar = useSidebar();
   const collapsed = sidebar?.state === "collapsed";
 
@@ -26,13 +34,20 @@ const NavItem = ({ icon, label, to, active, isParent = false }: NavItemProps) =>
             : "hover:bg-gray-100 text-gray-600",
           isParent && !active 
             ? "font-semibold" 
-            : "pl-6", // Indent non-parent items
+            : "",
+          isSubItem 
+            ? "pl-10 mt-1 text-sm" // Add left padding for sub-items
+            : isParent ? "" : "pl-6", // Normal indent for non-parent items
           collapsed ? "justify-center" : "space-x-3"
         )}
       >
         {icon}
         {!collapsed && (
-          <span className={cn("font-medium", isParent && !active && "text-lg")}>
+          <span className={cn(
+            "font-medium", 
+            isParent && !active && "text-lg",
+            isSubItem && "text-sm"
+          )}>
             {label}
           </span>
         )}
