@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { usePoolWorksheet } from "@/hooks/usePoolWorksheets";
+import { usePoolWorksheet, useDeleteWorksheetItem } from "@/hooks/usePoolWorksheets";
 import {
   Table,
   TableBody,
@@ -17,6 +17,7 @@ import { formatCurrency } from "@/utils/format";
 export function WorksheetView() {
   const [isAddingItem, setIsAddingItem] = useState(false);
   const { data: worksheet, isLoading } = usePoolWorksheet();
+  const deleteItemMutation = useDeleteWorksheetItem();
 
   if (isLoading) {
     return <div className="flex justify-center p-6">Loading worksheet data...</div>;
@@ -43,6 +44,14 @@ export function WorksheetView() {
   }
 
   const totalCost = worksheet.items.reduce((sum, item) => sum + item.total_cost, 0);
+
+  const handleDeleteItem = async (id: string) => {
+    try {
+      await deleteItemMutation.mutateAsync(id);
+    } catch (error) {
+      console.error("Error deleting item:", error);
+    }
+  };
 
   return (
     <>
@@ -92,7 +101,13 @@ export function WorksheetView() {
                     <Button variant="ghost" size="icon">
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="text-red-500">
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="text-red-500"
+                      onClick={() => handleDeleteItem(item.id)}
+                      disabled={deleteItemMutation.isPending}
+                    >
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>

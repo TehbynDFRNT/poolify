@@ -46,7 +46,8 @@ export function AddWorksheetItemDialog({ open, onOpenChange }: AddWorksheetItemD
     try {
       await addItemMutation.mutateAsync({
         ...data,
-        total_cost: totalCost
+        total_cost: totalCost,
+        notes: data.notes || null // Ensure notes is null when empty to match the required type
       });
       onOpenChange(false);
       reset();
