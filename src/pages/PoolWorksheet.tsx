@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import {
@@ -74,7 +74,7 @@ const columnGroups = [
     id: "fixed_costs",
     title: "Fixed Costs",
     color: "bg-purple-100 text-purple-800",
-    columns: ["fixed_cost_name", "fixed_cost_price"]
+    columns: [] // This will be populated dynamically
   }
 ];
 
@@ -106,8 +106,6 @@ const columnLabels: Record<string, string> = {
   "beam": "Beam",
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
-  "fixed_cost_name": "Fixed Cost Name",
-  "fixed_cost_price": "Price",
 };
 
 // Column configuration component
@@ -236,6 +234,24 @@ const PoolWorksheet = () => {
     columnGroups.map(group => group.id) // Initially all groups are visible
   );
 
+  // Update fixed costs columns when fixed costs are loaded
+  useEffect(() => {
+    if (fixedCosts && fixedCosts.length > 0) {
+      // Find the fixed costs group
+      const fixedCostsGroupIndex = columnGroups.findIndex(group => group.id === 'fixed_costs');
+      
+      if (fixedCostsGroupIndex !== -1) {
+        // Update the columns with fixed cost column IDs
+        columnGroups[fixedCostsGroupIndex].columns = fixedCosts.map(cost => `fixed_cost_${cost.id}`);
+        
+        // Update the column labels
+        fixedCosts.forEach(cost => {
+          columnLabels[`fixed_cost_${cost.id}`] = cost.name;
+        });
+      }
+    }
+  }, [fixedCosts]);
+
   // Get all columns from visible groups
   const getVisibleColumns = () => {
     return columnGroups
@@ -320,11 +336,18 @@ const PoolWorksheet = () => {
               
               {/* Render column headers */}
               <TableRow>
-                {getVisibleColumns().map(column => (
-                  <TableHead key={column}>
-                    {columnLabels[column] || column}
-                  </TableHead>
-                ))}
+                {getVisibleColumns().map(column => {
+                  // For fixed cost columns, use the name from columnLabels
+                  const headerLabel = column.startsWith('fixed_cost_')
+                    ? columnLabels[column]
+                    : columnLabels[column] || column;
+                  
+                  return (
+                    <TableHead key={column}>
+                      {headerLabel}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -344,25 +367,14 @@ const PoolWorksheet = () => {
                 pools.map((pool) => (
                   <TableRow key={pool.id}>
                     {getVisibleColumns().map(column => {
-                      // Handle fixed costs columns
-                      if (column === "fixed_cost_name" && fixedCosts && fixedCosts.length > 0) {
+                      // Handle fixed cost columns
+                      if (column.startsWith('fixed_cost_') && fixedCosts) {
+                        const fixedCostId = column.replace('fixed_cost_', '');
+                        const fixedCost = fixedCosts.find(cost => cost.id === fixedCostId);
+                        
                         return (
                           <TableCell key={`${pool.id}-${column}`}>
-                            <div className="space-y-1">
-                              {fixedCosts.map((cost) => (
-                                <div key={cost.id}>{cost.name}</div>
-                              ))}
-                            </div>
-                          </TableCell>
-                        );
-                      } else if (column === "fixed_cost_price" && fixedCosts && fixedCosts.length > 0) {
-                        return (
-                          <TableCell key={`${pool.id}-${column}`}>
-                            <div className="space-y-1">
-                              {fixedCosts.map((cost) => (
-                                <div key={cost.id}>{formatCurrency(cost.price)}</div>
-                              ))}
-                            </div>
+                            {fixedCost ? formatCurrency(fixedCost.price) : '-'}
                           </TableCell>
                         );
                       }
