@@ -15,12 +15,12 @@ const MainNav: React.FC = () => {
   const location = useLocation();
   
   const navigation = [
-    { icon: <Home className="h-5 w-5" />, label: "Dashboard", path: "/" },
-    { icon: <Database className="h-5 w-5" />, label: "Pool Specifications", path: "/pool-specifications" },
-    { icon: <Construction className="h-5 w-5" />, label: "Construction Costs", path: "/construction-costs" },
-    { icon: <Users className="h-5 w-5" />, label: "Third Party Costs", path: "/third-party-costs" },
-    { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems" },
-    { icon: <PlusCircle className="h-5 w-5" />, label: "Add-Ons", path: "/add-ons" },
+    { icon: <Home className="h-5 w-5" />, label: "Cost Builder", path: "/", isParent: true },
+    { icon: <Database className="h-5 w-5" />, label: "Pool Specifications", path: "/pool-specifications", isParent: false },
+    { icon: <Construction className="h-5 w-5" />, label: "Construction Costs", path: "/construction-costs", isParent: false },
+    { icon: <Users className="h-5 w-5" />, label: "Third Party Costs", path: "/third-party-costs", isParent: false },
+    { icon: <Filter className="h-5 w-5" />, label: "Filtration Systems", path: "/filtration-systems", isParent: false },
+    { icon: <PlusCircle className="h-5 w-5" />, label: "Add-Ons", path: "/add-ons", isParent: false },
   ];
 
   return (
@@ -32,6 +32,7 @@ const MainNav: React.FC = () => {
           label={item.label}
           to={item.path}
           active={location.pathname === item.path || location.pathname.startsWith(`${item.path}/`)}
+          isParent={item.isParent}
         />
       ))}
     </nav>
