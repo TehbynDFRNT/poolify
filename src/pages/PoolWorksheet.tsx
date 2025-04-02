@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -68,6 +69,12 @@ const columnGroups = [
     title: "Pool Individual Costs",
     color: "bg-amber-100 text-amber-800",
     columns: ["excavation", "pea_gravel", "install_fee", "trucked_water", "salt_bags", "coping_supply", "beam", "coping_lay", "total_cost"]
+  },
+  {
+    id: "fixed_costs",
+    title: "Fixed Costs",
+    color: "bg-purple-100 text-purple-800",
+    columns: ["fixed_cost_name", "fixed_cost_price"]
   }
 ];
 
@@ -99,6 +106,8 @@ const columnLabels: Record<string, string> = {
   "beam": "Beam",
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
+  "fixed_cost_name": "Fixed Cost Name",
+  "fixed_cost_price": "Price",
 };
 
 // Column configuration component
@@ -183,6 +192,21 @@ const PoolWorksheet = () => {
     }
   });
 
+  // Fetch fixed costs
+  const { data: fixedCosts, isLoading: isLoadingFixedCosts } = useQuery({
+    queryKey: ["fixed-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("fixed_costs")
+        .select("*")
+        .order("display_order");
+      
+      if (error) throw error;
+      
+      return data;
+    }
+  });
+
   // Fetch dig types for excavation costs calculation
   const { data: poolDigMatches } = useQuery({
     queryKey: ["pool-dig-type-matches"],
@@ -244,7 +268,7 @@ const PoolWorksheet = () => {
     return excavationCost;
   };
 
-  const isLoading = isLoadingPools || isLoadingPackages || isLoadingCosts;
+  const isLoading = isLoadingPools || isLoadingPackages || isLoadingCosts || isLoadingFixedCosts;
   const error = poolsError;
 
   return (
@@ -320,6 +344,29 @@ const PoolWorksheet = () => {
                 pools.map((pool) => (
                   <TableRow key={pool.id}>
                     {getVisibleColumns().map(column => {
+                      // Handle fixed costs columns
+                      if (column === "fixed_cost_name" && fixedCosts && fixedCosts.length > 0) {
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            <div className="space-y-1">
+                              {fixedCosts.map((cost) => (
+                                <div key={cost.id}>{cost.name}</div>
+                              ))}
+                            </div>
+                          </TableCell>
+                        );
+                      } else if (column === "fixed_cost_price" && fixedCosts && fixedCosts.length > 0) {
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            <div className="space-y-1">
+                              {fixedCosts.map((cost) => (
+                                <div key={cost.id}>{formatCurrency(cost.price)}</div>
+                              ))}
+                            </div>
+                          </TableCell>
+                        );
+                      }
+                      
                       // Handle filtration package columns
                       if (column === "default_package") {
                         const package_info = packagesByPoolId[pool.id];
