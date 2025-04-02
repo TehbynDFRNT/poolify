@@ -24,14 +24,18 @@ const NavItem = ({ icon, label, to, active, isParent = false }: NavItemProps) =>
           active
             ? "bg-primary text-white"
             : "hover:bg-gray-100 text-gray-600",
-          isParent 
-            ? "font-semibold text-primary" 
+          isParent && !active 
+            ? "font-semibold" 
             : "pl-6", // Indent non-parent items
           collapsed ? "justify-center" : "space-x-3"
         )}
       >
         {icon}
-        {!collapsed && <span className={cn("font-medium", isParent && "text-lg")}>{label}</span>}
+        {!collapsed && (
+          <span className={cn("font-medium", isParent && !active && "text-lg")}>
+            {label}
+          </span>
+        )}
       </div>
     </Link>
   );

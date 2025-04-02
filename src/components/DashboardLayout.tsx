@@ -17,7 +17,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
           {/* Sidebar */}
           <div 
             className={cn(
-              "h-screen bg-white border-r fixed left-0 top-0 p-4 transition-all duration-300",
+              "h-screen bg-white border-r fixed left-0 top-0 p-4 transition-all duration-300 z-10",
               collapsed ? "w-20" : "w-64"
             )}
           >
