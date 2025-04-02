@@ -46,7 +46,7 @@ export const useCreatePoolWorksheet = () => {
   const queryClient = useQueryClient();
   
   return useMutation({
-    mutationFn: async (worksheetData: Partial<PoolWorksheet>) => {
+    mutationFn: async (worksheetData: { name: string; pool_id?: string; notes?: string }) => {
       const { data, error } = await supabase
         .from('pool_worksheets')
         .insert(worksheetData)

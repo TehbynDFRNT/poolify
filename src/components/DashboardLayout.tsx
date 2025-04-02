@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -8,7 +8,7 @@ import { SidebarProvider } from "./ui/sidebar";
 import MainNav from "./Navigation/MainNav";
 
 export const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = React.useState(false);
 
   return (
     <div className="min-h-screen bg-gray-50">
