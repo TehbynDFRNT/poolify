@@ -1,6 +1,5 @@
 
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
 import {
   Breadcrumb,
@@ -42,6 +41,14 @@ const PoolWorksheet = () => {
         <div className="overflow-x-auto border rounded-md">
           <Table>
             <TableHeader>
+              <TableRow>
+                <TableCell 
+                  colSpan={15} 
+                  className="bg-blue-100 text-blue-800 font-medium py-2 px-4 text-left border-b"
+                >
+                  Pool Specifications
+                </TableCell>
+              </TableRow>
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Range</TableHead>
