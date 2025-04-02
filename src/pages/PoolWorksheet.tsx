@@ -33,7 +33,7 @@ const PoolWorksheet = () => {
         </Breadcrumb>
 
         <div className="mb-8">
-          <h1 className="text-3xl font-bold">Pool Specifications</h1>
+          <h1 className="text-3xl font-bold">Pool Worksheet</h1>
           <p className="text-muted-foreground mt-1">
             A comprehensive breakdown of all pool specifications
           </p>
