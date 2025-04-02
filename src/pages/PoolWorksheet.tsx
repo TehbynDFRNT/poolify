@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -23,6 +22,8 @@ import {
 } from "@/components/ui/sheet";
 import { usePoolPackages } from "@/hooks/usePoolPackages";
 import { calculatePackagePrice } from "@/utils/package-calculations";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 // Define column groups for organizing the table columns
 const columnGroups = [
@@ -52,7 +53,7 @@ const columnGroups = [
   },
   {
     id: "pricing",
-    title: "Pricing",
+    title: "Pool Pricing",
     color: "bg-blue-100 text-blue-800",
     columns: ["buy_price_ex_gst", "buy_price_inc_gst"]
   },
@@ -61,6 +62,12 @@ const columnGroups = [
     title: "Filtration Package",
     color: "bg-green-100 text-green-800",
     columns: ["default_package", "package_price"]
+  },
+  {
+    id: "construction_costs",
+    title: "Construction Costs",
+    color: "bg-amber-100 text-amber-800",
+    columns: ["excavation", "pea_gravel", "install_fee", "trucked_water", "salt_bags", "coping_supply", "beam", "coping_lay", "total_cost"]
   }
 ];
 
@@ -83,6 +90,15 @@ const columnLabels: Record<string, string> = {
   "buy_price_inc_gst": "Buy Price (inc GST)",
   "default_package": "Filtration Package",
   "package_price": "Package Price",
+  "excavation": "Excavation",
+  "pea_gravel": "Pea Gravel",
+  "install_fee": "Install Fee",
+  "trucked_water": "Trucked Water",
+  "salt_bags": "Salt Bags",
+  "coping_supply": "Coping Supply",
+  "beam": "Beam",
+  "coping_lay": "Coping Lay",
+  "total_cost": "Total Cost",
 };
 
 // Column configuration component
@@ -148,6 +164,49 @@ const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
   const { poolsWithPackages, isLoading: isLoadingPackages } = usePoolPackages();
   
+  // Fetch pool costs
+  const { data: poolCosts, isLoading: isLoadingCosts } = useQuery({
+    queryKey: ["pool-costs"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_costs")
+        .select("*");
+      
+      if (error) throw error;
+      
+      const costsMap = new Map();
+      data?.forEach(cost => {
+        costsMap.set(cost.pool_id, cost);
+      });
+      
+      return costsMap;
+    }
+  });
+
+  // Fetch dig types for excavation costs calculation
+  const { data: poolDigMatches } = useQuery({
+    queryKey: ["pool-dig-type-matches"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("pool_dig_type_matches")
+        .select(`
+          id,
+          pool_id,
+          dig_type_id,
+          dig_type:dig_types(*)
+        `);
+      
+      if (error) throw error;
+      
+      const matchesMap = new Map();
+      data?.forEach(match => {
+        matchesMap.set(match.pool_id, match);
+      });
+      
+      return matchesMap;
+    }
+  });
+  
   // State to track which column groups are visible
   const [visibleGroups, setVisibleGroups] = useState<string[]>(
     columnGroups.map(group => group.id) // Initially all groups are visible
@@ -173,7 +232,19 @@ const PoolWorksheet = () => {
     return acc;
   }, {} as Record<string, any>) || {};
 
-  const isLoading = isLoadingPools || isLoadingPackages;
+  // Calculate excavation cost for a pool
+  const calculateExcavationCost = (poolId: string) => {
+    const match = poolDigMatches?.get(poolId);
+    if (!match || !match.dig_type) return 0;
+    
+    const digType = match.dig_type;
+    const excavationCost = (digType.excavation_hours * digType.excavation_hourly_rate) +
+                            (digType.truck_quantity * digType.truck_hours * digType.truck_hourly_rate);
+    
+    return excavationCost;
+  };
+
+  const isLoading = isLoadingPools || isLoadingPackages || isLoadingCosts;
   const error = poolsError;
 
   return (
@@ -249,8 +320,8 @@ const PoolWorksheet = () => {
                 pools.map((pool) => (
                   <TableRow key={pool.id}>
                     {getVisibleColumns().map(column => {
+                      // Handle filtration package columns
                       if (column === "default_package") {
-                        // Display the filtration package name
                         const package_info = packagesByPoolId[pool.id];
                         return (
                           <TableCell key={`${pool.id}-${column}`}>
@@ -258,7 +329,6 @@ const PoolWorksheet = () => {
                           </TableCell>
                         );
                       } else if (column === "package_price") {
-                        // Display the package price
                         const package_info = packagesByPoolId[pool.id];
                         return (
                           <TableCell key={`${pool.id}-${column}`}>
@@ -267,6 +337,50 @@ const PoolWorksheet = () => {
                         );
                       }
                       
+                      // Handle construction costs columns
+                      const poolCost = poolCosts?.get(pool.id) || {};
+                      
+                      if (column === "excavation") {
+                        const excavationCost = calculateExcavationCost(pool.id);
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            {formatCurrency(excavationCost)}
+                          </TableCell>
+                        );
+                      } else if (column === "total_cost") {
+                        const excavationCost = calculateExcavationCost(pool.id);
+                        const total = 
+                          excavationCost + 
+                          (poolCost.pea_gravel || 0) + 
+                          (poolCost.install_fee || 0) + 
+                          (poolCost.trucked_water || 0) + 
+                          (poolCost.salt_bags || 0) + 
+                          (poolCost.coping_supply || 0) + 
+                          (poolCost.beam || 0) + 
+                          (poolCost.coping_lay || 0);
+                        
+                        return (
+                          <TableCell key={`${pool.id}-${column}`} className="font-medium">
+                            {formatCurrency(total)}
+                          </TableCell>
+                        );
+                      } else if ([
+                        "pea_gravel", 
+                        "install_fee", 
+                        "trucked_water", 
+                        "salt_bags", 
+                        "coping_supply", 
+                        "beam", 
+                        "coping_lay"
+                      ].includes(column)) {
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            {formatCurrency(poolCost[column] || 0)}
+                          </TableCell>
+                        );
+                      }
+                      
+                      // Handle regular pool specification columns
                       const value = pool[column as keyof typeof pool];
                       
                       // Format the value based on column type
