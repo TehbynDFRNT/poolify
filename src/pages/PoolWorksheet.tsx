@@ -2,8 +2,7 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CreateWorksheetDialog } from "@/components/worksheets/CreateWorksheetDialog";
-import { WorksheetsList } from "@/components/worksheets/WorksheetsList";
+import { WorksheetView } from "@/components/worksheets/WorksheetView";
 import { Link } from "react-router-dom";
 import {
   Breadcrumb,
@@ -32,23 +31,22 @@ const PoolWorksheet = () => {
         </Breadcrumb>
 
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Pool Worksheets</h1>
-          <Button className="bg-teal-500 hover:bg-teal-600" onClick={() => document.getElementById('create-worksheet-trigger')?.click()}>
+          <h1 className="text-3xl font-bold">Pool Worksheet</h1>
+          <Button className="bg-teal-500 hover:bg-teal-600">
             <Plus className="mr-2 h-4 w-4" />
-            Create Worksheet
+            Add Item
           </Button>
         </div>
         
         <Card className="w-full">
           <CardHeader>
-            <CardTitle>Manage Pool Worksheets</CardTitle>
+            <CardTitle>Pool Details</CardTitle>
           </CardHeader>
           <CardContent>
-            <WorksheetsList />
+            <WorksheetView />
           </CardContent>
         </Card>
       </div>
-      <CreateWorksheetDialog />
     </DashboardLayout>
   );
 };
