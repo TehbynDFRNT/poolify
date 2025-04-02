@@ -21,6 +21,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { usePoolPackages } from "@/hooks/usePoolPackages";
+import { calculatePackagePrice } from "@/utils/package-calculations";
 
 // Define column groups for organizing the table columns
 const columnGroups = [
@@ -53,6 +55,12 @@ const columnGroups = [
     title: "Pricing",
     color: "bg-blue-100 text-blue-800",
     columns: ["buy_price_ex_gst", "buy_price_inc_gst"]
+  },
+  {
+    id: "filtration",
+    title: "Filtration Package",
+    color: "bg-green-100 text-green-800",
+    columns: ["default_package", "package_price"]
   }
 ];
 
@@ -73,6 +81,8 @@ const columnLabels: Record<string, string> = {
   "minerals_kg_topup": "Topup Minerals (kg)",
   "buy_price_ex_gst": "Buy Price (ex GST)",
   "buy_price_inc_gst": "Buy Price (inc GST)",
+  "default_package": "Filtration Package",
+  "package_price": "Package Price",
 };
 
 // Column configuration component
@@ -135,7 +145,8 @@ const ColumnConfigSheet = ({
 };
 
 const PoolWorksheet = () => {
-  const { data: pools, isLoading, error } = usePoolSpecifications();
+  const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
+  const { poolsWithPackages, isLoading: isLoadingPackages } = usePoolPackages();
   
   // State to track which column groups are visible
   const [visibleGroups, setVisibleGroups] = useState<string[]>(
@@ -153,6 +164,17 @@ const PoolWorksheet = () => {
   const visibleColumnGroups = columnGroups.filter(group => 
     visibleGroups.includes(group.id)
   );
+
+  // Create a lookup object for packages by pool ID
+  const packagesByPoolId = poolsWithPackages?.reduce((acc, pool) => {
+    if (pool.default_filtration_package_id && pool.default_package) {
+      acc[pool.id] = pool.default_package;
+    }
+    return acc;
+  }, {} as Record<string, any>) || {};
+
+  const isLoading = isLoadingPools || isLoadingPackages;
+  const error = poolsError;
 
   return (
     <DashboardLayout>
@@ -227,6 +249,24 @@ const PoolWorksheet = () => {
                 pools.map((pool) => (
                   <TableRow key={pool.id}>
                     {getVisibleColumns().map(column => {
+                      if (column === "default_package") {
+                        // Display the filtration package name
+                        const package_info = packagesByPoolId[pool.id];
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            {package_info ? `Option ${package_info.display_order}` : '-'}
+                          </TableCell>
+                        );
+                      } else if (column === "package_price") {
+                        // Display the package price
+                        const package_info = packagesByPoolId[pool.id];
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            {package_info ? formatCurrency(calculatePackagePrice(package_info)) : '-'}
+                          </TableCell>
+                        );
+                      }
+                      
                       const value = pool[column as keyof typeof pool];
                       
                       // Format the value based on column type
