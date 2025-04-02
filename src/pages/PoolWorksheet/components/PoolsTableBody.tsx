@@ -182,7 +182,7 @@ export const PoolsTableBody = ({
       
       {/* Only show one fixed costs total row when fixed costs group is visible */}
       {visibleGroups.includes('fixed_costs') && (
-        <TableRow className="bg-purple-100 font-bold">
+        <TableRow className="bg-purple-100">
           {getVisibleColumns().map((column, columnIndex) => {
             // First column shows "FIXED COSTS TOTAL"
             if (columnIndex === 0) {
