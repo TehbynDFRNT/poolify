@@ -47,7 +47,7 @@ export const columnGroups = [
     id: "fixed_costs",
     title: "Fixed Costs",
     color: "bg-purple-100 text-purple-800",
-    columns: [] // This will be populated dynamically
+    columns: [] // This will be populated dynamically, and total will be added automatically
   }
 ];
 
@@ -79,4 +79,5 @@ export const columnLabels: Record<string, string> = {
   "beam": "Beam",
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
+  "fixed_costs_total": "FIXED COSTS TOTAL",
 };

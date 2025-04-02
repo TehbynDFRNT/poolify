@@ -16,7 +16,8 @@ export const useVisibleColumns = (fixedCosts?: FixedCost[]) => {
       
       if (fixedCostsGroupIndex !== -1) {
         // Update the columns with fixed cost column IDs
-        columnGroups[fixedCostsGroupIndex].columns = fixedCosts.map(cost => `fixed_cost_${cost.id}`);
+        const fixedCostColumns = fixedCosts.map(cost => `fixed_cost_${cost.id}`);
+        columnGroups[fixedCostsGroupIndex].columns = fixedCostColumns;
       }
     }
   }, [fixedCosts]);

@@ -85,6 +85,18 @@ export const PoolsTableBody = ({
               );
             }
             
+            // Add special column for fixed costs total if it's the last fixed cost column
+            const fixedCostsColumns = getVisibleColumns().filter(col => col.startsWith('fixed_cost_'));
+            const isLastFixedCostColumn = column === fixedCostsColumns[fixedCostsColumns.length - 1];
+            
+            if (column === "fixed_costs_total" || (isLastFixedCostColumn && visibleGroups.includes('fixed_costs'))) {
+              return (
+                <TableCell key={`${pool.id}-fixed-costs-total`} className="font-bold bg-purple-100">
+                  {formatCurrency(fixedCostsTotal)}
+                </TableCell>
+              );
+            }
+            
             // Handle filtration package columns
             if (column === "default_package") {
               const package_info = packagesByPoolId[pool.id];
@@ -179,49 +191,6 @@ export const PoolsTableBody = ({
           })}
         </TableRow>
       ))}
-      
-      {/* Only show one fixed costs total row when fixed costs group is visible */}
-      {visibleGroups.includes('fixed_costs') && (
-        <TableRow className="bg-purple-100">
-          {getVisibleColumns().map((column, columnIndex) => {
-            // First column shows "FIXED COSTS TOTAL"
-            if (columnIndex === 0) {
-              return (
-                <TableCell key="fixed-costs-total-label" className="font-bold">
-                  FIXED COSTS TOTAL
-                </TableCell>
-              );
-            }
-            
-            // Show each fixed cost value in its respective column
-            if (column.startsWith('fixed_cost_') && fixedCosts) {
-              const fixedCostId = column.replace('fixed_cost_', '');
-              const fixedCost = fixedCosts.find(cost => cost.id === fixedCostId);
-              
-              return (
-                <TableCell key={`fixed-costs-total-${column}`} className="font-bold">
-                  {fixedCost ? formatCurrency(fixedCost.price) : '-'}
-                </TableCell>
-              );
-            }
-            
-            // Show grand total in the last fixed costs column
-            const fixedCostsColumns = getVisibleColumns().filter(col => col.startsWith('fixed_cost_'));
-            const isLastFixedCostColumn = column === fixedCostsColumns[fixedCostsColumns.length - 1];
-            
-            if (isLastFixedCostColumn) {
-              return (
-                <TableCell key="grand-total-value" className="font-bold">
-                  {formatCurrency(fixedCostsTotal)}
-                </TableCell>
-              );
-            }
-            
-            // Empty cells for other columns
-            return <TableCell key={`fixed-costs-total-${column}`}></TableCell>;
-          })}
-        </TableRow>
-      )}
     </TableBody>
   );
 };
