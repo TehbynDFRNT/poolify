@@ -1027,6 +1027,88 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_worksheet_items: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          item_name: string
+          notes: string | null
+          quantity: number | null
+          total_cost: number
+          unit_cost: number
+          updated_at: string
+          worksheet_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          item_name: string
+          notes?: string | null
+          quantity?: number | null
+          total_cost?: number
+          unit_cost?: number
+          updated_at?: string
+          worksheet_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          item_name?: string
+          notes?: string | null
+          quantity?: number | null
+          total_cost?: number
+          unit_cost?: number
+          updated_at?: string
+          worksheet_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_worksheet_items_worksheet_id_fkey"
+            columns: ["worksheet_id"]
+            isOneToOne: false
+            referencedRelation: "pool_worksheets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_worksheets: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          pool_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          pool_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          pool_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_worksheets_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pricing_models: {
         Row: {
           base_price: number
