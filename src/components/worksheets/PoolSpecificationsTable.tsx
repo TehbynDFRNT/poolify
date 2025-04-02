@@ -20,7 +20,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-// Define comprehensive column groups for better organization
+// Define comprehensive column groups for better organization - ordering matches the image
 const columnGroups = [
   {
     id: "dimensions",
@@ -33,14 +33,14 @@ const columnGroups = [
     columns: ["volume_liters", "waterline_l_m", "weight_kg"],
   },
   {
-    id: "minerals",
-    title: "Minerals & Salt",
-    columns: ["minerals_kg_initial", "minerals_kg_topup", "salt_volume_bags", "salt_volume_bags_fixed"],
-  },
-  {
     id: "pricing",
     title: "Pricing",
     columns: ["buy_price_ex_gst", "buy_price_inc_gst"],
+  },
+  {
+    id: "minerals",
+    title: "Minerals & Salt",
+    columns: ["minerals_kg_initial", "minerals_kg_topup", "salt_volume_bags", "salt_volume_bags_fixed"],
   },
   {
     id: "other",
@@ -49,8 +49,8 @@ const columnGroups = [
   }
 ];
 
-// Essential columns that are always visible
-const essentialColumns = ["range", "name"];
+// Essential columns that are always visible, ordered with name first and range last per the image
+const essentialColumns = ["name", "range"];
 
 export function PoolSpecificationsTable() {
   // Using the hook that properly sorts by range order
@@ -101,6 +101,16 @@ export function PoolSpecificationsTable() {
     key !== 'created_at' && 
     key !== 'updated_at'
   );
+  
+  // Order columns based on the image:
+  // First the dimension columns, then volume info, then pricing, then name, then range
+  const orderedColumns = [
+    ...columnGroups.flatMap(group => group.columns.filter(col => allColumns.includes(col))),
+    ...essentialColumns
+  ];
+
+  // Remove duplicates while preserving order
+  const displayColumns = [...new Set(orderedColumns)];
 
   return (
     <div>
@@ -148,7 +158,7 @@ export function PoolSpecificationsTable() {
         <Table>
           <TableHeader>
             <TableRow>
-              {allColumns.map((column) => {
+              {displayColumns.map((column) => {
                 if (!isColumnVisible(column)) return null;
                 
                 // Format the column header
@@ -160,7 +170,7 @@ export function PoolSpecificationsTable() {
                 return (
                   <TableHead 
                     key={column}
-                    className={column === "range" || column === "name" ? "" : "text-right"}
+                    className={column === "range" || column === "name" ? "" : ""}
                   >
                     {formattedHeader}
                   </TableHead>
@@ -171,7 +181,7 @@ export function PoolSpecificationsTable() {
           <TableBody>
             {pools.map((pool) => (
               <TableRow key={pool.id}>
-                {allColumns.map((column) => {
+                {displayColumns.map((column) => {
                   if (!isColumnVisible(column)) return null;
                   
                   const value = pool[column as keyof Pool];
@@ -191,7 +201,7 @@ export function PoolSpecificationsTable() {
                   return (
                     <TableCell 
                       key={`${pool.id}-${column}`}
-                      className={column === "range" || column === "name" ? "" : "text-right"}
+                      className={column === "range" || column === "name" ? "" : ""}
                     >
                       {displayValue || '-'}
                     </TableCell>
