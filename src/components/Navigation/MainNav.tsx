@@ -15,50 +15,52 @@ import NavItem from "@/components/Navigation/NavItem";
 const MainNav: React.FC = () => {
   const location = useLocation();
   
-  // Define the main navigation items - all as top-level items
+  // Define navigation with Cost Builder as parent and others as sub-items
   const navigation = [
     { 
       icon: <Home className="h-5 w-5" />, 
       label: "Cost Builder", 
       path: "/", 
-      isParent: false
-    },
-    { 
-      icon: <Wand2 className="h-5 w-5" />, 
-      label: "Pool Creation Wizard", 
-      path: "/pool-creation-wizard", 
-      isParent: false 
-    },
-    { 
-      icon: <Database className="h-5 w-5" />, 
-      label: "Pool Specifications", 
-      path: "/pool-specifications", 
-      isParent: false 
-    },
-    { 
-      icon: <Construction className="h-5 w-5" />, 
-      label: "Construction Costs", 
-      path: "/construction-costs", 
-      isParent: false 
-    },
-    { 
-      icon: <Users className="h-5 w-5" />, 
-      label: "Third Party Costs", 
-      path: "/third-party-costs", 
-      isParent: false 
-    },
-    { 
-      icon: <Filter className="h-5 w-5" />, 
-      label: "Filtration Systems", 
-      path: "/filtration-systems", 
-      isParent: false 
-    },
-    { 
-      icon: <PlusCircle className="h-5 w-5" />, 
-      label: "Add-Ons", 
-      path: "/add-ons", 
-      isParent: false 
-    },
+      isParent: true,
+      subItems: [
+        { 
+          icon: <Wand2 className="h-5 w-5" />, 
+          label: "Pool Creation Wizard", 
+          path: "/pool-creation-wizard", 
+          isParent: false 
+        },
+        { 
+          icon: <Database className="h-5 w-5" />, 
+          label: "Pool Specifications", 
+          path: "/pool-specifications", 
+          isParent: false 
+        },
+        { 
+          icon: <Construction className="h-5 w-5" />, 
+          label: "Construction Costs", 
+          path: "/construction-costs", 
+          isParent: false 
+        },
+        { 
+          icon: <Users className="h-5 w-5" />, 
+          label: "Third Party Costs", 
+          path: "/third-party-costs", 
+          isParent: false 
+        },
+        { 
+          icon: <Filter className="h-5 w-5" />, 
+          label: "Filtration Systems", 
+          path: "/filtration-systems", 
+          isParent: false 
+        },
+        { 
+          icon: <PlusCircle className="h-5 w-5" />, 
+          label: "Add-Ons", 
+          path: "/add-ons", 
+          isParent: false 
+        },
+      ]
+    }
   ];
 
   const isActive = (item: any) => {
@@ -71,14 +73,28 @@ const MainNav: React.FC = () => {
   return (
     <nav className="space-y-1">
       {navigation.map((item) => (
-        <NavItem
-          key={item.path}
-          icon={item.icon}
-          label={item.label}
-          to={item.path}
-          active={isActive(item)}
-          isParent={item.isParent}
-        />
+        <React.Fragment key={item.path}>
+          <NavItem
+            icon={item.icon}
+            label={item.label}
+            to={item.path}
+            active={isActive(item)}
+            isParent={item.isParent}
+          />
+          
+          {/* Render sub-items */}
+          {item.subItems?.map((subItem) => (
+            <NavItem
+              key={subItem.path}
+              icon={subItem.icon}
+              label={subItem.label}
+              to={subItem.path}
+              active={isActive(subItem)}
+              isParent={false}
+              isSubItem={true}
+            />
+          ))}
+        </React.Fragment>
       ))}
     </nav>
   );

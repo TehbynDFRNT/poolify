@@ -32,7 +32,9 @@ const NavItem = ({
           active
             ? "bg-primary text-white"
             : "hover:bg-gray-100 text-gray-600",
-          "px-4", // Consistent padding for all items
+          isSubItem 
+            ? "pl-10" // Add left padding for sub-items
+            : "px-4", // Normal padding for parent items
           collapsed ? "justify-center" : "space-x-3"
         )}
       >
