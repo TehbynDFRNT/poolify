@@ -71,7 +71,7 @@ const MainNav: React.FC = () => {
   };
 
   return (
-    <nav className="space-y-2">
+    <nav className="space-y-1">
       {navigation.map((item) => (
         <React.Fragment key={item.path}>
           <NavItem

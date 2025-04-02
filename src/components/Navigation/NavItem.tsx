@@ -25,10 +25,10 @@ const NavItem = ({
   const collapsed = sidebar?.state === "collapsed";
 
   return (
-    <Link to={to}>
+    <Link to={to} className="block">
       <div
         className={cn(
-          "flex items-center px-4 py-3 rounded-lg transition-all duration-200",
+          "flex items-center py-3 rounded-lg transition-all duration-200",
           active
             ? "bg-primary text-white"
             : "hover:bg-gray-100 text-gray-600",
@@ -36,12 +36,17 @@ const NavItem = ({
             ? "font-semibold" 
             : "",
           isSubItem 
-            ? "pl-10 mt-1 text-sm" // Add left padding for sub-items
-            : isParent ? "" : "pl-6", // Normal indent for non-parent items
+            ? "pl-12 mt-1 text-sm" // Increased left padding for sub-items
+            : "px-4", // Consistent padding for all main items
           collapsed ? "justify-center" : "space-x-3"
         )}
       >
-        {icon}
+        <span className={cn(
+          "flex items-center justify-center",
+          isSubItem && !collapsed ? "ml-1" : ""
+        )}>
+          {icon}
+        </span>
         {!collapsed && (
           <span className={cn(
             "font-medium", 

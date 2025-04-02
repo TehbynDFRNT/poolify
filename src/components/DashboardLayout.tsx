@@ -17,16 +17,16 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
           {/* Sidebar */}
           <div 
             className={cn(
-              "h-screen bg-white border-r fixed left-0 top-0 p-4 transition-all duration-300 z-10",
+              "h-screen bg-white border-r fixed left-0 top-0 transition-all duration-300 z-10",
               collapsed ? "w-20" : "w-64"
             )}
           >
-            <div className="mb-8 flex items-center justify-between">
-              <Link to="/">
+            <div className="px-4 py-6 flex items-center justify-between">
+              <Link to="/" className="flex items-center">
                 {collapsed ? (
-                  <h1 className="text-2xl font-bold text-primary">P</h1>
+                  <h1 className="text-3xl font-bold text-primary">P</h1>
                 ) : (
-                  <h1 className="text-2xl font-bold text-primary">Poolify</h1>
+                  <h1 className="text-3xl font-bold text-primary">Poolify</h1>
                 )}
               </Link>
               <Button
@@ -44,7 +44,9 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             </div>
             
             {/* Use the MainNav component */}
-            <MainNav />
+            <div className="px-2 mt-2">
+              <MainNav />
+            </div>
           </div>
 
           {/* Main content */}
