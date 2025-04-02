@@ -6,7 +6,8 @@ import {
   Database,
   Filter,
   Users,
-  PlusCircle
+  PlusCircle,
+  ClipboardList
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
@@ -42,6 +43,12 @@ const Index = () => {
       description: "Manage pool add-ons and optional features",
       icon: <PlusCircle className="w-6 h-6 text-primary" />,
       link: "/add-ons",
+    },
+    {
+      title: "Pool Worksheet",
+      description: "Create and manage pool worksheets",
+      icon: <ClipboardList className="w-6 h-6 text-primary" />,
+      link: "/pool-worksheet",
     },
   ];
 

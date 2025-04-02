@@ -8,7 +8,8 @@ import {
   Filter, 
   PlusCircle,
   Users,
-  Wand2
+  Wand2,
+  ClipboardList
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
 
@@ -57,6 +58,12 @@ const MainNav: React.FC = () => {
           icon: <PlusCircle className="h-5 w-5" />, 
           label: "Add-Ons", 
           path: "/add-ons", 
+          isParent: false 
+        },
+        { 
+          icon: <ClipboardList className="h-5 w-5" />, 
+          label: "Pool Worksheet", 
+          path: "/pool-worksheet", 
           isParent: false 
         },
       ]
