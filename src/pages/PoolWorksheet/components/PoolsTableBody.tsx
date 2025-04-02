@@ -2,6 +2,7 @@
 import { formatCurrency } from "@/utils/format";
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Pool } from "@/types/pool";
+import { calculatePackagePrice } from "@/pages/PoolWorksheet/utils/calculationHelpers";
 
 interface PoolsTableBodyProps {
   pools: Pool[];
@@ -179,20 +180,20 @@ export const PoolsTableBody = ({
         </TableRow>
       ))}
       
-      {/* Fixed Costs Total row - only show if fixed costs group is visible */}
+      {/* Only show one fixed costs total row when fixed costs group is visible */}
       {visibleGroups.includes('fixed_costs') && (
-        <TableRow className="bg-purple-50 font-medium">
+        <TableRow className="bg-purple-100 font-bold">
           {getVisibleColumns().map((column, columnIndex) => {
             // First column shows "FIXED COSTS TOTAL"
             if (columnIndex === 0) {
               return (
-                <TableCell key={`fixed-costs-total-label`} className="font-bold">
+                <TableCell key="fixed-costs-total-label" className="font-bold">
                   FIXED COSTS TOTAL
                 </TableCell>
               );
             }
             
-            // Show total in each fixed cost column
+            // Show each fixed cost value in its respective column
             if (column.startsWith('fixed_cost_') && fixedCosts) {
               const fixedCostId = column.replace('fixed_cost_', '');
               const fixedCost = fixedCosts.find(cost => cost.id === fixedCostId);
@@ -204,26 +205,7 @@ export const PoolsTableBody = ({
               );
             }
             
-            // Empty cells for other columns
-            return <TableCell key={`fixed-costs-total-${column}`}></TableCell>;
-          })}
-        </TableRow>
-      )}
-      
-      {/* Grand total row for fixed costs */}
-      {visibleGroups.includes('fixed_costs') && (
-        <TableRow className="bg-purple-100 font-bold">
-          {getVisibleColumns().map((column, columnIndex) => {
-            // First column shows "GRAND TOTAL"
-            if (columnIndex === 0) {
-              return (
-                <TableCell key="grand-total-label" className="font-bold">
-                  FIXED COSTS GRAND TOTAL
-                </TableCell>
-              );
-            }
-            
-            // Last fixed costs column shows the total
+            // Show grand total in the last fixed costs column
             const fixedCostsColumns = getVisibleColumns().filter(col => col.startsWith('fixed_cost_'));
             const isLastFixedCostColumn = column === fixedCostsColumns[fixedCostsColumns.length - 1];
             
@@ -236,7 +218,7 @@ export const PoolsTableBody = ({
             }
             
             // Empty cells for other columns
-            return <TableCell key={`grand-total-${column}`}></TableCell>;
+            return <TableCell key={`fixed-costs-total-${column}`}></TableCell>;
           })}
         </TableRow>
       )}
