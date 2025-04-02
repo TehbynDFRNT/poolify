@@ -65,7 +65,7 @@ const columnGroups = [
   },
   {
     id: "construction_costs",
-    title: "Construction Costs",
+    title: "Pool Individual Costs",
     color: "bg-amber-100 text-amber-800",
     columns: ["excavation", "pea_gravel", "install_fee", "trucked_water", "salt_bags", "coping_supply", "beam", "coping_lay", "total_cost"]
   }
