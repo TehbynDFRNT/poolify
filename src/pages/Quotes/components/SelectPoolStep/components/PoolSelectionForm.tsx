@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePools } from '@/hooks/usePools';
+import { usePools } from '@/pages/Quotes/components/SelectPoolStep/hooks/usePools';
 
 interface PoolSelectionFormProps {
   onNext: () => void;
@@ -14,7 +14,7 @@ interface PoolSelectionFormProps {
 
 export const PoolSelectionForm: React.FC<PoolSelectionFormProps> = ({ onNext, onPrevious }) => {
   const [selectedPoolId, setSelectedPoolId] = useState<string>("");
-  const { data: pools, isLoading } = usePools();
+  const { pools, poolsByRange, isLoading } = usePools();
 
   const handlePoolChange = (value: string) => {
     setSelectedPoolId(value);
@@ -61,7 +61,7 @@ export const PoolSelectionForm: React.FC<PoolSelectionFormProps> = ({ onNext, on
                     {pools && pools.length > 0 ? (
                       pools.map((pool) => (
                         <SelectItem key={pool.id} value={pool.id}>
-                          {pool.model_name} - {pool.length}m × {pool.width}m
+                          {pool.name} - {pool.length}m × {pool.width}m
                         </SelectItem>
                       ))
                     ) : (
