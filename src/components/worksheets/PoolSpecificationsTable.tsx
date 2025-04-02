@@ -11,12 +11,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { ChevronRight, ChevronLeft } from "lucide-react";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Sheet,
   SheetContent,
@@ -25,13 +19,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import {
-  ResizablePanelGroup,
-  ResizablePanel,
-  ResizableHandle,
-} from "@/components/ui/resizable";
 
-// Define column groups for organization
+// Define comprehensive column groups for better organization
 const columnGroups = [
   {
     id: "dimensions",
@@ -43,15 +32,30 @@ const columnGroups = [
     title: "Volume Information",
     columns: ["volume_liters", "waterline_l_m", "weight_kg"],
   },
+  {
+    id: "minerals",
+    title: "Minerals & Salt",
+    columns: ["minerals_kg_initial", "minerals_kg_topup", "salt_volume_bags", "salt_volume_bags_fixed"],
+  },
+  {
+    id: "pricing",
+    title: "Pricing",
+    columns: ["buy_price_ex_gst", "buy_price_inc_gst"],
+  },
+  {
+    id: "other",
+    title: "Other Information",
+    columns: ["pool_type_id", "default_filtration_package_id", "dig_type_id", "dig_level", "outline_image_url"],
+  }
 ];
 
-// Define essential columns that are always visible
+// Essential columns that are always visible
 const essentialColumns = ["range", "name"];
 
 export function PoolSpecificationsTable() {
-  // Using the existing hook that properly sorts by range order
+  // Using the hook that properly sorts by range order
   const { data: pools, isLoading, error } = usePoolSpecifications();
-  const [visibleGroups, setVisibleGroups] = useState<string[]>(["dimensions", "volume"]);
+  const [visibleGroups, setVisibleGroups] = useState<string[]>(["dimensions", "volume", "pricing"]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   const toggleColumnGroup = (groupId: string) => {
@@ -173,10 +177,15 @@ export function PoolSpecificationsTable() {
                   const value = pool[column as keyof Pool];
                   let displayValue = value;
                   
-                  // Format numeric values
-                  if (typeof value === 'number' && 
-                      (column === 'volume_liters' || column === 'weight_kg')) {
-                    displayValue = value.toLocaleString();
+                  // Format numeric values with thousands separator
+                  if (typeof value === 'number') {
+                    if (column.includes('price') || column.includes('cost')) {
+                      // Currency formatting
+                      displayValue = `$${value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                    } else {
+                      // Regular number formatting
+                      displayValue = value.toLocaleString();
+                    }
                   }
                   
                   return (
