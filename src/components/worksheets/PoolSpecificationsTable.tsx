@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { Pool } from "@/types/pool";
 import {
@@ -9,10 +10,69 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { ChevronRight, ChevronLeft } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import {
+  ResizablePanelGroup,
+  ResizablePanel,
+  ResizableHandle,
+} from "@/components/ui/resizable";
+
+// Define column groups for organization
+const columnGroups = [
+  {
+    id: "dimensions",
+    title: "Dimensions",
+    columns: ["length", "width", "depth_shallow", "depth_deep"],
+  },
+  {
+    id: "volume",
+    title: "Volume Information",
+    columns: ["volume_liters", "waterline_l_m", "weight_kg"],
+  },
+];
+
+// Define essential columns that are always visible
+const essentialColumns = ["range", "name"];
 
 export function PoolSpecificationsTable() {
   // Using the existing hook that properly sorts by range order
   const { data: pools, isLoading, error } = usePoolSpecifications();
+  const [visibleGroups, setVisibleGroups] = useState<string[]>(["dimensions", "volume"]);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+
+  const toggleColumnGroup = (groupId: string) => {
+    if (visibleGroups.includes(groupId)) {
+      setVisibleGroups(visibleGroups.filter(id => id !== groupId));
+    } else {
+      setVisibleGroups([...visibleGroups, groupId]);
+    }
+  };
+
+  // Check if a column should be visible
+  const isColumnVisible = (columnName: string): boolean => {
+    if (essentialColumns.includes(columnName)) return true;
+    
+    for (const group of columnGroups) {
+      if (group.columns.includes(columnName) && visibleGroups.includes(group.id)) {
+        return true;
+      }
+    }
+    return false;
+  };
 
   if (isLoading) {
     return <div className="flex justify-center p-6">Loading pool specifications...</div>;
@@ -30,38 +90,109 @@ export function PoolSpecificationsTable() {
     );
   }
 
+  // Get all column keys from the first pool object
+  const allColumns = Object.keys(pools[0]).filter(key => 
+    key !== 'id' && 
+    !key.startsWith('_') && 
+    key !== 'created_at' && 
+    key !== 'updated_at'
+  );
+
   return (
-    <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Range</TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead className="text-right">Length (m)</TableHead>
-            <TableHead className="text-right">Width (m)</TableHead>
-            <TableHead className="text-right">Depth - Shallow (m)</TableHead>
-            <TableHead className="text-right">Depth - Deep (m)</TableHead>
-            <TableHead className="text-right">Volume (L)</TableHead>
-            <TableHead className="text-right">Waterline (L/m)</TableHead>
-            <TableHead className="text-right">Weight (kg)</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {pools.map((pool) => (
-            <TableRow key={pool.id}>
-              <TableCell>{pool.range}</TableCell>
-              <TableCell>{pool.name}</TableCell>
-              <TableCell className="text-right">{pool.length}</TableCell>
-              <TableCell className="text-right">{pool.width}</TableCell>
-              <TableCell className="text-right">{pool.depth_shallow}</TableCell>
-              <TableCell className="text-right">{pool.depth_deep}</TableCell>
-              <TableCell className="text-right">{pool.volume_liters ? pool.volume_liters.toLocaleString() : '-'}</TableCell>
-              <TableCell className="text-right">{pool.waterline_l_m || '-'}</TableCell>
-              <TableCell className="text-right">{pool.weight_kg ? pool.weight_kg.toLocaleString() : '-'}</TableCell>
+    <div>
+      <div className="mb-4 flex justify-between items-center">
+        <h3 className="text-lg font-medium">Pool Specifications</h3>
+        <div className="flex gap-2">
+          <Sheet open={isConfigOpen} onOpenChange={setIsConfigOpen}>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm">
+                Configure Columns
+              </Button>
+            </SheetTrigger>
+            <SheetContent>
+              <SheetHeader>
+                <SheetTitle>Column Visibility</SheetTitle>
+                <SheetDescription>
+                  Toggle which column groups are visible in the table
+                </SheetDescription>
+              </SheetHeader>
+              <div className="py-4">
+                {columnGroups.map((group) => (
+                  <div key={group.id} className="flex items-center justify-between py-2">
+                    <div>
+                      <h4 className="font-medium">{group.title}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {group.columns.length} columns
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => toggleColumnGroup(group.id)}
+                      variant={visibleGroups.includes(group.id) ? "default" : "outline"}
+                      size="sm"
+                    >
+                      {visibleGroups.includes(group.id) ? "Hide" : "Show"}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+
+      <div className="overflow-x-auto border rounded-md">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {allColumns.map((column) => {
+                if (!isColumnVisible(column)) return null;
+                
+                // Format the column header
+                const formattedHeader = column
+                  .split('_')
+                  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(' ');
+                
+                return (
+                  <TableHead 
+                    key={column}
+                    className={column === "range" || column === "name" ? "" : "text-right"}
+                  >
+                    {formattedHeader}
+                  </TableHead>
+                );
+              })}
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {pools.map((pool) => (
+              <TableRow key={pool.id}>
+                {allColumns.map((column) => {
+                  if (!isColumnVisible(column)) return null;
+                  
+                  const value = pool[column as keyof Pool];
+                  let displayValue = value;
+                  
+                  // Format numeric values
+                  if (typeof value === 'number' && 
+                      (column === 'volume_liters' || column === 'weight_kg')) {
+                    displayValue = value.toLocaleString();
+                  }
+                  
+                  return (
+                    <TableCell 
+                      key={`${pool.id}-${column}`}
+                      className={column === "range" || column === "name" ? "" : "text-right"}
+                    >
+                      {displayValue || '-'}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

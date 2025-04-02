@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "react-router-dom";
@@ -37,10 +38,7 @@ const PoolWorksheet = () => {
         
         <div className="space-y-8">
           <Card className="w-full">
-            <CardHeader>
-              <CardTitle>Pool Specifications</CardTitle>
-            </CardHeader>
-            <CardContent>
+            <CardContent className="pt-6">
               <PoolSpecificationsTable />
             </CardContent>
           </Card>
