@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { PlusCircle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -50,10 +49,7 @@ export function CreateWorksheetDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Create Worksheet
-        </Button>
+        <button id="create-worksheet-trigger" className="hidden">Create Worksheet</button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[550px]">
         <DialogHeader>
@@ -105,6 +101,7 @@ export function CreateWorksheetDialog() {
             </DialogClose>
             <Button 
               type="submit" 
+              className="bg-teal-500 hover:bg-teal-600"
               disabled={createWorksheetMutation.isPending}
             >
               {createWorksheetMutation.isPending ? "Creating..." : "Create Worksheet"}

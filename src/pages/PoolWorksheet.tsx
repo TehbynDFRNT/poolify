@@ -11,6 +11,7 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Plus } from "lucide-react";
 
 const PoolWorksheet = () => {
   return (
@@ -32,7 +33,10 @@ const PoolWorksheet = () => {
 
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Pool Worksheets</h1>
-          <CreateWorksheetDialog />
+          <Button className="bg-teal-500 hover:bg-teal-600" onClick={() => document.getElementById('create-worksheet-trigger')?.click()}>
+            <Plus className="mr-2 h-4 w-4" />
+            Create Worksheet
+          </Button>
         </div>
         
         <Card className="w-full">
@@ -44,6 +48,7 @@ const PoolWorksheet = () => {
           </CardContent>
         </Card>
       </div>
+      <CreateWorksheetDialog />
     </DashboardLayout>
   );
 };

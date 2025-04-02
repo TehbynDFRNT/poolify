@@ -10,7 +10,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -59,9 +58,9 @@ export function WorksheetsList() {
 
   if (!worksheets?.length) {
     return (
-      <div className="text-center p-10 border rounded-md bg-muted/10">
-        <p className="text-muted-foreground mb-2">No worksheets found</p>
-        <p className="text-sm mb-4">Create a new worksheet to get started</p>
+      <div className="text-center p-16 border border-dashed rounded-md bg-muted/10">
+        <p className="text-xl text-muted-foreground mb-2">No worksheets found</p>
+        <p className="text-muted-foreground mb-4">Create a new worksheet to get started</p>
       </div>
     );
   }
