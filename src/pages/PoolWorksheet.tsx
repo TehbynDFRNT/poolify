@@ -106,6 +106,7 @@ const columnLabels: Record<string, string> = {
   "beam": "Beam",
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
+  "fixed_costs_total": "Fixed Costs Total", // Added fixed costs total column label
 };
 
 // Column configuration component
@@ -241,8 +242,10 @@ const PoolWorksheet = () => {
       const fixedCostsGroupIndex = columnGroups.findIndex(group => group.id === 'fixed_costs');
       
       if (fixedCostsGroupIndex !== -1) {
-        // Update the columns with fixed cost column IDs
-        columnGroups[fixedCostsGroupIndex].columns = fixedCosts.map(cost => `fixed_cost_${cost.id}`);
+        // Update the columns with fixed cost column IDs and add the total column
+        const fixedCostColumns = fixedCosts.map(cost => `fixed_cost_${cost.id}`);
+        // Add fixed_costs_total as the last column in the fixed costs group
+        columnGroups[fixedCostsGroupIndex].columns = [...fixedCostColumns, "fixed_costs_total"];
         
         // Update the column labels
         fixedCosts.forEach(cost => {
@@ -282,6 +285,13 @@ const PoolWorksheet = () => {
                             (digType.truck_quantity * digType.truck_hours * digType.truck_hourly_rate);
     
     return excavationCost;
+  };
+
+  // Calculate the total fixed costs
+  const calculateFixedCostsTotal = () => {
+    if (!fixedCosts) return 0;
+    
+    return fixedCosts.reduce((total, cost) => total + (cost.price || 0), 0);
   };
 
   const isLoading = isLoadingPools || isLoadingPackages || isLoadingCosts || isLoadingFixedCosts;
@@ -367,6 +377,16 @@ const PoolWorksheet = () => {
                 pools.map((pool) => (
                   <TableRow key={pool.id}>
                     {getVisibleColumns().map(column => {
+                      // Handle fixed costs total column
+                      if (column === "fixed_costs_total") {
+                        const total = calculateFixedCostsTotal();
+                        return (
+                          <TableCell key={`${pool.id}-${column}`} className="font-medium">
+                            {formatCurrency(total)}
+                          </TableCell>
+                        );
+                      }
+                      
                       // Handle fixed cost columns
                       if (column.startsWith('fixed_cost_') && fixedCosts) {
                         const fixedCostId = column.replace('fixed_cost_', '');
