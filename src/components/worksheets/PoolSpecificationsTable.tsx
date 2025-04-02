@@ -1,6 +1,5 @@
 
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { Pool } from "@/types/pool";
 import {
   Table,
@@ -12,18 +11,8 @@ import {
 } from "@/components/ui/table";
 
 export function PoolSpecificationsTable() {
-  const { data: pools, isLoading, error } = useQuery({
-    queryKey: ["pool-specifications"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("pool_specifications")
-        .select("*")
-        .order("range");
-      
-      if (error) throw error;
-      return data as Pool[];
-    }
-  });
+  // Using the existing hook that properly sorts by range order
+  const { data: pools, isLoading, error } = usePoolSpecifications();
 
   if (isLoading) {
     return <div className="flex justify-center p-6">Loading pool specifications...</div>;
