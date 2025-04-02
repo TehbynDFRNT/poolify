@@ -28,14 +28,14 @@ const MainNav: React.FC = () => {
           label: "Pool Creation Wizard", 
           path: "/pool-creation-wizard", 
           isParent: false 
+        },
+        { 
+          icon: <Database className="h-5 w-5" />, 
+          label: "Pool Specifications", 
+          path: "/pool-specifications", 
+          isParent: false 
         }
       ]
-    },
-    { 
-      icon: <Database className="h-5 w-5" />, 
-      label: "Pool Specifications", 
-      path: "/pool-specifications", 
-      isParent: false 
     },
     { 
       icon: <Construction className="h-5 w-5" />, 
