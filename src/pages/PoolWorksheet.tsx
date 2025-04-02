@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/breadcrumb";
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatCurrency } from "@/utils/format";
 
 const PoolWorksheet = () => {
   const { data: pools, isLoading, error } = usePoolSpecifications();
@@ -42,29 +43,33 @@ const PoolWorksheet = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>name</TableHead>
-                <TableHead>range</TableHead>
-                <TableHead>length</TableHead>
-                <TableHead>width</TableHead>
-                <TableHead>depth_shallow</TableHead>
-                <TableHead>depth_deep</TableHead>
-                <TableHead>waterline_l_m</TableHead>
-                <TableHead>volume_liters</TableHead>
-                <TableHead>salt_volume_bags</TableHead>
-                <TableHead>salt_volume_bags_fixed</TableHead>
-                <TableHead>weight_kg</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Range</TableHead>
+                <TableHead>Length</TableHead>
+                <TableHead>Width</TableHead>
+                <TableHead>Depth (Shallow)</TableHead>
+                <TableHead>Depth (Deep)</TableHead>
+                <TableHead>Waterline (L/m)</TableHead>
+                <TableHead>Volume (L)</TableHead>
+                <TableHead>Weight (kg)</TableHead>
+                <TableHead>Salt Bags</TableHead>
+                <TableHead>Salt Bags (Fixed)</TableHead>
+                <TableHead>Initial Minerals (kg)</TableHead>
+                <TableHead>Topup Minerals (kg)</TableHead>
+                <TableHead>Buy Price (ex GST)</TableHead>
+                <TableHead>Buy Price (inc GST)</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-4">
+                  <TableCell colSpan={15} className="text-center py-4">
                     Loading pool specifications...
                   </TableCell>
                 </TableRow>
               ) : error ? (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-4 text-red-500">
+                  <TableCell colSpan={15} className="text-center py-4 text-red-500">
                     Error loading pool specifications
                   </TableCell>
                 </TableRow>
@@ -77,16 +82,20 @@ const PoolWorksheet = () => {
                     <TableCell>{pool.width.toFixed(2)}m</TableCell>
                     <TableCell>{pool.depth_shallow.toFixed(2)}m</TableCell>
                     <TableCell>{pool.depth_deep.toFixed(2)}m</TableCell>
-                    <TableCell>{pool.waterline_l_m?.toFixed(2)}L/m</TableCell>
-                    <TableCell>{pool.volume_liters?.toLocaleString()}L</TableCell>
+                    <TableCell>{pool.waterline_l_m?.toFixed(2) || '-'}L/m</TableCell>
+                    <TableCell>{pool.volume_liters?.toLocaleString() || '-'}L</TableCell>
+                    <TableCell>{pool.weight_kg?.toLocaleString() || '-'}kg</TableCell>
                     <TableCell>{pool.salt_volume_bags || '-'}</TableCell>
                     <TableCell>{pool.salt_volume_bags_fixed || '-'}</TableCell>
-                    <TableCell>{pool.weight_kg ? pool.weight_kg.toLocaleString() : '-'}</TableCell>
+                    <TableCell>{pool.minerals_kg_initial || '-'}</TableCell>
+                    <TableCell>{pool.minerals_kg_topup || '-'}</TableCell>
+                    <TableCell>{pool.buy_price_ex_gst ? formatCurrency(pool.buy_price_ex_gst) : '-'}</TableCell>
+                    <TableCell>{pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : '-'}</TableCell>
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell colSpan={11} className="text-center py-4">
+                  <TableCell colSpan={15} className="text-center py-4">
                     No pool specifications available
                   </TableCell>
                 </TableRow>
