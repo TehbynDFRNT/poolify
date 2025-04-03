@@ -52,6 +52,8 @@ const PoolWorksheet = () => {
           pools={pools}
           isLoading={isLoadingPools}
           error={poolsError}
+          visibleGroups={visibleGroups}
+          setVisibleGroups={setVisibleGroups}
         />
       </div>
     </DashboardLayout>

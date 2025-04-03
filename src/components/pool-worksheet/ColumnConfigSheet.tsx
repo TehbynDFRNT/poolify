@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { columnGroups } from "./column-config";
 
 interface ColumnConfigSheetProps { 
@@ -25,6 +26,14 @@ export const ColumnConfigSheet = ({
       setVisibleGroups(visibleGroups.filter(id => id !== groupId));
     } else {
       setVisibleGroups([...visibleGroups, groupId]);
+    }
+  };
+
+  const toggleAllGroups = (show: boolean) => {
+    if (show) {
+      setVisibleGroups(columnGroups.map(group => group.id));
+    } else {
+      setVisibleGroups([]);
     }
   };
 
@@ -47,7 +56,25 @@ export const ColumnConfigSheet = ({
             Toggle column groups to display in the table
           </SheetDescription>
         </SheetHeader>
-        <div className="py-4">
+        
+        <div className="flex justify-between py-2 mt-2">
+          <Button 
+            onClick={() => toggleAllGroups(true)} 
+            variant="outline" 
+            size="sm"
+          >
+            Show All
+          </Button>
+          <Button 
+            onClick={() => toggleAllGroups(false)} 
+            variant="outline" 
+            size="sm"
+          >
+            Hide All
+          </Button>
+        </div>
+        
+        <ScrollArea className="h-[calc(100vh-200px)] mt-4 pr-4">
           {columnGroups.map((group) => (
             <div key={group.id} className="flex items-center justify-between py-2 border-b">
               <div>
@@ -65,7 +92,7 @@ export const ColumnConfigSheet = ({
               </Button>
             </div>
           ))}
-        </div>
+        </ScrollArea>
       </SheetContent>
     </Sheet>
   );
