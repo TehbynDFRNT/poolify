@@ -30,25 +30,30 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
         ))}
       </TableRow>
       
-      {/* Render column headers with more prominent numbers */}
+      {/* Add a dedicated row just for column numbers */}
       <TableRow>
-        {visibleColumns.map((column, index) => {
+        {visibleColumns.map((column, index) => (
+          <TableHead key={`number-${column}`} className="py-1 border-b">
+            <div className="w-6 h-6 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
+              {index + 1}
+            </div>
+          </TableHead>
+        ))}
+      </TableRow>
+      
+      {/* Render column headers */}
+      <TableRow>
+        {visibleColumns.map((column) => {
           // For fixed cost columns, use the name from columnLabels
           const headerLabel = column.startsWith('fixed_cost_')
             ? columnLabels[column]
             : columnLabels[column] || column;
-          
-          // Add column number to the label with more prominence
-          const columnNumber = index + 1;
           
           return (
             <TableHead 
               key={column} 
               className={column === "dig_type" ? "whitespace-nowrap w-32" : ""}
             >
-              <span className="text-lg font-bold mr-1 text-blue-700">
-                {columnNumber}.
-              </span>{' '}
               {headerLabel}
             </TableHead>
           );
