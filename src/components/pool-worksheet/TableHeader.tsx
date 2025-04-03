@@ -1,5 +1,5 @@
 
-import { TableHead, TableHeader, TableRow, TableCell } from "@/components/ui/table";
+import { TableHead, TableHeader as UITableHeader, TableRow, TableCell } from "@/components/ui/table";
 import { ColumnGroup, ColumnLabels } from "./types";
 import { columnLabels } from "./column-config";
 
@@ -10,7 +10,7 @@ interface TableHeaderProps {
 
 export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHeaderProps) => {
   return (
-    <TableHeader>
+    <UITableHeader>
       {/* Render group headers */}
       <TableRow>
         {visibleColumnGroups.map(group => (
@@ -33,12 +33,15 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
             : columnLabels[column] || column;
           
           return (
-            <TableHead key={column}>
+            <TableHead 
+              key={column} 
+              className={column === "dig_type" ? "whitespace-nowrap w-32" : ""}
+            >
               {headerLabel}
             </TableHead>
           );
         })}
       </TableRow>
-    </TableHeader>
+    </UITableHeader>
   );
 };

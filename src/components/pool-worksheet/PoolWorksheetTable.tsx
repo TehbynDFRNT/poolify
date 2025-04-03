@@ -49,5 +49,3 @@ export const PoolWorksheetTable = ({ pools, isLoading, error }: PoolWorksheetTab
     </div>
   );
 };
-
-export { visibleGroups as VisibleGroups };
