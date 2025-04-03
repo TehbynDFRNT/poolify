@@ -74,9 +74,12 @@ export const useFixedCostsData = () => {
     setFixedCostColumnsSetup(true);
     
     // Force the global columnNumberMap to be recalculated
-    // This triggers recreation of columnNumberMap in TableHeader
-    const event = new CustomEvent('fixedCostsUpdated');
-    window.dispatchEvent(event);
+    // This uses a custom event to notify the TableHeader component
+    setTimeout(() => {
+      console.log("Dispatching fixedCostsUpdated event");
+      const event = new CustomEvent('fixedCostsUpdated');
+      window.dispatchEvent(event);
+    }, 0);
   }, [fixedCosts]);
 
   // Calculate the total of all fixed costs

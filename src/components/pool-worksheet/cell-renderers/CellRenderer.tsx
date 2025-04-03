@@ -37,7 +37,7 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
   }
   
   // Handle construction costs columns
-  if (["excavation", "total_cost", "pea_gravel", "install_fee", "trucked_water", 
+  if (["total_cost", "pea_gravel", "install_fee", "trucked_water", 
        "salt_bags", "coping_supply", "beam", "coping_lay"].includes(column)) {
     return <ConstructionCostsCell 
       poolId={pool.id} 
