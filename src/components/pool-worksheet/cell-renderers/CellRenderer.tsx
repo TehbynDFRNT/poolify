@@ -6,6 +6,7 @@ import { FixedCostsCell } from "./FixedCostsCell";
 import { FiltrationPackageCell } from "./FiltrationPackageCell";
 import { ConstructionCostsCell } from "./ConstructionCostsCell";
 import { PoolSpecificationCell } from "./PoolSpecificationCell";
+import { TrueCostCell } from "./TrueCostCell";
 
 interface CellRendererProps {
   pool: Pool;
@@ -42,6 +43,15 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
       poolId={pool.id} 
       column={column} 
       poolCost={poolCost} 
+    />;
+  }
+
+  // Handle True Cost column
+  if (column === "true_cost") {
+    return <TrueCostCell 
+      poolId={pool.id}
+      poolCost={poolCost}
+      packageInfo={packageInfo}
     />;
   }
   

@@ -1,4 +1,3 @@
-
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define some default fixed costs columns that will be used as fallback
@@ -65,6 +64,12 @@ export const columnGroups: ColumnGroup[] = [
     title: "Fixed Costs",
     color: "bg-purple-100 text-purple-800",
     columns: defaultFixedCostColumns // Initialize with at least the total column
+  },
+  {
+    id: "true_cost",
+    title: "True Cost",
+    color: "bg-red-100 text-red-800",
+    columns: ["true_cost"]
   }
 ];
 
@@ -102,10 +107,13 @@ export const columnLabels: ColumnLabels = {
   "crane_cost": "Crane Cost",
   
   // Initialize fixed costs total
-  "fixed_costs_total": "Fixed Costs Total"
+  "fixed_costs_total": "Fixed Costs Total",
+  
+  // Add new True Cost column label
+  "true_cost": "True Cost"
 };
 
-// Default visible column groups - ensure fixed_costs is included
+// Default visible column groups - ensure fixed_costs and true_cost are included
 export const defaultVisibleGroups = [
-  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs"
+  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs", "true_cost"
 ];
