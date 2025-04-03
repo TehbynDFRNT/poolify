@@ -1,6 +1,7 @@
 
 import { formatCurrency } from "@/utils/format";
 import { ExcavationCell } from "./ExcavationCell";
+import { usePoolDigData } from "../hooks/usePoolDigData";
 
 interface ConstructionCostsCellProps {
   poolId: string;
@@ -9,11 +10,12 @@ interface ConstructionCostsCellProps {
 }
 
 export const ConstructionCostsCell = ({ poolId, column, poolCost }: ConstructionCostsCellProps) => {
+  const { calculateExcavationCost } = usePoolDigData();
+  
   if (column === "excavation") {
     return <ExcavationCell poolId={poolId} column={column} />;
   } else if (column === "total_cost") {
     // Calculate the total cost
-    const { calculateExcavationCost } = require("../hooks/usePoolDigData")();
     const excavationCost = calculateExcavationCost(poolId);
     const total = 
       excavationCost + 
