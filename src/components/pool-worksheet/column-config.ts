@@ -1,3 +1,4 @@
+
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define column groups for organizing the table columns
@@ -98,8 +99,7 @@ export const columnLabels: ColumnLabels = {
   
   // Add new crane column labels
   "crane_type": "Crane Type",
-  "crane_cost": "Crane Cost",
-  "fixed_costs_total": "Fixed Costs Total"
+  "crane_cost": "Crane Cost"
 };
 
 // Default visible column groups
