@@ -22,13 +22,13 @@ export const PoolTableRow = ({
   
   return (
     <TableRow key={pool.id}>
-      {columns.map(column => (
+      {columns.map((column, index) => (
         <TableCell key={`${pool.id}-${column}`}>
           <CellRenderer 
             pool={pool} 
             column={column} 
             poolCost={poolCost} 
-            packageInfo={packageInfo} 
+            packageInfo={packageInfo}
           />
         </TableCell>
       ))}

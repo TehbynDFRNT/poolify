@@ -12,6 +12,9 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
   console.log("Visible column groups:", visibleColumnGroups);
   console.log("Visible columns:", getVisibleColumns());
   
+  // Get all visible columns
+  const visibleColumns = getVisibleColumns();
+  
   return (
     <UITableHeader>
       {/* Render group headers */}
@@ -27,20 +30,24 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
         ))}
       </TableRow>
       
-      {/* Render column headers */}
+      {/* Render column headers with numbers */}
       <TableRow>
-        {getVisibleColumns().map(column => {
+        {visibleColumns.map((column, index) => {
           // For fixed cost columns, use the name from columnLabels
           const headerLabel = column.startsWith('fixed_cost_')
             ? columnLabels[column]
             : columnLabels[column] || column;
+          
+          // Add column number to the label
+          const columnNumber = index + 1;
+          const formattedHeader = `${columnNumber}. ${headerLabel}`;
           
           return (
             <TableHead 
               key={column} 
               className={column === "dig_type" ? "whitespace-nowrap w-32" : ""}
             >
-              {headerLabel}
+              {formattedHeader}
             </TableHead>
           );
         })}
