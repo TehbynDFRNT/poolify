@@ -12,7 +12,7 @@ interface TrueCostCellProps {
 
 export const TrueCostCell = ({ poolId, poolCost, packageInfo }: TrueCostCellProps) => {
   // Get fixed costs total
-  const { calculateFixedCostsTotal } = useFixedCostsData();
+  const { calculateFixedCostsTotal, fixedCosts } = useFixedCostsData();
   const fixedCostsTotal = calculateFixedCostsTotal();
   
   // Get excavation cost
@@ -26,14 +26,22 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo }: TrueCostCellProp
   // Get package price
   const packagePrice = packageInfo?.price || 0;
   
-  // Calculate construction costs total
-  const constructionCostsTotal = Object.values(poolCost).reduce((sum, cost) => sum + (cost || 0), 0);
+  // Calculate construction costs total - only include the actual individual costs without excavation
+  const constructionCostsTotal = 
+    (poolCost.pea_gravel || 0) + 
+    (poolCost.install_fee || 0) + 
+    (poolCost.trucked_water || 0) + 
+    (poolCost.salt_bags || 0) + 
+    (poolCost.coping_supply || 0) + 
+    (poolCost.beam || 0) + 
+    (poolCost.coping_lay || 0);
   
   // Calculate the true cost by adding up all costs
   const trueCost = fixedCostsTotal + excavationCost + craneCost + packagePrice + constructionCostsTotal;
   
   // Log calculation details for debugging
   console.log(`True Cost Calculation for pool ${poolId}:`, {
+    fixedCosts,
     fixedCostsTotal,
     excavationCost,
     craneCost,

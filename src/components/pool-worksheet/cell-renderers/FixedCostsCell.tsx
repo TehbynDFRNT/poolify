@@ -27,7 +27,9 @@ export const FixedCostsCell = ({ column }: FixedCostsCellProps) => {
     const fixedCost = fixedCosts.find(cost => cost.id === fixedCostId);
     console.log(`Rendering fixed cost ${fixedCostId}:`, fixedCost);
     
-    return <>{fixedCost ? formatCurrency(fixedCost.price) : '-'}</>;
+    if (fixedCost) {
+      return <>{formatCurrency(fixedCost.price)}</>;
+    }
   }
   
   return null;
