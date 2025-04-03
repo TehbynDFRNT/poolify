@@ -112,8 +112,8 @@ const columnLabels: Record<string, string> = {
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
   "fixed_costs_total": "Fixed Costs Total",
-  "dig_type": "Dig Type", // Added new column for dig type
-  "dig_total": "Dig Total" // Added new column for dig total cost
+  "dig_type": "Dig Type",
+  "dig_total": "Dig Total"
 };
 
 // Column configuration component
