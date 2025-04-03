@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -65,6 +64,12 @@ const columnGroups = [
     columns: ["default_package", "package_price"]
   },
   {
+    id: "excavation",
+    title: "Excavation",
+    color: "bg-amber-100 text-amber-800",
+    columns: ["dig_type", "dig_total"]
+  },
+  {
     id: "construction_costs",
     title: "Pool Individual Costs",
     color: "bg-amber-100 text-amber-800",
@@ -106,7 +111,9 @@ const columnLabels: Record<string, string> = {
   "beam": "Beam",
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
-  "fixed_costs_total": "Fixed Costs Total", // Added fixed costs total column label
+  "fixed_costs_total": "Fixed Costs Total",
+  "dig_type": "Dig Type", // Added new column for dig type
+  "dig_total": "Dig Total" // Added new column for dig total cost
 };
 
 // Column configuration component
@@ -287,6 +294,12 @@ const PoolWorksheet = () => {
     return excavationCost;
   };
 
+  // Get dig type name for a pool
+  const getDigTypeName = (poolId: string) => {
+    const match = poolDigMatches?.get(poolId);
+    return match?.dig_type?.name || '-';
+  };
+
   // Calculate the total fixed costs
   const calculateFixedCostsTotal = () => {
     if (!fixedCosts) return 0;
@@ -377,6 +390,22 @@ const PoolWorksheet = () => {
                 pools.map((pool) => (
                   <TableRow key={pool.id}>
                     {getVisibleColumns().map(column => {
+                      // Handle excavation columns
+                      if (column === "dig_type") {
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            {getDigTypeName(pool.id)}
+                          </TableCell>
+                        );
+                      } else if (column === "dig_total") {
+                        const digTotal = calculateExcavationCost(pool.id);
+                        return (
+                          <TableCell key={`${pool.id}-${column}`}>
+                            {formatCurrency(digTotal)}
+                          </TableCell>
+                        );
+                      }
+
                       // Handle fixed costs total column
                       if (column === "fixed_costs_total") {
                         const total = calculateFixedCostsTotal();
