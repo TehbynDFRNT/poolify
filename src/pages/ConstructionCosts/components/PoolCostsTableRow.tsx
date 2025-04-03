@@ -27,8 +27,8 @@ export const PoolCostsTableRow = ({
   onCancel,
   onCostChange,
 }: PoolCostsTableRowProps) => {
+  // Calculate total of ONLY the construction costs (without excavation)
   const total = 
-    excavationCost + 
     (costs?.pea_gravel || 0) + 
     (costs?.install_fee || 0) + 
     (costs?.trucked_water || 0) + 
