@@ -1,12 +1,30 @@
 
 import { TableHead, TableHeader as UITableHeader, TableRow, TableCell } from "@/components/ui/table";
 import { ColumnGroup, ColumnLabels } from "./types";
-import { columnLabels } from "./column-config";
+import { columnLabels, columnGroups as allColumnGroups } from "./column-config";
 
 interface TableHeaderProps {
   visibleColumnGroups: ColumnGroup[];
   getVisibleColumns: () => string[];
 }
+
+// Create a mapping of column keys to their fixed column numbers
+const getColumnNumberMap = () => {
+  // Flatten all columns from all groups to create a full column list
+  const allColumns = allColumnGroups.flatMap(group => group.columns);
+  
+  // Create a map of column keys to their fixed position
+  const columnNumberMap: Record<string, number> = {};
+  
+  // Assign a fixed number to each column
+  allColumns.forEach((column, index) => {
+    columnNumberMap[column] = index + 1;
+  });
+  
+  return columnNumberMap;
+};
+
+const columnNumberMap = getColumnNumberMap();
 
 export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHeaderProps) => {
   console.log("Visible column groups:", visibleColumnGroups);
@@ -30,12 +48,12 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
         ))}
       </TableRow>
       
-      {/* Add a dedicated row just for column numbers */}
+      {/* Add a dedicated row for fixed column numbers */}
       <TableRow>
-        {visibleColumns.map((column, index) => (
+        {visibleColumns.map((column) => (
           <TableHead key={`number-${column}`} className="py-1 border-b">
             <div className="w-6 h-6 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-              {index + 1}
+              {columnNumberMap[column] || '-'}
             </div>
           </TableHead>
         ))}
