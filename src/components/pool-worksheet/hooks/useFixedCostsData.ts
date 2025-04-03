@@ -72,6 +72,11 @@ export const useFixedCostsData = () => {
     
     console.log("Updated fixed costs columns:", columnGroups[fixedCostsGroupIndex].columns);
     setFixedCostColumnsSetup(true);
+    
+    // Force the global columnNumberMap to be recalculated
+    // This triggers recreation of columnNumberMap in TableHeader
+    const event = new CustomEvent('fixedCostsUpdated');
+    window.dispatchEvent(event);
   }, [fixedCosts]);
 
   // Calculate the total of all fixed costs

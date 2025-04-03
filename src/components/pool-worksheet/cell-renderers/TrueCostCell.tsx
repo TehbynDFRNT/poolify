@@ -8,7 +8,9 @@ interface TrueCostCellProps {
 }
 
 export const TrueCostCell = ({ poolId, poolCost, packageInfo }: TrueCostCellProps) => {
-  // This is a placeholder - we'll implement the actual calculation logic later
-  // For now, we're just displaying a placeholder value
-  return <>{formatCurrency(0)}</>;
+  // Calculate the true cost by adding up all pool costs
+  // This is a basic implementation that we can enhance later
+  const trueCost = Object.values(poolCost).reduce((sum, cost) => sum + (cost || 0), 0);
+  
+  return <>{formatCurrency(trueCost)}</>;
 };

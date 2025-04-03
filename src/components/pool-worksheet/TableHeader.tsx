@@ -33,6 +33,9 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
   // Get all visible columns
   const visibleColumns = getVisibleColumns();
   
+  // Debug: Print all column numbers for troubleshooting
+  console.log("Column number map:", columnNumberMap);
+  
   return (
     <UITableHeader>
       {/* Render group headers */}
@@ -51,13 +54,14 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
       {/* Add a dedicated row for fixed column numbers */}
       <TableRow>
         {visibleColumns.map((column) => {
-          // Every column should have a numbered circle, including fixed costs columns
-          const columnNumber = columnNumberMap[column] || '-';
+          // Get the column number from the map - if it's a fixed cost column, 
+          // we need to ensure it's properly numbered based on its position
+          const columnNumber = columnNumberMap[column];
           
           return (
             <TableHead key={`number-${column}`} className="py-1 border-b">
               <div className="w-6 h-6 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-                {columnNumber}
+                {columnNumber || '-'}
               </div>
             </TableHead>
           );
