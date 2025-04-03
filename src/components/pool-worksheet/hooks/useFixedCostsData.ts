@@ -19,13 +19,14 @@ export const useFixedCostsData = () => {
       
       if (error) throw error;
       
+      console.log("Fetched fixed costs:", data);
       return data as FixedCost[];
     }
   });
 
   // Update fixed costs columns when fixed costs are loaded
   useEffect(() => {
-    if (fixedCosts && fixedCosts.length > 0 && !columnsUpdated) {
+    if (fixedCosts && fixedCosts.length > 0) {
       // Find the fixed costs group
       const fixedCostsGroupIndex = columnGroups.findIndex(group => group.id === 'fixed_costs');
       
@@ -50,7 +51,7 @@ export const useFixedCostsData = () => {
         console.log("Fixed costs columns updated:", columnGroups[fixedCostsGroupIndex].columns);
       }
     }
-  }, [fixedCosts, columnsUpdated]);
+  }, [fixedCosts]);
 
   // Calculate the total fixed costs
   const calculateFixedCostsTotal = () => {
