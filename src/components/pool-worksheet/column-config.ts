@@ -1,3 +1,4 @@
+
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define some default fixed costs columns that will be used as fallback
@@ -57,7 +58,7 @@ export const columnGroups: ColumnGroup[] = [
     id: "construction_costs",
     title: "Pool Individual Costs",
     color: "bg-amber-100 text-amber-800",
-    columns: ["excavation", "pea_gravel", "install_fee", "trucked_water", "salt_bags", "coping_supply", "beam", "coping_lay", "total_cost"]
+    columns: ["pea_gravel", "install_fee", "trucked_water", "salt_bags", "coping_supply", "beam", "coping_lay", "total_cost"]
   },
   {
     id: "fixed_costs",
