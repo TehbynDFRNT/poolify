@@ -47,7 +47,7 @@ export const columnGroups: ColumnGroup[] = [
   {
     id: "excavation",
     title: "Excavation",
-    color: "bg-orange-100 text-orange-800", // Orange to make it distinct
+    color: "bg-orange-100 text-orange-800",
     columns: ["dig_type", "dig_total"]
   },
   {
@@ -98,10 +98,11 @@ export const columnLabels: ColumnLabels = {
   
   // Add new crane column labels
   "crane_type": "Crane Type",
-  "crane_cost": "Crane Cost"
+  "crane_cost": "Crane Cost",
+  "fixed_costs_total": "Fixed Costs Total"
 };
 
 // Default visible column groups
 export const defaultVisibleGroups = [
-  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs"
+  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs"
 ];

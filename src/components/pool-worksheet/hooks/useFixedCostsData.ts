@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { columnGroups, columnLabels } from '../column-config';
+import { FixedCost } from '@/types/fixed-cost';
 
 export const useFixedCostsData = () => {
   const { data: fixedCosts, isLoading: isLoadingFixedCosts } = useQuery({
@@ -15,7 +16,7 @@ export const useFixedCostsData = () => {
       
       if (error) throw error;
       
-      return data;
+      return data as FixedCost[];
     }
   });
 
@@ -26,15 +27,19 @@ export const useFixedCostsData = () => {
       const fixedCostsGroupIndex = columnGroups.findIndex(group => group.id === 'fixed_costs');
       
       if (fixedCostsGroupIndex !== -1) {
-        // Update the columns with fixed cost column IDs and add the total column
+        // Update the columns with fixed cost column IDs
         const fixedCostColumns = fixedCosts.map(cost => `fixed_cost_${cost.id}`);
+        
         // Add fixed_costs_total as the last column in the fixed costs group
         columnGroups[fixedCostsGroupIndex].columns = [...fixedCostColumns, "fixed_costs_total"];
         
-        // Update the column labels
+        // Update the column labels in the columnLabels object
         fixedCosts.forEach(cost => {
           columnLabels[`fixed_cost_${cost.id}`] = cost.name;
         });
+        
+        // Make sure the fixed_costs_total label is set
+        columnLabels["fixed_costs_total"] = "Fixed Costs Total";
       }
     }
   }, [fixedCosts]);
