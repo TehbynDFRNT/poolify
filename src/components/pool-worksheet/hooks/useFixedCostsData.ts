@@ -1,11 +1,14 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { columnGroups, columnLabels } from '../column-config';
 import { FixedCost } from '@/types/fixed-cost';
 
 export const useFixedCostsData = () => {
+  // State to track if columns have been updated
+  const [columnsUpdated, setColumnsUpdated] = useState(false);
+
   const { data: fixedCosts, isLoading: isLoadingFixedCosts } = useQuery({
     queryKey: ["fixed-costs"],
     queryFn: async () => {
@@ -22,7 +25,7 @@ export const useFixedCostsData = () => {
 
   // Update fixed costs columns when fixed costs are loaded
   useEffect(() => {
-    if (fixedCosts && fixedCosts.length > 0) {
+    if (fixedCosts && fixedCosts.length > 0 && !columnsUpdated) {
       // Find the fixed costs group
       const fixedCostsGroupIndex = columnGroups.findIndex(group => group.id === 'fixed_costs');
       
@@ -40,9 +43,14 @@ export const useFixedCostsData = () => {
         
         // Make sure the fixed_costs_total label is set
         columnLabels["fixed_costs_total"] = "Fixed Costs Total";
+        
+        // Prevent multiple updates
+        setColumnsUpdated(true);
+        
+        console.log("Fixed costs columns updated:", columnGroups[fixedCostsGroupIndex].columns);
       }
     }
-  }, [fixedCosts]);
+  }, [fixedCosts, columnsUpdated]);
 
   // Calculate the total fixed costs
   const calculateFixedCostsTotal = () => {

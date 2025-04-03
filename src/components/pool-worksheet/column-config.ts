@@ -93,13 +93,13 @@ export const columnLabels: ColumnLabels = {
   "beam": "Beam",
   "coping_lay": "Coping Lay",
   "total_cost": "Total Cost",
-  "fixed_costs_total": "Fixed Costs Total",
-  "dig_type": "Dig Type",
-  "dig_total": "Dig Total",
   
   // Add new crane column labels
   "crane_type": "Crane Type",
-  "crane_cost": "Crane Cost"
+  "crane_cost": "Crane Cost",
+  
+  // Fixed costs total (only once)
+  "fixed_costs_total": "Fixed Costs Total"
 };
 
 // Default visible column groups

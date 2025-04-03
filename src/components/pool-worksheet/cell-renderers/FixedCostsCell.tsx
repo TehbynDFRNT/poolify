@@ -9,6 +9,9 @@ interface FixedCostsCellProps {
 export const FixedCostsCell = ({ column }: FixedCostsCellProps) => {
   const { fixedCosts, calculateFixedCostsTotal } = useFixedCostsData();
   
+  // For debugging
+  console.log("FixedCostsCell column:", column, "fixedCosts:", fixedCosts);
+  
   if (column === "fixed_costs_total") {
     const total = calculateFixedCostsTotal();
     return <>{formatCurrency(total)}</>;

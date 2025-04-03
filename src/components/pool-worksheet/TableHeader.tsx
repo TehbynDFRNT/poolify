@@ -9,6 +9,9 @@ interface TableHeaderProps {
 }
 
 export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHeaderProps) => {
+  console.log("Visible column groups:", visibleColumnGroups);
+  console.log("Visible columns:", getVisibleColumns());
+  
   return (
     <UITableHeader>
       {/* Render group headers */}
@@ -19,7 +22,7 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
             colSpan={group.columns.length} 
             className={`${group.color} font-medium py-2 px-4 text-left border-b border-r`}
           >
-            {group.title}
+            {group.title} ({group.columns.length})
           </TableCell>
         ))}
       </TableRow>
