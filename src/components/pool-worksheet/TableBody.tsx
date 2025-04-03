@@ -1,10 +1,10 @@
-
 import { TableBody as UITableBody, TableRow, TableCell } from "@/components/ui/table";
 import { formatCurrency } from "@/utils/format";
 import { Pool } from "@/types/pool";
 import { usePoolCostsData } from "./hooks/usePoolCostsData";
 import { usePoolDigData } from "./hooks/usePoolDigData";
 import { useFixedCostsData } from "./hooks/useFixedCostsData";
+import { useCraneData } from "./hooks/useCraneData";
 import { usePoolPackages } from "@/hooks/usePoolPackages";
 import { calculatePackagePrice } from "@/utils/package-calculations";
 
@@ -20,6 +20,7 @@ export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: Ta
   const { poolCosts } = usePoolCostsData();
   const { calculateExcavationCost, getDigTypeName } = usePoolDigData();
   const { fixedCosts, calculateFixedCostsTotal } = useFixedCostsData();
+  const { getCraneName, getCraneCost } = useCraneData();
 
   // Create a lookup object for packages by pool ID
   const packagesByPoolId = poolsWithPackages?.reduce((acc, pool) => {
@@ -70,6 +71,21 @@ export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: Ta
       {pools.map((pool) => (
         <TableRow key={pool.id}>
           {getVisibleColumns().map(column => {
+            // Handle crane columns
+            if (column === "crane_type") {
+              return (
+                <TableCell key={`${pool.id}-${column}`}>
+                  {getCraneName(pool.id)}
+                </TableCell>
+              );
+            } else if (column === "crane_cost") {
+              return (
+                <TableCell key={`${pool.id}-${column}`}>
+                  {formatCurrency(getCraneCost(pool.id))}
+                </TableCell>
+              );
+            }
+            
             // Handle excavation columns
             if (column === "dig_type") {
               return (

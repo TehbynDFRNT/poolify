@@ -1,4 +1,3 @@
-
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define column groups for organizing the table columns
@@ -38,6 +37,12 @@ export const columnGroups: ColumnGroup[] = [
     title: "Filtration Package",
     color: "bg-green-100 text-green-800",
     columns: ["default_package", "package_price"]
+  },
+  {
+    id: "crane",
+    title: "Crane Information",
+    color: "bg-amber-100 text-amber-800",
+    columns: ["crane_type", "crane_cost"]
   },
   {
     id: "excavation",
@@ -89,10 +94,14 @@ export const columnLabels: ColumnLabels = {
   "total_cost": "Total Cost",
   "fixed_costs_total": "Fixed Costs Total",
   "dig_type": "Dig Type",
-  "dig_total": "Dig Total"
+  "dig_total": "Dig Total",
+  
+  // Add new crane column labels
+  "crane_type": "Crane Type",
+  "crane_cost": "Crane Cost"
 };
 
 // Default visible column groups
 export const defaultVisibleGroups = [
-  "identification", "dimensions", "pricing", "excavation", "construction_costs"
+  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs"
 ];
