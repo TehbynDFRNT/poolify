@@ -2,7 +2,7 @@
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -12,10 +12,21 @@ import {
 import { ColumnConfigSheet } from "@/components/pool-worksheet/ColumnConfigSheet";
 import { PoolWorksheetTable } from "@/components/pool-worksheet/PoolWorksheetTable";
 import { columnGroups, defaultVisibleGroups } from "@/components/pool-worksheet/column-config";
+import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
 
 const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
+  const { fixedCosts, isLoadingFixedCosts } = useFixedCostsData();
   const [visibleGroups, setVisibleGroups] = useState<string[]>(defaultVisibleGroups);
+
+  // Log the state of column groups for debugging
+  useEffect(() => {
+    const fixedCostsGroup = columnGroups.find(group => group.id === 'fixed_costs');
+    console.log("Fixed costs group columns:", fixedCostsGroup?.columns);
+    console.log("Fixed costs data:", fixedCosts);
+  }, [fixedCosts]);
+
+  const isLoading = isLoadingPools || isLoadingFixedCosts;
 
   return (
     <DashboardLayout>
@@ -50,7 +61,7 @@ const PoolWorksheet = () => {
         
         <PoolWorksheetTable 
           pools={pools}
-          isLoading={isLoadingPools}
+          isLoading={isLoading}
           error={poolsError}
           visibleGroups={visibleGroups}
           setVisibleGroups={setVisibleGroups}

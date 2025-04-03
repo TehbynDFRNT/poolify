@@ -1,6 +1,9 @@
 
 import { ColumnGroup, ColumnLabels } from "./types";
 
+// Define some default fixed costs columns that will be used as fallback
+export const defaultFixedCostColumns = ["fixed_costs_total"];
+
 // Define column groups for organizing the table columns
 export const columnGroups: ColumnGroup[] = [
   {
@@ -61,7 +64,7 @@ export const columnGroups: ColumnGroup[] = [
     id: "fixed_costs",
     title: "Fixed Costs",
     color: "bg-purple-100 text-purple-800",
-    columns: [] // This will be populated dynamically
+    columns: defaultFixedCostColumns // Initialize with at least the total column
   }
 ];
 
@@ -98,7 +101,7 @@ export const columnLabels: ColumnLabels = {
   "crane_type": "Crane Type",
   "crane_cost": "Crane Cost",
   
-  // Fixed costs total (only once)
+  // Initialize fixed costs total
   "fixed_costs_total": "Fixed Costs Total"
 };
 
