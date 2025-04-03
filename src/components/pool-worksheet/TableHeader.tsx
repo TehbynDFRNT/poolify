@@ -30,7 +30,7 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
         ))}
       </TableRow>
       
-      {/* Render column headers with numbers */}
+      {/* Render column headers with more prominent numbers */}
       <TableRow>
         {visibleColumns.map((column, index) => {
           // For fixed cost columns, use the name from columnLabels
@@ -38,16 +38,18 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
             ? columnLabels[column]
             : columnLabels[column] || column;
           
-          // Add column number to the label
+          // Add column number to the label with more prominence
           const columnNumber = index + 1;
-          const formattedHeader = `${columnNumber}. ${headerLabel}`;
           
           return (
             <TableHead 
               key={column} 
               className={column === "dig_type" ? "whitespace-nowrap w-32" : ""}
             >
-              {formattedHeader}
+              <span className="text-lg font-bold mr-1 text-blue-700">
+                {columnNumber}.
+              </span>{' '}
+              {headerLabel}
             </TableHead>
           );
         })}
