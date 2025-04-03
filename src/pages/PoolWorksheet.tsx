@@ -237,9 +237,10 @@ const PoolWorksheet = () => {
     }
   });
   
-  // State to track which column groups are visible
+  // State to track which column groups are visible - MAKE SURE EXCAVATION IS INCLUDED
   const [visibleGroups, setVisibleGroups] = useState<string[]>(
-    columnGroups.map(group => group.id) // Initially all groups are visible
+    // Make sure "excavation" is explicitly included in the default visible groups
+    ["identification", "dimensions", "pricing", "excavation", "construction_costs"]
   );
 
   // Update fixed costs columns when fixed costs are loaded
