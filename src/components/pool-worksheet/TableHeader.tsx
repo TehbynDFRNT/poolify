@@ -9,39 +9,35 @@ interface TableHeaderProps {
   getVisibleColumns: () => string[];
 }
 
-// Create a mapping of column keys to their fixed column numbers
-const getColumnNumberMap = (columns: string[]) => {
-  // Create a map of column keys to their fixed position
-  const columnNumberMap: Record<string, number> = {};
+// Global map of all columns to their absolute positions (1-based)
+const allColumnsPositionMap: Record<string, number> = {};
+
+// This function initializes a fixed numbering for all possible columns
+const initializeAllColumnNumbers = () => {
+  // Get all columns from all column groups
+  const allColumns = allColumnGroups.flatMap(group => group.columns);
   
-  // Assign a fixed number to each column - 1-based index
-  columns.forEach((column, index) => {
-    columnNumberMap[column] = index + 1;
+  // Assign a fixed position to each column (1-based index)
+  allColumns.forEach((column, index) => {
+    allColumnsPositionMap[column] = index + 1;
   });
   
-  return columnNumberMap;
+  console.log("All columns position map initialized:", allColumnsPositionMap);
 };
+
+// Initialize the map on module load
+initializeAllColumnNumbers();
 
 export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHeaderProps) => {
   // Get all visible columns
   const visibleColumns = getVisibleColumns();
   
-  // Store column number map in state to ensure it updates
-  const [columnNumberMap, setColumnNumberMap] = useState<Record<string, number>>({});
-  
-  // Update column number map when columns change or fixed cost update event fires
+  // Listen for fixed costs updated event
   useEffect(() => {
-    // Calculate column numbers based on the current visible columns in order
-    const map = getColumnNumberMap(visibleColumns);
-    setColumnNumberMap(map);
-    
-    // Log the column number map for debugging
-    console.log("Column number map updated:", map);
-    
-    // Listen for fixed costs updated event
     const handleFixedCostsUpdate = () => {
-      console.log("Fixed costs updated event received, recalculating column numbers");
-      setColumnNumberMap(getColumnNumberMap(getVisibleColumns()));
+      console.log("Fixed costs updated event received");
+      // Reinitialize the column numbers when fixed costs update
+      initializeAllColumnNumbers();
     };
     
     window.addEventListener('fixedCostsUpdated', handleFixedCostsUpdate);
@@ -49,7 +45,7 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
     return () => {
       window.removeEventListener('fixedCostsUpdated', handleFixedCostsUpdate);
     };
-  }, [visibleColumns, getVisibleColumns]);
+  }, []);
   
   return (
     <UITableHeader>
@@ -68,10 +64,10 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
       
       {/* Add a dedicated row for fixed column numbers */}
       <TableRow>
-        {visibleColumns.map((column, index) => (
+        {visibleColumns.map((column) => (
           <TableHead key={`number-${column}`} className="py-1 border-b">
             <div className="w-6 h-6 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-              {index + 1}
+              {allColumnsPositionMap[column] || "?"}
             </div>
           </TableHead>
         ))}

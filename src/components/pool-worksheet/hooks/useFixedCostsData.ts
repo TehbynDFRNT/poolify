@@ -79,7 +79,7 @@ export const useFixedCostsData = () => {
       console.log("Dispatching fixedCostsUpdated event");
       const event = new CustomEvent('fixedCostsUpdated');
       window.dispatchEvent(event);
-    }, 0);
+    }, 100); // Slightly longer timeout to ensure all data is processed
   }, [fixedCosts]);
 
   // Calculate the total of all fixed costs

@@ -32,5 +32,15 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo }: TrueCostCellProp
   // Calculate the true cost by adding up all costs
   const trueCost = fixedCostsTotal + excavationCost + craneCost + packagePrice + constructionCostsTotal;
   
+  // Log calculation details for debugging
+  console.log(`True Cost Calculation for pool ${poolId}:`, {
+    fixedCostsTotal,
+    excavationCost,
+    craneCost,
+    packagePrice,
+    constructionCostsTotal,
+    totalTrueCost: trueCost
+  });
+  
   return <>{formatCurrency(trueCost)}</>;
 };
