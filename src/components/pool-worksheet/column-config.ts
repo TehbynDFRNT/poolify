@@ -105,7 +105,7 @@ export const columnLabels: ColumnLabels = {
   "fixed_costs_total": "Fixed Costs Total"
 };
 
-// Default visible column groups
+// Default visible column groups - ensure fixed_costs is included
 export const defaultVisibleGroups = [
   "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs"
 ];

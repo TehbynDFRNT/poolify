@@ -1,4 +1,3 @@
-
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -14,17 +13,45 @@ import { PoolWorksheetTable } from "@/components/pool-worksheet/PoolWorksheetTab
 import { columnGroups, defaultVisibleGroups } from "@/components/pool-worksheet/column-config";
 import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
 
+const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
+
 const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
   const { fixedCosts, isLoadingFixedCosts } = useFixedCostsData();
-  const [visibleGroups, setVisibleGroups] = useState<string[]>(defaultVisibleGroups);
+  
+  // Initialize visible groups from local storage or use default
+  const [visibleGroups, setVisibleGroups] = useState<string[]>(() => {
+    const savedGroups = localStorage.getItem(LOCAL_STORAGE_KEY);
+    
+    // If we have saved groups, use them
+    if (savedGroups) {
+      try {
+        const parsedGroups = JSON.parse(savedGroups);
+        console.log("Loaded saved column config:", parsedGroups);
+        return Array.isArray(parsedGroups) ? parsedGroups : defaultVisibleGroups;
+      } catch (e) {
+        console.error("Error parsing saved column groups:", e);
+        return defaultVisibleGroups;
+      }
+    }
+    
+    // Otherwise use defaults
+    return defaultVisibleGroups;
+  });
+
+  // Save visible groups to local storage whenever they change
+  useEffect(() => {
+    console.log("Saving column config to localStorage:", visibleGroups);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(visibleGroups));
+  }, [visibleGroups]);
 
   // Log the state of column groups for debugging
   useEffect(() => {
     const fixedCostsGroup = columnGroups.find(group => group.id === 'fixed_costs');
     console.log("Fixed costs group columns:", fixedCostsGroup?.columns);
     console.log("Fixed costs data:", fixedCosts);
-  }, [fixedCosts]);
+    console.log("Current visible groups:", visibleGroups);
+  }, [fixedCosts, visibleGroups]);
 
   const isLoading = isLoadingPools || isLoadingFixedCosts;
 
