@@ -66,7 +66,7 @@ const columnGroups = [
   {
     id: "excavation",
     title: "Excavation",
-    color: "bg-amber-100 text-amber-800",
+    color: "bg-orange-100 text-orange-800", // Changed from amber to orange to make it distinct
     columns: ["dig_type", "dig_total"]
   },
   {
@@ -310,6 +310,12 @@ const PoolWorksheet = () => {
 
   const isLoading = isLoadingPools || isLoadingPackages || isLoadingCosts || isLoadingFixedCosts;
   const error = poolsError;
+
+  // Log what's happening with excavation data to debug
+  console.log('Visible groups:', visibleGroups);
+  console.log('Pool dig matches:', poolDigMatches);
+  
+  console.log('Visible column groups:', visibleColumnGroups);
 
   return (
     <DashboardLayout>
