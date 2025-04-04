@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Settings, List } from "lucide-react";
 import {
@@ -11,12 +10,9 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { columnGroups } from "./column-config";
+import { columnGroups, essentialGroups } from "./column-config";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-
-// Define essential column groups that correspond to columns 1,2,15,17,19,21,29,40,41
-export const essentialGroups = ["identification", "pricing", "crane", "excavation", "true_cost"];
 
 interface ColumnConfigSheetProps { 
   visibleGroups: string[]; 

@@ -1,4 +1,3 @@
-
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -11,17 +10,13 @@ import {
 } from "@/components/ui/breadcrumb";
 import { ColumnConfigSheet } from "@/components/pool-worksheet/ColumnConfigSheet";
 import { PoolWorksheetTable } from "@/components/pool-worksheet/PoolWorksheetTable";
-import { columnGroups, defaultVisibleGroups } from "@/components/pool-worksheet/column-config";
+import { columnGroups, defaultVisibleGroups, essentialGroups } from "@/components/pool-worksheet/column-config";
 import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
 import { Button } from "@/components/ui/button";
 import { List } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
 const ESSENTIAL_COLUMNS_KEY = "poolWorksheet_essentialOnly";
-
-// Essential column groups that correspond to specific numbered columns (1,2,15,17,19,21,29,40,41)
-// The actual columns map to these groups in the column-config.ts file
-const essentialGroups = ["identification", "pricing", "crane", "excavation", "true_cost"];
 
 const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();

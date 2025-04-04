@@ -1,3 +1,4 @@
+
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define some default fixed costs columns that will be used as fallback
@@ -121,3 +122,7 @@ export const columnLabels: ColumnLabels = {
 export const defaultVisibleGroups = [
   "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs", "true_cost"
 ];
+
+// Define essential column groups to include columns 1,2,15,17,19,21,29,40,41
+export const essentialGroups = ["identification", "pricing", "filtration", "crane", "excavation", "construction_costs", "true_cost"];
+
