@@ -1,7 +1,8 @@
 
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Pool } from "@/types/pool";
-import { columnGroups, essentialColumns } from "./PoolSpecificationsTable";
+import { criticalColumns } from "./ColumnConfigSheet";
+import { essentialColumns } from "./PoolSpecificationsTable";
 
 interface TableContentProps {
   pools: Pool[] | undefined;
@@ -55,10 +56,10 @@ export function TableContent({ pools, isLoading, error, isColumnVisible }: Table
     key !== 'updated_at'
   );
   
-  // Order columns based on the image:
+  // Order columns properly: first critical columns in their defined order, then the rest
   const orderedColumns = [
-    ...columnGroups.flatMap(group => group.columns.filter(col => allColumns.includes(col))),
-    ...essentialColumns
+    ...criticalColumns,
+    ...allColumns.filter(col => !criticalColumns.includes(col))
   ];
 
   // Remove duplicates while preserving order
