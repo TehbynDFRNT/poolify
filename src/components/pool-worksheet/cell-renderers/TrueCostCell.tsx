@@ -8,25 +8,29 @@ interface TrueCostCellProps {
   poolId: string;
   poolCost: Record<string, number>;
   packageInfo: any;
+  pool: any;
 }
 
-export const TrueCostCell = ({ poolId, poolCost, packageInfo }: TrueCostCellProps) => {
-  // Get fixed costs total
-  const { calculateFixedCostsTotal, fixedCosts } = useFixedCostsData();
+export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCellProps) => {
+  // Get fixed costs total (row 40)
+  const { calculateFixedCostsTotal } = useFixedCostsData();
   const fixedCostsTotal = calculateFixedCostsTotal();
   
-  // Get excavation cost
+  // Get excavation cost (row 21)
   const { calculateExcavationCost } = usePoolDigData();
   const excavationCost = calculateExcavationCost(poolId);
   
-  // Get crane cost
+  // Get crane cost (row 19)
   const { getCraneCost } = useCraneData();
   const craneCost = getCraneCost(poolId);
   
-  // Get package price
+  // Get package price (row 17 - Filtration Package Price)
   const packagePrice = packageInfo?.price || 0;
   
-  // Calculate construction costs total - only include the actual individual costs without excavation
+  // Get buy price (row 15 - Buy Price inc GST)
+  const buyPriceIncGST = pool?.buy_price_inc_gst || 0;
+  
+  // Calculate construction costs total (row 29 - Pool Individual Costs Total)
   const constructionCostsTotal = 
     (poolCost.pea_gravel || 0) + 
     (poolCost.install_fee || 0) + 
@@ -36,17 +40,17 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo }: TrueCostCellProp
     (poolCost.beam || 0) + 
     (poolCost.coping_lay || 0);
   
-  // Calculate the true cost by adding up all costs
-  const trueCost = fixedCostsTotal + excavationCost + craneCost + packagePrice + constructionCostsTotal;
+  // Calculate the true cost by adding up all costs from the specified rows
+  const trueCost = buyPriceIncGST + packagePrice + craneCost + excavationCost + constructionCostsTotal + fixedCostsTotal;
   
   // Log calculation details for debugging
   console.log(`True Cost Calculation for pool ${poolId}:`, {
-    fixedCosts,
-    fixedCostsTotal,
-    excavationCost,
-    craneCost,
+    buyPriceIncGST,
     packagePrice,
+    craneCost,
+    excavationCost,
     constructionCostsTotal,
+    fixedCostsTotal,
     totalTrueCost: trueCost
   });
   

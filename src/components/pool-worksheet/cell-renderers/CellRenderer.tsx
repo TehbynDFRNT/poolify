@@ -52,6 +52,7 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
       poolId={pool.id}
       poolCost={poolCost}
       packageInfo={packageInfo}
+      pool={pool}
     />;
   }
   
