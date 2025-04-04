@@ -57,18 +57,15 @@ export function TableContent({ pools, isLoading, error, isColumnVisible }: Table
   
   // Order columns properly: first critical columns in their defined order, then the rest
   const orderedColumns = [
-    ...criticalColumns,
+    ...criticalColumns.filter(col => allColumns.includes(col)),
     ...allColumns.filter(col => !criticalColumns.includes(col))
   ];
-
-  // Remove duplicates while preserving order
-  const displayColumns = [...new Set(orderedColumns)];
 
   return (
     <TableBody>
       {pools.map((pool) => (
         <TableRow key={pool.id}>
-          {displayColumns.map((column) => {
+          {orderedColumns.map((column) => {
             if (!isColumnVisible(column)) return null;
             
             const value = pool[column as keyof Pool];
@@ -88,7 +85,7 @@ export function TableContent({ pools, isLoading, error, isColumnVisible }: Table
             return (
               <TableCell 
                 key={`${pool.id}-${column}`}
-                className={column === "range" || column === "name" ? "" : ""}
+                className={column === "range" || column === "name" ? "font-medium" : ""}
               >
                 {displayValue || '-'}
               </TableCell>

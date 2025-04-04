@@ -10,9 +10,6 @@ import { ColumnConfigSheet, criticalColumns, toggleableColumnGroups } from "./Co
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
 
-// Essential columns that are always visible
-export const essentialColumns = criticalColumns;
-
 export function PoolSpecificationsTable() {
   const { data: pools, isLoading, error } = usePoolSpecifications();
   const [visibleGroups, setVisibleGroups] = useState<string[]>(["details"]);
@@ -21,7 +18,7 @@ export function PoolSpecificationsTable() {
   // Check if a column should be visible
   const isColumnVisible = (columnName: string): boolean => {
     // Critical columns are always visible
-    if (essentialColumns.includes(columnName)) return true;
+    if (criticalColumns.includes(columnName)) return true;
     
     // Check if column is in any visible group
     for (const group of toggleableColumnGroups) {
