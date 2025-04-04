@@ -1,3 +1,4 @@
+
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -28,7 +29,15 @@ const PoolWorksheet = () => {
       try {
         const parsedGroups = JSON.parse(savedGroups);
         console.log("Loaded saved column config:", parsedGroups);
-        return Array.isArray(parsedGroups) ? parsedGroups : defaultVisibleGroups;
+        
+        // Ensure identification is always included
+        if (Array.isArray(parsedGroups)) {
+          return parsedGroups.includes('identification') 
+            ? parsedGroups 
+            : ['identification', ...parsedGroups];
+        }
+        
+        return defaultVisibleGroups;
       } catch (e) {
         console.error("Error parsing saved column groups:", e);
         return defaultVisibleGroups;
@@ -41,17 +50,22 @@ const PoolWorksheet = () => {
 
   // Save visible groups to local storage whenever they change
   useEffect(() => {
-    console.log("Saving column config to localStorage:", visibleGroups);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(visibleGroups));
+    // Ensure identification is always included
+    const groupsToSave = visibleGroups.includes('identification') 
+      ? visibleGroups 
+      : ['identification', ...visibleGroups];
+      
+    console.log("Saving column config to localStorage:", groupsToSave);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(groupsToSave));
   }, [visibleGroups]);
 
-  // Log the state of column groups for debugging
-  useEffect(() => {
-    const fixedCostsGroup = columnGroups.find(group => group.id === 'fixed_costs');
-    console.log("Fixed costs group columns:", fixedCostsGroup?.columns);
-    console.log("Fixed costs data:", fixedCosts);
-    console.log("Current visible groups:", visibleGroups);
-  }, [fixedCosts, visibleGroups]);
+  // Ensure identification columns are always visible
+  const handleSetVisibleGroups = (groups: string[]) => {
+    const updatedGroups = groups.includes('identification')
+      ? groups
+      : ['identification', ...groups];
+    setVisibleGroups(updatedGroups);
+  };
 
   const isLoading = isLoadingPools || isLoadingFixedCosts;
 
@@ -82,7 +96,7 @@ const PoolWorksheet = () => {
           
           <ColumnConfigSheet 
             visibleGroups={visibleGroups} 
-            setVisibleGroups={setVisibleGroups} 
+            setVisibleGroups={handleSetVisibleGroups} 
           />
         </div>
         
@@ -91,7 +105,7 @@ const PoolWorksheet = () => {
           isLoading={isLoading}
           error={poolsError}
           visibleGroups={visibleGroups}
-          setVisibleGroups={setVisibleGroups}
+          setVisibleGroups={handleSetVisibleGroups}
         />
       </div>
     </DashboardLayout>

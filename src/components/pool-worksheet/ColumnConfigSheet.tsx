@@ -48,13 +48,26 @@ export const ColumnConfigSheet = ({
     if (show) {
       setTempVisibleGroups(columnGroups.map(group => group.id));
     } else {
-      setTempVisibleGroups([]);
+      // When hiding all, still keep identification group
+      setTempVisibleGroups(['identification']);
     }
+  };
+  
+  // Show only the selected group plus identification
+  const showOnlyGroup = (groupId: string) => {
+    // Always include identification columns
+    const newGroups = groupId === 'identification' ? ['identification'] : ['identification', groupId];
+    setTempVisibleGroups(newGroups);
   };
 
   // Save the changes back to the parent component
   const saveChanges = () => {
-    setVisibleGroups(tempVisibleGroups);
+    // Ensure identification group is always included
+    const newGroups = tempVisibleGroups.includes('identification') 
+      ? tempVisibleGroups 
+      : ['identification', ...tempVisibleGroups];
+      
+    setVisibleGroups(newGroups);
     toast.success("Column configuration saved!");
     setIsOpen(false);
   };
@@ -105,13 +118,26 @@ export const ColumnConfigSheet = ({
                   {group.columns.length} columns
                 </p>
               </div>
-              <Button
-                onClick={() => toggleColumnGroup(group.id)}
-                variant={tempVisibleGroups.includes(group.id) ? "default" : "outline"}
-                size="sm"
-              >
-                {tempVisibleGroups.includes(group.id) ? "Hide" : "Show"}
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => showOnlyGroup(group.id)}
+                  variant="secondary"
+                  size="sm"
+                  title="Show only this group (plus identification)"
+                  className="text-xs px-2"
+                >
+                  Only
+                </Button>
+                <Button
+                  onClick={() => toggleColumnGroup(group.id)}
+                  variant={tempVisibleGroups.includes(group.id) ? "default" : "outline"}
+                  size="sm"
+                  disabled={group.id === 'identification'} // Prevent toggling identification group
+                  title={group.id === 'identification' ? "Pool identification columns are always visible" : undefined}
+                >
+                  {tempVisibleGroups.includes(group.id) ? "Hide" : "Show"}
+                </Button>
+              </div>
             </div>
           ))}
         </ScrollArea>
