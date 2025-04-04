@@ -15,17 +15,21 @@ import { columnGroups } from "./column-config";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 
-// Define essential column groups (for columns 1,2,15,17,19,21,29,40,41)
-export const essentialGroups = ["identification", "pricing"];
+// Define essential column groups that correspond to columns 1,2,15,17,19,21,29,40,41
+export const essentialGroups = ["identification", "pricing", "crane", "excavation", "true_cost"];
 
 interface ColumnConfigSheetProps { 
   visibleGroups: string[]; 
   setVisibleGroups: (groups: string[]) => void;
+  showEssentialOnly?: boolean;
+  toggleEssentialColumnsOnly?: () => void;
 }
 
 export const ColumnConfigSheet = ({ 
   visibleGroups, 
-  setVisibleGroups 
+  setVisibleGroups,
+  showEssentialOnly = false,
+  toggleEssentialColumnsOnly
 }: ColumnConfigSheetProps) => {
   // Keep a temporary copy of the visible groups for editing
   const [tempVisibleGroups, setTempVisibleGroups] = useState<string[]>(visibleGroups);

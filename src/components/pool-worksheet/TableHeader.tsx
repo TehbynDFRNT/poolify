@@ -7,7 +7,13 @@ import { useState, useEffect } from "react";
 interface TableHeaderProps {
   visibleColumnGroups: ColumnGroup[];
   getVisibleColumns: () => string[];
+  showEssentialOnly?: boolean;
 }
+
+// Specific essential columns that correspond to 1,2,15,17,19,21,29,40,41
+// The absolute positions are based on the order in the columnGroups array
+// These will be highlighted when in essential mode
+const essentialColumnNumbers = [1, 2, 15, 17, 19, 21, 29, 40, 41];
 
 // Global map of all columns to their absolute positions (1-based)
 const allColumnsPositionMap: Record<string, number> = {};
@@ -28,7 +34,11 @@ const initializeAllColumnNumbers = () => {
 // Initialize the map on module load
 initializeAllColumnNumbers();
 
-export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHeaderProps) => {
+export const TableHeader = ({ 
+  visibleColumnGroups, 
+  getVisibleColumns,
+  showEssentialOnly = false
+}: TableHeaderProps) => {
   // Get all visible columns
   const visibleColumns = getVisibleColumns();
   
@@ -46,6 +56,11 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
       window.removeEventListener('fixedCostsUpdated', handleFixedCostsUpdate);
     };
   }, []);
+
+  // Determine if a column number is part of the essential columns set
+  const isEssentialColumn = (columnNumber: number) => {
+    return essentialColumnNumbers.includes(columnNumber);
+  };
   
   return (
     <UITableHeader>
@@ -64,13 +79,21 @@ export const TableHeader = ({ visibleColumnGroups, getVisibleColumns }: TableHea
       
       {/* Add a dedicated row for fixed column numbers */}
       <TableRow>
-        {visibleColumns.map((column) => (
-          <TableHead key={`number-${column}`} className="py-1 border-b">
-            <div className="w-6 h-6 mx-auto rounded-full bg-blue-600 text-white flex items-center justify-center font-bold">
-              {allColumnsPositionMap[column] || "?"}
-            </div>
-          </TableHead>
-        ))}
+        {visibleColumns.map((column) => {
+          const columnNumber = allColumnsPositionMap[column] || 0;
+          const isEssential = isEssentialColumn(columnNumber);
+          
+          return (
+            <TableHead key={`number-${column}`} className="py-1 border-b">
+              <div 
+                className={`w-6 h-6 mx-auto rounded-full text-white flex items-center justify-center font-bold
+                  ${isEssential ? 'bg-blue-600' : (showEssentialOnly ? 'bg-gray-400' : 'bg-blue-600')}`}
+              >
+                {columnNumber || "?"}
+              </div>
+            </TableHead>
+          );
+        })}
       </TableRow>
       
       {/* Render column headers */}

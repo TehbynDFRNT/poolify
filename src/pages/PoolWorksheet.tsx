@@ -19,8 +19,9 @@ import { List } from "lucide-react";
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
 const ESSENTIAL_COLUMNS_KEY = "poolWorksheet_essentialOnly";
 
-// Essential column groups that correspond to columns 1,2,15,17,19,21,29,40,41
-const essentialGroups = ["identification", "pricing"];
+// Essential column groups that correspond to specific numbered columns (1,2,15,17,19,21,29,40,41)
+// The actual columns map to these groups in the column-config.ts file
+const essentialGroups = ["identification", "pricing", "crane", "excavation", "true_cost"];
 
 const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
@@ -74,6 +75,13 @@ const PoolWorksheet = () => {
   // Save essential only mode to local storage
   useEffect(() => {
     localStorage.setItem(ESSENTIAL_COLUMNS_KEY, showEssentialOnly.toString());
+  }, [showEssentialOnly]);
+
+  // Effect to update visible groups when essential mode changes
+  useEffect(() => {
+    if (showEssentialOnly) {
+      setVisibleGroups(essentialGroups);
+    }
   }, [showEssentialOnly]);
 
   // Ensure identification columns are always visible
@@ -137,6 +145,8 @@ const PoolWorksheet = () => {
             <ColumnConfigSheet 
               visibleGroups={visibleGroups} 
               setVisibleGroups={handleSetVisibleGroups} 
+              showEssentialOnly={showEssentialOnly}
+              toggleEssentialColumnsOnly={toggleEssentialColumnsOnly}
             />
           </div>
         </div>
@@ -145,8 +155,9 @@ const PoolWorksheet = () => {
           pools={pools}
           isLoading={isLoading}
           error={poolsError}
-          visibleGroups={showEssentialOnly ? essentialGroups : visibleGroups}
+          visibleGroups={visibleGroups}
           setVisibleGroups={handleSetVisibleGroups}
+          showEssentialOnly={showEssentialOnly}
         />
       </div>
     </DashboardLayout>

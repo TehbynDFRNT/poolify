@@ -12,6 +12,7 @@ interface PoolWorksheetTableProps {
   error: Error | null;
   visibleGroups: string[];
   setVisibleGroups: (groups: string[]) => void;
+  showEssentialOnly?: boolean;
 }
 
 export const PoolWorksheetTable = ({ 
@@ -19,7 +20,8 @@ export const PoolWorksheetTable = ({
   isLoading, 
   error, 
   visibleGroups, 
-  setVisibleGroups 
+  setVisibleGroups,
+  showEssentialOnly = false
 }: PoolWorksheetTableProps) => {
   // Get all columns from visible groups
   const getVisibleColumns = () => {
@@ -47,6 +49,7 @@ export const PoolWorksheetTable = ({
         <TableHeader 
           visibleColumnGroups={visibleColumnGroups}
           getVisibleColumns={getVisibleColumns}
+          showEssentialOnly={showEssentialOnly}
         />
         <PoolTableBody 
           pools={pools}
