@@ -9,14 +9,15 @@ import {
   PlusCircle,
   Users,
   Wand2,
-  ClipboardList
+  ClipboardList,
+  Pool
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
 
 const MainNav: React.FC = () => {
   const location = useLocation();
   
-  // Define navigation with Cost Builder as parent and others as sub-items
+  // Define navigation with Cost Builder and Pool Builder as parents
   const navigation = [
     { 
       icon: <Home className="h-5 w-5" />, 
@@ -67,6 +68,13 @@ const MainNav: React.FC = () => {
           isParent: false 
         },
       ]
+    },
+    { 
+      icon: <Pool className="h-5 w-5" />, 
+      label: "Pool Builder", 
+      path: "/pool-builder", 
+      isParent: true,
+      subItems: []
     }
   ];
 

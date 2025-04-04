@@ -21,6 +21,7 @@ import Fencing from "@/pages/ThirdPartyCosts/Fencing";
 import AddOns from "@/pages/AddOns";
 import PoolCreationWizard from "@/pages/PoolCreationWizard";
 import PoolWorksheet from "@/pages/PoolWorksheet";
+import PoolBuilder from "@/pages/PoolBuilder";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -54,6 +55,7 @@ function App() {
         <Route path="/third-party-costs/fencing" element={<Fencing />} />
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/pool-worksheet" element={<PoolWorksheet />} />
+        <Route path="/pool-builder" element={<PoolBuilder />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
