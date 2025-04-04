@@ -6,17 +6,23 @@ import {
 } from "@/components/ui/table";
 import { TableHeader } from "./TableHeader";
 import { TableContent } from "./TableContent";
-import { ColumnConfigSheet, criticalColumns, toggleableColumnGroups } from "./ColumnConfigSheet";
+import { ColumnConfigSheet, criticalColumns, toggleableColumnGroups, essentialColumnSet } from "./ColumnConfigSheet";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, List } from "lucide-react";
 
 export function PoolSpecificationsTable() {
   const { data: pools, isLoading, error } = usePoolSpecifications();
   const [visibleGroups, setVisibleGroups] = useState<string[]>(["details"]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [showEssentialOnly, setShowEssentialOnly] = useState(false);
 
   // Check if a column should be visible
   const isColumnVisible = (columnName: string): boolean => {
+    // If essential only mode is active, only show essential columns
+    if (showEssentialOnly) {
+      return essentialColumnSet.includes(columnName);
+    }
+    
     // Critical columns are always visible
     if (criticalColumns.includes(columnName)) return true;
     
@@ -29,11 +35,27 @@ export function PoolSpecificationsTable() {
     return false;
   };
 
+  const toggleEssentialColumnsOnly = () => {
+    setShowEssentialOnly(!showEssentialOnly);
+    if (!showEssentialOnly) {
+      setVisibleGroups([]);
+    }
+  };
+
   return (
     <div>
       <div className="mb-4 flex justify-between items-center">
         <h3 className="text-lg font-medium">Pool Specifications</h3>
         <div className="flex gap-2">
+          <Button 
+            variant={showEssentialOnly ? "default" : "outline"} 
+            size="sm"
+            onClick={toggleEssentialColumnsOnly}
+            className="flex items-center gap-2"
+          >
+            <List size={16} />
+            {showEssentialOnly ? "Essential Columns Only" : "Show All Columns"}
+          </Button>
           <Button 
             variant="outline" 
             size="sm"
