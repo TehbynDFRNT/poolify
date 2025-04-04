@@ -8,7 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
-import { Pool } from "lucide-react";
+import { Waves } from "lucide-react";
 
 const PoolBuilder = () => {
   return (
@@ -37,7 +37,7 @@ const PoolBuilder = () => {
 
         <Card className="p-6">
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Pool className="h-16 w-16 text-primary mb-4" />
+            <Waves className="h-16 w-16 text-primary mb-4" />
             <h2 className="text-2xl font-semibold mb-2">Start Building Your Pool</h2>
             <p className="text-muted-foreground max-w-md mb-6">
               This is a placeholder for the Pool Builder feature. Future functionality will allow you to design and customize swimming pools in detail.

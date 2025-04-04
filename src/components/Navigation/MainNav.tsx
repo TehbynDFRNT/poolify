@@ -10,7 +10,7 @@ import {
   Users,
   Wand2,
   ClipboardList,
-  Pool
+  Waves
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
 
@@ -70,7 +70,7 @@ const MainNav: React.FC = () => {
       ]
     },
     { 
-      icon: <Pool className="h-5 w-5" />, 
+      icon: <Waves className="h-5 w-5" />, 
       label: "Pool Builder", 
       path: "/pool-builder", 
       isParent: true,
