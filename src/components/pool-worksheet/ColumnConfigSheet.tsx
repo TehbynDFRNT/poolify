@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
+import { Settings, List } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -13,6 +14,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { columnGroups } from "./column-config";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+
+// Define essential column groups (for columns 1,2,15,17,19,21,29,40,41)
+export const essentialGroups = ["identification", "pricing"];
 
 interface ColumnConfigSheetProps { 
   visibleGroups: string[]; 
@@ -59,6 +63,12 @@ export const ColumnConfigSheet = ({
     const newGroups = groupId === 'identification' ? ['identification'] : ['identification', groupId];
     setTempVisibleGroups(newGroups);
   };
+  
+  // Show only essential columns (1,2,15,17,19,21,29,40,41)
+  const showEssentialColumnsOnly = () => {
+    setTempVisibleGroups(essentialGroups);
+    toast.info("Showing only essential columns (1, 2, 15, 17, 19, 21, 29, 40, 41)");
+  };
 
   // Save the changes back to the parent component
   const saveChanges = () => {
@@ -92,7 +102,7 @@ export const ColumnConfigSheet = ({
           </SheetDescription>
         </SheetHeader>
         
-        <div className="flex justify-between py-2 mt-2">
+        <div className="flex flex-wrap gap-2 py-2 mt-2">
           <Button 
             onClick={() => toggleAllGroups(true)} 
             variant="outline" 
@@ -106,6 +116,13 @@ export const ColumnConfigSheet = ({
             size="sm"
           >
             Hide All
+          </Button>
+          <Button 
+            onClick={showEssentialColumnsOnly} 
+            variant="default" 
+            size="sm"
+          >
+            Essential Columns Only
           </Button>
         </div>
         

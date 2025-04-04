@@ -13,8 +13,14 @@ import { ColumnConfigSheet } from "@/components/pool-worksheet/ColumnConfigSheet
 import { PoolWorksheetTable } from "@/components/pool-worksheet/PoolWorksheetTable";
 import { columnGroups, defaultVisibleGroups } from "@/components/pool-worksheet/column-config";
 import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
+import { Button } from "@/components/ui/button";
+import { List } from "lucide-react";
 
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
+const ESSENTIAL_COLUMNS_KEY = "poolWorksheet_essentialOnly";
+
+// Essential column groups that correspond to columns 1,2,15,17,19,21,29,40,41
+const essentialGroups = ["identification", "pricing"];
 
 const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
@@ -47,6 +53,12 @@ const PoolWorksheet = () => {
     // Otherwise use defaults
     return defaultVisibleGroups;
   });
+  
+  // Track essential columns only mode
+  const [showEssentialOnly, setShowEssentialOnly] = useState<boolean>(() => {
+    const savedValue = localStorage.getItem(ESSENTIAL_COLUMNS_KEY);
+    return savedValue === 'true';
+  });
 
   // Save visible groups to local storage whenever they change
   useEffect(() => {
@@ -58,6 +70,11 @@ const PoolWorksheet = () => {
     console.log("Saving column config to localStorage:", groupsToSave);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(groupsToSave));
   }, [visibleGroups]);
+  
+  // Save essential only mode to local storage
+  useEffect(() => {
+    localStorage.setItem(ESSENTIAL_COLUMNS_KEY, showEssentialOnly.toString());
+  }, [showEssentialOnly]);
 
   // Ensure identification columns are always visible
   const handleSetVisibleGroups = (groups: string[]) => {
@@ -65,6 +82,18 @@ const PoolWorksheet = () => {
       ? groups
       : ['identification', ...groups];
     setVisibleGroups(updatedGroups);
+  };
+  
+  // Toggle essential columns only mode
+  const toggleEssentialColumnsOnly = () => {
+    setShowEssentialOnly(!showEssentialOnly);
+    if (!showEssentialOnly) {
+      // Show only essential groups
+      handleSetVisibleGroups(essentialGroups);
+    } else {
+      // Show default groups when turning off essential mode
+      handleSetVisibleGroups(defaultVisibleGroups);
+    }
   };
 
   const isLoading = isLoadingPools || isLoadingFixedCosts;
@@ -94,17 +123,29 @@ const PoolWorksheet = () => {
             </p>
           </div>
           
-          <ColumnConfigSheet 
-            visibleGroups={visibleGroups} 
-            setVisibleGroups={handleSetVisibleGroups} 
-          />
+          <div className="flex gap-2">
+            <Button
+              variant={showEssentialOnly ? "default" : "outline"}
+              size="sm"
+              onClick={toggleEssentialColumnsOnly}
+              className="flex items-center gap-2"
+            >
+              <List size={16} />
+              {showEssentialOnly ? "Essential Columns Only" : "Show All Columns"}
+            </Button>
+            
+            <ColumnConfigSheet 
+              visibleGroups={visibleGroups} 
+              setVisibleGroups={handleSetVisibleGroups} 
+            />
+          </div>
         </div>
         
         <PoolWorksheetTable 
           pools={pools}
           isLoading={isLoading}
           error={poolsError}
-          visibleGroups={visibleGroups}
+          visibleGroups={showEssentialOnly ? essentialGroups : visibleGroups}
           setVisibleGroups={handleSetVisibleGroups}
         />
       </div>
