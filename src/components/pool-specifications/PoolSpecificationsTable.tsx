@@ -5,53 +5,25 @@ import {
   Table,
   TableBody,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
 import { TableHeader } from "./TableHeader";
 import { TableContent } from "./TableContent";
-import { ColumnConfigSheet } from "./ColumnConfigSheet";
-
-// Define comprehensive column groups for better organization
-export const columnGroups = [
-  {
-    id: "dimensions",
-    title: "Dimensions",
-    columns: ["length", "width", "depth_shallow", "depth_deep"],
-  },
-  {
-    id: "volume",
-    title: "Volume Information",
-    columns: ["volume_liters", "waterline_l_m", "weight_kg"],
-  },
-  {
-    id: "pricing",
-    title: "Pricing",
-    columns: ["buy_price_ex_gst", "buy_price_inc_gst"],
-  },
-  {
-    id: "minerals",
-    title: "Minerals & Salt",
-    columns: ["minerals_kg_initial", "minerals_kg_topup", "salt_volume_bags", "salt_volume_bags_fixed"],
-  },
-  {
-    id: "other",
-    title: "Other Information",
-    columns: ["pool_type_id", "default_filtration_package_id", "dig_type_id", "dig_level", "outline_image_url"],
-  }
-];
+import { ColumnConfigSheet, criticalColumns, toggleableColumnGroups } from "./ColumnConfigSheet";
 
 // Essential columns that are always visible
-export const essentialColumns = ["name", "range"];
+export const essentialColumns = criticalColumns;
 
 export function PoolSpecificationsTable() {
   const { data: pools, isLoading, error } = usePoolSpecifications();
-  const [visibleGroups, setVisibleGroups] = useState<string[]>(["dimensions", "volume", "pricing"]);
+  const [visibleGroups, setVisibleGroups] = useState<string[]>(["details"]);
   const [isConfigOpen, setIsConfigOpen] = useState(false);
 
   // Check if a column should be visible
   const isColumnVisible = (columnName: string): boolean => {
+    // Critical columns are always visible
     if (essentialColumns.includes(columnName)) return true;
     
-    for (const group of columnGroups) {
+    // Check if column is in any visible group
+    for (const group of toggleableColumnGroups) {
       if (group.columns.includes(columnName) && visibleGroups.includes(group.id)) {
         return true;
       }
