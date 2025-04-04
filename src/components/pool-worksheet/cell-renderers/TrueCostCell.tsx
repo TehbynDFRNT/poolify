@@ -3,6 +3,7 @@ import { formatCurrency } from "@/utils/format";
 import { useFixedCostsData } from "../hooks/useFixedCostsData";
 import { useCraneData } from "../hooks/useCraneData";
 import { usePoolDigData } from "../hooks/usePoolDigData";
+import { calculatePackagePrice } from "@/utils/package-calculations";
 
 interface TrueCostCellProps {
   poolId: string;
@@ -25,7 +26,8 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
   const craneCost = getCraneCost(poolId);
   
   // Get package price (row 17 - Filtration Package Price)
-  const packagePrice = packageInfo?.price || 0;
+  // Use calculatePackagePrice to ensure we get the correct price
+  const packagePrice = packageInfo ? calculatePackagePrice(packageInfo) : 0;
   
   // Get buy price (row 15 - Buy Price inc GST)
   const buyPriceIncGST = pool?.buy_price_inc_gst || 0;
