@@ -3,11 +3,12 @@ import { useState } from "react";
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import {
   Table,
-  TableBody,
 } from "@/components/ui/table";
 import { TableHeader } from "./TableHeader";
 import { TableContent } from "./TableContent";
 import { ColumnConfigSheet, criticalColumns, toggleableColumnGroups } from "./ColumnConfigSheet";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 // Essential columns that are always visible
 export const essentialColumns = criticalColumns;
@@ -36,6 +37,15 @@ export function PoolSpecificationsTable() {
       <div className="mb-4 flex justify-between items-center">
         <h3 className="text-lg font-medium">Pool Specifications</h3>
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setIsConfigOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Settings size={16} />
+            Configure Columns
+          </Button>
           <ColumnConfigSheet 
             isOpen={isConfigOpen}
             setIsOpen={setIsConfigOpen}

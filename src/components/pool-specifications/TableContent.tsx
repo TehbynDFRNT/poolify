@@ -2,7 +2,6 @@
 import { TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Pool } from "@/types/pool";
 import { criticalColumns } from "./ColumnConfigSheet";
-import { essentialColumns } from "./PoolSpecificationsTable";
 
 interface TableContentProps {
   pools: Pool[] | undefined;
