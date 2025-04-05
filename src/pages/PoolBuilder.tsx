@@ -8,7 +8,9 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
-import { Waves } from "lucide-react";
+import { Waves, Calculator } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 
 const PoolBuilder = () => {
   return (
@@ -35,15 +37,26 @@ const PoolBuilder = () => {
           </p>
         </div>
 
-        <Card className="p-6">
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Waves className="h-16 w-16 text-primary mb-4" />
-            <h2 className="text-2xl font-semibold mb-2">Start Building Your Pool</h2>
-            <p className="text-muted-foreground max-w-md mb-6">
-              This is a placeholder for the Pool Builder feature. Future functionality will allow you to design and customize swimming pools in detail.
-            </p>
-          </div>
-        </Card>
+        <Tabs defaultValue="overview" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="formula-reference">Formula Reference</TabsTrigger>
+          </TabsList>
+          <TabsContent value="overview">
+            <Card className="p-6">
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <Waves className="h-16 w-16 text-primary mb-4" />
+                <h2 className="text-2xl font-semibold mb-2">Start Building Your Pool</h2>
+                <p className="text-muted-foreground max-w-md mb-6">
+                  This is a placeholder for the Pool Builder feature. Future functionality will allow you to design and customize swimming pools in detail.
+                </p>
+              </div>
+            </Card>
+          </TabsContent>
+          <TabsContent value="formula-reference">
+            <FormulaReference />
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
