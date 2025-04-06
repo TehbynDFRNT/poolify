@@ -119,7 +119,7 @@ export const FormulaReference: React.FC = () => {
                     The total margin across all selections is calculated as:
                   </p>
                   <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalMargin = sum(selections.map(selection => selection.meters × (selection.marginCost + sum(laborMargins))))
+                    totalMargin = sum(selections.map(selection =&gt; selection.meters × (selection.marginCost + sum(laborMargins))))
                   </div>
                   <p className="text-muted-foreground mt-2">Where:</p>
                   <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
