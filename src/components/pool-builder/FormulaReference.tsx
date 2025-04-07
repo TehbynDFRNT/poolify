@@ -13,16 +13,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calculator, Layers, Sparkles } from "lucide-react";
+import { Calculator, Layers, Sparkles, Shovel } from "lucide-react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
+import { useExtraConcreting } from "@/pages/ConstructionCosts/hooks/useExtraConcreting";
 import { formatCurrency } from "@/utils/format";
 
 export const FormulaReference: React.FC = () => {
   const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
   const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
   const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
+  const { extraConcretingItems, isLoading: isLoadingExtraConcreting } = useExtraConcreting();
   
   // Calculate the total concrete cost per meter
   const concreteCostPerMeter = concreteCosts?.[0]?.total_cost || 0;
@@ -43,7 +45,7 @@ export const FormulaReference: React.FC = () => {
   const existingConcreteLabourMargin = 30;
   const existingConcreteLabourWithMargin = existingConcreteLabourCost + (existingConcreteLabourCost * existingConcreteLabourMargin / 100);
   
-  const isLoading = isLoadingPaving || isLoadingConcrete || isLoadingLabour;
+  const isLoading = isLoadingPaving || isLoadingConcrete || isLoadingLabour || isLoadingExtraConcreting;
 
   return (
     <Card>
@@ -194,8 +196,61 @@ export const FormulaReference: React.FC = () => {
               </div>
             </AccordionContent>
           </AccordionItem>
+
+          <AccordionItem value="extra-concreting">
+            <AccordionTrigger className="text-md font-semibold">
+              <div className="flex items-center gap-2">
+                <Shovel className="h-5 w-5 text-primary" />
+                Extra Concreting Formula
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pt-2">
+              <div className="rounded-md border p-4">
+                <h3 className="font-medium text-base mb-3">Extra Concreting Cost Calculation</h3>
+                <p className="text-muted-foreground mb-3">
+                  Formula for calculating cost: Base Price + (Base Price × Margin %)
+                </p>
+                
+                {isLoadingExtraConcreting ? (
+                  <div className="text-muted-foreground">Loading extra concreting data...</div>
+                ) : (
+                  <div className="space-y-4">
+                    {extraConcretingItems?.map((item) => {
+                      const marginAmount = item.price * (item.margin / 100);
+                      const totalCost = item.price + marginAmount;
+                      
+                      return (
+                        <div key={item.id} className="bg-gray-50 p-3 rounded border">
+                          <h4 className="font-medium mb-2">{item.type}</h4>
+                          
+                          <div className="grid grid-cols-2 gap-y-1 text-sm">
+                            <span>Base Price:</span>
+                            <span className="text-right">{formatCurrency(item.price)}</span>
+                            
+                            <span>Margin Rate:</span>
+                            <span className="text-right">{item.margin}%</span>
+                            
+                            <span>Margin Amount:</span>
+                            <span className="text-right">{formatCurrency(marginAmount)}</span>
+                            
+                            <span className="font-medium border-t pt-1 mt-1">Total Cost:</span>
+                            <span className="text-right font-medium border-t pt-1 mt-1">{formatCurrency(totalCost)}</span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                    
+                    {(!extraConcretingItems || extraConcretingItems.length === 0) && (
+                      <p className="text-muted-foreground italic">No extra concreting items found in the system.</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            </AccordionContent>
+          </AccordionItem>
         </Accordion>
       </CardContent>
     </Card>
   );
 };
+
