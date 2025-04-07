@@ -29,47 +29,25 @@ export const FormulaReference: React.FC = () => {
       </CardHeader>
       <CardContent className="pt-4">
         <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="extra-paving">
+          <AccordionItem value="extra-paving-concrete">
             <AccordionTrigger className="text-md font-semibold">
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-primary" />
-                Extra Paving Calculations
+                Extra Paving and Concrete
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-2">
               <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Paving Calculations Placeholder</h3>
+                <h3 className="font-medium text-base mb-2">Paving and Concrete Calculations Placeholder</h3>
                 <p className="text-muted-foreground">
-                  This section will contain detailed formulas for paving calculations, including:
+                  This section will contain detailed formulas for paving and concrete calculations, including:
                 </p>
                 <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
                   <li>Material cost calculations</li>
                   <li>Labor cost calculations</li>
                   <li>Margin calculations</li>
                   <li>Total cost formulas</li>
-                </ul>
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-
-          <AccordionItem value="extra-concreting">
-            <AccordionTrigger className="text-md font-semibold">
-              <div className="flex items-center gap-2">
-                <Ruler className="h-5 w-5 text-primary" />
-                Extra Concreting Calculations
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="space-y-6 pt-2">
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Concrete Calculations Placeholder</h3>
-                <p className="text-muted-foreground">
-                  This section will contain detailed formulas for concrete calculations, including:
-                </p>
-                <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
                   <li>Concrete volume calculations</li>
-                  <li>Labor cost formulas</li>
-                  <li>Material cost formulas</li>
-                  <li>Total pricing formulas</li>
                 </ul>
               </div>
             </AccordionContent>
