@@ -33,7 +33,7 @@ export const FormulaReference: React.FC = () => {
             <AccordionTrigger className="text-md font-semibold">
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-primary" />
-                Extrapaving and Concrete
+                Formulas
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-2">
