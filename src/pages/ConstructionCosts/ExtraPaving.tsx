@@ -1,4 +1,3 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Layers, Scissors, Ruler, Truck, Fence, HardHat, Shovel, Calculator } from "lucide-react";
@@ -16,9 +15,9 @@ const ExtraPaving = () => {
     <DashboardLayout>
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Extra Paving</h1>
+          <h1 className="text-2xl font-bold">Extra Paving and Concrete</h1>
           <p className="text-gray-500 mt-1">
-            Manage additional paving costs for pool installations
+            Manage additional paving and concrete costs for pool installations
           </p>
         </div>
 
