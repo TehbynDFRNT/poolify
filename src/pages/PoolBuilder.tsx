@@ -8,10 +8,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
-import { Waves, Calculator, Users } from "lucide-react";
+import { Waves, Calculator, Users, CheckSquare, ListFilter } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
+import PoolSelectionSection from "@/components/pool-builder/pool-selection/PoolSelectionSection";
 import { Button } from "@/components/ui/button";
 
 const PoolBuilder = () => {
@@ -50,8 +51,12 @@ const PoolBuilder = () => {
         <Tabs defaultValue="builder" className="space-y-4">
           <TabsList>
             <TabsTrigger value="builder" className="flex items-center gap-2">
-              <Waves className="h-4 w-4" />
-              Pool Builder
+              <CheckSquare className="h-4 w-4" />
+              Customer Info
+            </TabsTrigger>
+            <TabsTrigger value="pool-selection" className="flex items-center gap-2">
+              <ListFilter className="h-4 w-4" />
+              Pool Selection
             </TabsTrigger>
             <TabsTrigger value="formula-reference" className="flex items-center gap-2">
               <Calculator className="h-4 w-4" />
@@ -61,6 +66,11 @@ const PoolBuilder = () => {
           <TabsContent value="builder">
             <Card className="p-6">
               <CustomerInformationSection />
+            </Card>
+          </TabsContent>
+          <TabsContent value="pool-selection">
+            <Card className="p-6">
+              <PoolSelectionSection />
             </Card>
           </TabsContent>
           <TabsContent value="formula-reference">
