@@ -40,8 +40,14 @@ const PoolBuilder = () => {
 
         <Tabs defaultValue="builder" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="builder">Pool Builder</TabsTrigger>
-            <TabsTrigger value="formula-reference">Formula Reference</TabsTrigger>
+            <TabsTrigger value="builder" className="flex items-center gap-2">
+              <Waves className="h-4 w-4" />
+              Pool Builder
+            </TabsTrigger>
+            <TabsTrigger value="formula-reference" className="flex items-center gap-2">
+              <Calculator className="h-4 w-4" />
+              Formula Reference
+            </TabsTrigger>
           </TabsList>
           <TabsContent value="builder">
             <Card className="p-6">

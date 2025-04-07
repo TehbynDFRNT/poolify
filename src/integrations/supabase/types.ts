@@ -888,6 +888,51 @@ export type Database = {
           },
         ]
       }
+      pool_projects: {
+        Row: {
+          created_at: string
+          email: string
+          home_address: string
+          id: string
+          installation_area: string
+          owner1: string
+          owner2: string | null
+          phone: string
+          proposal_name: string
+          resident_homeowner: boolean
+          site_address: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          home_address: string
+          id?: string
+          installation_area: string
+          owner1: string
+          owner2?: string | null
+          phone: string
+          proposal_name: string
+          resident_homeowner?: boolean
+          site_address?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          home_address?: string
+          id?: string
+          installation_area?: string
+          owner1?: string
+          owner2?: string | null
+          phone?: string
+          proposal_name?: string
+          resident_homeowner?: boolean
+          site_address?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pool_ranges: {
         Row: {
           created_at: string
