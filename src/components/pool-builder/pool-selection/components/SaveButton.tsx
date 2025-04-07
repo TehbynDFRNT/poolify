@@ -18,7 +18,7 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
     <Button 
       onClick={onClick}
       disabled={isSubmitting || disabled}
-      className="mt-4 w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground"
+      className="mt-4 w-full sm:w-auto"
       size="lg"
     >
       {isSubmitting ? (

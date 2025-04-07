@@ -10,7 +10,6 @@ export const usePoolSelection = (customerId?: string | null) => {
   const [selectedPoolId, setSelectedPoolId] = useState("");
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("details");
   const { toast } = useToast();
 
   // Group pools by range for better organization
@@ -123,8 +122,6 @@ export const usePoolSelection = (customerId?: string | null) => {
     selectedColor,
     setSelectedColor,
     isSubmitting,
-    activeTab,
-    setActiveTab,
     selectedPool,
     handleSavePoolSelection
   };

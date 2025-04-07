@@ -5,7 +5,7 @@ import { CheckCircle } from "lucide-react";
 import { usePoolSelection } from "./hooks/usePoolSelection";
 import { PoolModelSelector } from "./components/PoolModelSelector";
 import { ColorSelector } from "./components/ColorSelector";
-import { PoolDetailsTabs } from "./components/PoolDetailsTabs";
+import { PoolDetailsSections } from "./components/PoolDetailsSections";
 import { SaveButton } from "./components/SaveButton";
 
 interface PoolSelectionSectionProps {
@@ -22,8 +22,6 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
     selectedPool,
     selectedColor,
     setSelectedColor,
-    activeTab,
-    setActiveTab,
     isSubmitting,
     handleSavePoolSelection
   } = usePoolSelection(customerId);
@@ -52,29 +50,27 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                 selectedPoolId={selectedPoolId} 
                 onSelect={(value) => {
                   setSelectedPoolId(value);
-                  setActiveTab("details");
                 }} 
               />
 
               {selectedPoolId && selectedPool && (
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 space-y-6">
                   <div className="flex items-center gap-2 mb-2">
                     <CheckCircle className="h-5 w-5 text-primary" />
                     <h3 className="font-medium text-lg">Selected Pool: {selectedPool.name}</h3>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div>
+                    <h3 className="font-medium mb-2">Select Color</h3>
                     <ColorSelector 
                       selectedColor={selectedColor} 
                       onChange={setSelectedColor} 
                     />
                   </div>
 
-                  <PoolDetailsTabs 
+                  <PoolDetailsSections 
                     pool={selectedPool}
                     selectedColor={selectedColor}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
                   />
                   
                   <div className="flex justify-end">
