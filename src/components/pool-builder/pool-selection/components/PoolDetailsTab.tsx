@@ -5,6 +5,7 @@ import { TabsContent } from "@/components/ui/tabs";
 import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/hooks/useFiltrationPackage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/utils/format";
+import { calculatePackagePrice } from "@/utils/package-calculations";
 
 interface PoolDetailsTabProps {
   pool: Pool;
@@ -94,7 +95,6 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
       case "filtration":
         return (
           <>
-            <h3 className="font-medium text-base mb-3">Filtration Package</h3>
             {!pool.default_filtration_package_id ? (
               <p>No default filtration package assigned to this pool.</p>
             ) : !filtrationPackage ? (
@@ -105,7 +105,7 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
               </div>
             ) : (
               <div className="space-y-4">
-                <p className="font-medium">
+                <p className="font-medium text-lg">
                   Option {filtrationPackage.display_order}: {filtrationPackage.name}
                 </p>
                 
@@ -159,6 +159,11 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
                     )}
                   </div>
                 )}
+                
+                <div className="mt-4 pt-4 border-t border-muted flex justify-between items-center">
+                  <span className="font-medium">Total Package Price:</span>
+                  <span className="font-bold text-lg">{formatCurrency(calculatePackagePrice(filtrationPackage))}</span>
+                </div>
               </div>
             )}
           </>
@@ -166,7 +171,6 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
       case "pricing":
         return (
           <>
-            <h3 className="font-medium text-base mb-3">Pricing Information</h3>
             <div className="grid grid-cols-2 gap-y-4">
               <div>
                 <span className="text-muted-foreground">Base Price (ex GST):</span>
@@ -194,7 +198,6 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
 
   return (
     <TabsContent value={tabId} className="p-4 border rounded-md">
-      <h3 className="font-medium text-base mb-3">{title}</h3>
       {renderContent()}
     </TabsContent>
   );

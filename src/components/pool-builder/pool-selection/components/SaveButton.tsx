@@ -20,6 +20,7 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
       disabled={isSubmitting || disabled}
       className="mt-4 w-full sm:w-auto"
       size="lg"
+      variant="primary"
     >
       {isSubmitting ? (
         <>
