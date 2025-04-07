@@ -3,6 +3,7 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { POOL_COLORS } from "@/types/pool";
+import { Paintbrush } from "lucide-react";
 
 interface ColorSelectorProps {
   selectedColor: string | undefined;
@@ -44,7 +45,10 @@ export const ColorSelector: React.FC<ColorSelectorProps> = ({ selectedColor, onC
         </Select>
 
         {selectedColor && (
-          <div className={`h-8 w-8 rounded ${getColorClass(selectedColor)} border`}></div>
+          <div className="flex items-center gap-2 px-3 py-2 rounded-md border">
+            <Paintbrush className="h-4 w-4 text-muted-foreground" />
+            <div className={`h-6 w-6 rounded ${getColorClass(selectedColor)}`}></div>
+          </div>
         )}
       </div>
     </div>

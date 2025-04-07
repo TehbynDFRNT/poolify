@@ -2,6 +2,9 @@
 import React from "react";
 import { Pool } from "@/types/pool";
 import { TabsContent } from "@/components/ui/tabs";
+import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/hooks/useFiltrationPackage";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/utils/format";
 
 interface PoolDetailsTabProps {
   pool: Pool;
@@ -18,6 +21,10 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
   tabId, 
   title 
 }) => {
+  // Get detailed filtration package data if needed
+  const { filtrationPackage } = tabId === "filtration" ? 
+    useFiltrationPackage(pool) : { filtrationPackage: null };
+
   // Helper to get color class for preview
   const getColorClass = (color: string) => {
     switch(color) {
@@ -88,16 +95,71 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
         return (
           <>
             <h3 className="font-medium text-base mb-3">Filtration Package</h3>
-            {pool.default_filtration_package_id ? (
-              <div>
-                <p className="font-medium">Default Filtration Package ID:</p>
-                <p>{pool.default_filtration_package_id}</p>
-                <p className="text-muted-foreground text-sm mt-2">
-                  Detailed filtration package information will be available after connecting to the database.
-                </p>
+            {!pool.default_filtration_package_id ? (
+              <p>No default filtration package assigned to this pool.</p>
+            ) : !filtrationPackage ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-4 w-1/2" />
+                <Skeleton className="h-4 w-2/3" />
               </div>
             ) : (
-              <p>No default filtration package assigned to this pool.</p>
+              <div className="space-y-4">
+                <p className="font-medium">
+                  Option {filtrationPackage.display_order}: {filtrationPackage.name}
+                </p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  {filtrationPackage.pump && (
+                    <div>
+                      <span className="text-muted-foreground text-sm">Pump:</span>
+                      <p className="font-medium">{filtrationPackage.pump.name}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(filtrationPackage.pump.price)}</p>
+                    </div>
+                  )}
+                  
+                  {filtrationPackage.filter && (
+                    <div>
+                      <span className="text-muted-foreground text-sm">Filter:</span>
+                      <p className="font-medium">{filtrationPackage.filter.name}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(filtrationPackage.filter.price)}</p>
+                    </div>
+                  )}
+                  
+                  {filtrationPackage.light && (
+                    <div>
+                      <span className="text-muted-foreground text-sm">Light:</span>
+                      <p className="font-medium">{filtrationPackage.light.name}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(filtrationPackage.light.price)}</p>
+                    </div>
+                  )}
+                  
+                  {filtrationPackage.sanitiser && (
+                    <div>
+                      <span className="text-muted-foreground text-sm">Sanitiser:</span>
+                      <p className="font-medium">{filtrationPackage.sanitiser.name}</p>
+                      <p className="text-sm text-muted-foreground">{formatCurrency(filtrationPackage.sanitiser.price)}</p>
+                    </div>
+                  )}
+                </div>
+                
+                {filtrationPackage.handover_kit && (
+                  <div className="mt-2">
+                    <span className="text-muted-foreground text-sm">Handover Kit:</span>
+                    <p className="font-medium">{filtrationPackage.handover_kit.name}</p>
+                    {filtrationPackage.handover_kit.components && filtrationPackage.handover_kit.components.length > 0 && (
+                      <div className="mt-1 pl-2 border-l-2 border-muted">
+                        {filtrationPackage.handover_kit.components.map((item) => (
+                          <div key={item.id} className="text-sm flex justify-between items-center">
+                            <span>{item.quantity}x {item.component?.name}</span>
+                            <span className="text-muted-foreground">{formatCurrency((item.component?.price || 0) * item.quantity)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </>
         );
@@ -122,12 +184,6 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
                     : "N/A"}
                 </p>
               </div>
-            </div>
-            <div className="mt-4">
-              <p className="text-muted-foreground text-sm">
-                Additional pricing information and customization options will be 
-                available after connecting to the database.
-              </p>
             </div>
           </>
         );
