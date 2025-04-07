@@ -79,6 +79,24 @@ const CustomerInformationSection: React.FC = () => {
       });
       
       console.log("Saved project data:", data);
+      
+      // Reset form after successful submission
+      setOwner1("");
+      setOwner2("");
+      setPhone("");
+      setEmail("");
+      setHomeAddress("");
+      setSiteAddress("");
+      setInstallationArea("");
+      setIsResidentHomeowner(true);
+      setProposalName("");
+      
+      // Switch to the customers tab
+      const customersTab = document.querySelector('[value="customers"]') as HTMLElement;
+      if (customersTab) {
+        customersTab.click();
+      }
+      
     } catch (error) {
       console.error("Error saving customer information:", error);
       toast({
