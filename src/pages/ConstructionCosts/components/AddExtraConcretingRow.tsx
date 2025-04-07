@@ -32,7 +32,7 @@ export const AddExtraConcretingRow = ({ onAdd, onCancel, displayOrder }: AddExtr
     });
   };
 
-  // Calculate total cost with margin
+  // Calculate total cost by adding price and margin
   const totalCost = calculateExtraConcretingCost(price, margin);
 
   return (

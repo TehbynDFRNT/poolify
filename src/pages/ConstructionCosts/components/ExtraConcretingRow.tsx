@@ -46,7 +46,7 @@ export const ExtraConcretingRow = ({ item, onUpdate, onDelete }: ExtraConcreting
     }
   };
 
-  // Calculate total cost with margin
+  // Calculate total cost by adding price and margin
   const totalCost = calculateExtraConcretingCost(item.price, item.margin);
 
   return (
@@ -83,7 +83,7 @@ export const ExtraConcretingRow = ({ item, onUpdate, onDelete }: ExtraConcreting
             className="w-full"
           />
         ) : (
-          `${margin}%`
+          formatCurrency(margin)
         )}
       </TableCell>
       <TableCell>

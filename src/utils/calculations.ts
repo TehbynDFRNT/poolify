@@ -6,10 +6,9 @@ export const calculateDigCost = () => {
 /**
  * Calculates the total cost for extra concreting items
  * @param price Base price of the concreting item
- * @param margin Margin percentage to apply
- * @returns Total cost with margin applied
+ * @param margin Margin amount in dollars to add
+ * @returns Total cost with margin added
  */
 export const calculateExtraConcretingCost = (price: number, margin: number): number => {
-  const marginAmount = price * (margin / 100);
-  return price + marginAmount;
+  return price + margin;
 };
