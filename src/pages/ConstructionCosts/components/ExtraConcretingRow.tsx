@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Check, Pencil, Trash, X } from "lucide-react";
 import { ExtraConcreting } from "@/types/extra-concreting";
 import { formatCurrency } from "@/utils/format";
+import { calculateExtraConcretingCost } from "@/utils/calculations";
 
 interface ExtraConcretingRowProps {
   item: ExtraConcreting;
@@ -45,6 +46,9 @@ export const ExtraConcretingRow = ({ item, onUpdate, onDelete }: ExtraConcreting
     }
   };
 
+  // Calculate total cost with margin
+  const totalCost = calculateExtraConcretingCost(item.price, item.margin);
+
   return (
     <TableRow>
       <TableCell>
@@ -79,8 +83,11 @@ export const ExtraConcretingRow = ({ item, onUpdate, onDelete }: ExtraConcreting
             className="w-full"
           />
         ) : (
-          margin
+          `${margin}%`
         )}
+      </TableCell>
+      <TableCell>
+        {formatCurrency(totalCost)}
       </TableCell>
       <TableCell>
         <div className="flex gap-2 justify-end">

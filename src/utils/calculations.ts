@@ -13,4 +13,3 @@ export const calculateExtraConcretingCost = (price: number, margin: number): num
   const marginAmount = price * (margin / 100);
   return price + marginAmount;
 };
-

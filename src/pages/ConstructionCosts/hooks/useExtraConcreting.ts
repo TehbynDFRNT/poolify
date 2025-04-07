@@ -20,6 +20,44 @@ export const useExtraConcreting = () => {
         throw error;
       }
 
+      // If we don't have any data yet, initialize with our defaults
+      if (!data || data.length === 0) {
+        const defaultItems = [
+          {
+            type: "Cover Crete",
+            price: 236,
+            margin: 89,
+            display_order: 1
+          },
+          {
+            type: "Exposed Aggregate",
+            price: 125,
+            margin: 40,
+            display_order: 2
+          },
+          {
+            type: "Standard",
+            price: 93,
+            margin: 42,
+            display_order: 3
+          }
+        ];
+
+        // Add the default items
+        for (const item of defaultItems) {
+          await supabase.from("extra_concreting").insert([item]);
+        }
+
+        // Fetch the data again
+        const { data: refetchedData, error: refetchError } = await supabase
+          .from("extra_concreting")
+          .select("*")
+          .order("display_order", { ascending: true });
+
+        if (refetchError) throw refetchError;
+        return refetchedData as ExtraConcreting[];
+      }
+
       return data as ExtraConcreting[];
     },
   });

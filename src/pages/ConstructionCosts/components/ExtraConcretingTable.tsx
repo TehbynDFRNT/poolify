@@ -7,6 +7,8 @@ import { useExtraConcreting } from "../hooks/useExtraConcreting";
 import { ExtraConcreting, ExtraConcretingInsert } from "@/types/extra-concreting";
 import { ExtraConcretingRow } from "./ExtraConcretingRow";
 import { AddExtraConcretingRow } from "./AddExtraConcretingRow";
+import { formatCurrency } from "@/utils/format";
+import { calculateExtraConcretingCost } from "@/utils/calculations";
 
 export const ExtraConcretingTable = () => {
   const [isAdding, setIsAdding] = useState(false);
@@ -60,6 +62,7 @@ export const ExtraConcretingTable = () => {
               <TableHead>Type</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Margin</TableHead>
+              <TableHead>Total</TableHead>
               <TableHead className="w-[150px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -81,7 +84,7 @@ export const ExtraConcretingTable = () => {
             ))}
             {extraConcretingItems?.length === 0 && !isAdding && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No extra concreting items defined. Click "Add New" to create one.
                 </TableCell>
               </TableRow>
