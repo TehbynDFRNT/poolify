@@ -34,8 +34,6 @@ export const POOL_RANGES = [
 // Define the pool colors
 export const POOL_COLORS = [
   "Silver Mist",
-  "Ocean Blue",
-  "Sky Blue",
   "Horizon",
   "Twilight"
 ] as const;

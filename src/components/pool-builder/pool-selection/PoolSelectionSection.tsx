@@ -6,7 +6,7 @@ import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePools } from "@/hooks/usePools";
-import { CheckCircle, Info, Settings, Package, Ruler, DollarSign, Palette } from "lucide-react";
+import { CheckCircle, Info, Settings, Package, Ruler, DollarSign } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { POOL_COLORS } from "@/types/pool";
@@ -93,20 +93,12 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
   const selectedPool = pools?.find(p => p.id === selectedPoolId);
 
   // Define color styles for preview
-  const getColorStyle = (color: string) => {
+  const getColorClass = (color: string) => {
     switch(color) {
-      case "Silver Mist":
-        return "bg-gray-300";
-      case "Ocean Blue":
-        return "bg-blue-600";
-      case "Sky Blue":
-        return "bg-blue-400";
-      case "Horizon":
-        return "bg-gray-800";
-      case "Twilight":
-        return "bg-gray-700";
-      default:
-        return "bg-gray-300";
+      case "Silver Mist": return "bg-gray-300";
+      case "Horizon": return "bg-gray-800";
+      case "Twilight": return "bg-gray-700";
+      default: return "bg-gray-300";
     }
   };
 
@@ -184,7 +176,7 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                             {POOL_COLORS.map((color) => (
                               <SelectItem key={color} value={color}>
                                 <div className="flex items-center gap-2">
-                                  <span className={`h-4 w-4 rounded-full ${getColorStyle(color)}`}></span>
+                                  <span className={`h-4 w-4 rounded-full ${getColorClass(color)}`}></span>
                                   <span>{color}</span>
                                 </div>
                               </SelectItem>
@@ -193,14 +185,14 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                         </Select>
                         
                         {selectedColor && (
-                          <div className={`h-8 w-8 rounded ${getColorStyle(selectedColor)} border`}></div>
+                          <div className={`h-8 w-8 rounded ${getColorClass(selectedColor)} border`}></div>
                         )}
                       </div>
                     </div>
                   </div>
 
                   <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid grid-cols-5 mb-4">
+                    <TabsList className="grid grid-cols-4 mb-4">
                       <TabsTrigger value="details" className="flex items-center gap-1">
                         <Info className="h-4 w-4" />
                         <span>Details</span>
@@ -212,10 +204,6 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                       <TabsTrigger value="filtration" className="flex items-center gap-1">
                         <Package className="h-4 w-4" />
                         <span>Filtration</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="appearance" className="flex items-center gap-1">
-                        <Palette className="h-4 w-4" />
-                        <span>Appearance</span>
                       </TabsTrigger>
                       <TabsTrigger value="pricing" className="flex items-center gap-1">
                         <DollarSign className="h-4 w-4" />
@@ -241,6 +229,13 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                         <div>
                           <span className="text-muted-foreground">Volume:</span>
                           <p className="font-medium">{selectedPool.volume_liters ? `${selectedPool.volume_liters.toLocaleString()} liters` : "N/A"}</p>
+                        </div>
+                        <div>
+                          <span className="text-muted-foreground">Color:</span>
+                          <div className="flex items-center gap-2 mt-1">
+                            <div className={`h-4 w-4 rounded-full ${getColorClass(selectedColor || "")}`}></div>
+                            <p className="font-medium">{selectedColor}</p>
+                          </div>
                         </div>
                       </div>
                     </TabsContent>
@@ -286,33 +281,6 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                       )}
                     </TabsContent>
 
-                    <TabsContent value="appearance" className="p-4 border rounded-md">
-                      <h3 className="font-medium text-base mb-3">Pool Appearance</h3>
-                      <div className="space-y-4">
-                        <div>
-                          <span className="text-muted-foreground">Selected Color:</span>
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className={`h-6 w-6 rounded ${getColorStyle(selectedColor || "")} border`}></div>
-                            <p className="font-medium">{selectedColor}</p>
-                          </div>
-                        </div>
-                        
-                        <div>
-                          <span className="text-muted-foreground">Color Preview:</span>
-                          <div className="mt-2 p-3 rounded-md border">
-                            <div className={`${getColorStyle(selectedColor || "")} h-24 w-full rounded-md border flex items-center justify-center`}>
-                              <div className="bg-white/20 px-3 py-1 rounded">
-                                {selectedPool.name}
-                              </div>
-                            </div>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            This is an approximate color representation. Actual pool colors may vary slightly.
-                          </p>
-                        </div>
-                      </div>
-                    </TabsContent>
-                    
                     <TabsContent value="pricing" className="p-4 border rounded-md">
                       <h3 className="font-medium text-base mb-3">Pricing Information</h3>
                       <div className="grid grid-cols-2 gap-y-4">

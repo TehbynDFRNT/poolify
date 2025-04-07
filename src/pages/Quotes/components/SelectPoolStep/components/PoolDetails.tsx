@@ -11,8 +11,6 @@ export const PoolDetails = ({ pool }: PoolDetailsProps) => {
   const getColorClass = (color?: string) => {
     switch(color) {
       case "Silver Mist": return "bg-gray-300";
-      case "Ocean Blue": return "bg-blue-600";
-      case "Sky Blue": return "bg-blue-400";
       case "Horizon": return "bg-gray-800";
       case "Twilight": return "bg-gray-700";
       default: return "bg-gray-300";
