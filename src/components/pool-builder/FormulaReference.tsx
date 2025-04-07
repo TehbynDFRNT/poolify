@@ -21,10 +21,10 @@ export const FormulaReference: React.FC = () => {
       <CardHeader className="bg-white pb-2">
         <div className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          <CardTitle>Formula Reference</CardTitle>
+          <CardTitle>Extra Paving and Concrete Formula</CardTitle>
         </div>
         <CardDescription>
-          Documentation of formulas and calculations used throughout the application
+          Documentation of formulas used for paving and concrete calculations
         </CardDescription>
       </CardHeader>
       <CardContent className="pt-4">

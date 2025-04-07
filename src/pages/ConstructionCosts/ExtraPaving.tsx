@@ -1,3 +1,4 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Layers, Scissors, Ruler, Truck, Fence, HardHat, Shovel, Calculator } from "lucide-react";
@@ -115,20 +116,7 @@ const ExtraPaving = () => {
           </Card>
 
           {/* Formula Reference Section */}
-          <Card>
-            <CardHeader>
-              <div className="flex items-center gap-2">
-                <Calculator className="h-5 w-5 text-primary" />
-                <CardTitle>Formula Reference</CardTitle>
-              </div>
-              <CardDescription>
-                Documentation of formulas used for paving and concrete calculations
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FormulaReference />
-            </CardContent>
-          </Card>
+          <FormulaReference />
         </div>
       </div>
     </DashboardLayout>
