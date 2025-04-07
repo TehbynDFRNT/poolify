@@ -36,6 +36,39 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
     }, {} as Record<string, any[]>);
   }, [pools]);
 
+  // Fetch existing pool selection if customer ID is available
+  useEffect(() => {
+    if (customerId) {
+      fetchPoolSelection();
+    }
+  }, [customerId]);
+
+  const fetchPoolSelection = async () => {
+    if (!customerId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('pool_projects')
+        .select('pool_specification_id, pool_color')
+        .eq('id', customerId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching pool selection:", error);
+        return;
+      }
+
+      if (data && data.pool_specification_id) {
+        setSelectedPoolId(data.pool_specification_id);
+        if (data.pool_color) {
+          setSelectedColor(data.pool_color);
+        }
+      }
+    } catch (error) {
+      console.error("Error in fetchPoolSelection:", error);
+    }
+  };
+
   // When a pool is selected, set the default color if available
   useEffect(() => {
     if (selectedPoolId && pools) {
@@ -65,10 +98,9 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
       const { error } = await supabase
         .from('pool_projects')
         .update({
-          // Use a type assertion to bypass the TypeScript error
           "pool_specification_id": selectedPoolId,
           "pool_color": selectedColor
-        } as any)
+        })
         .eq('id', customerId);
 
       if (error) throw error;
