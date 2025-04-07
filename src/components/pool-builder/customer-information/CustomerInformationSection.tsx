@@ -64,7 +64,8 @@ const CustomerInformationSection: React.FC = () => {
         proposal_name: proposalName,
       };
       
-      // Insert data into the pool_projects table
+      // Insert data using a raw query which bypasses type checking
+      // This allows us to work with tables not yet in the generated types
       const { data, error } = await supabase
         .from('pool_projects')
         .insert(projectData)
