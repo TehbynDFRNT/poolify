@@ -21,7 +21,7 @@ export const FormulaReference: React.FC = () => {
       <CardHeader className="bg-white pb-2">
         <div className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          <CardTitle>Extra Paving and Concrete Formula</CardTitle>
+          <CardTitle>Formulas</CardTitle>
         </div>
         <CardDescription>
           Documentation of formulas used for paving and concrete calculations
@@ -33,7 +33,7 @@ export const FormulaReference: React.FC = () => {
             <AccordionTrigger className="text-md font-semibold">
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-primary" />
-                Formulas
+                Extra Paving and Concrete Formula
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-2">
