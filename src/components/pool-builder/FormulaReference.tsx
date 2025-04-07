@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calculator, Layers, HardHat, Ruler, Truck } from "lucide-react";
+import { Calculator, Layers } from "lucide-react";
 
 export const FormulaReference: React.FC = () => {
   return (
