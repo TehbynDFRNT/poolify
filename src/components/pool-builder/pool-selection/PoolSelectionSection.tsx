@@ -1,141 +1,32 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePools } from "@/hooks/usePools";
-import { CheckCircle, Info, Settings, Package, Ruler, DollarSign } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { POOL_COLORS } from "@/types/pool";
+import { CheckCircle } from "lucide-react";
+import { usePoolSelection } from "./hooks/usePoolSelection";
+import { PoolModelSelector } from "./components/PoolModelSelector";
+import { ColorSelector } from "./components/ColorSelector";
+import { PoolDetailsTabs } from "./components/PoolDetailsTabs";
+import { SaveButton } from "./components/SaveButton";
 
 interface PoolSelectionSectionProps {
   customerId?: string | null;
 }
 
 const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId }) => {
-  const { data: pools, isLoading, error } = usePools();
-  const [selectedPoolId, setSelectedPoolId] = useState("");
-  const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeTab, setActiveTab] = useState("details");
-  const { toast } = useToast();
-
-  // Group pools by range for better organization
-  const poolsByRange = React.useMemo(() => {
-    if (!pools) return {};
-    
-    return pools.reduce((acc, pool) => {
-      if (!acc[pool.range]) {
-        acc[pool.range] = [];
-      }
-      acc[pool.range].push(pool);
-      return acc;
-    }, {} as Record<string, any[]>);
-  }, [pools]);
-
-  // Fetch existing pool selection if customer ID is available
-  useEffect(() => {
-    if (customerId) {
-      fetchPoolSelection();
-    }
-  }, [customerId]);
-
-  const fetchPoolSelection = async () => {
-    if (!customerId) return;
-
-    try {
-      const { data, error } = await supabase
-        .from('pool_projects')
-        .select('pool_specification_id, pool_color')
-        .eq('id', customerId)
-        .single();
-
-      if (error) {
-        console.error("Error fetching pool selection:", error);
-        return;
-      }
-
-      if (data) {
-        if (data.pool_specification_id) {
-          setSelectedPoolId(data.pool_specification_id);
-        }
-        
-        if (data.pool_color) {
-          setSelectedColor(data.pool_color);
-        }
-      }
-    } catch (error) {
-      console.error("Error in fetchPoolSelection:", error);
-    }
-  };
-
-  // When a pool is selected, set the default color if available
-  useEffect(() => {
-    if (selectedPoolId && pools) {
-      const pool = pools.find(p => p.id === selectedPoolId);
-      if (pool && pool.color) {
-        setSelectedColor(pool.color);
-      } else {
-        setSelectedColor(POOL_COLORS[0]);
-      }
-    }
-  }, [selectedPoolId, pools]);
-
-  const handleSavePoolSelection = async () => {
-    if (!customerId || !selectedPoolId) {
-      toast({
-        title: "Selection Required",
-        description: "Please select a pool model first.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      // Update the customer record with the selected pool and color
-      const { error } = await supabase
-        .from('pool_projects')
-        .update({
-          pool_specification_id: selectedPoolId,
-          pool_color: selectedColor
-        })
-        .eq('id', customerId);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success!",
-        description: "Pool selection saved successfully",
-      });
-    } catch (error) {
-      console.error("Error saving pool selection:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save pool selection. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Get the selected pool details
-  const selectedPool = pools?.find(p => p.id === selectedPoolId);
-
-  // Define color styles for preview
-  const getColorClass = (color: string) => {
-    switch(color) {
-      case "Silver Mist": return "bg-gray-300";
-      case "Horizon": return "bg-gray-800";
-      case "Twilight": return "bg-gray-700";
-      default: return "bg-gray-300";
-    }
-  };
+  const {
+    poolsByRange,
+    isLoading,
+    error,
+    selectedPoolId,
+    setSelectedPoolId,
+    selectedPool,
+    selectedColor,
+    setSelectedColor,
+    activeTab,
+    setActiveTab,
+    isSubmitting,
+    handleSavePoolSelection
+  } = usePoolSelection(customerId);
 
   return (
     <div className="space-y-6">
@@ -156,38 +47,14 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
             </div>
           ) : (
             <>
-              <div className="space-y-2">
-                <Label htmlFor="pool-select">Pool Model</Label>
-                <Select
-                  value={selectedPoolId}
-                  onValueChange={(value) => {
-                    setSelectedPoolId(value);
-                    setActiveTab("details");
-                  }}
-                >
-                  <SelectTrigger id="pool-select" className="w-full">
-                    <SelectValue placeholder="Select a pool model" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.keys(poolsByRange).length === 0 ? (
-                      <SelectItem value="no-pools" disabled>
-                        No pools available
-                      </SelectItem>
-                    ) : (
-                      Object.entries(poolsByRange).map(([range, poolsInRange]) => (
-                        <div key={range} className="py-2">
-                          <div className="px-2 text-sm font-medium text-gray-500">{range}</div>
-                          {poolsInRange.map((pool) => (
-                            <SelectItem key={pool.id} value={pool.id}>
-                              {pool.name} ({pool.length}m × {pool.width}m)
-                            </SelectItem>
-                          ))}
-                        </div>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+              <PoolModelSelector 
+                poolsByRange={poolsByRange} 
+                selectedPoolId={selectedPoolId} 
+                onSelect={(value) => {
+                  setSelectedPoolId(value);
+                  setActiveTab("details");
+                }} 
+              />
 
               {selectedPoolId && selectedPool && (
                 <div className="mt-6 space-y-4">
@@ -197,161 +64,25 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                   </div>
                   
                   <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="pool-color">Pool Color</Label>
-                      <div className="flex items-center gap-3 mt-2">
-                        <Select
-                          value={selectedColor}
-                          onValueChange={setSelectedColor}
-                        >
-                          <SelectTrigger id="pool-color" className="w-full">
-                            <SelectValue placeholder="Select a color" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {POOL_COLORS.map((color) => (
-                              <SelectItem key={color} value={color}>
-                                <div className="flex items-center gap-2">
-                                  <span className={`h-4 w-4 rounded-full ${getColorClass(color)}`}></span>
-                                  <span>{color}</span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        
-                        {selectedColor && (
-                          <div className={`h-8 w-8 rounded ${getColorClass(selectedColor)} border`}></div>
-                        )}
-                      </div>
-                    </div>
+                    <ColorSelector 
+                      selectedColor={selectedColor} 
+                      onChange={setSelectedColor} 
+                    />
                   </div>
 
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid grid-cols-4 mb-4">
-                      <TabsTrigger value="details" className="flex items-center gap-1">
-                        <Info className="h-4 w-4" />
-                        <span>Details</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="dimensions" className="flex items-center gap-1">
-                        <Ruler className="h-4 w-4" />
-                        <span>Dimensions</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="filtration" className="flex items-center gap-1">
-                        <Package className="h-4 w-4" />
-                        <span>Filtration</span>
-                      </TabsTrigger>
-                      <TabsTrigger value="pricing" className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        <span>Pricing</span>
-                      </TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="details" className="p-4 border rounded-md">
-                      <h3 className="font-medium text-base mb-3">Pool Details</h3>
-                      <div className="grid grid-cols-2 gap-y-4">
-                        <div>
-                          <span className="text-muted-foreground">Pool Range:</span>
-                          <p className="font-medium">{selectedPool.range}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Pool Type:</span>
-                          <p className="font-medium">{selectedPool.pool_type_id || "Standard"}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Weight:</span>
-                          <p className="font-medium">{selectedPool.weight_kg ? `${selectedPool.weight_kg} kg` : "N/A"}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Volume:</span>
-                          <p className="font-medium">{selectedPool.volume_liters ? `${selectedPool.volume_liters.toLocaleString()} liters` : "N/A"}</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Color:</span>
-                          <div className="flex items-center gap-2 mt-1">
-                            <div className={`h-4 w-4 rounded-full ${getColorClass(selectedColor || "")}`}></div>
-                            <p className="font-medium">{selectedColor}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="dimensions" className="p-4 border rounded-md">
-                      <h3 className="font-medium text-base mb-3">Pool Dimensions</h3>
-                      <div className="grid grid-cols-2 gap-y-4">
-                        <div>
-                          <span className="text-muted-foreground">Length:</span>
-                          <p className="font-medium">{selectedPool.length} m</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Width:</span>
-                          <p className="font-medium">{selectedPool.width} m</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Shallow End Depth:</span>
-                          <p className="font-medium">{selectedPool.depth_shallow} m</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Deep End Depth:</span>
-                          <p className="font-medium">{selectedPool.depth_deep} m</p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Waterline:</span>
-                          <p className="font-medium">{selectedPool.waterline_l_m ? `${selectedPool.waterline_l_m} L/m` : "N/A"}</p>
-                        </div>
-                      </div>
-                    </TabsContent>
-                    
-                    <TabsContent value="filtration" className="p-4 border rounded-md">
-                      <h3 className="font-medium text-base mb-3">Filtration Package</h3>
-                      {selectedPool.default_filtration_package_id ? (
-                        <div>
-                          <p className="font-medium">Default Filtration Package ID:</p>
-                          <p>{selectedPool.default_filtration_package_id}</p>
-                          <p className="text-muted-foreground text-sm mt-2">
-                            Detailed filtration package information will be available after connecting to the database.
-                          </p>
-                        </div>
-                      ) : (
-                        <p>No default filtration package assigned to this pool.</p>
-                      )}
-                    </TabsContent>
-
-                    <TabsContent value="pricing" className="p-4 border rounded-md">
-                      <h3 className="font-medium text-base mb-3">Pricing Information</h3>
-                      <div className="grid grid-cols-2 gap-y-4">
-                        <div>
-                          <span className="text-muted-foreground">Base Price (ex GST):</span>
-                          <p className="font-medium">
-                            {selectedPool.buy_price_ex_gst 
-                              ? `$${selectedPool.buy_price_ex_gst.toLocaleString()}` 
-                              : "N/A"}
-                          </p>
-                        </div>
-                        <div>
-                          <span className="text-muted-foreground">Base Price (inc GST):</span>
-                          <p className="font-medium">
-                            {selectedPool.buy_price_inc_gst 
-                              ? `$${selectedPool.buy_price_inc_gst.toLocaleString()}` 
-                              : "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="mt-4">
-                        <p className="text-muted-foreground text-sm">
-                          Additional pricing information and customization options will be 
-                          available after connecting to the database.
-                        </p>
-                      </div>
-                    </TabsContent>
-                  </Tabs>
+                  <PoolDetailsTabs 
+                    pool={selectedPool}
+                    selectedColor={selectedColor}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                  />
                   
-                  <div className="flex justify-end mt-4">
-                    <Button 
+                  <div className="flex justify-end">
+                    <SaveButton 
                       onClick={handleSavePoolSelection}
-                      disabled={isSubmitting || !customerId}
-                    >
-                      {isSubmitting ? "Saving..." : "Save Pool Selection"}
-                    </Button>
+                      isSubmitting={isSubmitting}
+                      disabled={!customerId}
+                    />
                   </div>
                 </div>
               )}
