@@ -4,12 +4,14 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 import OwnerDetailsSection from "./OwnerDetailsSection";
 import PropertyDetailsSection from "./PropertyDetailsSection";
 import ProposalInfoSection from "./ProposalInfoSection";
 
 const CustomerInformationSection: React.FC = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Owner Details State
@@ -91,11 +93,8 @@ const CustomerInformationSection: React.FC = () => {
       setIsResidentHomeowner(true);
       setProposalName("");
       
-      // Switch to the customers tab
-      const customersTab = document.querySelector('[value="customers"]') as HTMLElement;
-      if (customersTab) {
-        customersTab.click();
-      }
+      // Navigate to the customers page
+      navigate("/customers");
       
     } catch (error) {
       console.error("Error saving customer information:", error);

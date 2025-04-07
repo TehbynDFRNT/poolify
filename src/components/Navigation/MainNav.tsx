@@ -10,7 +10,8 @@ import {
   Users,
   Wand2,
   ClipboardList,
-  Waves
+  Waves,
+  UserRound
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
 
@@ -73,6 +74,13 @@ const MainNav: React.FC = () => {
       icon: <Waves className="h-5 w-5" />, 
       label: "Pool Builder", 
       path: "/pool-builder", 
+      isParent: true,
+      subItems: []
+    },
+    { 
+      icon: <UserRound className="h-5 w-5" />, 
+      label: "Customers", 
+      path: "/customers", 
       isParent: true,
       subItems: []
     }
