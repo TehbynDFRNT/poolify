@@ -1,135 +1,134 @@
 
-import React, { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
-import { Card, CardContent } from "@/components/ui/card";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Eye, Pencil, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Card } from "@/components/ui/card";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { Pencil, Phone, Mail, Home, User, ArrowRight } from "lucide-react";
 
-interface Customer {
-  id: string;
-  owner1: string;
-  owner2: string | null;
-  phone: string;
-  email: string;
-  home_address: string;
-  site_address: string | null;
-  installation_area: string;
-  resident_homeowner: boolean;
-  proposal_name: string;
-  created_at: string;
-}
-
-const CustomersList: React.FC = () => {
-  const { toast } = useToast();
-  const [customers, setCustomers] = useState<Customer[]>([]);
+const CustomersList = () => {
+  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchCustomers = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('pool_projects')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (error) throw error;
-        
-        setCustomers(data as Customer[]);
-      } catch (error) {
-        console.error('Error fetching customers:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load customer data. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchCustomers();
-  }, [toast]);
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('pool_projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      setCustomers(data || []);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load customers. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContinueQuote = (customer) => {
+    // For now, we'll just navigate to the pool builder page.
+    // In a more complex implementation, we could pass the customer ID as a parameter
+    // and load their data in the pool builder.
+    navigate("/pool-builder");
+  };
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <div className="flex justify-center items-center h-40">
-          <p className="text-muted-foreground">Loading customers...</p>
-        </div>
-      </Card>
+      <div className="py-8">
+        <Card className="p-6">
+          <p className="text-center text-muted-foreground">Loading customers...</p>
+        </Card>
+      </div>
     );
   }
 
   if (customers.length === 0) {
     return (
-      <Card className="p-6">
-        <div className="flex flex-col justify-center items-center h-60 gap-4">
-          <Users className="h-16 w-16 text-muted-foreground" />
-          <h3 className="text-xl font-medium">No Customers Found</h3>
-          <p className="text-muted-foreground text-center max-w-md">
-            You haven't added any customers yet. Use the Pool Builder form to add your first customer.
-          </p>
-        </div>
-      </Card>
+      <div className="py-8">
+        <Card className="p-6">
+          <div className="text-center">
+            <p className="text-muted-foreground mb-4">No customers found.</p>
+            <Button onClick={() => navigate("/pool-builder")}>Add New Customer</Button>
+          </div>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Customers</h2>
-        <span className="text-muted-foreground">{customers.length} customer{customers.length !== 1 ? 's' : ''}</span>
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      {customers.map((customer) => (
+        <Card key={customer.id} className="p-6 flex flex-col h-full">
+          <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-lg">
+                {customer.owner1}
+                {customer.owner2 && ` & ${customer.owner2}`}
+              </h3>
+            </div>
+          </div>
+          
+          <div className="space-y-2 flex-grow">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <span>{customer.phone}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Mail className="h-4 w-4 text-muted-foreground" />
+              <span>{customer.email}</span>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Home className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">{customer.home_address}</span>
+            </div>
+            
+            {customer.site_address && customer.site_address !== customer.home_address && (
+              <div className="flex items-center gap-2">
+                <Home className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm">Site: {customer.site_address}</span>
+              </div>
+            )}
+            
+            <div className="mt-4">
+              <p className="text-sm text-muted-foreground">Project: {customer.proposal_name}</p>
+            </div>
+          </div>
+          
+          <div className="mt-4 flex justify-between">
+            <Button variant="outline" size="sm" className="gap-1">
+              <Pencil className="h-3.5 w-3.5" />
+              Edit
+            </Button>
+            <Button 
+              onClick={() => handleContinueQuote(customer)} 
+              size="sm" 
+              className="gap-1"
+            >
+              Continue Quote
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        </Card>
       </div>
-      
-      <Card>
-        <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Proposal Name</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Installation Area</TableHead>
-                <TableHead>Date Added</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {customers.map((customer) => (
-                <TableRow key={customer.id}>
-                  <TableCell className="font-medium">{customer.proposal_name}</TableCell>
-                  <TableCell>
-                    {customer.owner1}
-                    {customer.owner2 && <span className="text-muted-foreground text-sm"> & {customer.owner2}</span>}
-                  </TableCell>
-                  <TableCell>
-                    <div>{customer.phone}</div>
-                    <div className="text-sm text-muted-foreground">{customer.email}</div>
-                  </TableCell>
-                  <TableCell>{customer.installation_area}</TableCell>
-                  <TableCell>{new Date(customer.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                        <Eye className="h-4 w-4" />
-                        <span className="sr-only">View</span>
-                      </Button>
-                      <Button variant="outline" size="sm" className="h-8 w-8 p-0">
-                        <Pencil className="h-4 w-4" />
-                        <span className="sr-only">Edit</span>
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-    </div>
+    );
   );
 };
 

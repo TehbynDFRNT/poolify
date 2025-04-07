@@ -82,6 +82,11 @@ const CustomerInformationSection: React.FC = () => {
       
       console.log("Saved project data:", data);
       
+      // Store the customer ID for future use in the quote process
+      if (data && data.length > 0) {
+        localStorage.setItem('currentCustomerId', data[0].id);
+      }
+      
       // Reset form after successful submission
       setOwner1("");
       setOwner2("");
