@@ -15,12 +15,12 @@ export const PoolFiltrationContent: React.FC<PoolFiltrationContentProps> = ({ po
   const { filtrationPackage } = useFiltrationPackage(pool);
 
   if (!pool.default_filtration_package_id) {
-    return <NoFiltrationPackage />;
+    return <NoFiltrationPackage pool={pool} />;
   }
   
   if (!filtrationPackage) {
     return <PoolFiltrationLoading />;
   }
   
-  return <FiltrationDetails filtrationPackage={filtrationPackage} />;
+  return <FiltrationDetails filtrationPackage={filtrationPackage} pool={pool} />;
 };
