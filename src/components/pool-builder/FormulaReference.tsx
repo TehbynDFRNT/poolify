@@ -13,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Calculator, Layers } from "lucide-react";
+import { Calculator, Layers, Sparkles } from "lucide-react";
 import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
 import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
 import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
@@ -111,6 +111,26 @@ export const FormulaReference: React.FC = () => {
                   </div>
                 </div>
               )}
+            </AccordionContent>
+          </AccordionItem>
+
+          <AccordionItem value="extrapaving-existing-concrete">
+            <AccordionTrigger className="text-md font-semibold">
+              <div className="flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                Extra Paving on Existing Concrete
+              </div>
+            </AccordionTrigger>
+            <AccordionContent className="space-y-6 pt-2">
+              <div className="rounded-md border p-4">
+                <h3 className="font-medium text-base mb-3">Extra Paving on Existing Concrete</h3>
+                <p className="text-muted-foreground mb-3">
+                  Formula calculations for extra paving on existing concrete will be added here.
+                </p>
+                <div className="bg-gray-50 p-4 rounded border text-center">
+                  <p className="text-muted-foreground italic">Formula details coming soon.</p>
+                </div>
+              </div>
             </AccordionContent>
           </AccordionItem>
         </Accordion>
