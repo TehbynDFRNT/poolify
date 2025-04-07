@@ -29,11 +29,11 @@ export const FormulaReference: React.FC = () => {
       </CardHeader>
       <CardContent className="pt-4">
         <Accordion type="single" collapsible className="w-full">
-          <AccordionItem value="extra-paving-concrete">
+          <AccordionItem value="extrapaving-concrete">
             <AccordionTrigger className="text-md font-semibold">
               <div className="flex items-center gap-2">
                 <Layers className="h-5 w-5 text-primary" />
-                Extra Paving and Concrete
+                Extrapaving and Concrete
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-2">
