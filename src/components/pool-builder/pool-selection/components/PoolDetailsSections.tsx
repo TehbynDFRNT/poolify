@@ -36,8 +36,8 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
       <PoolDetailsSection 
         pool={pool}
         selectedColor={selectedColor}
-        sectionId="filtration"
-        title="Filtration Package"
+        sectionId="pricing"
+        title="Pool Shell Pricing"
       />
       
       <div className="border-t border-border pt-6"></div>
@@ -45,8 +45,8 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
       <PoolDetailsSection 
         pool={pool}
         selectedColor={selectedColor}
-        sectionId="pricing"
-        title="Pricing Information"
+        sectionId="filtration"
+        title="Filtration Package"
       />
     </Card>
   );
