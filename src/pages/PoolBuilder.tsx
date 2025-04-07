@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Waves, Calculator } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormulaReference } from "@/components/pool-builder/FormulaReference";
+import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
 
 const PoolBuilder = () => {
   return (
@@ -37,20 +38,14 @@ const PoolBuilder = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="overview" className="space-y-4">
+        <Tabs defaultValue="builder" className="space-y-4">
           <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="builder">Pool Builder</TabsTrigger>
             <TabsTrigger value="formula-reference">Formula Reference</TabsTrigger>
           </TabsList>
-          <TabsContent value="overview">
+          <TabsContent value="builder">
             <Card className="p-6">
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <Waves className="h-16 w-16 text-primary mb-4" />
-                <h2 className="text-2xl font-semibold mb-2">Start Building Your Pool</h2>
-                <p className="text-muted-foreground max-w-md mb-6">
-                  This is a placeholder for the Pool Builder feature. Future functionality will allow you to design and customize swimming pools in detail.
-                </p>
-              </div>
+              <CustomerInformationSection />
             </Card>
           </TabsContent>
           <TabsContent value="formula-reference">
