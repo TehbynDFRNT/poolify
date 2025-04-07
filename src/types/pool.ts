@@ -38,6 +38,24 @@ export const POOL_COLORS = [
   "Twilight"
 ] as const;
 
+// Define a type for pool projects to match the database structure
+export interface PoolProject {
+  id: string;
+  owner1: string;
+  owner2?: string | null;
+  email: string;
+  phone: string;
+  home_address: string;
+  site_address?: string | null;
+  proposal_name: string;
+  installation_area: string;
+  resident_homeowner: boolean;
+  pool_specification_id?: string | null;
+  pool_color?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Define the schema for form validation
 export const poolSchema = z.object({
   name: z.string().min(1, "Name is required"),

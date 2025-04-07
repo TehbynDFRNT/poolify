@@ -898,6 +898,8 @@ export type Database = {
           owner1: string
           owner2: string | null
           phone: string
+          pool_color: string | null
+          pool_specification_id: string | null
           proposal_name: string
           resident_homeowner: boolean
           site_address: string | null
@@ -912,6 +914,8 @@ export type Database = {
           owner1: string
           owner2?: string | null
           phone: string
+          pool_color?: string | null
+          pool_specification_id?: string | null
           proposal_name: string
           resident_homeowner?: boolean
           site_address?: string | null
@@ -926,12 +930,22 @@ export type Database = {
           owner1?: string
           owner2?: string | null
           phone?: string
+          pool_color?: string | null
+          pool_specification_id?: string | null
           proposal_name?: string
           resident_homeowner?: boolean
           site_address?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "pool_projects_pool_specification_id_fkey"
+            columns: ["pool_specification_id"]
+            isOneToOne: false
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pool_ranges: {
         Row: {

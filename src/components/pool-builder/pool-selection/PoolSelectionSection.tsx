@@ -58,8 +58,11 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
         return;
       }
 
-      if (data && data.pool_specification_id) {
-        setSelectedPoolId(data.pool_specification_id);
+      if (data) {
+        if (data.pool_specification_id) {
+          setSelectedPoolId(data.pool_specification_id);
+        }
+        
         if (data.pool_color) {
           setSelectedColor(data.pool_color);
         }
@@ -98,8 +101,8 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
       const { error } = await supabase
         .from('pool_projects')
         .update({
-          "pool_specification_id": selectedPoolId,
-          "pool_color": selectedColor
+          pool_specification_id: selectedPoolId,
+          pool_color: selectedColor
         })
         .eq('id', customerId);
 

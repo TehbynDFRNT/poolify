@@ -17,11 +17,12 @@ import PoolSelectionSection from "@/components/pool-builder/pool-selection/PoolS
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { PoolProject } from "@/types/pool";
 
 const PoolBuilder = () => {
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get("customerId");
-  const [customer, setCustomer] = useState(null);
+  const [customer, setCustomer] = useState<PoolProject | null>(null);
   const [loading, setLoading] = useState(!!customerId);
   const { toast } = useToast();
   
@@ -32,7 +33,7 @@ const PoolBuilder = () => {
     }
   }, [customerId]);
   
-  const fetchCustomerData = async (id) => {
+  const fetchCustomerData = async (id: string) => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -44,7 +45,7 @@ const PoolBuilder = () => {
       if (error) throw error;
       
       if (data) {
-        setCustomer(data);
+        setCustomer(data as PoolProject);
       }
     } catch (error) {
       console.error("Error fetching customer:", error);
