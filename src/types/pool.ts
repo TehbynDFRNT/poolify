@@ -20,6 +20,7 @@ export interface Pool {
   salt_volume_bags_fixed?: number;
   waterline_l_m?: number;
   volume_liters?: number;
+  color?: string;
 }
 
 // Add the pool ranges constant
@@ -28,6 +29,15 @@ export const POOL_RANGES = [
   "Fibreglass",
   "Concrete",
   "Other"
+] as const;
+
+// Define the pool colors
+export const POOL_COLORS = [
+  "Silver Mist",
+  "Ocean Blue",
+  "Sky Blue",
+  "Horizon",
+  "Twilight"
 ] as const;
 
 // Define the schema for form validation
@@ -49,6 +59,7 @@ export const poolSchema = z.object({
   buy_price_inc_gst: z.number().nullable(),
   pool_type_id: z.string().optional(),
   default_filtration_package_id: z.string().optional(),
+  color: z.string().optional(),
 });
 
 // Export the type for the form values

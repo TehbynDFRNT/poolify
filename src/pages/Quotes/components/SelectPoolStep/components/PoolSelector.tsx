@@ -15,6 +15,18 @@ export const PoolSelector = ({
   selectedPoolId, 
   onSelectPool 
 }: PoolSelectorProps) => {
+  // Helper to get color display class
+  const getColorClass = (color?: string) => {
+    switch(color) {
+      case "Silver Mist": return "bg-gray-300";
+      case "Ocean Blue": return "bg-blue-600";
+      case "Sky Blue": return "bg-blue-400";
+      case "Horizon": return "bg-gray-800";
+      case "Twilight": return "bg-gray-700";
+      default: return "";
+    }
+  };
+
   return (
     <div className="space-y-2">
       <Label htmlFor="pool-select">Select a Pool Model</Label>
@@ -40,7 +52,12 @@ export const PoolSelector = ({
                   <div className="px-2 text-sm font-medium text-gray-500">{range}</div>
                   {poolsInRange.map((pool) => (
                     <SelectItem key={pool.id} value={pool.id}>
-                      {pool.name} ({pool.length}m × {pool.width}m)
+                      <div className="flex items-center gap-2">
+                        {pool.color && (
+                          <span className={`h-3 w-3 rounded-full ${getColorClass(pool.color)}`}></span>
+                        )}
+                        {pool.name} ({pool.length}m × {pool.width}m)
+                      </div>
                     </SelectItem>
                   ))}
                 </div>

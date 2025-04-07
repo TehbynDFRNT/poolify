@@ -7,6 +7,18 @@ interface PoolDetailsProps {
 }
 
 export const PoolDetails = ({ pool }: PoolDetailsProps) => {
+  // Helper to get color display class
+  const getColorClass = (color?: string) => {
+    switch(color) {
+      case "Silver Mist": return "bg-gray-300";
+      case "Ocean Blue": return "bg-blue-600";
+      case "Sky Blue": return "bg-blue-400";
+      case "Horizon": return "bg-gray-800";
+      case "Twilight": return "bg-gray-700";
+      default: return "bg-gray-300";
+    }
+  };
+
   return (
     <Card>
       <CardContent className="pt-6">
@@ -36,6 +48,15 @@ export const PoolDetails = ({ pool }: PoolDetailsProps) => {
             <dt className="text-sm font-medium text-gray-500">Weight</dt>
             <dd className="mt-1 text-sm">{pool.weight_kg ? `${pool.weight_kg} kg` : 'N/A'}</dd>
           </div>
+          {pool.color && (
+            <div>
+              <dt className="text-sm font-medium text-gray-500">Color</dt>
+              <dd className="mt-1 text-sm flex items-center gap-2">
+                <span className={`inline-block h-4 w-4 rounded-full ${getColorClass(pool.color)}`}></span>
+                {pool.color}
+              </dd>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
