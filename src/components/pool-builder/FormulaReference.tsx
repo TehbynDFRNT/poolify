@@ -37,109 +37,17 @@ export const FormulaReference: React.FC = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-2">
-              {/* Total Cost Per Selection Calculation */}
               <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Selection Cost Formula</h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    The cost for a single paving selection is calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalSelectionCost = meters × (paverCost + wastageCost + marginCost + laborCostPerMeter + concreteCostPerMeter)
-                  </div>
-                  <p className="text-muted-foreground mt-2">Where:</p>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    <li><span className="font-medium">meters</span>: Area in square meters</li>
-                    <li><span className="font-medium">paverCost</span>: Base cost of the paver material per meter</li>
-                    <li><span className="font-medium">wastageCost</span>: Cost of waste material per meter</li>
-                    <li><span className="font-medium">marginCost</span>: Profit margin per meter</li>
-                    <li><span className="font-medium">laborCostPerMeter</span>: Sum of all labor costs per meter</li>
-                    <li><span className="font-medium">concreteCostPerMeter</span>: Sum of concrete material costs per meter</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Material Costs Calculation */}
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Material Cost Formula</h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    Material costs are calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalMaterialCost = meters × (paverCost + wastageCost)
-                  </div>
-                </div>
-              </div>
-
-              {/* Labor Costs Calculation */}
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">
-                  <div className="flex items-center gap-2">
-                    <HardHat className="h-4 w-4" />
-                    Labor Cost Formula
-                  </div>
-                </h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    Labor costs are calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalLaborCost = meters × (sum of all labor costs from database)
-                  </div>
-                  <p className="text-muted-foreground mt-2">
-                    Where labor costs include both the base labor cost and the labor margin.
-                  </p>
-                </div>
-              </div>
-
-              {/* Concrete Costs Calculation */}
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">
-                  <div className="flex items-center gap-2">
-                    <Truck className="h-4 w-4" />
-                    Concrete Cost Formula
-                  </div>
-                </h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    Concrete costs are calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalConcreteCost = meters × (concrete_cost + dust_cost)
-                  </div>
-                </div>
-              </div>
-
-              {/* Total Margin Calculation */}
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Total Margin Formula</h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    The total margin across all selections is calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalMargin = sum(selections.map(selection =&gt; selection.meters × (selection.marginCost + sum(laborMargins))))
-                  </div>
-                  <p className="text-muted-foreground mt-2">Where:</p>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    <li><span className="font-medium">selection.marginCost</span>: Profit margin per meter for materials</li>
-                    <li><span className="font-medium">laborMargins</span>: Sum of all labor margin costs per meter from the database</li>
-                  </ul>
-                </div>
-              </div>
-
-              {/* Total Cost Calculation */}
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Total Cost Formula</h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    The total cost across all paving selections is calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalCost = sum(calculateSelectionCost(selection) for each selection)
-                  </div>
-                </div>
+                <h3 className="font-medium text-base mb-2">Paving Calculations Placeholder</h3>
+                <p className="text-muted-foreground">
+                  This section will contain detailed formulas for paving calculations, including:
+                </p>
+                <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
+                  <li>Material cost calculations</li>
+                  <li>Labor cost calculations</li>
+                  <li>Margin calculations</li>
+                  <li>Total cost formulas</li>
+                </ul>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -153,21 +61,16 @@ export const FormulaReference: React.FC = () => {
             </AccordionTrigger>
             <AccordionContent className="space-y-6 pt-2">
               <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Extra Concreting Cost Formula</h3>
-                <div className="text-sm space-y-2">
-                  <p className="text-muted-foreground">
-                    Extra concreting cost is calculated as:
-                  </p>
-                  <div className="bg-slate-50 p-3 rounded-md border font-mono text-sm">
-                    totalCost = meterage × (price + margin)
-                  </div>
-                  <p className="text-muted-foreground mt-2">Where:</p>
-                  <ul className="list-disc pl-6 space-y-1 text-muted-foreground">
-                    <li><span className="font-medium">meterage</span>: Area in square meters</li>
-                    <li><span className="font-medium">price</span>: Base price per square meter</li>
-                    <li><span className="font-medium">margin</span>: Profit margin per square meter</li>
-                  </ul>
-                </div>
+                <h3 className="font-medium text-base mb-2">Concrete Calculations Placeholder</h3>
+                <p className="text-muted-foreground">
+                  This section will contain detailed formulas for concrete calculations, including:
+                </p>
+                <ul className="list-disc pl-6 mt-2 space-y-1 text-muted-foreground">
+                  <li>Concrete volume calculations</li>
+                  <li>Labor cost formulas</li>
+                  <li>Material cost formulas</li>
+                  <li>Total pricing formulas</li>
+                </ul>
               </div>
             </AccordionContent>
           </AccordionItem>
