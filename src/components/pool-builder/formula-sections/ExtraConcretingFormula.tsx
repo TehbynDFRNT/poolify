@@ -3,8 +3,11 @@ import React from "react";
 import { Shovel } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useFormulaCalculations } from "@/hooks/calculations/useFormulaCalculations";
 
 export const ExtraConcretingFormula: React.FC = () => {
+  const { extraConcretingTotals } = useFormulaCalculations();
+  
   return (
     <AccordionItem value="extra-concreting">
       <AccordionTrigger className="text-md font-semibold">
@@ -24,65 +27,32 @@ export const ExtraConcretingFormula: React.FC = () => {
           </p>
           
           <div className="space-y-6">
-            {/* Cover Crete */}
-            <div className="bg-gray-50 p-4 rounded border">
-              <h4 className="font-medium mb-3">Cover Crete</h4>
-              <div className="grid grid-cols-2 gap-y-2 text-sm mb-3">
-                <span>Base Price:</span>
-                <span className="text-right">{formatCurrency(236)}</span>
+            {extraConcretingTotals.map(item => (
+              <div key={item.id} className="bg-gray-50 p-4 rounded border">
+                <h4 className="font-medium mb-3">{item.type}</h4>
+                <div className="grid grid-cols-2 gap-y-2 text-sm mb-3">
+                  <span>Base Price:</span>
+                  <span className="text-right">{formatCurrency(item.price)}</span>
+                  
+                  <span>Margin:</span>
+                  <span className="text-right">{formatCurrency(item.margin)}</span>
+                  
+                  <span className="font-medium">Total Per m²:</span>
+                  <span className="text-right font-medium">{formatCurrency(item.totalCost)}</span>
+                </div>
                 
-                <span>Margin:</span>
-                <span className="text-right">{formatCurrency(89)}</span>
-                
-                <span className="font-medium">Total Per m²:</span>
-                <span className="text-right font-medium">{formatCurrency(325)}</span>
+                <div className="text-sm pt-2 border-t">
+                  <span className="font-medium">Formula:</span>
+                  <div className="mt-1">
+                    {formatCurrency(item.price)} + {formatCurrency(item.margin)} = {formatCurrency(item.totalCost)}
+                  </div>
+                </div>
               </div>
-              
-              <div className="text-sm pt-2 border-t">
-                <span className="font-medium">Formula:</span>
-                <div className="mt-1">{formatCurrency(236)} + {formatCurrency(89)} = {formatCurrency(325)}</div>
-              </div>
-            </div>
+            ))}
             
-            {/* Exposed Aggregate */}
-            <div className="bg-gray-50 p-4 rounded border">
-              <h4 className="font-medium mb-3">Exposed Aggregate</h4>
-              <div className="grid grid-cols-2 gap-y-2 text-sm mb-3">
-                <span>Base Price:</span>
-                <span className="text-right">{formatCurrency(125)}</span>
-                
-                <span>Margin:</span>
-                <span className="text-right">{formatCurrency(40)}</span>
-                
-                <span className="font-medium">Total Per m²:</span>
-                <span className="text-right font-medium">{formatCurrency(165)}</span>
-              </div>
-              
-              <div className="text-sm pt-2 border-t">
-                <span className="font-medium">Formula:</span>
-                <div className="mt-1">{formatCurrency(125)} + {formatCurrency(40)} = {formatCurrency(165)}</div>
-              </div>
-            </div>
-            
-            {/* Standard */}
-            <div className="bg-gray-50 p-4 rounded border">
-              <h4 className="font-medium mb-3">Standard</h4>
-              <div className="grid grid-cols-2 gap-y-2 text-sm mb-3">
-                <span>Base Price:</span>
-                <span className="text-right">{formatCurrency(93)}</span>
-                
-                <span>Margin:</span>
-                <span className="text-right">{formatCurrency(42)}</span>
-                
-                <span className="font-medium">Total Per m²:</span>
-                <span className="text-right font-medium">{formatCurrency(135)}</span>
-              </div>
-              
-              <div className="text-sm pt-2 border-t">
-                <span className="font-medium">Formula:</span>
-                <div className="mt-1">{formatCurrency(93)} + {formatCurrency(42)} = {formatCurrency(135)}</div>
-              </div>
-            </div>
+            {(!extraConcretingTotals || extraConcretingTotals.length === 0) && (
+              <p className="text-muted-foreground italic">No extra concreting types found in the system.</p>
+            )}
           </div>
         </div>
       </AccordionContent>

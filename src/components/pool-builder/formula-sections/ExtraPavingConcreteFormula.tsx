@@ -2,31 +2,16 @@
 import React from "react";
 import { Layers } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
-import { useExtraPavingCosts } from "@/pages/ConstructionCosts/hooks/useExtraPavingCosts";
-import { useConcreteCosts } from "@/pages/ConstructionCosts/hooks/useConcreteCosts";
-import { useConcreteLabourCosts } from "@/pages/ConstructionCosts/hooks/useConcreteLabourCosts";
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useFormulaCalculations } from "@/hooks/calculations/useFormulaCalculations";
 
 export const ExtraPavingConcreteFormula: React.FC = () => {
-  const { extraPavingCosts, isLoading: isLoadingPaving } = useExtraPavingCosts();
-  const { concreteCosts, isLoading: isLoadingConcrete } = useConcreteCosts();
-  const { concreteLabourCosts, isLoading: isLoadingLabour } = useConcreteLabourCosts();
-  
-  // Calculate the total concrete cost per meter
-  const concreteCostPerMeter = concreteCosts?.[0]?.total_cost || 0;
-  
-  // Calculate the total labour cost with margin per meter
-  const calculateLabourCostWithMargin = () => {
-    if (!concreteLabourCosts?.length) return 0;
-    
-    return concreteLabourCosts.reduce((total, cost) => {
-      return total + cost.cost + (cost.cost * cost.margin / 100);
-    }, 0);
-  };
-  
-  const labourCostWithMargin = calculateLabourCostWithMargin();
-  
-  const isLoading = isLoadingPaving || isLoadingConcrete || isLoadingLabour;
+  const {
+    pavingCategoryTotals,
+    concreteCostPerMeter,
+    labourCostWithMargin,
+    isLoading
+  } = useFormulaCalculations();
 
   return (
     <AccordionItem value="extrapaving-concrete">
@@ -47,41 +32,36 @@ export const ExtraPavingConcreteFormula: React.FC = () => {
             </p>
             
             <div className="space-y-4">
-              {extraPavingCosts?.map(category => {
-                const categoryTotal = category.paver_cost + category.wastage_cost + category.margin_cost;
-                const totalRate = categoryTotal + concreteCostPerMeter + labourCostWithMargin;
-                
-                return (
-                  <div key={category.id} className="bg-gray-50 p-3 rounded border">
-                    <h4 className="font-medium mb-2">{category.category}</h4>
+              {pavingCategoryTotals.map(category => (
+                <div key={category.id} className="bg-gray-50 p-3 rounded border">
+                  <h4 className="font-medium mb-2">{category.category}</h4>
+                  
+                  <div className="grid grid-cols-2 gap-y-1 text-sm">
+                    <span>Paver Cost:</span>
+                    <span className="text-right">{formatCurrency(category.paverCost)}</span>
                     
-                    <div className="grid grid-cols-2 gap-y-1 text-sm">
-                      <span>Paver Cost:</span>
-                      <span className="text-right">{formatCurrency(category.paver_cost)}</span>
-                      
-                      <span>Wastage Cost:</span>
-                      <span className="text-right">{formatCurrency(category.wastage_cost)}</span>
-                      
-                      <span>Margin Cost:</span>
-                      <span className="text-right">{formatCurrency(category.margin_cost)}</span>
-                      
-                      <span className="font-medium">Paving Material Subtotal:</span>
-                      <span className="text-right font-medium">{formatCurrency(categoryTotal)}</span>
-                      
-                      <span>Concrete Material:</span>
-                      <span className="text-right">{formatCurrency(concreteCostPerMeter)}</span>
-                      
-                      <span>Labour with Margin:</span>
-                      <span className="text-right">{formatCurrency(labourCostWithMargin)}</span>
-                      
-                      <span className="font-medium border-t pt-1 mt-1">Total Cost Per Meter:</span>
-                      <span className="text-right font-medium border-t pt-1 mt-1">{formatCurrency(totalRate)}</span>
-                    </div>
+                    <span>Wastage Cost:</span>
+                    <span className="text-right">{formatCurrency(category.wastageCost)}</span>
+                    
+                    <span>Margin Cost:</span>
+                    <span className="text-right">{formatCurrency(category.marginCost)}</span>
+                    
+                    <span className="font-medium">Paving Material Subtotal:</span>
+                    <span className="text-right font-medium">{formatCurrency(category.categoryTotal)}</span>
+                    
+                    <span>Concrete Material:</span>
+                    <span className="text-right">{formatCurrency(concreteCostPerMeter)}</span>
+                    
+                    <span>Labour with Margin:</span>
+                    <span className="text-right">{formatCurrency(labourCostWithMargin)}</span>
+                    
+                    <span className="font-medium border-t pt-1 mt-1">Total Cost Per Meter:</span>
+                    <span className="text-right font-medium border-t pt-1 mt-1">{formatCurrency(category.totalRate)}</span>
                   </div>
-                );
-              })}
+                </div>
+              ))}
               
-              {(!extraPavingCosts || extraPavingCosts.length === 0) && (
+              {(!pavingCategoryTotals || pavingCategoryTotals.length === 0) && (
                 <p className="text-muted-foreground italic">No paving categories found in the system.</p>
               )}
             </div>
