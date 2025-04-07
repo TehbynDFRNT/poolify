@@ -127,8 +127,8 @@ const CustomersList = () => {
             </Button>
           </div>
         </Card>
-      </div>
-    );
+      ))}
+    </div>
   );
 };
 
