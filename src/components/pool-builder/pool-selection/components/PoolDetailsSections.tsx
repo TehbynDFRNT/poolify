@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Pool } from "@/types/pool";
-import { PoolDetailsSection } from "./PoolDetailsSection";
+import { PoolDetailsSection } from "./pool-details/PoolDetailsSection";
 import { Card } from "@/components/ui/card";
 
 interface PoolDetailsSectionsProps {
