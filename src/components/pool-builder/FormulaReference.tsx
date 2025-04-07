@@ -38,21 +38,6 @@ export const FormulaReference: React.FC = () => {
   
   const labourCostWithMargin = calculateLabourCostWithMargin();
   
-  // Calculate total cost per meter for each paving category
-  const calculateTotalForCategory = (categoryId: string) => {
-    const category = extraPavingCosts?.find(cost => cost.id === categoryId);
-    if (!category) return null;
-    
-    const pavingMaterialCost = category.paver_cost + category.wastage_cost + category.margin_cost;
-    const totalCostPerMeter = pavingMaterialCost + concreteCostPerMeter + labourCostWithMargin;
-    
-    return {
-      category: category.category,
-      pavingMaterialCost,
-      totalCostPerMeter
-    };
-  };
-  
   const isLoading = isLoadingPaving || isLoadingConcrete || isLoadingLabour;
 
   return (
@@ -103,27 +88,6 @@ export const FormulaReference: React.FC = () => {
                   Example: If Base Cost is $100 and Margin is 30%, then:<br />
                   Total Cost = $100 + ($100 × 30 / 100) = $100 + $30 = $130
                 </p>
-              </div>
-              
-              <div className="rounded-md border p-4">
-                <h3 className="font-medium text-base mb-2">Complete Extra Paving Formula (Per Meter)</h3>
-                <p className="text-muted-foreground mb-2">
-                  The complete formula for calculating the total cost per meter for extra paving is:
-                </p>
-                <div className="bg-gray-50 p-3 rounded border mb-3">
-                  <p className="font-mono">
-                    Total Cost Per Meter = <br />
-                    &nbsp;&nbsp;Paving Material Cost + <br />
-                    &nbsp;&nbsp;Concrete Material Cost + <br />
-                    &nbsp;&nbsp;Labour Cost with Margin
-                  </p>
-                  <p className="font-mono mt-2">
-                    Where:<br />
-                    &nbsp;&nbsp;Paving Material Cost = Paver Cost + Wastage Cost + Margin Cost<br />
-                    &nbsp;&nbsp;Concrete Material Cost = Concrete Cost + Dust Cost<br />
-                    &nbsp;&nbsp;Labour Cost with Margin = Labour Cost + (Labour Cost × Margin% / 100)
-                  </p>
-                </div>
               </div>
               
               {isLoading ? (
