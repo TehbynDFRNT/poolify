@@ -106,7 +106,7 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
             ) : (
               <div className="space-y-4">
                 <p className="font-medium text-lg">
-                  Option {filtrationPackage.display_order}: {filtrationPackage.name}
+                  {filtrationPackage.name} (Option {filtrationPackage.display_order})
                 </p>
                 
                 <div className="grid grid-cols-2 gap-4">
