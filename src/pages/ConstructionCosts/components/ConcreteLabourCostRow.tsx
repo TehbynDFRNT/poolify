@@ -37,6 +37,9 @@ export const ConcreteLabourCostRow = ({ cost, onUpdate, onDelete }: ConcreteLabo
     setEditValues({});
   };
 
+  // Calculate the total (cost + margin)
+  const totalCost = cost.cost + (cost.cost * cost.margin / 100);
+
   return (
     <TableRow>
       <TableCell>
@@ -73,8 +76,11 @@ export const ConcreteLabourCostRow = ({ cost, onUpdate, onDelete }: ConcreteLabo
             step="0.01"
           />
         ) : (
-          cost.margin
+          `${cost.margin}%`
         )}
+      </TableCell>
+      <TableCell>
+        {formatCurrency(totalCost)}
       </TableCell>
       <TableCell className="w-[150px]">
         {isEditing ? (

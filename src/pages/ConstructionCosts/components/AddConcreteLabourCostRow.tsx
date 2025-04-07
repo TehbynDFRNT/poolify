@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { formatCurrency } from "@/utils/format";
 import { ConcreteLabourCostInsert } from "@/types/concrete-labour-cost";
 
 interface AddConcreteLabourCostRowProps {
@@ -23,6 +24,9 @@ export const AddConcreteLabourCostRow = ({ onAdd, onCancel, displayOrder }: AddC
     if (!newCost.description) return;
     onAdd(newCost as ConcreteLabourCostInsert);
   };
+
+  // Calculate the total cost (cost + margin)
+  const totalCost = (newCost.cost || 0) + ((newCost.cost || 0) * (newCost.margin || 0) / 100);
 
   return (
     <TableRow>
@@ -53,6 +57,9 @@ export const AddConcreteLabourCostRow = ({ onAdd, onCancel, displayOrder }: AddC
           step="0.01"
           placeholder="0"
         />
+      </TableCell>
+      <TableCell>
+        {formatCurrency(totalCost)}
       </TableCell>
       <TableCell className="w-[150px]">
         <div className="flex items-center gap-2">

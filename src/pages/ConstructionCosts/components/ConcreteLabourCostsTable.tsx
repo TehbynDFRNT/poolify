@@ -54,6 +54,7 @@ export const ConcreteLabourCostsTable = () => {
               <TableHead>Description</TableHead>
               <TableHead>Cost</TableHead>
               <TableHead>Margin</TableHead>
+              <TableHead>Total</TableHead>
               <TableHead className="w-[150px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -75,7 +76,7 @@ export const ConcreteLabourCostsTable = () => {
             ))}
             {concreteLabourCosts?.length === 0 && !isAdding && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No concrete labour costs defined. Click "Add New Concrete Labour Cost" to create one.
                 </TableCell>
               </TableRow>
