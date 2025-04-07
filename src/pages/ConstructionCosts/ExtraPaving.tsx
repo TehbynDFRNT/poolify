@@ -1,6 +1,7 @@
+
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Layers, Scissors, Ruler, Truck, Fence, HardHat, Shovel } from "lucide-react";
+import { Layers, Scissors, Ruler, Truck, Fence, HardHat, Shovel, Calculator } from "lucide-react";
 import { ExtraPavingCostsTable } from "./components/ExtraPavingCostsTable";
 import { ConcreteCutsTable } from "./components/ConcreteCutsTable";
 import { ConcreteCostsTable } from "./components/ConcreteCostsTable";
@@ -8,6 +9,7 @@ import { ConcreteLabourCostsTable } from "./components/ConcreteLabourCostsTable"
 import { ConcretePump } from "./components/ConcretePump";
 import { UnderFenceConcreteStripsTable } from "./components/UnderFenceConcreteStripsTable";
 import { ExtraConcretingTable } from "./components/ExtraConcretingTable";
+import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 
 const ExtraPaving = () => {
   return (
@@ -110,6 +112,22 @@ const ExtraPaving = () => {
             </CardHeader>
             <CardContent>
               <ExtraConcretingTable />
+            </CardContent>
+          </Card>
+
+          {/* Formula Reference Section */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Calculator className="h-5 w-5 text-primary" />
+                <CardTitle>Formula Reference</CardTitle>
+              </div>
+              <CardDescription>
+                Documentation of formulas used for paving and concrete calculations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FormulaReference />
             </CardContent>
           </Card>
         </div>
