@@ -1,14 +1,23 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SelectValue, SelectTrigger, SelectItem, SelectContent, Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { usePools } from "@/hooks/usePools";
+import { CheckCircle } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
-const PoolSelectionSection: React.FC = () => {
+interface PoolSelectionSectionProps {
+  customerId?: string | null;
+}
+
+const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId }) => {
   const { data: pools, isLoading, error } = usePools();
-  const [selectedPoolId, setSelectedPoolId] = React.useState("");
+  const [selectedPoolId, setSelectedPoolId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
   // Group pools by range for better organization
   const poolsByRange = React.useMemo(() => {
@@ -22,6 +31,43 @@ const PoolSelectionSection: React.FC = () => {
       return acc;
     }, {} as Record<string, any[]>);
   }, [pools]);
+
+  const handleSavePoolSelection = async () => {
+    if (!customerId || !selectedPoolId) {
+      toast({
+        title: "Selection Required",
+        description: "Please select a pool model first.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      // Update the customer record with the selected pool
+      const { error } = await supabase
+        .from('pool_projects')
+        .update({ pool_id: selectedPoolId })
+        .eq('id', customerId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success!",
+        description: "Pool selection saved successfully",
+      });
+    } catch (error) {
+      console.error("Error saving pool selection:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save pool selection. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -74,13 +120,52 @@ const PoolSelectionSection: React.FC = () => {
 
               {selectedPoolId && (
                 <div className="bg-primary/10 p-4 rounded-md mt-4">
-                  <h3 className="font-medium mb-2">Selected Pool</h3>
-                  <p className="text-sm">
-                    {pools?.find(p => p.id === selectedPoolId)?.name || 'Pool details'}
-                  </p>
-                  <div className="mt-4">
-                    <Button size="sm">Continue with this pool</Button>
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle className="h-5 w-5 text-primary" />
+                    <h3 className="font-medium">Selected Pool</h3>
                   </div>
+                  
+                  <div className="mb-4">
+                    {pools && pools.find(p => p.id === selectedPoolId) && (
+                      <div className="space-y-2">
+                        <p className="font-medium">{pools.find(p => p.id === selectedPoolId)?.name}</p>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                          <div>
+                            <span className="text-muted-foreground">Dimensions: </span>
+                            {pools.find(p => p.id === selectedPoolId)?.length}m × {pools.find(p => p.id === selectedPoolId)?.width}m
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Depth: </span>
+                            {pools.find(p => p.id === selectedPoolId)?.depth_shallow}m - {pools.find(p => p.id === selectedPoolId)?.depth_deep}m
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Volume: </span>
+                            {pools.find(p => p.id === selectedPoolId)?.volume_liters?.toLocaleString()} liters
+                          </div>
+                          <div>
+                            <span className="text-muted-foreground">Range: </span>
+                            {pools.find(p => p.id === selectedPoolId)?.range}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="flex justify-end">
+                    <Button 
+                      onClick={handleSavePoolSelection}
+                      disabled={isSubmitting || !customerId}
+                      size="sm"
+                    >
+                      {isSubmitting ? "Saving..." : "Save Pool Selection"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {!customerId && selectedPoolId && (
+                <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm">
+                  <p>To save this pool selection, please save customer information first.</p>
                 </div>
               )}
             </>

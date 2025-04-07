@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -9,7 +9,11 @@ import OwnerDetailsSection from "./OwnerDetailsSection";
 import PropertyDetailsSection from "./PropertyDetailsSection";
 import ProposalInfoSection from "./ProposalInfoSection";
 
-const CustomerInformationSection: React.FC = () => {
+interface CustomerInformationSectionProps {
+  existingCustomer?: any;
+}
+
+const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({ existingCustomer }) => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,6 +32,21 @@ const CustomerInformationSection: React.FC = () => {
   
   // Proposal Info State
   const [proposalName, setProposalName] = useState("");
+  
+  // Load existing customer data
+  useEffect(() => {
+    if (existingCustomer) {
+      setOwner1(existingCustomer.owner1 || "");
+      setOwner2(existingCustomer.owner2 || "");
+      setPhone(existingCustomer.phone || "");
+      setEmail(existingCustomer.email || "");
+      setHomeAddress(existingCustomer.home_address || "");
+      setSiteAddress(existingCustomer.site_address || "");
+      setInstallationArea(existingCustomer.installation_area || "");
+      setIsResidentHomeowner(existingCustomer.resident_homeowner || true);
+      setProposalName(existingCustomer.proposal_name || "");
+    }
+  }, [existingCustomer]);
   
   // Form validation
   const isFormValid = () => {
@@ -66,18 +85,32 @@ const CustomerInformationSection: React.FC = () => {
         proposal_name: proposalName,
       };
       
-      // Insert data using a raw query which bypasses type checking
-      // This allows us to work with tables not yet in the generated types
-      const { data, error } = await supabase
-        .from('pool_projects')
-        .insert(projectData)
-        .select();
-        
+      let response;
+      
+      if (existingCustomer) {
+        // Update existing customer
+        response = await supabase
+          .from('pool_projects')
+          .update(projectData)
+          .eq('id', existingCustomer.id)
+          .select();
+      } else {
+        // Insert new customer
+        response = await supabase
+          .from('pool_projects')
+          .insert(projectData)
+          .select();
+      }
+      
+      const { data, error } = response;
+      
       if (error) throw error;
       
       toast({
         title: "Success!",
-        description: "Customer information saved successfully.",
+        description: existingCustomer 
+          ? "Customer information updated successfully." 
+          : "Customer information saved successfully.",
       });
       
       console.log("Saved project data:", data);
@@ -87,19 +120,21 @@ const CustomerInformationSection: React.FC = () => {
         localStorage.setItem('currentCustomerId', data[0].id);
       }
       
-      // Reset form after successful submission
-      setOwner1("");
-      setOwner2("");
-      setPhone("");
-      setEmail("");
-      setHomeAddress("");
-      setSiteAddress("");
-      setInstallationArea("");
-      setIsResidentHomeowner(true);
-      setProposalName("");
-      
-      // Navigate to the customers page
-      navigate("/customers");
+      if (!existingCustomer) {
+        // Only reset form if it's a new customer
+        setOwner1("");
+        setOwner2("");
+        setPhone("");
+        setEmail("");
+        setHomeAddress("");
+        setSiteAddress("");
+        setInstallationArea("");
+        setIsResidentHomeowner(true);
+        setProposalName("");
+        
+        // Navigate to the customers page
+        navigate("/customers");
+      }
       
     } catch (error) {
       console.error("Error saving customer information:", error);
@@ -115,7 +150,9 @@ const CustomerInformationSection: React.FC = () => {
   
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold">Customer Information</h2>
+      <h2 className="text-2xl font-bold">
+        {existingCustomer ? "Edit Customer Information" : "Customer Information"}
+      </h2>
       
       <OwnerDetailsSection
         owner1={owner1}
@@ -153,7 +190,9 @@ const CustomerInformationSection: React.FC = () => {
             disabled={isSubmitting}
             className="bg-primary hover:bg-primary-400"
           >
-            {isSubmitting ? "Saving..." : "Save Customer Information"}
+            {isSubmitting ? "Saving..." : existingCustomer 
+              ? "Update Customer Information" 
+              : "Save Customer Information"}
           </Button>
         </div>
       </Card>

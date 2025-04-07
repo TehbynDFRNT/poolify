@@ -41,10 +41,9 @@ const CustomersList = () => {
   };
 
   const handleContinueQuote = (customer) => {
-    // For now, we'll just navigate to the pool builder page.
-    // In a more complex implementation, we could pass the customer ID as a parameter
-    // and load their data in the pool builder.
-    navigate("/pool-builder");
+    // Store the customer ID in localStorage and navigate to the pool builder
+    localStorage.setItem('currentCustomerId', customer.id);
+    navigate(`/pool-builder?customerId=${customer.id}`);
   };
 
   if (loading) {
