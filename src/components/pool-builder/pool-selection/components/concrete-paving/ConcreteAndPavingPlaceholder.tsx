@@ -2,6 +2,7 @@
 import React from "react";
 import { Pool } from "@/types/pool";
 import { Layers } from "lucide-react";
+import { ExtraPavingConcreting } from "./ExtraPavingConcreting";
 
 interface ConcreteAndPavingPlaceholderProps {
   pool: Pool;
@@ -33,14 +34,7 @@ export const ConcreteAndPavingPlaceholder: React.FC<ConcreteAndPavingPlaceholder
         </div>
       </div>
 
-      <div className="bg-slate-50 rounded-lg p-8 border text-center space-y-4">
-        <Layers className="h-16 w-16 text-muted-foreground mx-auto" />
-        <h3 className="text-xl font-medium">Concrete & Paving Configuration</h3>
-        <p className="text-muted-foreground max-w-md mx-auto">
-          This section will allow you to configure concrete and paving options for the selected pool.
-          Coming soon!
-        </p>
-      </div>
+      <ExtraPavingConcreting customerId={customerId} pool={pool} />
     </div>
   );
 };
