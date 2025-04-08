@@ -57,13 +57,7 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
           extra_concreting_total_cost,
           concrete_pump_total_cost,
           under_fence_concrete_strips_cost,
-          concrete_cuts_cost,
-          extra_paving_margin,
-          existing_concrete_paving_margin,
-          extra_concreting_margin,
-          concrete_pump_margin,
-          under_fence_strips_margin,
-          concrete_cuts_margin
+          concrete_cuts_cost
         `)
         .eq('id', customerId)
         .single();
@@ -82,13 +76,13 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
         const underFenceStripsCost = data.under_fence_concrete_strips_cost || 0;
         const concreteCutsCost = data.concrete_cuts_cost || 0;
         
-        // Extract margins (fallback to estimates if not available)
-        const extraPavingMargin = data.extra_paving_margin || (extraPavingCost * 0.15);
-        const existingConcretePavingMargin = data.existing_concrete_paving_margin || (existingConcretePavingCost * 0.15);
-        const extraConcretingMargin = data.extra_concreting_margin || (extraConcretingCost * 0.12);
-        const concretePumpMargin = data.concrete_pump_margin || (concretePumpCost * 0.1);
-        const underFenceStripsMargin = data.under_fence_strips_margin || (underFenceStripsCost * 0.12);
-        const concreteCutsMargin = data.concrete_cuts_margin || (concreteCutsCost * 0.12);
+        // Calculate margins (using a default percentage for each type)
+        const extraPavingMargin = extraPavingCost * 0.15;
+        const existingConcretePavingMargin = existingConcretePavingCost * 0.15;
+        const extraConcretingMargin = extraConcretingCost * 0.12;
+        const concretePumpMargin = concretePumpCost * 0.1;
+        const underFenceStripsMargin = underFenceStripsCost * 0.12;
+        const concreteCutsMargin = concreteCutsCost * 0.12;
         
         // Calculate totals
         const totalCost = 
