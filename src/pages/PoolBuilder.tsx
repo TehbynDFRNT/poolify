@@ -66,7 +66,12 @@ const PoolBuilder = () => {
     try {
       const { data, error } = await supabase
         .from('pool_selections')
-        .select('pool_id, pool:pools(*)')
+        .select(`
+          id,
+          color,
+          pool_id,
+          pool:pool_id(*)
+        `)
         .eq('customer_id', customerId)
         .single();
 
