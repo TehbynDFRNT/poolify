@@ -70,7 +70,18 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
           
           // Safely handle the custom requirements data with proper type checking
           if (data.site_requirements_data && Array.isArray(data.site_requirements_data)) {
-            setCustomRequirements(data.site_requirements_data as CustomRequirement[]);
+            // First convert to unknown, then to the specific type
+            const requirementsData = data.site_requirements_data as unknown;
+            // Validate the shape of each item in the array before setting the state
+            const validRequirements = (requirementsData as any[]).filter(item => 
+              typeof item === 'object' && 
+              item !== null && 
+              'id' in item && 
+              'description' in item && 
+              'price' in item
+            ) as CustomRequirement[];
+            
+            setCustomRequirements(validRequirements);
           }
           
           setNotes(data.site_requirements_notes || "");
