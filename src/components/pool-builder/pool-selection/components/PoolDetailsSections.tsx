@@ -62,6 +62,15 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           title="Crane Information"
           className="border rounded-md shadow-sm"
         />
+        
+        {/* Excavation Section */}
+        <PoolDetailsSection
+          pool={pool}
+          selectedColor={selectedColor}
+          sectionId="excavation"
+          title="Excavation Information"
+          className="border rounded-md shadow-sm"
+        />
       </div>
     </div>
   );

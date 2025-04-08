@@ -6,6 +6,7 @@ import { PoolDimensionsContent } from "./PoolDimensionsContent";
 import { PoolPricingContent } from "./PoolPricingContent";
 import { PoolFiltrationContent } from "./PoolFiltrationContent";
 import { PoolCraneContent } from "./PoolCraneContent";
+import { PoolExcavationContent } from "./PoolExcavationContent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PoolDetailsSectionProps {
@@ -36,6 +37,8 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
         return <PoolFiltrationContent pool={pool} />;
       case "crane":
         return <PoolCraneContent pool={pool} />;
+      case "excavation":
+        return <PoolExcavationContent pool={pool} />;
       default:
         return <p>No details available</p>;
     }
