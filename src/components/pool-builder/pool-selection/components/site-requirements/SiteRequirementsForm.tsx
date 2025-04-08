@@ -5,12 +5,13 @@ import { SiteRequirementsSection } from "./SiteRequirementsSection";
 import { CustomSiteRequirements } from "./CustomSiteRequirements";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2 } from "lucide-react";
+import { Loader2, Calculator } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
+import { SiteRequirementsCostSummary } from "./SiteRequirementsCostSummary";
 
 interface CustomRequirement {
   id: string;
@@ -37,6 +38,9 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
   const [customRequirements, setCustomRequirements] = useState<CustomRequirement[]>([]);
   const [notes, setNotes] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
+  const [craneCost, setCraneCost] = useState<number>(0);
+  const [trafficControlCost, setTrafficControlCost] = useState<number>(0);
+  const [bobcatCost, setBobcatCost] = useState<number>(0);
 
   // Load existing site requirements if any
   useEffect(() => {
@@ -96,6 +100,62 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     fetchExistingRequirements();
   }, [customerId]);
 
+  // Load cost data for selected items
+  useEffect(() => {
+    const fetchCosts = async () => {
+      try {
+        // Fetch crane cost if selected
+        if (craneId && craneId !== 'none') {
+          const { data: craneData } = await supabase
+            .from('crane_costs')
+            .select('price')
+            .eq('id', craneId)
+            .single();
+          
+          if (craneData) {
+            setCraneCost(craneData.price);
+          }
+        } else {
+          setCraneCost(0);
+        }
+        
+        // Fetch traffic control cost if selected
+        if (trafficControlId && trafficControlId !== 'none') {
+          const { data: trafficData } = await supabase
+            .from('traffic_control_costs')
+            .select('price')
+            .eq('id', trafficControlId)
+            .single();
+          
+          if (trafficData) {
+            setTrafficControlCost(trafficData.price);
+          }
+        } else {
+          setTrafficControlCost(0);
+        }
+        
+        // Fetch bobcat cost if selected
+        if (bobcatId && bobcatId !== 'none') {
+          const { data: bobcatData } = await supabase
+            .from('bobcat_costs')
+            .select('price')
+            .eq('id', bobcatId)
+            .single();
+          
+          if (bobcatData) {
+            setBobcatCost(bobcatData.price);
+          }
+        } else {
+          setBobcatCost(0);
+        }
+      } catch (error) {
+        console.error("Error fetching costs:", error);
+      }
+    };
+    
+    fetchCosts();
+  }, [craneId, trafficControlId, bobcatId]);
+
   const handleSaveRequirements = () => {
     onSave({
       craneId,
@@ -128,6 +188,15 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
       return req;
     }));
   };
+
+  // Calculate the total cost of custom requirements
+  const customRequirementsTotal = customRequirements.reduce(
+    (total, req) => total + (req.price || 0), 
+    0
+  );
+
+  // Calculate the grand total
+  const totalCost = craneCost + trafficControlCost + bobcatCost + customRequirementsTotal;
 
   if (isLoading) {
     return (
@@ -183,6 +252,25 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             className="min-h-[100px]"
+          />
+        </CardContent>
+      </Card>
+      
+      {/* Cost Summary Section */}
+      <Card>
+        <CardHeader className="bg-secondary/20">
+          <CardTitle className="text-xl flex items-center">
+            <Calculator className="h-5 w-5 mr-2 text-primary" />
+            Site Requirements Cost Summary
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-4">
+          <SiteRequirementsCostSummary 
+            craneCost={craneCost} 
+            trafficControlCost={trafficControlCost}
+            bobcatCost={bobcatCost}
+            customRequirementsTotal={customRequirementsTotal}
+            totalCost={totalCost}
           />
         </CardContent>
       </Card>
