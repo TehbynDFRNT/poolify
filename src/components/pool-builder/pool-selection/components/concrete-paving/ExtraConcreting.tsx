@@ -4,7 +4,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
+import { SaveButton } from "../SaveButton";
 import { Pool } from "@/types/pool";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -161,20 +161,36 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
   };
 
   return (
-    <Card className="border border-gray-200">
-      <CardHeader className="bg-white pb-0">
-        <h3 className="text-lg font-semibold">Extra Concreting</h3>
-        <p className="text-sm text-muted-foreground">Add extra concrete to your project</p>
+    <Card>
+      <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+        <div>
+          <h3 className="text-xl font-semibold">Extra Concreting</h3>
+          <p className="text-muted-foreground">
+            Add extra concrete to your project
+          </p>
+        </div>
+        
+        {customerId && (
+          <SaveButton 
+            onClick={handleSave}
+            isSubmitting={isSaving}
+            disabled={!selectedType || meterage <= 0}
+            buttonText="Save Details"
+            className="bg-primary"
+          />
+        )}
       </CardHeader>
-      <CardContent className="pt-4 space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
+      
+      <CardContent className="pt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div>
             <Label htmlFor="concrete-type">Concrete Type</Label>
             <Select
               value={selectedType}
               onValueChange={handleTypeChange}
+              disabled={isLoading}
             >
-              <SelectTrigger id="concrete-type">
+              <SelectTrigger id="concrete-type" className="mt-2">
                 <SelectValue placeholder="Select concrete type" />
               </SelectTrigger>
               <SelectContent>
@@ -187,77 +203,84 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
             </Select>
           </div>
           
-          <div className="space-y-2">
+          <div>
             <Label htmlFor="meterage">Meterage (m²)</Label>
             <Input
               id="meterage"
               type="number"
               min="0"
-              step="0.01"
+              step="0.1"
               value={meterage || ""}
               onChange={handleMeterageChange}
-              disabled={!selectedType}
+              placeholder="Enter area in square meters"
+              className="mt-2"
+              disabled={!selectedType || isLoading}
             />
           </div>
         </div>
         
         {selectedType && meterage > 0 && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
-            <h4 className="text-base font-medium mb-2">Cost Summary</h4>
-            <div className="space-y-4">
-              {/* Cost breakdown */}
-              <div className="grid grid-cols-2 gap-y-1.5 text-sm">
-                <span className="text-gray-600">Base Price:</span>
-                <span className="text-right font-medium">
-                  ${getSelectedConcreteType()?.price.toFixed(2)}/m²
-                </span>
-                
-                <span className="text-gray-600">Margin:</span>
-                <span className="text-right font-medium">
-                  ${getSelectedConcreteType()?.margin.toFixed(2)}/m²
-                </span>
-                
-                <span className="text-gray-600 font-medium pt-1 border-t">Rate per m²:</span>
-                <span className="text-right font-medium pt-1 border-t">
-                  ${getPerMeterRate().toFixed(2)}/m²
-                </span>
-                
-                <span className="text-gray-600">Area:</span>
-                <span className="text-right">{meterage} m²</span>
-              </div>
+          <div className="mt-6 bg-gray-50 p-4 rounded-md">
+            <h4 className="font-medium mb-2">Cost Summary</h4>
+            <div className="grid grid-cols-2 gap-y-2">
+              <div>Rate per m²:</div>
+              <div className="text-right">${getPerMeterRate().toFixed(2)}</div>
               
-              {/* Total calculation */}
-              <div className="flex justify-between pt-2 border-t border-gray-200">
-                <span className="font-medium">Total Cost:</span>
-                <span className="font-bold">${totalCost.toFixed(2)}</span>
-              </div>
+              <div>Area:</div>
+              <div className="text-right">{meterage} m²</div>
               
-              <div className="text-xs text-gray-500 mt-1">
-                Calculation: {getSelectedConcreteType()?.label}: ${getPerMeterRate().toFixed(2)} × {meterage} m²
+              <div className="font-medium border-t pt-2 mt-1">Total Cost:</div>
+              <div className="text-right font-medium border-t pt-2 mt-1">${totalCost.toFixed(2)}</div>
+            </div>
+            
+            <div className="mt-4 pt-4 border-t">
+              <h4 className="font-medium mb-2">Rate Breakdown</h4>
+              <div className="grid grid-cols-4 gap-4">
+                {/* Per m² Column */}
+                <div className="col-span-2">
+                  <h5 className="text-sm font-medium mb-2">Per m²</h5>
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                    <div>Base Price:</div>
+                    <div className="text-right">${getSelectedConcreteType()?.price.toFixed(2)}</div>
+                    
+                    <div>Margin:</div>
+                    <div className="text-right">${getSelectedConcreteType()?.margin.toFixed(2)}</div>
+                    
+                    <div className="font-medium">Materials Subtotal:</div>
+                    <div className="text-right font-medium">${getPerMeterRate().toFixed(2)}</div>
+                  </div>
+                </div>
+                
+                {/* Total Column (multiplied by square meters) */}
+                <div className="col-span-2">
+                  <h5 className="text-sm font-medium mb-2">Total ({meterage} m²)</h5>
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                    <div>Base Price:</div>
+                    <div className="text-right">${(getSelectedConcreteType()?.price || 0 * meterage).toFixed(2)}</div>
+                    
+                    <div>Margin:</div>
+                    <div className="text-right">${(getSelectedConcreteType()?.margin || 0 * meterage).toFixed(2)}</div>
+                    
+                    <div className="font-medium">Materials Subtotal:</div>
+                    <div className="text-right font-medium">${totalCost.toFixed(2)}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         )}
         
-        <div className="flex flex-wrap gap-3 pt-2">
-          <Button
-            onClick={handleSave}
-            disabled={isSaving || isLoading || !selectedType || meterage <= 0}
-            className="bg-primary"
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-          
-          {selectedType && (
-            <Button
-              variant="destructive"
+        {selectedType && (
+          <div className="mt-6">
+            <button
               onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isDeleting || isLoading}
             >
               {isDeleting ? "Removing..." : "Remove"}
-            </Button>
-          )}
-        </div>
+            </button>
+          </div>
+        )}
       </CardContent>
       
       {/* Delete Confirmation Dialog */}
