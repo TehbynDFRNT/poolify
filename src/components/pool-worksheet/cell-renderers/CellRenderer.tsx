@@ -8,6 +8,8 @@ import { ConstructionCostsCell } from "./ConstructionCostsCell";
 import { PoolSpecificationCell } from "./PoolSpecificationCell";
 import { TrueCostCell } from "./TrueCostCell";
 import { MarginCell } from "./MarginCell";
+import { WebPriceCell } from "./WebPriceCell";
+import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 
 interface CellRendererProps {
   pool: Pool;
@@ -49,17 +51,35 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
 
   // Handle True Cost column
   if (column === "true_cost") {
-    return <TrueCostCell 
-      poolId={pool.id}
-      poolCost={poolCost}
-      packageInfo={packageInfo}
-      pool={pool}
-    />;
+    const trueCostResult = TrueCostCell({ 
+      poolId: pool.id,
+      poolCost,
+      packageInfo,
+      pool
+    });
+    return trueCostResult.content;
   }
   
   // Handle Margin column
   if (column === "margin_percentage") {
     return <MarginCell poolId={pool.id} />;
+  }
+  
+  // Handle Web Price column
+  if (column === "web_price") {
+    const { marginData } = useMargin(pool.id);
+    const { getTrueCost } = TrueCostCell({ 
+      poolId: pool.id, 
+      poolCost, 
+      packageInfo, 
+      pool 
+    });
+    
+    return <WebPriceCell 
+      poolId={pool.id} 
+      trueCost={getTrueCost()} 
+      marginPercentage={marginData || 0} 
+    />;
   }
   
   // Handle regular pool specification columns

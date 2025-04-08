@@ -1,3 +1,4 @@
+
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define some default fixed costs columns that will be used as fallback
@@ -76,6 +77,12 @@ export const columnGroups: ColumnGroup[] = [
     title: "Margin",
     color: "bg-emerald-100 text-emerald-800",
     columns: ["margin_percentage"] // Column 41
+  },
+  {
+    id: "web_price",
+    title: "Web Price",
+    color: "bg-green-100 text-green-800",
+    columns: ["web_price"] // Column 42
   }
 ];
 
@@ -123,13 +130,16 @@ export const columnLabels: ColumnLabels = {
   "dig_total": "Dig Total",
   
   // Add new Margin column label
-  "margin_percentage": "Margin %"
+  "margin_percentage": "Margin %",
+  
+  // Add new Web Price column label
+  "web_price": "Web Price"
 };
 
 // Default visible column groups - ensure fixed_costs and true_cost are included
 export const defaultVisibleGroups = [
-  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs", "true_cost", "margin"
+  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs", "true_cost", "margin", "web_price"
 ];
 
 // Define essential column groups to include columns 1,2,15,17,19,21,29,40,41,42
-export const essentialGroups = ["identification", "pricing", "filtration", "crane", "excavation", "construction_costs", "true_cost", "margin"];
+export const essentialGroups = ["identification", "pricing", "filtration", "crane", "excavation", "construction_costs", "true_cost", "margin", "web_price"];
