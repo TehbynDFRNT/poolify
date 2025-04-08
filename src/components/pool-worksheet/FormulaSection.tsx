@@ -51,7 +51,7 @@ export function FormulaSection() {
         
         <AccordionItem value="margin">
           <AccordionTrigger className="text-md font-medium">
-            Margin and Web Price
+            Margin and RRP
           </AccordionTrigger>
           <AccordionContent>
             <div className="p-2">
@@ -61,15 +61,15 @@ export function FormulaSection() {
               
               <div className="bg-white p-3 rounded-md border mb-3">
                 <code className="text-sm font-bold">
-                  Web Price = True Cost * (1 + Margin % / 100)
+                  RRP = True Cost * (1 + Margin % / 100)
                 </code>
               </div>
               
               <div className="text-sm text-muted-foreground">
                 <p className="mb-1">For example:</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>If True Cost is $30,000 and Margin is 25%, then Web Price is $37,500</li>
-                  <li>If True Cost is $30,000 and Margin is 30%, then Web Price is $39,000</li>
+                  <li>If True Cost is $30,000 and Margin is 25%, then RRP is $37,500</li>
+                  <li>If True Cost is $30,000 and Margin is 30%, then RRP is $39,000</li>
                 </ul>
               </div>
             </div>
