@@ -8,68 +8,36 @@ interface IndividualCostsCellProps {
   column: string;
 }
 
-export const IndividualCostsCell = ({ poolId, column }: IndividualCostsCellProps) => {
-  // Query pool individual costs data for the specified pool
-  const { data, isLoading } = useQuery({
-    queryKey: ["pool-individual-costs", poolId],
+export const IndividualCostsCell = ({ poolId }: IndividualCostsCellProps) => {
+  // Fetch the pool costs data for this pool
+  const { data: poolCosts, isLoading } = useQuery({
+    queryKey: ["pool-costs", poolId],
     queryFn: async () => {
-      // Get the individual costs for this pool model and range
-      const { data: pool } = await supabase
-        .from("pool_specifications")
-        .select("name, range")
-        .eq("id", poolId)
-        .single();
-
-      if (!pool) return 0;
-
-      console.log(`Fetching individual costs for pool: ${pool.name}, range: ${pool.range}`);
-      
-      // Find the individual cost for this pool's range and name
-      const { data: costs, error } = await supabase
-        .from("pool_individual_costs")
+      const { data, error } = await supabase
+        .from("pool_costs")
         .select("*")
-        .eq("range", pool.range)
-        .eq("name", pool.name);
+        .eq("pool_id", poolId)
+        .single();
       
-      if (error) {
-        console.error("Error fetching individual costs:", error);
-        return 0;
-      }
-
-      console.log("Found costs:", costs);
-      
-      // If cost found, return it, otherwise return 0
-      if (costs && costs.length > 0) {
-        return costs[0].cost_value;
-      } else {
-        // Try without exact name match - just use range and check if name includes the pool name
-        // This is helpful when pool name in specifications might be slightly different from the name in costs
-        const { data: alternativeCosts, error: altError } = await supabase
-          .from("pool_individual_costs")
-          .select("*")
-          .eq("range", pool.range);
-          
-        if (altError) {
-          console.error("Error fetching alternative costs:", altError);
-          return 0;
-        }
-        
-        console.log("Alternative costs by range:", alternativeCosts);
-        
-        // Find a match where the cost name includes the pool name (case insensitive)
-        const matchingCost = alternativeCosts?.find(cost => 
-          cost.name.toLowerCase().includes(pool.name.toLowerCase()) || 
-          pool.name.toLowerCase().includes(cost.name.toLowerCase())
-        );
-        
-        return matchingCost ? matchingCost.cost_value : 0;
-      }
+      if (error) return null;
+      return data;
     },
-    enabled: !!poolId && column === "individual_costs"
+    enabled: !!poolId,
   });
 
-  if (isLoading) return <span className="text-gray-400">Loading...</span>;
-
-  // Format and display just the dollar value
-  return <>{formatCurrency(data || 0)}</>;
+  if (isLoading) return <span className="text-muted-foreground">Loading...</span>;
+  
+  if (!poolCosts) return <span className="text-muted-foreground">-</span>;
+  
+  // Calculate the total of all individual costs
+  const total = 
+    (poolCosts.pea_gravel || 0) + 
+    (poolCosts.install_fee || 0) + 
+    (poolCosts.trucked_water || 0) + 
+    (poolCosts.salt_bags || 0) + 
+    (poolCosts.coping_supply || 0) + 
+    (poolCosts.beam || 0) + 
+    (poolCosts.coping_lay || 0);
+  
+  return <span>{formatCurrency(total)}</span>;
 };
