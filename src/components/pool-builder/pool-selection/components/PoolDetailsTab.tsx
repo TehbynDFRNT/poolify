@@ -6,6 +6,8 @@ import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/h
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency } from "@/utils/format";
 import { calculatePackagePrice } from "@/utils/package-calculations";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PoolDetailsTabProps {
   pool: Pool;
@@ -25,6 +27,28 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
   // Get detailed filtration package data if needed
   const { filtrationPackage } = tabId === "filtration" ? 
     useFiltrationPackage(pool) : { filtrationPackage: null };
+
+  // Fetch pool type information if we're on the details tab
+  const { data: poolType } = useQuery({
+    queryKey: ['pool-type', pool.pool_type_id],
+    queryFn: async () => {
+      if (!pool.pool_type_id) return null;
+      
+      const { data, error } = await supabase
+        .from('pool_types')
+        .select('name')
+        .eq('id', pool.pool_type_id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching pool type:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!pool.pool_type_id && tabId === "details",
+  });
 
   // Helper to get color class for preview
   const getColorClass = (color: string) => {
@@ -48,7 +72,9 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
             </div>
             <div>
               <span className="text-muted-foreground">Pool Type:</span>
-              <p className="font-medium">{pool.pool_type_id || "Standard"}</p>
+              <p className="font-medium">
+                {poolType ? poolType.name : (pool.pool_type_id ? "Loading..." : "Standard")}
+              </p>
             </div>
             <div>
               <span className="text-muted-foreground">Weight:</span>

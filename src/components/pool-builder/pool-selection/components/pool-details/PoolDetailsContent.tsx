@@ -1,6 +1,8 @@
 
 import React from "react";
 import { Pool } from "@/types/pool";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PoolDetailsContentProps {
   pool: Pool;
@@ -11,6 +13,28 @@ export const PoolDetailsContent: React.FC<PoolDetailsContentProps> = ({
   pool, 
   selectedColor 
 }) => {
+  // Fetch pool type information
+  const { data: poolType } = useQuery({
+    queryKey: ['pool-type', pool.pool_type_id],
+    queryFn: async () => {
+      if (!pool.pool_type_id) return null;
+      
+      const { data, error } = await supabase
+        .from('pool_types')
+        .select('name')
+        .eq('id', pool.pool_type_id)
+        .single();
+        
+      if (error) {
+        console.error('Error fetching pool type:', error);
+        return null;
+      }
+      
+      return data;
+    },
+    enabled: !!pool.pool_type_id,
+  });
+
   // Helper to get color class for preview
   const getColorClass = (color: string) => {
     switch(color) {
@@ -29,7 +53,9 @@ export const PoolDetailsContent: React.FC<PoolDetailsContentProps> = ({
       </div>
       <div>
         <span className="text-muted-foreground">Pool Type:</span>
-        <p className="font-medium">{pool.pool_type_id || "Standard"}</p>
+        <p className="font-medium">
+          {poolType ? poolType.name : (pool.pool_type_id ? "Loading..." : "Standard")}
+        </p>
       </div>
       <div>
         <span className="text-muted-foreground">Weight:</span>
