@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link, useSearchParams } from "react-router-dom";
@@ -64,7 +63,29 @@ const PoolBuilder = () => {
 
   const fetchPoolData = async (customerId: string) => {
     try {
-      const { data, error } = await supabase
+      // First try to get directly from pool_projects table
+      const { data: projectData, error: projectError } = await supabase
+        .from('pool_projects')
+        .select(`
+          pool_specification_id,
+          pool_color,
+          pool_spec:pool_specification_id(*)
+        `)
+        .eq('id', customerId)
+        .single();
+
+      if (projectError) {
+        console.error("Error fetching pool from pool_projects:", projectError);
+        return;
+      }
+      
+      if (projectData && projectData.pool_spec) {
+        setSelectedPool(projectData.pool_spec as Pool);
+        return;
+      }
+
+      // As a fallback, try the pool_selections table
+      const { data: selectionData, error: selectionError } = await supabase
         .from('pool_selections')
         .select(`
           id,
@@ -75,15 +96,16 @@ const PoolBuilder = () => {
         .eq('customer_id', customerId)
         .single();
 
-      if (error) {
-        if (error.code !== 'PGRST116') { // Not found error
-          console.error("Error fetching pool selection:", error);
+      if (selectionError) {
+        // Not found error is expected if no selection exists
+        if (selectionError.code !== 'PGRST116') {
+          console.error("Error fetching pool selection:", selectionError);
         }
         return;
       }
       
-      if (data && data.pool) {
-        setSelectedPool(data.pool as Pool);
+      if (selectionData && selectionData.pool) {
+        setSelectedPool(selectionData.pool as Pool);
       }
     } catch (error) {
       console.error("Error fetching pool data:", error);
