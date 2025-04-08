@@ -1,5 +1,5 @@
 
-import React from "react";
+import * as React from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
