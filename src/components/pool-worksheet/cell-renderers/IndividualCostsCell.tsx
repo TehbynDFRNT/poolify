@@ -22,15 +22,48 @@ export const IndividualCostsCell = ({ poolId, column }: IndividualCostsCellProps
 
       if (!pool) return 0;
 
+      console.log(`Fetching individual costs for pool: ${pool.name}, range: ${pool.range}`);
+      
       // Find the individual cost for this pool's range and name
-      const { data: costs } = await supabase
+      const { data: costs, error } = await supabase
         .from("pool_individual_costs")
-        .select("cost_value")
+        .select("*")
         .eq("range", pool.range)
         .eq("name", pool.name);
+      
+      if (error) {
+        console.error("Error fetching individual costs:", error);
+        return 0;
+      }
 
+      console.log("Found costs:", costs);
+      
       // If cost found, return it, otherwise return 0
-      return costs && costs.length > 0 ? costs[0].cost_value : 0;
+      if (costs && costs.length > 0) {
+        return costs[0].cost_value;
+      } else {
+        // Try without exact name match - just use range and check if name includes the pool name
+        // This is helpful when pool name in specifications might be slightly different from the name in costs
+        const { data: alternativeCosts, error: altError } = await supabase
+          .from("pool_individual_costs")
+          .select("*")
+          .eq("range", pool.range);
+          
+        if (altError) {
+          console.error("Error fetching alternative costs:", altError);
+          return 0;
+        }
+        
+        console.log("Alternative costs by range:", alternativeCosts);
+        
+        // Find a match where the cost name includes the pool name (case insensitive)
+        const matchingCost = alternativeCosts?.find(cost => 
+          cost.name.toLowerCase().includes(pool.name.toLowerCase()) || 
+          pool.name.toLowerCase().includes(cost.name.toLowerCase())
+        );
+        
+        return matchingCost ? matchingCost.cost_value : 0;
+      }
     },
     enabled: !!poolId && column === "individual_costs"
   });
