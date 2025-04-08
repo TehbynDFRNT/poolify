@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link, useSearchParams } from "react-router-dom";
@@ -8,7 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Card } from "@/components/ui/card";
-import { Waves, Calculator, Users, CheckSquare, ListFilter, User, MapPin } from "lucide-react";
+import { Waves, Calculator, Users, CheckSquare, ListFilter, User, MapPin, Layers } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
@@ -18,6 +19,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Pool, PoolProject } from "@/types/pool";
 import { SiteRequirementsPlaceholder } from "@/components/pool-builder/pool-selection/components/site-requirements/SiteRequirementsPlaceholder";
+import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-selection/components/concrete-paving/ConcreteAndPavingPlaceholder";
 
 const PoolBuilder = () => {
   const [searchParams] = useSearchParams();
@@ -186,6 +188,10 @@ const PoolBuilder = () => {
                 <MapPin className="h-4 w-4" />
                 Site Requirements
               </TabsTrigger>
+              <TabsTrigger value="concrete-paving" className="flex items-center gap-2">
+                <Layers className="h-4 w-4" />
+                Concrete & Paving
+              </TabsTrigger>
               <TabsTrigger value="formula-reference" className="flex items-center gap-2">
                 <Calculator className="h-4 w-4" />
                 Formula Reference
@@ -211,6 +217,21 @@ const PoolBuilder = () => {
                     <h3 className="text-lg font-medium">Please Select a Pool First</h3>
                     <p className="text-muted-foreground max-w-md mx-auto">
                       Site requirements are specific to the pool model. Please select a pool in the Pool Selection tab to view site requirements.
+                    </p>
+                  </div>
+                )}
+              </Card>
+            </TabsContent>
+            <TabsContent value="concrete-paving">
+              <Card className="p-6">
+                {selectedPool ? (
+                  <ConcreteAndPavingPlaceholder pool={selectedPool} customerId={customerId} />
+                ) : (
+                  <div className="bg-slate-50 rounded-lg p-6 border text-center space-y-3">
+                    <Layers className="h-12 w-12 text-muted-foreground mx-auto" />
+                    <h3 className="text-lg font-medium">Please Select a Pool First</h3>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Concrete and paving options are specific to the pool model. Please select a pool in the Pool Selection tab to view options.
                     </p>
                   </div>
                 )}
