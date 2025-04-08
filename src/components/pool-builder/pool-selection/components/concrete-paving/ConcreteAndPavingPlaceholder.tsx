@@ -2,8 +2,6 @@
 import React from "react";
 import { Pool } from "@/types/pool";
 import { ExtraPavingConcreting } from "./ExtraPavingConcreting";
-import { PavingOnExistingConcrete } from "./PavingOnExistingConcrete";
-import { ExtraConcreting } from "./ExtraConcreting";
 
 interface ConcreteAndPavingPlaceholderProps {
   pool: Pool;
@@ -25,8 +23,6 @@ export const ConcreteAndPavingPlaceholder: React.FC<ConcreteAndPavingPlaceholder
   return (
     <div className="space-y-6">
       <ExtraPavingConcreting pool={pool} customerId={customerId} />
-      <PavingOnExistingConcrete pool={pool} customerId={customerId} />
-      <ExtraConcreting pool={pool} customerId={customerId} />
     </div>
   );
 };

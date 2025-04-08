@@ -5,13 +5,14 @@ export interface UnderFenceConcreteStrip {
   cost: number;
   margin: number;
   display_order: number;
-  created_at: string;
+  created_at?: string;
   updated_at?: string;
 }
 
-export interface UnderFenceConcreteStripInsert {
+export interface UnderFenceConcreteStripSelection {
+  id: string;
   type: string;
   cost: number;
   margin: number;
-  display_order: number;
+  quantity: number;
 }

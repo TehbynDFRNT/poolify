@@ -16,9 +16,14 @@ interface UnderFenceConcreteStripsProps {
   customerId: string;
 }
 
+interface ConcreteStripData {
+  id: string;
+  length: number;
+}
+
 export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> = ({ pool, customerId }) => {
   const [stripTypes, setStripTypes] = useState<any[]>([]);
-  const [selectedStrips, setSelectedStrips] = useState<{id: string, length: number}[]>([]);
+  const [selectedStrips, setSelectedStrips] = useState<ConcreteStripData[]>([]);
   const [totalCost, setTotalCost] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -64,7 +69,9 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
         try {
           // Data is stored as a JSON array
           if (data.under_fence_concrete_strips_data && Array.isArray(data.under_fence_concrete_strips_data)) {
-            setSelectedStrips(data.under_fence_concrete_strips_data);
+            // Ensure we have the right type
+            const stripsData = data.under_fence_concrete_strips_data as ConcreteStripData[];
+            setSelectedStrips(stripsData);
           } else {
             setSelectedStrips([]);
           }
