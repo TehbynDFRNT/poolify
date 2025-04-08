@@ -56,21 +56,24 @@ export function FormulaSection() {
           <AccordionContent>
             <div className="p-2">
               <p className="mb-2">
-                The Margin % is editable and determines the markup on the True Cost.
+                The Margin % is editable and determines the profit portion of the RRP.
               </p>
               
               <div className="bg-white p-3 rounded-md border mb-3">
                 <code className="text-sm font-bold">
-                  RRP = True Cost * (1 + Margin % / 100)
+                  RRP = True Cost / (1 - Margin % / 100)
                 </code>
               </div>
               
               <div className="text-sm text-muted-foreground">
                 <p className="mb-1">For example:</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li>If True Cost is $30,000 and Margin is 25%, then RRP is $37,500</li>
-                  <li>If True Cost is $30,000 and Margin is 30%, then RRP is $39,000</li>
+                  <li>If True Cost is $30,000 and Margin is 25%, then RRP is $40,000</li>
+                  <li>If True Cost is $30,000 and Margin is 30%, then RRP is $42,857</li>
                 </ul>
+                <p className="mt-2 text-xs">
+                  Note: Margin represents the percentage of the selling price that is profit.
+                </p>
               </div>
             </div>
           </AccordionContent>
