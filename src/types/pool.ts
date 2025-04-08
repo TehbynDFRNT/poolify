@@ -1,3 +1,4 @@
+
 export interface Pool {
   id: string;
   name: string;
@@ -26,6 +27,24 @@ export interface Pool {
   notes?: string;
   created_at: string;
   updated_at: string;
+  
+  // Additional properties from pool_specifications table
+  range?: string;
+  pool_type_id?: string;
+  default_filtration_package_id?: string;
+  weight_kg?: number;
+  volume_liters?: number;
+  waterline_l_m?: number;
+  salt_volume_bags?: number;
+  salt_volume_bags_fixed?: number;
+  minerals_kg_initial?: number;
+  minerals_kg_topup?: number;
+  buy_price_ex_gst?: number;
+  buy_price_inc_gst?: number;
+  color?: string;
+  dig_level?: string;
+  dig_type_id?: string;
+  outline_image_url?: string;
 }
 
 export interface PoolProject {
@@ -57,3 +76,43 @@ export interface PoolSelection {
   color: string;
   created_at: string;
 }
+
+// Add the missing POOL_COLORS constant
+export const POOL_COLORS = [
+  "Silver Mist",
+  "Horizon",
+  "Twilight"
+];
+
+// Add missing POOL_RANGES constant
+export const POOL_RANGES = [
+  "Oasis",
+  "Riviera",
+  "Sanctuary",
+  "Serenity",
+  "Tranquility"
+];
+
+// Export schema and form types used in other parts of the app
+export interface PoolFormValues {
+  name: string;
+  range: string;
+  length: number;
+  width: number;
+  depth_shallow: number;
+  depth_deep: number;
+  waterline_l_m?: number;
+  volume_liters?: number;
+  salt_volume_bags?: number;
+  salt_volume_bags_fixed?: number;
+  weight_kg?: number;
+  minerals_kg_initial?: number;
+  minerals_kg_topup?: number;
+  buy_price_ex_gst?: number;
+  buy_price_inc_gst?: number;
+}
+
+export const poolSchema = {
+  // This is a placeholder. The actual schema would be defined using Zod or another validation library
+  // Projects referencing this likely have their own implementation
+};
