@@ -55,11 +55,11 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
   };
 
   return (
-    <Card className={className}>
-      <CardHeader className="pb-3">
+    <Card className={`overflow-hidden shadow-sm hover:shadow-md transition-shadow ${className}`}>
+      <CardHeader className="bg-secondary/50 pb-3">
         <CardTitle className="text-lg font-semibold">{title}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-4">
         {renderContent()}
       </CardContent>
     </Card>

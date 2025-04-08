@@ -77,7 +77,7 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
       </div>
 
       {/* Pool Selection Card */}
-      <Card>
+      <Card className="mb-6">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Select a Pool Model</CardTitle>
           
@@ -112,20 +112,22 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
               />
 
               {selectedPoolId && selectedPool && (
-                <div className="mt-6 space-y-6">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="mt-6">
+                  <div className="flex items-center gap-2 mb-4 p-3 bg-primary/10 rounded-md">
                     <CheckCircle className="h-5 w-5 text-primary" />
                     <h3 className="font-medium text-lg">Selected Pool: {selectedPool.name}</h3>
                   </div>
                   
-                  <div>
+                  <div className="mb-6">
                     <h3 className="font-medium mb-2">Select Color</h3>
                     <ColorSelector 
                       selectedColor={selectedColor} 
                       onChange={setSelectedColor} 
                     />
                   </div>
-
+                  
+                  {/* Pool Details Section with vertical flow */}
+                  <h3 className="font-medium text-lg mb-4">Pool Information</h3>
                   <PoolDetailsSections 
                     pool={selectedPool}
                     selectedColor={selectedColor}

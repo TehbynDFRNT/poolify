@@ -53,7 +53,7 @@ export const PoolDetailsSections = ({ pool, selectedColor }: PoolDetailsSections
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="flex flex-col gap-4">
       {sections.map((section) => (
         <PoolDetailsSection
           key={section.id}
@@ -61,6 +61,7 @@ export const PoolDetailsSections = ({ pool, selectedColor }: PoolDetailsSections
           selectedColor={selectedColor}
           sectionId={section.id}
           title={section.title}
+          className="w-full"
         />
       ))}
     </div>
