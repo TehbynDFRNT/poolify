@@ -1,82 +1,59 @@
-
-import { z } from "zod";
-
 export interface Pool {
   id: string;
   name: string;
-  range: string;
+  description: string;
   length: number;
   width: number;
   depth_shallow: number;
   depth_deep: number;
-  pool_type_id?: string;
-  default_filtration_package_id?: string;
-  buy_price_ex_gst?: number;
-  buy_price_inc_gst?: number;
-  minerals_kg_initial?: number;
-  minerals_kg_topup?: number;
-  weight_kg?: number;
-  salt_volume_bags?: number;
-  salt_volume_bags_fixed?: number;
-  waterline_l_m?: number;
-  volume_liters?: number;
-  color?: string;
-}
-
-// Add the pool ranges constant
-export const POOL_RANGES = [
-  "Composite",
-  "Fibreglass",
-  "Concrete",
-  "Other"
-] as const;
-
-// Define the pool colors
-export const POOL_COLORS = [
-  "Silver Mist",
-  "Horizon",
-  "Twilight"
-] as const;
-
-// Define a type for pool projects to match the database structure
-export interface PoolProject {
-  id: string;
-  owner1: string;
-  owner2?: string | null;
-  email: string;
-  phone: string;
-  home_address: string;
-  site_address?: string | null;
-  proposal_name: string;
-  installation_area: string;
-  resident_homeowner: boolean;
-  pool_specification_id?: string | null;
-  pool_color?: string | null;
+  volume: number;
+  perimeter: number;
+  surface_area: number;
+  price_base: number;
+  price_excavation: number;
+  price_plumbing: number;
+  price_electrical: number;
+  price_installation: number;
+  price_coping: number;
+  price_equipment: number;
+  price_filtration: number;
+  price_heater: number;
+  price_lights: number;
+  price_cleaning: number;
+  price_chemicals: number;
+  price_winterizing: number;
+  price_warranty: number;
+  notes?: string;
   created_at: string;
   updated_at: string;
 }
 
-// Define the schema for form validation
-export const poolSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  range: z.string().min(1, "Range is required"),
-  length: z.number().min(0, "Length must be positive"),
-  width: z.number().min(0, "Width must be positive"),
-  depth_shallow: z.number().min(0, "Shallow depth must be positive"),
-  depth_deep: z.number().min(0, "Deep depth must be positive"),
-  waterline_l_m: z.number().nullable(),
-  volume_liters: z.number().nullable(),
-  salt_volume_bags: z.number().nullable(),
-  salt_volume_bags_fixed: z.number().nullable(),
-  weight_kg: z.number().nullable(),
-  minerals_kg_initial: z.number().nullable(),
-  minerals_kg_topup: z.number().nullable(),
-  buy_price_ex_gst: z.number().nullable(),
-  buy_price_inc_gst: z.number().nullable(),
-  pool_type_id: z.string().optional(),
-  default_filtration_package_id: z.string().optional(),
-  color: z.string().optional(),
-});
+export interface PoolProject {
+  id: string;
+  owner1: string;
+  owner2?: string;
+  email: string;
+  phone: string;
+  home_address: string;
+  site_address?: string;
+  proposal_name: string;
+  installation_area: string;
+  resident_homeowner: boolean;
+  pool_specification_id?: string;
+  pool_color?: string;
+  crane_id?: string;
+  traffic_control_id?: string;
+  bobcat_id?: string;
+  site_requirements_data?: any[];
+  site_requirements_notes?: string;
+  created_at: string;
+  updated_at: string;
+}
 
-// Export the type for the form values
-export type PoolFormValues = z.infer<typeof poolSchema>;
+export interface PoolSelection {
+  id: string;
+  customer_id: string;
+  pool_id: string;
+  color: string;
+  created_at: string;
+}
