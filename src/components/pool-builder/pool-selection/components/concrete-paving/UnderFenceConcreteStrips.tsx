@@ -1,14 +1,14 @@
 
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
 import { SaveButton } from "../SaveButton";
 import { Pool } from "@/types/pool";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { Fence } from "lucide-react";
+import { Layers } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
 interface UnderFenceConcreteStripsProps {
@@ -18,8 +18,7 @@ interface UnderFenceConcreteStripsProps {
 
 export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> = ({ pool, customerId }) => {
   const [stripTypes, setStripTypes] = useState<any[]>([]);
-  const [selectedStrips, setSelectedStrips] = useState<string[]>([]);
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [selectedStrips, setSelectedStrips] = useState<{id: string, length: number}[]>([]);
   const [totalCost, setTotalCost] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -45,7 +44,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
         setStripTypes(data);
       }
     } catch (error) {
-      console.error("Error fetching under fence concrete strips:", error);
+      console.error("Error fetching under fence concrete strip types:", error);
     }
   };
   
@@ -55,139 +54,87 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
       // Fetch project data
       const { data, error } = await supabase
         .from('pool_projects')
-        .select('site_requirements_data')
+        .select('*')
         .eq('id', customerId)
         .single();
         
       if (error) {
-        console.error("Error fetching existing under fence strips data:", error);
-      } else if (data && data.site_requirements_data) {
-        // Extract under fence strips data from site requirements
-        if (Array.isArray(data.site_requirements_data)) {
-          const underFenceData = data.site_requirements_data.filter(
-            (item: any) => item.type === 'under_fence_strip'
-          );
-          
-          if (underFenceData.length > 0) {
-            const selectedStripsIds: string[] = [];
-            const quantitiesObj: Record<string, number> = {};
-            
-            underFenceData.forEach((item: any) => {
-              if (item.stripId && item.length) {
-                selectedStripsIds.push(item.stripId);
-                quantitiesObj[item.stripId] = item.length;
-              }
-            });
-            
-            setSelectedStrips(selectedStripsIds);
-            setQuantities(quantitiesObj);
-            
-            // Calculate total cost
-            let total = 0;
-            underFenceData.forEach((item: any) => {
-              const stripType = stripTypes.find(type => type.id === item.stripId);
-              if (stripType) {
-                total += (stripType.cost + stripType.margin) * item.length;
-              }
-            });
-            
-            setTotalCost(total);
+        console.error("Error fetching existing strips data:", error);
+      } else if (data) {
+        try {
+          // Data is stored as a JSON array
+          if (data.under_fence_concrete_strips_data && Array.isArray(data.under_fence_concrete_strips_data)) {
+            setSelectedStrips(data.under_fence_concrete_strips_data);
+          } else {
+            setSelectedStrips([]);
           }
+          
+          if (data.under_fence_concrete_strips_cost) {
+            setTotalCost(data.under_fence_concrete_strips_cost);
+          }
+        } catch (parseError) {
+          console.error("Error parsing strips data:", parseError);
         }
       }
     } catch (error) {
-      console.error("Error fetching existing under fence strips data:", error);
+      console.error("Error fetching existing strips data:", error);
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Calculate total cost whenever selected strips or quantities change
+  // Calculate total cost whenever selected strips change
   useEffect(() => {
     let total = 0;
-    selectedStrips.forEach(stripId => {
-      const stripType = stripTypes.find(type => type.id === stripId);
+    selectedStrips.forEach(strip => {
+      const stripType = stripTypes.find(type => type.id === strip.id);
       if (stripType) {
-        total += (stripType.cost + stripType.margin) * (quantities[stripId] || 1);
+        const stripCost = stripType.cost + stripType.margin;
+        total += stripCost * strip.length;
       }
     });
     setTotalCost(total);
-  }, [selectedStrips, quantities, stripTypes]);
+  }, [selectedStrips, stripTypes]);
   
   // Handle strip selection
   const handleStripSelection = (stripId: string, checked: boolean) => {
     if (checked) {
-      setSelectedStrips([...selectedStrips, stripId]);
-      // Initialize quantity to 1 if not already set
-      if (!quantities[stripId]) {
-        setQuantities({...quantities, [stripId]: 1});
+      const exists = selectedStrips.some(strip => strip.id === stripId);
+      if (!exists) {
+        setSelectedStrips([...selectedStrips, { id: stripId, length: 1 }]);
       }
     } else {
-      setSelectedStrips(selectedStrips.filter(id => id !== stripId));
+      setSelectedStrips(selectedStrips.filter(strip => strip.id !== stripId));
     }
   };
   
-  // Handle quantity change
-  const handleQuantityChange = (stripId: string, value: string) => {
-    const quantity = parseFloat(value);
-    setQuantities({
-      ...quantities,
-      [stripId]: isNaN(quantity) || quantity <= 0 ? 1 : quantity
-    });
+  // Handle length change
+  const handleLengthChange = (stripId: string, value: string) => {
+    const length = parseFloat(value);
+    
+    setSelectedStrips(selectedStrips.map(strip => {
+      if (strip.id === stripId) {
+        return { ...strip, length: isNaN(length) || length <= 0 ? 1 : length };
+      }
+      return strip;
+    }));
   };
   
-  // Save under fence concrete strips data
+  // Save strips data
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      // Fetch existing site requirements data
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from('pool_projects')
-        .select('site_requirements_data')
-        .eq('id', customerId)
-        .single();
+        .update({
+          under_fence_concrete_strips_data: selectedStrips,
+          under_fence_concrete_strips_cost: totalCost
+        })
+        .eq('id', customerId);
         
       if (error) throw error;
       
-      // Remove existing under fence strips data
-      let siteRequirementsData = data.site_requirements_data || [];
-      
-      if (Array.isArray(siteRequirementsData)) {
-        siteRequirementsData = siteRequirementsData.filter(
-          (item: any) => item.type !== 'under_fence_strip'
-        );
-        
-        // Add new under fence strips data
-        selectedStrips.forEach(stripId => {
-          const stripType = stripTypes.find(type => type.id === stripId);
-          if (stripType) {
-            const length = quantities[stripId] || 1;
-            const cost = (stripType.cost + stripType.margin) * length;
-            
-            siteRequirementsData.push({
-              type: 'under_fence_strip',
-              stripId,
-              stripType: stripType.type,
-              length,
-              cost
-            });
-          }
-        });
-        
-        // Update the database
-        const { error: updateError } = await supabase
-          .from('pool_projects')
-          .update({
-            site_requirements_data: siteRequirementsData
-          })
-          .eq('id', customerId);
-          
-        if (updateError) throw updateError;
-        
-        toast.success("Under fence concrete strips saved successfully.");
-      } else {
-        toast.error("Site requirements data has unexpected format.");
-      }
+      toast.success("Under fence concrete strips saved successfully.");
     } catch (error) {
       console.error("Error saving under fence concrete strips:", error);
       toast.error("Failed to save under fence concrete strips.");
@@ -201,11 +148,11 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
       <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <Fence className="h-5 w-5 text-primary" />
+            <Layers className="h-5 w-5 text-primary" />
             <h3 className="text-xl font-semibold">Under Fence Concrete Strips</h3>
           </div>
           <p className="text-muted-foreground">
-            Add concrete strips under fences where required
+            Add concrete strips under fences for your project
           </p>
         </div>
         
@@ -227,7 +174,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
               <div className="flex items-center h-5 mt-1">
                 <Checkbox 
                   id={`strip-${stripType.id}`} 
-                  checked={selectedStrips.includes(stripType.id)}
+                  checked={selectedStrips.some(strip => strip.id === stripType.id)}
                   onCheckedChange={(checked) => handleStripSelection(stripType.id, checked === true)}
                   disabled={isLoading}
                 />
@@ -241,7 +188,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                 </p>
               </div>
               
-              {selectedStrips.includes(stripType.id) && (
+              {selectedStrips.some(strip => strip.id === stripType.id) && (
                 <div className="w-24">
                   <Label htmlFor={`length-${stripType.id}`} className="text-sm">Length (m)</Label>
                   <Input
@@ -249,8 +196,8 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                     type="number"
                     min="0.1"
                     step="0.1"
-                    value={quantities[stripType.id] || 1}
-                    onChange={(e) => handleQuantityChange(stripType.id, e.target.value)}
+                    value={selectedStrips.find(strip => strip.id === stripType.id)?.length || 1}
+                    onChange={(e) => handleLengthChange(stripType.id, e.target.value)}
                     className="mt-1 h-8"
                     disabled={isLoading}
                   />
@@ -263,18 +210,17 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
             <div className="mt-6 bg-gray-50 p-4 rounded-md">
               <h4 className="font-medium mb-2">Cost Summary</h4>
               <div className="space-y-2">
-                {selectedStrips.map(stripId => {
-                  const stripType = stripTypes.find(type => type.id === stripId);
+                {selectedStrips.map(selectedStrip => {
+                  const stripType = stripTypes.find(type => type.id === selectedStrip.id);
                   if (!stripType) return null;
                   
-                  const length = quantities[stripId] || 1;
                   const ratePerMeter = stripType.cost + stripType.margin;
-                  const itemTotal = ratePerMeter * length;
+                  const itemTotal = ratePerMeter * selectedStrip.length;
                   
                   return (
-                    <div key={stripId} className="grid grid-cols-3 gap-y-1 text-sm">
+                    <div key={selectedStrip.id} className="grid grid-cols-3 gap-y-1 text-sm">
                       <span>{stripType.type}</span>
-                      <span className="text-right">{length}m × {formatCurrency(ratePerMeter)}</span>
+                      <span className="text-right">{selectedStrip.length}m × {formatCurrency(ratePerMeter)}</span>
                       <span className="text-right">{formatCurrency(itemTotal)}</span>
                     </div>
                   );
@@ -291,7 +237,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
           
           {stripTypes.length === 0 && (
             <div className="text-center py-6 text-muted-foreground">
-              No under fence concrete strip types available
+              No concrete strip types available
             </div>
           )}
         </div>

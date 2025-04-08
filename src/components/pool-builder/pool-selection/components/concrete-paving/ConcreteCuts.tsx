@@ -55,7 +55,7 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
       // Fetch project data
       const { data, error } = await supabase
         .from('pool_projects')
-        .select('concrete_cuts, concrete_cuts_cost')
+        .select('*')
         .eq('id', customerId)
         .single();
         
