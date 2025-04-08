@@ -37,7 +37,7 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
     console.log('Fixed Costs Total:', fixedCostsTotal);
     
     // 3. Filtration Costs
-    const filtrationCost = packageInfo?.price || 0;
+    const filtrationCost = calculateFiltrationCost(packageInfo);
     console.log('Filtration Costs:', filtrationCost);
     
     // 4. Crane Cost
@@ -65,6 +65,30 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
     console.log(`=================================================================`);
       
     return trueCost;
+  };
+  
+  // Calculate filtration cost from package info
+  const calculateFiltrationCost = (packageInfo: any): number => {
+    if (!packageInfo) return 0;
+    
+    let totalCost = 0;
+    
+    // Add costs for main components if they exist
+    if (packageInfo.pump?.price) totalCost += packageInfo.pump.price;
+    if (packageInfo.filter?.price) totalCost += packageInfo.filter.price;
+    if (packageInfo.sanitiser?.price) totalCost += packageInfo.sanitiser.price;
+    if (packageInfo.light?.price) totalCost += packageInfo.light.price;
+    
+    // Add costs for handover kit components if they exist
+    if (packageInfo.handover_kit?.components) {
+      packageInfo.handover_kit.components.forEach((item: any) => {
+        if (item.component?.price && item.quantity) {
+          totalCost += item.component.price * item.quantity;
+        }
+      });
+    }
+    
+    return totalCost;
   };
   
   // Calculate individual costs total
