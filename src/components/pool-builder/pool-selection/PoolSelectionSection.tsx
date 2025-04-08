@@ -9,8 +9,6 @@ import { PoolDetailsSections } from "./components/PoolDetailsSections";
 import { SaveButton } from "./components/SaveButton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { SiteRequirementsPlaceholder } from "./components/site-requirements/SiteRequirementsPlaceholder";
 
 interface PoolSelectionSectionProps {
   customerId?: string | null;
@@ -31,7 +29,6 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
   } = usePoolSelection(customerId);
 
   const [isSubmittingAll, setIsSubmittingAll] = useState(false);
-  const [activeTab, setActiveTab] = useState("pool-info");
 
   // Function to save all sections
   const handleSaveAll = async () => {
@@ -128,27 +125,11 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
                     />
                   </div>
                   
-                  {/* Add tabs for Pool Info and Site Requirements */}
-                  <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
-                    <TabsList className="mb-4">
-                      <TabsTrigger value="pool-info">Pool Information</TabsTrigger>
-                      <TabsTrigger value="site-requirements">Site Requirements</TabsTrigger>
-                    </TabsList>
-                    
-                    <TabsContent value="pool-info">
-                      <PoolDetailsSections 
-                        pool={selectedPool}
-                        selectedColor={selectedColor}
-                      />
-                    </TabsContent>
-                    
-                    <TabsContent value="site-requirements">
-                      <SiteRequirementsPlaceholder 
-                        pool={selectedPool}
-                        customerId={customerId}
-                      />
-                    </TabsContent>
-                  </Tabs>
+                  {/* Pool Details Section with vertical flow */}
+                  <PoolDetailsSections 
+                    pool={selectedPool}
+                    selectedColor={selectedColor}
+                  />
                 </div>
               )}
               
