@@ -1,61 +1,44 @@
+import { ExtraPavingCost } from "@/types/extra-paving";
 
 /**
- * Calculates the dig cost
- * @returns The calculated dig cost
+ * Format a number as currency
+ * @param amount The number to format
+ * @returns The formatted currency string
  */
-export const calculateDigCost = () => {
-  return 0;
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-AU', {
+    style: 'currency',
+    currency: 'AUD'
+  }).format(amount);
 };
 
 /**
- * Calculates the total cost for extra concreting items
- * @param price Base price of the concreting item
- * @param margin Margin amount in dollars to add
- * @returns Total cost with margin added
+ * Calculate total cost for extra paving
+ * @param paverCost Cost of pavers
+ * @param wastageCost Cost of wastage
+ * @param marginCost Cost of margin
+ * @returns Total cost for extra paving
  */
-export const calculateExtraConcretingCost = (price: number, margin: number): number => {
-  return price + margin;
-};
-
-/**
- * Calculates the total material cost for paving
- * @param paverCost Cost of the paver material
- * @param wastageCost Cost for wastage
- * @param marginCost Margin cost
- * @returns Total material cost
- */
-export const calculatePavingMaterialCost = (
-  paverCost: number, 
-  wastageCost: number, 
-  marginCost: number
-): number => {
+export const calculateExtraPavingCost = (paverCost: number, wastageCost: number, marginCost: number) => {
   return paverCost + wastageCost + marginCost;
 };
 
 /**
- * Calculates labour cost with margin
- * @param labourCost Base labour cost
- * @param marginPercent Margin percentage to apply
- * @returns Total labour cost with margin
+ * Calculate cost for extra concreting
+ * @param price Base price per square meter
+ * @param margin Margin per square meter
+ * @returns Total cost per square meter
  */
-export const calculateLabourWithMargin = (
-  labourCost: number, 
-  marginPercent: number
-): number => {
-  return labourCost + (labourCost * marginPercent / 100);
+export const calculateExtraConcretingCost = (price: number, margin: number) => {
+  return price + margin;
 };
 
 /**
- * Calculates total paving rate per meter
- * @param materialCost Total material cost
- * @param labourCost Total labour cost
- * @param concreteCost Concrete material cost (optional)
- * @returns Total rate per meter
+ * Calculate total cost for concrete
+ * @param cost Cost of concrete
+ * @param margin Margin percentage
+ * @returns Total cost for concrete with margin
  */
-export const calculateTotalPavingRate = (
-  materialCost: number, 
-  labourCost: number, 
-  concreteCost: number = 0
-): number => {
-  return materialCost + labourCost + concreteCost;
+export const calculateConcreteCostWithMargin = (cost: number, margin: number) => {
+  return cost + (cost * margin / 100);
 };
