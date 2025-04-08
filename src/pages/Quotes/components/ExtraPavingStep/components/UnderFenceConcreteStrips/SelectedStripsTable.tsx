@@ -24,8 +24,10 @@ export const SelectedStripsTable = ({
         <TableRow>
           <TableHead>Type</TableHead>
           <TableHead>Cost</TableHead>
-          <TableHead>Quantity</TableHead>
+          <TableHead>Margin</TableHead>
           <TableHead>Total</TableHead>
+          <TableHead>Quantity</TableHead>
+          <TableHead>Line Total</TableHead>
           <TableHead className="w-[80px]"></TableHead>
         </TableRow>
       </TableHeader>
@@ -34,6 +36,8 @@ export const SelectedStripsTable = ({
           <TableRow key={strip.id}>
             <TableCell>{strip.type}</TableCell>
             <TableCell>${strip.cost.toFixed(2)}</TableCell>
+            <TableCell>${strip.margin.toFixed(2)}</TableCell>
+            <TableCell>${(strip.cost + strip.margin).toFixed(2)}</TableCell>
             <TableCell>
               <Input 
                 type="number" 
@@ -44,7 +48,7 @@ export const SelectedStripsTable = ({
               />
             </TableCell>
             <TableCell className="font-medium">
-              ${(strip.cost * strip.quantity).toFixed(2)}
+              ${((strip.cost + strip.margin) * strip.quantity).toFixed(2)}
             </TableCell>
             <TableCell>
               <Button 

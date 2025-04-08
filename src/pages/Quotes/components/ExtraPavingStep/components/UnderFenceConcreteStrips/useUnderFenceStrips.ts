@@ -1,25 +1,24 @@
 
-import { useState } from "react";
 import { UnderFenceConcreteStrip } from "@/types/under-fence-concrete-strip";
 import { UnderFenceConcreteStripSelection } from "../../types";
 
 export const useUnderFenceStrips = (
-  initialStrips: UnderFenceConcreteStripSelection[],
+  selectedStrips: UnderFenceConcreteStripSelection[],
   onUpdateStrips: (strips: UnderFenceConcreteStripSelection[]) => void
 ) => {
   // Add a concrete strip with quantity 1
   const handleAddStrip = (strip: UnderFenceConcreteStrip) => {
-    const existingStrip = initialStrips.find(s => s.id === strip.id);
+    const existingStrip = selectedStrips.find(s => s.id === strip.id);
     
     if (existingStrip) {
       // If already exists, update quantity
-      const updatedStrips = initialStrips.map(s => 
+      const updatedStrips = selectedStrips.map(s => 
         s.id === strip.id ? { ...s, quantity: s.quantity + 1 } : s
       );
       onUpdateStrips(updatedStrips);
     } else {
       // Add new strip with quantity 1
-      onUpdateStrips([...initialStrips, { 
+      onUpdateStrips([...selectedStrips, { 
         id: strip.id, 
         type: strip.type, 
         cost: strip.cost,
@@ -33,11 +32,11 @@ export const useUnderFenceStrips = (
   const handleUpdateQuantity = (stripId: string, quantity: number) => {
     if (quantity <= 0) {
       // Remove if quantity is 0 or less
-      const updatedStrips = initialStrips.filter(s => s.id !== stripId);
+      const updatedStrips = selectedStrips.filter(s => s.id !== stripId);
       onUpdateStrips(updatedStrips);
     } else {
       // Update quantity
-      const updatedStrips = initialStrips.map(s => 
+      const updatedStrips = selectedStrips.map(s => 
         s.id === stripId ? { ...s, quantity } : s
       );
       onUpdateStrips(updatedStrips);
@@ -46,14 +45,14 @@ export const useUnderFenceStrips = (
   
   // Remove a concrete strip
   const handleRemoveStrip = (stripId: string) => {
-    const updatedStrips = initialStrips.filter(s => s.id !== stripId);
+    const updatedStrips = selectedStrips.filter(s => s.id !== stripId);
     onUpdateStrips(updatedStrips);
   };
   
   // Calculate total cost
   const calculateTotalCost = () => {
-    return initialStrips.reduce((total, strip) => 
-      total + (strip.cost * strip.quantity), 0
+    return selectedStrips.reduce((total, strip) => 
+      total + ((strip.cost + strip.margin) * strip.quantity), 0
     );
   };
 

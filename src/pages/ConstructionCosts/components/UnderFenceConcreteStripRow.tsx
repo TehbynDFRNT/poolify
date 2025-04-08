@@ -39,6 +39,16 @@ export const UnderFenceConcreteStripRow = ({
     setIsEditing(false);
   };
 
+  // Calculate total (cost + margin)
+  const getTotalCost = () => {
+    if (isEditing) {
+      const cost = parseFloat(editedCost) || 0;
+      const margin = parseFloat(editedMargin) || 0;
+      return cost + margin;
+    }
+    return strip.cost + strip.margin;
+  };
+
   return (
     <TableRow>
       <TableCell>
@@ -72,6 +82,9 @@ export const UnderFenceConcreteStripRow = ({
         ) : (
           formatCurrency(strip.margin)
         )}
+      </TableCell>
+      <TableCell>
+        {formatCurrency(getTotalCost())}
       </TableCell>
       <TableCell className="flex justify-end gap-2">
         {isEditing ? (

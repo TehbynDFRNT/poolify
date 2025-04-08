@@ -67,7 +67,7 @@ export const UnderFenceConcreteStripSelector = ({
   // Calculate total cost
   const calculateTotalCost = () => {
     return selectedStrips.reduce((total, strip) => 
-      total + (strip.cost * strip.quantity), 0
+      total + ((strip.cost + strip.margin) * strip.quantity), 0
     );
   };
 
@@ -102,7 +102,7 @@ export const UnderFenceConcreteStripSelector = ({
                     onClick={() => handleAddStrip(strip)}
                   >
                     <span>{strip.type}</span>
-                    <span className="font-bold">${strip.cost.toFixed(2)}</span>
+                    <span className="font-bold">${(strip.cost + strip.margin).toFixed(2)}</span>
                   </Button>
                 ))}
               </div>
@@ -117,8 +117,10 @@ export const UnderFenceConcreteStripSelector = ({
                     <TableRow>
                       <TableHead>Type</TableHead>
                       <TableHead>Cost</TableHead>
-                      <TableHead>Quantity</TableHead>
+                      <TableHead>Margin</TableHead>
                       <TableHead>Total</TableHead>
+                      <TableHead>Quantity</TableHead>
+                      <TableHead>Line Total</TableHead>
                       <TableHead className="w-[80px]"></TableHead>
                     </TableRow>
                   </TableHeader>
@@ -127,6 +129,8 @@ export const UnderFenceConcreteStripSelector = ({
                       <TableRow key={strip.id}>
                         <TableCell>{strip.type}</TableCell>
                         <TableCell>${strip.cost.toFixed(2)}</TableCell>
+                        <TableCell>${strip.margin.toFixed(2)}</TableCell>
+                        <TableCell>${(strip.cost + strip.margin).toFixed(2)}</TableCell>
                         <TableCell>
                           <Input 
                             type="number" 
@@ -137,7 +141,7 @@ export const UnderFenceConcreteStripSelector = ({
                           />
                         </TableCell>
                         <TableCell className="font-medium">
-                          ${(strip.cost * strip.quantity).toFixed(2)}
+                          ${((strip.cost + strip.margin) * strip.quantity).toFixed(2)}
                         </TableCell>
                         <TableCell>
                           <Button 

@@ -77,6 +77,7 @@ export const UnderFenceConcreteStripsTable = () => {
               <TableHead>Type</TableHead>
               <TableHead>Cost</TableHead>
               <TableHead>Margin</TableHead>
+              <TableHead>Total</TableHead>
               <TableHead className="w-[100px]"></TableHead>
             </TableRow>
           </TableHeader>
@@ -98,7 +99,7 @@ export const UnderFenceConcreteStripsTable = () => {
             ))}
             {underFenceConcreteStrips?.length === 0 && !isAdding && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No under fence concrete strips defined. Click "Add New" to create one.
                 </TableCell>
               </TableRow>

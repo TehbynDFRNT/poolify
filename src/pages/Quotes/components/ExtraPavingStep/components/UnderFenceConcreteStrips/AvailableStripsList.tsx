@@ -7,9 +7,10 @@ interface AvailableStripsListProps {
   onAddStrip: (strip: UnderFenceConcreteStrip) => void;
 }
 
-export const AvailableStripsList = ({ strips, onAddStrip }: AvailableStripsListProps) => {
-  if (!strips || strips.length === 0) return null;
-  
+export const AvailableStripsList = ({ 
+  strips, 
+  onAddStrip 
+}: AvailableStripsListProps) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
       {strips.map(strip => (
@@ -20,9 +21,15 @@ export const AvailableStripsList = ({ strips, onAddStrip }: AvailableStripsListP
           onClick={() => onAddStrip(strip)}
         >
           <span>{strip.type}</span>
-          <span className="font-bold">${strip.cost.toFixed(2)}</span>
+          <span className="font-bold">${(strip.cost + strip.margin).toFixed(2)}</span>
         </Button>
       ))}
+      
+      {strips.length === 0 && (
+        <div className="col-span-3 text-muted-foreground text-center py-4">
+          No concrete strips defined in system
+        </div>
+      )}
     </div>
   );
 };

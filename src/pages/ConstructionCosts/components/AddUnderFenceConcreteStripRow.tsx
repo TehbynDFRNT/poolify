@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
 import type { UnderFenceConcreteStripInsert } from "@/types/under-fence-concrete-strip";
+import { formatCurrency } from "@/utils/format";
 
 interface AddUnderFenceConcreteStripRowProps {
   onAdd: (data: UnderFenceConcreteStripInsert) => void;
@@ -39,6 +40,13 @@ export const AddUnderFenceConcreteStripRow = ({
     setMargin("");
   };
 
+  // Calculate total (cost + margin)
+  const getTotal = () => {
+    const costValue = parseFloat(cost) || 0;
+    const marginValue = parseFloat(margin) || 0;
+    return costValue + marginValue;
+  };
+
   return (
     <TableRow className="bg-muted/50">
       <TableCell>
@@ -63,6 +71,9 @@ export const AddUnderFenceConcreteStripRow = ({
           value={margin}
           onChange={(e) => setMargin(e.target.value)}
         />
+      </TableCell>
+      <TableCell>
+        {(cost || margin) ? formatCurrency(getTotal()) : "-"}
       </TableCell>
       <TableCell className="flex justify-end gap-2">
         <Button
