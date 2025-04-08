@@ -3,6 +3,7 @@ import React from "react";
 import { Pool } from "@/types/pool";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PoolDetailsTab } from "./PoolDetailsTab";
+import { Info, Ruler, Package, DollarSign } from "lucide-react";
 
 interface PoolDetailsSectionsProps {
   pool: Pool;
@@ -19,10 +20,22 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
       
       <Tabs defaultValue="details" className="w-full">
         <TabsList className="grid grid-cols-4 mb-4">
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="dimensions">Dimensions</TabsTrigger>
-          <TabsTrigger value="pricing">Pricing</TabsTrigger>
-          <TabsTrigger value="filtration">Filtration</TabsTrigger>
+          <TabsTrigger value="details" className="flex items-center gap-1">
+            <Info className="h-4 w-4" />
+            <span>Details</span>
+          </TabsTrigger>
+          <TabsTrigger value="dimensions" className="flex items-center gap-1">
+            <Ruler className="h-4 w-4" />
+            <span>Dimensions</span>
+          </TabsTrigger>
+          <TabsTrigger value="pricing" className="flex items-center gap-1">
+            <DollarSign className="h-4 w-4" />
+            <span>Pricing</span>
+          </TabsTrigger>
+          <TabsTrigger value="filtration" className="flex items-center gap-1">
+            <Package className="h-4 w-4" />
+            <span>Filtration</span>
+          </TabsTrigger>
         </TabsList>
         
         <TabsContent value="details">
