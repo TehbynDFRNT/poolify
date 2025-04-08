@@ -14,8 +14,9 @@ import { PoolWorksheetTable } from "@/components/pool-worksheet/PoolWorksheetTab
 import { columnGroups, defaultVisibleGroups, essentialGroups } from "@/components/pool-worksheet/column-config";
 import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
 import { Button } from "@/components/ui/button";
-import { List } from "lucide-react";
+import { List, Plus } from "lucide-react";
 import { FormulaSection } from "@/components/pool-worksheet/FormulaSection";
+import { toast } from "sonner";
 
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
 const ESSENTIAL_COLUMNS_KEY = "poolWorksheet_essentialOnly";
@@ -102,6 +103,15 @@ const PoolWorksheet = () => {
   };
 
   const isLoading = isLoadingPools || isLoadingFixedCosts;
+  
+  // Show a notification that the data has been reset
+  useEffect(() => {
+    toast.info("Pool worksheet data has been reset", {
+      description: "The pool worksheet has been reset to a clean state."
+    });
+  }, []);
+
+  const isDataEmpty = !pools || pools.length === 0;
 
   return (
     <DashboardLayout>
@@ -124,41 +134,60 @@ const PoolWorksheet = () => {
           <div>
             <h1 className="text-3xl font-bold">Pool Worksheet</h1>
             <p className="text-muted-foreground mt-1">
-              A comprehensive breakdown of all pool specifications
+              {isDataEmpty 
+                ? "All pool worksheet data has been reset" 
+                : "A comprehensive breakdown of all pool specifications"}
             </p>
           </div>
           
           <div className="flex gap-2">
-            <Button
-              variant={showEssentialOnly ? "default" : "outline"}
-              size="sm"
-              onClick={toggleEssentialColumnsOnly}
-              className="flex items-center gap-2"
-            >
-              <List size={16} />
-              {showEssentialOnly ? "Essential Columns Only" : "Show All Columns"}
-            </Button>
+            {!isDataEmpty && (
+              <Button
+                variant={showEssentialOnly ? "default" : "outline"}
+                size="sm"
+                onClick={toggleEssentialColumnsOnly}
+                className="flex items-center gap-2"
+              >
+                <List size={16} />
+                {showEssentialOnly ? "Essential Columns Only" : "Show All Columns"}
+              </Button>
+            )}
             
-            <ColumnConfigSheet 
-              visibleGroups={visibleGroups} 
-              setVisibleGroups={handleSetVisibleGroups} 
-              showEssentialOnly={showEssentialOnly}
-              toggleEssentialColumnsOnly={toggleEssentialColumnsOnly}
-            />
+            {!isDataEmpty && (
+              <ColumnConfigSheet 
+                visibleGroups={visibleGroups} 
+                setVisibleGroups={handleSetVisibleGroups} 
+                showEssentialOnly={showEssentialOnly}
+                toggleEssentialColumnsOnly={toggleEssentialColumnsOnly}
+              />
+            )}
           </div>
         </div>
         
-        <PoolWorksheetTable 
-          pools={pools}
-          isLoading={isLoading}
-          error={poolsError}
-          visibleGroups={visibleGroups}
-          setVisibleGroups={handleSetVisibleGroups}
-          showEssentialOnly={showEssentialOnly}
-        />
-        
-        {/* Add Formula Section */}
-        <FormulaSection />
+        {isDataEmpty ? (
+          <div className="border rounded-md p-12 bg-slate-50 text-center">
+            <p className="text-lg mb-4">All pool worksheet data has been reset.</p>
+            <p className="mb-6">You can add new pools from the Pool Specifications page.</p>
+            <Link to="/pool-specifications">
+              <Button className="bg-teal-500 hover:bg-teal-600">
+                <Plus className="mr-2 h-4 w-4" />
+                Go to Pool Specifications
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <>
+            <PoolWorksheetTable 
+              pools={pools}
+              isLoading={isLoading}
+              error={poolsError}
+              visibleGroups={visibleGroups}
+              setVisibleGroups={handleSetVisibleGroups}
+              showEssentialOnly={showEssentialOnly}
+            />
+            <FormulaSection />
+          </>
+        )}
       </div>
     </DashboardLayout>
   );

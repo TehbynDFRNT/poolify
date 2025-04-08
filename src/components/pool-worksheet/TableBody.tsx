@@ -41,7 +41,7 @@ export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: Ta
       <UITableBody>
         <TableRow>
           <TableCell colSpan={getVisibleColumns().length} className="text-center py-4 text-red-500">
-            Error loading pool specifications
+            Error loading pool specifications: {error.message}
           </TableCell>
         </TableRow>
       </UITableBody>
@@ -52,8 +52,12 @@ export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: Ta
     return (
       <UITableBody>
         <TableRow>
-          <TableCell colSpan={getVisibleColumns().length} className="text-center py-4">
-            No pool specifications available
+          <TableCell colSpan={getVisibleColumns().length} className="text-center py-8">
+            <div className="flex flex-col items-center justify-center">
+              <p className="text-lg font-medium text-muted-foreground mb-2">No pool data available</p>
+              <p className="text-sm text-muted-foreground">The data has been reset. Please navigate to Pool Specifications 
+                to add new pool data.</p>
+            </div>
           </TableCell>
         </TableRow>
       </UITableBody>
