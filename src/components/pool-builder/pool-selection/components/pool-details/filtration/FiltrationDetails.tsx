@@ -15,7 +15,8 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Edit2, Check } from "lucide-react";
+import { Edit2, Check, Save } from "lucide-react";
+import { SaveButton } from "../../../components/SaveButton";
 
 interface FiltrationDetailsProps {
   filtrationPackage: PackageWithComponents;
@@ -67,14 +68,13 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
               >
                 Cancel
               </Button>
-              <Button 
-                size="sm" 
+              <SaveButton 
                 onClick={handleUpdatePackage}
-                disabled={updatePoolPackageMutation.isPending || selectedPackageId === filtrationPackage.id}
-              >
-                <Check className="h-4 w-4 mr-1" />
-                {updatePoolPackageMutation.isPending ? "Saving..." : "Save"}
-              </Button>
+                isSubmitting={updatePoolPackageMutation.isPending}
+                disabled={selectedPackageId === filtrationPackage.id}
+                buttonText="Save Filtration"
+                className="bg-green-600 hover:bg-green-700"
+              />
             </div>
           ) : (
             <Button 

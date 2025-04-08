@@ -5,19 +5,22 @@ import { PoolDetailsContent } from "./PoolDetailsContent";
 import { PoolDimensionsContent } from "./PoolDimensionsContent";
 import { PoolPricingContent } from "./PoolPricingContent";
 import { PoolFiltrationContent } from "./PoolFiltrationContent";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PoolDetailsSectionProps {
   pool: Pool;
   selectedColor?: string;
   sectionId: string;
   title: string;
+  className?: string;
 }
 
 export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({ 
   pool, 
   selectedColor, 
   sectionId, 
-  title 
+  title,
+  className
 }) => {
   // Generate content based on section type
   const renderContent = () => {
@@ -36,9 +39,13 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
   };
 
   return (
-    <div className="space-y-3">
-      <h3 className="text-lg font-semibold">{title}</h3>
-      {renderContent()}
-    </div>
+    <Card className={className}>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {renderContent()}
+      </CardContent>
+    </Card>
   );
 };
