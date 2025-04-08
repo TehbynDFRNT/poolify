@@ -1,4 +1,6 @@
 
+import { z } from "zod";
+
 export interface Pool {
   id: string;
   name: string;
@@ -112,7 +114,21 @@ export interface PoolFormValues {
   buy_price_inc_gst?: number;
 }
 
-export const poolSchema = {
-  // This is a placeholder. The actual schema would be defined using Zod or another validation library
-  // Projects referencing this likely have their own implementation
-};
+// Create a proper Zod schema for pool form validation
+export const poolSchema = z.object({
+  name: z.string().min(1, { message: "Name is required" }),
+  range: z.string().min(1, { message: "Range is required" }),
+  length: z.number().positive({ message: "Length must be a positive number" }),
+  width: z.number().positive({ message: "Width must be a positive number" }),
+  depth_shallow: z.number().positive({ message: "Shallow depth must be a positive number" }),
+  depth_deep: z.number().positive({ message: "Deep depth must be a positive number" }),
+  waterline_l_m: z.number().optional(),
+  volume_liters: z.number().optional(),
+  salt_volume_bags: z.number().optional(),
+  salt_volume_bags_fixed: z.number().optional(),
+  weight_kg: z.number().optional(),
+  minerals_kg_initial: z.number().optional(),
+  minerals_kg_topup: z.number().optional(),
+  buy_price_ex_gst: z.number().optional(),
+  buy_price_inc_gst: z.number().optional()
+});

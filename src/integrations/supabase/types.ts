@@ -890,6 +890,8 @@ export type Database = {
       }
       pool_projects: {
         Row: {
+          bobcat_id: string | null
+          crane_id: string | null
           created_at: string
           email: string
           home_address: string
@@ -903,9 +905,14 @@ export type Database = {
           proposal_name: string
           resident_homeowner: boolean
           site_address: string | null
+          site_requirements_data: Json | null
+          site_requirements_notes: string | null
+          traffic_control_id: string | null
           updated_at: string
         }
         Insert: {
+          bobcat_id?: string | null
+          crane_id?: string | null
           created_at?: string
           email: string
           home_address: string
@@ -919,9 +926,14 @@ export type Database = {
           proposal_name: string
           resident_homeowner?: boolean
           site_address?: string | null
+          site_requirements_data?: Json | null
+          site_requirements_notes?: string | null
+          traffic_control_id?: string | null
           updated_at?: string
         }
         Update: {
+          bobcat_id?: string | null
+          crane_id?: string | null
           created_at?: string
           email?: string
           home_address?: string
@@ -935,14 +947,38 @@ export type Database = {
           proposal_name?: string
           resident_homeowner?: boolean
           site_address?: string | null
+          site_requirements_data?: Json | null
+          site_requirements_notes?: string | null
+          traffic_control_id?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "pool_projects_bobcat_id_fkey"
+            columns: ["bobcat_id"]
+            isOneToOne: false
+            referencedRelation: "bobcat_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_projects_crane_id_fkey"
+            columns: ["crane_id"]
+            isOneToOne: false
+            referencedRelation: "crane_costs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pool_projects_pool_specification_id_fkey"
             columns: ["pool_specification_id"]
             isOneToOne: false
             referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_projects_traffic_control_id_fkey"
+            columns: ["traffic_control_id"]
+            isOneToOne: false
+            referencedRelation: "traffic_control_costs"
             referencedColumns: ["id"]
           },
         ]
