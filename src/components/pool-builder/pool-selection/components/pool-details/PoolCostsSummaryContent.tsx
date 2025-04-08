@@ -9,7 +9,6 @@ import { useCrane } from "@/pages/Quotes/components/SelectPoolStep/hooks/useCran
 import { useCostCalculation } from "@/pages/Quotes/components/SelectPoolStep/hooks/useCostCalculation";
 import { formatCurrency } from "@/utils/format";
 import { Separator } from "@/components/ui/separator";
-import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 
 interface PoolCostsSummaryContentProps {
   pool: Pool;
@@ -87,18 +86,6 @@ export const PoolCostsSummaryContent: React.FC<PoolCostsSummaryContentProps> = (
   // Calculate grand total
   const grandTotal = poolBaseCost + filtrationCost + fixedCostsTotal + craneCost + excavationCost + individualCostsTotal;
   
-  // Get margin data for this pool
-  const { marginData } = useMargin(pool.id);
-  
-  // Calculate RRP using margin formula: Cost / (1 - Margin/100)
-  const calculateRRP = (cost: number, marginPercentage: number) => {
-    if (marginPercentage >= 100) return 0; // Prevent division by zero or negative values
-    return cost / (1 - marginPercentage / 100);
-  };
-  
-  const marginPercentage = marginData || 0;
-  const rrp = calculateRRP(grandTotal, marginPercentage);
-  
   if (isLoadingFixedCosts || isLoadingPoolCosts) {
     return <div className="text-center py-4">Loading costs data...</div>;
   }
@@ -142,35 +129,6 @@ export const PoolCostsSummaryContent: React.FC<PoolCostsSummaryContentProps> = (
       <div className="flex justify-between">
         <span className="text-lg font-semibold">Total Costs:</span>
         <span className="text-lg font-bold">{formatCurrency(grandTotal)}</span>
-      </div>
-      
-      {/* Add Web RRP Section */}
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-3">Web RRP</h3>
-        <div className="bg-slate-50 rounded-lg p-4 border">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-white p-3 rounded-md border space-y-1">
-              <span className="text-sm text-muted-foreground">Margin Percentage</span>
-              <div className="text-xl font-semibold">{marginPercentage.toFixed(2)}%</div>
-              <div className="text-xs text-muted-foreground">
-                Portion of selling price as profit
-              </div>
-            </div>
-            
-            <div className="bg-white p-3 rounded-md border space-y-1">
-              <span className="text-sm text-muted-foreground">Recommended Retail Price</span>
-              <div className="text-xl font-semibold text-primary">{formatCurrency(rrp)}</div>
-              <div className="text-xs text-muted-foreground">
-                Cost / (1 - Margin/100)
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-3 text-xs text-muted-foreground">
-            <p>The RRP is calculated using the margin percentage from the Pool Worksheet. 
-            This represents the recommended selling price to achieve the desired profit margin.</p>
-          </div>
-        </div>
       </div>
     </div>
   );
