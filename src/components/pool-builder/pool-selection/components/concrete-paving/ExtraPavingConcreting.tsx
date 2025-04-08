@@ -96,22 +96,49 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
             </div>
             
             <div className="mt-4 pt-4 border-t">
-              <h4 className="font-medium mb-2">Rate Breakdown (per m²)</h4>
-              <div className="grid grid-cols-2 gap-y-2 text-sm">
-                <div>Paver Cost:</div>
-                <div className="text-right">{formatCurrency(selectedCategoryDetails.paverCost)}</div>
+              <h4 className="font-medium mb-2">Rate Breakdown</h4>
+              <div className="grid grid-cols-4 gap-4">
+                {/* Per m² Column */}
+                <div className="col-span-2">
+                  <h5 className="text-sm font-medium mb-2">Per m²</h5>
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                    <div>Paver Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.paverCost)}</div>
+                    
+                    <div>Wastage Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.wastageCost)}</div>
+                    
+                    <div>Margin Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.marginCost)}</div>
+                    
+                    <div className="font-medium">Materials Subtotal:</div>
+                    <div className="text-right font-medium">{formatCurrency(selectedCategoryDetails.categoryTotal)}</div>
+                    
+                    <div>Concrete Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.totalRate - selectedCategoryDetails.categoryTotal)}</div>
+                  </div>
+                </div>
                 
-                <div>Wastage Cost:</div>
-                <div className="text-right">{formatCurrency(selectedCategoryDetails.wastageCost)}</div>
-                
-                <div>Margin Cost:</div>
-                <div className="text-right">{formatCurrency(selectedCategoryDetails.marginCost)}</div>
-                
-                <div className="font-medium">Materials Subtotal:</div>
-                <div className="text-right font-medium">{formatCurrency(selectedCategoryDetails.categoryTotal)}</div>
-                
-                <div>Concrete Cost:</div>
-                <div className="text-right">{formatCurrency(selectedCategoryDetails.totalRate - selectedCategoryDetails.categoryTotal)}</div>
+                {/* Total Column (multiplied by square meters) */}
+                <div className="col-span-2">
+                  <h5 className="text-sm font-medium mb-2">Total ({squareMeters} m²)</h5>
+                  <div className="grid grid-cols-2 gap-y-2 text-sm">
+                    <div>Paver Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.paverCost * squareMeters)}</div>
+                    
+                    <div>Wastage Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.wastageCost * squareMeters)}</div>
+                    
+                    <div>Margin Cost:</div>
+                    <div className="text-right">{formatCurrency(selectedCategoryDetails.marginCost * squareMeters)}</div>
+                    
+                    <div className="font-medium">Materials Subtotal:</div>
+                    <div className="text-right font-medium">{formatCurrency(selectedCategoryDetails.categoryTotal * squareMeters)}</div>
+                    
+                    <div>Concrete Cost:</div>
+                    <div className="text-right">{formatCurrency((selectedCategoryDetails.totalRate - selectedCategoryDetails.categoryTotal) * squareMeters)}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
