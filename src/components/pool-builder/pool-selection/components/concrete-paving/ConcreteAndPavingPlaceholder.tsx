@@ -1,11 +1,7 @@
 
 import React from "react";
 import { Pool } from "@/types/pool";
-import { SiteRequirementsFormHeader } from "../site-requirements/SiteRequirementsFormHeader";
-import { Card, CardContent } from "@/components/ui/card";
-import { Layers, Scissors, Shovel } from "lucide-react";
-import { LoadingIndicator } from "../site-requirements/LoadingIndicator";
-import { ConcreteAndPavingForm } from "./ConcreteAndPavingForm";
+import { Layers } from "lucide-react";
 
 interface ConcreteAndPavingPlaceholderProps {
   pool: Pool;
@@ -37,15 +33,14 @@ export const ConcreteAndPavingPlaceholder: React.FC<ConcreteAndPavingPlaceholder
         </div>
       </div>
 
-      <Card>
-        <SiteRequirementsFormHeader
-          title="Concrete & Paving"
-          icon={<Layers className="h-5 w-5 text-primary" />}
-        />
-        <CardContent>
-          <ConcreteAndPavingForm pool={pool} customerId={customerId} />
-        </CardContent>
-      </Card>
+      <div className="bg-slate-50 rounded-lg p-8 border text-center space-y-4">
+        <Layers className="h-16 w-16 text-muted-foreground mx-auto" />
+        <h3 className="text-xl font-medium">Concrete & Paving Configuration</h3>
+        <p className="text-muted-foreground max-w-md mx-auto">
+          This section will allow you to configure concrete and paving options for the selected pool.
+          Coming soon!
+        </p>
+      </div>
     </div>
   );
 };
