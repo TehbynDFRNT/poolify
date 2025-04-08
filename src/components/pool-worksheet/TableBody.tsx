@@ -1,8 +1,6 @@
 
 import { TableBody as UITableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Pool } from "@/types/pool";
-import { usePoolCostsData } from "./hooks/usePoolCostsData";
-import { usePoolPackages } from "@/hooks/usePoolPackages";
 import { PoolTableRow } from "./PoolTableRow";
 
 interface TableBodyProps {
@@ -13,17 +11,6 @@ interface TableBodyProps {
 }
 
 export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: TableBodyProps) => {
-  const { poolsWithPackages } = usePoolPackages();
-  const { poolCosts } = usePoolCostsData();
-
-  // Create a lookup object for packages by pool ID
-  const packagesByPoolId = poolsWithPackages?.reduce((acc, pool) => {
-    if (pool.default_filtration_package_id && pool.default_package) {
-      acc[pool.id] = pool.default_package;
-    }
-    return acc;
-  }, {} as Record<string, any>) || {};
-
   if (isLoading) {
     return (
       <UITableBody>
@@ -71,8 +58,8 @@ export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: Ta
           key={pool.id}
           pool={pool}
           getVisibleColumns={getVisibleColumns}
-          packagesByPoolId={packagesByPoolId}
-          poolCosts={poolCosts || new Map()}
+          packagesByPoolId={{}}
+          poolCosts={new Map()}
         />
       ))}
     </UITableBody>

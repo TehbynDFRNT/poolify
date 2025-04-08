@@ -1,4 +1,3 @@
-
 import { Pool } from "@/types/pool";
 import { CraneCell } from "./CraneCell";
 import { ExcavationCell } from "./ExcavationCell";

@@ -9,105 +9,24 @@ import {
   BreadcrumbItem,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { ColumnConfigSheet } from "@/components/pool-worksheet/ColumnConfigSheet";
 import { PoolWorksheetTable } from "@/components/pool-worksheet/PoolWorksheetTable";
-import { columnGroups, defaultVisibleGroups, essentialGroups } from "@/components/pool-worksheet/column-config";
-import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
+import { columnGroups, defaultVisibleGroups } from "@/components/pool-worksheet/column-config";
 import { Button } from "@/components/ui/button";
-import { List, Plus } from "lucide-react";
-import { FormulaSection } from "@/components/pool-worksheet/FormulaSection";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
-const ESSENTIAL_COLUMNS_KEY = "poolWorksheet_essentialOnly";
 
 const PoolWorksheet = () => {
   const { data: pools, isLoading: isLoadingPools, error: poolsError } = usePoolSpecifications();
-  const { fixedCosts, isLoadingFixedCosts } = useFixedCostsData();
   
-  // Initialize visible groups from local storage or use default
-  const [visibleGroups, setVisibleGroups] = useState<string[]>(() => {
-    const savedGroups = localStorage.getItem(LOCAL_STORAGE_KEY);
-    
-    // If we have saved groups, use them
-    if (savedGroups) {
-      try {
-        const parsedGroups = JSON.parse(savedGroups);
-        console.log("Loaded saved column config:", parsedGroups);
-        
-        // Ensure identification is always included
-        if (Array.isArray(parsedGroups)) {
-          return parsedGroups.includes('identification') 
-            ? parsedGroups 
-            : ['identification', ...parsedGroups];
-        }
-        
-        return defaultVisibleGroups;
-      } catch (e) {
-        console.error("Error parsing saved column groups:", e);
-        return defaultVisibleGroups;
-      }
-    }
-    
-    // Otherwise use defaults
-    return defaultVisibleGroups;
-  });
+  // Initialize visible groups with only our simplified columns
+  const [visibleGroups, setVisibleGroups] = useState<string[]>(defaultVisibleGroups);
   
-  // Track essential columns only mode
-  const [showEssentialOnly, setShowEssentialOnly] = useState<boolean>(() => {
-    const savedValue = localStorage.getItem(ESSENTIAL_COLUMNS_KEY);
-    return savedValue === 'true';
-  });
-
-  // Save visible groups to local storage whenever they change
+  // Show a notification that the data has been simplified
   useEffect(() => {
-    // Ensure identification is always included
-    const groupsToSave = visibleGroups.includes('identification') 
-      ? visibleGroups 
-      : ['identification', ...visibleGroups];
-      
-    console.log("Saving column config to localStorage:", groupsToSave);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(groupsToSave));
-  }, [visibleGroups]);
-  
-  // Save essential only mode to local storage
-  useEffect(() => {
-    localStorage.setItem(ESSENTIAL_COLUMNS_KEY, showEssentialOnly.toString());
-  }, [showEssentialOnly]);
-
-  // Effect to update visible groups when essential mode changes
-  useEffect(() => {
-    if (showEssentialOnly) {
-      setVisibleGroups(essentialGroups);
-    }
-  }, [showEssentialOnly]);
-
-  // Ensure identification columns are always visible
-  const handleSetVisibleGroups = (groups: string[]) => {
-    const updatedGroups = groups.includes('identification')
-      ? groups
-      : ['identification', ...groups];
-    setVisibleGroups(updatedGroups);
-  };
-  
-  // Toggle essential columns only mode
-  const toggleEssentialColumnsOnly = () => {
-    setShowEssentialOnly(!showEssentialOnly);
-    if (!showEssentialOnly) {
-      // Show only essential groups
-      handleSetVisibleGroups(essentialGroups);
-    } else {
-      // Show default groups when turning off essential mode
-      handleSetVisibleGroups(defaultVisibleGroups);
-    }
-  };
-
-  const isLoading = isLoadingPools || isLoadingFixedCosts;
-  
-  // Show a notification that the data has been reset
-  useEffect(() => {
-    toast.info("Pool worksheet data has been reset", {
-      description: "The pool worksheet has been reset to a clean state."
+    toast.info("Pool worksheet simplified", {
+      description: "Now showing only pool name, range, and buy prices as requested."
     });
   }, []);
 
@@ -132,35 +51,12 @@ const PoolWorksheet = () => {
 
         <div className="mb-4 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Pool Worksheet</h1>
+            <h1 className="text-3xl font-bold">Simplified Pool Worksheet</h1>
             <p className="text-muted-foreground mt-1">
               {isDataEmpty 
                 ? "All pool worksheet data has been reset" 
-                : "A comprehensive breakdown of all pool specifications"}
+                : "Showing only pool name, range, and buy prices"}
             </p>
-          </div>
-          
-          <div className="flex gap-2">
-            {!isDataEmpty && (
-              <Button
-                variant={showEssentialOnly ? "default" : "outline"}
-                size="sm"
-                onClick={toggleEssentialColumnsOnly}
-                className="flex items-center gap-2"
-              >
-                <List size={16} />
-                {showEssentialOnly ? "Essential Columns Only" : "Show All Columns"}
-              </Button>
-            )}
-            
-            {!isDataEmpty && (
-              <ColumnConfigSheet 
-                visibleGroups={visibleGroups} 
-                setVisibleGroups={handleSetVisibleGroups} 
-                showEssentialOnly={showEssentialOnly}
-                toggleEssentialColumnsOnly={toggleEssentialColumnsOnly}
-              />
-            )}
           </div>
         </div>
         
@@ -176,17 +72,14 @@ const PoolWorksheet = () => {
             </Link>
           </div>
         ) : (
-          <>
-            <PoolWorksheetTable 
-              pools={pools}
-              isLoading={isLoading}
-              error={poolsError}
-              visibleGroups={visibleGroups}
-              setVisibleGroups={handleSetVisibleGroups}
-              showEssentialOnly={showEssentialOnly}
-            />
-            <FormulaSection />
-          </>
+          <PoolWorksheetTable 
+            pools={pools}
+            isLoading={isLoadingPools}
+            error={poolsError}
+            visibleGroups={visibleGroups}
+            setVisibleGroups={setVisibleGroups}
+            showEssentialOnly={true}
+          />
         )}
       </div>
     </DashboardLayout>
