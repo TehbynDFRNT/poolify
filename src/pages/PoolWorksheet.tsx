@@ -14,6 +14,7 @@ import { columnGroups, defaultVisibleGroups } from "@/components/pool-worksheet/
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { FormulaSection } from "@/components/pool-worksheet/FormulaSection";
 
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
 
@@ -26,7 +27,7 @@ const PoolWorksheet = () => {
   // Show a notification that the data has been simplified
   useEffect(() => {
     toast.info("Pool worksheet updated", {
-      description: "Now showing pool name, range, buy prices, fixed costs, filtration costs, crane costs, excavation costs, individual costs, and true cost."
+      description: "Now showing pool name, range, buy prices, fixed costs, filtration costs, crane costs, excavation costs, individual costs, true cost and editable margin."
     });
   }, []);
 
@@ -55,7 +56,7 @@ const PoolWorksheet = () => {
             <p className="text-muted-foreground mt-1">
               {isDataEmpty 
                 ? "All pool worksheet data has been reset" 
-                : "Showing pool details, pricing, fixed costs, filtration costs, crane costs, excavation costs, individual costs, and true cost"}
+                : "Showing pool details, pricing, costs, and editable margins"}
             </p>
           </div>
         </div>
@@ -72,14 +73,17 @@ const PoolWorksheet = () => {
             </Link>
           </div>
         ) : (
-          <PoolWorksheetTable 
-            pools={pools}
-            isLoading={isLoadingPools}
-            error={poolsError}
-            visibleGroups={visibleGroups}
-            setVisibleGroups={setVisibleGroups}
-            showEssentialOnly={true}
-          />
+          <>
+            <PoolWorksheetTable 
+              pools={pools}
+              isLoading={isLoadingPools}
+              error={poolsError}
+              visibleGroups={visibleGroups}
+              setVisibleGroups={setVisibleGroups}
+              showEssentialOnly={true}
+            />
+            <FormulaSection />
+          </>
         )}
       </div>
     </DashboardLayout>

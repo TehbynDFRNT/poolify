@@ -16,7 +16,7 @@ export const columnGroups: ColumnGroup[] = [
     id: "pricing",
     title: "Pool Costs",
     color: "bg-blue-100 text-blue-800",
-    columns: ["buy_price_inc_gst", "fixed_costs_total", "filtration_costs", "crane_cost", "excavation", "individual_costs", "true_cost"] // Added true_cost column
+    columns: ["buy_price_inc_gst", "fixed_costs_total", "filtration_costs", "crane_cost", "excavation", "individual_costs", "true_cost", "margin_editable"] // Added margin_editable column
   }
 ];
 
@@ -32,6 +32,8 @@ export const columnLabels: ColumnLabels = {
   "excavation": "Excavation Costs",
   "individual_costs": "Individual Costs",
   "true_cost": "True Cost",
+  "margin_percentage": "Margin %",
+  "margin_editable": "Margin % (editable)",
 };
 
 // Default visible column groups - only show identification and pricing

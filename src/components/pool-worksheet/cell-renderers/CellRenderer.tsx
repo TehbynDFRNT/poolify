@@ -8,6 +8,7 @@ import { ConstructionCostsCell } from "./ConstructionCostsCell";
 import { PoolSpecificationCell } from "./PoolSpecificationCell";
 import { TrueCostCell } from "./TrueCostCell";
 import { MarginCell } from "./MarginCell";
+import { EditableMarginCell } from "./EditableMarginCell";
 import { WebPriceCell } from "./WebPriceCell";
 import { IndividualCostsCell } from "./IndividualCostsCell";
 import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
@@ -66,9 +67,14 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
     return trueCostResult.content;
   }
   
-  // Handle Margin column
+  // Handle regular Margin column
   if (column === "margin_percentage") {
     return <MarginCell poolId={pool.id} />;
+  }
+  
+  // Handle editable Margin column
+  if (column === "margin_editable") {
+    return <EditableMarginCell poolId={pool.id} />;
   }
   
   // Handle Web Price column
