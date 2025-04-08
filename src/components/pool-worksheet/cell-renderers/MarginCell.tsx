@@ -1,5 +1,5 @@
 
-import { formatNumber } from "@/utils/format";
+import { formatCurrency } from "@/utils/format";
 import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 
 interface MarginCellProps {
@@ -11,7 +11,7 @@ export const MarginCell = ({ poolId }: MarginCellProps) => {
   
   // Format the margin as a percentage with % symbol
   const formattedMargin = marginData 
-    ? `${formatNumber(marginData)}%` 
+    ? `${marginData.toFixed(2)}%` 
     : "-";
   
   return <>{formattedMargin}</>;
