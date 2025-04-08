@@ -5,6 +5,7 @@ import { Calculator, Percent, DollarSign } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import { Pool } from "@/types/pool";
 import { supabase } from "@/integrations/supabase/client";
+import { UnderFenceConcreteStripSelection } from "@/types/under-fence-concrete-strip";
 
 interface ConcreteAndPavingCostSummaryProps {
   pool: Pool;
@@ -132,14 +133,19 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
         
         // Get margin for extra concreting if applicable
         if (data.extra_concreting_type && data.extra_concreting_square_meters > 0) {
-          const { data: concretingData } = await supabase
-            .from('extra_concreting')
-            .select('margin')
-            .eq('id', data.extra_concreting_type)
-            .single();
-            
-          if (concretingData) {
-            extraConcretingMargin = concretingData.margin * data.extra_concreting_square_meters;
+          // Fix the query since the id is a uuid not a string
+          try {
+            const { data: concretingData } = await supabase
+              .from('extra_concreting')
+              .select('margin')
+              .eq('type', data.extra_concreting_type)
+              .single();
+              
+            if (concretingData) {
+              extraConcretingMargin = concretingData.margin * data.extra_concreting_square_meters;
+            }
+          } catch (err) {
+            console.error("Error fetching extra concreting margin:", err);
           }
         }
         
@@ -155,11 +161,33 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
         }
         
         // Get margin for under fence strips
-        if (data.under_fence_concrete_strips_data && Array.isArray(data.under_fence_concrete_strips_data)) {
-          for (const strip of data.under_fence_concrete_strips_data) {
-            if (strip && strip.margin && strip.quantity) {
-              underFenceStripsMargin += strip.margin * strip.quantity;
+        if (data.under_fence_concrete_strips_data) {
+          try {
+            // Safely type and access the data
+            const stripsData = data.under_fence_concrete_strips_data as any[];
+            
+            if (Array.isArray(stripsData)) {
+              for (const strip of stripsData) {
+                if (strip && typeof strip === 'object' && 'id' in strip) {
+                  // Fetch the margin for this strip type
+                  const { data: stripData } = await supabase
+                    .from('under_fence_concrete_strips')
+                    .select('margin')
+                    .eq('id', strip.id)
+                    .single();
+                    
+                  if (stripData && stripData.margin) {
+                    // If the strip has a quantity/length property, use it, otherwise assume 1
+                    const quantity = typeof strip.length === 'number' ? strip.length : 
+                                     typeof strip.quantity === 'number' ? strip.quantity : 1;
+                    
+                    underFenceStripsMargin += stripData.margin * quantity;
+                  }
+                }
+              }
             }
+          } catch (err) {
+            console.error("Error calculating under fence strips margin:", err);
           }
         }
         
