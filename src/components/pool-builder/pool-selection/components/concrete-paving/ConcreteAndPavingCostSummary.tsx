@@ -18,6 +18,12 @@ interface SummaryData {
   concretePumpCost: number;
   underFenceStripsCost: number;
   concreteCutsCost: number;
+  extraPavingMargin: number;
+  existingConcretePavingMargin: number;
+  extraConcretingMargin: number;
+  concretePumpMargin: number;
+  underFenceStripsMargin: number;
+  concreteCutsMargin: number;
   totalCost: number;
   totalMargin: number;
   marginPercentage: number;
@@ -34,6 +40,12 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
     concretePumpCost: 0,
     underFenceStripsCost: 0,
     concreteCutsCost: 0,
+    extraPavingMargin: 0,
+    existingConcretePavingMargin: 0,
+    extraConcretingMargin: 0,
+    concretePumpMargin: 0,
+    underFenceStripsMargin: 0,
+    concreteCutsMargin: 0,
     totalCost: 0,
     totalMargin: 0,
     marginPercentage: 0
@@ -49,6 +61,7 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
   const fetchSummaryData = async () => {
     setIsLoading(true);
     try {
+      // First, get the basic cost data from pool_projects
       const { data, error } = await supabase
         .from('pool_projects')
         .select(`
@@ -57,7 +70,14 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
           extra_concreting_total_cost,
           concrete_pump_total_cost,
           under_fence_concrete_strips_cost,
-          concrete_cuts_cost
+          concrete_cuts_cost,
+          extra_paving_category,
+          extra_paving_square_meters,
+          existing_concrete_paving_category,
+          existing_concrete_paving_square_meters,
+          extra_concreting_type,
+          extra_concreting_square_meters,
+          under_fence_concrete_strips_data
         `)
         .eq('id', customerId)
         .single();
@@ -75,14 +95,76 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
         const concretePumpCost = data.concrete_pump_total_cost || 0;
         const underFenceStripsCost = data.under_fence_concrete_strips_cost || 0;
         const concreteCutsCost = data.concrete_cuts_cost || 0;
+
+        // Variables to store margin calculations
+        let extraPavingMargin = 0;
+        let existingConcretePavingMargin = 0;
+        let extraConcretingMargin = 0;
+        let concretePumpMargin = 0;
+        let underFenceStripsMargin = 0;
+        let concreteCutsMargin = 0;
         
-        // Calculate margins (using a default percentage for each type)
-        const extraPavingMargin = extraPavingCost * 0.15;
-        const existingConcretePavingMargin = existingConcretePavingCost * 0.15;
-        const extraConcretingMargin = extraConcretingCost * 0.12;
-        const concretePumpMargin = concretePumpCost * 0.1;
-        const underFenceStripsMargin = underFenceStripsCost * 0.12;
-        const concreteCutsMargin = concreteCutsCost * 0.12;
+        // Get margin for extra paving if applicable
+        if (data.extra_paving_category && data.extra_paving_square_meters > 0) {
+          const { data: pavingData } = await supabase
+            .from('extra_paving_costs')
+            .select('margin_cost')
+            .eq('id', data.extra_paving_category)
+            .single();
+            
+          if (pavingData) {
+            extraPavingMargin = pavingData.margin_cost * data.extra_paving_square_meters;
+          }
+        }
+        
+        // Get margin for existing concrete paving if applicable
+        if (data.existing_concrete_paving_category && data.existing_concrete_paving_square_meters > 0) {
+          const { data: existingPavingData } = await supabase
+            .from('extra_paving_costs')
+            .select('margin_cost')
+            .eq('id', data.existing_concrete_paving_category)
+            .single();
+            
+          if (existingPavingData) {
+            existingConcretePavingMargin = existingPavingData.margin_cost * data.existing_concrete_paving_square_meters;
+          }
+        }
+        
+        // Get margin for extra concreting if applicable
+        if (data.extra_concreting_type && data.extra_concreting_square_meters > 0) {
+          const { data: concretingData } = await supabase
+            .from('extra_concreting')
+            .select('margin')
+            .eq('id', data.extra_concreting_type)
+            .single();
+            
+          if (concretingData) {
+            extraConcretingMargin = concretingData.margin * data.extra_concreting_square_meters;
+          }
+        }
+        
+        // Get margin for concrete pump
+        const { data: pumpData } = await supabase
+          .from('concrete_pump')
+          .select('*')
+          .single();
+          
+        if (pumpData && concretePumpCost > 0) {
+          // Assume a 10% margin on concrete pump if not explicitly stored
+          concretePumpMargin = concretePumpCost * 0.1;
+        }
+        
+        // Get margin for under fence strips
+        if (data.under_fence_concrete_strips_data && Array.isArray(data.under_fence_concrete_strips_data)) {
+          for (const strip of data.under_fence_concrete_strips_data) {
+            if (strip && strip.margin && strip.quantity) {
+              underFenceStripsMargin += strip.margin * strip.quantity;
+            }
+          }
+        }
+        
+        // Get margin for concrete cuts (use a default 10% if not explicitly available)
+        concreteCutsMargin = concreteCutsCost * 0.1;
         
         // Calculate totals
         const totalCost = 
@@ -111,6 +193,12 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
           concretePumpCost,
           underFenceStripsCost,
           concreteCutsCost,
+          extraPavingMargin,
+          existingConcretePavingMargin,
+          extraConcretingMargin,
+          concretePumpMargin,
+          underFenceStripsMargin,
+          concreteCutsMargin,
           totalCost,
           totalMargin,
           marginPercentage
@@ -124,7 +212,7 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
   };
 
   // Check if there's any cost data
-  const hasAnyCosts = Object.values(summaryData).some(cost => cost > 0);
+  const hasAnyCosts = summaryData.totalCost > 0;
 
   return (
     <Card>
