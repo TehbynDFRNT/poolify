@@ -2,6 +2,7 @@
 import { TableBody as UITableBody, TableRow, TableCell } from "@/components/ui/table";
 import { Pool } from "@/types/pool";
 import { PoolTableRow } from "./PoolTableRow";
+import { usePoolCostsData } from "./hooks/usePoolCostsData";
 
 interface TableBodyProps {
   pools: Pool[] | undefined;
@@ -11,6 +12,9 @@ interface TableBodyProps {
 }
 
 export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: TableBodyProps) => {
+  // Get pool costs data
+  const { poolCosts } = usePoolCostsData();
+  
   if (isLoading) {
     return (
       <UITableBody>
@@ -58,8 +62,7 @@ export const PoolTableBody = ({ pools, isLoading, error, getVisibleColumns }: Ta
           key={pool.id}
           pool={pool}
           getVisibleColumns={getVisibleColumns}
-          packagesByPoolId={{}}
-          poolCosts={new Map()}
+          poolCosts={poolCosts || new Map()}
         />
       ))}
     </UITableBody>

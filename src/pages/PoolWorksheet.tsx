@@ -25,8 +25,8 @@ const PoolWorksheet = () => {
   
   // Show a notification that the data has been simplified
   useEffect(() => {
-    toast.info("Pool worksheet simplified", {
-      description: "Now showing only pool name, range, and buy prices as requested."
+    toast.info("Pool worksheet updated", {
+      description: "Now showing pool name, range, buy prices, fixed costs, and filtration package details."
     });
   }, []);
 
@@ -51,11 +51,11 @@ const PoolWorksheet = () => {
 
         <div className="mb-4 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold">Simplified Pool Worksheet</h1>
+            <h1 className="text-3xl font-bold">Pool Worksheet</h1>
             <p className="text-muted-foreground mt-1">
               {isDataEmpty 
                 ? "All pool worksheet data has been reset" 
-                : "Showing only pool name, range, and buy prices"}
+                : "Showing pool details, pricing, fixed costs, and filtration packages"}
             </p>
           </div>
         </div>
