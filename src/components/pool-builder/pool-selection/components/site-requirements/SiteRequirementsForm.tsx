@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { SiteRequirementsSection } from "./SiteRequirementsSection";
@@ -41,9 +40,12 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
   const [craneCost, setCraneCost] = useState<number>(0);
   const [trafficControlCost, setTrafficControlCost] = useState<number>(0);
   const [bobcatCost, setBobcatCost] = useState<number>(0);
+  const [defaultCraneCost, setDefaultCraneCost] = useState<number>(0);
+  const [defaultCraneId, setDefaultCraneId] = useState<string | undefined>(undefined);
 
   // Load existing site requirements if any
   useEffect(() => {
+    
     const fetchExistingRequirements = async () => {
       if (!customerId) return;
       
@@ -98,10 +100,35 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     };
 
     fetchExistingRequirements();
+    fetchDefaultCraneCost();
   }, [customerId]);
+
+  // Fetch the default crane cost (Franna Crane-S20T-L1)
+  const fetchDefaultCraneCost = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('crane_costs')
+        .select('id, price')
+        .eq('name', 'Franna Crane-S20T-L1')
+        .single();
+      
+      if (error) {
+        console.error("Error fetching default crane cost:", error);
+        return;
+      }
+      
+      if (data) {
+        setDefaultCraneCost(data.price);
+        setDefaultCraneId(data.id);
+      }
+    } catch (error) {
+      console.error("Error fetching default crane cost:", error);
+    }
+  };
 
   // Load cost data for selected items
   useEffect(() => {
+    
     const fetchCosts = async () => {
       try {
         // Fetch crane cost if selected
@@ -156,6 +183,8 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     fetchCosts();
   }, [craneId, trafficControlId, bobcatId]);
 
+  
+
   const handleSaveRequirements = () => {
     onSave({
       craneId,
@@ -195,7 +224,10 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     0
   );
 
-  // Calculate the grand total
+  // Check if default crane is selected
+  const isDefaultCrane = craneId === defaultCraneId;
+
+  // Calculate the grand total - need to adjust the crane cost if it's the default crane
   const totalCost = craneCost + trafficControlCost + bobcatCost + customRequirementsTotal;
 
   if (isLoading) {
@@ -271,6 +303,8 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
             bobcatCost={bobcatCost}
             customRequirementsTotal={customRequirementsTotal}
             totalCost={totalCost}
+            isDefaultCrane={isDefaultCrane}
+            defaultCraneCost={defaultCraneCost}
           />
         </CardContent>
       </Card>

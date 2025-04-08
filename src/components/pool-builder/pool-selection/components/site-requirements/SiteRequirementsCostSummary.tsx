@@ -8,6 +8,8 @@ interface SiteRequirementsCostSummaryProps {
   bobcatCost: number;
   customRequirementsTotal: number;
   totalCost: number;
+  isDefaultCrane?: boolean;
+  defaultCraneCost?: number;
 }
 
 export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryProps> = ({
@@ -15,8 +17,18 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
   trafficControlCost,
   bobcatCost,
   customRequirementsTotal,
-  totalCost
+  totalCost,
+  isDefaultCrane = false,
+  defaultCraneCost = 0
 }) => {
+  // Calculate the crane cost difference if this is not the default crane
+  const craneCostDifference = isDefaultCrane ? 0 : craneCost - defaultCraneCost;
+  
+  // Calculate the adjusted total (subtracting the default crane cost if needed)
+  const adjustedTotal = isDefaultCrane ? 
+    totalCost : 
+    totalCost - craneCost + craneCostDifference;
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -24,8 +36,19 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
           <h3 className="font-medium text-sm text-muted-foreground">Standard Requirements</h3>
           <div className="space-y-1 text-sm">
             <div className="flex justify-between py-1">
-              <span>Crane:</span>
-              <span className="font-medium">{formatCurrency(craneCost)}</span>
+              <span>
+                Crane: 
+                {!isDefaultCrane && defaultCraneCost > 0 && (
+                  <span className="text-xs text-muted-foreground ml-1">
+                    (additional cost)
+                  </span>
+                )}
+              </span>
+              <span className="font-medium">
+                {isDefaultCrane ? 
+                  "Included in base price" : 
+                  formatCurrency(craneCostDifference)}
+              </span>
             </div>
             <div className="flex justify-between py-1">
               <span>Traffic Control:</span>
@@ -52,8 +75,13 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
       <div className="border-t pt-4 mt-2">
         <div className="flex justify-between items-center">
           <span className="text-lg font-medium">Total Site Requirements Cost:</span>
-          <span className="text-lg font-bold text-primary">{formatCurrency(totalCost)}</span>
+          <span className="text-lg font-bold text-primary">{formatCurrency(adjustedTotal)}</span>
         </div>
+        {!isDefaultCrane && defaultCraneCost > 0 && (
+          <p className="text-xs text-muted-foreground mt-1">
+            *Standard Franna crane cost is already included in the base pool price
+          </p>
+        )}
       </div>
     </div>
   );
