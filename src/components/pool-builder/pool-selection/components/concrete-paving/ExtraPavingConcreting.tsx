@@ -6,6 +6,7 @@ import { ExtraConcreting } from "./ExtraConcreting";
 import { ConcretePumpSelector } from "./ConcretePumpSelector";
 import { UnderFenceConcreteStrips } from "./UnderFenceConcreteStrips";
 import { ConcreteCuts } from "./ConcreteCuts";
+import { ConcreteAndPavingCostSummary } from "./ConcreteAndPavingCostSummary";
 import { Pool } from "@/types/pool";
 
 interface ExtraPavingConcretingProps {
@@ -22,6 +23,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
       <ConcretePumpSelector pool={pool} customerId={customerId} />
       <UnderFenceConcreteStrips pool={pool} customerId={customerId} />
       <ConcreteCuts pool={pool} customerId={customerId} />
+      <ConcreteAndPavingCostSummary pool={pool} customerId={customerId} />
     </div>
   );
 };
