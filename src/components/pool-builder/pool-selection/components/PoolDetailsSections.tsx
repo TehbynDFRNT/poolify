@@ -53,6 +53,15 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           title="Filtration Package"
           className="border rounded-md shadow-sm"
         />
+        
+        {/* Crane Section */}
+        <PoolDetailsSection
+          pool={pool}
+          selectedColor={selectedColor}
+          sectionId="crane"
+          title="Crane Information"
+          className="border rounded-md shadow-sm"
+        />
       </div>
     </div>
   );
