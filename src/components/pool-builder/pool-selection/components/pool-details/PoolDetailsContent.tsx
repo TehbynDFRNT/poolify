@@ -75,3 +75,4 @@ export const PoolDetailsContent: React.FC<PoolDetailsContentProps> = ({
     </div>
   );
 };
+

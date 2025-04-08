@@ -39,3 +39,4 @@ export function PackageHeaderRow({ pkg, onEdit }: PackageHeaderRowProps) {
     </TableRow>
   );
 }
+

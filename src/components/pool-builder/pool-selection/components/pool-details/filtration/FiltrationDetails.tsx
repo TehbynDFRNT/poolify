@@ -50,7 +50,7 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-medium text-lg">
-          {filtrationPackage.name} (Option {filtrationPackage.display_order})
+          Filtration Package - Option {filtrationPackage.display_order}
         </h3>
         
         {pool && (
@@ -101,7 +101,7 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
             <SelectContent>
               {packages.map((pkg) => (
                 <SelectItem key={pkg.id} value={pkg.id}>
-                  {pkg.name} (Option {pkg.display_order})
+                  Option {pkg.display_order} - {pkg.name}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -119,3 +119,4 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
     </div>
   );
 };
+

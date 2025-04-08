@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Pool } from "@/types/pool";
 import { TabsContent } from "@/components/ui/tabs";
@@ -132,7 +131,7 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
             ) : (
               <div className="space-y-4">
                 <p className="font-medium text-lg">
-                  {filtrationPackage.name} (Option {filtrationPackage.display_order})
+                  Filtration Package - Option {filtrationPackage.display_order}
                 </p>
                 
                 <div className="grid grid-cols-2 gap-4">

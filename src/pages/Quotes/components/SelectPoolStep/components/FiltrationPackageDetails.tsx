@@ -10,7 +10,7 @@ export const FiltrationPackageDetails = ({ filtrationPackage }: FiltrationPackag
   return (
     <Card>
       <CardContent className="pt-6">
-        <h3 className="text-lg font-medium mb-4">Filtration Package (Option {filtrationPackage.display_order})</h3>
+        <h3 className="text-lg font-medium mb-4">Filtration Package - Option {filtrationPackage.display_order}</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {filtrationPackage.light && (
             <div>
@@ -45,3 +45,4 @@ export const FiltrationPackageDetails = ({ filtrationPackage }: FiltrationPackag
     </Card>
   );
 };
+
