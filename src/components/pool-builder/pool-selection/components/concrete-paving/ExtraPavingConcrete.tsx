@@ -148,7 +148,7 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
         <div>
           <div className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Extra Paving</h3>
+            <h3 className="text-xl font-semibold">Extra Paving and Concrete</h3>
           </div>
           <p className="text-muted-foreground">
             Add extra paving requirements for your project
