@@ -35,6 +35,8 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       (poolCost?.coping_supply || 0) + 
       (poolCost?.beam || 0) + 
       (poolCost?.coping_lay || 0);
+      
+    // Log individual construction costs for debugging
     console.log('Construction costs:', {
       pea_gravel: poolCost?.pea_gravel || 0,
       install_fee: poolCost?.install_fee || 0,
@@ -72,6 +74,18 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       poolBuyPrice;
     
     console.log('TOTAL TRUE COST:', trueCost);
+    
+    // Log the sum that user mentioned for comparison
+    if (pool.name.includes('Empire')) {
+      const userMentionedSum = 36859.8;
+      console.log('User mentioned sum:', userMentionedSum);
+      console.log('Difference:', userMentionedSum - trueCost);
+      
+      // Calculate if any component is missing by comparing
+      const potentialMissingValue = userMentionedSum - trueCost;
+      console.log('Potential missing value:', potentialMissingValue);
+    }
+    
     console.log(`=================================================================`);
       
     return trueCost;
