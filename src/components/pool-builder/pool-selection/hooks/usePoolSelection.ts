@@ -3,14 +3,13 @@ import { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { usePools } from "@/hooks/usePools";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 export const usePoolSelection = (customerId?: string | null) => {
   const { data: pools, isLoading, error } = usePools();
   const [selectedPoolId, setSelectedPoolId] = useState("");
   const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
 
   // Group pools by range for better organization
   const poolsByRange = pools?.reduce((acc, pool) => {
@@ -74,9 +73,7 @@ export const usePoolSelection = (customerId?: string | null) => {
 
   const handleSavePoolSelection = async () => {
     if (!customerId || !selectedPoolId) {
-      toast({
-        title: "Selection Required",
-        description: "Please select a pool model first.",
+      toast("Please select a pool model first.", {
         variant: "destructive"
       });
       return;
@@ -96,15 +93,10 @@ export const usePoolSelection = (customerId?: string | null) => {
 
       if (error) throw error;
 
-      toast({
-        title: "Success!",
-        description: "Pool selection saved successfully",
-      });
+      toast("Pool selection saved successfully");
     } catch (error) {
       console.error("Error saving pool selection:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save pool selection. Please try again.",
+      toast("Failed to save pool selection. Please try again.", {
         variant: "destructive"
       });
     } finally {

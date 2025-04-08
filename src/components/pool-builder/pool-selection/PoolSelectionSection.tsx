@@ -34,8 +34,7 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
   // Function to save all sections
   const handleSaveAll = async () => {
     if (!customerId) {
-      toast({
-        description: "Please save customer information first.",
+      toast("Please save customer information first.", {
         variant: "destructive"
       });
       return;
@@ -48,13 +47,10 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
       
       // Add other section saves here if needed in the future
       
-      toast({
-        description: "All sections saved successfully",
-      });
+      toast("All sections saved successfully");
     } catch (error) {
       console.error("Error saving all sections:", error);
-      toast({
-        description: "Failed to save all sections. Please try again.",
+      toast("Failed to save all sections. Please try again.", {
         variant: "destructive"
       });
     } finally {
