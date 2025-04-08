@@ -74,7 +74,7 @@ export const usePoolSelection = (customerId?: string | null) => {
   const handleSavePoolSelection = async () => {
     if (!customerId || !selectedPoolId) {
       toast("Please select a pool model first.", {
-        variant: "destructive"
+        className: "bg-destructive text-destructive-foreground"
       });
       return;
     }
@@ -97,7 +97,7 @@ export const usePoolSelection = (customerId?: string | null) => {
     } catch (error) {
       console.error("Error saving pool selection:", error);
       toast("Failed to save pool selection. Please try again.", {
-        variant: "destructive"
+        className: "bg-destructive text-destructive-foreground"
       });
     } finally {
       setIsSubmitting(false);

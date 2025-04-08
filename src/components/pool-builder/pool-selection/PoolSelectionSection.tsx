@@ -35,7 +35,7 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
   const handleSaveAll = async () => {
     if (!customerId) {
       toast("Please save customer information first.", {
-        variant: "destructive"
+        className: "bg-destructive text-destructive-foreground"
       });
       return;
     }
@@ -51,7 +51,7 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
     } catch (error) {
       console.error("Error saving all sections:", error);
       toast("Failed to save all sections. Please try again.", {
-        variant: "destructive"
+        className: "bg-destructive text-destructive-foreground"
       });
     } finally {
       setIsSubmittingAll(false);

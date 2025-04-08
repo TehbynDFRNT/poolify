@@ -96,7 +96,7 @@ const MainNav: React.FC = () => {
   return (
     <nav className="space-y-1">
       {navigation.map((item) => (
-        <React.Fragment key={item.path}>
+        <div key={item.path}>
           <NavItem
             icon={item.icon}
             label={item.label}
@@ -117,7 +117,7 @@ const MainNav: React.FC = () => {
               isSubItem={true}
             />
           ))}
-        </React.Fragment>
+        </div>
       ))}
     </nav>
   );
