@@ -7,6 +7,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { useFormulaCalculations } from "@/hooks/calculations/useFormulaCalculations";
 import { formatCurrency } from "@/utils/format";
+import { SaveButton } from "../SaveButton";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ExtraPavingConcretingProps {
   pool: Pool;
@@ -16,6 +19,7 @@ interface ExtraPavingConcretingProps {
 export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ pool, customerId }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { pavingCategoryTotals, isLoading } = useFormulaCalculations();
 
   // Get selected category details
@@ -34,13 +38,60 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
     setSquareMeters(isNaN(value) ? 0 : value);
   };
 
+  // Handle save
+  const handleSave = async () => {
+    if (!customerId) {
+      toast.error("Customer information required to save");
+      return;
+    }
+
+    if (!selectedCategory || squareMeters <= 0) {
+      toast.error("Please select a category and enter square meters");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Save to database
+      const { error } = await supabase
+        .from('pool_projects')
+        .update({
+          extra_paving_category: selectedCategory,
+          extra_paving_square_meters: squareMeters,
+          extra_paving_total_cost: totalCost
+        })
+        .eq('id', customerId);
+
+      if (error) throw error;
+      
+      toast.success("Extra paving and concreting saved successfully");
+    } catch (error) {
+      console.error("Error saving extra paving:", error);
+      toast.error("Failed to save extra paving details");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Card>
-      <CardHeader className="bg-white pb-2">
-        <h3 className="text-xl font-semibold">Extra Paving and Concreting</h3>
-        <p className="text-muted-foreground">
-          Add extra paving and concreting options to your pool project
-        </p>
+      <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+        <div>
+          <h3 className="text-xl font-semibold">Extra Paving and Concreting</h3>
+          <p className="text-muted-foreground">
+            Add extra paving and concreting options to your pool project
+          </p>
+        </div>
+        
+        {customerId && (
+          <SaveButton 
+            onClick={handleSave}
+            isSubmitting={isSubmitting}
+            disabled={!selectedCategory || squareMeters <= 0}
+            buttonText="Save Details"
+            className="bg-primary"
+          />
+        )}
       </CardHeader>
       
       <CardContent className="pt-4">
