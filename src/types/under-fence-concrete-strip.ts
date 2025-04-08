@@ -16,3 +16,10 @@ export interface UnderFenceConcreteStripSelection {
   margin: number;
   quantity: number;
 }
+
+export interface UnderFenceConcreteStripInsert {
+  type: string;
+  cost: number;
+  margin: number;
+  display_order: number;
+}
