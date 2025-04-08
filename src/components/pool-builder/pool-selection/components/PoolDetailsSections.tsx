@@ -19,14 +19,6 @@ export const PoolDetailsSections = ({ pool, selectedColor }: PoolDetailsSections
       title: "Pool Dimensions",
     },
     {
-      id: "costs-summary",
-      title: "Costs Summary",
-    },
-    {
-      id: "web-rrp",
-      title: "Web RRP",
-    },
-    {
       id: "pricing",
       title: "Pricing",
     },
@@ -49,6 +41,14 @@ export const PoolDetailsSections = ({ pool, selectedColor }: PoolDetailsSections
     {
       id: "individual-costs",
       title: "Individual Costs",
+    },
+    {
+      id: "costs-summary",
+      title: "Costs Summary",
+    },
+    {
+      id: "web-rrp",
+      title: "Web RRP",
     },
   ];
 
