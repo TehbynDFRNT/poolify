@@ -41,7 +41,7 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           pool={pool}
           selectedColor={selectedColor}
           sectionId="pricing"
-          title="Pool Pricing"
+          title="Pool Costs"
           className="border rounded-md shadow-sm"
         />
 
@@ -59,7 +59,7 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           pool={pool}
           selectedColor={selectedColor}
           sectionId="filtration"
-          title="Filtration Package"
+          title="Filtration Costs"
           className="border rounded-md shadow-sm"
         />
         
@@ -68,7 +68,7 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           pool={pool}
           selectedColor={selectedColor}
           sectionId="crane"
-          title="Crane Information"
+          title="Crane Costs"
           className="border rounded-md shadow-sm"
         />
         
@@ -77,7 +77,7 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           pool={pool}
           selectedColor={selectedColor}
           sectionId="excavation"
-          title="Excavation Information"
+          title="Excavation Costs"
           className="border rounded-md shadow-sm"
         />
         
