@@ -16,6 +16,7 @@ import { ExtraPavingExistingConcreteFormula } from "./formula-sections/ExtraPavi
 import { ExtraConcretingFormula } from "./formula-sections/ExtraConcretingFormula";
 import { UnderFenceConcreteStripsFormula } from "./formula-sections/UnderFenceConcreteStripsFormula";
 import { ConcreteCutsFormula } from "./formula-sections/ConcreteCutsFormula";
+import { ConcretePumpFormula } from "./formula-sections/ConcretePumpFormula";
 
 export const FormulaReference: React.FC = () => {
   return (
@@ -36,6 +37,7 @@ export const FormulaReference: React.FC = () => {
           <ExtraConcretingFormula />
           <UnderFenceConcreteStripsFormula />
           <ConcreteCutsFormula />
+          <ConcretePumpFormula />
         </Accordion>
       </CardContent>
     </Card>
