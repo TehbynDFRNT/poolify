@@ -12,6 +12,7 @@ export const WebPriceCell = ({ poolId, trueCost, marginPercentage }: WebPriceCel
   // Web Price = True Cost / (1 - Margin/100)
   const calculateWebPrice = () => {
     if (!trueCost || marginPercentage === undefined || marginPercentage === null) {
+      console.log(`Web price calculation skipped for ${poolId}: Missing true cost or margin`);
       return null;
     }
     
@@ -20,10 +21,13 @@ export const WebPriceCell = ({ poolId, trueCost, marginPercentage }: WebPriceCel
     
     // Prevent division by zero or invalid calculations
     if (marginDecimal >= 1) {
+      console.log(`Web price calculation invalid for ${poolId}: Margin is >= 100%`);
       return null;
     }
     
-    return trueCost / (1 - marginDecimal);
+    const webPrice = trueCost / (1 - marginDecimal);
+    console.log(`Web price calculation for ${poolId}: ${trueCost} / (1 - ${marginPercentage/100}) = ${webPrice}`);
+    return webPrice;
   };
   
   const webPrice = calculateWebPrice();

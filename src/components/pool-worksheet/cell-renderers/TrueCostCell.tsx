@@ -19,9 +19,12 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
   
   // Calculate the true cost of the pool
   const getTrueCost = () => {
+    console.log(`========= True Cost Calculation for pool ${pool.name} (${poolId}) =========`);
+    
     // Get fixed costs total
     const fixedCostsTotal = fixedCosts ? 
       fixedCosts.reduce((total, cost) => total + (cost.price || 0), 0) : 0;
+    console.log('Fixed costs total:', fixedCostsTotal);
     
     // Get construction costs total
     const constructionCostsTotal = 
@@ -32,15 +35,32 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       (poolCost?.coping_supply || 0) + 
       (poolCost?.beam || 0) + 
       (poolCost?.coping_lay || 0);
+    console.log('Construction costs:', {
+      pea_gravel: poolCost?.pea_gravel || 0,
+      install_fee: poolCost?.install_fee || 0,
+      trucked_water: poolCost?.trucked_water || 0,
+      salt_bags: poolCost?.salt_bags || 0,
+      coping_supply: poolCost?.coping_supply || 0,
+      beam: poolCost?.beam || 0,
+      coping_lay: poolCost?.coping_lay || 0,
+      total: constructionCostsTotal
+    });
     
     // Get filtration package cost
     const filtrationCost = packageInfo?.price || 0;
+    console.log('Filtration package cost:', filtrationCost);
     
     // Get crane cost using the getCraneCost function
     const craneCost = getCraneCost(poolId);
+    console.log('Crane cost:', craneCost);
     
     // Get excavation cost using the calculateExcavationCost function
     const excavationCost = calculateExcavationCost(poolId);
+    console.log('Excavation cost:', excavationCost);
+    
+    // Get pool buy price
+    const poolBuyPrice = pool?.buy_price_ex_gst || 0;
+    console.log('Pool buy price:', poolBuyPrice);
     
     // Calculate total true cost
     const trueCost = 
@@ -49,7 +69,10 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       filtrationCost + 
       craneCost + 
       excavationCost + 
-      (pool?.buy_price_ex_gst || 0);
+      poolBuyPrice;
+    
+    console.log('TOTAL TRUE COST:', trueCost);
+    console.log(`=================================================================`);
       
     return trueCost;
   };
