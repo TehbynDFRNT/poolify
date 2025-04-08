@@ -17,16 +17,29 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
   const { getCraneCost } = useCraneData();
   const { calculateExcavationCost } = usePoolDigData();
   
-  // Calculate the true cost of the pool
+  // Calculate the true cost of the pool according to the formula: 15+17+19+21+29+40
+  // Which corresponds to: buy_price_inc_gst + package_price + crane_cost + dig_total + total_cost + fixed_costs_total
   const getTrueCost = () => {
     console.log(`========= True Cost Calculation for pool ${pool.name} (${poolId}) =========`);
+    console.log('Following the formula: Column 15 + Column 17 + Column 19 + Column 21 + Column 29 + Column 40');
     
-    // Get fixed costs total
-    const fixedCostsTotal = fixedCosts ? 
-      fixedCosts.reduce((total, cost) => total + (cost.price || 0), 0) : 0;
-    console.log('Fixed costs total:', fixedCostsTotal);
+    // Column 15: Buy Price (inc GST)
+    const poolBuyPrice = pool?.buy_price_inc_gst || 0;
+    console.log('Column 15 - Pool buy price (inc GST):', poolBuyPrice);
     
-    // Get construction costs total
+    // Column 17: Filtration Package Price
+    const filtrationCost = packageInfo?.price || 0;
+    console.log('Column 17 - Filtration package cost:', filtrationCost);
+    
+    // Column 19: Crane Cost
+    const craneCost = getCraneCost(poolId);
+    console.log('Column 19 - Crane cost:', craneCost);
+    
+    // Column 21: Excavation Cost
+    const excavationCost = calculateExcavationCost(poolId);
+    console.log('Column 21 - Excavation cost:', excavationCost);
+    
+    // Column 29: Construction Costs Total
     const constructionCostsTotal = 
       (poolCost?.pea_gravel || 0) + 
       (poolCost?.install_fee || 0) + 
@@ -37,7 +50,7 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       (poolCost?.coping_lay || 0);
       
     // Log individual construction costs for debugging
-    console.log('Construction costs:', {
+    console.log('Column 29 - Construction costs:', {
       pea_gravel: poolCost?.pea_gravel || 0,
       install_fee: poolCost?.install_fee || 0,
       trucked_water: poolCost?.trucked_water || 0,
@@ -48,32 +61,21 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       total: constructionCostsTotal
     });
     
-    // Get filtration package cost
-    const filtrationCost = packageInfo?.price || 0;
-    console.log('Filtration package cost:', filtrationCost);
+    // Column 40: Fixed Costs Total
+    const fixedCostsTotal = fixedCosts ? 
+      fixedCosts.reduce((total, cost) => total + (cost.price || 0), 0) : 0;
+    console.log('Column 40 - Fixed costs total:', fixedCostsTotal);
     
-    // Get crane cost using the getCraneCost function
-    const craneCost = getCraneCost(poolId);
-    console.log('Crane cost:', craneCost);
-    
-    // Get excavation cost using the calculateExcavationCost function
-    const excavationCost = calculateExcavationCost(poolId);
-    console.log('Excavation cost:', excavationCost);
-    
-    // Get pool buy price
-    const poolBuyPrice = pool?.buy_price_ex_gst || 0;
-    console.log('Pool buy price:', poolBuyPrice);
-    
-    // Calculate total true cost
+    // Calculate total true cost according to the formula
     const trueCost = 
-      fixedCostsTotal + 
-      constructionCostsTotal + 
+      poolBuyPrice +
       filtrationCost + 
       craneCost + 
       excavationCost + 
-      poolBuyPrice;
+      constructionCostsTotal + 
+      fixedCostsTotal;
     
-    console.log('TOTAL TRUE COST:', trueCost);
+    console.log('TOTAL TRUE COST (sum of columns 15+17+19+21+29+40):', trueCost);
     
     // Log the sum that user mentioned for comparison
     if (pool.name.includes('Empire')) {

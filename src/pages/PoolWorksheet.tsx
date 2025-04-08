@@ -1,3 +1,4 @@
+
 import { usePoolSpecifications } from "@/pages/ConstructionCosts/hooks/usePoolSpecifications";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
@@ -14,6 +15,7 @@ import { columnGroups, defaultVisibleGroups, essentialGroups } from "@/component
 import { useFixedCostsData } from "@/components/pool-worksheet/hooks/useFixedCostsData";
 import { Button } from "@/components/ui/button";
 import { List } from "lucide-react";
+import { FormulaSection } from "@/components/pool-worksheet/FormulaSection";
 
 const LOCAL_STORAGE_KEY = "poolWorksheet_visibleGroups";
 const ESSENTIAL_COLUMNS_KEY = "poolWorksheet_essentialOnly";
@@ -154,6 +156,9 @@ const PoolWorksheet = () => {
           setVisibleGroups={handleSetVisibleGroups}
           showEssentialOnly={showEssentialOnly}
         />
+        
+        {/* Add Formula Section */}
+        <FormulaSection />
       </div>
     </DashboardLayout>
   );
