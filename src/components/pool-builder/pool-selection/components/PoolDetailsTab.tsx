@@ -18,11 +18,6 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
   tabId, 
   title 
 }) => {
-  // Only show content when the tab is active
-  if (activeTab !== tabId) {
-    return null;
-  }
-
   return (
     <PoolDetailsSection
       pool={pool}

@@ -9,6 +9,7 @@ import { PoolDetailsSections } from "./components/PoolDetailsSections";
 import { SaveButton } from "./components/SaveButton";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface PoolSelectionSectionProps {
   customerId?: string | null;

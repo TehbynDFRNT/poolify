@@ -1,6 +1,6 @@
 
 import React from "react";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Info, Ruler, Package, DollarSign } from "lucide-react";
 import { Pool } from "@/types/pool";
 import { PoolDetailsTab } from "./PoolDetailsTab";
@@ -8,19 +8,15 @@ import { PoolDetailsTab } from "./PoolDetailsTab";
 interface PoolDetailsTabsProps {
   pool: Pool;
   selectedColor?: string;
-  activeTab: string;
-  setActiveTab: (value: string) => void;
 }
 
 export const PoolDetailsTabs: React.FC<PoolDetailsTabsProps> = ({ 
   pool, 
-  selectedColor, 
-  activeTab, 
-  setActiveTab 
+  selectedColor
 }) => {
   return (
     <div className="mt-4">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs defaultValue="details" className="w-full">
         <TabsList className="grid grid-cols-4 mb-4">
           <TabsTrigger value="details" className="flex items-center gap-1">
             <Info className="h-4 w-4" />
@@ -40,37 +36,45 @@ export const PoolDetailsTabs: React.FC<PoolDetailsTabsProps> = ({
           </TabsTrigger>
         </TabsList>
         
-        <PoolDetailsTab 
-          pool={pool}
-          selectedColor={selectedColor}
-          activeTab={activeTab}
-          tabId="details"
-          title="Pool Details"
-        />
+        <TabsContent value="details">
+          <PoolDetailsTab 
+            pool={pool}
+            selectedColor={selectedColor}
+            activeTab="details"
+            tabId="details"
+            title="Pool Details"
+          />
+        </TabsContent>
         
-        <PoolDetailsTab 
-          pool={pool}
-          selectedColor={selectedColor}
-          activeTab={activeTab}
-          tabId="dimensions"
-          title="Pool Dimensions"
-        />
+        <TabsContent value="dimensions">
+          <PoolDetailsTab 
+            pool={pool}
+            selectedColor={selectedColor}
+            activeTab="dimensions"
+            tabId="dimensions"
+            title="Pool Dimensions"
+          />
+        </TabsContent>
         
-        <PoolDetailsTab 
-          pool={pool}
-          selectedColor={selectedColor}
-          activeTab={activeTab}
-          tabId="filtration"
-          title="Filtration Package"
-        />
+        <TabsContent value="filtration">
+          <PoolDetailsTab 
+            pool={pool}
+            selectedColor={selectedColor}
+            activeTab="filtration"
+            tabId="filtration"
+            title="Filtration Package"
+          />
+        </TabsContent>
         
-        <PoolDetailsTab 
-          pool={pool}
-          selectedColor={selectedColor}
-          activeTab={activeTab}
-          tabId="pricing"
-          title="Pricing Information"
-        />
+        <TabsContent value="pricing">
+          <PoolDetailsTab 
+            pool={pool}
+            selectedColor={selectedColor}
+            activeTab="pricing"
+            tabId="pricing"
+            title="Pricing Information"
+          />
+        </TabsContent>
       </Tabs>
     </div>
   );
