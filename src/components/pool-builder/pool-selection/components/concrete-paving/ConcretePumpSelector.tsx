@@ -99,7 +99,7 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({ pool
           concrete_pump_needed: isPumpNeeded,
           concrete_pump_quantity: isPumpNeeded ? quantity : null,
           concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
-        } as any) // Type assertion to bypass TypeScript error temporarily
+        })
         .eq('id', customerId);
         
       if (error) throw error;
@@ -130,6 +130,7 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({ pool
           <SaveButton 
             onClick={handleSave}
             isSubmitting={isSaving}
+            disabled={false}
             buttonText="Save Details"
             className="bg-primary"
           />

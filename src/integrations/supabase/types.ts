@@ -891,6 +891,9 @@ export type Database = {
       pool_projects: {
         Row: {
           bobcat_id: string | null
+          concrete_pump_needed: boolean | null
+          concrete_pump_quantity: number | null
+          concrete_pump_total_cost: number | null
           crane_id: string | null
           created_at: string
           email: string
@@ -921,6 +924,9 @@ export type Database = {
         }
         Insert: {
           bobcat_id?: string | null
+          concrete_pump_needed?: boolean | null
+          concrete_pump_quantity?: number | null
+          concrete_pump_total_cost?: number | null
           crane_id?: string | null
           created_at?: string
           email: string
@@ -951,6 +957,9 @@ export type Database = {
         }
         Update: {
           bobcat_id?: string | null
+          concrete_pump_needed?: boolean | null
+          concrete_pump_quantity?: number | null
+          concrete_pump_total_cost?: number | null
           crane_id?: string | null
           created_at?: string
           email?: string
