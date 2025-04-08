@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { calculateExtraConcretingCost } from "@/utils/calculations";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface ExtraConcretingProps {
   pool: Pool;
@@ -256,10 +257,10 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
                   <h5 className="text-sm font-medium mb-2">Total ({meterage} m²)</h5>
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <div>Base Price:</div>
-                    <div className="text-right">${(getSelectedConcreteType()?.price || 0 * meterage).toFixed(2)}</div>
+                    <div className="text-right">${((getSelectedConcreteType()?.price || 0) * meterage).toFixed(2)}</div>
                     
                     <div>Margin:</div>
-                    <div className="text-right">${(getSelectedConcreteType()?.margin || 0 * meterage).toFixed(2)}</div>
+                    <div className="text-right">${((getSelectedConcreteType()?.margin || 0) * meterage).toFixed(2)}</div>
                     
                     <div className="font-medium">Materials Subtotal:</div>
                     <div className="text-right font-medium">${totalCost.toFixed(2)}</div>
@@ -272,13 +273,13 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
         
         {selectedType && (
           <div className="mt-6">
-            <button
+            <Button
               onClick={() => setShowDeleteConfirm(true)}
               className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isDeleting || isLoading}
             >
               {isDeleting ? "Removing..." : "Remove"}
-            </button>
+            </Button>
           </div>
         )}
       </CardContent>

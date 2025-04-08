@@ -10,6 +10,8 @@ import { formatCurrency } from "@/utils/format";
 import { SaveButton } from "../SaveButton";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 interface ExtraPavingConcretingProps {
   pool: Pool;
@@ -28,6 +30,8 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const { pavingCategoryTotals, isLoading: isCategoriesLoading } = useFormulaCalculations();
 
   // Fetch existing data when component mounts
@@ -122,6 +126,43 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
       toast.error("Failed to save extra paving details");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Handle delete
+  const handleDelete = async () => {
+    if (!customerId) {
+      toast.error("Customer information required");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      // Clear the values in the database
+      const updateData = {
+        extra_paving_category: null,
+        extra_paving_square_meters: null,
+        extra_paving_total_cost: null
+      };
+      
+      const { error } = await supabase
+        .from('pool_projects')
+        .update(updateData as any)
+        .eq('id', customerId);
+
+      if (error) throw error;
+      
+      // Reset the form
+      setSelectedCategory("");
+      setSquareMeters(0);
+      
+      toast.success("Extra paving and concreting removed successfully");
+      setShowDeleteConfirm(false);
+    } catch (error) {
+      console.error("Error removing extra paving:", error);
+      toast.error("Failed to remove extra paving details");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -246,7 +287,41 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
             </div>
           </div>
         )}
+
+        {selectedCategory && (
+          <div className="mt-6">
+            <Button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isDeleting || isLoading}
+            >
+              {isDeleting ? "Removing..." : "Remove"}
+            </Button>
+          </div>
+        )}
       </CardContent>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Extra Paving and Concreting</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove the extra paving and concreting data? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
