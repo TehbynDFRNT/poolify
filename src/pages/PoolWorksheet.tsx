@@ -26,7 +26,7 @@ const PoolWorksheet = () => {
   // Show a notification that the data has been simplified
   useEffect(() => {
     toast.info("Pool worksheet updated", {
-      description: "Now showing pool name, range, buy prices, fixed costs, filtration costs, crane costs, excavation costs, and individual costs."
+      description: "Now showing pool name, range, buy prices, fixed costs, filtration costs, crane costs, and excavation costs."
     });
   }, []);
 
@@ -55,7 +55,7 @@ const PoolWorksheet = () => {
             <p className="text-muted-foreground mt-1">
               {isDataEmpty 
                 ? "All pool worksheet data has been reset" 
-                : "Showing pool details, pricing, fixed costs, filtration costs, crane costs, excavation costs, and individual costs"}
+                : "Showing pool details, pricing, fixed costs, filtration costs, crane costs, and excavation costs"}
             </p>
           </div>
         </div>

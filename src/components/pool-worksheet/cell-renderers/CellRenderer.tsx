@@ -9,7 +9,6 @@ import { PoolSpecificationCell } from "./PoolSpecificationCell";
 import { TrueCostCell } from "./TrueCostCell";
 import { MarginCell } from "./MarginCell";
 import { WebPriceCell } from "./WebPriceCell";
-import { IndividualCostsCell } from "./IndividualCostsCell";
 import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 
 interface CellRendererProps {
@@ -30,10 +29,7 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
     return <ExcavationCell poolId={pool.id} column={column} />;
   }
 
-  // Handle individual costs column
-  if (column === "individual_costs") {
-    return <IndividualCostsCell poolId={pool.id} column={column} />;
-  }
+  // Removed individual costs column handler
 
   // Handle fixed costs columns
   if (column === "fixed_costs_total" || column.startsWith('fixed_cost_')) {
