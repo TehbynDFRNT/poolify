@@ -149,10 +149,15 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
     }
   };
 
-  // Get label from ID
-  const getTypeLabel = (id: string) => {
-    const type = CONCRETE_TYPES.find(item => item.id === id);
-    return type ? type.label : "";
+  // Get selected concrete type details
+  const getSelectedConcreteType = () => {
+    return CONCRETE_TYPES.find(item => item.id === selectedType);
+  };
+
+  // Get per meter rate
+  const getPerMeterRate = () => {
+    const concreteType = getSelectedConcreteType();
+    return concreteType ? calculateExtraConcretingCost(concreteType.price, concreteType.margin) : 0;
   };
 
   return (
@@ -198,15 +203,38 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
         
         {selectedType && meterage > 0 && (
           <div className="mt-4 p-4 bg-gray-50 rounded-md border border-gray-200">
-            <div className="flex justify-between">
-              <span className="font-medium">Total Cost:</span>
-              <span className="font-bold">${totalCost.toFixed(2)}</span>
-            </div>
-            <div className="text-xs text-gray-500 mt-1">
-              {getTypeLabel(selectedType)}: ${(calculateExtraConcretingCost(
-                CONCRETE_TYPES.find(t => t.id === selectedType)?.price || 0,
-                CONCRETE_TYPES.find(t => t.id === selectedType)?.margin || 0
-              )).toFixed(2)} × {meterage} m²
+            <h4 className="text-base font-medium mb-2">Cost Summary</h4>
+            <div className="space-y-4">
+              {/* Cost breakdown */}
+              <div className="grid grid-cols-2 gap-y-1.5 text-sm">
+                <span className="text-gray-600">Base Price:</span>
+                <span className="text-right font-medium">
+                  ${getSelectedConcreteType()?.price.toFixed(2)}/m²
+                </span>
+                
+                <span className="text-gray-600">Margin:</span>
+                <span className="text-right font-medium">
+                  ${getSelectedConcreteType()?.margin.toFixed(2)}/m²
+                </span>
+                
+                <span className="text-gray-600 font-medium pt-1 border-t">Rate per m²:</span>
+                <span className="text-right font-medium pt-1 border-t">
+                  ${getPerMeterRate().toFixed(2)}/m²
+                </span>
+                
+                <span className="text-gray-600">Area:</span>
+                <span className="text-right">{meterage} m²</span>
+              </div>
+              
+              {/* Total calculation */}
+              <div className="flex justify-between pt-2 border-t border-gray-200">
+                <span className="font-medium">Total Cost:</span>
+                <span className="font-bold">${totalCost.toFixed(2)}</span>
+              </div>
+              
+              <div className="text-xs text-gray-500 mt-1">
+                Calculation: {getSelectedConcreteType()?.label}: ${getPerMeterRate().toFixed(2)} × {meterage} m²
+              </div>
             </div>
           </div>
         )}
