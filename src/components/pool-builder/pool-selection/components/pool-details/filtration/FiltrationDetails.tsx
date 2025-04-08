@@ -101,7 +101,7 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
             <SelectContent>
               {packages.map((pkg) => (
                 <SelectItem key={pkg.id} value={pkg.id}>
-                  Option {pkg.display_order} - {pkg.name}
+                  Option {pkg.display_order}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -119,4 +119,3 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
     </div>
   );
 };
-
