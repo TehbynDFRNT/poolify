@@ -48,9 +48,9 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
       const { data, error } = await supabase
         .from('pool_projects')
         .select(`
-          extra_paving_concrete_cost,
-          paving_on_existing_concrete_cost,
-          extra_concreting_cost,
+          extra_paving_total_cost,
+          existing_concrete_paving_total_cost,
+          extra_concreting_total_cost,
           concrete_pump_total_cost,
           under_fence_concrete_strips_cost,
           concrete_cuts_cost
@@ -65,9 +65,9 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
       
       if (data) {
         const summaryData: SummaryData = {
-          extraPavingCost: data.extra_paving_concrete_cost || 0,
-          existingConcretePavingCost: data.paving_on_existing_concrete_cost || 0,
-          extraConcretingCost: data.extra_concreting_cost || 0,
+          extraPavingCost: data.extra_paving_total_cost || 0,
+          existingConcretePavingCost: data.existing_concrete_paving_total_cost || 0,
+          extraConcretingCost: data.extra_concreting_total_cost || 0,
           concretePumpCost: data.concrete_pump_total_cost || 0,
           underFenceStripsCost: data.under_fence_concrete_strips_cost || 0,
           concreteCutsCost: data.concrete_cuts_cost || 0,
