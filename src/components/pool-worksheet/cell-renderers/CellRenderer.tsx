@@ -25,7 +25,7 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
   }
   
   // Handle excavation columns
-  if (column === "dig_type" || column === "dig_total") {
+  if (column === "dig_type" || column === "dig_total" || column === "excavation") {
     return <ExcavationCell poolId={pool.id} column={column} />;
   }
 
