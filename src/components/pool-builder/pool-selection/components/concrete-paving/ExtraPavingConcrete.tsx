@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Layers } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
+import { useFormulaCalculations } from "@/hooks/calculations/useFormulaCalculations";
 
 interface ExtraPavingConcreteProps {
   pool: Pool;
@@ -23,6 +24,8 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
   const [totalCost, setTotalCost] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  
+  const { pavingCategoryTotals, concreteCostPerMeter, labourCostWithMargin } = useFormulaCalculations();
   
   // Fetch extra paving categories on component mount
   useEffect(() => {
@@ -85,13 +88,16 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
     if (selectedCategory && squareMeters > 0) {
       const selectedPaving = extraPavingCosts.find(paving => paving.id === selectedCategory);
       if (selectedPaving) {
-        const totalPerMeter = selectedPaving.paver_cost + selectedPaving.margin_cost + selectedPaving.wastage_cost;
-        setTotalCost(totalPerMeter * squareMeters);
+        const selectedPavingTotal = pavingCategoryTotals.find(cat => cat.id === selectedCategory);
+        if (selectedPavingTotal) {
+          // Use formula from reference: Rate per m² × Area
+          setTotalCost(selectedPavingTotal.totalRate * squareMeters);
+        }
       }
     } else {
       setTotalCost(0);
     }
-  }, [selectedCategory, squareMeters, extraPavingCosts]);
+  }, [selectedCategory, squareMeters, extraPavingCosts, pavingCategoryTotals]);
   
   // Handle category selection
   const handleCategoryChange = (value: string) => {
@@ -126,6 +132,14 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
     } finally {
       setIsSaving(false);
     }
+  };
+  
+  // Get the rate per m² for the selected category
+  const getRatePerMeter = () => {
+    if (!selectedCategory) return 0;
+    
+    const selectedPavingTotal = pavingCategoryTotals.find(cat => cat.id === selectedCategory);
+    return selectedPavingTotal ? selectedPavingTotal.totalRate : 0;
   };
   
   return (
@@ -176,23 +190,21 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
             </Select>
           </div>
           
-          {selectedCategory && (
-            <div>
-              <Label htmlFor="square-meters" className="font-medium">
-                Square Meters Required
-              </Label>
-              <Input
-                id="square-meters"
-                type="number"
-                min="0"
-                step="0.5"
-                value={squareMeters}
-                onChange={handleSquareMetersChange}
-                className="mt-2"
-                disabled={isLoading}
-              />
-            </div>
-          )}
+          <div>
+            <Label htmlFor="square-meters" className="font-medium">
+              Square Meters Required
+            </Label>
+            <Input
+              id="square-meters"
+              type="number"
+              min="0"
+              step="0.5"
+              value={squareMeters}
+              onChange={handleSquareMetersChange}
+              className="mt-2"
+              disabled={isLoading}
+            />
+          </div>
           
           {selectedCategory && squareMeters > 0 && (
             <div className="mt-6 bg-gray-50 p-4 rounded-md">
@@ -200,33 +212,24 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
               
               {extraPavingCosts.find(paving => paving.id === selectedCategory) && (
                 <div className="space-y-2">
-                  {(() => {
-                    const selectedPaving = extraPavingCosts.find(paving => paving.id === selectedCategory)!;
-                    const totalPerMeter = selectedPaving.paver_cost + selectedPaving.margin_cost + selectedPaving.wastage_cost;
+                  <div className="grid grid-cols-2 gap-y-1 text-sm">
+                    <span>Category:</span>
+                    <span className="text-right">{extraPavingCosts.find(paving => paving.id === selectedCategory)?.category}</span>
                     
-                    return (
-                      <>
-                        <div className="grid grid-cols-2 gap-y-1 text-sm">
-                          <span>Category:</span>
-                          <span className="text-right">{selectedPaving.category}</span>
-                          
-                          <span>Cost per m²:</span>
-                          <span className="text-right">{formatCurrency(totalPerMeter)}</span>
-                          
-                          <span>Area:</span>
-                          <span className="text-right">{squareMeters} m²</span>
-                          
-                          <span className="font-medium border-t pt-2 mt-1">Total Cost:</span>
-                          <span className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</span>
-                        </div>
-                        
-                        <div className="mt-4 text-sm text-muted-foreground">
-                          <p>This is based on the standard formula: Rate per m² × Area</p>
-                          <p className="mt-1">Example: {formatCurrency(totalPerMeter)} × {squareMeters} m² = {formatCurrency(totalCost)}</p>
-                        </div>
-                      </>
-                    );
-                  })()}
+                    <span>Cost per m²:</span>
+                    <span className="text-right">{formatCurrency(getRatePerMeter())}</span>
+                    
+                    <span>Area:</span>
+                    <span className="text-right">{squareMeters} m²</span>
+                    
+                    <span className="font-medium border-t pt-2 mt-1">Total Cost:</span>
+                    <span className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</span>
+                  </div>
+                  
+                  <div className="mt-4 text-sm text-muted-foreground">
+                    <p>This is based on the standard formula: Rate per m² × Area</p>
+                    <p className="mt-1">Example: {formatCurrency(getRatePerMeter())} × {squareMeters} m² = {formatCurrency(totalCost)}</p>
+                  </div>
                 </div>
               )}
             </div>
