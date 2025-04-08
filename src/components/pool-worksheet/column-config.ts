@@ -16,7 +16,7 @@ export const columnGroups: ColumnGroup[] = [
     id: "pricing",
     title: "Pool Costs",
     color: "bg-blue-100 text-blue-800",
-    columns: ["buy_price_inc_gst", "fixed_costs_total", "filtration_costs", "crane_cost", "excavation", "individual_costs"] // Removed buy_price_ex_gst
+    columns: ["buy_price_inc_gst", "fixed_costs_total", "filtration_costs", "crane_cost", "excavation", "individual_costs", "true_cost"] // Added true_cost column
   }
 ];
 
@@ -31,6 +31,7 @@ export const columnLabels: ColumnLabels = {
   "crane_cost": "Crane Costs",
   "excavation": "Excavation Costs",
   "individual_costs": "Individual Costs",
+  "true_cost": "True Cost",
 };
 
 // Default visible column groups - only show identification and pricing
