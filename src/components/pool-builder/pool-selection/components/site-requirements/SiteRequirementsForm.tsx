@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { SiteRequirementsSection } from "./SiteRequirementsSection";
 import { CustomSiteRequirements } from "./CustomSiteRequirements";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -139,25 +139,44 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
 
   return (
     <div className="space-y-6">
-      <SiteRequirementsSection
-        craneId={craneId}
-        onCraneChange={setCraneId}
-        trafficControlId={trafficControlId}
-        onTrafficControlChange={setTrafficControlId}
-        bobcatId={bobcatId}
-        onBobcatChange={setBobcatId}
-      />
-      
-      <CustomSiteRequirements
-        requirements={customRequirements}
-        addRequirement={addRequirement}
-        removeRequirement={removeRequirement}
-        updateRequirement={updateRequirement}
-      />
-      
+      {/* Standard Site Requirements Section */}
       <Card>
-        <CardContent className="p-4">
-          <Label htmlFor="site-notes" className="mb-2 block">Additional Notes</Label>
+        <CardHeader>
+          <CardTitle className="text-xl">Standard Site Requirements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SiteRequirementsSection
+            craneId={craneId}
+            onCraneChange={setCraneId}
+            trafficControlId={trafficControlId}
+            onTrafficControlChange={setTrafficControlId}
+            bobcatId={bobcatId}
+            onBobcatChange={setBobcatId}
+          />
+        </CardContent>
+      </Card>
+      
+      {/* Custom Site Requirements Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Custom Requirements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CustomSiteRequirements
+            requirements={customRequirements}
+            addRequirement={addRequirement}
+            removeRequirement={removeRequirement}
+            updateRequirement={updateRequirement}
+          />
+        </CardContent>
+      </Card>
+      
+      {/* Additional Notes Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Additional Notes</CardTitle>
+        </CardHeader>
+        <CardContent>
           <Textarea
             id="site-notes"
             placeholder="Enter any additional notes about site requirements..."
@@ -168,6 +187,7 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
         </CardContent>
       </Card>
       
+      {/* Save Button */}
       <div className="flex justify-end">
         <Button 
           onClick={handleSaveRequirements}
