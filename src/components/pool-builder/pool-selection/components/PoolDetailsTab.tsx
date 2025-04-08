@@ -24,7 +24,7 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
       selectedColor={selectedColor}
       sectionId={tabId}
       title={title}
-      className="mt-2"
+      className="mt-0 shadow-none border-0 bg-transparent"
     />
   );
 };
