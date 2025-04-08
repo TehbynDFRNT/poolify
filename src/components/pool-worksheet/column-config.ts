@@ -1,4 +1,3 @@
-
 import { ColumnGroup, ColumnLabels } from "./types";
 
 // Define some default fixed costs columns that will be used as fallback
@@ -32,37 +31,37 @@ export const columnGroups: ColumnGroup[] = [
   },
   {
     id: "pricing",
-    title: "Pool Pricing",
+    title: "Pool Costs",
     color: "bg-blue-100 text-blue-800",
     columns: ["buy_price_ex_gst", "buy_price_inc_gst"] // Columns 14, 15
   },
   {
     id: "filtration",
-    title: "Filtration Package",
+    title: "Filtration Costs",
     color: "bg-green-100 text-green-800",
     columns: ["default_package", "package_price"] // Columns 16, 17
   },
   {
     id: "crane",
-    title: "Crane Information",
+    title: "Crane Costs",
     color: "bg-amber-100 text-amber-800",
     columns: ["crane_type", "crane_cost"] // Columns 18, 19
   },
   {
     id: "excavation",
-    title: "Excavation",
+    title: "Excavation Costs",
     color: "bg-orange-100 text-orange-800",
     columns: ["dig_type", "dig_total"] // Columns 20, 21
   },
   {
     id: "construction_costs",
-    title: "Pool Individual Costs",
+    title: "Individual Pool Costs",
     color: "bg-amber-100 text-amber-800",
     columns: ["pea_gravel", "install_fee", "trucked_water", "salt_bags", "coping_supply", "beam", "coping_lay", "total_cost"] // Columns 22-29
   },
   {
     id: "fixed_costs",
-    title: "Fixed Costs",
+    title: "Fixed Pool Costs",
     color: "bg-purple-100 text-purple-800",
     columns: defaultFixedCostColumns // Columns 30-39 (variable)
   },
@@ -70,7 +69,13 @@ export const columnGroups: ColumnGroup[] = [
     id: "true_cost",
     title: "True Cost",
     color: "bg-red-100 text-red-800",
-    columns: ["true_cost"] // Column 40, 41
+    columns: ["true_cost"] // Column 40
+  },
+  {
+    id: "margin",
+    title: "Margin",
+    color: "bg-emerald-100 text-emerald-800",
+    columns: ["margin_percentage"] // Column 41
   }
 ];
 
@@ -115,14 +120,16 @@ export const columnLabels: ColumnLabels = {
   
   // Excavation
   "dig_type": "Dig Type",
-  "dig_total": "Dig Total"
+  "dig_total": "Dig Total",
+  
+  // Add new Margin column label
+  "margin_percentage": "Margin %"
 };
 
 // Default visible column groups - ensure fixed_costs and true_cost are included
 export const defaultVisibleGroups = [
-  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs", "true_cost"
+  "identification", "dimensions", "pricing", "crane", "excavation", "construction_costs", "fixed_costs", "true_cost", "margin"
 ];
 
-// Define essential column groups to include columns 1,2,15,17,19,21,29,40,41
-export const essentialGroups = ["identification", "pricing", "filtration", "crane", "excavation", "construction_costs", "true_cost"];
-
+// Define essential column groups to include columns 1,2,15,17,19,21,29,40,41,42
+export const essentialGroups = ["identification", "pricing", "filtration", "crane", "excavation", "construction_costs", "true_cost", "margin"];

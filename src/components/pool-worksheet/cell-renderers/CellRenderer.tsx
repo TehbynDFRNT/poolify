@@ -7,6 +7,7 @@ import { FiltrationPackageCell } from "./FiltrationPackageCell";
 import { ConstructionCostsCell } from "./ConstructionCostsCell";
 import { PoolSpecificationCell } from "./PoolSpecificationCell";
 import { TrueCostCell } from "./TrueCostCell";
+import { MarginCell } from "./MarginCell";
 
 interface CellRendererProps {
   pool: Pool;
@@ -54,6 +55,11 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
       packageInfo={packageInfo}
       pool={pool}
     />;
+  }
+  
+  // Handle Margin column
+  if (column === "margin_percentage") {
+    return <MarginCell poolId={pool.id} />;
   }
   
   // Handle regular pool specification columns
