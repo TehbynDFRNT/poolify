@@ -14,13 +14,14 @@ interface TrueCostCellProps {
 
 export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCellProps) => {
   const { fixedCosts } = useFixedCostsData();
-  const { craneDataByPoolId } = useCraneData();
-  const { digDataByPoolId } = usePoolDigData();
+  const { getCraneCost } = useCraneData();
+  const { calculateExcavationCost } = usePoolDigData();
   
   // Calculate the true cost of the pool
   const getTrueCost = () => {
     // Get fixed costs total
-    const fixedCostsTotal = fixedCosts?.fixed_costs_total || 0;
+    const fixedCostsTotal = fixedCosts ? 
+      fixedCosts.reduce((total, cost) => total + (cost.price || 0), 0) : 0;
     
     // Get construction costs total
     const constructionCostsTotal = 
@@ -35,11 +36,11 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
     // Get filtration package cost
     const filtrationCost = packageInfo?.price || 0;
     
-    // Get crane cost
-    const craneCost = craneDataByPoolId?.[poolId]?.crane_cost || 0;
+    // Get crane cost using the getCraneCost function
+    const craneCost = getCraneCost(poolId);
     
-    // Get excavation cost
-    const excavationCost = digDataByPoolId?.[poolId]?.dig_total || 0;
+    // Get excavation cost using the calculateExcavationCost function
+    const excavationCost = calculateExcavationCost(poolId);
     
     // Calculate total true cost
     const trueCost = 

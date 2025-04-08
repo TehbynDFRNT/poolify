@@ -1,6 +1,5 @@
 
 import { formatCurrency } from "@/utils/format";
-import { useWebPrice } from "@/pages/Quotes/components/SelectPoolStep/hooks/useWebPrice";
 
 interface WebPriceCellProps {
   poolId: string;
