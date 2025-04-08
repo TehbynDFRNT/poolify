@@ -4,6 +4,7 @@ import { Pool } from "@/types/pool";
 import { PoolDetailsContent } from "./PoolDetailsContent";
 import { PoolDimensionsContent } from "./PoolDimensionsContent";
 import { PoolPricingContent } from "./PoolPricingContent";
+import { PoolFixedCostsContent } from "./PoolFixedCostsContent";
 import { PoolFiltrationContent } from "./PoolFiltrationContent";
 import { PoolCraneContent } from "./PoolCraneContent";
 import { PoolExcavationContent } from "./PoolExcavationContent";
@@ -34,6 +35,8 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
         return <PoolDimensionsContent pool={pool} />;
       case "pricing":
         return <PoolPricingContent pool={pool} />;
+      case "fixed-costs":
+        return <PoolFixedCostsContent pool={pool} />;
       case "filtration":
         return <PoolFiltrationContent pool={pool} />;
       case "crane":

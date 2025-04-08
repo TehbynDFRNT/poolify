@@ -45,6 +45,15 @@ export const PoolDetailsSections: React.FC<PoolDetailsSectionsProps> = ({
           className="border rounded-md shadow-sm"
         />
 
+        {/* Fixed Costs Section */}
+        <PoolDetailsSection
+          pool={pool}
+          selectedColor={selectedColor}
+          sectionId="fixed-costs"
+          title="Fixed Pool Costs"
+          className="border rounded-md shadow-sm"
+        />
+
         {/* Pool Filtration Section */}
         <PoolDetailsSection
           pool={pool}
