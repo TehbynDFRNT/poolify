@@ -10,6 +10,7 @@ import { PoolCraneContent } from "./PoolCraneContent";
 import { PoolExcavationContent } from "./PoolExcavationContent";
 import { PoolIndividualCostsContent } from "./PoolIndividualCostsContent";
 import { PoolCostsSummaryContent } from "./PoolCostsSummaryContent";
+import { PoolWebRRPContent } from "./PoolWebRRPContent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PoolDetailsSectionProps {
@@ -47,8 +48,9 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
       case "individual-costs":
         return <PoolIndividualCostsContent pool={pool} />;
       case "costs-summary":
-      case "web-rrp": // We're using the same component for both costs-summary and web-rrp
         return <PoolCostsSummaryContent pool={pool} />;
+      case "web-rrp":
+        return <PoolWebRRPContent pool={pool} />;
       default:
         return <p>No details available</p>;
     }
