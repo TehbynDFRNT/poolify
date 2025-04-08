@@ -76,18 +76,6 @@ export const TrueCostCell = ({ poolId, poolCost, packageInfo, pool }: TrueCostCe
       fixedCostsTotal;
     
     console.log('TOTAL TRUE COST (sum of columns 15+17+19+21+29+40):', trueCost);
-    
-    // Log the sum that user mentioned for comparison
-    if (pool.name.includes('Empire')) {
-      const userMentionedSum = 36859.8;
-      console.log('User mentioned sum:', userMentionedSum);
-      console.log('Difference:', userMentionedSum - trueCost);
-      
-      // Calculate if any component is missing by comparing
-      const potentialMissingValue = userMentionedSum - trueCost;
-      console.log('Potential missing value:', potentialMissingValue);
-    }
-    
     console.log(`=================================================================`);
       
     return trueCost;

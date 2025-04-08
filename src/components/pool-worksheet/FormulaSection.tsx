@@ -22,7 +22,7 @@ export function FormulaSection() {
     <div className="mt-8 border rounded-md p-4 bg-slate-50">
       <h2 className="text-xl font-bold mb-4">Formulas</h2>
       
-      <Accordion type="single" collapsible className="w-full">
+      <Accordion type="single" collapsible className="w-full" defaultValue="true-cost">
         <AccordionItem value="true-cost">
           <AccordionTrigger className="text-md font-medium">
             True Cost Calculation
@@ -34,7 +34,7 @@ export function FormulaSection() {
               </p>
               
               <div className="bg-white p-3 rounded-md border mb-3">
-                <code className="text-sm">
+                <code className="text-sm font-bold">
                   Column 15 ({columnLabels["buy_price_inc_gst"]}) + 
                   Column 17 ({columnLabels["package_price"]}) + 
                   Column 19 ({columnLabels["crane_cost"]}) + 
