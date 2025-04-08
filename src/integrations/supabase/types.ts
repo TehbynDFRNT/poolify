@@ -894,6 +894,9 @@ export type Database = {
           crane_id: string | null
           created_at: string
           email: string
+          extra_paving_category: string | null
+          extra_paving_square_meters: number | null
+          extra_paving_total_cost: number | null
           home_address: string
           id: string
           installation_area: string
@@ -915,6 +918,9 @@ export type Database = {
           crane_id?: string | null
           created_at?: string
           email: string
+          extra_paving_category?: string | null
+          extra_paving_square_meters?: number | null
+          extra_paving_total_cost?: number | null
           home_address: string
           id?: string
           installation_area: string
@@ -936,6 +942,9 @@ export type Database = {
           crane_id?: string | null
           created_at?: string
           email?: string
+          extra_paving_category?: string | null
+          extra_paving_square_meters?: number | null
+          extra_paving_total_cost?: number | null
           home_address?: string
           id?: string
           installation_area?: string
@@ -953,6 +962,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "fk_extra_paving_category"
+            columns: ["extra_paving_category"]
+            isOneToOne: false
+            referencedRelation: "extra_paving_costs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "pool_projects_bobcat_id_fkey"
             columns: ["bobcat_id"]

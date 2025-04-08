@@ -20,7 +20,41 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const { pavingCategoryTotals, isLoading } = useFormulaCalculations();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { pavingCategoryTotals, isLoading: isCategoriesLoading } = useFormulaCalculations();
+
+  // Fetch existing data when component mounts
+  useEffect(() => {
+    if (customerId) {
+      fetchExistingData();
+    }
+  }, [customerId]);
+
+  // Fetch existing extra paving data for this customer
+  const fetchExistingData = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .from('pool_projects')
+        .select('extra_paving_category, extra_paving_square_meters')
+        .eq('id', customerId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching extra paving data:", error);
+        return;
+      }
+
+      if (data && data.extra_paving_category) {
+        setSelectedCategory(data.extra_paving_category);
+        setSquareMeters(data.extra_paving_square_meters || 0);
+      }
+    } catch (error) {
+      console.error("Error in fetchExistingData:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Get selected category details
   const selectedCategoryDetails = pavingCategoryTotals.find(
@@ -101,7 +135,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
             <Select
               value={selectedCategory}
               onValueChange={setSelectedCategory}
-              disabled={isLoading}
+              disabled={isLoading || isCategoriesLoading}
             >
               <SelectTrigger id="paving-category" className="mt-2">
                 <SelectValue placeholder="Select category" />
@@ -127,7 +161,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
               onChange={handleSquareMetersChange}
               placeholder="Enter area in square meters"
               className="mt-2"
-              disabled={!selectedCategory}
+              disabled={!selectedCategory || isLoading}
             />
           </div>
         </div>
