@@ -34,8 +34,8 @@ export const CellRenderer = ({ pool, column, poolCost, packageInfo }: CellRender
     return <FixedCostsCell column={column} />;
   }
   
-  // Handle filtration package columns
-  if (column === "default_package" || column === "package_price") {
+  // Handle filtration package column - only show filtration_costs now
+  if (column === "filtration_costs") {
     return <FiltrationPackageCell package_info={packageInfo} column={column} />;
   }
   

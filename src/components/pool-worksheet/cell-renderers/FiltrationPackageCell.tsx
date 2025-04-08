@@ -8,9 +8,7 @@ interface FiltrationPackageCellProps {
 }
 
 export const FiltrationPackageCell = ({ package_info, column }: FiltrationPackageCellProps) => {
-  if (column === "default_package") {
-    return <>{package_info ? `Option ${package_info.display_order}` : '-'}</>;
-  } else if (column === "package_price") {
+  if (column === "filtration_costs") {
     const price = package_info ? calculatePackagePrice(package_info) : 0;
     return <>{package_info ? formatCurrency(price) : '-'}</>;
   }
