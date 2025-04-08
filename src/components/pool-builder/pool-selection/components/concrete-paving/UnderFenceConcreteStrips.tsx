@@ -63,34 +63,36 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
         console.error("Error fetching existing under fence strips data:", error);
       } else if (data && data.site_requirements_data) {
         // Extract under fence strips data from site requirements
-        const underFenceData = data.site_requirements_data.filter(
-          (item: any) => item.type === 'under_fence_strip'
-        );
-        
-        if (underFenceData.length > 0) {
-          const selectedStripsIds: string[] = [];
-          const quantitiesObj: Record<string, number> = {};
+        if (Array.isArray(data.site_requirements_data)) {
+          const underFenceData = data.site_requirements_data.filter(
+            (item: any) => item.type === 'under_fence_strip'
+          );
           
-          underFenceData.forEach((item: any) => {
-            if (item.stripId && item.length) {
-              selectedStripsIds.push(item.stripId);
-              quantitiesObj[item.stripId] = item.length;
-            }
-          });
-          
-          setSelectedStrips(selectedStripsIds);
-          setQuantities(quantitiesObj);
-          
-          // Calculate total cost
-          let total = 0;
-          underFenceData.forEach((item: any) => {
-            const stripType = stripTypes.find(type => type.id === item.stripId);
-            if (stripType) {
-              total += (stripType.cost + stripType.margin) * item.length;
-            }
-          });
-          
-          setTotalCost(total);
+          if (underFenceData.length > 0) {
+            const selectedStripsIds: string[] = [];
+            const quantitiesObj: Record<string, number> = {};
+            
+            underFenceData.forEach((item: any) => {
+              if (item.stripId && item.length) {
+                selectedStripsIds.push(item.stripId);
+                quantitiesObj[item.stripId] = item.length;
+              }
+            });
+            
+            setSelectedStrips(selectedStripsIds);
+            setQuantities(quantitiesObj);
+            
+            // Calculate total cost
+            let total = 0;
+            underFenceData.forEach((item: any) => {
+              const stripType = stripTypes.find(type => type.id === item.stripId);
+              if (stripType) {
+                total += (stripType.cost + stripType.margin) * item.length;
+              }
+            });
+            
+            setTotalCost(total);
+          }
         }
       }
     } catch (error) {
@@ -149,38 +151,43 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
       
       // Remove existing under fence strips data
       let siteRequirementsData = data.site_requirements_data || [];
-      siteRequirementsData = siteRequirementsData.filter(
-        (item: any) => item.type !== 'under_fence_strip'
-      );
       
-      // Add new under fence strips data
-      selectedStrips.forEach(stripId => {
-        const stripType = stripTypes.find(type => type.id === stripId);
-        if (stripType) {
-          const length = quantities[stripId] || 1;
-          const cost = (stripType.cost + stripType.margin) * length;
-          
-          siteRequirementsData.push({
-            type: 'under_fence_strip',
-            stripId,
-            stripType: stripType.type,
-            length,
-            cost
-          });
-        }
-      });
-      
-      // Update the database
-      const { error: updateError } = await supabase
-        .from('pool_projects')
-        .update({
-          site_requirements_data: siteRequirementsData
-        })
-        .eq('id', customerId);
+      if (Array.isArray(siteRequirementsData)) {
+        siteRequirementsData = siteRequirementsData.filter(
+          (item: any) => item.type !== 'under_fence_strip'
+        );
         
-      if (updateError) throw updateError;
-      
-      toast.success("Under fence concrete strips saved successfully.");
+        // Add new under fence strips data
+        selectedStrips.forEach(stripId => {
+          const stripType = stripTypes.find(type => type.id === stripId);
+          if (stripType) {
+            const length = quantities[stripId] || 1;
+            const cost = (stripType.cost + stripType.margin) * length;
+            
+            siteRequirementsData.push({
+              type: 'under_fence_strip',
+              stripId,
+              stripType: stripType.type,
+              length,
+              cost
+            });
+          }
+        });
+        
+        // Update the database
+        const { error: updateError } = await supabase
+          .from('pool_projects')
+          .update({
+            site_requirements_data: siteRequirementsData
+          })
+          .eq('id', customerId);
+          
+        if (updateError) throw updateError;
+        
+        toast.success("Under fence concrete strips saved successfully.");
+      } else {
+        toast.error("Site requirements data has unexpected format.");
+      }
     } catch (error) {
       console.error("Error saving under fence concrete strips:", error);
       toast.error("Failed to save under fence concrete strips.");

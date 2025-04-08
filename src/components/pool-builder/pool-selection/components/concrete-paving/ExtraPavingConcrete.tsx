@@ -3,18 +3,12 @@ import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SaveButton } from "../SaveButton";
 import { Pool } from "@/types/pool";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Layers } from "lucide-react";
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { formatCurrency } from "@/utils/format";
 
 interface ExtraPavingConcreteProps {
@@ -23,23 +17,22 @@ interface ExtraPavingConcreteProps {
 }
 
 export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, customerId }) => {
-  const [pavingCategory, setPavingCategory] = useState<string>("");
+  const [extraPavingCosts, setExtraPavingCosts] = useState<any[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(0);
-  const [pavingOptions, setPavingOptions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
-  const [selectedPavingRate, setSelectedPavingRate] = useState<number>(0);
   
-  // Fetch paving categories on component mount
+  // Fetch extra paving categories on component mount
   useEffect(() => {
-    fetchPavingOptions();
+    fetchPavingCosts();
     if (customerId) {
       fetchExistingData();
     }
   }, [customerId]);
   
-  const fetchPavingOptions = async () => {
+  const fetchPavingCosts = async () => {
     try {
       const { data, error } = await supabase
         .from('extra_paving_costs')
@@ -49,10 +42,10 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
       if (error) throw error;
       
       if (data) {
-        setPavingOptions(data);
+        setExtraPavingCosts(data);
       }
     } catch (error) {
-      console.error("Error fetching paving options:", error);
+      console.error("Error fetching extra paving costs:", error);
     }
   };
   
@@ -66,17 +59,10 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
         .single();
         
       if (error) {
-        console.error("Error fetching existing paving data:", error);
+        console.error("Error fetching existing extra paving data:", error);
       } else if (data) {
         if (data.extra_paving_category) {
-          setPavingCategory(data.extra_paving_category);
-          
-          // Find the rate for the selected category
-          const selectedOption = pavingOptions.find(option => option.id === data.extra_paving_category);
-          if (selectedOption) {
-            const totalRate = selectedOption.paver_cost + selectedOption.wastage_cost + selectedOption.margin_cost;
-            setSelectedPavingRate(totalRate);
-          }
+          setSelectedCategory(data.extra_paving_category);
         }
         
         if (data.extra_paving_square_meters) {
@@ -88,46 +74,46 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
         }
       }
     } catch (error) {
-      console.error("Error fetching existing paving data:", error);
+      console.error("Error fetching existing extra paving data:", error);
     } finally {
       setIsLoading(false);
     }
   };
   
-  // Handle paving category change
-  const handlePavingCategoryChange = (value: string) => {
-    setPavingCategory(value);
-    
-    // Find the rate for the selected category
-    const selectedOption = pavingOptions.find(option => option.id === value);
-    if (selectedOption) {
-      const totalRate = selectedOption.paver_cost + selectedOption.wastage_cost + selectedOption.margin_cost;
-      setSelectedPavingRate(totalRate);
-      
-      // Recalculate the total cost
-      setTotalCost(totalRate * squareMeters);
+  // Calculate total cost whenever category or square meters change
+  useEffect(() => {
+    if (selectedCategory && squareMeters > 0) {
+      const selectedPaving = extraPavingCosts.find(paving => paving.id === selectedCategory);
+      if (selectedPaving) {
+        const totalPerMeter = selectedPaving.paver_cost + selectedPaving.margin_cost + selectedPaving.wastage_cost;
+        setTotalCost(totalPerMeter * squareMeters);
+      }
+    } else {
+      setTotalCost(0);
     }
+  }, [selectedCategory, squareMeters, extraPavingCosts]);
+  
+  // Handle category selection
+  const handleCategoryChange = (value: string) => {
+    setSelectedCategory(value);
   };
   
-  // Handle square meters change
+  // Handle square meters input
   const handleSquareMetersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
-    setSquareMeters(isNaN(value) ? 0 : value);
-    
-    // Recalculate the total cost
-    setTotalCost(selectedPavingRate * (isNaN(value) ? 0 : value));
+    setSquareMeters(isNaN(value) || value < 0 ? 0 : value);
   };
   
-  // Save paving details
+  // Save extra paving data
   const handleSave = async () => {
     setIsSaving(true);
     try {
       const { error } = await supabase
         .from('pool_projects')
         .update({
-          extra_paving_category: pavingCategory,
-          extra_paving_square_meters: squareMeters,
-          extra_paving_total_cost: totalCost
+          extra_paving_category: selectedCategory || null,
+          extra_paving_square_meters: squareMeters || 0,
+          extra_paving_total_cost: totalCost || 0
         })
         .eq('id', customerId);
         
@@ -148,10 +134,10 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
         <div>
           <div className="flex items-center gap-2">
             <Layers className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Extra Paving Concrete</h3>
+            <h3 className="text-xl font-semibold">Extra Paving</h3>
           </div>
           <p className="text-muted-foreground">
-            Add additional paving for your pool area
+            Add extra paving requirements for your project
           </p>
         </div>
         
@@ -167,58 +153,88 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
       </CardHeader>
       
       <CardContent className="pt-4">
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
             <Label htmlFor="paving-category" className="font-medium">
-              Paving Category
+              Select Paving Category
             </Label>
             <Select 
-              value={pavingCategory} 
-              onValueChange={handlePavingCategoryChange}
+              value={selectedCategory} 
+              onValueChange={handleCategoryChange}
               disabled={isLoading}
             >
-              <SelectTrigger className="w-full md:w-1/2 mt-1">
+              <SelectTrigger id="paving-category" className="mt-2">
                 <SelectValue placeholder="Select a paving category" />
               </SelectTrigger>
               <SelectContent>
-                {pavingOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.category} ({formatCurrency(option.paver_cost + option.wastage_cost + option.margin_cost)}/m²)
+                {extraPavingCosts.map((category) => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.category}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
           </div>
           
-          <div>
-            <Label htmlFor="square-meters" className="font-medium">
-              Square Meters
-            </Label>
-            <Input
-              id="square-meters"
-              type="number"
-              min="0"
-              step="0.5"
-              value={squareMeters}
-              onChange={handleSquareMetersChange}
-              className="mt-1 w-full md:w-1/3"
-              disabled={isLoading || !pavingCategory}
-            />
-          </div>
+          {selectedCategory && (
+            <div>
+              <Label htmlFor="square-meters" className="font-medium">
+                Square Meters Required
+              </Label>
+              <Input
+                id="square-meters"
+                type="number"
+                min="0"
+                step="0.5"
+                value={squareMeters}
+                onChange={handleSquareMetersChange}
+                className="mt-2"
+                disabled={isLoading}
+              />
+            </div>
+          )}
           
-          {pavingCategory && squareMeters > 0 && (
-            <div className="mt-4 bg-gray-50 p-4 rounded-md">
+          {selectedCategory && squareMeters > 0 && (
+            <div className="mt-6 bg-gray-50 p-4 rounded-md">
               <h4 className="font-medium mb-2">Cost Summary</h4>
-              <div className="grid grid-cols-2 gap-y-2">
-                <div>Rate per m²:</div>
-                <div className="text-right">{formatCurrency(selectedPavingRate)}</div>
-                
-                <div>Square meters:</div>
-                <div className="text-right">{squareMeters}</div>
-                
-                <div className="font-medium border-t pt-2 mt-1">Total Cost:</div>
-                <div className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</div>
-              </div>
+              
+              {extraPavingCosts.find(paving => paving.id === selectedCategory) && (
+                <div className="space-y-2">
+                  {(() => {
+                    const selectedPaving = extraPavingCosts.find(paving => paving.id === selectedCategory)!;
+                    const totalPerMeter = selectedPaving.paver_cost + selectedPaving.margin_cost + selectedPaving.wastage_cost;
+                    
+                    return (
+                      <>
+                        <div className="grid grid-cols-2 gap-y-1 text-sm">
+                          <span>Category:</span>
+                          <span className="text-right">{selectedPaving.category}</span>
+                          
+                          <span>Cost per m²:</span>
+                          <span className="text-right">{formatCurrency(totalPerMeter)}</span>
+                          
+                          <span>Area:</span>
+                          <span className="text-right">{squareMeters} m²</span>
+                          
+                          <span className="font-medium border-t pt-2 mt-1">Total Cost:</span>
+                          <span className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</span>
+                        </div>
+                        
+                        <div className="mt-4 text-sm text-muted-foreground">
+                          <p>This is based on the standard formula: Rate per m² × Area</p>
+                          <p className="mt-1">Example: {formatCurrency(totalPerMeter)} × {squareMeters} m² = {formatCurrency(totalCost)}</p>
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+          )}
+          
+          {extraPavingCosts.length === 0 && (
+            <div className="text-center py-6 text-muted-foreground">
+              No paving categories available
             </div>
           )}
         </div>

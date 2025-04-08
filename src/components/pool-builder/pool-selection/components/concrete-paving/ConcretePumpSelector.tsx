@@ -47,17 +47,9 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({ pool
       if (error) {
         console.error("Error fetching concrete pump data:", error);
       } else if (data) {
-        if (data.concrete_pump_needed !== null) {
-          setIsPumpNeeded(data.concrete_pump_needed);
-        }
-        
-        if (data.concrete_pump_quantity) {
-          setQuantity(data.concrete_pump_quantity);
-        }
-        
-        if (data.concrete_pump_total_cost) {
-          setTotalCost(data.concrete_pump_total_cost);
-        }
+        setIsPumpNeeded(data.concrete_pump_needed || false);
+        setQuantity(data.concrete_pump_quantity || 1);
+        setTotalCost(data.concrete_pump_total_cost || 0);
       }
     } catch (error) {
       console.error("Error fetching concrete pump data:", error);

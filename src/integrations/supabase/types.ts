@@ -891,6 +891,8 @@ export type Database = {
       pool_projects: {
         Row: {
           bobcat_id: string | null
+          concrete_cuts: string | null
+          concrete_cuts_cost: number | null
           concrete_pump_needed: boolean | null
           concrete_pump_quantity: number | null
           concrete_pump_total_cost: number | null
@@ -920,10 +922,14 @@ export type Database = {
           site_requirements_data: Json | null
           site_requirements_notes: string | null
           traffic_control_id: string | null
+          under_fence_concrete_strips_cost: number | null
+          under_fence_concrete_strips_data: Json | null
           updated_at: string
         }
         Insert: {
           bobcat_id?: string | null
+          concrete_cuts?: string | null
+          concrete_cuts_cost?: number | null
           concrete_pump_needed?: boolean | null
           concrete_pump_quantity?: number | null
           concrete_pump_total_cost?: number | null
@@ -953,10 +959,14 @@ export type Database = {
           site_requirements_data?: Json | null
           site_requirements_notes?: string | null
           traffic_control_id?: string | null
+          under_fence_concrete_strips_cost?: number | null
+          under_fence_concrete_strips_data?: Json | null
           updated_at?: string
         }
         Update: {
           bobcat_id?: string | null
+          concrete_cuts?: string | null
+          concrete_cuts_cost?: number | null
           concrete_pump_needed?: boolean | null
           concrete_pump_quantity?: number | null
           concrete_pump_total_cost?: number | null
@@ -986,6 +996,8 @@ export type Database = {
           site_requirements_data?: Json | null
           site_requirements_notes?: string | null
           traffic_control_id?: string | null
+          under_fence_concrete_strips_cost?: number | null
+          under_fence_concrete_strips_data?: Json | null
           updated_at?: string
         }
         Relationships: [

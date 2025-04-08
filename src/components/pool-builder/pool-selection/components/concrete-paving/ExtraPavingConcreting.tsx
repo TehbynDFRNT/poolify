@@ -7,8 +7,8 @@ import { ConcretePumpSelector } from "./ConcretePumpSelector";
 import { UnderFenceConcreteStrips } from "./UnderFenceConcreteStrips";
 import { ConcreteCuts } from "./ConcreteCuts";
 import { Tab, Tabs, TabList, TabPanel } from "react-tabs";
-import "react-tabs/style/react-tabs.css";
 import { Pool } from "@/types/pool";
+import "react-tabs/style/react-tabs.css";
 
 interface ExtraPavingConcretingProps {
   pool: Pool;
