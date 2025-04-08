@@ -14,6 +14,16 @@ import ThirdPartyCosts from "./pages/ThirdPartyCosts";
 import PoolCreationWizard from "./pages/PoolCreationWizard";
 import Customers from "./pages/Customers";
 
+// Import construction costs sub-pages
+import Excavation from "./pages/ConstructionCosts/Excavation";
+import FixedCosts from "./pages/ConstructionCosts/FixedCosts";
+import RetainingWalls from "./pages/ConstructionCosts/RetainingWalls";
+import BobcatCosts from "./pages/ConstructionCosts/BobcatCosts";
+import CraneCosts from "./pages/ConstructionCosts/CraneCosts";
+import PoolIndividualCosts from "./pages/ConstructionCosts/PoolIndividualCosts";
+import ExtraPaving from "./pages/ConstructionCosts/ExtraPaving";
+import WaterFeature from "./pages/ConstructionCosts/WaterFeature";
+
 function App() {
   return (
     <>
@@ -28,6 +38,17 @@ function App() {
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/pool-worksheet" element={<PoolWorksheet />} />
         <Route path="/pool-creation-wizard" element={<PoolCreationWizard />} />
+        
+        {/* Construction Costs Sub-routes */}
+        <Route path="/construction-costs/excavation" element={<Excavation />} />
+        <Route path="/construction-costs/fixed-costs" element={<FixedCosts />} />
+        <Route path="/construction-costs/retaining-walls" element={<RetainingWalls />} />
+        <Route path="/construction-costs/bobcat" element={<BobcatCosts />} />
+        <Route path="/construction-costs/crane" element={<CraneCosts />} />
+        <Route path="/construction-costs/pool-individual-costs" element={<PoolIndividualCosts />} />
+        <Route path="/construction-costs/extra-paving" element={<ExtraPaving />} />
+        <Route path="/construction-costs/water-feature" element={<WaterFeature />} />
+        
         <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
