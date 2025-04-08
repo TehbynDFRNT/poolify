@@ -33,20 +33,12 @@ export const PoolWebRRPContent: React.FC<PoolWebRRPContentProps> = ({ pool }) =>
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4 border">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div className="bg-white p-3 rounded-md border space-y-1">
             <span className="text-sm text-muted-foreground">Margin Percentage</span>
             <div className="text-xl font-semibold">{marginPercentage.toFixed(2)}%</div>
             <div className="text-xs text-muted-foreground">
               Portion of selling price as profit
-            </div>
-          </div>
-          
-          <div className="bg-white p-3 rounded-md border space-y-1">
-            <span className="text-sm text-muted-foreground">Recommended Retail Price</span>
-            <div className="text-xl font-semibold text-primary">{formatCurrency(rrp)}</div>
-            <div className="text-xs text-muted-foreground">
-              Cost / (1 - Margin/100)
             </div>
           </div>
           
@@ -59,10 +51,10 @@ export const PoolWebRRPContent: React.FC<PoolWebRRPContentProps> = ({ pool }) =>
           </div>
           
           <div className="bg-white p-3 rounded-md border space-y-1">
-            <span className="text-sm text-muted-foreground">Total Cost</span>
-            <div className="text-xl font-semibold">{formatCurrency(totalCost)}</div>
+            <span className="text-sm text-muted-foreground">Recommended Retail Price</span>
+            <div className="text-xl font-semibold text-primary">{formatCurrency(rrp)}</div>
             <div className="text-xs text-muted-foreground">
-              Base cost before margin
+              Cost / (1 - Margin/100)
             </div>
           </div>
         </div>
