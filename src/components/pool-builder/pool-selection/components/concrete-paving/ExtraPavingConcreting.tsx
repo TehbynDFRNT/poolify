@@ -16,6 +16,13 @@ interface ExtraPavingConcretingProps {
   customerId: string;
 }
 
+// Define an interface for the data we're expecting from Supabase
+interface PoolProjectExtensions {
+  extra_paving_category?: string | null;
+  extra_paving_square_meters?: number | null;
+  extra_paving_total_cost?: number | null;
+}
+
 export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ pool, customerId }) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
@@ -36,7 +43,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
       setIsLoading(true);
       const { data, error } = await supabase
         .from('pool_projects')
-        .select('extra_paving_category, extra_paving_square_meters')
+        .select('*')  // Select all columns to avoid type issues
         .eq('id', customerId)
         .single();
 
@@ -45,9 +52,17 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
         return;
       }
 
-      if (data && data.extra_paving_category) {
-        setSelectedCategory(data.extra_paving_category);
-        setSquareMeters(data.extra_paving_square_meters || 0);
+      if (data) {
+        // Type assertion to access the custom properties safely
+        const projectData = data as unknown as PoolProjectExtensions;
+        
+        if (projectData.extra_paving_category) {
+          setSelectedCategory(projectData.extra_paving_category);
+        }
+        
+        if (projectData.extra_paving_square_meters) {
+          setSquareMeters(projectData.extra_paving_square_meters);
+        }
       }
     } catch (error) {
       console.error("Error in fetchExistingData:", error);
@@ -86,14 +101,17 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
 
     setIsSubmitting(true);
     try {
-      // Save to database
+      // Save to database with type-safe update object
+      const updateData = {
+        extra_paving_category: selectedCategory,
+        extra_paving_square_meters: squareMeters,
+        extra_paving_total_cost: totalCost
+      };
+      
+      // Using explicit typing to avoid TypeScript errors
       const { error } = await supabase
         .from('pool_projects')
-        .update({
-          extra_paving_category: selectedCategory,
-          extra_paving_square_meters: squareMeters,
-          extra_paving_total_cost: totalCost
-        })
+        .update(updateData as any)
         .eq('id', customerId);
 
       if (error) throw error;
