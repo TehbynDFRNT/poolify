@@ -67,7 +67,12 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
           setCraneId(data.crane_id || undefined);
           setTrafficControlId(data.traffic_control_id || 'none');
           setBobcatId(data.bobcat_id || 'none');
-          setCustomRequirements(data.site_requirements_data || []);
+          
+          // Safely handle the custom requirements data with proper type checking
+          if (data.site_requirements_data && Array.isArray(data.site_requirements_data)) {
+            setCustomRequirements(data.site_requirements_data as CustomRequirement[]);
+          }
+          
           setNotes(data.site_requirements_notes || "");
         }
       } catch (error) {
