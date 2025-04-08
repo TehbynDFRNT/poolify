@@ -27,6 +27,9 @@ export const PoolWebRRPContent: React.FC<PoolWebRRPContentProps> = ({ pool }) =>
   const totalCost = costs?.total || 0;
   const rrp = calculateRRP(totalCost, marginPercentage);
   
+  // Calculate the dollar margin amount (RRP - Total Cost)
+  const dollarMargin = rrp - totalCost;
+  
   return (
     <div className="space-y-4">
       <div className="bg-slate-50 rounded-lg p-4 border">
@@ -44,6 +47,22 @@ export const PoolWebRRPContent: React.FC<PoolWebRRPContentProps> = ({ pool }) =>
             <div className="text-xl font-semibold text-primary">{formatCurrency(rrp)}</div>
             <div className="text-xs text-muted-foreground">
               Cost / (1 - Margin/100)
+            </div>
+          </div>
+          
+          <div className="bg-white p-3 rounded-md border space-y-1">
+            <span className="text-sm text-muted-foreground">Dollar Margin</span>
+            <div className="text-xl font-semibold text-green-600">{formatCurrency(dollarMargin)}</div>
+            <div className="text-xs text-muted-foreground">
+              Actual profit amount
+            </div>
+          </div>
+          
+          <div className="bg-white p-3 rounded-md border space-y-1">
+            <span className="text-sm text-muted-foreground">Total Cost</span>
+            <div className="text-xl font-semibold">{formatCurrency(totalCost)}</div>
+            <div className="text-xs text-muted-foreground">
+              Base cost before margin
             </div>
           </div>
         </div>
