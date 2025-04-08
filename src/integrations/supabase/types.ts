@@ -894,6 +894,9 @@ export type Database = {
           crane_id: string | null
           created_at: string
           email: string
+          existing_concrete_paving_category: string | null
+          existing_concrete_paving_square_meters: number | null
+          existing_concrete_paving_total_cost: number | null
           extra_paving_category: string | null
           extra_paving_square_meters: number | null
           extra_paving_total_cost: number | null
@@ -918,6 +921,9 @@ export type Database = {
           crane_id?: string | null
           created_at?: string
           email: string
+          existing_concrete_paving_category?: string | null
+          existing_concrete_paving_square_meters?: number | null
+          existing_concrete_paving_total_cost?: number | null
           extra_paving_category?: string | null
           extra_paving_square_meters?: number | null
           extra_paving_total_cost?: number | null
@@ -942,6 +948,9 @@ export type Database = {
           crane_id?: string | null
           created_at?: string
           email?: string
+          existing_concrete_paving_category?: string | null
+          existing_concrete_paving_square_meters?: number | null
+          existing_concrete_paving_total_cost?: number | null
           extra_paving_category?: string | null
           extra_paving_square_meters?: number | null
           extra_paving_total_cost?: number | null
