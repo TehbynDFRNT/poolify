@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PackageWithComponents } from "@/types/filtration";
 import { FiltrationComponentsGrid } from "./FiltrationComponentsGrid";
 import { HandoverKitSection } from "./HandoverKitSection";
@@ -15,8 +15,9 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Edit2, Check, Save } from "lucide-react";
+import { Edit2 } from "lucide-react";
 import { SaveButton } from "../../../components/SaveButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface FiltrationDetailsProps {
   filtrationPackage: PackageWithComponents;
@@ -24,21 +25,46 @@ interface FiltrationDetailsProps {
 }
 
 export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({ 
-  filtrationPackage,
+  filtrationPackage: initialPackage,
   pool
 }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedPackageId, setSelectedPackageId] = useState(filtrationPackage.id);
+  const [selectedPackageId, setSelectedPackageId] = useState(initialPackage.id);
+  const [currentPackage, setCurrentPackage] = useState<PackageWithComponents>(initialPackage);
   const { packages } = useFiltrationQueries(null);
   const { updatePoolPackageMutation } = usePoolPackages();
+  const queryClient = useQueryClient();
+
+  // Update local state when the initial package changes from props
+  useEffect(() => {
+    setCurrentPackage(initialPackage);
+    setSelectedPackageId(initialPackage.id);
+  }, [initialPackage]);
+
+  // When a new package is selected from the dropdown, find and update the local display
+  useEffect(() => {
+    if (packages && selectedPackageId && selectedPackageId !== currentPackage.id) {
+      const newPackage = packages.find(p => p.id === selectedPackageId);
+      if (newPackage) {
+        setCurrentPackage(newPackage);
+      }
+    }
+  }, [selectedPackageId, packages, currentPackage.id]);
 
   const handleUpdatePackage = () => {
-    if (pool?.id && selectedPackageId !== filtrationPackage.id) {
+    if (pool?.id && selectedPackageId !== initialPackage.id) {
       updatePoolPackageMutation.mutate({
         poolId: pool.id,
         packageId: selectedPackageId
       }, {
         onSuccess: () => {
+          // Invalidate relevant queries to ensure fresh data
+          queryClient.invalidateQueries({
+            queryKey: ["filtration-package", selectedPackageId]
+          });
+          queryClient.invalidateQueries({
+            queryKey: ["pools-with-packages"]
+          });
           setIsEditing(false);
         }
       });
@@ -51,7 +77,7 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="font-medium text-lg">
-          Filtration Package - Option {filtrationPackage.display_order}
+          Filtration Package - Option {currentPackage.display_order}
         </h3>
         
         {pool && (
@@ -61,7 +87,8 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
                 variant="outline" 
                 size="sm" 
                 onClick={() => {
-                  setSelectedPackageId(filtrationPackage.id);
+                  setSelectedPackageId(initialPackage.id);
+                  setCurrentPackage(initialPackage);
                   setIsEditing(false);
                 }}
                 disabled={updatePoolPackageMutation.isPending}
@@ -71,7 +98,7 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
               <SaveButton 
                 onClick={handleUpdatePackage}
                 isSubmitting={updatePoolPackageMutation.isPending}
-                disabled={selectedPackageId === filtrationPackage.id}
+                disabled={selectedPackageId === initialPackage.id}
                 buttonText="Save Filtration"
                 className="bg-green-600 hover:bg-green-700"
               />
@@ -109,13 +136,13 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
         </div>
       ) : null}
       
-      <FiltrationComponentsGrid filtrationPackage={filtrationPackage} />
+      <FiltrationComponentsGrid filtrationPackage={currentPackage} />
       
-      {filtrationPackage.handover_kit && (
-        <HandoverKitSection handoverKit={filtrationPackage.handover_kit} />
+      {currentPackage.handover_kit && (
+        <HandoverKitSection handoverKit={currentPackage.handover_kit} />
       )}
       
-      <FiltrationTotalPrice filtrationPackage={filtrationPackage} />
+      <FiltrationTotalPrice filtrationPackage={currentPackage} />
     </div>
   );
 };

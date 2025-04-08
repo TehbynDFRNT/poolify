@@ -79,8 +79,12 @@ export const usePoolPackages = () => {
         throw error;
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Invalidate queries to refetch fresh data
       queryClient.invalidateQueries({ queryKey: ["pools-with-packages"] });
+      queryClient.invalidateQueries({ queryKey: ["filtration-package", variables.packageId] });
+      queryClient.invalidateQueries({ queryKey: ["pool", variables.poolId] });
+      
       toast.success("Package updated successfully");
     },
     onError: (error) => {

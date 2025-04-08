@@ -5,7 +5,7 @@ import { Pool } from "@/types/pool";
 
 export const useFiltrationPackage = (selectedPool: Pool | undefined) => {
   // Fetch filtration package data for the selected pool
-  const { data: filtrationPackage } = useQuery({
+  const { data: filtrationPackage, isLoading, error } = useQuery({
     queryKey: ["filtration-package", selectedPool?.default_filtration_package_id],
     queryFn: async () => {
       if (!selectedPool?.default_filtration_package_id) return null;
@@ -53,7 +53,8 @@ export const useFiltrationPackage = (selectedPool: Pool | undefined) => {
       return data;
     },
     enabled: !!selectedPool?.default_filtration_package_id,
+    staleTime: 0, // Ensure we always refetch when the query key changes
   });
 
-  return { filtrationPackage };
+  return { filtrationPackage, isLoading, error };
 };
