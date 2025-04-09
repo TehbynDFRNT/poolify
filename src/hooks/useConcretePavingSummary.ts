@@ -136,15 +136,10 @@ export const useConcretePavingSummary = (customerId: string) => {
           }
         }
         
-        // Get margin for concrete pump
-        const { data: pumpData } = await supabase
-          .from('concrete_pump')
-          .select('*')
-          .single();
-          
-        if (pumpData && concretePumpCost > 0) {
-          // Use a fixed margin from the concrete pump rate instead of percentage
-          concretePumpMargin = pumpData.margin || concretePumpCost * 0.1;
+        // Get margin for concrete pump - using a fixed percentage as margin isn't in the table
+        if (concretePumpCost > 0) {
+          // Use a fixed percentage (10%) for concrete pump margin
+          concretePumpMargin = concretePumpCost * 0.1;
         }
         
         // Get margin for under fence strips
@@ -178,15 +173,10 @@ export const useConcretePavingSummary = (customerId: string) => {
           }
         }
         
-        // Fetch margin for concrete cuts
-        const { data: cutsData } = await supabase
-          .from('concrete_cuts')
-          .select('margin')
-          .single();
-          
-        if (cutsData && concreteCutsCost > 0) {
-          // Use the actual margin rate for concrete cuts
-          concreteCutsMargin = cutsData.margin || concreteCutsCost * 0.1;
+        // Use a fixed percentage for concrete cuts margin
+        if (concreteCutsCost > 0) {
+          // Apply a standard margin rate of 10% for concrete cuts
+          concreteCutsMargin = concreteCutsCost * 0.1;
         }
         
         // Calculate totals
@@ -206,8 +196,7 @@ export const useConcretePavingSummary = (customerId: string) => {
           underFenceStripsMargin +
           concreteCutsMargin;
         
-        // Calculate margin percentage - this is now just for display purposes
-        // It's calculated properly from the actual margin rates above
+        // Calculate margin percentage based on the actual margin amounts
         const marginPercentage = totalCost > 0 ? (totalMargin / totalCost) * 100 : 0;
         
         setSummaryData({
