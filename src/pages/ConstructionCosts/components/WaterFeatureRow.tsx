@@ -41,6 +41,13 @@ export const WaterFeatureRow = ({ feature, onUpdate, onDelete }: WaterFeatureRow
     setEditValues({});
   };
 
+  // Calculate total (price + margin)
+  const calculateTotal = () => {
+    const price = isEditing ? (editValues.price !== undefined ? editValues.price : 0) : feature.price;
+    const margin = isEditing ? (editValues.margin !== undefined ? editValues.margin : 0) : feature.margin;
+    return price + margin;
+  };
+
   return (
     <TableRow>
       <TableCell>
@@ -79,6 +86,9 @@ export const WaterFeatureRow = ({ feature, onUpdate, onDelete }: WaterFeatureRow
         ) : (
           formatCurrency(feature.margin)
         )}
+      </TableCell>
+      <TableCell>
+        {formatCurrency(calculateTotal())}
       </TableCell>
       <TableCell>
         {isEditing ? (

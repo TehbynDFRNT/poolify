@@ -60,6 +60,7 @@ export const WaterFeaturesTable = () => {
               <TableHead>Description</TableHead>
               <TableHead>Price</TableHead>
               <TableHead>Margin</TableHead>
+              <TableHead>Total</TableHead>
               <TableHead className="w-[150px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -81,7 +82,7 @@ export const WaterFeaturesTable = () => {
             ))}
             {waterFeatures?.length === 0 && !isAdding && (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                   No water features defined. Click "Add New Water Feature" to create one.
                 </TableCell>
               </TableRow>

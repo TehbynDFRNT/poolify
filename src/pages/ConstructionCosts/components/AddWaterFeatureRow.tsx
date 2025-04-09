@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
+import { formatCurrency } from "@/utils/format";
 import { WaterFeatureInsert } from "@/types/water-feature";
 
 interface AddWaterFeatureRowProps {
@@ -34,6 +35,13 @@ export const AddWaterFeatureRow = ({ onAdd, onCancel, displayOrder }: AddWaterFe
     newFeature.price !== undefined &&
     newFeature.margin !== undefined;
 
+  // Calculate total
+  const calculateTotal = () => {
+    const price = newFeature.price !== undefined ? newFeature.price : 0;
+    const margin = newFeature.margin !== undefined ? newFeature.margin : 0;
+    return price + margin;
+  };
+
   return (
     <TableRow className="bg-muted/30">
       <TableCell>
@@ -63,6 +71,9 @@ export const AddWaterFeatureRow = ({ onAdd, onCancel, displayOrder }: AddWaterFe
           className="max-w-[100px]"
           step="0.01"
         />
+      </TableCell>
+      <TableCell>
+        {formatCurrency(calculateTotal())}
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
