@@ -94,6 +94,8 @@ export const useConcretePavingSummary = (customerId: string) => {
         let concreteCutsMargin = 0;
         
         // Get margin for extra paving if applicable
+        // The margin comes from the margin_cost field in the extra_paving_costs table
+        // and is multiplied by the square meters
         if (data.extra_paving_category && data.extra_paving_square_meters > 0) {
           const { data: pavingData } = await supabase
             .from('extra_paving_costs')
@@ -107,6 +109,8 @@ export const useConcretePavingSummary = (customerId: string) => {
         }
         
         // Get margin for existing concrete paving if applicable
+        // The margin comes from the margin_cost field in the extra_paving_costs table
+        // and is multiplied by the square meters
         if (data.existing_concrete_paving_category && data.existing_concrete_paving_square_meters > 0) {
           const { data: existingPavingData } = await supabase
             .from('extra_paving_costs')
@@ -120,6 +124,8 @@ export const useConcretePavingSummary = (customerId: string) => {
         }
         
         // Get margin for extra concreting if applicable
+        // The margin comes from the margin field in the extra_concreting table
+        // and is multiplied by the square meters
         if (data.extra_concreting_type && data.extra_concreting_square_meters > 0) {
           try {
             const { data: concretingData } = await supabase
@@ -137,12 +143,14 @@ export const useConcretePavingSummary = (customerId: string) => {
         }
         
         // Get margin for concrete pump - using a fixed percentage as margin isn't in the table
+        // We apply a standard 10% margin on the concrete pump cost
         if (concretePumpCost > 0) {
-          // Use a fixed percentage (10%) for concrete pump margin
           concretePumpMargin = concretePumpCost * 0.1;
         }
         
         // Get margin for under fence strips
+        // The margin comes from the margin field in the under_fence_concrete_strips table
+        // and is summed for all selected strips
         if (data.under_fence_concrete_strips_data) {
           try {
             // Safely type and access the data
@@ -174,8 +182,8 @@ export const useConcretePavingSummary = (customerId: string) => {
         }
         
         // Use a fixed percentage for concrete cuts margin
+        // As there's no margin field in the concrete_cuts table, we apply a standard 10%
         if (concreteCutsCost > 0) {
-          // Apply a standard margin rate of 10% for concrete cuts
           concreteCutsMargin = concreteCutsCost * 0.1;
         }
         
@@ -188,6 +196,13 @@ export const useConcretePavingSummary = (customerId: string) => {
           underFenceStripsCost +
           concreteCutsCost;
           
+        // The total margin ($2,679.00) is the sum of all the individual margin calculations
+        // - Extra Paving: margin_cost × square_meters from extra_paving_costs table
+        // - Existing Concrete Paving: margin_cost × square_meters from extra_paving_costs table
+        // - Extra Concreting: margin × square_meters from extra_concreting table
+        // - Concrete Pump: 10% of concrete pump cost
+        // - Under Fence Strips: sum of (margin × length) for each strip from under_fence_concrete_strips table
+        // - Concrete Cuts: 10% of concrete cuts cost
         const totalMargin = 
           extraPavingMargin +
           existingConcretePavingMargin +
@@ -196,7 +211,7 @@ export const useConcretePavingSummary = (customerId: string) => {
           underFenceStripsMargin +
           concreteCutsMargin;
         
-        // Calculate margin percentage based on the actual margin amounts
+        // Calculate margin percentage for internal use only
         const marginPercentage = totalCost > 0 ? (totalMargin / totalCost) * 100 : 0;
         
         setSummaryData({

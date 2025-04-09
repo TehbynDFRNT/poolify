@@ -27,12 +27,7 @@ export const CostTotals: React.FC<CostTotalsProps> = ({ summaryData }) => {
             <Calculator className="h-4 w-4 mr-1 text-primary" />
             Total Margin:
           </span>
-          <div className="flex items-center space-x-3">
-            <span>{formatCurrency(summaryData.totalMargin)}</span>
-            <span className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-xs">
-              {summaryData.marginPercentage.toFixed(1)}%
-            </span>
-          </div>
+          <span>{formatCurrency(summaryData.totalMargin)}</span>
         </div>
       </div>
     </div>
