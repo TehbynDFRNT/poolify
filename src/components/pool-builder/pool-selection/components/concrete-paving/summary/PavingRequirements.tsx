@@ -14,7 +14,7 @@ export const PavingRequirements: React.FC<PavingRequirementsProps> = ({ summaryD
       <div className="space-y-1 text-sm">
         {summaryData.extraPavingCost > 0 && (
           <div className="flex justify-between py-1">
-            <span>Extra Paving and Concrete:</span>
+            <span>Extra Paving & Concreting:</span>
             <span className="font-medium">{formatCurrency(summaryData.extraPavingCost)}</span>
           </div>
         )}

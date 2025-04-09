@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Layers } from "lucide-react";
 
 interface PavingOnExistingConcreteProps {
   pool: Pool;
@@ -170,7 +171,10 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
     <Card>
       <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
         <div>
-          <h3 className="text-xl font-semibold">Paving on Existing Concrete</h3>
+          <div className="flex items-center gap-2">
+            <Layers className="h-5 w-5 text-primary" />
+            <h3 className="text-xl font-semibold">Paving on Existing Concrete</h3>
+          </div>
           <p className="text-muted-foreground">
             Add paving on existing concrete areas to your pool project
           </p>

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator } from "lucide-react";
 import { SummaryContent } from "./summary/SummaryContent";
@@ -18,16 +18,9 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
 }) => {
   const { 
     summaryData, 
-    refreshSummary, 
     isLoading, 
     error 
   } = useConcretePavingSummary(customerId);
-
-  useEffect(() => {
-    if (customerId) {
-      refreshSummary();
-    }
-  }, [customerId, refreshSummary]);
 
   return (
     <Card>
