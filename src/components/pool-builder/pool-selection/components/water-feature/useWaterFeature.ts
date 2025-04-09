@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 // Constants for water feature options
 export const WATER_FEATURE_SIZES = [
@@ -62,7 +64,7 @@ interface WaterFeatureSummary {
   selectedBladeName: string;
 }
 
-export const useWaterFeature = () => {
+export const useWaterFeature = (customerId?: string | null, poolId?: string | null) => {
   const [summary, setSummary] = useState<WaterFeatureSummary>({
     basePrice: 0,
     baseMargin: 0,
@@ -73,6 +75,10 @@ export const useWaterFeature = () => {
     totalCost: 0,
     selectedBladeName: "None",
   });
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingData, setExistingData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<WaterFeatureFormValues>({
     defaultValues: {
@@ -84,6 +90,46 @@ export const useWaterFeature = () => {
       ledBlade: "none",
     },
   });
+
+  // Fetch existing water feature data if available
+  useEffect(() => {
+    const fetchExistingData = async () => {
+      if (!customerId || !poolId) return;
+      
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('pool_water_features')
+          .select('*')
+          .eq('customer_id', customerId)
+          .eq('pool_id', poolId)
+          .single();
+        
+        if (error) {
+          console.error("Error fetching water feature data:", error);
+          return;
+        }
+        
+        if (data) {
+          setExistingData(data);
+          form.reset({
+            waterFeatureSize: data.water_feature_size,
+            backCladdingNeeded: data.back_cladding_needed,
+            frontFinish: data.front_finish,
+            topFinish: data.top_finish,
+            sidesFinish: data.sides_finish,
+            ledBlade: data.led_blade,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching water feature data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchExistingData();
+  }, [customerId, poolId, form]);
 
   // Calculate costs whenever form values change
   useEffect(() => {
@@ -133,9 +179,62 @@ export const useWaterFeature = () => {
     return () => subscription.unsubscribe();
   }, [form]);
 
+  // Function to save water feature data
+  const saveWaterFeature = async (values: WaterFeatureFormValues) => {
+    if (!customerId || !poolId) {
+      toast.error("Missing customer or pool information");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const dataToSave = {
+        pool_id: poolId,
+        customer_id: customerId,
+        water_feature_size: values.waterFeatureSize,
+        back_cladding_needed: values.backCladdingNeeded,
+        front_finish: values.frontFinish,
+        top_finish: values.topFinish,
+        sides_finish: values.sidesFinish,
+        led_blade: values.ledBlade,
+        total_cost: summary.totalCost
+      };
+
+      let response;
+      
+      if (existingData) {
+        // Update existing record
+        response = await supabase
+          .from('pool_water_features')
+          .update(dataToSave)
+          .eq('id', existingData.id);
+      } else {
+        // Insert new record
+        response = await supabase
+          .from('pool_water_features')
+          .insert([dataToSave]);
+      }
+
+      if (response.error) {
+        throw response.error;
+      }
+      
+      toast.success("Water feature options saved successfully");
+      return true;
+    } catch (error) {
+      console.error("Error saving water feature:", error);
+      toast.error("Failed to save water feature options");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     form,
     summary,
-    isSubmitting: form.formState.isSubmitting,
+    isSubmitting,
+    isLoading,
+    saveWaterFeature
   };
 };

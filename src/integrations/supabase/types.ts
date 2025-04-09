@@ -1279,6 +1279,66 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_water_features: {
+        Row: {
+          back_cladding_needed: boolean
+          created_at: string
+          customer_id: string
+          front_finish: string
+          id: string
+          led_blade: string
+          pool_id: string
+          sides_finish: string
+          top_finish: string
+          total_cost: number
+          updated_at: string
+          water_feature_size: string
+        }
+        Insert: {
+          back_cladding_needed?: boolean
+          created_at?: string
+          customer_id: string
+          front_finish?: string
+          id?: string
+          led_blade?: string
+          pool_id: string
+          sides_finish?: string
+          top_finish?: string
+          total_cost?: number
+          updated_at?: string
+          water_feature_size: string
+        }
+        Update: {
+          back_cladding_needed?: boolean
+          created_at?: string
+          customer_id?: string
+          front_finish?: string
+          id?: string
+          led_blade?: string
+          pool_id?: string
+          sides_finish?: string
+          top_finish?: string
+          total_cost?: number
+          updated_at?: string
+          water_feature_size?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_water_features_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_water_features_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_worksheet_items: {
         Row: {
           category: string

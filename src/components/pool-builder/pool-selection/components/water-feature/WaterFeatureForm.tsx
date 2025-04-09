@@ -19,6 +19,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { SaveButton } from "../SaveButton";
 import { 
   useWaterFeature, 
   WATER_FEATURE_SIZES, 
@@ -40,7 +41,7 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
   pool,
   customerId,
 }) => {
-  const { form, summary, isSubmitting } = useWaterFeature();
+  const { form, summary, isSubmitting, isLoading, saveWaterFeature } = useWaterFeature(customerId, pool?.id);
 
   const onSubmit = async (data: WaterFeatureFormValues) => {
     if (!customerId || !pool) {
@@ -48,30 +49,17 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
       return;
     }
 
-    try {
-      // Here you would typically save the data to your database
-      // For example using supabase client
-      
-      // const { error } = await supabase
-      //   .from('pool_water_features')
-      //   .upsert({
-      //     customer_id: customerId,
-      //     pool_id: pool.id,
-      //     ...data,
-      //     total_cost: summary.totalCost
-      //   });
-      
-      // if (error) throw error;
-      
-      // Mock successful saving for now
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      toast.success("Water feature options saved successfully");
-    } catch (error) {
-      console.error("Error saving water feature:", error);
-      toast.error("Failed to save water feature options");
-    }
+    await saveWaterFeature(data);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-3 text-muted-foreground">Loading water feature options...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,9 +236,12 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
 
               {/* Submit Button */}
               <div className="flex justify-end">
-                <Button type="submit" disabled={isSubmitting}>
-                  {isSubmitting ? "Saving..." : "Save Water Feature Options"}
-                </Button>
+                <SaveButton 
+                  onClick={form.handleSubmit(onSubmit)}
+                  isSubmitting={isSubmitting}
+                  disabled={!form.formState.isDirty}
+                  buttonText="Save Water Feature Options"
+                />
               </div>
             </form>
           </Form>
