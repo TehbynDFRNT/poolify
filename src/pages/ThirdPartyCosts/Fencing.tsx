@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { FencingCostsTable } from "./components/FencingCostsTable";
+import { FencingFormulaSection } from "./components/FencingFormulaSection";
 import { useFencingCosts } from "./hooks/useFencingCosts";
 import { toast } from "sonner";
 
@@ -59,6 +60,9 @@ const Fencing = () => {
             }}
           />
         </div>
+        
+        {/* Formula Reference Section */}
+        <FencingFormulaSection />
       </div>
     </DashboardLayout>
   );
