@@ -62,16 +62,9 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
       {/* Cost Summary */}
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Cost Summary</h3>
-        <WaterFeatureCostSummary
-          basePrice={summary.basePrice}
-          backCladdingPrice={summary.backCladdingPrice}
-          bladePrice={summary.bladePrice}
-          totalCost={summary.totalCost}
+        <WaterFeatureCostSummary 
+          summary={summary}
           hasBackCladding={form.getValues().backCladdingNeeded}
-          selectedBlade={summary.selectedBladeName}
-          baseMargin={summary.baseMargin}
-          backCladdingMargin={summary.backCladdingMargin}
-          bladeMargin={summary.bladeMargin}
         />
       </div>
     </div>

@@ -23,7 +23,7 @@ interface FinishOption {
 
 interface FinishSelectorProps {
   form: UseFormReturn<WaterFeatureFormValues>;
-  name: keyof WaterFeatureFormValues;
+  name: "frontFinish" | "topFinish" | "sidesFinish"; // Narrowed type to only allow string fields
   label: string;
   options: FinishOption[];
 }
