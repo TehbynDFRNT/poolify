@@ -8,6 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { SaveButton } from "../SaveButton";
 import { formatCurrency } from "@/utils/format";
 import { ConcreteStripData } from "@/types/concrete-paving-summary";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface UnderFenceConcreteStripsProps {
   pool: Pool;
@@ -202,88 +206,126 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
             Loading concrete strip types...
           </div>
         ) : (
-          <div className="space-y-4">
-            {strips.map((strip) => (
-              <div key={strip.id} className="flex items-center justify-between p-4 border rounded-md">
-                <div>
-                  <h4 className="font-medium">{strip.type}</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Cost: {formatCurrency(strip.cost)} + Margin: {formatCurrency(strip.margin)}
-                  </p>
-                </div>
-                
-                <div className="flex items-end gap-3">
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">Length (m)</label>
-                    <input
-                      type="number"
-                      className="w-24 h-8 rounded-md bg-black text-white px-2 text-sm"
-                      value={selectedStrips.find(s => s.id === strip.id)?.length || ''}
-                      onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 0)}
-                    />
+          <div className="space-y-6">
+            <div>
+              <h4 className="text-base font-medium mb-3">Available Concrete Strips</h4>
+              <div className="grid gap-4 md:grid-cols-2">
+                {strips.map((strip) => (
+                  <div key={strip.id} className="rounded-md border p-4 bg-card">
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <h5 className="font-medium">{strip.type}</h5>
+                        <p className="text-sm text-muted-foreground">
+                          {formatCurrency(strip.cost)} + {formatCurrency(strip.margin)} = {formatCurrency(strip.cost + strip.margin)}
+                        </p>
+                      </div>
+                      <Button
+                        onClick={() => handleAddStrip(strip.id)}
+                        variant="outline"
+                        size="sm"
+                      >
+                        Add
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <Label htmlFor={`length-${strip.id}`} className="text-sm mb-1 block">
+                          Length (m)
+                        </Label>
+                        <Input
+                          id={`length-${strip.id}`}
+                          type="number"
+                          className="h-9 text-sm"
+                          value={selectedStrips.find(s => s.id === strip.id)?.length || ''}
+                          onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 0)}
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor={`quantity-${strip.id}`} className="text-sm mb-1 block">
+                          Quantity
+                        </Label>
+                        <Input
+                          id={`quantity-${strip.id}`}
+                          type="number"
+                          className="h-9 text-sm"
+                          value={selectedStrips.find(s => s.id === strip.id)?.quantity || ''}
+                          onChange={(e) => handleQuantityChange(strip.id, parseInt(e.target.value, 10) || 0)}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  
-                  <div>
-                    <label className="text-sm font-medium text-gray-700 block mb-1">Quantity</label>
-                    <input
-                      type="number"
-                      className="w-24 h-8 rounded-md bg-black text-white px-2 text-sm"
-                      value={selectedStrips.find(s => s.id === strip.id)?.quantity || ''}
-                      onChange={(e) => handleQuantityChange(strip.id, parseInt(e.target.value, 10) || 0)}
-                    />
-                  </div>
-                  
-                  <button
-                    onClick={() => handleAddStrip(strip.id)}
-                    className="h-8 px-4 bg-teal-500 text-white rounded-md"
-                  >
-                    Add
-                  </button>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
             
             {selectedStrips.length > 0 && (
-              <div className="mt-6 bg-gray-50 p-4 rounded-md">
-                <h4 className="font-medium mb-2">Selected Strips</h4>
-                <div className="space-y-2">
-                  {selectedStrips.map(selectedStrip => {
-                    const strip = strips.find(s => s.id === selectedStrip.id);
-                    if (!strip) return null;
-                    
-                    const quantity = selectedStrip.quantity || 1;
-                    const length = selectedStrip.length || 1;
-                    const itemTotal = (strip.cost + strip.margin) * quantity * length;
-                    
-                    return (
-                      <div key={selectedStrip.id} className="flex justify-between items-center py-2 px-4 bg-white rounded border">
-                        <div>
-                          <span className="font-medium">{strip.type}</span>
-                          <div className="text-sm text-gray-600">
-                            {quantity} × {length}m × {formatCurrency(strip.cost + strip.margin)} = {formatCurrency(itemTotal)}
-                          </div>
-                        </div>
-                        <button
-                          onClick={() => handleRemoveStrip(selectedStrip.id)}
-                          className="text-red-500 hover:text-red-700"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    );
-                  })}
-                  
-                  <div className="flex justify-between font-medium pt-2 border-t mt-2">
-                    <span>Total</span>
-                    <span>{formatCurrency(totalCost)}</span>
-                  </div>
+              <div className="mt-6">
+                <h4 className="text-base font-medium mb-3">Selected Strips</h4>
+                <div className="rounded-md border overflow-hidden">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Length (m)</TableHead>
+                        <TableHead>Quantity</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead className="w-[80px]"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {selectedStrips.map(selectedStrip => {
+                        const strip = strips.find(s => s.id === selectedStrip.id);
+                        if (!strip) return null;
+                        
+                        const quantity = selectedStrip.quantity || 1;
+                        const length = selectedStrip.length || 1;
+                        const unitPrice = strip.cost + strip.margin;
+                        const itemTotal = unitPrice * quantity * length;
+                        
+                        return (
+                          <TableRow key={selectedStrip.id}>
+                            <TableCell className="font-medium">{strip.type}</TableCell>
+                            <TableCell>{length}m</TableCell>
+                            <TableCell>{quantity}</TableCell>
+                            <TableCell>{formatCurrency(unitPrice)}</TableCell>
+                            <TableCell className="font-medium">{formatCurrency(itemTotal)}</TableCell>
+                            <TableCell>
+                              <Button
+                                onClick={() => handleRemoveStrip(selectedStrip.id)}
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                Remove
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                      
+                      <TableRow>
+                        <TableCell colSpan={4} className="text-right font-semibold">
+                          Total Cost:
+                        </TableCell>
+                        <TableCell className="font-bold">
+                          {formatCurrency(totalCost)}
+                        </TableCell>
+                        <TableCell></TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
             )}
             
             {strips.length === 0 && (
-              <div className="text-center py-6 text-muted-foreground">
-                No under fence concrete strip types available
+              <div className="text-center py-6 border rounded-md bg-muted/10">
+                <p className="text-muted-foreground">
+                  No under fence concrete strip types available
+                </p>
               </div>
             )}
           </div>
