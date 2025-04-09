@@ -21,39 +21,42 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               collapsed ? "w-20" : "w-64"
             )}
           >
-            <div className="px-3 py-8 flex items-center justify-between">
-              <Link to="/" className="flex items-center">
-                {collapsed ? (
-                  <img 
-                    src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
-                    alt="Poolify Logo" 
-                    className="h-42 w-auto" 
-                  />
-                ) : (
-                  <img 
-                    src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
-                    alt="Poolify Logo" 
-                    className="h-60 w-auto max-w-[210px]"
-                  />
-                )}
-              </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="ml-1"
-                onClick={() => setCollapsed(!collapsed)}
-              >
-                {collapsed ? (
-                  <ChevronRight className="h-4 w-4" />
-                ) : (
-                  <ChevronLeft className="h-4 w-4" />
-                )}
-              </Button>
-            </div>
-            
-            {/* Use the MainNav component with adjusted spacing */}
-            <div className="px-2 mt-2">
-              <MainNav />
+            <div className="flex flex-col h-full">
+              {/* Logo section with centered alignment */}
+              <div className="px-3 py-4 flex items-center justify-between border-b">
+                <Link to="/" className="flex items-center">
+                  {collapsed ? (
+                    <img 
+                      src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
+                      alt="Poolify Logo" 
+                      className="h-42 w-auto" 
+                    />
+                  ) : (
+                    <img 
+                      src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
+                      alt="Poolify Logo" 
+                      className="h-60 w-auto max-w-[210px]"
+                    />
+                  )}
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="ml-1"
+                  onClick={() => setCollapsed(!collapsed)}
+                >
+                  {collapsed ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              
+              {/* Navigation with better spacing */}
+              <div className="px-2 py-3 flex-1 overflow-y-auto">
+                <MainNav />
+              </div>
             </div>
           </div>
 
@@ -64,7 +67,9 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               collapsed ? "ml-20" : "ml-64"
             )}
           >
-            {children}
+            <div className="py-6">
+              {children}
+            </div>
           </div>
         </SidebarProvider>
       </div>

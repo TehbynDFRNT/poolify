@@ -54,7 +54,7 @@ const Index = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8">
+      <div className="container mx-auto px-6">
         <h1 className="text-3xl font-bold mb-8">Cost Builder</h1>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {modules.map((module) => (
