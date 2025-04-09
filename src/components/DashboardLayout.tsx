@@ -27,13 +27,13 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                   <img 
                     src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
                     alt="Poolify Logo" 
-                    className="h-14 w-auto" 
+                    className="h-42 w-auto" 
                   />
                 ) : (
                   <img 
                     src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
                     alt="Poolify Logo" 
-                    className="h-20 w-auto max-w-[180px]"
+                    className="h-60 w-auto max-w-[210px]"
                   />
                 )}
               </Link>
