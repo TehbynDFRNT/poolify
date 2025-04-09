@@ -1,13 +1,11 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calculator } from "lucide-react";
-import { useConcretePavingSummary } from "@/hooks/useConcretePavingSummary";
 import { SummaryContent } from "./summary/SummaryContent";
 import { CostTotals } from "./summary/CostTotals";
+import { useConcretePavingSummary } from "@/hooks/useConcretePavingSummary";
 import { Pool } from "@/types/pool";
-import { SaveAllButton } from "./SaveAllButton";
-import { useSaveAll } from "@/components/pool-builder/pool-selection/hooks/useSaveAll";
 
 interface ConcreteAndPavingCostSummaryProps {
   pool: Pool;
@@ -18,44 +16,44 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
   pool, 
   customerId 
 }) => {
-  const { summaryData, isLoading } = useConcretePavingSummary(customerId);
-  const { isSubmittingAll, handleSaveAll } = useSaveAll(customerId, async () => {
-    // In a real implementation, this would save all sections
-    return Promise.resolve();
-  });
+  const { 
+    summaryData, 
+    refreshSummary, 
+    isLoading, 
+    error 
+  } = useConcretePavingSummary(customerId);
+
+  useEffect(() => {
+    if (customerId) {
+      refreshSummary();
+    }
+  }, [customerId, refreshSummary]);
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between bg-muted/50 pb-2">
-        <div className="flex items-center gap-2">
-          <Calculator className="h-5 w-5 text-primary" />
-          <CardTitle className="text-lg font-semibold">Concrete & Paving Summary</CardTitle>
+      <CardHeader className="bg-white">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg font-medium">
+              Concrete & Paving Summary
+            </CardTitle>
+          </div>
         </div>
-        
-        <SaveAllButton 
-          onSaveAll={handleSaveAll} 
-          isSubmitting={isSubmittingAll}
-          className="hidden sm:flex"
-        />
       </CardHeader>
-      <CardContent className="pt-4">
+      <CardContent className="p-5">
         {isLoading ? (
-          <div className="animate-pulse space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          <div className="text-center py-4 text-muted-foreground">
+            Loading summary data...
+          </div>
+        ) : error ? (
+          <div className="text-center py-4 text-red-500">
+            Error loading summary data. Please try again.
           </div>
         ) : (
           <>
             <SummaryContent summaryData={summaryData} />
             <CostTotals summaryData={summaryData} />
-            
-            <div className="flex justify-end mt-4 sm:hidden">
-              <SaveAllButton 
-                onSaveAll={handleSaveAll} 
-                isSubmitting={isSubmittingAll}
-              />
-            </div>
           </>
         )}
       </CardContent>

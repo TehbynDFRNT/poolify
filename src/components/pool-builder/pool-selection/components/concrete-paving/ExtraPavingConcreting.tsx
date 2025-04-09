@@ -9,6 +9,7 @@ import { ConcreteCuts } from "./ConcreteCuts";
 import { ConcreteAndPavingCostSummary } from "./ConcreteAndPavingCostSummary";
 import { SaveAllButton } from "./SaveAllButton";
 import { useSaveAll } from "@/components/pool-builder/pool-selection/hooks/useSaveAll";
+import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import { Pool } from "@/types/pool";
 
 interface ExtraPavingConcretingProps {
@@ -32,6 +33,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
       <UnderFenceConcreteStrips pool={pool} customerId={customerId} />
       <ConcreteCuts pool={pool} customerId={customerId} />
       <ConcreteAndPavingCostSummary pool={pool} customerId={customerId} />
+      <FormulaReference />
       
       <div className="flex justify-end mt-8">
         <SaveAllButton 
