@@ -10,6 +10,8 @@ import { formatCurrency } from "@/utils/format";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface ConcreteCutsProps {
   pool: Pool;
@@ -107,7 +109,7 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
     setTotalCost(total);
   }, [selectedCuts, quantities, cutTypes]);
   
-  // Handle cut selection
+  // Handle cut selection/deselection
   const handleCutSelection = (cutId: string, checked: boolean) => {
     if (checked) {
       setSelectedCuts([...selectedCuts, cutId]);
@@ -127,6 +129,16 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
       ...quantities,
       [cutId]: isNaN(quantity) || quantity < 1 ? 1 : quantity
     });
+  };
+  
+  // Remove a specific cut from selection
+  const handleRemoveCut = (cutId: string) => {
+    setSelectedCuts(selectedCuts.filter(id => id !== cutId));
+    
+    // Create a new quantities object without the removed cut
+    const newQuantities = {...quantities};
+    delete newQuantities[cutId];
+    setQuantities(newQuantities);
   };
   
   // Save concrete cuts data
@@ -157,6 +169,16 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
     }
   };
   
+  // Clear all selected cuts
+  const handleClearAll = () => {
+    if (selectedCuts.length === 0) return;
+    
+    if (window.confirm("Are you sure you want to remove all selected concrete cuts?")) {
+      setSelectedCuts([]);
+      setQuantities({});
+    }
+  };
+  
   return (
     <Card>
       <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
@@ -170,15 +192,28 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
           </p>
         </div>
         
-        {customerId && (
-          <SaveButton 
-            onClick={handleSave}
-            isSubmitting={isSaving}
-            disabled={false}
-            buttonText="Save Cuts"
-            className="bg-primary"
-          />
-        )}
+        <div className="flex gap-2">
+          {selectedCuts.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleClearAll}
+              className="text-red-500 border-red-200 hover:bg-red-50"
+            >
+              Clear All
+            </Button>
+          )}
+          
+          {customerId && (
+            <SaveButton 
+              onClick={handleSave}
+              isSubmitting={isSaving}
+              disabled={false}
+              buttonText="Save Cuts"
+              className="bg-primary"
+            />
+          )}
+        </div>
       </CardHeader>
       
       <CardContent className="pt-4">
@@ -203,17 +238,29 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
               </div>
               
               {selectedCuts.includes(cutType.id) && (
-                <div className="w-24">
-                  <Label htmlFor={`quantity-${cutType.id}`} className="text-sm">Quantity</Label>
-                  <Input
-                    id={`quantity-${cutType.id}`}
-                    type="number"
-                    min="1"
-                    value={quantities[cutType.id] || 1}
-                    onChange={(e) => handleQuantityChange(cutType.id, e.target.value)}
-                    className="mt-1 h-8"
-                    disabled={isLoading}
-                  />
+                <div className="flex items-end gap-2">
+                  <div className="w-24">
+                    <Label htmlFor={`quantity-${cutType.id}`} className="text-sm">Quantity</Label>
+                    <Input
+                      id={`quantity-${cutType.id}`}
+                      type="number"
+                      min="1"
+                      value={quantities[cutType.id] || 1}
+                      onChange={(e) => handleQuantityChange(cutType.id, e.target.value)}
+                      className="mt-1 h-8"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 h-8 w-8 p-0"
+                    onClick={() => handleRemoveCut(cutType.id)}
+                    title="Remove this cut"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Remove</span>
+                  </Button>
                 </div>
               )}
             </div>
