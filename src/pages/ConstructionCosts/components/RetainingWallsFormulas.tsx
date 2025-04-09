@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Function, ChevronDown, ChevronUp } from "lucide-react";
+import { Calculator, ChevronDown, ChevronUp } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 export const RetainingWallsFormulas = () => {
@@ -11,7 +11,7 @@ export const RetainingWallsFormulas = () => {
     <Card className="mt-8">
       <CardHeader className="bg-white pb-2">
         <div className="flex items-center gap-2">
-          <Function className="h-5 w-5 text-primary" />
+          <Calculator className="h-5 w-5 text-primary" />
           <CardTitle>Retaining Walls Formulas</CardTitle>
         </div>
         <CardDescription>
