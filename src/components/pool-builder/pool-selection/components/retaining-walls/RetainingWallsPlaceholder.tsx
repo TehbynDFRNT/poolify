@@ -24,7 +24,7 @@ export const RetainingWallsPlaceholder: React.FC<RetainingWallsPlaceholderProps>
         Calculate retaining wall costs based on dimensions and wall type.
       </div>
       
-      <RetainingWallCalculator />
+      <RetainingWallCalculator customerId={customerId} />
     </div>
   );
 };

@@ -918,6 +918,11 @@ export type Database = {
           pool_specification_id: string | null
           proposal_name: string
           resident_homeowner: boolean
+          retaining_wall_height1: number | null
+          retaining_wall_height2: number | null
+          retaining_wall_length: number | null
+          retaining_wall_total_cost: number | null
+          retaining_wall_type: string | null
           site_address: string | null
           site_requirements_data: Json | null
           site_requirements_notes: string | null
@@ -955,6 +960,11 @@ export type Database = {
           pool_specification_id?: string | null
           proposal_name: string
           resident_homeowner?: boolean
+          retaining_wall_height1?: number | null
+          retaining_wall_height2?: number | null
+          retaining_wall_length?: number | null
+          retaining_wall_total_cost?: number | null
+          retaining_wall_type?: string | null
           site_address?: string | null
           site_requirements_data?: Json | null
           site_requirements_notes?: string | null
@@ -992,6 +1002,11 @@ export type Database = {
           pool_specification_id?: string | null
           proposal_name?: string
           resident_homeowner?: boolean
+          retaining_wall_height1?: number | null
+          retaining_wall_height2?: number | null
+          retaining_wall_length?: number | null
+          retaining_wall_total_cost?: number | null
+          retaining_wall_type?: string | null
           site_address?: string | null
           site_requirements_data?: Json | null
           site_requirements_notes?: string | null

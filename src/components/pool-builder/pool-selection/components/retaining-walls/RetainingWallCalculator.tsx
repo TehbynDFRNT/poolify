@@ -12,9 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Save, Trash2 } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { FormActions } from "@/pages/Quotes/components/ExtraPavingStep/components/PavingOnExistingConcrete/components/FormActions";
 
 interface RetainingWallCalculatorProps {
-  customerId?: string;
+  customerId?: string | null;
 }
 
 export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = ({ 
@@ -219,26 +220,6 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
       <CardHeader className="bg-white">
         <div className="flex items-center justify-between">
           <CardTitle className="text-xl font-semibold">Retaining Wall Calculator</CardTitle>
-          
-          {customerId && (
-            <Button 
-              onClick={handleSave} 
-              disabled={isSaving || !selectedWallType || !height1 || !height2 || !length}
-              className="flex items-center gap-1"
-            >
-              {isSaving ? (
-                <>
-                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-4 w-4" />
-                  Save Details
-                </>
-              )}
-            </Button>
-          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-6 pt-4">
@@ -357,19 +338,15 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
             </div>
           </div>
           
-          {/* Remove button */}
-          {hasExistingData && (
-            <div className="mt-4">
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeleteConfirm(true)}
-                disabled={isDeleting}
-                className="flex items-center gap-1"
-              >
-                <Trash2 className="h-4 w-4" />
-                {isDeleting ? "Removing..." : "Remove"}
-              </Button>
-            </div>
+          {/* Form actions (Save/Delete buttons) */}
+          {customerId && (
+            <FormActions 
+              onSave={handleSave}
+              onDelete={() => setShowDeleteConfirm(true)}
+              isSubmitting={isSaving}
+              isDeleting={isDeleting}
+              hasExistingData={hasExistingData}
+            />
           )}
         </div>
       </CardContent>
