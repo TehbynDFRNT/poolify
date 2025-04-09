@@ -10,8 +10,8 @@ import { formatCurrency } from "@/utils/format";
 import { ConcreteStripData } from "@/types/concrete-paving-summary";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface UnderFenceConcreteStripsProps {
   pool: Pool;
@@ -96,19 +96,17 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     }
   };
   
-  // Handle add strip to selection
-  const handleAddStrip = (stripId: string) => {
-    // Check if strip already exists
-    const existingStrip = selectedStrips.find(s => s.id === stripId);
-    if (existingStrip) {
-      // Update length if exists
-      const updatedStrips = selectedStrips.map(s => 
-        s.id === stripId ? { ...s, length: (s.length || 1) + 1 } : s
-      );
-      setSelectedStrips(updatedStrips);
+  // Handle strip selection/deselection
+  const handleStripSelection = (stripId: string, checked: boolean) => {
+    if (checked) {
+      // Check if strip already exists
+      const existingStrip = selectedStrips.find(s => s.id === stripId);
+      if (!existingStrip) {
+        setSelectedStrips([...selectedStrips, { id: stripId, length: 1 }]);
+      }
     } else {
-      // Add new strip with default length of 1 linear meter
-      setSelectedStrips([...selectedStrips, { id: stripId, length: 1 }]);
+      // Remove the strip
+      setSelectedStrips(selectedStrips.filter(s => s.id !== stripId));
     }
   };
   
@@ -117,12 +115,6 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     const updatedStrips = selectedStrips.map(s => 
       s.id === stripId ? { ...s, length } : s
     );
-    setSelectedStrips(updatedStrips);
-  };
-  
-  // Handle remove strip
-  const handleRemoveStrip = (stripId: string) => {
-    const updatedStrips = selectedStrips.filter(s => s.id !== stripId);
     setSelectedStrips(updatedStrips);
   };
   
@@ -167,6 +159,15 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     }
   };
 
+  // Clear all selected strips
+  const handleClearAll = () => {
+    if (selectedStrips.length === 0) return;
+    
+    if (window.confirm("Are you sure you want to remove all selected concrete strips?")) {
+      setSelectedStrips([]);
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="pb-2 flex flex-row items-center justify-between">
@@ -176,19 +177,31 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
             <h3 className="text-xl font-semibold">Under Fence Concrete Strips</h3>
           </div>
           <p className="text-muted-foreground">
-            Manage concrete strips under the fence for your project
+            Select concrete strips under the fence for your project
           </p>
         </div>
         
-        {customerId && (
-          <SaveButton 
-            onClick={handleSave}
-            isSubmitting={isSaving}
-            disabled={false}
-            buttonText="Save Strips"
-            className="bg-primary"
-          />
-        )}
+        <div className="flex gap-2">
+          {selectedStrips.length > 0 && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleClearAll}
+            >
+              Clear All
+            </Button>
+          )}
+          
+          {customerId && (
+            <SaveButton 
+              onClick={handleSave}
+              isSubmitting={isSaving}
+              disabled={false}
+              buttonText="Save Strips"
+              className="bg-primary"
+            />
+          )}
+        </div>
       </CardHeader>
       
       <CardContent className="pt-4">
@@ -197,103 +210,77 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
             Loading concrete strip types...
           </div>
         ) : (
-          <div className="space-y-6">
-            <div>
-              <h4 className="text-base font-medium mb-3">Available Concrete Strips</h4>
-              <div className="grid gap-4 md:grid-cols-2">
-                {strips.map((strip) => (
-                  <div key={strip.id} className="rounded-md border p-4 bg-card">
-                    <div className="flex justify-between items-center mb-3">
-                      <div>
-                        <h5 className="font-medium">{strip.type}</h5>
-                        <p className="text-sm text-muted-foreground">
-                          Cost: {formatCurrency(strip.cost)} + Margin: {formatCurrency(strip.margin)} = {formatCurrency(strip.cost + strip.margin)} per L/M
-                        </p>
-                      </div>
-                      <Button
-                        onClick={() => handleAddStrip(strip.id)}
-                        variant="outline"
-                        size="sm"
-                      >
-                        Add
-                      </Button>
+          <div className="space-y-4">
+            {strips.map((strip) => {
+              const selectedStrip = selectedStrips.find(s => s.id === strip.id);
+              const isSelected = !!selectedStrip;
+              const price = strip.cost + strip.margin;
+              
+              return (
+                <div key={strip.id} className="border rounded-md hover:bg-slate-50 p-4">
+                  <div className="flex items-start space-x-3">
+                    <Checkbox 
+                      id={`strip-${strip.id}`}
+                      checked={isSelected}
+                      onCheckedChange={(checked) => handleStripSelection(strip.id, checked === true)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <Label htmlFor={`strip-${strip.id}`} className="font-medium">
+                        {strip.type}
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        {formatCurrency(price)} per L/M
+                      </p>
                     </div>
                     
-                    <div>
-                      <Label htmlFor={`length-${strip.id}`} className="text-sm mb-1 block">
-                        Length (linear meters)
-                      </Label>
-                      <Input
-                        id={`length-${strip.id}`}
-                        type="number"
-                        className="h-9 text-sm"
-                        value={selectedStrips.find(s => s.id === strip.id)?.length || ''}
-                        onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 0)}
-                      />
-                    </div>
+                    {isSelected && (
+                      <div className="flex items-end space-x-2">
+                        <div>
+                          <Label htmlFor={`length-${strip.id}`} className="text-sm">Meters</Label>
+                          <Input
+                            id={`length-${strip.id}`}
+                            type="number"
+                            min="0.1"
+                            step="0.1"
+                            value={selectedStrip.length || 1}
+                            onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 1)}
+                            className="w-20 h-8"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ))}
-              </div>
-            </div>
+                </div>
+              );
+            })}
             
             {selectedStrips.length > 0 && (
-              <div className="mt-6">
-                <h4 className="text-base font-medium mb-3">Selected Strips</h4>
-                <div className="rounded-md border overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Cost</TableHead>
-                        <TableHead>Margin</TableHead>
-                        <TableHead>Price Per L/M</TableHead>
-                        <TableHead>Length (m)</TableHead>
-                        <TableHead>Total</TableHead>
-                        <TableHead className="w-[80px]"></TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {selectedStrips.map(selectedStrip => {
-                        const strip = strips.find(s => s.id === selectedStrip.id);
-                        if (!strip) return null;
-                        
-                        const length = selectedStrip.length || 1;
-                        const unitPrice = strip.cost + strip.margin;
-                        const itemTotal = unitPrice * length;
-                        
-                        return (
-                          <TableRow key={selectedStrip.id}>
-                            <TableCell className="font-medium">{strip.type}</TableCell>
-                            <TableCell>{formatCurrency(strip.cost)}</TableCell>
-                            <TableCell>{formatCurrency(strip.margin)}</TableCell>
-                            <TableCell>{formatCurrency(unitPrice)}</TableCell>
-                            <TableCell>{length}m</TableCell>
-                            <TableCell className="font-medium">{formatCurrency(itemTotal)}</TableCell>
-                            <TableCell>
-                              <Button
-                                onClick={() => handleRemoveStrip(selectedStrip.id)}
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              >
-                                Remove
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                      
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-right font-semibold">
-                          Total Cost:
-                        </TableCell>
-                        <TableCell className="font-bold">
-                          {formatCurrency(totalCost)}
-                        </TableCell>
-                        <TableCell></TableCell>
-                      </TableRow>
-                    </TableBody>
-                  </Table>
+              <div className="mt-6 bg-gray-50 p-4 rounded-md">
+                <h4 className="font-medium mb-2">Cost Summary</h4>
+                <div className="space-y-2">
+                  {selectedStrips.map(selectedStrip => {
+                    const strip = strips.find(s => s.id === selectedStrip.id);
+                    if (!strip) return null;
+                    
+                    const length = selectedStrip.length || 1;
+                    const unitPrice = strip.cost + strip.margin;
+                    const itemTotal = unitPrice * length;
+                    
+                    return (
+                      <div key={selectedStrip.id} className="grid grid-cols-3 gap-y-1 text-sm">
+                        <span>{strip.type}</span>
+                        <span className="text-right">{length} m × {formatCurrency(unitPrice)}</span>
+                        <span className="text-right">{formatCurrency(itemTotal)}</span>
+                      </div>
+                    );
+                  })}
+                  
+                  <div className="grid grid-cols-3 gap-y-1 pt-2 border-t mt-2 font-medium">
+                    <span>Total</span>
+                    <span></span>
+                    <span className="text-right">{formatCurrency(totalCost)}</span>
+                  </div>
                 </div>
               </div>
             )}
