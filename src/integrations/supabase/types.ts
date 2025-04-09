@@ -918,11 +918,26 @@ export type Database = {
           pool_specification_id: string | null
           proposal_name: string
           resident_homeowner: boolean
-          retaining_wall_height1: number | null
-          retaining_wall_height2: number | null
-          retaining_wall_length: number | null
-          retaining_wall_total_cost: number | null
-          retaining_wall_type: string | null
+          retaining_wall1_height1: number | null
+          retaining_wall1_height2: number | null
+          retaining_wall1_length: number | null
+          retaining_wall1_total_cost: number | null
+          retaining_wall1_type: string | null
+          retaining_wall2_height1: number | null
+          retaining_wall2_height2: number | null
+          retaining_wall2_length: number | null
+          retaining_wall2_total_cost: number | null
+          retaining_wall2_type: string | null
+          retaining_wall3_height1: number | null
+          retaining_wall3_height2: number | null
+          retaining_wall3_length: number | null
+          retaining_wall3_total_cost: number | null
+          retaining_wall3_type: string | null
+          retaining_wall4_height1: number | null
+          retaining_wall4_height2: number | null
+          retaining_wall4_length: number | null
+          retaining_wall4_total_cost: number | null
+          retaining_wall4_type: string | null
           site_address: string | null
           site_requirements_data: Json | null
           site_requirements_notes: string | null
@@ -960,11 +975,26 @@ export type Database = {
           pool_specification_id?: string | null
           proposal_name: string
           resident_homeowner?: boolean
-          retaining_wall_height1?: number | null
-          retaining_wall_height2?: number | null
-          retaining_wall_length?: number | null
-          retaining_wall_total_cost?: number | null
-          retaining_wall_type?: string | null
+          retaining_wall1_height1?: number | null
+          retaining_wall1_height2?: number | null
+          retaining_wall1_length?: number | null
+          retaining_wall1_total_cost?: number | null
+          retaining_wall1_type?: string | null
+          retaining_wall2_height1?: number | null
+          retaining_wall2_height2?: number | null
+          retaining_wall2_length?: number | null
+          retaining_wall2_total_cost?: number | null
+          retaining_wall2_type?: string | null
+          retaining_wall3_height1?: number | null
+          retaining_wall3_height2?: number | null
+          retaining_wall3_length?: number | null
+          retaining_wall3_total_cost?: number | null
+          retaining_wall3_type?: string | null
+          retaining_wall4_height1?: number | null
+          retaining_wall4_height2?: number | null
+          retaining_wall4_length?: number | null
+          retaining_wall4_total_cost?: number | null
+          retaining_wall4_type?: string | null
           site_address?: string | null
           site_requirements_data?: Json | null
           site_requirements_notes?: string | null
@@ -1002,11 +1032,26 @@ export type Database = {
           pool_specification_id?: string | null
           proposal_name?: string
           resident_homeowner?: boolean
-          retaining_wall_height1?: number | null
-          retaining_wall_height2?: number | null
-          retaining_wall_length?: number | null
-          retaining_wall_total_cost?: number | null
-          retaining_wall_type?: string | null
+          retaining_wall1_height1?: number | null
+          retaining_wall1_height2?: number | null
+          retaining_wall1_length?: number | null
+          retaining_wall1_total_cost?: number | null
+          retaining_wall1_type?: string | null
+          retaining_wall2_height1?: number | null
+          retaining_wall2_height2?: number | null
+          retaining_wall2_length?: number | null
+          retaining_wall2_total_cost?: number | null
+          retaining_wall2_type?: string | null
+          retaining_wall3_height1?: number | null
+          retaining_wall3_height2?: number | null
+          retaining_wall3_length?: number | null
+          retaining_wall3_total_cost?: number | null
+          retaining_wall3_type?: string | null
+          retaining_wall4_height1?: number | null
+          retaining_wall4_height2?: number | null
+          retaining_wall4_length?: number | null
+          retaining_wall4_total_cost?: number | null
+          retaining_wall4_type?: string | null
           site_address?: string | null
           site_requirements_data?: Json | null
           site_requirements_notes?: string | null
