@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { fetchConcreteAndPavingData } from "@/utils/concrete-paving-data";
 import { 
   calculateExtraPavingMargin,
@@ -32,15 +32,12 @@ export const useConcretePavingSummary = (customerId: string) => {
     marginPercentage: 0
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
-    if (customerId) {
-      fetchSummaryData();
-    }
-  }, [customerId]);
-
-  const fetchSummaryData = async () => {
+  const fetchSummaryData = useCallback(async () => {
     setIsLoading(true);
+    setError(null);
+    
     try {
       // First, get the basic cost data from pool_projects
       const data = await fetchConcreteAndPavingData(customerId);
@@ -116,12 +113,25 @@ export const useConcretePavingSummary = (customerId: string) => {
           marginPercentage
         });
       }
-    } catch (error) {
-      console.error("Error fetching concrete and paving summary data:", error);
+    } catch (err) {
+      console.error("Error fetching concrete and paving summary data:", err);
+      setError(err instanceof Error ? err : new Error('Unknown error occurred'));
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [customerId]);
 
-  return { summaryData, isLoading };
+  // Execute the fetch on initial load
+  useCallback(() => {
+    if (customerId) {
+      fetchSummaryData();
+    }
+  }, [customerId, fetchSummaryData]);
+
+  return { 
+    summaryData, 
+    isLoading,
+    error,
+    refreshSummary: fetchSummaryData
+  };
 };
