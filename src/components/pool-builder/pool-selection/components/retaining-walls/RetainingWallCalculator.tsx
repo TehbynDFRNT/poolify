@@ -17,6 +17,7 @@ export const RetainingWallCalculator = () => {
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(0);
   const [selectedWall, setSelectedWall] = useState<RetainingWall | null>(null);
+  const [marginAmount, setMarginAmount] = useState<number>(0);
 
   const { data: retainingWalls, isLoading } = useQuery({
     queryKey: ["retainingWalls"],
@@ -52,8 +53,13 @@ export const RetainingWallCalculator = () => {
       // Formula: Square Meters × Total Rate
       const calculatedTotalCost = squareMeters * selectedWall.total;
       setTotalCost(parseFloat(calculatedTotalCost.toFixed(2)));
+      
+      // Calculate margin amount based on the margin percentage in the selected wall
+      const calculatedMarginAmount = squareMeters * selectedWall.margin;
+      setMarginAmount(parseFloat(calculatedMarginAmount.toFixed(2)));
     } else {
       setTotalCost(0);
+      setMarginAmount(0);
     }
   }, [squareMeters, selectedWall]);
 
@@ -143,14 +149,41 @@ export const RetainingWallCalculator = () => {
             </div>
           </div>
           
+          {selectedWall && (
+            <div className="bg-slate-50 rounded-md p-3 border mt-2">
+              <h4 className="font-medium text-sm mb-2">Wall Type Details:</h4>
+              <div className="grid grid-cols-3 gap-3 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Base Rate:</p>
+                  <p>{formatCurrency(selectedWall.rate)}/m²</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Extra Rate:</p>
+                  <p>{formatCurrency(selectedWall.extra_rate)}/m²</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Margin:</p>
+                  <p>{formatCurrency(selectedWall.margin)}/m²</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Results section */}
           <div className="mt-6 bg-slate-50 p-4 rounded-md">
             <h3 className="font-medium mb-2">Calculation Results:</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <p className="text-sm text-muted-foreground">Square Meters:</p>
                 <p className="text-lg font-medium">{squareMeters} m²</p>
                 <p className="text-xs text-muted-foreground mt-1">((Height 1 + Height 2) ÷ 2) × Length</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Margin Amount:</p>
+                <p className="text-lg font-medium text-green-600">{formatCurrency(marginAmount)}</p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {squareMeters} m² × {selectedWall ? formatCurrency(selectedWall.margin) : '$0.00'}/m²
+                </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Total Cost:</p>
