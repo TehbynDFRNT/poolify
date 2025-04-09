@@ -8,9 +8,10 @@ import {
   calculateConcretePumpMargin,
   calculateConcreteCutsMargin
 } from "@/utils/concrete-margin-calculations";
-import { SummaryData } from "@/types/concrete-paving-summary";
+import type { SummaryData } from "@/types/concrete-paving-summary";
 
-export { SummaryData } from "@/types/concrete-paving-summary";
+// Use 'export type' to re-export the type when isolatedModules is enabled
+export type { SummaryData } from "@/types/concrete-paving-summary";
 
 export const useConcretePavingSummary = (customerId: string) => {
   const [summaryData, setSummaryData] = useState<SummaryData>({
