@@ -1,6 +1,6 @@
 
 import React from "react";
-import { DollarSign, Percent } from "lucide-react";
+import { DollarSign, Calculator } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import { SummaryData } from "@/hooks/useConcretePavingSummary";
 
@@ -24,8 +24,8 @@ export const CostTotals: React.FC<CostTotalsProps> = ({ summaryData }) => {
         
         <div className="flex justify-between items-center text-sm text-muted-foreground">
           <span className="flex items-center">
-            <Percent className="h-4 w-4 mr-1 text-primary" />
-            Margin:
+            <Calculator className="h-4 w-4 mr-1 text-primary" />
+            Total Margin:
           </span>
           <div className="flex items-center space-x-3">
             <span>{formatCurrency(summaryData.totalMargin)}</span>

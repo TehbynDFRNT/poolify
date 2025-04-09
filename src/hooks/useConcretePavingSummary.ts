@@ -143,8 +143,8 @@ export const useConcretePavingSummary = (customerId: string) => {
           .single();
           
         if (pumpData && concretePumpCost > 0) {
-          // Assume a 10% margin on concrete pump if not explicitly stored
-          concretePumpMargin = concretePumpCost * 0.1;
+          // Use a fixed margin from the concrete pump rate instead of percentage
+          concretePumpMargin = pumpData.margin || concretePumpCost * 0.1;
         }
         
         // Get margin for under fence strips
@@ -178,8 +178,16 @@ export const useConcretePavingSummary = (customerId: string) => {
           }
         }
         
-        // Get margin for concrete cuts (use a default 10% if not explicitly available)
-        concreteCutsMargin = concreteCutsCost * 0.1;
+        // Fetch margin for concrete cuts
+        const { data: cutsData } = await supabase
+          .from('concrete_cuts')
+          .select('margin')
+          .single();
+          
+        if (cutsData && concreteCutsCost > 0) {
+          // Use the actual margin rate for concrete cuts
+          concreteCutsMargin = cutsData.margin || concreteCutsCost * 0.1;
+        }
         
         // Calculate totals
         const totalCost = 
@@ -198,7 +206,8 @@ export const useConcretePavingSummary = (customerId: string) => {
           underFenceStripsMargin +
           concreteCutsMargin;
         
-        // Calculate margin percentage
+        // Calculate margin percentage - this is now just for display purposes
+        // It's calculated properly from the actual margin rates above
         const marginPercentage = totalCost > 0 ? (totalMargin / totalCost) * 100 : 0;
         
         setSummaryData({
