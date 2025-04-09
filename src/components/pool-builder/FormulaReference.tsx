@@ -18,6 +18,7 @@ import { UnderFenceConcreteStripsFormula } from "./formula-sections/UnderFenceCo
 import { ConcreteCutsFormula } from "./formula-sections/ConcreteCutsFormula";
 import { ConcretePumpFormula } from "./formula-sections/ConcretePumpFormula";
 import { RetainingWallFormula } from "./formula-sections/RetainingWallFormula";
+import { WaterFeatureFormula } from "./formula-sections/WaterFeatureFormula";
 
 export const FormulaReference: React.FC = () => {
   return (
@@ -40,6 +41,7 @@ export const FormulaReference: React.FC = () => {
           <ConcreteCutsFormula />
           <ConcretePumpFormula />
           <RetainingWallFormula />
+          <WaterFeatureFormula />
         </Accordion>
       </CardContent>
     </Card>
