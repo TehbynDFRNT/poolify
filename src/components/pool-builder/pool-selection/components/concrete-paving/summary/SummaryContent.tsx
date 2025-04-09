@@ -2,7 +2,6 @@
 import React from "react";
 import { PavingRequirements } from "./PavingRequirements";
 import { ConcreteRequirements } from "./ConcreteRequirements";
-import { CostTotals } from "./CostTotals";
 import { SummaryData } from "@/hooks/useConcretePavingSummary";
 
 interface SummaryContentProps {
@@ -27,7 +26,6 @@ export const SummaryContent: React.FC<SummaryContentProps> = ({ summaryData }) =
         <PavingRequirements summaryData={summaryData} />
         <ConcreteRequirements summaryData={summaryData} />
       </div>
-      <CostTotals summaryData={summaryData} />
     </div>
   );
 };
