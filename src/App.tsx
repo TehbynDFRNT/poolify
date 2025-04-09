@@ -24,6 +24,10 @@ import PoolIndividualCosts from "./pages/ConstructionCosts/PoolIndividualCosts";
 import ExtraPaving from "./pages/ConstructionCosts/ExtraPaving";
 import WaterFeature from "./pages/ConstructionCosts/WaterFeature";
 
+// Import third party costs sub-pages
+import Electrical from "./pages/ThirdPartyCosts/Electrical";
+import Fencing from "./pages/ThirdPartyCosts/Fencing";
+
 function App() {
   return (
     <>
@@ -48,6 +52,10 @@ function App() {
         <Route path="/construction-costs/pool-individual-costs" element={<PoolIndividualCosts />} />
         <Route path="/construction-costs/extra-paving" element={<ExtraPaving />} />
         <Route path="/construction-costs/water-feature" element={<WaterFeature />} />
+        
+        {/* Third Party Costs Sub-routes */}
+        <Route path="/third-party-costs/electrical" element={<Electrical />} />
+        <Route path="/third-party-costs/fencing" element={<Fencing />} />
         
         <Route path="*" element={<NotFound />} />
       </Routes>
