@@ -101,14 +101,14 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     // Check if strip already exists
     const existingStrip = selectedStrips.find(s => s.id === stripId);
     if (existingStrip) {
-      // Update quantity if exists
+      // Update length if exists
       const updatedStrips = selectedStrips.map(s => 
-        s.id === stripId ? { ...s, quantity: (s.quantity || 1) + 1 } : s
+        s.id === stripId ? { ...s, length: (s.length || 1) + 1 } : s
       );
       setSelectedStrips(updatedStrips);
     } else {
-      // Add new strip
-      setSelectedStrips([...selectedStrips, { id: stripId, quantity: 1 }]);
+      // Add new strip with default length of 1 linear meter
+      setSelectedStrips([...selectedStrips, { id: stripId, length: 1 }]);
     }
   };
   
@@ -116,14 +116,6 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
   const handleLengthChange = (stripId: string, length: number) => {
     const updatedStrips = selectedStrips.map(s => 
       s.id === stripId ? { ...s, length } : s
-    );
-    setSelectedStrips(updatedStrips);
-  };
-  
-  // Handle strip quantity change
-  const handleQuantityChange = (stripId: string, quantity: number) => {
-    const updatedStrips = selectedStrips.map(s => 
-      s.id === stripId ? { ...s, quantity } : s
     );
     setSelectedStrips(updatedStrips);
   };
@@ -140,9 +132,8 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     selectedStrips.forEach(selectedStrip => {
       const strip = strips.find(s => s.id === selectedStrip.id);
       if (strip) {
-        const quantity = selectedStrip.quantity || 1;
         const length = selectedStrip.length || 1;
-        total += (strip.cost + strip.margin) * quantity * length;
+        total += (strip.cost + strip.margin) * length;
       }
     });
     setTotalCost(total);
@@ -216,7 +207,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                       <div>
                         <h5 className="font-medium">{strip.type}</h5>
                         <p className="text-sm text-muted-foreground">
-                          {formatCurrency(strip.cost)} + {formatCurrency(strip.margin)} = {formatCurrency(strip.cost + strip.margin)}
+                          Cost: {formatCurrency(strip.cost)} + Margin: {formatCurrency(strip.margin)} = {formatCurrency(strip.cost + strip.margin)} per L/M
                         </p>
                       </div>
                       <Button
@@ -228,32 +219,17 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                       </Button>
                     </div>
                     
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <Label htmlFor={`length-${strip.id}`} className="text-sm mb-1 block">
-                          Length (m)
-                        </Label>
-                        <Input
-                          id={`length-${strip.id}`}
-                          type="number"
-                          className="h-9 text-sm"
-                          value={selectedStrips.find(s => s.id === strip.id)?.length || ''}
-                          onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 0)}
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor={`quantity-${strip.id}`} className="text-sm mb-1 block">
-                          Quantity
-                        </Label>
-                        <Input
-                          id={`quantity-${strip.id}`}
-                          type="number"
-                          className="h-9 text-sm"
-                          value={selectedStrips.find(s => s.id === strip.id)?.quantity || ''}
-                          onChange={(e) => handleQuantityChange(strip.id, parseInt(e.target.value, 10) || 0)}
-                        />
-                      </div>
+                    <div>
+                      <Label htmlFor={`length-${strip.id}`} className="text-sm mb-1 block">
+                        Length (linear meters)
+                      </Label>
+                      <Input
+                        id={`length-${strip.id}`}
+                        type="number"
+                        className="h-9 text-sm"
+                        value={selectedStrips.find(s => s.id === strip.id)?.length || ''}
+                        onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 0)}
+                      />
                     </div>
                   </div>
                 ))}
@@ -268,9 +244,10 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                     <TableHeader>
                       <TableRow>
                         <TableHead>Type</TableHead>
+                        <TableHead>Cost</TableHead>
+                        <TableHead>Margin</TableHead>
+                        <TableHead>Price Per L/M</TableHead>
                         <TableHead>Length (m)</TableHead>
-                        <TableHead>Quantity</TableHead>
-                        <TableHead>Price</TableHead>
                         <TableHead>Total</TableHead>
                         <TableHead className="w-[80px]"></TableHead>
                       </TableRow>
@@ -280,17 +257,17 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                         const strip = strips.find(s => s.id === selectedStrip.id);
                         if (!strip) return null;
                         
-                        const quantity = selectedStrip.quantity || 1;
                         const length = selectedStrip.length || 1;
                         const unitPrice = strip.cost + strip.margin;
-                        const itemTotal = unitPrice * quantity * length;
+                        const itemTotal = unitPrice * length;
                         
                         return (
                           <TableRow key={selectedStrip.id}>
                             <TableCell className="font-medium">{strip.type}</TableCell>
-                            <TableCell>{length}m</TableCell>
-                            <TableCell>{quantity}</TableCell>
+                            <TableCell>{formatCurrency(strip.cost)}</TableCell>
+                            <TableCell>{formatCurrency(strip.margin)}</TableCell>
                             <TableCell>{formatCurrency(unitPrice)}</TableCell>
+                            <TableCell>{length}m</TableCell>
                             <TableCell className="font-medium">{formatCurrency(itemTotal)}</TableCell>
                             <TableCell>
                               <Button
@@ -307,7 +284,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
                       })}
                       
                       <TableRow>
-                        <TableCell colSpan={4} className="text-right font-semibold">
+                        <TableCell colSpan={5} className="text-right font-semibold">
                           Total Cost:
                         </TableCell>
                         <TableCell className="font-bold">
