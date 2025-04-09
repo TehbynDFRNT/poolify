@@ -21,26 +21,26 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               collapsed ? "w-20" : "w-64"
             )}
           >
-            <div className="px-4 py-4 flex items-center justify-between">
+            <div className="px-3 py-6 flex items-center justify-between">
               <Link to="/" className="flex items-center">
                 {collapsed ? (
                   <img 
-                    src="/lovable-uploads/24e1a72e-5067-4de7-82ee-530179df922c.png" 
+                    src="/lovable-uploads/649276cc-664a-49c2-b4fd-43731b79f7cc.png" 
                     alt="Poolify Logo" 
-                    className="h-10 w-auto" 
+                    className="h-14 w-auto" 
                   />
                 ) : (
                   <img 
-                    src="/lovable-uploads/24e1a72e-5067-4de7-82ee-530179df922c.png" 
+                    src="/lovable-uploads/649276cc-664a-49c2-b4fd-43731b79f7cc.png" 
                     alt="Poolify Logo" 
-                    className="h-14 w-auto"
+                    className="h-20 w-auto max-w-[180px]"
                   />
                 )}
               </Link>
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-2"
+                className="ml-1"
                 onClick={() => setCollapsed(!collapsed)}
               >
                 {collapsed ? (
@@ -52,7 +52,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             </div>
             
             {/* Use the MainNav component */}
-            <div className="px-2 mt-2">
+            <div className="px-2 mt-4">
               <MainNav />
             </div>
           </div>
