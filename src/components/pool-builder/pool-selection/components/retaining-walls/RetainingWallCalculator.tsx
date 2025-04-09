@@ -8,8 +8,18 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { RetainingWall, WALL_TYPES } from "@/types/retaining-wall";
 import { formatCurrency } from "@/utils/format";
+import { Button } from "@/components/ui/button";
+import { Save, Trash2 } from "lucide-react";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
-export const RetainingWallCalculator = () => {
+interface RetainingWallCalculatorProps {
+  customerId?: string;
+}
+
+export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = ({ 
+  customerId 
+}) => {
   const [selectedWallType, setSelectedWallType] = useState<string>("");
   const [height1, setHeight1] = useState<number>(0);
   const [height2, setHeight2] = useState<number>(0);
@@ -18,8 +28,13 @@ export const RetainingWallCalculator = () => {
   const [totalCost, setTotalCost] = useState<number>(0);
   const [selectedWall, setSelectedWall] = useState<RetainingWall | null>(null);
   const [marginAmount, setMarginAmount] = useState<number>(0);
+  const [isSaving, setIsSaving] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [hasExistingData, setHasExistingData] = useState<boolean>(false);
 
-  const { data: retainingWalls, isLoading } = useQuery({
+  const { data: retainingWalls, isLoading: isLoadingWalls } = useQuery({
     queryKey: ["retainingWalls"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -35,6 +50,51 @@ export const RetainingWallCalculator = () => {
       return data as RetainingWall[];
     },
   });
+
+  // Fetch existing data when component mounts
+  useEffect(() => {
+    if (customerId) {
+      fetchExistingData();
+    }
+  }, [customerId]);
+
+  const fetchExistingData = async () => {
+    if (!customerId) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('pool_projects')
+        .select('retaining_wall_type, retaining_wall_height1, retaining_wall_height2, retaining_wall_length, retaining_wall_total_cost')
+        .eq('id', customerId)
+        .single();
+
+      if (error) {
+        console.error("Error fetching retaining wall data:", error);
+      } else if (data) {
+        if (data.retaining_wall_type) {
+          setSelectedWallType(data.retaining_wall_type);
+          setHasExistingData(true);
+        }
+        
+        if (data.retaining_wall_height1) {
+          setHeight1(data.retaining_wall_height1);
+        }
+        
+        if (data.retaining_wall_height2) {
+          setHeight2(data.retaining_wall_height2);
+        }
+        
+        if (data.retaining_wall_length) {
+          setLength(data.retaining_wall_length);
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching retaining wall data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   // Calculate square meters when dimensions change
   useEffect(() => {
@@ -78,10 +138,108 @@ export const RetainingWallCalculator = () => {
     setter(value);
   };
 
+  const handleSave = async () => {
+    if (!customerId) {
+      toast.error("No customer ID provided");
+      return;
+    }
+
+    if (!selectedWallType || !height1 || !height2 || !length) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const { error } = await supabase
+        .from('pool_projects')
+        .update({
+          retaining_wall_type: selectedWallType,
+          retaining_wall_height1: height1,
+          retaining_wall_height2: height2,
+          retaining_wall_length: length,
+          retaining_wall_total_cost: totalCost
+        })
+        .eq('id', customerId);
+
+      if (error) throw error;
+      
+      toast.success("Retaining wall details saved successfully");
+      setHasExistingData(true);
+    } catch (error) {
+      console.error("Error saving retaining wall data:", error);
+      toast.error("Failed to save retaining wall details");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!customerId) {
+      toast.error("No customer ID provided");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from('pool_projects')
+        .update({
+          retaining_wall_type: null,
+          retaining_wall_height1: null,
+          retaining_wall_height2: null,
+          retaining_wall_length: null,
+          retaining_wall_total_cost: null
+        })
+        .eq('id', customerId);
+
+      if (error) throw error;
+      
+      // Reset form
+      setSelectedWallType('');
+      setHeight1(0);
+      setHeight2(0);
+      setLength(0);
+      setTotalCost(0);
+      setMarginAmount(0);
+      
+      setShowDeleteConfirm(false);
+      setHasExistingData(false);
+      toast.success("Retaining wall removed successfully");
+    } catch (error) {
+      console.error("Error removing retaining wall data:", error);
+      toast.error("Failed to remove retaining wall");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <Card className="shadow-md">
       <CardHeader className="bg-white">
-        <CardTitle className="text-xl font-semibold">Retaining Wall Calculator</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl font-semibold">Retaining Wall Calculator</CardTitle>
+          
+          {customerId && (
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving || !selectedWallType || !height1 || !height2 || !length}
+              className="flex items-center gap-1"
+            >
+              {isSaving ? (
+                <>
+                  <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save Details
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="space-y-6 pt-4">
         <div className="space-y-4">
@@ -91,12 +249,13 @@ export const RetainingWallCalculator = () => {
               <Select
                 value={selectedWallType}
                 onValueChange={setSelectedWallType}
+                disabled={isLoading}
               >
                 <SelectTrigger id="wallType" className="w-full">
                   <SelectValue placeholder="Select a wall type" />
                 </SelectTrigger>
                 <SelectContent>
-                  {isLoading ? (
+                  {isLoadingWalls ? (
                     <SelectItem value="loading">Loading wall types...</SelectItem>
                   ) : (
                     retainingWalls?.map((wall) => (
@@ -120,6 +279,7 @@ export const RetainingWallCalculator = () => {
                   value={height1 || ""}
                   onChange={handleInputChange(setHeight1)}
                   className="w-full"
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -132,6 +292,7 @@ export const RetainingWallCalculator = () => {
                   value={height2 || ""}
                   onChange={handleInputChange(setHeight2)}
                   className="w-full"
+                  disabled={isLoading}
                 />
               </div>
               <div>
@@ -144,6 +305,7 @@ export const RetainingWallCalculator = () => {
                   value={length || ""}
                   onChange={handleInputChange(setLength)}
                   className="w-full"
+                  disabled={isLoading}
                 />
               </div>
             </div>
@@ -194,8 +356,45 @@ export const RetainingWallCalculator = () => {
               </div>
             </div>
           </div>
+          
+          {/* Remove button */}
+          {hasExistingData && (
+            <div className="mt-4">
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={isDeleting}
+                className="flex items-center gap-1"
+              >
+                <Trash2 className="h-4 w-4" />
+                {isDeleting ? "Removing..." : "Remove"}
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
+      
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Retaining Wall</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove the retaining wall data? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {isDeleting ? "Removing..." : "Remove"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 };
