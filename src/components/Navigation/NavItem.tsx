@@ -28,7 +28,7 @@ const NavItem = ({
     <Link to={to} className="block">
       <div
         className={cn(
-          "flex items-center py-2 rounded-lg transition-all duration-200",
+          "flex items-center py-3 rounded-lg transition-all duration-200",
           active
             ? "bg-primary text-white"
             : "hover:bg-gray-100 text-gray-600",

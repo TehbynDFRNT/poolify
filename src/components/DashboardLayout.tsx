@@ -21,55 +21,42 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               collapsed ? "w-20" : "w-64"
             )}
           >
-            <div className="flex flex-col h-full">
-              {/* Logo section - positioned higher */}
-              <div className="px-3 pt-6 flex items-center justify-between border-b pb-4">
-                <Link to="/" className="flex items-center">
-                  {collapsed ? (
-                    <img 
-                      src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
-                      alt="Poolify Logo" 
-                      className="h-42 w-auto" 
-                    />
-                  ) : (
-                    <img 
-                      src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
-                      alt="Poolify Logo" 
-                      className="h-60 w-auto max-w-[210px]"
-                    />
-                  )}
-                </Link>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="ml-1"
-                  onClick={() => setCollapsed(!collapsed)}
-                >
-                  {collapsed ? (
-                    <ChevronRight className="h-4 w-4" />
-                  ) : (
-                    <ChevronLeft className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              
-              {/* Navigation with better spacing */}
-              <div className="px-2 py-3 flex-1 overflow-y-auto">
-                <MainNav />
-              </div>
+            <div className="px-4 py-6 flex items-center justify-between">
+              <Link to="/" className="flex items-center">
+                {collapsed ? (
+                  <h1 className="text-3xl font-bold text-primary">P</h1>
+                ) : (
+                  <h1 className="text-3xl font-bold text-primary">Poolify</h1>
+                )}
+              </Link>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-2"
+                onClick={() => setCollapsed(!collapsed)}
+              >
+                {collapsed ? (
+                  <ChevronRight className="h-4 w-4" />
+                ) : (
+                  <ChevronLeft className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            
+            {/* Use the MainNav component */}
+            <div className="px-2 mt-2">
+              <MainNav />
             </div>
           </div>
 
-          {/* Main content - adjusted for vertical alignment */}
+          {/* Main content */}
           <div 
             className={cn(
               "flex-1 transition-all duration-300",
               collapsed ? "ml-20" : "ml-64"
             )}
           >
-            <div className="py-6">
-              {children}
-            </div>
+            {children}
           </div>
         </SidebarProvider>
       </div>
