@@ -47,7 +47,7 @@ export const ConcreteAndPavingCostSummary: React.FC<ConcreteAndPavingCostSummary
           </div>
         ) : (
           <>
-            <SummaryContent data={summaryData} />
+            <SummaryContent summaryData={summaryData} />
             <CostTotals summaryData={summaryData} />
             
             <div className="flex justify-end mt-4 sm:hidden">

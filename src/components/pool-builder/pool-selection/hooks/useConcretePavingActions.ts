@@ -15,8 +15,9 @@ export const useConcretePavingActions = (customerId: string | null | undefined) 
     
     setIsSubmitting(true);
     try {
+      // Use type assertion to ensure tableName is recognized as a valid table name
       const { error } = await supabase
-        .from(tableName)
+        .from(tableName as 'pool_projects')
         .update(data)
         .eq('id', customerId);
         
@@ -45,8 +46,9 @@ export const useConcretePavingActions = (customerId: string | null | undefined) 
       const updateData: Record<string, null> = {};
       updateData[field] = null;
       
+      // Use type assertion to ensure tableName is recognized as a valid table name
       const { error } = await supabase
-        .from(tableName)
+        .from(tableName as 'pool_projects')
         .update(updateData)
         .eq('id', customerId);
         
