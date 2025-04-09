@@ -21,37 +21,37 @@ export const WaterFeatureFormula = () => {
           <div>
             <h3 className="text-md font-semibold mb-2">🧮 Formula:</h3>
             <p className="text-sm">
-              Total Cost = Water Feature (Size Price + Margin)
-              + Back Cladding Price (if selected)
+              Total Cost = Water Feature Size Total
+              + Back Cladding Total (if selected)
+              + Blade Total (if selected)
             </p>
             <p className="text-xs text-muted-foreground mt-2">
-              All prices in the system already include the margin, so no additional margin calculation is required.
+              All prices include margin — do not apply additional markup.
             </p>
           </div>
           
           <div>
-            <h3 className="text-md font-semibold mb-2">✅ Worked Example 1 – With Back Cladding</h3>
+            <h3 className="text-md font-semibold mb-2">✅ Worked Example – Size + Cladding + 900mm Blade</h3>
             <p className="text-sm font-medium">Water Feature Size: 1.6m x 0.8m</p>
             <ul className="text-sm list-disc pl-5 space-y-1 mt-1">
-              <li>Base Price: $2,163</li>
-              <li>Margin: $1,037</li>
-              <li>Back Cladding: $1,000 (includes $300 margin)</li>
+              <li>Size: 1.6m x 0.8m = $3,200</li>
+              <li>Back Cladding: $1,000</li>
+              <li>Blade: 900mm = $300</li>
             </ul>
             <p className="text-sm font-medium mt-2">
-              Total Cost: $3,200 + $1,000 = <span className="font-bold">$4,200</span>
+              Total: <span className="font-bold">$4,500</span>
             </p>
           </div>
           
           <div>
-            <h3 className="text-md font-semibold mb-2">✅ Worked Example 2 – Without Back Cladding</h3>
+            <h3 className="text-md font-semibold mb-2">✅ Worked Example – Size + 1200mm Blade Only</h3>
             <p className="text-sm font-medium">Water Feature Size: 2m x 1m</p>
             <ul className="text-sm list-disc pl-5 space-y-1 mt-1">
-              <li>Base Price: $2,443</li>
-              <li>Margin: $1,057</li>
-              <li>Back Cladding: Not selected</li>
+              <li>Size: 2m x 1m = $3,500</li>
+              <li>Blade: 1200mm = $400</li>
             </ul>
             <p className="text-sm font-medium mt-2">
-              Total Cost: $2,443 + $1,057 = <span className="font-bold">$3,500</span>
+              Total: <span className="font-bold">$3,900</span>
             </p>
           </div>
         </div>
