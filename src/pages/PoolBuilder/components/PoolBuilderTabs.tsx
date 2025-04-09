@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
@@ -12,7 +11,7 @@ import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import { SiteRequirementsPlaceholder } from "@/components/pool-builder/pool-selection/components/site-requirements/SiteRequirementsPlaceholder";
 import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-selection/components/concrete-paving/ConcreteAndPavingPlaceholder";
 import { RetainingWallsPlaceholder } from "@/components/pool-builder/pool-selection/components/retaining-walls/RetainingWallsPlaceholder";
-import { WaterFeaturePlaceholder } from "@/components/pool-builder/pool-selection/components/water-feature/WaterFeaturePlaceholder";
+import { WaterFeatureSection } from "@/components/pool-builder/pool-selection/components/water-feature/WaterFeatureSection";
 
 interface PoolBuilderTabsProps {
   customerId: string | null;
@@ -128,7 +127,7 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
       <TabsContent value="water-feature">
         <Card className="p-6">
           {selectedPool ? (
-            <WaterFeaturePlaceholder pool={selectedPool} customerId={customerId} />
+            <WaterFeatureSection pool={selectedPool} customerId={customerId} />
           ) : (
             <PlaceholderMessage 
               icon={<Droplets className="h-12 w-12 text-muted-foreground mx-auto" />}
