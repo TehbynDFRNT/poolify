@@ -1,4 +1,3 @@
-
 export interface WaterFeature {
   id: string;
   name: string;
@@ -43,4 +42,24 @@ export interface PoolWaterFeatureInsert {
   sides_finish: string;
   led_blade: string;
   total_cost: number;
+}
+
+export interface WaterFeatureFormValues {
+  waterFeatureSize: string;
+  backCladdingNeeded: boolean;
+  frontFinish: string;
+  topFinish: string;
+  sidesFinish: string;
+  ledBlade: string;
+}
+
+export interface WaterFeatureSummary {
+  basePrice: number;
+  baseMargin: number;
+  backCladdingPrice: number;
+  backCladdingMargin: number;
+  bladePrice: number;
+  bladeMargin: number;
+  totalCost: number;
+  selectedBladeName: string;
 }

@@ -3,66 +3,13 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-// Constants for water feature options
-export const WATER_FEATURE_SIZES = [
-  { 
-    id: "small", 
-    size: "1.6m x 0.8m", 
-    basePrice: 3200,
-    margin: 800,
-    total: 3200, 
-  },
-  { 
-    id: "medium", 
-    size: "2m x 1m", 
-    basePrice: 3500,
-    margin: 900,
-    total: 3500, 
-  },
-];
-
-export const FRONT_FINISH_OPTIONS = [
-  { value: "none", label: "None" },
-  { value: "bag_washed", label: "Bag Washed" },
-  { value: "stackstone", label: "Stackstone" },
-  { value: "other", label: "Other" },
-];
-
-export const FINISH_OPTIONS = [
-  { value: "none", label: "None" },
-  { value: "coping_style", label: "Coping Style" },
-  { value: "other", label: "Other" },
-];
-
-export const LED_BLADE_OPTIONS = [
-  { value: "none", label: "None", price: 0, margin: 0 },
-  { value: "900mm", label: "900mm LED Blade", price: 300, margin: 100 },
-  { value: "1200mm", label: "1200mm LED Blade", price: 400, margin: 100 },
-];
-
-export const BACK_CLADDING_PRICE = 1000;
-export const BACK_CLADDING_MARGIN = 300;
-
-export interface WaterFeatureFormValues {
-  waterFeatureSize: string;
-  backCladdingNeeded: boolean;
-  frontFinish: string;
-  topFinish: string;
-  sidesFinish: string;
-  ledBlade: string;
-}
-
-interface WaterFeatureSummary {
-  basePrice: number;
-  baseMargin: number;
-  backCladdingPrice: number;
-  backCladdingMargin: number;
-  bladePrice: number;
-  bladeMargin: number;
-  totalCost: number;
-  selectedBladeName: string;
-}
+import { WaterFeatureFormValues, WaterFeatureSummary, PoolWaterFeature } from "@/types/water-feature";
+import { 
+  WATER_FEATURE_SIZES, 
+  LED_BLADE_OPTIONS, 
+  BACK_CLADDING_PRICE,
+  BACK_CLADDING_MARGIN
+} from "./constants";
 
 export const useWaterFeature = (customerId?: string | null, poolId?: string | null) => {
   const [summary, setSummary] = useState<WaterFeatureSummary>({
@@ -77,7 +24,7 @@ export const useWaterFeature = (customerId?: string | null, poolId?: string | nu
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingData, setExistingData] = useState<any>(null);
+  const [existingData, setExistingData] = useState<PoolWaterFeature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<WaterFeatureFormValues>({
@@ -99,10 +46,10 @@ export const useWaterFeature = (customerId?: string | null, poolId?: string | nu
       setIsLoading(true);
       try {
         const { data, error } = await supabase
-          .from('pool_water_features')
-          .select('*')
-          .eq('customer_id', customerId)
-          .eq('pool_id', poolId)
+          .from("pool_water_features")
+          .select("*")
+          .eq("customer_id", customerId)
+          .eq("pool_id", poolId)
           .single();
         
         if (error) {
@@ -111,7 +58,7 @@ export const useWaterFeature = (customerId?: string | null, poolId?: string | nu
         }
         
         if (data) {
-          setExistingData(data);
+          setExistingData(data as PoolWaterFeature);
           form.reset({
             waterFeatureSize: data.water_feature_size,
             backCladdingNeeded: data.back_cladding_needed,
@@ -205,13 +152,13 @@ export const useWaterFeature = (customerId?: string | null, poolId?: string | nu
       if (existingData) {
         // Update existing record
         response = await supabase
-          .from('pool_water_features')
+          .from("pool_water_features")
           .update(dataToSave)
-          .eq('id', existingData.id);
+          .eq("id", existingData.id);
       } else {
         // Insert new record
         response = await supabase
-          .from('pool_water_features')
+          .from("pool_water_features")
           .insert([dataToSave]);
       }
 
