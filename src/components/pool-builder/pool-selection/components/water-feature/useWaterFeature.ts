@@ -34,12 +34,13 @@ export const FINISH_OPTIONS = [
 ];
 
 export const LED_BLADE_OPTIONS = [
-  { value: "none", label: "None", price: 0 },
-  { value: "900mm", label: "900mm LED Blade", price: 300 },
-  { value: "1200mm", label: "1200mm LED Blade", price: 400 },
+  { value: "none", label: "None", price: 0, margin: 0 },
+  { value: "900mm", label: "900mm LED Blade", price: 300, margin: 100 },
+  { value: "1200mm", label: "1200mm LED Blade", price: 400, margin: 100 },
 ];
 
 export const BACK_CLADDING_PRICE = 1000;
+export const BACK_CLADDING_MARGIN = 300;
 
 export interface WaterFeatureFormValues {
   waterFeatureSize: string;
@@ -52,8 +53,11 @@ export interface WaterFeatureFormValues {
 
 interface WaterFeatureSummary {
   basePrice: number;
+  baseMargin: number;
   backCladdingPrice: number;
+  backCladdingMargin: number;
   bladePrice: number;
+  bladeMargin: number;
   totalCost: number;
   selectedBladeName: string;
 }
@@ -61,8 +65,11 @@ interface WaterFeatureSummary {
 export const useWaterFeature = () => {
   const [summary, setSummary] = useState<WaterFeatureSummary>({
     basePrice: 0,
+    baseMargin: 0,
     backCladdingPrice: 0,
+    backCladdingMargin: 0,
     bladePrice: 0,
+    bladeMargin: 0,
     totalCost: 0,
     selectedBladeName: "None",
   });
@@ -88,15 +95,18 @@ export const useWaterFeature = () => {
         (size) => size.id === values.waterFeatureSize
       );
       const basePrice = selectedSize ? selectedSize.total : 0;
+      const baseMargin = selectedSize ? selectedSize.margin : 0;
       
-      // Back cladding cost
+      // Back cladding cost and margin
       const backCladdingPrice = values.backCladdingNeeded ? BACK_CLADDING_PRICE : 0;
+      const backCladdingMargin = values.backCladdingNeeded ? BACK_CLADDING_MARGIN : 0;
       
-      // LED blade cost and name
+      // LED blade cost, margin and name
       const selectedBlade = LED_BLADE_OPTIONS.find(
         (blade) => blade.value === values.ledBlade
       );
       const bladePrice = selectedBlade ? selectedBlade.price : 0;
+      const bladeMargin = selectedBlade ? selectedBlade.margin : 0;
       const selectedBladeName = selectedBlade ? selectedBlade.label : "None";
       
       // Total cost
@@ -104,8 +114,11 @@ export const useWaterFeature = () => {
       
       setSummary({
         basePrice,
+        baseMargin,
         backCladdingPrice,
+        backCladdingMargin,
         bladePrice,
+        bladeMargin,
         totalCost,
         selectedBladeName,
       });

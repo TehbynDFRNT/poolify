@@ -1,6 +1,5 @@
 
 import React from "react";
-import { Droplets } from "lucide-react";
 import { Pool } from "@/types/pool";
 import {
   Form,
@@ -27,6 +26,7 @@ import {
   FINISH_OPTIONS, 
   LED_BLADE_OPTIONS,
   BACK_CLADDING_PRICE,
+  BACK_CLADDING_MARGIN,
   WaterFeatureFormValues
 } from "./useWaterFeature";
 import { WaterFeatureCostSummary } from "./WaterFeatureCostSummary";
@@ -119,7 +119,7 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
                           Back Cladding Needed
                         </FormLabel>
                         <div className="text-sm text-muted-foreground">
-                          Additional ${BACK_CLADDING_PRICE}
+                          Additional ${BACK_CLADDING_PRICE} (includes ${BACK_CLADDING_MARGIN} margin)
                         </div>
                       </div>
                       <FormControl>
@@ -236,7 +236,7 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
                           {LED_BLADE_OPTIONS.map((option) => (
                             <SelectItem key={option.value} value={option.value}>
                               {option.label}
-                              {option.price > 0 && ` - $${option.price}`}
+                              {option.price > 0 && ` - $${option.price} (includes $${option.margin} margin)`}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -267,6 +267,9 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
           totalCost={summary.totalCost}
           hasBackCladding={form.getValues().backCladdingNeeded}
           selectedBlade={summary.selectedBladeName}
+          baseMargin={summary.baseMargin}
+          backCladdingMargin={summary.backCladdingMargin}
+          bladeMargin={summary.bladeMargin}
         />
       </div>
     </div>

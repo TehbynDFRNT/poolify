@@ -9,6 +9,9 @@ interface WaterFeatureCostSummaryProps {
   totalCost: number;
   hasBackCladding: boolean;
   selectedBlade: string;
+  baseMargin?: number;
+  backCladdingMargin?: number;
+  bladeMargin?: number;
 }
 
 export const WaterFeatureCostSummary: React.FC<WaterFeatureCostSummaryProps> = ({
@@ -18,6 +21,9 @@ export const WaterFeatureCostSummary: React.FC<WaterFeatureCostSummaryProps> = (
   totalCost,
   hasBackCladding,
   selectedBlade,
+  baseMargin = 800,
+  backCladdingMargin = 300,
+  bladeMargin = 100,
 }) => {
   return (
     <Card>
@@ -25,35 +31,52 @@ export const WaterFeatureCostSummary: React.FC<WaterFeatureCostSummaryProps> = (
         <div className="space-y-4">
           <div className="flex justify-between items-center border-b pb-2">
             <span className="font-medium">Item</span>
-            <span className="font-medium">Cost</span>
+            <div className="flex items-center gap-4">
+              <span className="font-medium text-muted-foreground">Margin</span>
+              <span className="font-medium min-w-[80px] text-right">Cost</span>
+            </div>
           </div>
           
           {/* Base water feature cost */}
           <div className="flex justify-between items-center">
             <span>Water Feature Base</span>
-            <span>${basePrice.toLocaleString()}</span>
+            <div className="flex items-center gap-4">
+              <span className="text-muted-foreground min-w-[80px] text-right">${baseMargin.toLocaleString()}</span>
+              <span className="min-w-[80px] text-right">${basePrice.toLocaleString()}</span>
+            </div>
           </div>
           
           {/* Back cladding if selected */}
           {hasBackCladding && (
             <div className="flex justify-between items-center">
               <span>Back Cladding</span>
-              <span>${backCladdingPrice.toLocaleString()}</span>
+              <div className="flex items-center gap-4">
+                <span className="text-muted-foreground min-w-[80px] text-right">${backCladdingMargin.toLocaleString()}</span>
+                <span className="min-w-[80px] text-right">${backCladdingPrice.toLocaleString()}</span>
+              </div>
             </div>
           )}
           
           {/* LED Blade if selected */}
           {selectedBlade !== "none" && bladePrice > 0 && (
             <div className="flex justify-between items-center">
-              <span>{selectedBlade} LED Blade</span>
-              <span>${bladePrice.toLocaleString()}</span>
+              <span>{selectedBlade}</span>
+              <div className="flex items-center gap-4">
+                <span className="text-muted-foreground min-w-[80px] text-right">${bladeMargin.toLocaleString()}</span>
+                <span className="min-w-[80px] text-right">${bladePrice.toLocaleString()}</span>
+              </div>
             </div>
           )}
           
           {/* Total cost */}
           <div className="flex justify-between items-center pt-2 border-t font-bold">
             <span>Total Cost</span>
-            <span>${totalCost.toLocaleString()}</span>
+            <div className="flex items-center gap-4">
+              <span className="text-muted-foreground min-w-[80px] text-right">
+                ${(baseMargin + (hasBackCladding ? backCladdingMargin : 0) + (selectedBlade !== "none" ? bladeMargin : 0)).toLocaleString()}
+              </span>
+              <span className="min-w-[80px] text-right">${totalCost.toLocaleString()}</span>
+            </div>
           </div>
           
           <p className="text-xs text-muted-foreground italic mt-2">
