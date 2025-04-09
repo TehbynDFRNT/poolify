@@ -9,6 +9,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { RetainingWallsCostsTable } from "./components/RetainingWallsCostsTable";
+import { RetainingWallsFormulas } from "./components/RetainingWallsFormulas";
 import { useRetainingWalls } from "./hooks/useRetainingWalls";
 
 const RetainingWalls = () => {
@@ -56,6 +57,9 @@ const RetainingWalls = () => {
               addMutation.mutate(cost);
             }}
           />
+          
+          {/* Add the Formulas section at the bottom */}
+          <RetainingWallsFormulas />
         </div>
       </div>
     </DashboardLayout>
