@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 interface ExtraConcretingProps {
   pool: Pool;
   customerId: string;
+  onSaveComplete?: () => void;
 }
 
 // Define concrete types
@@ -24,7 +24,11 @@ const CONCRETE_TYPES = [
   { id: "standard", label: "Standard", price: 128, margin: 52 }
 ];
 
-export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customerId }) => {
+export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ 
+  pool, 
+  customerId,
+  onSaveComplete
+}) => {
   const [selectedType, setSelectedType] = useState<string>("");
   const [meterage, setMeterage] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(0);
@@ -113,6 +117,11 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
       if (error) throw error;
       
       toast.success("Extra concreting details saved successfully.");
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error saving extra concreting:", error);
       toast.error("Failed to save extra concreting details.");
@@ -142,6 +151,11 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ pool, customer
       
       setShowDeleteConfirm(false);
       toast.success("Extra concreting removed successfully.");
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error removing extra concreting:", error);
       toast.error("Failed to remove extra concreting.");

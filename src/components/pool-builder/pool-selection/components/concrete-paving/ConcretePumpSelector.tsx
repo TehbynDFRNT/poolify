@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -15,9 +14,14 @@ import { formatCurrency } from "@/utils/format";
 interface ConcretePumpSelectorProps {
   pool: Pool;
   customerId: string;
+  onSaveComplete?: () => void;
 }
 
-export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({ pool, customerId }) => {
+export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({ 
+  pool, 
+  customerId,
+  onSaveComplete 
+}) => {
   const [isPumpNeeded, setIsPumpNeeded] = useState(false);
   const [quantity, setQuantity] = useState<number>(1);
   const [totalCost, setTotalCost] = useState<number>(0);
@@ -97,6 +101,11 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({ pool
       if (error) throw error;
       
       toast.success("Concrete pump details saved successfully.");
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error saving concrete pump details:", error);
       toast.error("Failed to save concrete pump details.");

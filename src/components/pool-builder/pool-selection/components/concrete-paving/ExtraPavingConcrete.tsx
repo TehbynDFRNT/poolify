@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { Sparkles } from "lucide-react";
 interface ExtraPavingConcreteProps {
   pool: Pool;
   customerId: string;
+  onSaveComplete?: () => void;
 }
 
 // Define an interface for the data we're expecting from Supabase
@@ -26,7 +26,11 @@ interface PoolProjectExtensions {
   extra_paving_total_cost?: number | null;
 }
 
-export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, customerId }) => {
+export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ 
+  pool, 
+  customerId,
+  onSaveComplete
+}) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -122,6 +126,11 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
       if (error) throw error;
       
       toast.success("Extra paving & concreting saved successfully");
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error saving extra paving:", error);
       toast.error("Failed to save extra paving details");
@@ -159,6 +168,11 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({ pool, 
       
       toast.success("Extra paving & concreting removed successfully");
       setShowDeleteConfirm(false);
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error removing extra paving:", error);
       toast.error("Failed to remove extra paving details");

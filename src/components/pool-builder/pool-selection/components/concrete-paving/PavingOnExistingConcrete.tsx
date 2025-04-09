@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -17,6 +16,7 @@ import { Layers } from "lucide-react";
 interface PavingOnExistingConcreteProps {
   pool: Pool;
   customerId: string;
+  onSaveComplete?: () => void;
 }
 
 // Define an interface for the data we're expecting from Supabase
@@ -26,7 +26,11 @@ interface PoolProjectExtensions {
   existing_concrete_paving_total_cost?: number | null;
 }
 
-export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> = ({ pool, customerId }) => {
+export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> = ({ 
+  pool, 
+  customerId,
+  onSaveComplete
+}) => {
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -122,6 +126,11 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
       if (error) throw error;
       
       toast.success("Paving on existing concrete saved successfully");
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error saving paving on existing concrete:", error);
       toast.error("Failed to save paving on existing concrete details");
@@ -159,6 +168,11 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
       
       toast.success("Paving on existing concrete removed successfully");
       setShowDeleteConfirm(false);
+      
+      // Call the onSaveComplete callback if provided
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error removing paving on existing concrete:", error);
       toast.error("Failed to remove paving on existing concrete details");

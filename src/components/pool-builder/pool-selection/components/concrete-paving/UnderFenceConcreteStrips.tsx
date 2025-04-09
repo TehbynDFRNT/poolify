@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Fence } from "lucide-react";
@@ -66,7 +67,12 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
       } else if (data) {
         if (data.under_fence_concrete_strips_data) {
           try {
-            const parsedData = JSON.parse(data.under_fence_concrete_strips_data);
+            // Fix: Ensure we're parsing a valid string
+            const dataStr = typeof data.under_fence_concrete_strips_data === 'string' 
+              ? data.under_fence_concrete_strips_data 
+              : JSON.stringify(data.under_fence_concrete_strips_data);
+              
+            const parsedData = JSON.parse(dataStr);
             setSelectedStrips(parsedData);
           } catch (e) {
             console.error("Error parsing under fence strips data:", e);
