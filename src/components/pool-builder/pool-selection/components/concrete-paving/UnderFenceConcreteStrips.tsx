@@ -67,12 +67,14 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
       } else if (data) {
         if (data.under_fence_concrete_strips_data) {
           try {
-            // Fix: Ensure we're parsing a valid string
-            const dataStr = typeof data.under_fence_concrete_strips_data === 'string' 
-              ? data.under_fence_concrete_strips_data 
-              : JSON.stringify(data.under_fence_concrete_strips_data);
-              
-            const parsedData = JSON.parse(dataStr);
+            // Parse the data based on its type
+            let parsedData;
+            if (typeof data.under_fence_concrete_strips_data === 'string') {
+              parsedData = JSON.parse(data.under_fence_concrete_strips_data);
+            } else {
+              // If it's already an object/array, use it directly
+              parsedData = data.under_fence_concrete_strips_data;
+            }
             setSelectedStrips(parsedData);
           } catch (e) {
             console.error("Error parsing under fence strips data:", e);
@@ -158,7 +160,7 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
       
       toast.success("Under fence concrete strips saved successfully.");
       
-      // Call onSaveComplete callback
+      // Call onSaveComplete callback to refresh the summary
       if (onSaveComplete) {
         onSaveComplete();
       }
