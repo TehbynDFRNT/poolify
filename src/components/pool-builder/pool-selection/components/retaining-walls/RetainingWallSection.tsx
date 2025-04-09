@@ -9,12 +9,14 @@ import { formatCurrency } from "@/utils/format";
 import { FormActions } from "@/pages/Quotes/components/ExtraPavingStep/components/PavingOnExistingConcrete/components/FormActions";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { DeleteConfirmDialog } from "@/pages/Quotes/components/ExtraPavingStep/components/PavingOnExistingConcrete/components/DeleteConfirmDialog";
 
 interface RetainingWallSectionProps {
   customerId: string | null;
   wallNumber: number;
   retainingWalls?: RetainingWall[];
   isLoadingWalls: boolean;
+  onWallUpdate?: () => void;
 }
 
 export const RetainingWallSection: React.FC<RetainingWallSectionProps> = ({
@@ -22,6 +24,7 @@ export const RetainingWallSection: React.FC<RetainingWallSectionProps> = ({
   wallNumber,
   retainingWalls,
   isLoadingWalls,
+  onWallUpdate,
 }) => {
   // Form state
   const [selectedWallType, setSelectedWallType] = useState<string>("");
@@ -166,6 +169,11 @@ export const RetainingWallSection: React.FC<RetainingWallSectionProps> = ({
       
       toast.success(`Retaining wall ${wallNumber} details saved successfully`);
       setHasExistingData(true);
+      
+      // Call the onWallUpdate callback to trigger a refetch in the summary component
+      if (onWallUpdate) {
+        onWallUpdate();
+      }
     } catch (error) {
       console.error(`Error saving retaining wall ${wallNumber} data:`, error);
       toast.error(`Failed to save retaining wall ${wallNumber} details`);
@@ -209,6 +217,11 @@ export const RetainingWallSection: React.FC<RetainingWallSectionProps> = ({
       setShowDeleteConfirm(false);
       setHasExistingData(false);
       toast.success(`Retaining wall ${wallNumber} removed successfully`);
+      
+      // Call the onWallUpdate callback to trigger a refetch in the summary component
+      if (onWallUpdate) {
+        onWallUpdate();
+      }
     } catch (error) {
       console.error(`Error removing retaining wall ${wallNumber} data:`, error);
       toast.error(`Failed to remove retaining wall ${wallNumber}`);
@@ -337,13 +350,22 @@ export const RetainingWallSection: React.FC<RetainingWallSectionProps> = ({
         
         {/* Form actions (Save/Delete buttons) */}
         {customerId && (
-          <FormActions 
-            onSave={handleSave}
-            onDelete={() => setShowDeleteConfirm(true)}
-            isSubmitting={isSaving}
-            isDeleting={isDeleting}
-            hasExistingData={hasExistingData}
-          />
+          <>
+            <FormActions 
+              onSave={handleSave}
+              onDelete={() => setShowDeleteConfirm(true)}
+              isSubmitting={isSaving}
+              isDeleting={isDeleting}
+              hasExistingData={hasExistingData}
+            />
+            
+            <DeleteConfirmDialog
+              isOpen={showDeleteConfirm}
+              onClose={() => setShowDeleteConfirm(false)}
+              onConfirm={handleDelete}
+              isDeleting={isDeleting}
+            />
+          </>
         )}
       </CardContent>
     </Card>

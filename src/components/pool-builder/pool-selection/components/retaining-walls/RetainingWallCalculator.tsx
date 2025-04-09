@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,6 +15,14 @@ interface RetainingWallCalculatorProps {
 export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = ({ 
   customerId 
 }) => {
+  // State to track when changes happen to trigger refetching in the summary
+  const [updateCounter, setUpdateCounter] = useState(0);
+
+  // Function to trigger refetching in the RetainingWallCostSummary component
+  const handleWallUpdate = () => {
+    setUpdateCounter(prev => prev + 1);
+  };
+
   // Load retaining wall types
   const { data: retainingWalls, isLoading: isLoadingWalls } = useQuery({
     queryKey: ["retainingWalls"],
@@ -55,7 +63,8 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
                 customerId={customerId || null} 
                 wallNumber={1} 
                 retainingWalls={retainingWalls} 
-                isLoadingWalls={isLoadingWalls} 
+                isLoadingWalls={isLoadingWalls}
+                onWallUpdate={handleWallUpdate}
               />
             </TabsContent>
             
@@ -64,7 +73,8 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
                 customerId={customerId || null} 
                 wallNumber={2} 
                 retainingWalls={retainingWalls} 
-                isLoadingWalls={isLoadingWalls} 
+                isLoadingWalls={isLoadingWalls}
+                onWallUpdate={handleWallUpdate}
               />
             </TabsContent>
             
@@ -73,7 +83,8 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
                 customerId={customerId || null} 
                 wallNumber={3} 
                 retainingWalls={retainingWalls} 
-                isLoadingWalls={isLoadingWalls} 
+                isLoadingWalls={isLoadingWalls}
+                onWallUpdate={handleWallUpdate}
               />
             </TabsContent>
             
@@ -82,15 +93,16 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
                 customerId={customerId || null} 
                 wallNumber={4} 
                 retainingWalls={retainingWalls} 
-                isLoadingWalls={isLoadingWalls} 
+                isLoadingWalls={isLoadingWalls}
+                onWallUpdate={handleWallUpdate}
               />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
       
-      {/* Add the cost summary component */}
-      {customerId && <RetainingWallCostSummary customerId={customerId} />}
+      {/* Add the cost summary component with the update counter */}
+      {customerId && <RetainingWallCostSummary customerId={customerId} updateCounter={updateCounter} />}
     </div>
   );
 };
