@@ -24,6 +24,7 @@ export const useWaterFeature = (customerId?: string | null, poolId?: string | nu
   });
   
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [existingData, setExistingData] = useState<PoolWaterFeature | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -177,11 +178,55 @@ export const useWaterFeature = (customerId?: string | null, poolId?: string | nu
     }
   };
 
+  // Function to delete water feature
+  const deleteWaterFeature = async () => {
+    if (!customerId || !poolId || !existingData) {
+      toast.error("No water feature options to remove");
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const { error } = await supabase
+        .from("pool_water_features")
+        .delete()
+        .eq("id", existingData.id);
+
+      if (error) {
+        throw error;
+      }
+
+      // Reset form and existingData
+      form.reset({
+        waterFeatureSize: "",
+        backCladdingNeeded: false,
+        frontFinish: "none",
+        topFinish: "none",
+        sidesFinish: "none",
+        ledBlade: "none",
+      });
+      
+      setExistingData(null);
+      
+      toast.success("Water feature options removed successfully");
+      return true;
+    } catch (error) {
+      console.error("Error removing water feature:", error);
+      toast.error("Failed to remove water feature options");
+      return false;
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return {
     form,
     summary,
     isSubmitting,
+    isDeleting,
     isLoading,
-    saveWaterFeature
+    existingData,
+    saveWaterFeature,
+    deleteWaterFeature
   };
 };
