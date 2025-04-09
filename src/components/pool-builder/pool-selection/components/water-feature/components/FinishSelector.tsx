@@ -43,7 +43,7 @@ export const FinishSelector: React.FC<FinishSelectorProps> = ({
           <FormLabel>{label}</FormLabel>
           <Select
             onValueChange={field.onChange}
-            value={field.value}
+            value={field.value as string} // Cast to string since we know this field only accepts string values
           >
             <FormControl>
               <SelectTrigger>
