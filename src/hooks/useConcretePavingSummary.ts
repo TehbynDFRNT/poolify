@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { fetchConcreteAndPavingData } from "@/utils/concrete-paving-data";
 import { 
   calculateExtraPavingMargin,
@@ -122,7 +122,7 @@ export const useConcretePavingSummary = (customerId: string) => {
   }, [customerId]);
 
   // Execute the fetch on initial load
-  useCallback(() => {
+  useEffect(() => {
     if (customerId) {
       fetchSummaryData();
     }
