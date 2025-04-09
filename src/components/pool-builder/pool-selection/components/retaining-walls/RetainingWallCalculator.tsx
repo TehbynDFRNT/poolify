@@ -73,20 +73,21 @@ export const RetainingWallCalculator: React.FC<RetainingWallCalculatorProps> = (
       if (error) {
         console.error("Error fetching retaining wall data:", error);
       } else if (data) {
+        // Check if we have valid data before trying to set state
         if (data.retaining_wall_type) {
           setSelectedWallType(data.retaining_wall_type);
           setHasExistingData(true);
         }
         
-        if (data.retaining_wall_height1) {
+        if (data.retaining_wall_height1 !== null) {
           setHeight1(data.retaining_wall_height1);
         }
         
-        if (data.retaining_wall_height2) {
+        if (data.retaining_wall_height2 !== null) {
           setHeight2(data.retaining_wall_height2);
         }
         
-        if (data.retaining_wall_length) {
+        if (data.retaining_wall_length !== null) {
           setLength(data.retaining_wall_length);
         }
       }
