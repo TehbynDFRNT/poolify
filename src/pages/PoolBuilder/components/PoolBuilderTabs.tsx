@@ -2,7 +2,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { CheckSquare, ListFilter, MapPin, Layers, Calculator } from "lucide-react";
+import { CheckSquare, ListFilter, MapPin, Layers, Calculator, Wall } from "lucide-react";
 import { Pool } from "@/types/pool";
 
 // Tab content imports
@@ -11,6 +11,7 @@ import PoolSelectionSection from "@/components/pool-builder/pool-selection/PoolS
 import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import { SiteRequirementsPlaceholder } from "@/components/pool-builder/pool-selection/components/site-requirements/SiteRequirementsPlaceholder";
 import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-selection/components/concrete-paving/ConcreteAndPavingPlaceholder";
+import { RetainingWallsPlaceholder } from "@/components/pool-builder/pool-selection/components/retaining-walls/RetainingWallsPlaceholder";
 
 interface PoolBuilderTabsProps {
   customerId: string | null;
@@ -55,6 +56,10 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           <Layers className="h-4 w-4" />
           Concrete & Paving
         </TabsTrigger>
+        <TabsTrigger value="retaining-walls" className="flex items-center gap-2">
+          <Wall className="h-4 w-4" />
+          Retaining Walls
+        </TabsTrigger>
         <TabsTrigger value="formula-reference" className="flex items-center gap-2">
           <Calculator className="h-4 w-4" />
           Formula Reference
@@ -96,6 +101,20 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
               icon={<Layers className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Concrete and paving options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
+            />
+          )}
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="retaining-walls">
+        <Card className="p-6">
+          {selectedPool ? (
+            <RetainingWallsPlaceholder pool={selectedPool} customerId={customerId} />
+          ) : (
+            <PlaceholderMessage 
+              icon={<Wall className="h-12 w-12 text-muted-foreground mx-auto" />}
+              title="Please Select a Pool First"
+              description="Retaining wall options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
             />
           )}
         </Card>
