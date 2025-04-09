@@ -35,6 +35,8 @@ export const useConcretePavingSummary = (customerId: string) => {
   const [error, setError] = useState<Error | null>(null);
 
   const fetchSummaryData = useCallback(async () => {
+    if (!customerId) return;
+    
     setIsLoading(true);
     setError(null);
     
@@ -132,6 +134,6 @@ export const useConcretePavingSummary = (customerId: string) => {
     summaryData, 
     isLoading,
     error,
-    refreshSummary: fetchSummaryData
+    refreshSummary: fetchSummaryData 
   };
 };

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { ExtraPavingConcrete } from "./ExtraPavingConcrete";
 import { PavingOnExistingConcrete } from "./PavingOnExistingConcrete";
 import { ExtraConcreting } from "./ExtraConcreting";
@@ -18,21 +18,56 @@ interface ExtraPavingConcretingProps {
 }
 
 export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ pool, customerId }) => {
+  const [summaryKey, setSummaryKey] = useState<number>(0);
+  
+  const refreshSummary = useCallback(() => {
+    setSummaryKey(prev => prev + 1);
+  }, []);
+  
   const { isSubmittingAll, handleSaveAll } = useSaveAll(customerId, async () => {
     // In a real implementation, this would save all sections
-    // For now, we'll just use the stub function from useSaveAll
+    // and refresh the summary afterward
+    refreshSummary();
     return Promise.resolve();
   });
 
   return (
     <div className="space-y-6">
-      <ExtraPavingConcrete pool={pool} customerId={customerId} />
-      <PavingOnExistingConcrete pool={pool} customerId={customerId} />
-      <ExtraConcreting pool={pool} customerId={customerId} />
-      <ConcretePumpSelector pool={pool} customerId={customerId} />
-      <UnderFenceConcreteStrips pool={pool} customerId={customerId} />
-      <ConcreteCuts pool={pool} customerId={customerId} />
-      <ConcreteAndPavingCostSummary pool={pool} customerId={customerId} />
+      <ExtraPavingConcrete 
+        pool={pool} 
+        customerId={customerId} 
+        onSaveComplete={refreshSummary}
+      />
+      <PavingOnExistingConcrete 
+        pool={pool} 
+        customerId={customerId} 
+        onSaveComplete={refreshSummary}
+      />
+      <ExtraConcreting 
+        pool={pool} 
+        customerId={customerId} 
+        onSaveComplete={refreshSummary}
+      />
+      <ConcretePumpSelector 
+        pool={pool} 
+        customerId={customerId} 
+        onSaveComplete={refreshSummary}
+      />
+      <UnderFenceConcreteStrips 
+        pool={pool} 
+        customerId={customerId} 
+        onSaveComplete={refreshSummary}
+      />
+      <ConcreteCuts 
+        pool={pool} 
+        customerId={customerId} 
+        onSaveComplete={refreshSummary}
+      />
+      <ConcreteAndPavingCostSummary 
+        key={summaryKey} 
+        pool={pool} 
+        customerId={customerId}
+      />
       <FormulaReference />
       
       <div className="flex justify-end mt-8">

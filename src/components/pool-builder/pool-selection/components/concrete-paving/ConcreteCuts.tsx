@@ -16,9 +16,10 @@ import { Trash2 } from "lucide-react";
 interface ConcreteCutsProps {
   pool: Pool;
   customerId: string;
+  onSaveComplete?: () => void;
 }
 
-export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) => {
+export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, onSaveComplete }) => {
   const [cutTypes, setCutTypes] = useState<any[]>([]);
   const [selectedCuts, setSelectedCuts] = useState<string[]>([]);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
@@ -161,6 +162,11 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId }) 
       if (error) throw error;
       
       toast.success("Concrete cuts saved successfully.");
+      
+      // Call the callback function to notify parent components
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     } catch (error) {
       console.error("Error saving concrete cuts:", error);
       toast.error("Failed to save concrete cuts.");
