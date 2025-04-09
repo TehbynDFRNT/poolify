@@ -38,11 +38,12 @@ export const RetainingWallsTable = ({ walls, onUpdate }: RetainingWallsTableProp
     setEditingValues((prev) => {
       const updates = { ...prev, [field]: field === 'type' ? value : Number(value) };
       
-      // Auto-calculate total when rate or extra_rate changes
-      if (field === 'rate' || field === 'extra_rate') {
+      // Auto-calculate total when rate, extra_rate, or margin changes
+      if (field === 'rate' || field === 'extra_rate' || field === 'margin') {
         const rate = field === 'rate' ? Number(value) : (prev.rate ?? 0);
         const extraRate = field === 'extra_rate' ? Number(value) : (prev.extra_rate ?? 0);
-        updates.total = rate + extraRate;
+        const margin = field === 'margin' ? Number(value) : (prev.margin ?? 0);
+        updates.total = rate + extraRate + margin;
       }
       
       return updates;
@@ -57,6 +58,7 @@ export const RetainingWallsTable = ({ walls, onUpdate }: RetainingWallsTableProp
             <TableHead>Type</TableHead>
             <TableHead className="text-right">Rate</TableHead>
             <TableHead className="text-right">Extra Rate</TableHead>
+            <TableHead className="text-right">Margin</TableHead>
             <TableHead className="text-right">Total</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -96,6 +98,18 @@ export const RetainingWallsTable = ({ walls, onUpdate }: RetainingWallsTableProp
                   />
                 ) : (
                   formatCurrency(wall.extra_rate)
+                )}
+              </TableCell>
+              <TableCell className="text-right">
+                {editingId === wall.id ? (
+                  <Input
+                    type="number"
+                    value={editingValues.margin ?? wall.margin}
+                    onChange={(e) => handleChange('margin', e.target.value)}
+                    className="w-24 ml-auto"
+                  />
+                ) : (
+                  formatCurrency(wall.margin)
                 )}
               </TableCell>
               <TableCell className="text-right">

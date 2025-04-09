@@ -22,6 +22,7 @@ export const RetainingWallsCostsTable = ({ costs, onUpdate, onAdd }: RetainingWa
     type: '',
     rate: 0,
     extra_rate: 0,
+    margin: 0,
     total: 0
   });
 
@@ -31,12 +32,13 @@ export const RetainingWallsCostsTable = ({ costs, onUpdate, onAdd }: RetainingWa
       type: cost.type,
       rate: cost.rate,
       extra_rate: cost.extra_rate,
+      margin: cost.margin,
       total: cost.total
     });
   };
 
   const handleSave = (id: string) => {
-    if (!editValues.type || typeof editValues.rate !== 'number' || typeof editValues.extra_rate !== 'number') {
+    if (!editValues.type || typeof editValues.rate !== 'number' || typeof editValues.extra_rate !== 'number' || typeof editValues.margin !== 'number') {
       toast.error('All fields are required');
       return;
     }
@@ -47,14 +49,14 @@ export const RetainingWallsCostsTable = ({ costs, onUpdate, onAdd }: RetainingWa
   };
 
   const handleAdd = () => {
-    if (!newCost.type || typeof newCost.rate !== 'number' || typeof newCost.extra_rate !== 'number') {
+    if (!newCost.type || typeof newCost.rate !== 'number' || typeof newCost.extra_rate !== 'number' || typeof newCost.margin !== 'number') {
       toast.error('All fields are required');
       return;
     }
 
     onAdd(newCost as Omit<RetainingWall, 'id'>);
     setIsAdding(false);
-    setNewCost({ type: '', rate: 0, extra_rate: 0, total: 0 });
+    setNewCost({ type: '', rate: 0, extra_rate: 0, margin: 0, total: 0 });
   };
 
   return (
@@ -76,6 +78,7 @@ export const RetainingWallsCostsTable = ({ costs, onUpdate, onAdd }: RetainingWa
               <TableHead>Type</TableHead>
               <TableHead className="text-right">Rate</TableHead>
               <TableHead className="text-right">Extra Rate</TableHead>
+              <TableHead className="text-right">Margin</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead className="w-[100px]">Actions</TableHead>
             </TableRow>

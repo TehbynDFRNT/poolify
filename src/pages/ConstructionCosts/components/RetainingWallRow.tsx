@@ -49,7 +49,7 @@ export const RetainingWallRow = ({
           onCancel={onCancel}
           onChange={(value) => onEditValueChange({ 
             rate: parseFloat(value),
-            total: parseFloat(value) + (editValues.extra_rate ?? cost.extra_rate)
+            total: parseFloat(value) + (editValues.extra_rate ?? cost.extra_rate) + (editValues.margin ?? cost.margin)
           })}
           onKeyDown={(e) => {
             if (e.key === 'Enter') onSave();
@@ -67,7 +67,25 @@ export const RetainingWallRow = ({
           onCancel={onCancel}
           onChange={(value) => onEditValueChange({ 
             extra_rate: parseFloat(value),
-            total: (editValues.rate ?? cost.rate) + parseFloat(value)
+            total: (editValues.rate ?? cost.rate) + parseFloat(value) + (editValues.margin ?? cost.margin)
+          })}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') onSave();
+            if (e.key === 'Escape') onCancel();
+          }}
+          type="number"
+        />
+      </TableCell>
+      <TableCell className="text-right">
+        <EditableCell
+          value={isEditing ? editValues.margin?.toString() || '' : formatCurrency(cost.margin)}
+          isEditing={isEditing}
+          onEdit={onEdit}
+          onSave={onSave}
+          onCancel={onCancel}
+          onChange={(value) => onEditValueChange({ 
+            margin: parseFloat(value),
+            total: (editValues.rate ?? cost.rate) + (editValues.extra_rate ?? cost.extra_rate) + parseFloat(value)
           })}
           onKeyDown={(e) => {
             if (e.key === 'Enter') onSave();

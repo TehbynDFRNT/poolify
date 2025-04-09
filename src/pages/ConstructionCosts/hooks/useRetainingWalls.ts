@@ -20,7 +20,11 @@ export const useRetainingWalls = () => {
         throw error;
       }
 
-      return data as RetainingWall[];
+      // Add margin field with default value of 0 if it doesn't exist
+      return data.map((wall: any) => ({
+        ...wall,
+        margin: wall.margin ?? 0
+      })) as RetainingWall[];
     },
   });
 

@@ -21,7 +21,7 @@ export const NewRetainingWallRow = ({
     const rate = parseFloat(value);
     onNewCostChange({ 
       rate,
-      total: rate + (newCost.extra_rate || 0)
+      total: rate + (newCost.extra_rate || 0) + (newCost.margin || 0)
     });
   };
 
@@ -29,7 +29,15 @@ export const NewRetainingWallRow = ({
     const extraRate = parseFloat(value);
     onNewCostChange({ 
       extra_rate: extraRate,
-      total: (newCost.rate || 0) + extraRate
+      total: (newCost.rate || 0) + extraRate + (newCost.margin || 0)
+    });
+  };
+
+  const handleMarginChange = (value: string) => {
+    const margin = parseFloat(value);
+    onNewCostChange({ 
+      margin,
+      total: (newCost.rate || 0) + (newCost.extra_rate || 0) + margin
     });
   };
 
@@ -57,6 +65,15 @@ export const NewRetainingWallRow = ({
           value={newCost.extra_rate}
           onChange={(e) => handleExtraRateChange(e.target.value)}
           placeholder="Enter extra rate"
+          className="text-right"
+        />
+      </TableCell>
+      <TableCell>
+        <Input
+          type="number"
+          value={newCost.margin}
+          onChange={(e) => handleMarginChange(e.target.value)}
+          placeholder="Enter margin"
           className="text-right"
         />
       </TableCell>

@@ -4,6 +4,7 @@ export interface RetainingWall {
   type: string;
   rate: number;
   extra_rate: number;
+  margin: number;
   total: number;
 }
 
