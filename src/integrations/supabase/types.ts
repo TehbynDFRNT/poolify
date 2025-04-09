@@ -1520,6 +1520,7 @@ export type Database = {
           created_at: string
           extra_rate: number
           id: string
+          margin: number
           rate: number
           total: number
           type: string
@@ -1529,6 +1530,7 @@ export type Database = {
           created_at?: string
           extra_rate?: number
           id?: string
+          margin?: number
           rate?: number
           total?: number
           type: string
@@ -1538,6 +1540,7 @@ export type Database = {
           created_at?: string
           extra_rate?: number
           id?: string
+          margin?: number
           rate?: number
           total?: number
           type?: string

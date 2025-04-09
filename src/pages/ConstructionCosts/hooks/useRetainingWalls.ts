@@ -20,16 +20,37 @@ export const useRetainingWalls = () => {
         throw error;
       }
 
-      // Add margin field with default value of 0 if it doesn't exist
+      // Ensure all required fields are present with default values if needed
       return data.map((wall: any) => ({
         ...wall,
-        margin: wall.margin ?? 0
+        margin: wall.margin ?? 0,
+        total: calculateTotal(wall)
       })) as RetainingWall[];
     },
   });
 
+  // Helper function to calculate total
+  const calculateTotal = (wall: any): number => {
+    const rate = Number(wall.rate) || 0;
+    const extraRate = Number(wall.extra_rate) || 0;
+    const margin = Number(wall.margin) || 0;
+    return rate + extraRate + margin;
+  };
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<RetainingWall> }) => {
+      // If updates include any of the cost fields but not total, calculate the new total
+      if ((updates.rate !== undefined || updates.extra_rate !== undefined || updates.margin !== undefined) && updates.total === undefined) {
+        const currentWall = retainingWalls?.find(wall => wall.id === id);
+        if (currentWall) {
+          const updatedWall = {
+            ...currentWall,
+            ...updates
+          };
+          updates.total = calculateTotal(updatedWall);
+        }
+      }
+
       const { error } = await supabase
         .from("retaining_walls")
         .update(updates)
@@ -49,9 +70,15 @@ export const useRetainingWalls = () => {
 
   const addMutation = useMutation({
     mutationFn: async (wall: Omit<RetainingWall, 'id'>) => {
+      // Ensure the total is calculated correctly
+      const newWall = {
+        ...wall,
+        total: (wall.rate || 0) + (wall.extra_rate || 0) + (wall.margin || 0)
+      };
+      
       const { error } = await supabase
         .from("retaining_walls")
-        .insert([wall]);
+        .insert([newWall]);
 
       if (error) throw error;
     },
