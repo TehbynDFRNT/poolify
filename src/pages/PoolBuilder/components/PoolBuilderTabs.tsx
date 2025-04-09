@@ -2,7 +2,7 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { CheckSquare, ListFilter, MapPin, Layers, Calculator, Wall } from "lucide-react";
+import { CheckSquare, ListFilter, MapPin, Layers, Calculator, Fence } from "lucide-react";
 import { Pool } from "@/types/pool";
 
 // Tab content imports
@@ -57,7 +57,7 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           Concrete & Paving
         </TabsTrigger>
         <TabsTrigger value="retaining-walls" className="flex items-center gap-2">
-          <Wall className="h-4 w-4" />
+          <Fence className="h-4 w-4" />
           Retaining Walls
         </TabsTrigger>
         <TabsTrigger value="formula-reference" className="flex items-center gap-2">
@@ -112,7 +112,7 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
             <RetainingWallsPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
             <PlaceholderMessage 
-              icon={<Wall className="h-12 w-12 text-muted-foreground mx-auto" />}
+              icon={<Fence className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Retaining wall options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
             />
