@@ -22,8 +22,8 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             )}
           >
             <div className="flex flex-col h-full">
-              {/* Logo section with centered alignment */}
-              <div className="px-3 py-4 flex items-center justify-between border-b">
+              {/* Logo section - positioned higher */}
+              <div className="px-3 pt-6 flex items-center justify-between border-b pb-4">
                 <Link to="/" className="flex items-center">
                   {collapsed ? (
                     <img 
@@ -60,7 +60,7 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             </div>
           </div>
 
-          {/* Main content */}
+          {/* Main content - adjusted for vertical alignment */}
           <div 
             className={cn(
               "flex-1 transition-all duration-300",

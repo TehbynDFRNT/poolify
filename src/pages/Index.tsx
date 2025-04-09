@@ -55,8 +55,8 @@ const Index = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto px-6">
-        <h1 className="text-3xl font-bold mb-8">Cost Builder</h1>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <h1 className="text-3xl font-bold">Cost Builder</h1>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-12">
           {modules.map((module) => (
             <Link 
               key={module.title} 
