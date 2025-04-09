@@ -24,9 +24,17 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
             <div className="px-4 py-6 flex items-center justify-between">
               <Link to="/" className="flex items-center">
                 {collapsed ? (
-                  <h1 className="text-3xl font-bold text-primary">P</h1>
+                  <img 
+                    src="/lovable-uploads/24e1a72e-5067-4de7-82ee-530179df922c.png" 
+                    alt="Poolify Logo" 
+                    className="h-8 w-auto"
+                  />
                 ) : (
-                  <h1 className="text-3xl font-bold text-primary">Poolify</h1>
+                  <img 
+                    src="/lovable-uploads/24e1a72e-5067-4de7-82ee-530179df922c.png" 
+                    alt="Poolify Logo" 
+                    className="h-10 w-auto"
+                  />
                 )}
               </Link>
               <Button
