@@ -25,13 +25,13 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               <Link to="/" className="flex items-center">
                 {collapsed ? (
                   <img 
-                    src="/lovable-uploads/590580b8-d08d-42ee-b7a5-d72d576b2263.png" 
+                    src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
                     alt="Poolify Logo" 
                     className="h-14 w-auto" 
                   />
                 ) : (
                   <img 
-                    src="/lovable-uploads/590580b8-d08d-42ee-b7a5-d72d576b2263.png" 
+                    src="/lovable-uploads/31b051dc-41d2-4f2e-b30e-588c8369e522.png" 
                     alt="Poolify Logo" 
                     className="h-20 w-auto max-w-[180px]"
                   />
