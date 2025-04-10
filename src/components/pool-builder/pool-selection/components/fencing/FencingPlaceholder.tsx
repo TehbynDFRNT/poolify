@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FramelessGlassFencing } from "./FramelessGlassFencing";
 import FencingHeader from "./components/FencingHeader";
+import FencingAlert from "./components/FencingAlert";
 
 interface FencingPlaceholderProps {
   pool: Pool | null;
@@ -32,11 +33,10 @@ export const FencingPlaceholder: React.FC<FencingPlaceholderProps> = ({ pool, cu
         
         <Card>
           <CardContent className="p-6">
-            <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">
-              <AlertDescription>
-                Please save customer information before configuring fencing options.
-              </AlertDescription>
-            </Alert>
+            <FencingAlert 
+              variant="warning"
+              description="Please save customer information before configuring fencing options."
+            />
           </CardContent>
         </Card>
       </div>
