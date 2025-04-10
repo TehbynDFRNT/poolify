@@ -24,11 +24,11 @@ export const FlatTopMetalFencingFormula: React.FC = () => {
           <div className="rounded-md bg-muted p-3">
             <code className="text-sm whitespace-pre-line">
               Total Cost = 
-              (Lineal Meters × $165) 
-              + (Gates × $297) 
-              + (Simple Retaining Panels × $220) 
-              + (Complex Retaining Panels × $385) 
-              + (Earthing × Lineal Meters × $150, if selected)
+              (Lineal Meters × Fence Price per Meter) 
+              + (Gates × Gate Price per Unit) 
+              + (Simple Retaining Panels × Simple Panel Price) 
+              + (Complex Retaining Panels × Complex Panel Price) 
+              + (Earthing × Lineal Meters × Earthing Price, if selected)
             </code>
           </div>
           
