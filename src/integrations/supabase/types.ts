@@ -548,6 +548,48 @@ export type Database = {
         }
         Relationships: []
       }
+      flat_top_metal_fencing: {
+        Row: {
+          complex_panels: number
+          created_at: string
+          customer_id: string
+          earthing_required: boolean
+          gates: number
+          id: string
+          linear_meters: number
+          pool_id: string
+          simple_panels: number
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          complex_panels?: number
+          created_at?: string
+          customer_id: string
+          earthing_required?: boolean
+          gates?: number
+          id?: string
+          linear_meters?: number
+          pool_id: string
+          simple_panels?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          complex_panels?: number
+          created_at?: string
+          customer_id?: string
+          earthing_required?: boolean
+          gates?: number
+          id?: string
+          linear_meters?: number
+          pool_id?: string
+          simple_panels?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       frameless_glass_fencing: {
         Row: {
           complex_panels: number
