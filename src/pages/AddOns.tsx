@@ -3,7 +3,7 @@ import React from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Scroll, Bath } from "lucide-react";
+import { Scroll, Bath, Thermometer } from "lucide-react";
 import { PoolCleanersTable } from "./AddOns/components/PoolCleanersTable";
 import { PoolBlanketsTable } from "./AddOns/components/blankets/PoolBlanketsTable";
 
@@ -17,15 +17,24 @@ const AddOns = () => {
         
         <Tabs defaultValue="blankets" className="w-full">
           <TabsList className="mb-6">
-            <TabsTrigger value="blankets">Blankets and Rollers</TabsTrigger>
-            <TabsTrigger value="cleaners">Pool Cleaners</TabsTrigger>
+            <TabsTrigger value="blankets" className="flex items-center gap-1">
+              <Scroll className="h-4 w-4" />
+              <span>Blankets & Heat Pumps</span>
+            </TabsTrigger>
+            <TabsTrigger value="cleaners" className="flex items-center gap-1">
+              <Bath className="h-4 w-4" />
+              <span>Pool Cleaners</span>
+            </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="blankets" className="space-y-6">
+          <TabsContent value="blankets" className="space-y-6 animate-fadeIn">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">
-                  <Scroll className="h-5 w-5 text-primary" />
+                  <div className="flex gap-1">
+                    <Scroll className="h-5 w-5 text-primary" />
+                    <Thermometer className="h-5 w-5 text-blue-500" />
+                  </div>
                   <CardTitle>Blankets, Rollers & Heat Pumps</CardTitle>
                 </div>
               </CardHeader>
@@ -35,7 +44,7 @@ const AddOns = () => {
             </Card>
           </TabsContent>
           
-          <TabsContent value="cleaners" className="space-y-6">
+          <TabsContent value="cleaners" className="space-y-6 animate-fadeIn">
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-2">

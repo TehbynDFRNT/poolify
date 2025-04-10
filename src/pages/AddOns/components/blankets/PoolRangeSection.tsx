@@ -13,12 +13,15 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface PoolRangeSectionProps {
   range: string;
   blankets: PoolBlanket[];
   onEditBlanket: (blanket: PoolBlanket) => void;
   onDeleteBlanket: (id: string) => void;
+  activeTab: "all" | "blankets" | "heatpumps";
 }
 
 export const PoolRangeSection = ({
@@ -26,25 +29,30 @@ export const PoolRangeSection = ({
   blankets,
   onEditBlanket,
   onDeleteBlanket,
+  activeTab
 }: PoolRangeSectionProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   
-  // Take the first blanket to get the blanket description (since they're all the same)
+  // Take the first blanket to get descriptions (since they're all the same for a range)
   const blanketDescription = blankets.length > 0 ? blankets[0].blanket_description : "";
+  const heatpumpDescription = blankets.length > 0 ? blankets[0].heatpump_description : "";
+
+  const showBlankets = activeTab === "all" || activeTab === "blankets";
+  const showHeatPumps = activeTab === "all" || activeTab === "heatpumps";
 
   return (
-    <div className="mb-6 rounded-xl overflow-hidden border shadow">
-      <div 
-        className="flex items-center justify-between p-4 cursor-pointer bg-gradient-to-r from-primary/10 to-transparent"
+    <Card className="overflow-hidden border shadow animate-fadeIn">
+      <CardHeader 
+        className="flex flex-row items-center justify-between py-3 cursor-pointer bg-gradient-to-r from-primary/10 to-transparent"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <h2 className="text-lg font-semibold flex items-center">
+        <CardTitle className="text-lg font-semibold flex items-center">
           <span className="h-3 w-3 rounded-full bg-primary mr-2"></span>
           {range} Range
           <span className="ml-2 text-sm text-muted-foreground font-normal">
             ({blankets.length} model{blankets.length !== 1 ? 's' : ''})
           </span>
-        </h2>
+        </CardTitle>
         <Button variant="ghost" size="icon" className="h-8 w-8">
           {isExpanded ? (
             <ChevronUp className="h-4 w-4" />
@@ -52,76 +60,91 @@ export const PoolRangeSection = ({
             <ChevronDown className="h-4 w-4" />
           )}
         </Button>
-      </div>
+      </CardHeader>
 
       {isExpanded && (
-        <div className="p-4 bg-card space-y-6">
+        <CardContent className="p-4 space-y-4">
           {/* Blankets & Rollers Section */}
-          <div>
-            <div className="flex items-center mb-3">
-              <span className="h-3 w-3 rounded-full bg-primary mr-2"></span>
-              <h3 className="font-medium">Pool Blankets & Rollers</h3>
+          {showBlankets && (
+            <div className="rounded-lg bg-card overflow-hidden">
+              <div className="bg-muted/30 px-4 py-2">
+                <div className="flex items-center">
+                  <span className="h-3 w-3 rounded-full bg-primary mr-2"></span>
+                  <h3 className="font-medium">Pool Blankets & Rollers</h3>
+                </div>
+                <div className="text-sm text-muted-foreground mt-1 ml-5">
+                  <p>{blanketDescription}</p>
+                </div>
+              </div>
+              
+              <div className="p-2">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Pool Model</TableHead>
+                      <TableHead>SKU</TableHead>
+                      <TableHead className="text-right">RRP</TableHead>
+                      <TableHead className="text-right">Trade</TableHead>
+                      <TableHead className="text-right">Margin</TableHead>
+                      <TableHead>Profit %</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {blankets.map((blanket) => (
+                      <PoolBlanketCard
+                        key={`blanket-${blanket.id}`}
+                        blanket={blanket}
+                        onEdit={onEditBlanket}
+                        onDelete={onDeleteBlanket}
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-            <div className="text-sm text-muted-foreground mb-3">
-              <p>{blanketDescription}</p>
-            </div>
-            
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Pool Model</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead className="text-right">RRP</TableHead>
-                  <TableHead className="text-right">Trade</TableHead>
-                  <TableHead className="text-right">Margin</TableHead>
-                  <TableHead>Profit %</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {blankets.map((blanket) => (
-                  <PoolBlanketCard
-                    key={`blanket-${blanket.id}`}
-                    blanket={blanket}
-                    onEdit={onEditBlanket}
-                    onDelete={onDeleteBlanket}
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          )}
           
           {/* Heat Pumps Section */}
-          <div>
-            <div className="flex items-center mb-3">
-              <span className="h-3 w-3 rounded-full bg-blue-500 mr-2"></span>
-              <h3 className="font-medium">Heat Pumps</h3>
+          {showHeatPumps && (
+            <div className="rounded-lg bg-card overflow-hidden">
+              <div className="bg-blue-50 px-4 py-2">
+                <div className="flex items-center">
+                  <span className="h-3 w-3 rounded-full bg-blue-500 mr-2"></span>
+                  <h3 className="font-medium">Heat Pumps</h3>
+                </div>
+                <div className="text-sm text-muted-foreground mt-1 ml-5">
+                  <p>{heatpumpDescription}</p>
+                </div>
+              </div>
+              
+              <div className="p-2">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Pool Model</TableHead>
+                      <TableHead>SKU</TableHead>
+                      <TableHead>Description</TableHead>
+                      <TableHead className="text-right">RRP</TableHead>
+                      <TableHead className="text-right">Trade</TableHead>
+                      <TableHead className="text-right">Margin</TableHead>
+                      <TableHead>Profit %</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {blankets.map((blanket) => (
+                      <HeatPumpRow 
+                        key={`heatpump-${blanket.id}`} 
+                        blanket={blanket} 
+                      />
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
-            
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Pool Model</TableHead>
-                  <TableHead>SKU</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">RRP</TableHead>
-                  <TableHead className="text-right">Trade</TableHead>
-                  <TableHead className="text-right">Margin</TableHead>
-                  <TableHead>Profit %</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {blankets.map((blanket) => (
-                  <HeatPumpRow 
-                    key={`heatpump-${blanket.id}`} 
-                    blanket={blanket} 
-                  />
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </div>
+          )}
+        </CardContent>
       )}
-    </div>
+    </Card>
   );
 };
