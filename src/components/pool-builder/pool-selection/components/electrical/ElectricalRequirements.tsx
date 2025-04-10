@@ -4,7 +4,7 @@ import { Pool } from "@/types/pool";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Zap, CheckCircle, Save, Plug, PlugZap, Bolt } from "lucide-react";
+import { Zap, CheckCircle, Save, PlugZap, Bolt } from "lucide-react";
 import { useElectricalRequirements } from "./hooks/useElectricalRequirements";
 import { formatCurrency } from "@/utils/format";
 
