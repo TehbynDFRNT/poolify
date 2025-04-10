@@ -39,6 +39,7 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
         .maybeSingle();
 
       if (error) throw error;
+      // Safely cast the data only when we're sure it's not an error
       return data as ElectricalData | null;
     },
     enabled: !!poolId && !!customerId,
@@ -56,7 +57,8 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
           .single();
 
         if (error) throw error;
-        return newData as ElectricalData;
+        // Only cast if there's no error
+        return newData as unknown as ElectricalData;
       } else {
         // Update existing record
         const { data: updatedData, error } = await supabase
@@ -73,7 +75,8 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
           .single();
 
         if (error) throw error;
-        return updatedData as ElectricalData;
+        // Only cast if there's no error
+        return updatedData as unknown as ElectricalData;
       }
     },
     onSuccess: () => {
