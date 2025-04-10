@@ -7,6 +7,8 @@ import { FencingFormValues, CostCalculation } from "../types";
 
 export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [existingDataId, setExistingDataId] = useState<string | null>(null);
   const [costs, setCosts] = useState<CostCalculation>({
     linearCost: 0,
     gatesCost: 0,
@@ -54,6 +56,7 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
 
       if (data && data.length > 0) {
         const fencingData = data[0];
+        setExistingDataId(fencingData.id);
         form.reset({
           linearMeters: fencingData.linear_meters,
           gates: fencingData.gates,
@@ -129,9 +132,12 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
           .eq("id", existingData[0].id);
 
         saveError = error;
+        if (!error) {
+          setExistingDataId(existingData[0].id);
+        }
       } else {
         // Create new entry
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("frameless_glass_fencing")
           .insert({
             customer_id: customerId,
@@ -142,9 +148,13 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
             complex_panels: values.complexPanels,
             earthing_required: values.earthingRequired,
             total_cost: costs.totalCost
-          });
+          })
+          .select();
 
         saveError = error;
+        if (!error && data) {
+          setExistingDataId(data[0].id);
+        }
       }
 
       if (saveError) {
@@ -165,10 +175,57 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
     }
   };
 
+  // Handle delete
+  const onDelete = async () => {
+    if (!customerId || !existingDataId) {
+      toast.error("No fencing data to delete");
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("frameless_glass_fencing")
+        .delete()
+        .eq("id", existingDataId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Frameless glass fencing removed successfully");
+      
+      // Reset form after deletion
+      form.reset({
+        linearMeters: 0,
+        gates: 0,
+        simplePanels: 0,
+        complexPanels: 0,
+        earthingRequired: false
+      });
+      
+      setExistingDataId(null);
+      
+      // Call the callback if provided
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      }
+    } catch (error) {
+      console.error("Error deleting fencing:", error);
+      toast.error("Failed to delete fencing");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return {
     form,
     costs,
     isSubmitting,
-    onSubmit
+    isDeleting,
+    hasExistingData: !!existingDataId,
+    onSubmit,
+    onDelete
   };
 };

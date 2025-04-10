@@ -11,8 +11,8 @@ import GateSelector from "./components/GateSelector";
 import PanelSelector from "./components/PanelSelector";
 import EarthingToggle from "./components/EarthingToggle";
 import CostSummary from "./components/CostSummary";
-import SubmitButton from "./components/SubmitButton";
 import InfoBanner from "./components/InfoBanner";
+import { FormActions } from "@/components/pool-builder/pool-selection/components/concrete-paving/FormActions";
 
 interface FramelessGlassFencingProps {
   pool: Pool;
@@ -25,7 +25,7 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({
   customerId,
   onSaveSuccess
 }) => {
-  const { form, costs, isSubmitting, onSubmit } = useFencingForm(
+  const { form, costs, isSubmitting, isDeleting, hasExistingData, onSubmit, onDelete } = useFencingForm(
     customerId, 
     pool.id,
     onSaveSuccess
@@ -67,7 +67,15 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({
               
               <CostSummary costs={costs} />
               
-              <SubmitButton isSubmitting={isSubmitting} />
+              <FormActions 
+                onSave={form.handleSubmit(onSubmit)}
+                onDelete={hasExistingData ? onDelete : undefined}
+                isSubmitting={isSubmitting}
+                isDeleting={isDeleting}
+                hasExistingData={hasExistingData}
+                saveText="Save Fencing"
+                deleteText="Remove Fencing"
+              />
               
               <InfoBanner />
             </form>

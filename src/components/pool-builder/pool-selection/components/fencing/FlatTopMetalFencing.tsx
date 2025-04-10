@@ -11,8 +11,8 @@ import GateSelector from "./components/GateSelector";
 import FTMPanelSelector from "./components/FTMPanelSelector";
 import EarthingToggle from "./components/EarthingToggle";
 import CostSummary from "./components/CostSummary";
-import SubmitButton from "./components/SubmitButton";
 import InfoBanner from "./components/InfoBanner";
+import { FormActions } from "@/components/pool-builder/pool-selection/components/concrete-paving/FormActions";
 
 interface FlatTopMetalFencingProps {
   pool: Pool;
@@ -25,7 +25,7 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
   customerId,
   onSaveSuccess 
 }) => {
-  const { form, costs, isSubmitting, onSubmit } = useFlatTopMetalFencingForm(
+  const { form, costs, isSubmitting, isDeleting, hasExistingData, onSubmit, onDelete } = useFlatTopMetalFencingForm(
     customerId, 
     pool.id,
     onSaveSuccess
@@ -72,7 +72,15 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
               
               <CostSummary costs={costs} />
               
-              <SubmitButton isSubmitting={isSubmitting} />
+              <FormActions 
+                onSave={form.handleSubmit(onSubmit)}
+                onDelete={hasExistingData ? onDelete : undefined}
+                isSubmitting={isSubmitting}
+                isDeleting={isDeleting}
+                hasExistingData={hasExistingData}
+                saveText="Save Fencing"
+                deleteText="Remove Fencing"
+              />
               
               <InfoBanner />
             </form>

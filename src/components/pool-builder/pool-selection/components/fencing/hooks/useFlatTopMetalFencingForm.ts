@@ -11,6 +11,8 @@ export const useFlatTopMetalFencingForm = (
   onSaveSuccess?: () => void
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [existingDataId, setExistingDataId] = useState<string | null>(null);
   const [costs, setCosts] = useState<CostCalculation>({
     linearCost: 0,
     gatesCost: 0,
@@ -58,6 +60,7 @@ export const useFlatTopMetalFencingForm = (
 
       if (data && data.length > 0) {
         const fencingData = data[0];
+        setExistingDataId(fencingData.id);
         form.reset({
           linearMeters: fencingData.linear_meters,
           gates: fencingData.gates,
@@ -132,9 +135,12 @@ export const useFlatTopMetalFencingForm = (
           .eq("id", existingData[0].id) as any; // Type assertion until Supabase types are updated
 
         saveError = error;
+        if (!error) {
+          setExistingDataId(existingData[0].id);
+        }
       } else {
         // Create new entry
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("flat_top_metal_fencing")
           .insert({
             customer_id: customerId,
@@ -145,9 +151,13 @@ export const useFlatTopMetalFencingForm = (
             complex_panels: values.complexPanels,
             earthing_required: values.earthingRequired,
             total_cost: costs.totalCost
-          }) as any; // Type assertion until Supabase types are updated
+          })
+          .select() as any; // Type assertion until Supabase types are updated
 
         saveError = error;
+        if (!error && data) {
+          setExistingDataId(data[0].id);
+        }
       }
 
       if (saveError) {
@@ -168,10 +178,57 @@ export const useFlatTopMetalFencingForm = (
     }
   };
 
+  // Handle delete
+  const onDelete = async () => {
+    if (!customerId || !existingDataId) {
+      toast.error("No fencing data to delete");
+      return;
+    }
+
+    setIsDeleting(true);
+
+    try {
+      const { error } = await supabase
+        .from("flat_top_metal_fencing")
+        .delete()
+        .eq("id", existingDataId);
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success("Flat top metal fencing removed successfully");
+      
+      // Reset form after deletion
+      form.reset({
+        linearMeters: 0,
+        gates: 0,
+        simplePanels: 0,
+        complexPanels: 0,
+        earthingRequired: false
+      });
+      
+      setExistingDataId(null);
+      
+      // Call the callback if provided
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      }
+    } catch (error) {
+      console.error("Error deleting fencing:", error);
+      toast.error("Failed to delete fencing");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return {
     form,
     costs,
     isSubmitting,
-    onSubmit
+    isDeleting,
+    hasExistingData: !!existingDataId,
+    onSubmit,
+    onDelete
   };
 };
