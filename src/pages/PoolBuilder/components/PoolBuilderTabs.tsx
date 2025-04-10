@@ -12,6 +12,7 @@ import { SiteRequirementsPlaceholder } from "@/components/pool-builder/pool-sele
 import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-selection/components/concrete-paving/ConcreteAndPavingPlaceholder";
 import { RetainingWallsPlaceholder } from "@/components/pool-builder/pool-selection/components/retaining-walls/RetainingWallsPlaceholder";
 import { WaterFeatureSection } from "@/components/pool-builder/pool-selection/components/water-feature/WaterFeatureSection";
+import { FencingPlaceholder } from "@/components/pool-builder/pool-selection/components/fencing/FencingPlaceholder";
 
 interface PoolBuilderTabsProps {
   customerId: string | null;
@@ -59,6 +60,10 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
         <TabsTrigger value="retaining-walls" className="flex items-center gap-2">
           <Fence className="h-4 w-4" />
           Retaining Walls
+        </TabsTrigger>
+        <TabsTrigger value="fencing" className="flex items-center gap-2">
+          <Fence className="h-4 w-4" />
+          Fencing
         </TabsTrigger>
         <TabsTrigger value="water-feature" className="flex items-center gap-2">
           <Droplets className="h-4 w-4" />
@@ -119,6 +124,20 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
               icon={<Fence className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Retaining wall options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
+            />
+          )}
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="fencing">
+        <Card className="p-6">
+          {selectedPool ? (
+            <FencingPlaceholder pool={selectedPool} customerId={customerId} />
+          ) : (
+            <PlaceholderMessage 
+              icon={<Fence className="h-12 w-12 text-muted-foreground mx-auto" />}
+              title="Please Select a Pool First"
+              description="Fencing options are specific to the pool model. Please select a pool in the Pool Selection tab to view fencing options."
             />
           )}
         </Card>
