@@ -1,6 +1,6 @@
 
 export type FenceCategory = 'Fencing' | 'Gates' | 'Earthing' | 'Retaining';
-export type FenceType = 'Fence (per meter)' | 'Gate (per unit)' | 'Per meter';
+export type FenceType = 'Fence (per meter)' | 'Gate (per unit)' | 'Per meter' | 'Per job';
 
 export interface FencingCost {
   id: string;
@@ -15,4 +15,4 @@ export interface FencingCost {
 export type FencingCostInsert = Omit<FencingCost, 'id' | 'created_at'>;
 
 export const FENCE_CATEGORIES: FenceCategory[] = ['Fencing', 'Gates', 'Earthing', 'Retaining'];
-export const FENCE_TYPES: FenceType[] = ['Fence (per meter)', 'Gate (per unit)', 'Per meter'];
+export const FENCE_TYPES: FenceType[] = ['Fence (per meter)', 'Gate (per unit)', 'Per meter', 'Per job'];
