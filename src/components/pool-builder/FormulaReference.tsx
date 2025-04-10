@@ -11,6 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { FramelessGlassFencingFormula } from "./formula-sections/FramelessGlassFencingFormula";
 import { ExtraPavingConcreteFormula } from "./formula-sections/ExtraPavingConcreteFormula";
 import { ExtraPavingExistingConcreteFormula } from "./formula-sections/ExtraPavingExistingConcreteFormula";
 import { ExtraConcretingFormula } from "./formula-sections/ExtraConcretingFormula";
@@ -34,6 +35,7 @@ export const FormulaReference: React.FC = () => {
       </CardHeader>
       <CardContent className="pt-4">
         <Accordion type="single" collapsible className="w-full">
+          <FramelessGlassFencingFormula />
           <ExtraPavingConcreteFormula />
           <ExtraPavingExistingConcreteFormula />
           <ExtraConcretingFormula />
