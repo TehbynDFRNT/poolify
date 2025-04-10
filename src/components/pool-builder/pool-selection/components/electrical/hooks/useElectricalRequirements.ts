@@ -32,15 +32,15 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
       if (!poolId || !customerId) return null;
 
       const { data, error } = await supabase
-        .from("pool_electrical_requirements" as any)
+        .from("pool_electrical_requirements")
         .select("*")
         .eq("pool_id", poolId)
         .eq("customer_id", customerId)
         .maybeSingle();
 
       if (error) throw error;
-      // Safely cast the data only when we're sure it's not an error
-      return data as ElectricalData | null;
+      // Return null if no data, ensuring we don't cast an error to ElectricalData
+      return data as unknown as (ElectricalData | null);
     },
     enabled: !!poolId && !!customerId,
   });
@@ -51,18 +51,18 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
       if (!data.id) {
         // Insert new record
         const { data: newData, error } = await supabase
-          .from("pool_electrical_requirements" as any)
+          .from("pool_electrical_requirements")
           .insert(data)
           .select()
           .single();
 
         if (error) throw error;
-        // Only cast if there's no error
+        // Use double casting to avoid TypeScript errors
         return newData as unknown as ElectricalData;
       } else {
         // Update existing record
         const { data: updatedData, error } = await supabase
-          .from("pool_electrical_requirements" as any)
+          .from("pool_electrical_requirements")
           .update({
             standard_power: data.standard_power,
             fence_earthing: data.fence_earthing,
@@ -75,7 +75,7 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
           .single();
 
         if (error) throw error;
-        // Only cast if there's no error
+        // Use double casting to avoid TypeScript errors
         return updatedData as unknown as ElectricalData;
       }
     },
