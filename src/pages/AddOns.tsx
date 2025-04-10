@@ -29,7 +29,7 @@ const AddOns = () => {
           
           <TabsContent value="blankets" className="space-y-6 animate-fadeIn">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <div className="flex gap-1">
                     <Scroll className="h-5 w-5 text-primary" />
@@ -46,7 +46,7 @@ const AddOns = () => {
           
           <TabsContent value="cleaners" className="space-y-6 animate-fadeIn">
             <Card>
-              <CardHeader>
+              <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Bath className="h-5 w-5 text-primary" />
                   <CardTitle>Pool Cleaners</CardTitle>

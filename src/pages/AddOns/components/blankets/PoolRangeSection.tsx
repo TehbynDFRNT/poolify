@@ -14,7 +14,6 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 interface PoolRangeSectionProps {
   range: string;
@@ -43,7 +42,7 @@ export const PoolRangeSection = ({
   return (
     <Card className="overflow-hidden border shadow animate-fadeIn">
       <CardHeader 
-        className="flex flex-row items-center justify-between py-3 cursor-pointer bg-gradient-to-r from-primary/10 to-transparent"
+        className="flex flex-row items-center justify-between py-3 cursor-pointer bg-muted/50"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <CardTitle className="text-lg font-semibold flex items-center">
@@ -66,7 +65,7 @@ export const PoolRangeSection = ({
         <CardContent className="p-4 space-y-4">
           {/* Blankets & Rollers Section */}
           {showBlankets && (
-            <div className="rounded-lg bg-card overflow-hidden">
+            <div className="rounded-lg bg-card overflow-hidden border">
               <div className="bg-muted/30 px-4 py-2">
                 <div className="flex items-center">
                   <span className="h-3 w-3 rounded-full bg-primary mr-2"></span>
@@ -86,7 +85,7 @@ export const PoolRangeSection = ({
                       <TableHead className="text-right">RRP</TableHead>
                       <TableHead className="text-right">Trade</TableHead>
                       <TableHead className="text-right">Margin</TableHead>
-                      <TableHead>Profit %</TableHead>
+                      <TableHead className="text-right">Profit %</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -107,7 +106,7 @@ export const PoolRangeSection = ({
           
           {/* Heat Pumps Section */}
           {showHeatPumps && (
-            <div className="rounded-lg bg-card overflow-hidden">
+            <div className="rounded-lg bg-card overflow-hidden border">
               <div className="bg-blue-50 px-4 py-2">
                 <div className="flex items-center">
                   <span className="h-3 w-3 rounded-full bg-blue-500 mr-2"></span>
@@ -128,7 +127,7 @@ export const PoolRangeSection = ({
                       <TableHead className="text-right">RRP</TableHead>
                       <TableHead className="text-right">Trade</TableHead>
                       <TableHead className="text-right">Margin</TableHead>
-                      <TableHead>Profit %</TableHead>
+                      <TableHead className="text-right">Profit %</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
