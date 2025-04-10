@@ -1,152 +1,168 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { FTMFencingFormValues, ftmFencingSchema, CostCalculation } from "../types";
+import { FencingFormValues, CostCalculation } from "../types";
 
-export const useFlatTopMetalFencingForm = (customerId: string, poolId: string) => {
+export const useFlatTopMetalFencingForm = (
+  customerId: string, 
+  poolId: string,
+  onSaveSuccess?: () => void
+) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [existingData, setExistingData] = useState<FTMFencingFormValues | null>(null);
-  
-  const form = useForm<FTMFencingFormValues>({
-    resolver: zodResolver(ftmFencingSchema),
+  const [costs, setCosts] = useState<CostCalculation>({
+    linearCost: 0,
+    gatesCost: 0,
+    freeGateDiscount: 0,
+    simplePanelsCost: 0,
+    complexPanelsCost: 0,
+    earthingCost: 0,
+    totalCost: 0
+  });
+
+  // Initialize form with default values
+  const form = useForm<FencingFormValues>({
     defaultValues: {
       linearMeters: 0,
       gates: 0,
       simplePanels: 0,
       complexPanels: 0,
-      earthingRequired: false,
-    },
+      earthingRequired: false
+    }
   });
 
-  const watchedValues = form.watch();
-  
-  // Load existing data on component mount
+  // Watch for form changes to calculate costs in real-time
+  const linearMeters = form.watch("linearMeters");
+  const gates = form.watch("gates");
+  const simplePanels = form.watch("simplePanels");
+  const complexPanels = form.watch("complexPanels");
+  const earthingRequired = form.watch("earthingRequired");
+
+  // Load existing data if available
   useEffect(() => {
-    const fetchExistingData = async () => {
-      try {
-        // Use type assertion to bypass TypeScript type checking for the table name
-        const { data, error } = await supabase
-          .from('flat_top_metal_fencing' as any)
-          .select('*')
-          .eq('customer_id', customerId)
-          .eq('pool_id', poolId)
-          .maybeSingle();
-        
-        if (error) {
-          console.error("Error fetching fencing data:", error);
-          return;
-        }
-        
-        if (data) {
-          // Use type assertion to safely access properties
-          const formValues = {
-            linearMeters: (data as any).linear_meters,
-            gates: (data as any).gates,
-            simplePanels: (data as any).simple_panels,
-            complexPanels: (data as any).complex_panels,
-            earthingRequired: (data as any).earthing_required,
-          };
-          
-          setExistingData(formValues);
-          form.reset(formValues);
-        }
-      } catch (error) {
-        console.error("Error in fetchExistingData:", error);
+    const loadExistingData = async () => {
+      if (!customerId) return;
+
+      const { data, error } = await supabase
+        .from("flat_top_metal_fencing")
+        .select("*")
+        .eq("customer_id", customerId)
+        .order("created_at", { ascending: false })
+        .limit(1) as any; // Type assertion until Supabase types are updated
+
+      if (error) {
+        console.error("Error loading flat top metal fencing data:", error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const fencingData = data[0];
+        form.reset({
+          linearMeters: fencingData.linear_meters,
+          gates: fencingData.gates,
+          simplePanels: fencingData.simple_panels,
+          complexPanels: fencingData.complex_panels,
+          earthingRequired: fencingData.earthing_required
+        });
       }
     };
-    
-    if (customerId && poolId) {
-      fetchExistingData();
-    }
-  }, [customerId, poolId, form]);
-  
-  // Calculate costs
-  const calculateCosts = (): CostCalculation => {
-    const linearCost = watchedValues.linearMeters * 165;
-    const gatesCost = watchedValues.gates * 297;
-    const simplePanelsCost = watchedValues.simplePanels * 220;
-    const complexPanelsCost = watchedValues.complexPanels * 385;
-    // Fixed cost of $150 for earthing if selected (not per meter)
-    const earthingCost = watchedValues.earthingRequired ? 150 : 0;
-    
+
+    loadExistingData();
+  }, [customerId, form]);
+
+  // Calculate costs whenever form values change
+  useEffect(() => {
+    const linearCost = linearMeters * 165;
+    const gatesCost = gates * 297;
+    const simplePanelsCost = simplePanels * 220;
+    const complexPanelsCost = complexPanels * 385;
+    // Fixed cost of $150 for earthing if required
+    const earthingCost = earthingRequired ? 150 : 0;
+
     const totalCost = linearCost + gatesCost + simplePanelsCost + complexPanelsCost + earthingCost;
-    
-    return {
+
+    setCosts({
       linearCost,
       gatesCost,
-      freeGateDiscount: 0,
+      freeGateDiscount: 0, // No free gate discount for flat top metal
       simplePanelsCost,
       complexPanelsCost,
       earthingCost,
-      totalCost,
-    };
-  };
-  
-  const costs = calculateCosts();
+      totalCost
+    });
+  }, [linearMeters, gates, simplePanels, complexPanels, earthingRequired]);
 
-  const onSubmit = async (data: FTMFencingFormValues) => {
-    if (!customerId || !poolId) {
-      toast.error("Missing customer or pool information");
+  // Handle form submission
+  const onSubmit = async (values: FencingFormValues) => {
+    if (!customerId) {
+      toast.error("Customer ID is required");
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      // Calculate the total cost
-      const calculatedCosts = calculateCosts();
-      
-      // Prepare data for Supabase
-      const fencingData = {
-        customer_id: customerId,
-        pool_id: poolId,
-        linear_meters: data.linearMeters,
-        gates: data.gates,
-        simple_panels: data.simplePanels,
-        complex_panels: data.complexPanels,
-        earthing_required: data.earthingRequired,
-        total_cost: calculatedCosts.totalCost,
-      };
-      
-      // Check if data already exists for this customer and pool
-      // Use type assertion to bypass TypeScript type checking
-      const { data: existingRecord } = await supabase
-        .from('flat_top_metal_fencing' as any)
-        .select('id')
-        .eq('customer_id', customerId)
-        .eq('pool_id', poolId)
-        .maybeSingle();
-      
-      let result;
-      
-      if (existingRecord) {
-        // Update existing record
-        // Use type assertion to bypass TypeScript type checking
-        result = await supabase
-          .from('flat_top_metal_fencing' as any)
-          .update(fencingData)
-          .eq('id', (existingRecord as any).id);
+      // Check if an entry already exists
+      const { data: existingData, error: fetchError } = await supabase
+        .from("flat_top_metal_fencing")
+        .select("id")
+        .eq("customer_id", customerId)
+        .limit(1) as any; // Type assertion until Supabase types are updated
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      let saveError;
+
+      if (existingData && existingData.length > 0) {
+        // Update existing entry
+        const { error } = await supabase
+          .from("flat_top_metal_fencing")
+          .update({
+            linear_meters: values.linearMeters,
+            gates: values.gates,
+            simple_panels: values.simplePanels,
+            complex_panels: values.complexPanels,
+            earthing_required: values.earthingRequired,
+            total_cost: costs.totalCost,
+            pool_id: poolId
+          })
+          .eq("id", existingData[0].id) as any; // Type assertion until Supabase types are updated
+
+        saveError = error;
       } else {
-        // Insert new record
-        // Use type assertion to bypass TypeScript type checking
-        result = await supabase
-          .from('flat_top_metal_fencing' as any)
-          .insert(fencingData);
+        // Create new entry
+        const { error } = await supabase
+          .from("flat_top_metal_fencing")
+          .insert({
+            customer_id: customerId,
+            pool_id: poolId,
+            linear_meters: values.linearMeters,
+            gates: values.gates,
+            simple_panels: values.simplePanels,
+            complex_panels: values.complexPanels,
+            earthing_required: values.earthingRequired,
+            total_cost: costs.totalCost
+          }) as any; // Type assertion until Supabase types are updated
+
+        saveError = error;
       }
-      
-      const { error } = result;
-      
-      if (error) {
-        throw error;
+
+      if (saveError) {
+        throw saveError;
       }
+
+      toast.success("Flat top metal fencing saved successfully");
       
-      toast.success("Flat top metal fencing configuration saved successfully");
+      // Call the callback if provided
+      if (onSaveSuccess) {
+        onSaveSuccess();
+      }
     } catch (error) {
-      console.error("Error saving fencing data:", error);
-      toast.error("Failed to save fencing configuration");
+      console.error("Error saving flat top metal fencing:", error);
+      toast.error("Failed to save fencing details");
     } finally {
       setIsSubmitting(false);
     }
@@ -156,7 +172,6 @@ export const useFlatTopMetalFencingForm = (customerId: string, poolId: string) =
     form,
     costs,
     isSubmitting,
-    existingData,
-    onSubmit,
+    onSubmit
   };
 };

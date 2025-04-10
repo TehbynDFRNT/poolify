@@ -17,10 +17,19 @@ import InfoBanner from "./components/InfoBanner";
 interface FramelessGlassFencingProps {
   pool: Pool;
   customerId: string;
+  onSaveSuccess?: () => void;
 }
 
-export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ pool, customerId }) => {
-  const { form, costs, isSubmitting, onSubmit } = useFencingForm(customerId, pool.id);
+export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ 
+  pool, 
+  customerId,
+  onSaveSuccess
+}) => {
+  const { form, costs, isSubmitting, onSubmit } = useFencingForm(
+    customerId, 
+    pool.id,
+    onSaveSuccess
+  );
 
   return (
     <div className="space-y-6">

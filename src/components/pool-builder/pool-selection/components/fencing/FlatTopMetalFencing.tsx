@@ -17,10 +17,19 @@ import InfoBanner from "./components/InfoBanner";
 interface FlatTopMetalFencingProps {
   pool: Pool;
   customerId: string;
+  onSaveSuccess?: () => void;
 }
 
-export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({ pool, customerId }) => {
-  const { form, costs, isSubmitting, onSubmit } = useFlatTopMetalFencingForm(customerId, pool.id);
+export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({ 
+  pool, 
+  customerId,
+  onSaveSuccess 
+}) => {
+  const { form, costs, isSubmitting, onSubmit } = useFlatTopMetalFencingForm(
+    customerId, 
+    pool.id,
+    onSaveSuccess
+  );
 
   return (
     <div className="space-y-6">
