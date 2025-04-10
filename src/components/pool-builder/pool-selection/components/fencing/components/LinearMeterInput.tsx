@@ -1,16 +1,22 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { FencingFormValues } from "../types";
+import CostDescription from "./CostDescription";
 
 interface LinearMeterInputProps {
   form: UseFormReturn<FencingFormValues>;
   linearCost: number;
+  unitCost?: number;
 }
 
-const LinearMeterInput: React.FC<LinearMeterInputProps> = ({ form, linearCost }) => {
+const LinearMeterInput: React.FC<LinearMeterInputProps> = ({ 
+  form, 
+  linearCost,
+  unitCost = 396
+}) => {
   return (
     <FormField
       control={form.control}
@@ -21,9 +27,10 @@ const LinearMeterInput: React.FC<LinearMeterInputProps> = ({ form, linearCost })
           <FormControl>
             <Input type="number" min="0" step="0.1" {...field} />
           </FormControl>
-          <FormDescription className="text-xs">
-            Cost: ${linearCost.toFixed(2)} (${396} per meter)
-          </FormDescription>
+          <CostDescription 
+            cost={linearCost} 
+            unitCost={unitCost} 
+          />
         </FormItem>
       )}
     />

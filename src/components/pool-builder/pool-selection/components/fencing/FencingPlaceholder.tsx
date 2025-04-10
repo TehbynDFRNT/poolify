@@ -2,8 +2,10 @@
 import React from "react";
 import { Fence } from "lucide-react";
 import { Pool } from "@/types/pool";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { FramelessGlassFencing } from "./FramelessGlassFencing";
+import FencingHeader from "./components/FencingHeader";
 
 interface FencingPlaceholderProps {
   pool: Pool | null;
@@ -26,14 +28,16 @@ export const FencingPlaceholder: React.FC<FencingPlaceholderProps> = ({ pool, cu
   if (!customerId) {
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Pool Fencing</h2>
-        </div>
-
-        <Card className="p-6">
-          <div className="text-center text-amber-800 bg-amber-50 p-4 rounded-md">
-            <p>Please save customer information before configuring fencing options.</p>
-          </div>
+        <FencingHeader />
+        
+        <Card>
+          <CardContent className="p-6">
+            <Alert variant="warning" className="bg-amber-50 text-amber-800 border-amber-200">
+              <AlertDescription>
+                Please save customer information before configuring fencing options.
+              </AlertDescription>
+            </Alert>
+          </CardContent>
         </Card>
       </div>
     );

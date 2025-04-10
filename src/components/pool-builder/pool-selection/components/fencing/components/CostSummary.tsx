@@ -2,6 +2,7 @@
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { CostCalculation } from "../types";
+import CostItem from "./CostItem";
 
 interface CostSummaryProps {
   costs: CostCalculation;
@@ -14,38 +15,33 @@ const CostSummary: React.FC<CostSummaryProps> = ({ costs }) => {
         <div className="space-y-2">
           <h3 className="font-medium text-lg">Cost Summary</h3>
           
-          <div className="space-y-1 text-sm">
-            <div className="flex justify-between">
-              <span>Fence Linear Cost:</span>
-              <span>${costs.linearCost.toFixed(2)}</span>
+          <div className="space-y-1 text-sm divide-y">
+            <div className="space-y-1 pb-2">
+              <CostItem label="Fence Linear Cost" amount={costs.linearCost} />
+              <CostItem label="Gates Cost" amount={costs.gatesCost} />
+              
+              {costs.freeGateDiscount !== 0 && (
+                <CostItem 
+                  label="Free Gate Discount" 
+                  amount={Math.abs(costs.freeGateDiscount)} 
+                  isDiscount 
+                />
+              )}
             </div>
-            <div className="flex justify-between">
-              <span>Gates Cost:</span>
-              <span>${costs.gatesCost.toFixed(2)}</span>
+            
+            <div className="space-y-1 py-2">
+              <CostItem label="Simple Panels Cost" amount={costs.simplePanelsCost} />
+              <CostItem label="Complex Panels Cost" amount={costs.complexPanelsCost} />
             </div>
-            {costs.freeGateDiscount !== 0 && (
-              <div className="flex justify-between text-green-600">
-                <span>Free Gate Discount:</span>
-                <span>${costs.freeGateDiscount.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span>Simple Panels Cost:</span>
-              <span>${costs.simplePanelsCost.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Complex Panels Cost:</span>
-              <span>${costs.complexPanelsCost.toFixed(2)}</span>
-            </div>
+            
             {costs.earthingCost > 0 && (
-              <div className="flex justify-between">
-                <span>Earthing Cost:</span>
-                <span>${costs.earthingCost.toFixed(2)}</span>
+              <div className="py-2">
+                <CostItem label="Earthing Cost" amount={costs.earthingCost} />
               </div>
             )}
-            <div className="flex justify-between font-bold pt-2 border-t mt-2">
-              <span>Total Cost:</span>
-              <span>${costs.totalCost.toFixed(2)}</span>
+            
+            <div className="pt-2">
+              <CostItem label="Total Cost" amount={costs.totalCost} isTotal />
             </div>
           </div>
         </div>

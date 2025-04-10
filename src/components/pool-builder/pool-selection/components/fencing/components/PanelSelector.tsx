@@ -1,6 +1,6 @@
 
 import React from "react";
-import { FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { FormField, FormItem, FormLabel, FormControl, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
 import { FencingFormValues } from "../types";
@@ -9,9 +9,17 @@ interface PanelSelectorProps {
   form: UseFormReturn<FencingFormValues>;
   simplePanelsCost: number;
   complexPanelsCost: number;
+  simplePanelUnitCost?: number;
+  complexPanelUnitCost?: number;
 }
 
-const PanelSelector: React.FC<PanelSelectorProps> = ({ form, simplePanelsCost, complexPanelsCost }) => {
+const PanelSelector: React.FC<PanelSelectorProps> = ({ 
+  form, 
+  simplePanelsCost, 
+  complexPanelsCost,
+  simplePanelUnitCost = 220,
+  complexPanelUnitCost = 660
+}) => {
   return (
     <div className="space-y-4 border p-4 rounded-md">
       <h3 className="text-sm font-medium">FG Retaining Panels</h3>
@@ -45,8 +53,12 @@ const PanelSelector: React.FC<PanelSelectorProps> = ({ form, simplePanelsCost, c
       </div>
       
       <div className="text-xs space-y-1">
-        <p>Simple Panels: ${simplePanelsCost.toFixed(2)} (${220} each)</p>
-        <p>Complex Panels: ${complexPanelsCost.toFixed(2)} (${660} each)</p>
+        <FormDescription className="text-xs">
+          Simple Panels: ${simplePanelsCost.toFixed(2)} (${simplePanelUnitCost} each)
+        </FormDescription>
+        <FormDescription className="text-xs">
+          Complex Panels: ${complexPanelsCost.toFixed(2)} (${complexPanelUnitCost} each)
+        </FormDescription>
       </div>
     </div>
   );

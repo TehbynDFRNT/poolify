@@ -7,9 +7,13 @@ import { FencingFormValues } from "../types";
 
 interface EarthingToggleProps {
   form: UseFormReturn<FencingFormValues>;
+  earthingCost?: number;
 }
 
-const EarthingToggle: React.FC<EarthingToggleProps> = ({ form }) => {
+const EarthingToggle: React.FC<EarthingToggleProps> = ({ 
+  form,
+  earthingCost = 40
+}) => {
   return (
     <FormField
       control={form.control}
@@ -19,7 +23,7 @@ const EarthingToggle: React.FC<EarthingToggleProps> = ({ form }) => {
           <div className="space-y-0.5">
             <FormLabel className="text-base">Include earthing?</FormLabel>
             <FormDescription>
-              Adds a flat fee of $40 to the total
+              Adds a flat fee of ${earthingCost} to the total
             </FormDescription>
           </div>
           <FormControl>
