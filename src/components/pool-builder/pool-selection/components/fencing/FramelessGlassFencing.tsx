@@ -27,8 +27,7 @@ interface FramelessGlassFencingProps {
 
 const fencingSchema = z.object({
   linearMeters: z.coerce.number().min(0, "Must be a positive number"),
-  simpleGates: z.coerce.number().min(0, "Must be 0 or more"),
-  complexGates: z.coerce.number().min(0, "Must be 0 or more"),
+  gates: z.coerce.number().min(0, "Must be 0 or more"),
   simplePanels: z.coerce.number().min(0, "Must be 0 or more"),
   complexPanels: z.coerce.number().min(0, "Must be 0 or more"),
   earthingRequired: z.boolean().default(false),
@@ -43,8 +42,7 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ po
     resolver: zodResolver(fencingSchema),
     defaultValues: {
       linearMeters: 0,
-      simpleGates: 0,
-      complexGates: 0,
+      gates: 0,
       simplePanels: 0,
       complexPanels: 0,
       earthingRequired: false,
@@ -56,7 +54,7 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ po
   // Calculate costs
   const calculateCosts = () => {
     const linearCost = watchedValues.linearMeters * 396;
-    const totalGates = watchedValues.simpleGates + watchedValues.complexGates;
+    const totalGates = watchedValues.gates;
     const gatesCost = totalGates * 495;
     const freeGateDiscount = totalGates > 0 ? -495 : 0;
     const simplePanelsCost = watchedValues.simplePanels * 220;
@@ -135,45 +133,25 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ po
                   )}
                 />
                 
-                {/* Gate Types Section */}
-                <div className="space-y-4 border p-4 rounded-md">
-                  <h3 className="text-sm font-medium">Gate Selection</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="simpleGates"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Simple Gates</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="0" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                    
-                    <FormField
-                      control={form.control}
-                      name="complexGates"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Complex Gates</FormLabel>
-                          <FormControl>
-                            <Input type="number" min="0" {...field} />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  
-                  <div className="text-xs">
-                    <p>Cost: ${costs.gatesCost.toFixed(2)} (${495} per gate)</p>
-                    {costs.freeGateDiscount !== 0 && (
-                      <p className="text-green-600">Free Gate Discount: ${costs.freeGateDiscount.toFixed(2)}</p>
-                    )}
-                  </div>
-                </div>
+                {/* Gates Section */}
+                <FormField
+                  control={form.control}
+                  name="gates"
+                  render={({ field }) => (
+                    <FormItem className="border p-4 rounded-md">
+                      <FormLabel>Gate Selection</FormLabel>
+                      <FormControl>
+                        <Input type="number" min="0" {...field} />
+                      </FormControl>
+                      <div className="text-xs mt-2">
+                        <p>Cost: ${costs.gatesCost.toFixed(2)} (${495} per gate)</p>
+                        {costs.freeGateDiscount !== 0 && (
+                          <p className="text-green-600">Free Gate Discount: ${costs.freeGateDiscount.toFixed(2)}</p>
+                        )}
+                      </div>
+                    </FormItem>
+                  )}
+                />
                 
                 {/* FG Retaining Panel Section */}
                 <div className="space-y-4 border p-4 rounded-md">
