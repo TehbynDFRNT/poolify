@@ -19,6 +19,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FramelessGlassFencingProps {
   pool: Pool;
@@ -37,6 +38,51 @@ type FencingFormValues = z.infer<typeof fencingSchema>;
 
 export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ pool, customerId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingData, setExistingData] = useState<FencingFormValues | null>(null);
+  
+  // Load existing data on component mount
+  React.useEffect(() => {
+    const fetchExistingData = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('frameless_glass_fencing')
+          .select('*')
+          .eq('customer_id', customerId)
+          .eq('pool_id', pool.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching fencing data:", error);
+          return;
+        }
+        
+        if (data) {
+          setExistingData({
+            linearMeters: data.linear_meters,
+            gates: data.gates,
+            simplePanels: data.simple_panels,
+            complexPanels: data.complex_panels,
+            earthingRequired: data.earthing_required,
+          });
+          
+          // Reset the form with existing values
+          form.reset({
+            linearMeters: data.linear_meters,
+            gates: data.gates,
+            simplePanels: data.simple_panels,
+            complexPanels: data.complex_panels,
+            earthingRequired: data.earthing_required,
+          });
+        }
+      } catch (error) {
+        console.error("Error in fetchExistingData:", error);
+      }
+    };
+    
+    if (customerId && pool.id) {
+      fetchExistingData();
+    }
+  }, [customerId, pool.id]);
   
   const form = useForm<FencingFormValues>({
     resolver: zodResolver(fencingSchema),
@@ -77,13 +123,57 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({ po
   const costs = calculateCosts();
 
   const onSubmit = async (data: FencingFormValues) => {
+    if (!customerId || !pool.id) {
+      toast.error("Missing customer or pool information");
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
-      // This would be where you'd save to your database
-      console.log("Saving fencing data:", data);
-      console.log("For customer:", customerId);
-      console.log("For pool:", pool.id);
+      // Calculate the total cost
+      const calculatedCosts = calculateCosts();
+      
+      // Prepare data for Supabase
+      const fencingData = {
+        customer_id: customerId,
+        pool_id: pool.id,
+        linear_meters: data.linearMeters,
+        gates: data.gates,
+        simple_panels: data.simplePanels,
+        complex_panels: data.complexPanels,
+        earthing_required: data.earthingRequired,
+        total_cost: calculatedCosts.totalCost,
+      };
+      
+      // Check if data already exists for this customer and pool
+      const { data: existingRecord } = await supabase
+        .from('frameless_glass_fencing')
+        .select('id')
+        .eq('customer_id', customerId)
+        .eq('pool_id', pool.id)
+        .maybeSingle();
+      
+      let result;
+      
+      if (existingRecord) {
+        // Update existing record
+        result = await supabase
+          .from('frameless_glass_fencing')
+          .update(fencingData)
+          .eq('id', existingRecord.id);
+      } else {
+        // Insert new record
+        result = await supabase
+          .from('frameless_glass_fencing')
+          .insert(fencingData);
+      }
+      
+      const { error } = result;
+      
+      if (error) {
+        throw error;
+      }
       
       toast.success("Fencing configuration saved successfully");
     } catch (error) {

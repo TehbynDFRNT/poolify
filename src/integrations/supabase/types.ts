@@ -548,6 +548,63 @@ export type Database = {
         }
         Relationships: []
       }
+      frameless_glass_fencing: {
+        Row: {
+          complex_panels: number
+          created_at: string
+          customer_id: string
+          earthing_required: boolean
+          gates: number
+          id: string
+          linear_meters: number
+          pool_id: string
+          simple_panels: number
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          complex_panels?: number
+          created_at?: string
+          customer_id: string
+          earthing_required?: boolean
+          gates?: number
+          id?: string
+          linear_meters?: number
+          pool_id: string
+          simple_panels?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          complex_panels?: number
+          created_at?: string
+          customer_id?: string
+          earthing_required?: boolean
+          gates?: number
+          id?: string
+          linear_meters?: number
+          pool_id?: string
+          simple_panels?: number
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "frameless_glass_fencing_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "frameless_glass_fencing_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       handover_kit_package_components: {
         Row: {
           component_id: string
