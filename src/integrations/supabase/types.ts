@@ -919,6 +919,42 @@ export type Database = {
           },
         ]
       }
+      pool_electrical_requirements: {
+        Row: {
+          created_at: string
+          customer_id: string
+          fence_earthing: boolean
+          heat_pump_circuit: boolean
+          id: string
+          pool_id: string
+          standard_power: boolean
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          fence_earthing?: boolean
+          heat_pump_circuit?: boolean
+          id?: string
+          pool_id: string
+          standard_power?: boolean
+          total_cost?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          fence_earthing?: boolean
+          heat_pump_circuit?: boolean
+          id?: string
+          pool_id?: string
+          standard_power?: boolean
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pool_individual_costs: {
         Row: {
           cost_value: number

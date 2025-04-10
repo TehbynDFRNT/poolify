@@ -3,25 +3,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-
-interface ElectricalOption {
-  id: string;
-  description: string;
-  rate: number;
-  isSelected: boolean;
-}
-
-interface ElectricalData {
-  id?: string;
-  pool_id: string;
-  customer_id: string;
-  standard_power: boolean;
-  fence_earthing: boolean;
-  heat_pump_circuit: boolean;
-  total_cost: number;
-  created_at?: string;
-  updated_at?: string;
-}
+import { ElectricalOption, ElectricalData } from "../types";
 
 export const useElectricalRequirements = (poolId: string, customerId: string | null) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -50,14 +32,14 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
       if (!poolId || !customerId) return null;
 
       const { data, error } = await supabase
-        .from("pool_electrical_requirements")
+        .from("pool_electrical_requirements" as any)
         .select("*")
         .eq("pool_id", poolId)
         .eq("customer_id", customerId)
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      return data as ElectricalData | null;
     },
     enabled: !!poolId && !!customerId,
   });
@@ -68,17 +50,17 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
       if (!data.id) {
         // Insert new record
         const { data: newData, error } = await supabase
-          .from("pool_electrical_requirements")
+          .from("pool_electrical_requirements" as any)
           .insert(data)
           .select()
           .single();
 
         if (error) throw error;
-        return newData;
+        return newData as ElectricalData;
       } else {
         // Update existing record
         const { data: updatedData, error } = await supabase
-          .from("pool_electrical_requirements")
+          .from("pool_electrical_requirements" as any)
           .update({
             standard_power: data.standard_power,
             fence_earthing: data.fence_earthing,
@@ -91,7 +73,7 @@ export const useElectricalRequirements = (poolId: string, customerId: string | n
           .single();
 
         if (error) throw error;
-        return updatedData;
+        return updatedData as ElectricalData;
       }
     },
     onSuccess: () => {
