@@ -1,7 +1,8 @@
+
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { CheckSquare, ListFilter, MapPin, Layers, Calculator, Fence, Droplets } from "lucide-react";
+import { CheckSquare, ListFilter, MapPin, Layers, Calculator, Fence, Droplets, Zap } from "lucide-react";
 import { Pool } from "@/types/pool";
 
 // Tab content imports
@@ -13,6 +14,7 @@ import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-sel
 import { RetainingWallsPlaceholder } from "@/components/pool-builder/pool-selection/components/retaining-walls/RetainingWallsPlaceholder";
 import { WaterFeatureSection } from "@/components/pool-builder/pool-selection/components/water-feature/WaterFeatureSection";
 import { FencingPlaceholder } from "@/components/pool-builder/pool-selection/components/fencing/FencingPlaceholder";
+import { ElectricalPlaceholder } from "@/components/pool-builder/pool-selection/components/electrical/ElectricalPlaceholder";
 
 interface PoolBuilderTabsProps {
   customerId: string | null;
@@ -64,6 +66,10 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
         <TabsTrigger value="fencing" className="flex items-center gap-2">
           <Fence className="h-4 w-4" />
           Fencing
+        </TabsTrigger>
+        <TabsTrigger value="electrical" className="flex items-center gap-2">
+          <Zap className="h-4 w-4" />
+          Electrical
         </TabsTrigger>
         <TabsTrigger value="water-feature" className="flex items-center gap-2">
           <Droplets className="h-4 w-4" />
@@ -138,6 +144,20 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
               icon={<Fence className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Fencing options are specific to the pool model. Please select a pool in the Pool Selection tab to view fencing options."
+            />
+          )}
+        </Card>
+      </TabsContent>
+      
+      <TabsContent value="electrical">
+        <Card className="p-6">
+          {selectedPool ? (
+            <ElectricalPlaceholder pool={selectedPool} customerId={customerId} />
+          ) : (
+            <PlaceholderMessage 
+              icon={<Zap className="h-12 w-12 text-muted-foreground mx-auto" />}
+              title="Please Select a Pool First"
+              description="Electrical requirements are specific to the pool model. Please select a pool in the Pool Selection tab to view electrical options."
             />
           )}
         </Card>
