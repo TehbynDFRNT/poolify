@@ -3,9 +3,7 @@ import React from "react";
 import { Fence } from "lucide-react";
 import { Pool } from "@/types/pool";
 import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { FramelessGlassFencing } from "./FramelessGlassFencing";
-import FencingHeader from "./components/FencingHeader";
+import FencingSelector from "./FencingSelector";
 import FencingAlert from "./components/FencingAlert";
 
 interface FencingPlaceholderProps {
@@ -29,7 +27,10 @@ export const FencingPlaceholder: React.FC<FencingPlaceholderProps> = ({ pool, cu
   if (!customerId) {
     return (
       <div className="space-y-6">
-        <FencingHeader />
+        <div className="flex items-center gap-2">
+          <Fence className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-semibold">Pool Fencing</h2>
+        </div>
         
         <Card>
           <CardContent className="p-6">
@@ -43,5 +44,5 @@ export const FencingPlaceholder: React.FC<FencingPlaceholderProps> = ({ pool, cu
     );
   }
 
-  return <FramelessGlassFencing pool={pool} customerId={customerId} />;
+  return <FencingSelector pool={pool} customerId={customerId} />;
 };

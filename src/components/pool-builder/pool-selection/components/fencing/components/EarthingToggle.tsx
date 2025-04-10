@@ -6,14 +6,24 @@ import { UseFormReturn } from "react-hook-form";
 import { FencingFormValues } from "../types";
 
 interface EarthingToggleProps {
-  form: UseFormReturn<FencingFormValues>;
+  form: UseFormReturn<any>;
+  isPerMeter?: boolean;
+  meterCount?: number;
+  perMeterCost?: number;
   earthingCost?: number;
 }
 
 const EarthingToggle: React.FC<EarthingToggleProps> = ({ 
   form,
+  isPerMeter = false,
+  meterCount = 0,
+  perMeterCost = 150,
   earthingCost = 40
 }) => {
+  const description = isPerMeter 
+    ? `Adds $${perMeterCost} per meter (${meterCount} meters = $${(meterCount * perMeterCost).toFixed(2)})`
+    : `Adds a flat fee of $${earthingCost} to the total`;
+
   return (
     <FormField
       control={form.control}
@@ -23,7 +33,7 @@ const EarthingToggle: React.FC<EarthingToggleProps> = ({
           <div className="space-y-0.5">
             <FormLabel className="text-base">Include earthing?</FormLabel>
             <FormDescription>
-              Adds a flat fee of ${earthingCost} to the total
+              {description}
             </FormDescription>
           </div>
           <FormControl>

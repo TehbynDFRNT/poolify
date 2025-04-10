@@ -12,7 +12,16 @@ export const fencingSchema = z.object({
 
 export type FencingFormValues = z.infer<typeof fencingSchema>;
 
+// Use the same schema for flat top metal fencing to ensure consistency
+export const ftmFencingSchema = fencingSchema;
+export type FTMFencingFormValues = z.infer<typeof ftmFencingSchema>;
+
 export interface FramelessGlassFencingProps {
+  pool: Pool;
+  customerId: string;
+}
+
+export interface FlatTopMetalFencingProps {
   pool: Pool;
   customerId: string;
 }
