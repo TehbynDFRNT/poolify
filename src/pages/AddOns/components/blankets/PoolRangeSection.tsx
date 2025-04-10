@@ -85,7 +85,6 @@ export const PoolRangeSection = ({
                       <TableHead className="text-right">RRP</TableHead>
                       <TableHead className="text-right">Trade</TableHead>
                       <TableHead className="text-right">Margin</TableHead>
-                      <TableHead className="text-right">Profit %</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -127,7 +126,6 @@ export const PoolRangeSection = ({
                       <TableHead className="text-right">RRP</TableHead>
                       <TableHead className="text-right">Trade</TableHead>
                       <TableHead className="text-right">Margin</TableHead>
-                      <TableHead className="text-right">Profit %</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
