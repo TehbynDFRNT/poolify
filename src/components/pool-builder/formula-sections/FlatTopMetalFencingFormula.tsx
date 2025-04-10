@@ -28,7 +28,7 @@ export const FlatTopMetalFencingFormula: React.FC = () => {
               + (Gates × Gate Price per Unit) 
               + (Simple Retaining Panels × Simple Panel Price) 
               + (Complex Retaining Panels × Complex Panel Price) 
-              + (Earthing × Lineal Meters × Earthing Price, if selected)
+              + (Earthing × Fixed Charge of $150, if selected)
             </code>
           </div>
           
@@ -53,11 +53,11 @@ export const FlatTopMetalFencingFormula: React.FC = () => {
                 <li>Fence: 10 × $165 = $1,650</li>
                 <li>Gates: 2 × $297 = $594</li>
                 <li>Retaining: $220 + $385 = $605</li>
-                <li>Earthing: 10 × $150 = $1,500</li>
+                <li>Earthing: $150 (fixed charge)</li>
               </ul>
               
               <p className="text-sm font-medium">
-                Total = $1,650 + $594 + $605 + $1,500 = $4,349
+                Total = $1,650 + $594 + $605 + $150 = $2,999
               </p>
             </div>
           </div>

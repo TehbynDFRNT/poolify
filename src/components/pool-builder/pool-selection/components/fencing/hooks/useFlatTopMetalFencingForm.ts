@@ -69,7 +69,8 @@ export const useFlatTopMetalFencingForm = (customerId: string, poolId: string) =
     const gatesCost = watchedValues.gates * 297;
     const simplePanelsCost = watchedValues.simplePanels * 220;
     const complexPanelsCost = watchedValues.complexPanels * 385;
-    const earthingCost = watchedValues.earthingRequired ? watchedValues.linearMeters * 150 : 0;
+    // Fixed cost of $150 for earthing if selected (not per meter)
+    const earthingCost = watchedValues.earthingRequired ? 150 : 0;
     
     const totalCost = linearCost + gatesCost + simplePanelsCost + complexPanelsCost + earthingCost;
     

@@ -11,6 +11,7 @@ interface EarthingToggleProps {
   meterCount?: number;
   perMeterCost?: number;
   earthingCost?: number;
+  isFixedCost?: boolean;
 }
 
 const EarthingToggle: React.FC<EarthingToggleProps> = ({ 
@@ -18,11 +19,18 @@ const EarthingToggle: React.FC<EarthingToggleProps> = ({
   isPerMeter = false,
   meterCount = 0,
   perMeterCost = 150,
-  earthingCost = 40
+  earthingCost = 40,
+  isFixedCost = false
 }) => {
-  const description = isPerMeter 
-    ? `Adds $${perMeterCost} per meter (${meterCount} meters = $${(meterCount * perMeterCost).toFixed(2)})`
-    : `Adds a flat fee of $${earthingCost} to the total`;
+  let description = "";
+  
+  if (isFixedCost) {
+    description = `Adds a one-off charge of $${perMeterCost} to the total`;
+  } else if (isPerMeter) {
+    description = `Adds $${perMeterCost} per meter (${meterCount} meters = $${(meterCount * perMeterCost).toFixed(2)})`;
+  } else {
+    description = `Adds a flat fee of $${earthingCost} to the total`;
+  }
 
   return (
     <FormField

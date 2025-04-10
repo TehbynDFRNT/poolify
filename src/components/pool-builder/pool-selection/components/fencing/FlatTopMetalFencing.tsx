@@ -55,9 +55,8 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({ pool, 
                   complexPanelsCost={costs.complexPanelsCost}
                 />
                 <EarthingToggle 
-                  form={form} 
-                  isPerMeter={true}
-                  meterCount={form.watch("linearMeters")} 
+                  form={form}
+                  isFixedCost={true}
                   perMeterCost={150}
                 />
               </div>
