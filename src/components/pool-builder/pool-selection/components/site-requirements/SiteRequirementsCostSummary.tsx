@@ -10,6 +10,10 @@ interface SiteRequirementsCostSummaryProps {
   totalCost: number;
   isDefaultCrane?: boolean;
   defaultCraneCost?: number;
+  customRequirementsMargin?: number;
+  craneMargin?: number;
+  trafficControlMargin?: number;
+  bobcatMargin?: number;
 }
 
 export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryProps> = ({
@@ -19,7 +23,11 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
   customRequirementsTotal,
   totalCost,
   isDefaultCrane = false,
-  defaultCraneCost = 0
+  defaultCraneCost = 0,
+  customRequirementsMargin = 0,
+  craneMargin = 0,
+  trafficControlMargin = 0,
+  bobcatMargin = 0
 }) => {
   // Calculate the crane cost difference if this is not the default crane
   const craneCostDifference = isDefaultCrane ? 0 : craneCost - defaultCraneCost;
@@ -44,19 +52,40 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
                   </span>
                 )}
               </span>
-              <span className="font-medium">
-                {isDefaultCrane ? 
-                  "Included in base price" : 
-                  formatCurrency(craneCostDifference)}
-              </span>
+              <div className="text-right">
+                <span className="font-medium">
+                  {isDefaultCrane ? 
+                    "Included in base price" : 
+                    formatCurrency(craneCostDifference)}
+                </span>
+                {!isDefaultCrane && craneMargin > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    {craneMargin}% margin
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex justify-between py-1">
               <span>Traffic Control:</span>
-              <span className="font-medium">{formatCurrency(trafficControlCost)}</span>
+              <div className="text-right">
+                <span className="font-medium">{formatCurrency(trafficControlCost)}</span>
+                {trafficControlCost > 0 && trafficControlMargin > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    {trafficControlMargin}% margin
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex justify-between py-1">
               <span>Bobcat:</span>
-              <span className="font-medium">{formatCurrency(bobcatCost)}</span>
+              <div className="text-right">
+                <span className="font-medium">{formatCurrency(bobcatCost)}</span>
+                {bobcatCost > 0 && bobcatMargin > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    {bobcatMargin}% margin
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -66,7 +95,14 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
           <div className="space-y-1 text-sm">
             <div className="flex justify-between py-1">
               <span>Custom Requirements Total:</span>
-              <span className="font-medium">{formatCurrency(customRequirementsTotal)}</span>
+              <div className="text-right">
+                <span className="font-medium">{formatCurrency(customRequirementsTotal)}</span>
+                {customRequirementsTotal > 0 && customRequirementsMargin > 0 && (
+                  <div className="text-xs text-muted-foreground">
+                    {customRequirementsMargin}% avg margin
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

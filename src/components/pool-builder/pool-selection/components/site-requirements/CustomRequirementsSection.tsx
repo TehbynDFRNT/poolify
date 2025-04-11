@@ -9,7 +9,7 @@ interface CustomRequirementsSectionProps {
   requirements: CustomRequirement[];
   addRequirement: () => void;
   removeRequirement: (id: string) => void;
-  updateRequirement: (id: string, field: 'description' | 'price', value: string) => void;
+  updateRequirement: (id: string, field: 'description' | 'price' | 'margin', value: string) => void;
 }
 
 export const CustomRequirementsSection: React.FC<CustomRequirementsSectionProps> = ({

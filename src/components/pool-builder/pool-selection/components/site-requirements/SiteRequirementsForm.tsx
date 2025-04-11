@@ -46,6 +46,27 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     updateRequirement
   } = useSiteRequirements(customerId);
 
+  // Calculate average margin for custom requirements
+  const calculateAverageMargin = () => {
+    if (customRequirements.length === 0 || customRequirementsTotal === 0) return 0;
+    
+    const totalMargin = customRequirements.reduce((sum, req) => {
+      // Calculate the weighted margin based on the price
+      return sum + (req.margin * req.price);
+    }, 0);
+    
+    // Return the weighted average
+    return Math.round(totalMargin / customRequirementsTotal);
+  };
+
+  const customRequirementsMargin = calculateAverageMargin();
+
+  // Since we don't have margin data for standard requirements in our state,
+  // we'll use default values as placeholders (these would typically come from the database)
+  const craneMargin = 15; // placeholder
+  const trafficControlMargin = 10; // placeholder
+  const bobcatMargin = 12; // placeholder
+
   const handleSaveRequirements = () => {
     onSave({
       craneId,
@@ -95,6 +116,10 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
         totalCost={totalCost}
         isDefaultCrane={isDefaultCrane}
         defaultCraneCost={defaultCraneCost}
+        customRequirementsMargin={customRequirementsMargin}
+        craneMargin={craneMargin}
+        trafficControlMargin={trafficControlMargin}
+        bobcatMargin={bobcatMargin}
       />
       
       {/* Save Button */}
