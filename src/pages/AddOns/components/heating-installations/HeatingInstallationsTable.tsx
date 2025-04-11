@@ -124,7 +124,10 @@ export const HeatingInstallationsTable = () => {
         {/* Add/Edit Installation Form Dialog */}
         <AddHeatingInstallationForm
           open={isAddDialogOpen}
-          onOpenChange={setIsAddDialogOpen}
+          onOpenChange={(open) => {
+            setIsAddDialogOpen(open);
+            if (!open) setEditingInstallation(null);
+          }}
           onSubmit={editingInstallation ? handleUpdateInstallation : handleAddInstallation}
           initialValues={editingInstallation}
           isEditMode={!!editingInstallation}

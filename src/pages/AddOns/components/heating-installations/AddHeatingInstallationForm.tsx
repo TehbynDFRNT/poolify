@@ -1,9 +1,9 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -39,11 +39,30 @@ export const AddHeatingInstallationForm = ({
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      installation_type: initialValues?.installation_type || "",
-      installation_cost: initialValues?.installation_cost || 0,
-      installation_inclusions: initialValues?.installation_inclusions || "",
+      installation_type: "",
+      installation_cost: 0,
+      installation_inclusions: "",
     },
   });
+
+  // Reset form when initialValues change or dialog opens/closes
+  useEffect(() => {
+    if (open) {
+      if (initialValues) {
+        form.reset({
+          installation_type: initialValues.installation_type,
+          installation_cost: initialValues.installation_cost,
+          installation_inclusions: initialValues.installation_inclusions || "",
+        });
+      } else {
+        form.reset({
+          installation_type: "",
+          installation_cost: 0,
+          installation_inclusions: "",
+        });
+      }
+    }
+  }, [form, initialValues, open]);
 
   const handleSubmit = async (values: FormValues) => {
     setIsSubmitting(true);
@@ -53,7 +72,6 @@ export const AddHeatingInstallationForm = ({
         installation_cost: values.installation_cost,
         installation_inclusions: values.installation_inclusions || "",
       });
-      form.reset();
     } finally {
       setIsSubmitting(false);
     }
@@ -66,6 +84,11 @@ export const AddHeatingInstallationForm = ({
           <DialogTitle>
             {isEditMode ? "Edit Heating Installation" : "Add Heating Installation"}
           </DialogTitle>
+          <DialogDescription>
+            {isEditMode 
+              ? "Update the details of this heating installation." 
+              : "Add a new heating installation option to your catalog."}
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -77,6 +100,7 @@ export const AddHeatingInstallationForm = ({
                   <FormLabel>Installation Type</FormLabel>
                   <Select
                     onValueChange={field.onChange}
+                    value={field.value}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -107,6 +131,7 @@ export const AddHeatingInstallationForm = ({
                       type="number"
                       step="0.01"
                       {...field}
+                      value={field.value}
                     />
                   </FormControl>
                   <FormMessage />
@@ -125,6 +150,7 @@ export const AddHeatingInstallationForm = ({
                       placeholder="List inclusions here..."
                       className="min-h-[100px]"
                       {...field}
+                      value={field.value || ""}
                     />
                   </FormControl>
                   <FormMessage />
