@@ -3,26 +3,16 @@ import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle,
-  DialogFooter 
-} from "@/components/ui/dialog";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Form } from "@/components/ui/form";
 import { toast } from "sonner";
 import { BlanketRoller, calculateMarginValue } from "@/types/blanket-roller";
 import { useBlanketRollers } from "@/hooks/useBlanketRollers";
+import { FormHeader } from "./components/FormHeader";
+import { PoolDetailsFields } from "./components/PoolDetailsFields";
+import { ProductInfoFields } from "./components/ProductInfoFields";
+import { PricingFields } from "./components/PricingFields";
+import { FormActions } from "./components/FormActions";
 
 const formSchema = z.object({
   pool_range: z.string().min(1, "Pool range is required"),
@@ -107,130 +97,16 @@ export const AddBlanketRollerForm: React.FC<AddBlanketRollerFormProps> = ({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>
-            {isEditMode ? "Edit Blanket & Roller" : "Add Blanket & Roller"}
-          </DialogTitle>
-        </DialogHeader>
+        <FormHeader isEditMode={isEditMode} />
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="pool_range"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pool Range</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Piazza" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="pool_model"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Pool Model</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g., Alto" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="sku"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>SKU</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., IX-ALTO-BR" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+            <PoolDetailsFields />
+            <ProductInfoFields />
+            <PricingFields />
+            <FormActions 
+              isEditMode={isEditMode} 
+              onCancel={() => onOpenChange(false)} 
             />
-            
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., 3mm Daisy Thermal Blanket..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="rrp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>RRP</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="trade"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Trade</FormLabel>
-                    <FormControl>
-                      <Input type="number" min="0" step="0.01" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="margin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Margin</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        readOnly
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <DialogFooter className="mt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                {isEditMode ? "Update" : "Add"} Blanket & Roller
-              </Button>
-            </DialogFooter>
           </form>
         </Form>
       </DialogContent>
