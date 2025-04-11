@@ -11,9 +11,6 @@ interface SiteRequirementsCostSummaryProps {
   isDefaultCrane?: boolean;
   defaultCraneCost?: number;
   customRequirementsMargin?: number;
-  craneMargin?: number;
-  trafficControlMargin?: number;
-  bobcatMargin?: number;
 }
 
 export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryProps> = ({
@@ -25,9 +22,6 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
   isDefaultCrane = false,
   defaultCraneCost = 0,
   customRequirementsMargin = 0,
-  craneMargin = 0,
-  trafficControlMargin = 0,
-  bobcatMargin = 0
 }) => {
   // Calculate the crane cost difference if this is not the default crane
   const craneCostDifference = isDefaultCrane ? 0 : craneCost - defaultCraneCost;
@@ -52,40 +46,19 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
                   </span>
                 )}
               </span>
-              <div className="text-right">
-                <span className="font-medium">
-                  {isDefaultCrane ? 
-                    "Included in base price" : 
-                    formatCurrency(craneCostDifference)}
-                </span>
-                {!isDefaultCrane && craneMargin > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    {craneMargin}% margin
-                  </div>
-                )}
-              </div>
+              <span className="font-medium">
+                {isDefaultCrane ? 
+                  "Included in base price" : 
+                  formatCurrency(craneCostDifference)}
+              </span>
             </div>
             <div className="flex justify-between py-1">
               <span>Traffic Control:</span>
-              <div className="text-right">
-                <span className="font-medium">{formatCurrency(trafficControlCost)}</span>
-                {trafficControlCost > 0 && trafficControlMargin > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    {trafficControlMargin}% margin
-                  </div>
-                )}
-              </div>
+              <span className="font-medium">{formatCurrency(trafficControlCost)}</span>
             </div>
             <div className="flex justify-between py-1">
               <span>Bobcat:</span>
-              <div className="text-right">
-                <span className="font-medium">{formatCurrency(bobcatCost)}</span>
-                {bobcatCost > 0 && bobcatMargin > 0 && (
-                  <div className="text-xs text-muted-foreground">
-                    {bobcatMargin}% margin
-                  </div>
-                )}
-              </div>
+              <span className="font-medium">{formatCurrency(bobcatCost)}</span>
             </div>
           </div>
         </div>

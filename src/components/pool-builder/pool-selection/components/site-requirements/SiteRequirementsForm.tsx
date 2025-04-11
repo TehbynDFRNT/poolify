@@ -61,12 +61,6 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
 
   const customRequirementsMargin = calculateAverageMargin();
 
-  // Since we don't have margin data for standard requirements in our state,
-  // we'll use default values as placeholders (these would typically come from the database)
-  const craneMargin = 15; // placeholder
-  const trafficControlMargin = 10; // placeholder
-  const bobcatMargin = 12; // placeholder
-
   const handleSaveRequirements = () => {
     onSave({
       craneId,
@@ -117,9 +111,6 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
         isDefaultCrane={isDefaultCrane}
         defaultCraneCost={defaultCraneCost}
         customRequirementsMargin={customRequirementsMargin}
-        craneMargin={craneMargin}
-        trafficControlMargin={trafficControlMargin}
-        bobcatMargin={bobcatMargin}
       />
       
       {/* Save Button */}
