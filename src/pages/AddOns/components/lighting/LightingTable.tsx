@@ -8,23 +8,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Lamp } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Sample data - in a real app this would come from an API or database
+// Updated lighting data with the exact values provided
 const lightingData = [
   {
     id: "1",
-    model_number: "LED-POOL-100",
-    description: "100W LED Pool Light with RGB Color Changing",
-    cost_price: 225,
-    margin: 175,
-    total: 400
-  },
-  {
-    id: "2", 
-    model_number: "LED-POOL-50",
-    description: "50W LED Pool Light with White Light",
-    cost_price: 150,
-    margin: 100,
-    total: 250
+    model_number: "Led lights",
+    description: "LED Pool Lighting",
+    cost_price: 250,
+    margin: 400,
+    total: 650
   }
 ];
 
@@ -85,7 +77,7 @@ export const LightingTable = () => {
                 <TableRow>
                   <TableHead>Model</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Cost</TableHead>
+                  <TableHead className="text-right">Price</TableHead>
                   <TableHead className="text-right">Margin</TableHead>
                   <TableHead className="text-right">Total</TableHead>
                   <TableHead className="text-right"></TableHead>
