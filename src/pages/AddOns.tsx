@@ -8,6 +8,7 @@ import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpPr
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
 import { PoolCleanersTable } from "./AddOns/components/PoolCleanersTable";
+import { SpaJetsTable } from "./AddOns/components/spa-jets/SpaJetsTable";
 
 const AddOns = () => {
   return (
@@ -66,6 +67,10 @@ const AddOns = () => {
           </TabsContent>
           
           <TabsContent value="other-addons" className="space-y-6 animate-fadeIn">
+            {/* Added the Spa Jets table here */}
+            <SpaJetsTable />
+            
+            {/* Kept the placeholder card for future add-ons */}
             <Card>
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
