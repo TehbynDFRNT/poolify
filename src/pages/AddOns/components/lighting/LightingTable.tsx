@@ -17,6 +17,14 @@ const lightingData = [
     cost_price: 250,
     margin: 400,
     total: 650
+  },
+  {
+    id: "2",
+    model_number: "Remote Control for Led lights",
+    description: "Remote control for LED pool lighting",
+    cost_price: 150,
+    margin: 100,
+    total: 250
   }
 ];
 
