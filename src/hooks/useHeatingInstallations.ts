@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { HeatingInstallation } from "@/types/heating-installation";
+import { Database } from "@/integrations/supabase/types";
 
 export const useHeatingInstallations = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +16,7 @@ export const useHeatingInstallations = () => {
       const { data, error } = await supabase
         .from("heating_installations")
         .select("*")
-        .order("installation_type", { ascending: true }) as { data: HeatingInstallation[] | null; error: any };
+        .order("installation_type", { ascending: true });
 
       if (error) {
         throw error;
@@ -41,7 +42,7 @@ export const useHeatingInstallations = () => {
         .from("heating_installations")
         .insert(installation)
         .select("*")
-        .single() as { data: HeatingInstallation | null; error: any };
+        .single();
 
       if (error) {
         throw error;
@@ -75,7 +76,7 @@ export const useHeatingInstallations = () => {
         .update(updates)
         .eq("id", id)
         .select("*")
-        .single() as { data: HeatingInstallation | null; error: any };
+        .single();
 
       if (error) {
         throw error;
@@ -114,7 +115,7 @@ export const useHeatingInstallations = () => {
       const { error } = await supabase
         .from("heating_installations")
         .delete()
-        .eq("id", id) as { error: any };
+        .eq("id", id);
 
       if (error) {
         throw error;
