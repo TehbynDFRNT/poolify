@@ -17,8 +17,6 @@ export const CompatibilityCollapsible: React.FC<CompatibilityCollapsibleProps> =
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
-  // We'll use product SKU for filtering in this demo 
-  // (in a real implementation, we'd use the product ID)
   const { 
     compatibilities, 
     fetchCompatibilities, 
@@ -27,7 +25,7 @@ export const CompatibilityCollapsible: React.FC<CompatibilityCollapsibleProps> =
   } = useHeatPumpCompatibility();
 
   useEffect(() => {
-    if (isOpen && compatibilities.length === 0) {
+    if (isOpen) {
       setIsLoading(true);
       fetchCompatibilities(product.hp_sku)
         .finally(() => setIsLoading(false));
