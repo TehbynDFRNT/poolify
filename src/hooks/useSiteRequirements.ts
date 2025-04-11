@@ -167,7 +167,7 @@ export const useSiteRequirements = (customerId: string) => {
   const addRequirement = () => {
     setCustomRequirements([
       ...customRequirements,
-      { id: crypto.randomUUID(), description: "", price: 0 }
+      { id: crypto.randomUUID(), description: "", price: 0, margin: 0 }
     ]);
   };
 
@@ -175,10 +175,10 @@ export const useSiteRequirements = (customerId: string) => {
     setCustomRequirements(customRequirements.filter(req => req.id !== id));
   };
 
-  const updateRequirement = (id: string, field: 'description' | 'price', value: string) => {
+  const updateRequirement = (id: string, field: 'description' | 'price' | 'margin', value: string) => {
     setCustomRequirements(customRequirements.map(req => {
       if (req.id === id) {
-        if (field === 'price') {
+        if (field === 'price' || field === 'margin') {
           return { ...req, [field]: parseFloat(value) || 0 };
         }
         return { ...req, [field]: value };
@@ -216,4 +216,5 @@ export interface CustomRequirement {
   id: string;
   description: string;
   price: number;
+  margin: number;
 }
