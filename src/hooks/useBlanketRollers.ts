@@ -22,7 +22,7 @@ export const useBlanketRollers = () => {
   });
 
   const addMutation = useMutation({
-    mutationFn: async (newBlanketRoller: Omit<BlanketRoller, 'id' | 'created_at'>) => {
+    mutationFn: async (newBlanketRoller: Omit<BlanketRoller, "id" | "created_at">) => {
       const { data, error } = await supabase
         .from('blanket_rollers')
         .insert([newBlanketRoller])

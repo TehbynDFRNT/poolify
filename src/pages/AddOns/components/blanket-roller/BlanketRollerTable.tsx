@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Table, 
@@ -17,14 +17,62 @@ import { BlanketRoller } from "@/types/blanket-roller";
 import { BlanketRollerRow } from "./BlanketRollerRow";
 import { AddBlanketRollerForm } from "./AddBlanketRollerForm";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import { EmptyState } from "./components/EmptyState";
+import { LoadingState } from "./components/LoadingState";
+
+// Sample data for initial population
+const sampleBlanketRollers = [
+  {
+    pool_range: "Piazza",
+    pool_model: "Alto",
+    sku: "PZ-ALTO-BR",
+    description: "3mm Daisy Thermal Blanket with Roller System",
+    rrp: 1450,
+    trade: 950,
+    margin: 500
+  },
+  {
+    pool_range: "Piazza",
+    pool_model: "Plunge",
+    sku: "PZ-PLUNGE-BR",
+    description: "3mm Daisy Thermal Blanket with Heavy Duty Roller",
+    rrp: 1550,
+    trade: 1050,
+    margin: 500
+  },
+  {
+    pool_range: "Majestic",
+    pool_model: "Luxe 8",
+    sku: "MJ-LUXE8-BR",
+    description: "4mm Premium Thermal Cover with Electric Roller",
+    rrp: 2350,
+    trade: 1650,
+    margin: 700
+  }
+];
 
 export const BlanketRollerTable = () => {
-  const { blanketRollers, isLoading, deleteBlanketRoller } = useBlanketRollers();
+  const { blanketRollers, isLoading, addBlanketRoller, deleteBlanketRoller } = useBlanketRollers();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BlanketRoller | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BlanketRoller | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
+  const [initialized, setInitialized] = useState(false);
+
+  // Add sample data if none exists
+  useEffect(() => {
+    const addSampleData = async () => {
+      if (!isLoading && blanketRollers.length === 0 && !initialized) {
+        setInitialized(true);
+        for (const sample of sampleBlanketRollers) {
+          await addBlanketRoller(sample);
+        }
+      }
+    };
+
+    addSampleData();
+  }, [isLoading, blanketRollers.length, initialized, addBlanketRoller]);
 
   const filteredItems = blanketRollers.filter((item) => {
     const search = searchTerm.toLowerCase();
@@ -64,35 +112,11 @@ export const BlanketRollerTable = () => {
 
   const renderContent = () => {
     if (isLoading) {
-      return (
-        <TableRow>
-          <TableCell colSpan={8} className="h-32 text-center">
-            <div className="flex flex-col items-center justify-center py-4">
-              <div className="my-2 text-sm animate-pulse">Loading blanket & roller data...</div>
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+      return <LoadingState />;
     }
 
     if (filteredItems.length === 0) {
-      return (
-        <TableRow>
-          <TableCell colSpan={8} className="h-32 text-center">
-            <div className="flex flex-col items-center justify-center space-y-1 py-4 text-muted-foreground">
-              <Layers className="h-10 w-10 text-muted-foreground/60" />
-              <div className="text-sm font-medium">
-                {searchTerm ? "No matching items found" : "No blanket & roller items yet"}
-              </div>
-              <div className="text-xs">
-                {searchTerm 
-                  ? "Try a different search term" 
-                  : "Add your first blanket & roller item to get started"}
-              </div>
-            </div>
-          </TableCell>
-        </TableRow>
-      );
+      return <EmptyState searchTerm={searchTerm} />;
     }
 
     return filteredItems.map((item) => (

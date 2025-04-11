@@ -67,9 +67,14 @@ export const AddBlanketRollerForm: React.FC<AddBlanketRollerFormProps> = ({
   });
 
   const onSubmit = async (data: FormValues) => {
-    // Calculate margin if not provided
+    // Ensure all required fields are present
     const completeData = {
-      ...data,
+      pool_range: data.pool_range,
+      pool_model: data.pool_model,
+      sku: data.sku,
+      description: data.description,
+      rrp: data.rrp,
+      trade: data.trade,
       margin: data.margin || calculateMarginValue(data.rrp, data.trade)
     };
     
