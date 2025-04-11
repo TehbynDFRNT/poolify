@@ -175,6 +175,14 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
                 <span className="text-muted-foreground">Package:</span>
                 <span>{selectedPackage.description}</span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Cost:</span>
+                <span>{formatPrice(selectedPackage.cost_price)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Margin:</span>
+                <span>{formatPrice(selectedPackage.margin)}</span>
+              </div>
               <div className="flex justify-between font-medium">
                 <span>Price:</span>
                 <span>{formatPrice(selectedPackage.total)}</span>
@@ -193,6 +201,14 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
               </div>
               
               <div className="pt-2 border-t mt-2">
+                <div className="flex justify-between">
+                  <span>Cost:</span>
+                  <span>{formatPrice(selectedPackage.cost_price)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Margin:</span>
+                  <span>{formatPrice(selectedPackage.margin)}</span>
+                </div>
                 <div className="flex justify-between font-semibold text-lg">
                   <span>Total:</span>
                   <span>{formatPrice(selectedPackage.total)}</span>
@@ -205,4 +221,3 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
     </Card>
   );
 };
-
