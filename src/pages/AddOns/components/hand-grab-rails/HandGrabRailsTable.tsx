@@ -10,7 +10,14 @@ import { GrabRailsTable } from "./GrabRailsTable";
 import { useHandGrabRails } from "./hooks/useHandGrabRails";
 
 export const HandGrabRailsTable = () => {
-  const { searchTerm, setSearchTerm, filteredHandGrabRails } = useHandGrabRails();
+  const { 
+    searchTerm, 
+    setSearchTerm, 
+    filteredHandGrabRails, 
+    isLoading, 
+    error,
+    deleteHandGrabRail 
+  } = useHandGrabRails();
   const { toast } = useToast();
 
   const handleAddClick = () => {
@@ -19,6 +26,32 @@ export const HandGrabRailsTable = () => {
       description: "This feature will be implemented soon.",
     });
   };
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader className="pb-2">
+          <div className="flex items-center gap-2">
+            <GripVertical className="h-5 w-5 text-primary" />
+            <CardTitle>Hand Grab Rails</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="p-6 text-center border border-destructive/20 rounded-lg bg-destructive/5">
+            <h3 className="text-lg font-medium mb-2 text-destructive">Error Loading Data</h3>
+            <p className="text-muted-foreground">{error}</p>
+            <Button 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => window.location.reload()}
+            >
+              Retry
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -56,6 +89,8 @@ export const HandGrabRailsTable = () => {
             items={filteredHandGrabRails}
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
+            isLoading={isLoading}
+            onDelete={deleteHandGrabRail}
           />
         </div>
       </CardContent>
