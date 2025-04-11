@@ -6,8 +6,9 @@ import { Plus, Search, Trash2, Edit } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HardDrive } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
-// Sample data for hardware upgrades
+// Updated sample data for hardware upgrades
 const sampleHardwareUpgrades = [
   {
     id: "1",
@@ -32,18 +33,59 @@ const sampleHardwareUpgrades = [
     margin: 400,
     total: 1600,
     description: "Automated valve control system"
+  },
+  {
+    id: "4",
+    model_number: "Quantum UV Sanitation",
+    cost_price: 1750,
+    margin: 1350,
+    total: 3100,
+    description: "UV sanitation system for pool water purification"
+  },
+  {
+    id: "5",
+    model_number: "THERAPM6002 (Main Controller)",
+    cost_price: 1427,
+    margin: 550,
+    total: 1977,
+    description: "Pool Manager main controller unit"
+  },
+  {
+    id: "6",
+    model_number: "THERAPM6002 plus THERAPM6010E (Ten amp slave)",
+    cost_price: 1677,
+    margin: 700,
+    total: 2377,
+    description: "Pool Manager with ten amp slave unit"
+  },
+  {
+    id: "7",
+    model_number: "THERAPM6002 plus THERAPM6010E + THERAPM6015E(15amp)",
+    cost_price: 1692,
+    margin: 700,
+    total: 2392,
+    description: "Pool Manager with ten amp and fifteen amp slave units"
   }
 ];
 
 export const HardwareUpgradesTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const { toast } = useToast();
 
   const filteredHardwareUpgrades = sampleHardwareUpgrades.filter((upgrade) => {
     const search = searchTerm.toLowerCase();
     return (
-      upgrade.model_number.toLowerCase().includes(search)
+      upgrade.model_number.toLowerCase().includes(search) ||
+      upgrade.description.toLowerCase().includes(search)
     );
   });
+
+  const handleAddClick = () => {
+    toast({
+      title: "Add Hardware Upgrade",
+      description: "This feature will be implemented soon.",
+    });
+  };
 
   return (
     <Card>
@@ -69,7 +111,7 @@ export const HardwareUpgradesTable = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-              <Button className="flex items-center gap-2">
+              <Button className="flex items-center gap-2" onClick={handleAddClick}>
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Add Hardware Upgrade</span>
                 <span className="sm:hidden">Add</span>
