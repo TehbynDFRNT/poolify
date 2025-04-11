@@ -50,13 +50,12 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
   const calculateAverageMargin = () => {
     if (customRequirements.length === 0 || customRequirementsTotal === 0) return 0;
     
-    const totalMargin = customRequirements.reduce((sum, req) => {
-      // Calculate the weighted margin based on the price
+    const totalMarginWeighted = customRequirements.reduce((sum, req) => {
       return sum + (req.margin * req.price);
     }, 0);
     
-    // Return the weighted average
-    return Math.round(totalMargin / customRequirementsTotal);
+    // Return the weighted average, rounded to nearest integer
+    return Math.round(totalMarginWeighted / customRequirementsTotal);
   };
 
   const customRequirementsMargin = calculateAverageMargin();
