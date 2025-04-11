@@ -67,8 +67,7 @@ export const PoolCleanersTable = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Brush className="h-5 w-5 text-primary" />
-          <h2 className="text-xl font-semibold">Pool Cleaners</h2>
+          {/* Removed the duplicated title with Brush icon here */}
         </div>
         <div className="flex items-center gap-2">
           <div className="relative">
