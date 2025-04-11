@@ -1,68 +1,140 @@
 
 import { useState } from "react";
-import { Table, TableBody } from "@/components/ui/table";
-import { usePoolCleaners } from "@/hooks/usePoolCleaners";
-import { AddPoolCleanerForm } from "./AddPoolCleanerForm";
-import { PoolCleanersTableHeader } from "./poolCleaners/PoolCleanersTableHeader";
-import { EmptyPoolCleanersState } from "./poolCleaners/EmptyPoolCleanersState";
-import { PoolCleanerRow } from "./poolCleaners/PoolCleanerRow";
-import { PoolCleanersActions } from "./poolCleaners/PoolCleanersActions";
-import { usePoolCleanerEditing } from "../hooks/usePoolCleanerEditing";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Plus, Search, Trash2, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Brush } from "lucide-react";
+
+// Sample data based on provided information
+const sampleCleaners = [
+  {
+    id: "1",
+    model_number: "CL-S150",
+    name: "Dolphin S150",
+    price: 1400,
+    cost_price: 1028,
+    margin: 26.57,
+    description: "Entry-level robotic pool cleaner suitable for small to medium pools."
+  },
+  {
+    id: "2",
+    model_number: "CL-L400",
+    name: "Dolphin Liberty 400",
+    price: 2350,
+    cost_price: 1844,
+    margin: 21.53,
+    description: "Cordless robotic pool cleaner with advanced navigation system."
+  },
+  {
+    id: "3",
+    model_number: "CL-X6",
+    name: "Dolphin X6",
+    price: 2850,
+    cost_price: 2128,
+    margin: 25.33,
+    description: "Premium robotic pool cleaner with multi-layer filtration and smart navigation."
+  },
+  {
+    id: "4",
+    model_number: "CL-DB2",
+    name: "Dolphin DB2",
+    price: 2350,
+    cost_price: 1028,
+    margin: 56.26,
+    description: "Commercial-grade robotic pool cleaner for larger pools."
+  }
+];
 
 export const PoolCleanersTable = () => {
-  const { poolCleaners, isLoading, deletePoolCleaner } = usePoolCleaners();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const {
-    editingCells,
-    editValues,
-    handleEditStart,
-    handleEditCancel,
-    handleEditSave,
-    handleEditChange,
-    handleEditKeyDown
-  } = usePoolCleanerEditing();
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const handleDeleteCleaner = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this pool cleaner?")) {
-      deletePoolCleaner(id);
-    }
+  const filteredCleaners = sampleCleaners.filter((cleaner) => {
+    const search = searchTerm.toLowerCase();
+    return (
+      cleaner.model_number.toLowerCase().includes(search) ||
+      cleaner.name.toLowerCase().includes(search)
+    );
+  });
+
+  // Calculate margin amount for display
+  const calculateMarginAmount = (price: number, costPrice: number) => {
+    return price - costPrice;
   };
-
-  if (isLoading) {
-    return <div className="p-4">Loading pool cleaners...</div>;
-  }
 
   return (
     <div className="space-y-4">
-      <PoolCleanersActions onAddNew={() => setIsDialogOpen(true)} />
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Brush className="h-5 w-5 text-primary" />
+          <h2 className="text-xl font-semibold">Pool Cleaners</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search cleaners..."
+              className="pl-8 w-[200px] md:w-[250px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Button className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Cleaner</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
+        </div>
+      </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm">
+      <div className="rounded-md border overflow-x-auto">
         <Table>
-          <PoolCleanersTableHeader />
+          <TableHeader>
+            <TableRow>
+              <TableHead>SKU</TableHead>
+              <TableHead>Model</TableHead>
+              <TableHead className="text-right">RRP</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+              <TableHead className="text-right">Margin %</TableHead>
+              <TableHead className="text-right">Margin $</TableHead>
+              <TableHead className="text-right"></TableHead>
+            </TableRow>
+          </TableHeader>
           <TableBody>
-            {poolCleaners?.length === 0 ? (
-              <EmptyPoolCleanersState />
+            {filteredCleaners.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="h-24 text-center">
+                  No pool cleaners found.
+                </TableCell>
+              </TableRow>
             ) : (
-              poolCleaners?.map((cleaner) => (
-                <PoolCleanerRow
-                  key={cleaner.id}
-                  cleaner={cleaner}
-                  editingCells={editingCells[cleaner.id] || {}}
-                  editValues={editValues[cleaner.id] || {}}
-                  onEditStart={(field, value) => handleEditStart(cleaner.id, field, value)}
-                  onEditSave={(field) => handleEditSave(cleaner.id, field)}
-                  onEditCancel={(field) => handleEditCancel(cleaner.id, field)}
-                  onEditChange={(field, value) => handleEditChange(cleaner.id, field, value)}
-                  onEditKeyDown={(e, field) => handleEditKeyDown(e, cleaner.id, field)}
-                  onDelete={() => handleDeleteCleaner(cleaner.id)}
-                />
+              filteredCleaners.map((cleaner) => (
+                <TableRow key={cleaner.id}>
+                  <TableCell>{cleaner.model_number}</TableCell>
+                  <TableCell>{cleaner.name}</TableCell>
+                  <TableCell className="text-right">${cleaner.price.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">${cleaner.cost_price.toLocaleString()}</TableCell>
+                  <TableCell className="text-right">{cleaner.margin.toFixed(2)}%</TableCell>
+                  <TableCell className="text-right">
+                    ${calculateMarginAmount(cleaner.price, cleaner.cost_price).toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end gap-2">
+                      <Button variant="ghost" size="icon">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon">
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
               ))
             )}
           </TableBody>
         </Table>
       </div>
-
-      <AddPoolCleanerForm open={isDialogOpen} onOpenChange={setIsDialogOpen} />
     </div>
   );
 };
