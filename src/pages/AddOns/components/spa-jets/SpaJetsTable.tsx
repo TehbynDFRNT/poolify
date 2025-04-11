@@ -32,6 +32,14 @@ const sampleSpaJets = [
     margin: 1000,
     total: 4500,
     description: "Complete spa jet upgrade package for Round Pool 23"
+  },
+  {
+    id: "4",
+    model_number: "Pepper Pots",
+    cost_price: 1200,
+    margin: 600,
+    total: 1850,
+    description: "Pepper pot style spa jets"
   }
 ];
 
