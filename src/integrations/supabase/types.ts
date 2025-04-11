@@ -740,6 +740,30 @@ export type Database = {
         }
         Relationships: []
       }
+      heating_installations: {
+        Row: {
+          created_at: string
+          id: string
+          installation_cost: number
+          installation_inclusions: string
+          installation_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          installation_cost: number
+          installation_inclusions: string
+          installation_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          installation_cost?: number
+          installation_inclusions?: string
+          installation_type?: string
+        }
+        Relationships: []
+      }
       pool_blankets: {
         Row: {
           blanket_description: string

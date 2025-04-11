@@ -1,9 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { 
-  useHeatingInstallations, 
-  type HeatingInstallation 
-} from "@/hooks/useHeatingInstallations";
+import { useHeatingInstallations } from "@/hooks/useHeatingInstallations";
+import { HeatingInstallation } from "@/types/heating-installation";
 import { LoadingState } from "./components/LoadingState";
 import { EmptyState } from "./components/EmptyState";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
