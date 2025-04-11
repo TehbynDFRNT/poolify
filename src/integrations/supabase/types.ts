@@ -9,6 +9,42 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      blanket_rollers: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          margin: number
+          pool_model: string
+          pool_range: string
+          rrp: number
+          sku: string
+          trade: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          margin: number
+          pool_model: string
+          pool_range: string
+          rrp: number
+          sku: string
+          trade: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          margin?: number
+          pool_model?: string
+          pool_range?: string
+          rrp?: number
+          sku?: string
+          trade?: number
+        }
+        Relationships: []
+      }
       bobcat_costs: {
         Row: {
           created_at: string
