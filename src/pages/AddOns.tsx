@@ -18,7 +18,10 @@ const AddOns = () => {
         <Tabs defaultValue="blankets" className="w-full">
           <TabsList className="mb-6">
             <TabsTrigger value="blankets" className="flex items-center gap-1">
-              <Scroll className="h-4 w-4" />
+              <div className="flex gap-1">
+                <Scroll className="h-4 w-4" />
+                <Thermometer className="h-4 w-4" />
+              </div>
               <span>Blankets & Heat Pumps</span>
             </TabsTrigger>
             <TabsTrigger value="cleaners" className="flex items-center gap-1">
@@ -35,7 +38,7 @@ const AddOns = () => {
                     <Scroll className="h-5 w-5 text-primary" />
                     <Thermometer className="h-5 w-5 text-blue-500" />
                   </div>
-                  <CardTitle>Blankets, Rollers & Heat Pumps</CardTitle>
+                  <CardTitle>Blankets & Heat Pumps</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
