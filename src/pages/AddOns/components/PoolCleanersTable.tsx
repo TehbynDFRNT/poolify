@@ -7,11 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Brush } from "lucide-react";
 
-// Sample data based on provided information
+// Sample data with modified model numbers (removed CL- prefix)
 const sampleCleaners = [
   {
     id: "1",
-    model_number: "CL-S150",
+    model_number: "S150",
     name: "Dolphin S150",
     price: 1400,
     cost_price: 1028,
@@ -20,7 +20,7 @@ const sampleCleaners = [
   },
   {
     id: "2",
-    model_number: "CL-L400",
+    model_number: "L400",
     name: "Dolphin Liberty 400",
     price: 2350,
     cost_price: 1844,
@@ -29,7 +29,7 @@ const sampleCleaners = [
   },
   {
     id: "3",
-    model_number: "CL-X6",
+    model_number: "X6",
     name: "Dolphin X6",
     price: 2850,
     cost_price: 2128,
@@ -38,7 +38,7 @@ const sampleCleaners = [
   },
   {
     id: "4",
-    model_number: "CL-DB2",
+    model_number: "DB2",
     name: "Dolphin DB2",
     price: 2350,
     cost_price: 1028,
@@ -96,15 +96,14 @@ export const PoolCleanersTable = () => {
               <TableHead>Model</TableHead>
               <TableHead className="text-right">RRP</TableHead>
               <TableHead className="text-right">Cost</TableHead>
-              <TableHead className="text-right">Margin %</TableHead>
-              <TableHead className="text-right">Margin $</TableHead>
+              <TableHead className="text-right">Margin</TableHead>
               <TableHead className="text-right"></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredCleaners.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 text-center">
                   No pool cleaners found.
                 </TableCell>
               </TableRow>
@@ -115,7 +114,6 @@ export const PoolCleanersTable = () => {
                   <TableCell>{cleaner.name}</TableCell>
                   <TableCell className="text-right">${cleaner.price.toLocaleString()}</TableCell>
                   <TableCell className="text-right">${cleaner.cost_price.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{cleaner.margin.toFixed(2)}%</TableCell>
                   <TableCell className="text-right">
                     ${calculateMarginAmount(cleaner.price, cleaner.cost_price).toLocaleString()}
                   </TableCell>
