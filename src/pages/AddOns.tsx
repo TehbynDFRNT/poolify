@@ -2,11 +2,12 @@
 import React from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Thermometer, Droplet, Layers } from "lucide-react";
+import { Thermometer, Droplet, Layers, Vacuum } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
+import { PoolCleanersTable } from "./AddOns/components/PoolCleanersTable";
 
 const AddOns = () => {
   return (
@@ -21,6 +22,10 @@ const AddOns = () => {
             <TabsTrigger value="pool-heating" className="flex items-center gap-2">
               <Thermometer className="h-4 w-4" />
               <span>Pool Heating</span>
+            </TabsTrigger>
+            <TabsTrigger value="pool-cleaners" className="flex items-center gap-2">
+              <Vacuum className="h-4 w-4" />
+              <span>Pool Cleaners</span>
             </TabsTrigger>
             <TabsTrigger value="other-addons" className="flex items-center gap-2">
               <Droplet className="h-4 w-4" />
@@ -44,6 +49,20 @@ const AddOns = () => {
             <HeatingInstallationsTable />
             
             <BlanketRollerTable />
+          </TabsContent>
+          
+          <TabsContent value="pool-cleaners" className="space-y-6 animate-fadeIn">
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center gap-2">
+                  <Vacuum className="h-5 w-5 text-primary" />
+                  <CardTitle>Pool Cleaners</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <PoolCleanersTable />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="other-addons" className="space-y-6 animate-fadeIn">
