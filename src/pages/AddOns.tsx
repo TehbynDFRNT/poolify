@@ -4,6 +4,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Thermometer, Droplet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
 
 const AddOns = () => {
   return (
@@ -30,16 +31,11 @@ const AddOns = () => {
               <CardHeader className="pb-2">
                 <div className="flex items-center gap-2">
                   <Thermometer className="h-5 w-5 text-primary" />
-                  <CardTitle>Pool Heating Solutions</CardTitle>
+                  <CardTitle>Heat Pump Products</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="p-6 text-center border border-dashed rounded-lg bg-muted/30">
-                  <h3 className="text-lg font-medium mb-2">Pool Heating Section</h3>
-                  <p className="text-muted-foreground">
-                    This section will contain pool heating products and solutions.
-                  </p>
-                </div>
+                <HeatPumpProductsTable />
               </CardContent>
             </Card>
           </TabsContent>

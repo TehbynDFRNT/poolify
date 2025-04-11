@@ -707,6 +707,39 @@ export type Database = {
         }
         Relationships: []
       }
+      heat_pump_products: {
+        Row: {
+          cost: number
+          created_at: string
+          hp_description: string
+          hp_sku: string
+          id: string
+          margin: number
+          rrp: number
+          updated_at: string
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          hp_description: string
+          hp_sku: string
+          id?: string
+          margin: number
+          rrp: number
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          hp_description?: string
+          hp_sku?: string
+          id?: string
+          margin?: number
+          rrp?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pool_blankets: {
         Row: {
           blanket_description: string
