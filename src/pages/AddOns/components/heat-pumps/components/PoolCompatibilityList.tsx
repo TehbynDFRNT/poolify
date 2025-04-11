@@ -145,9 +145,8 @@ export const PoolCompatibilityList: React.FC<PoolCompatibilityListProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-1/3">Pool Range</TableHead>
-                <TableHead className="w-1/3">Pool Model</TableHead>
-                <TableHead className="w-1/4">Heat Pump</TableHead>
+                <TableHead className="w-1/2">Pool Range</TableHead>
+                <TableHead className="w-1/2">Pool Model</TableHead>
                 <TableHead className="w-[50px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -164,7 +163,6 @@ export const PoolCompatibilityList: React.FC<PoolCompatibilityListProps> = ({
                         )}
                       </TableCell>
                       <TableCell>{item.pool_model}</TableCell>
-                      <TableCell className="font-mono text-xs">{item.hp_sku}</TableCell>
                       <TableCell>
                         {item.id && (
                           <Button
