@@ -2,7 +2,7 @@
 import React from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Thermometer, Droplet, Layers, Brush, HardDrive, Lamp } from "lucide-react";
+import { Thermometer, Droplet, Layers, Brush, HardDrive, Lamp, GripVertical } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
@@ -12,6 +12,7 @@ import { SpaJetsTable } from "./AddOns/components/spa-jets/SpaJetsTable";
 import { DeckJetsTable } from "./AddOns/components/deck-jets/DeckJetsTable";
 import { HardwareUpgradesTable } from "./AddOns/components/hardware-upgrades/HardwareUpgradesTable";
 import { LightingTable } from "./AddOns/components/lighting/LightingTable";
+import { HandGrabRailsTable } from "./AddOns/components/hand-grab-rails/HandGrabRailsTable";
 
 const AddOns = () => {
   return (
@@ -81,10 +82,13 @@ const AddOns = () => {
             {/* Lighting table first */}
             <LightingTable />
             
-            {/* Spa Jets table second */}
+            {/* Hand Grab Rails table second */}
+            <HandGrabRailsTable />
+            
+            {/* Spa Jets table third */}
             <SpaJetsTable />
             
-            {/* Deck Jets table third */}
+            {/* Deck Jets table fourth */}
             <DeckJetsTable />
             
             {/* Kept the placeholder card for future add-ons */}
