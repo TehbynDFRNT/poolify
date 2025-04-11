@@ -31,6 +31,11 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
     totalCost : 
     totalCost - craneCost + craneCostDifference;
 
+  // Only display margin if it's a reasonable value (between 0 and 100)
+  const shouldDisplayMargin = customRequirementsTotal > 0 && 
+                              customRequirementsMargin > 0 && 
+                              customRequirementsMargin <= 100;
+
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -70,7 +75,7 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
               <span>Custom Requirements Total:</span>
               <div className="text-right">
                 <span className="font-medium">{formatCurrency(customRequirementsTotal)}</span>
-                {customRequirementsTotal > 0 && customRequirementsMargin > 0 && (
+                {shouldDisplayMargin && (
                   <div className="text-xs text-muted-foreground">
                     {customRequirementsMargin}% avg margin
                   </div>
