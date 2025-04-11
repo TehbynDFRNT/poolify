@@ -24,6 +24,14 @@ const sampleSpaJets = [
     margin: 200,
     total: 1000,
     description: "Pump for spa jets"
+  },
+  {
+    id: "3",
+    model_number: "Round Pool 23 Spa Jet Upgrade",
+    cost_price: 3500,
+    margin: 1000,
+    total: 4500,
+    description: "Complete spa jet upgrade package for Round Pool 23"
   }
 ];
 
