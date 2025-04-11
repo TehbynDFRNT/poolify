@@ -8,32 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HardDrive } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-// Updated sample data for hardware upgrades
+// Hardware upgrades data
 const sampleHardwareUpgrades = [
-  {
-    id: "1",
-    model_number: "Pool CPU Controller",
-    cost_price: 950,
-    margin: 350,
-    total: 1300,
-    description: "Advanced CPU controller for pool systems"
-  },
-  {
-    id: "2",
-    model_number: "Smart Pool Monitor",
-    cost_price: 750,
-    margin: 250,
-    total: 1000,
-    description: "Smart monitoring system for pool parameters"
-  },
-  {
-    id: "3",
-    model_number: "Automated Valve System",
-    cost_price: 1200,
-    margin: 400,
-    total: 1600,
-    description: "Automated valve control system"
-  },
   {
     id: "4",
     model_number: "Quantum UV Sanitation",
