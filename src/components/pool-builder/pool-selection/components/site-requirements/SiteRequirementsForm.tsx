@@ -46,19 +46,18 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     updateRequirement
   } = useSiteRequirements(customerId);
 
-  // Calculate average margin for custom requirements
-  const calculateAverageMargin = () => {
+  // Calculate total margin value for custom requirements
+  const calculateTotalMargin = () => {
     if (customRequirements.length === 0 || customRequirementsTotal === 0) return 0;
     
-    const totalMarginWeighted = customRequirements.reduce((sum, req) => {
-      return sum + (req.margin * req.price);
+    // Calculate the sum of all individual margins (price * margin% / 100)
+    return customRequirements.reduce((sum, req) => {
+      const marginAmount = (req.price * req.margin) / 100;
+      return sum + marginAmount;
     }, 0);
-    
-    // Return the weighted average, rounded to nearest integer
-    return Math.round(totalMarginWeighted / customRequirementsTotal);
   };
 
-  const customRequirementsMargin = calculateAverageMargin();
+  const customRequirementsMargin = calculateTotalMargin();
 
   const handleSaveRequirements = () => {
     onSave({

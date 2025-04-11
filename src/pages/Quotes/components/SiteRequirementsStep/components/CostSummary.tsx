@@ -1,5 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
+import { formatCurrency } from "@/utils/format";
 
 interface CostSummaryProps {
   siteRequirementsCost: number;
@@ -7,10 +8,8 @@ interface CostSummaryProps {
 }
 
 export const CostSummary = ({ siteRequirementsCost, averageMargin }: CostSummaryProps) => {
-  // Only display margin if it's a reasonable value (between 0 and 100)
-  const shouldDisplayMargin = averageMargin !== undefined && 
-                              averageMargin > 0 && 
-                              averageMargin <= 100;
+  // Only display margin if it's a valid number
+  const shouldDisplayMargin = averageMargin !== undefined && averageMargin > 0;
                               
   return (
     <Card className="bg-muted/50">
@@ -21,7 +20,7 @@ export const CostSummary = ({ siteRequirementsCost, averageMargin }: CostSummary
             <div>${siteRequirementsCost.toFixed(2)}</div>
             {shouldDisplayMargin && (
               <div className="text-xs text-muted-foreground">
-                {averageMargin}% avg margin
+                {formatCurrency(averageMargin)} margin
               </div>
             )}
           </div>
