@@ -12,11 +12,12 @@ import { useToast } from "@/hooks/use-toast";
 
 interface DeckJet {
   id: string;
-  quantity: number;
   cost_price: number;
   margin: number;
   total: number;
   description: string;
+  model_number: string;
+  quantity?: number; // Made quantity optional
 }
 
 interface DeckJetsSelection {
@@ -64,7 +65,13 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
         throw error;
       }
       
-      setDeckJets(data || []);
+      // Map the database results to include a derived quantity property
+      const mappedData = data?.map(jet => ({
+        ...jet,
+        quantity: parseInt(jet.model_number.split('-')[0]) || 0 // Extract quantity from model_number or set to 0
+      })) || [];
+      
+      setDeckJets(mappedData);
     } catch (error: any) {
       console.error("Error fetching deck jets:", error);
       toast({
@@ -86,7 +93,7 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
 
     // If a package is selected, find its costs
     if (selection.deckJetsPackage !== "none") {
-      const selectedJets = deckJets.find(jet => jet.quantity.toString() === selection.deckJetsPackage);
+      const selectedJets = deckJets.find(jet => jet.quantity?.toString() === selection.deckJetsPackage);
       
       if (selectedJets) {
         totalPrice = selectedJets.total;
@@ -130,7 +137,7 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
 
   // Get the selected package information
   const selectedPackage = selection.deckJetsPackage !== "none" 
-    ? deckJets.find(jet => jet.quantity.toString() === selection.deckJetsPackage) 
+    ? deckJets.find(jet => jet.quantity?.toString() === selection.deckJetsPackage) 
     : null;
 
   return (
@@ -155,7 +162,7 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
             <SelectContent>
               <SelectItem value="none">None</SelectItem>
               {deckJets.map((jet) => (
-                <SelectItem key={jet.id} value={jet.quantity.toString()}>
+                <SelectItem key={jet.id} value={jet.quantity?.toString() || "0"}>
                   {jet.quantity} Jets - {formatPrice(jet.total)}
                 </SelectItem>
               ))}
@@ -198,3 +205,4 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
     </Card>
   );
 };
+
