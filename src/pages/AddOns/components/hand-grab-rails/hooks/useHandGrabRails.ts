@@ -23,15 +23,17 @@ export const useHandGrabRails = () => {
     const fetchHandGrabRails = async () => {
       try {
         setIsLoading(true);
+        // Use type assertion to handle the Supabase type issue
         const { data, error } = await supabase
-          .from("hand_grab_rails")
+          .from("hand_grab_rails" as any)
           .select("*");
 
         if (error) {
           throw error;
         }
 
-        setHandGrabRails(data || []);
+        // Type cast the returned data to our HandGrabRailItem[] type
+        setHandGrabRails(data as unknown as HandGrabRailItem[]);
       } catch (error) {
         console.error("Error fetching hand grab rails:", error);
         setError("Failed to load hand grab rails");
@@ -54,8 +56,9 @@ export const useHandGrabRails = () => {
 
   const addHandGrabRail = async (newRail: Omit<HandGrabRailItem, "id">) => {
     try {
+      // Use type assertion for the Supabase query
       const { data, error } = await supabase
-        .from("hand_grab_rails")
+        .from("hand_grab_rails" as any)
         .insert([newRail])
         .select();
 
@@ -63,7 +66,9 @@ export const useHandGrabRails = () => {
         throw error;
       }
 
-      setHandGrabRails([...(data || []), ...handGrabRails]);
+      // Type cast the returned data
+      const typedData = data as unknown as HandGrabRailItem[];
+      setHandGrabRails([...typedData, ...handGrabRails]);
       toast.success("Hand grab rail added successfully");
       return true;
     } catch (error) {
@@ -75,8 +80,9 @@ export const useHandGrabRails = () => {
 
   const updateHandGrabRail = async (id: string, updates: Partial<HandGrabRailItem>) => {
     try {
+      // Use type assertion for the Supabase query
       const { error } = await supabase
-        .from("hand_grab_rails")
+        .from("hand_grab_rails" as any)
         .update(updates)
         .eq("id", id);
 
@@ -100,8 +106,9 @@ export const useHandGrabRails = () => {
 
   const deleteHandGrabRail = async (id: string) => {
     try {
+      // Use type assertion for the Supabase query
       const { error } = await supabase
-        .from("hand_grab_rails")
+        .from("hand_grab_rails" as any)
         .delete()
         .eq("id", id);
 
