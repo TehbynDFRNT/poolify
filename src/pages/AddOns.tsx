@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Thermometer, Droplet } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
+import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 
 const AddOns = () => {
   return (
@@ -38,6 +39,8 @@ const AddOns = () => {
                 <HeatPumpProductsTable />
               </CardContent>
             </Card>
+            
+            <HeatingInstallationsTable />
           </TabsContent>
           
           <TabsContent value="other-addons" className="space-y-6 animate-fadeIn">

@@ -94,7 +94,7 @@ export const HeatPumpProductsTable = () => {
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmDialog 
         product={productToDelete}
-        onOpenChange={setProductToDelete}
+        onOpenChange={() => setProductToDelete(null)}
         onConfirm={handleDeleteConfirm}
       />
     </div>
