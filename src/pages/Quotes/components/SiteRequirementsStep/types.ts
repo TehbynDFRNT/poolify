@@ -8,5 +8,4 @@ export interface CustomSiteRequirement {
   id: string;
   description: string;
   price: number;
-  margin: number;
 }

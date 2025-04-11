@@ -13,7 +13,6 @@ interface CostSummarySectionProps {
   totalCost: number;
   isDefaultCrane: boolean;
   defaultCraneCost: number;
-  customRequirementsMargin?: number;
 }
 
 export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
@@ -23,8 +22,7 @@ export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
   customRequirementsTotal,
   totalCost,
   isDefaultCrane,
-  defaultCraneCost,
-  customRequirementsMargin = 0
+  defaultCraneCost
 }) => {
   return (
     <Card>
@@ -42,7 +40,6 @@ export const CostSummarySection: React.FC<CostSummarySectionProps> = ({
           totalCost={totalCost}
           isDefaultCrane={isDefaultCrane}
           defaultCraneCost={defaultCraneCost}
-          customRequirementsMargin={customRequirementsMargin}
         />
       </CardContent>
     </Card>

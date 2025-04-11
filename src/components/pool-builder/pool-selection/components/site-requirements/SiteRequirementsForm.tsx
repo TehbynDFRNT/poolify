@@ -46,19 +46,6 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     updateRequirement
   } = useSiteRequirements(customerId);
 
-  // Calculate total margin value for custom requirements
-  const calculateTotalMargin = () => {
-    if (customRequirements.length === 0 || customRequirementsTotal === 0) return 0;
-    
-    // Calculate the sum of all individual margins (price * margin% / 100)
-    return customRequirements.reduce((sum, req) => {
-      const marginAmount = (req.price * req.margin) / 100;
-      return sum + marginAmount;
-    }, 0);
-  };
-
-  const customRequirementsMargin = calculateTotalMargin();
-
   const handleSaveRequirements = () => {
     onSave({
       craneId,
@@ -108,7 +95,6 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
         totalCost={totalCost}
         isDefaultCrane={isDefaultCrane}
         defaultCraneCost={defaultCraneCost}
-        customRequirementsMargin={customRequirementsMargin}
       />
       
       {/* Save Button */}

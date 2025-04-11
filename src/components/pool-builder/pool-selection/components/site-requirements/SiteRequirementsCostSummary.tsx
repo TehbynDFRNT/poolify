@@ -10,7 +10,6 @@ interface SiteRequirementsCostSummaryProps {
   totalCost: number;
   isDefaultCrane?: boolean;
   defaultCraneCost?: number;
-  customRequirementsMargin?: number;
 }
 
 export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryProps> = ({
@@ -20,8 +19,7 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
   customRequirementsTotal,
   totalCost,
   isDefaultCrane = false,
-  defaultCraneCost = 0,
-  customRequirementsMargin = 0,
+  defaultCraneCost = 0
 }) => {
   // Calculate the crane cost difference if this is not the default crane
   const craneCostDifference = isDefaultCrane ? 0 : craneCost - defaultCraneCost;
@@ -30,9 +28,6 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
   const adjustedTotal = isDefaultCrane ? 
     totalCost : 
     totalCost - craneCost + craneCostDifference;
-
-  // Only display margin if it's a valid value
-  const shouldDisplayMargin = customRequirementsTotal > 0 && customRequirementsMargin > 0;
 
   return (
     <div className="space-y-4">
@@ -71,14 +66,7 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
           <div className="space-y-1 text-sm">
             <div className="flex justify-between py-1">
               <span>Custom Requirements Total:</span>
-              <div className="text-right">
-                <span className="font-medium">{formatCurrency(customRequirementsTotal)}</span>
-                {shouldDisplayMargin && (
-                  <div className="text-xs text-muted-foreground">
-                    {formatCurrency(customRequirementsMargin)} margin
-                  </div>
-                )}
-              </div>
+              <span className="font-medium">{formatCurrency(customRequirementsTotal)}</span>
             </div>
           </div>
         </div>
