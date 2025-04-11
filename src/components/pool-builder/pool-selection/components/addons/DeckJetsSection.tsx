@@ -2,11 +2,10 @@
 import React, { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Droplet } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Droplet, Search, Plus, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -22,6 +21,7 @@ interface DeckJet {
 
 interface DeckJetsSelection {
   deckJetsPackage: string;
+  selectedJetId: string | null;
 }
 
 interface DeckJetsSectionProps {
@@ -42,8 +42,10 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
   const [deckJets, setDeckJets] = useState<DeckJet[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selection, setSelection] = useState<DeckJetsSelection>({
-    deckJetsPackage: "none"
+    deckJetsPackage: "none",
+    selectedJetId: null
   });
+  const [searchTerm, setSearchTerm] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -92,8 +94,8 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
     let totalMargin = 0;
 
     // If a package is selected, find its costs
-    if (selection.deckJetsPackage !== "none") {
-      const selectedJets = deckJets.find(jet => jet.quantity?.toString() === selection.deckJetsPackage);
+    if (selection.selectedJetId) {
+      const selectedJets = deckJets.find(jet => jet.id === selection.selectedJetId);
       
       if (selectedJets) {
         totalPrice = selectedJets.total;
@@ -111,12 +113,24 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
     }
   };
 
-  const handlePackageChange = (value: string) => {
+  const handleJetSelection = (jetId: string) => {
     setSelection(prev => ({
       ...prev,
-      deckJetsPackage: value
+      selectedJetId: jetId,
+      deckJetsPackage: deckJets.find(jet => jet.id === jetId)?.quantity?.toString() || "none"
     }));
   };
+
+  const filteredDeckJets = deckJets.filter(jet => {
+    if (!searchTerm) return true;
+    
+    const search = searchTerm.toLowerCase();
+    return (
+      (jet.quantity?.toString() || "").includes(search) ||
+      jet.description.toLowerCase().includes(search) ||
+      jet.model_number.toLowerCase().includes(search)
+    );
+  });
 
   const formatPrice = (amount: number) => {
     return new Intl.NumberFormat('en-AU', {
@@ -127,7 +141,7 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
 
   if (isLoading) {
     return (
-      <Card className="bg-white">
+      <Card className="bg-white mt-6">
         <CardContent className="p-6">
           <p className="text-center text-muted-foreground">Loading deck jet options...</p>
         </CardContent>
@@ -135,85 +149,105 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
     );
   }
 
-  // Get the selected package information
-  const selectedPackage = selection.deckJetsPackage !== "none" 
-    ? deckJets.find(jet => jet.quantity?.toString() === selection.deckJetsPackage) 
-    : null;
-
   return (
     <Card className="bg-white mt-6">
       <CardHeader className="pb-3">
-        <div className="flex items-center gap-2">
-          <Droplet className="h-5 w-5 text-primary" />
-          <CardTitle>Deck Jets</CardTitle>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2">
+            <Droplet className="h-5 w-5 text-primary" />
+            <CardTitle>Deck Jets</CardTitle>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search deck jets..."
+                className="pl-8 w-[250px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <Button className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              <span>Add Deck Jet</span>
+            </Button>
+          </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-6">
-        {/* Deck Jet Package Selection */}
-        <div className="space-y-3">
-          <Label htmlFor="deck-jets-package">Select Deck Jets Package</Label>
-          <Select 
-            value={selection.deckJetsPackage} 
-            onValueChange={handlePackageChange}
-          >
-            <SelectTrigger id="deck-jets-package" className="w-full">
-              <SelectValue placeholder="Select a package" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">None</SelectItem>
-              {deckJets.map((jet) => (
-                <SelectItem key={jet.id} value={jet.quantity?.toString() || "0"}>
-                  {jet.quantity} Jets - {formatPrice(jet.total)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          {selectedPackage && (
-            <div className="pt-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Package:</span>
-                <span>{selectedPackage.description}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Cost:</span>
-                <span>{formatPrice(selectedPackage.cost_price)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Margin:</span>
-                <span>{formatPrice(selectedPackage.margin)}</span>
-              </div>
-              <div className="flex justify-between font-medium">
-                <span>Price:</span>
-                <span>{formatPrice(selectedPackage.total)}</span>
-              </div>
-            </div>
-          )}
+      <CardContent>
+        <div className="rounded-md border overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Quantity</TableHead>
+                <TableHead className="text-right">Cost</TableHead>
+                <TableHead className="text-right">Margin</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+                <TableHead className="text-right"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredDeckJets.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="h-24 text-center">
+                    No deck jets found.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                filteredDeckJets.map((jet) => (
+                  <TableRow 
+                    key={jet.id}
+                    className={selection.selectedJetId === jet.id ? "bg-primary/10" : undefined}
+                    onClick={() => handleJetSelection(jet.id)}
+                  >
+                    <TableCell>{jet.quantity} Jets</TableCell>
+                    <TableCell className="text-right">${jet.cost_price.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">${jet.margin.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">${jet.total.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button variant="ghost" size="icon">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button variant="ghost" size="icon">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         </div>
-
-        {/* Total Summary */}
-        {selectedPackage && (
+        
+        {/* Selection Summary */}
+        {selection.selectedJetId && (
           <div className="mt-6 p-4 border rounded-lg bg-slate-50">
+            <h4 className="font-medium mb-2">Selected Package</h4>
             <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="font-medium">Deck Jets Package:</span>
-                <span>{formatPrice(selectedPackage.total)}</span>
-              </div>
-              
-              <div className="pt-2 border-t mt-2">
-                <div className="flex justify-between">
-                  <span>Cost:</span>
-                  <span>{formatPrice(selectedPackage.cost_price)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span>Margin:</span>
-                  <span>{formatPrice(selectedPackage.margin)}</span>
-                </div>
-                <div className="flex justify-between font-semibold text-lg">
-                  <span>Total:</span>
-                  <span>{formatPrice(selectedPackage.total)}</span>
-                </div>
-              </div>
+              {deckJets
+                .filter(jet => jet.id === selection.selectedJetId)
+                .map(selectedJet => (
+                  <div key={selectedJet.id}>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Description:</span>
+                      <span>{selectedJet.description}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Cost:</span>
+                      <span>{formatPrice(selectedJet.cost_price)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Margin:</span>
+                      <span>{formatPrice(selectedJet.margin)}</span>
+                    </div>
+                    <div className="flex justify-between font-medium">
+                      <span>Total:</span>
+                      <span>{formatPrice(selectedJet.total)}</span>
+                    </div>
+                  </div>
+                ))}
             </div>
           </div>
         )}
