@@ -46,6 +46,7 @@ export const HeatPumpProductsTable = () => {
     fetchHeatPumpProducts();
   }, []);
 
+  // Use the form values directly and calculate margin based on cost and rrp
   const handleAddProduct = async (product: Omit<HeatPumpProduct, "id" | "created_at">) => {
     await addHeatPumpProduct(product);
   };

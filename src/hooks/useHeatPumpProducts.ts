@@ -46,9 +46,16 @@ export const useHeatPumpProducts = () => {
   const addHeatPumpProduct = async (product: Omit<HeatPumpProduct, "id" | "created_at">) => {
     setIsLoading(true);
     try {
+      // Always ensure margin is calculated correctly (RRP - Cost)
+      const calculatedMargin = Math.max(0, product.rrp - product.cost);
+      const productToAdd = {
+        ...product,
+        margin: calculatedMargin
+      };
+
       const { data, error } = await supabase
         .from("heat_pump_products")
-        .insert(product)
+        .insert(productToAdd)
         .select("*")
         .single() as { data: HeatPumpProduct | null; error: any };
 
@@ -79,9 +86,22 @@ export const useHeatPumpProducts = () => {
   const updateHeatPumpProduct = async (id: string, updates: Partial<HeatPumpProduct>) => {
     setIsLoading(true);
     try {
+      // If cost or rrp is being updated, recalculate margin
+      let updatesWithMargin = { ...updates };
+      
+      if ('cost' in updates || 'rrp' in updates) {
+        // Get current product to use existing values if not in updates
+        const currentProduct = heatPumpProducts.find(p => p.id === id);
+        if (currentProduct) {
+          const cost = 'cost' in updates ? updates.cost! : currentProduct.cost;
+          const rrp = 'rrp' in updates ? updates.rrp! : currentProduct.rrp;
+          updatesWithMargin.margin = Math.max(0, rrp - cost);
+        }
+      }
+
       const { data, error } = await supabase
         .from("heat_pump_products")
-        .update(updates)
+        .update(updatesWithMargin)
         .eq("id", id)
         .select("*")
         .single() as { data: HeatPumpProduct | null; error: any };

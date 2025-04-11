@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,6 @@ const formSchema = z.object({
   hp_sku: z.string().min(1, "SKU is required"),
   hp_description: z.string().min(1, "Description is required"),
   cost: z.coerce.number().min(0, "Cost must be a positive number"),
-  margin: z.coerce.number().min(0, "Margin must be a positive number"),
   rrp: z.coerce.number().min(0, "RRP must be a positive number"),
 });
 
@@ -22,7 +21,7 @@ type FormValues = z.infer<typeof formSchema>;
 interface AddHeatPumpFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (values: FormValues) => Promise<void>;
+  onSubmit: (values: FormValues & { margin: number }) => Promise<void>;
   initialValues?: HeatPumpProduct | null;
   isEditMode?: boolean;
 }
@@ -40,10 +39,19 @@ export const AddHeatPumpForm = ({
       hp_sku: "",
       hp_description: "",
       cost: 0,
-      margin: 0,
       rrp: 0,
     },
   });
+
+  // Calculate margin as RRP - Cost
+  const calculateMargin = (cost: number, rrp: number) => {
+    return Math.max(0, rrp - cost);
+  };
+
+  // Calculate and display the current margin
+  const cost = form.watch("cost");
+  const rrp = form.watch("rrp");
+  const currentMargin = calculateMargin(cost, rrp);
 
   // Reset form when dialog opens/closes or when initialValues change
   useEffect(() => {
@@ -53,7 +61,6 @@ export const AddHeatPumpForm = ({
           hp_sku: initialValues.hp_sku,
           hp_description: initialValues.hp_description,
           cost: initialValues.cost,
-          margin: initialValues.margin,
           rrp: initialValues.rrp,
         });
       } else {
@@ -61,7 +68,6 @@ export const AddHeatPumpForm = ({
           hp_sku: "",
           hp_description: "",
           cost: 0,
-          margin: 0,
           rrp: 0,
         });
       }
@@ -70,7 +76,8 @@ export const AddHeatPumpForm = ({
 
   const handleSubmit = async (values: FormValues) => {
     try {
-      await onSubmit(values);
+      const margin = calculateMargin(values.cost, values.rrp);
+      await onSubmit({ ...values, margin });
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting form:", error);
@@ -84,6 +91,9 @@ export const AddHeatPumpForm = ({
           <DialogTitle>
             {isEditMode ? "Edit Heat Pump Product" : "Add New Heat Pump Product"}
           </DialogTitle>
+          <DialogDescription>
+            The margin will be automatically calculated as RRP - Cost.
+          </DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -113,31 +123,13 @@ export const AddHeatPumpForm = ({
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="cost"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Cost</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        step="0.01" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="margin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Margin</FormLabel>
                     <FormControl>
                       <Input 
                         type="number" 
@@ -169,6 +161,13 @@ export const AddHeatPumpForm = ({
                 )}
               />
             </div>
+            <div className="p-3 bg-muted/40 rounded-md border">
+              <div className="flex justify-between">
+                <span className="font-medium">Calculated Margin:</span>
+                <span className="font-bold text-primary">{formatCurrency(currentMargin)}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">This value is automatically calculated as RRP - Cost.</p>
+            </div>
             <DialogFooter>
               <Button type="submit" className="mt-4">
                 {isEditMode ? "Update" : "Add"} Heat Pump
@@ -179,4 +178,12 @@ export const AddHeatPumpForm = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+// Helper function to format currency
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-AU', {
+    style: 'currency',
+    currency: 'AUD'
+  }).format(amount);
 };
