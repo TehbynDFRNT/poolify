@@ -24,7 +24,7 @@ export const useHeatPumpProducts = () => {
       const { data, error } = await supabase
         .from("heat_pump_products")
         .select("*")
-        .order("hp_sku", { ascending: true });
+        .order("hp_sku", { ascending: true }) as { data: HeatPumpProduct[] | null; error: any };
 
       if (error) {
         throw error;
@@ -50,13 +50,13 @@ export const useHeatPumpProducts = () => {
         .from("heat_pump_products")
         .insert(product)
         .select("*")
-        .single();
+        .single() as { data: HeatPumpProduct | null; error: any };
 
       if (error) {
         throw error;
       }
 
-      setHeatPumpProducts([...heatPumpProducts, data]);
+      setHeatPumpProducts([...heatPumpProducts, data as HeatPumpProduct]);
       toast({
         title: "Heat pump product added",
         description: `${product.hp_sku} has been added successfully.`,
@@ -84,19 +84,19 @@ export const useHeatPumpProducts = () => {
         .update(updates)
         .eq("id", id)
         .select("*")
-        .single();
+        .single() as { data: HeatPumpProduct | null; error: any };
 
       if (error) {
         throw error;
       }
 
       setHeatPumpProducts(
-        heatPumpProducts.map((product) => (product.id === id ? data : product))
+        heatPumpProducts.map((product) => (product.id === id ? data as HeatPumpProduct : product))
       );
       
       toast({
         title: "Heat pump product updated",
-        description: `${data.hp_sku} has been updated successfully.`,
+        description: `${(data as HeatPumpProduct).hp_sku} has been updated successfully.`,
       });
       
       return data;
@@ -121,7 +121,7 @@ export const useHeatPumpProducts = () => {
       const { error } = await supabase
         .from("heat_pump_products")
         .delete()
-        .eq("id", id);
+        .eq("id", id) as { error: any };
 
       if (error) {
         throw error;
