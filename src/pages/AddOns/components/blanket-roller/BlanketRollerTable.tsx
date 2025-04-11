@@ -19,17 +19,14 @@ import { AddBlanketRollerForm } from "./AddBlanketRollerForm";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { EmptyState } from "./components/EmptyState";
 import { LoadingState } from "./components/LoadingState";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
 export const BlanketRollerTable = () => {
-  const { blanketRollers, isLoading, addBlanketRoller, deleteBlanketRoller, deleteAllBlanketRollers } = useBlanketRollers();
+  const { blanketRollers, isLoading, addBlanketRoller, deleteBlanketRoller } = useBlanketRollers();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<BlanketRoller | null>(null);
   const [itemToDelete, setItemToDelete] = useState<BlanketRoller | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isDeleteAllDialogOpen, setIsDeleteAllDialogOpen] = useState(false);
-  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   const filteredItems = blanketRollers.filter((item) => {
     const search = searchTerm.toLowerCase();
@@ -59,16 +56,6 @@ export const BlanketRollerTable = () => {
         setIsDeleting(false);
         setItemToDelete(null);
       }
-    }
-  };
-
-  const confirmDeleteAll = async () => {
-    setIsDeletingAll(true);
-    try {
-      await deleteAllBlanketRollers();
-    } finally {
-      setIsDeletingAll(false);
-      setIsDeleteAllDialogOpen(false);
     }
   };
 
@@ -114,17 +101,6 @@ export const BlanketRollerTable = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            {blanketRollers.length > 0 && (
-              <Button
-                onClick={() => setIsDeleteAllDialogOpen(true)}
-                variant="destructive"
-                className="flex items-center gap-2"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span className="hidden sm:inline">Delete All</span>
-                <span className="sm:hidden">Delete All</span>
-              </Button>
-            )}
             <Button
               onClick={() => setIsAddDialogOpen(true)}
               className="flex items-center gap-2"
@@ -170,37 +146,6 @@ export const BlanketRollerTable = () => {
           onConfirm={confirmDelete}
           isDeleting={isDeleting}
         />
-
-        <AlertDialog open={isDeleteAllDialogOpen} onOpenChange={setIsDeleteAllDialogOpen}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete All Blanket & Rollers</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete all blanket & roller products? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeletingAll}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={(e) => {
-                  e.preventDefault();
-                  confirmDeleteAll();
-                }}
-                disabled={isDeletingAll}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {isDeletingAll ? (
-                  <>
-                    <span className="loading loading-spinner mr-2"></span>
-                    Deleting...
-                  </>
-                ) : (
-                  "Delete All"
-                )}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </CardContent>
     </Card>
   );

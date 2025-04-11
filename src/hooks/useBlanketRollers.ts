@@ -84,32 +84,11 @@ export const useBlanketRollers = () => {
     },
   });
 
-  const deleteAllMutation = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase
-        .from('blanket_rollers')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // This will delete all records
-      
-      if (error) throw error;
-      return true;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['blanket-rollers'] });
-      toast.success("All blanket & rollers deleted successfully");
-    },
-    onError: (error) => {
-      toast.error("Failed to delete all blanket & rollers");
-      console.error("Error deleting all blanket & rollers:", error);
-    },
-  });
-
   return {
     blanketRollers: blanketRollers || [],
     isLoading,
     addBlanketRoller: addMutation.mutate,
     updateBlanketRoller: updateMutation.mutate,
-    deleteBlanketRoller: deleteMutation.mutate,
-    deleteAllBlanketRollers: deleteAllMutation.mutate
+    deleteBlanketRoller: deleteMutation.mutate
   };
 };
