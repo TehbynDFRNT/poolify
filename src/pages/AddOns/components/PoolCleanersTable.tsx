@@ -94,9 +94,9 @@ export const PoolCleanersTable = () => {
             <TableRow>
               <TableHead>SKU</TableHead>
               <TableHead>Model</TableHead>
-              <TableHead className="text-right">RRP</TableHead>
               <TableHead className="text-right">Cost</TableHead>
               <TableHead className="text-right">Margin</TableHead>
+              <TableHead className="text-right">RRP</TableHead>
               <TableHead className="text-right"></TableHead>
             </TableRow>
           </TableHeader>
@@ -112,11 +112,11 @@ export const PoolCleanersTable = () => {
                 <TableRow key={cleaner.id}>
                   <TableCell>{cleaner.model_number}</TableCell>
                   <TableCell>{cleaner.name}</TableCell>
-                  <TableCell className="text-right">${cleaner.price.toLocaleString()}</TableCell>
                   <TableCell className="text-right">${cleaner.cost_price.toLocaleString()}</TableCell>
                   <TableCell className="text-right">
                     ${calculateMarginAmount(cleaner.price, cleaner.cost_price).toLocaleString()}
                   </TableCell>
+                  <TableCell className="text-right">${cleaner.price.toLocaleString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button variant="ghost" size="icon">
