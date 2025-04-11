@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { BlanketRoller } from "@/types/blanket-roller";
+import { BlanketRoller, calculateMarginValue } from "@/types/blanket-roller";
 import { useBlanketRollers } from "@/hooks/useBlanketRollers";
 
 const formSchema = z.object({
@@ -68,15 +68,16 @@ export const AddBlanketRollerForm: React.FC<AddBlanketRollerFormProps> = ({
 
   const onSubmit = async (data: FormValues) => {
     // Calculate margin if not provided
-    if (!data.margin) {
-      data.margin = data.rrp - data.trade;
-    }
+    const completeData = {
+      ...data,
+      margin: data.margin || calculateMarginValue(data.rrp, data.trade)
+    };
     
     try {
       if (isEditMode && initialValues) {
-        await updateBlanketRoller({ id: initialValues.id, updates: data });
+        await updateBlanketRoller({ id: initialValues.id, updates: completeData });
       } else {
-        await addBlanketRoller(data);
+        await addBlanketRoller(completeData);
       }
       onOpenChange(false);
       form.reset(defaultValues);
@@ -92,7 +93,7 @@ export const AddBlanketRollerForm: React.FC<AddBlanketRollerFormProps> = ({
       if (name === "rrp" || name === "trade") {
         const rrp = form.getValues("rrp") || 0;
         const trade = form.getValues("trade") || 0;
-        form.setValue("margin", rrp - trade);
+        form.setValue("margin", calculateMarginValue(rrp, trade));
       }
     });
     return () => subscription.unsubscribe();

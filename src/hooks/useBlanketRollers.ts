@@ -17,7 +17,7 @@ export const useBlanketRollers = () => {
         .order('pool_model', { ascending: true });
       
       if (error) throw error;
-      return data as unknown as BlanketRoller[];
+      return data as BlanketRoller[];
     },
   });
 
@@ -30,7 +30,7 @@ export const useBlanketRollers = () => {
         .single();
 
       if (error) throw error;
-      return data as unknown as BlanketRoller;
+      return data as BlanketRoller;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blanket-rollers'] });
@@ -52,7 +52,7 @@ export const useBlanketRollers = () => {
         .single();
 
       if (error) throw error;
-      return data as unknown as BlanketRoller;
+      return data as BlanketRoller;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['blanket-rollers'] });
