@@ -1,52 +1,17 @@
 
 import { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, Trash2, Edit } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-
-// Hand Grab Rails data
-const handGrabRailsData = [
-  {
-    id: "1",
-    model_number: "Black RTD-348BL",
-    description: "Black Hand Grab Rail",
-    cost_price: 793,
-    margin: 357,
-    total: 1150
-  },
-  {
-    id: "2",
-    model_number: "Taupe RTD 348T",
-    description: "Taupe Hand Grab Rail",
-    cost_price: 793,
-    margin: 357,
-    total: 1150
-  },
-  {
-    id: "3",
-    model_number: "White RTD-348W",
-    description: "White Hand Grab Rail",
-    cost_price: 793,
-    margin: 357,
-    total: 1150
-  }
-];
+import { GrabRailsTable } from "./GrabRailsTable";
+import { useHandGrabRails } from "./hooks/useHandGrabRails";
 
 export const HandGrabRailsTable = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const { searchTerm, setSearchTerm, filteredHandGrabRails } = useHandGrabRails();
   const { toast } = useToast();
-
-  const filteredRails = handGrabRailsData.filter((item) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      item.model_number.toLowerCase().includes(search) ||
-      item.description.toLowerCase().includes(search)
-    );
-  });
 
   const handleAddClick = () => {
     toast({
@@ -87,49 +52,11 @@ export const HandGrabRailsTable = () => {
             </div>
           </div>
 
-          <div className="rounded-md border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Model</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="text-right">Price</TableHead>
-                  <TableHead className="text-right">Margin</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="text-right"></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredRails.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="h-24 text-center">
-                      No hand grab rails found.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredRails.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.model_number}</TableCell>
-                      <TableCell>{item.description}</TableCell>
-                      <TableCell className="text-right">${item.cost_price.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">${item.margin.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">${item.total.toLocaleString()}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="icon">
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+          <GrabRailsTable 
+            items={filteredHandGrabRails}
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+          />
         </div>
       </CardContent>
     </Card>
