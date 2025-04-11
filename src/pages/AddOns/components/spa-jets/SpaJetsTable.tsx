@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Droplet } from "lucide-react";
 
-// Sample data for spa jets
+// Updated sample data for spa jets
 const sampleSpaJets = [
   {
     id: "1",
@@ -16,6 +16,14 @@ const sampleSpaJets = [
     margin: 75,
     total: 220,
     description: "Standard spa jet with adjustable flow control"
+  },
+  {
+    id: "2",
+    model_number: "Spa Jet Pump",
+    cost_price: 800,
+    margin: 200,
+    total: 1000,
+    description: "Pump for spa jets"
   }
 ];
 

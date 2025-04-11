@@ -68,10 +68,10 @@ const AddOns = () => {
           </TabsContent>
           
           <TabsContent value="other-addons" className="space-y-6 animate-fadeIn">
-            {/* Added the Spa Jets table */}
+            {/* Spa Jets table first */}
             <SpaJetsTable />
             
-            {/* Added the new Deck Jets table */}
+            {/* Deck Jets table second */}
             <DeckJetsTable />
             
             {/* Kept the placeholder card for future add-ons */}
