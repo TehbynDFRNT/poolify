@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Pool } from "@/types/pool";
 import { Card } from "@/components/ui/card";
 import { SpaJetsSection } from "./SpaJetsSection";
+import { DeckJetsSection } from "./DeckJetsSection";
 
 interface AddonsSectionProps {
   pool: Pool;
@@ -16,15 +17,32 @@ export const AddonsSection: React.FC<AddonsSectionProps> = ({ pool, customerId }
     totalMargin: 0
   });
 
+  const handleAddonsChange = (sectionTotals: {
+    totalPrice: number;
+    totalCost: number;
+    totalMargin: number;
+  }, sectionName: string) => {
+    setTotals(prev => ({
+      totalPrice: prev.totalPrice + sectionTotals.totalPrice,
+      totalCost: prev.totalCost + sectionTotals.totalCost,
+      totalMargin: prev.totalMargin + sectionTotals.totalMargin
+    }));
+  };
+
   const handleSpaJetsChange = (spaJetTotals: {
     totalPrice: number;
     totalCost: number;
     totalMargin: number;
   }) => {
-    setTotals(prev => ({
-      ...prev,
-      ...spaJetTotals
-    }));
+    handleAddonsChange(spaJetTotals, 'spaJets');
+  };
+
+  const handleDeckJetsChange = (deckJetTotals: {
+    totalPrice: number;
+    totalCost: number;
+    totalMargin: number;
+  }) => {
+    handleAddonsChange(deckJetTotals, 'deckJets');
   };
 
   return (
@@ -32,12 +50,19 @@ export const AddonsSection: React.FC<AddonsSectionProps> = ({ pool, customerId }
       <div className="bg-white rounded-lg p-6 shadow-sm border">
         <h2 className="text-xl font-semibold mb-4">Pool Add-ons</h2>
         
-        {/* Spa Jets Section */}
         <div className="space-y-6">
+          {/* Spa Jets Section */}
           <SpaJetsSection 
             pool={pool} 
             customerId={customerId} 
             onSelectionChange={handleSpaJetsChange}
+          />
+          
+          {/* Deck Jets Section */}
+          <DeckJetsSection 
+            pool={pool} 
+            customerId={customerId} 
+            onSelectionChange={handleDeckJetsChange}
           />
           
           {/* Summary of all add-ons */}

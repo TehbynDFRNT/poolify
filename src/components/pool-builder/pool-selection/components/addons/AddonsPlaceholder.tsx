@@ -8,6 +8,11 @@ interface AddonsPlaceholderProps {
   customerId: string | null;
 }
 
-export const AddonsPlaceholder: React.FC<AddonsPlaceholderProps> = ({ pool, customerId }) => {
-  return <AddonsSection pool={pool} customerId={customerId} />;
+export const AddonsPlaceholder: React.FC<AddonsPlaceholderProps> = ({ 
+  pool, 
+  customerId 
+}) => {
+  return (
+    <AddonsSection pool={pool} customerId={customerId} />
+  );
 };
