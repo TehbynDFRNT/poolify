@@ -142,45 +142,34 @@ export const PoolCompatibilityList: React.FC<PoolCompatibilityListProps> = ({
 
       {Object.entries(groupedCompatibilities).length > 0 ? (
         <div className="border rounded-md overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-1/2">Pool Range</TableHead>
-                <TableHead className="w-1/2">Pool Model</TableHead>
-                <TableHead className="w-[50px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Object.entries(groupedCompatibilities).map(([range, models]) => (
-                <React.Fragment key={range}>
-                  {models.map((item, index) => (
-                    <TableRow key={item.id || index} className="hover:bg-muted/50">
-                      <TableCell>
-                        {index === 0 && (
-                          <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20">
-                            {range}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>{item.pool_model}</TableCell>
-                      <TableCell>
-                        {item.id && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-7 w-7 p-0 text-destructive hover:bg-destructive/10"
-                            onClick={() => handleDelete(item.id as string)}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                      </TableCell>
-                    </TableRow>
+          <div className="grid grid-cols-1 gap-2 p-2">
+            {Object.entries(groupedCompatibilities).map(([range, models]) => (
+              <div key={range} className="border rounded-md p-2 bg-white">
+                <div className="mb-2">
+                  <Badge variant="outline" className="bg-primary/10 hover:bg-primary/20">
+                    {range}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {models.map((item) => (
+                    <div key={item.id} className="flex items-center justify-between border px-3 py-2 rounded-md bg-slate-50">
+                      <span className="text-sm">{item.pool_model}</span>
+                      {item.id && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 ml-2 text-destructive hover:bg-destructive/10"
+                          onClick={() => handleDelete(item.id as string)}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      )}
+                    </div>
                   ))}
-                </React.Fragment>
-              ))}
-            </TableBody>
-          </Table>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="text-center py-4 text-muted-foreground text-sm">
