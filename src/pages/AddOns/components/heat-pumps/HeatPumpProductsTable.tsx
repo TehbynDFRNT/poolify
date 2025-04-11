@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { 
   useHeatPumpProducts, 
@@ -26,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { formatCurrency } from "@/utils/format";
 import { AddHeatPumpForm } from "./AddHeatPumpForm";
+import { HeatPumpSeedData } from "./HeatPumpSeedData";
 
 export const HeatPumpProductsTable = () => {
   const { 
@@ -99,16 +99,19 @@ export const HeatPumpProductsTable = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button
-          onClick={() => {
-            setEditingProduct(null);
-            setIsAddDialogOpen(true);
-          }}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          Add New Heat Pump
-        </Button>
+        <div className="flex gap-2">
+          {heatPumpProducts.length === 0 && <HeatPumpSeedData />}
+          <Button
+            onClick={() => {
+              setEditingProduct(null);
+              setIsAddDialogOpen(true);
+            }}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Add New Heat Pump
+          </Button>
+        </div>
       </div>
 
       <Card>
