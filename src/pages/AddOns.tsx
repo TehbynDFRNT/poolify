@@ -1,113 +1,67 @@
 
-import React from "react";
+import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Thermometer, Droplet, Layers, Brush, HardDrive, Lamp, GripVertical } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
+import { PoolCleanersTable } from "./AddOns/components/poolCleaners/PoolCleanersTable";
+import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/components/HeatPumpTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
+import { PoolBlanketProductsTable } from "./AddOns/components/blankets/PoolBlanketProductsTable";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
-import { PoolCleanersTable } from "./AddOns/components/PoolCleanersTable";
+import { HandGrabRailsTable } from "./AddOns/components/hand-grab-rails/HandGrabRailsTable";
 import { SpaJetsTable } from "./AddOns/components/spa-jets/SpaJetsTable";
 import { DeckJetsTable } from "./AddOns/components/deck-jets/DeckJetsTable";
-import { HardwareUpgradesTable } from "./AddOns/components/hardware-upgrades/HardwareUpgradesTable";
 import { LightingTable } from "./AddOns/components/lighting/LightingTable";
-import { HandGrabRailsTable } from "./AddOns/components/hand-grab-rails/HandGrabRailsTable";
+import { HardwareUpgradesTable } from "./AddOns/components/hardware-upgrades/HardwareUpgradesTable";
+import { PoolManagementTable } from "./AddOns/components/hardware-upgrades/PoolManagementTable";
+import { QuantumSanitationTable } from "./AddOns/components/hardware-upgrades/QuantumSanitationTable";
+import { AddOnsPageHeader } from "./AddOns/components/AddOnsPageHeader";
 
 const AddOns = () => {
+  const [activeTab, setActiveTab] = useState("pool-cleaners");
+
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Pool Add-Ons</h1>
-        </div>
+      <div className="container py-6 space-y-6">
+        <AddOnsPageHeader />
         
-        <Tabs defaultValue="pool-heating" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="pool-heating" className="flex items-center gap-2">
-              <Thermometer className="h-4 w-4" />
-              <span>Pool Heating</span>
-            </TabsTrigger>
-            <TabsTrigger value="pool-cleaners" className="flex items-center gap-2">
-              <Brush className="h-4 w-4" />
-              <span>Pool Cleaners</span>
-            </TabsTrigger>
-            <TabsTrigger value="hardware-upgrades" className="flex items-center gap-2">
-              <HardDrive className="h-4 w-4" />
-              <span>Hardware Upgrades</span>
-            </TabsTrigger>
-            <TabsTrigger value="other-addons" className="flex items-center gap-2">
-              <Droplet className="h-4 w-4" />
-              <span>Other Add-ons</span>
-            </TabsTrigger>
+        <Tabs defaultValue="pool-cleaners" value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 lg:grid-cols-6 h-auto">
+            <TabsTrigger value="pool-cleaners">Pool Cleaners</TabsTrigger>
+            <TabsTrigger value="heating">Heating</TabsTrigger>
+            <TabsTrigger value="blankets">Pool Blankets</TabsTrigger>
+            <TabsTrigger value="hardware">Hardware</TabsTrigger>
+            <TabsTrigger value="sanitation">Sanitation</TabsTrigger>
+            <TabsTrigger value="other">Other Add-ons</TabsTrigger>
           </TabsList>
-          
-          <TabsContent value="pool-heating" className="space-y-6 animate-fadeIn">
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Thermometer className="h-5 w-5 text-primary" />
-                  <CardTitle>Heat Pump Products</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <HeatPumpProductsTable />
-              </CardContent>
-            </Card>
-            
+
+          <TabsContent value="pool-cleaners" className="space-y-6">
+            <PoolCleanersTable />
+          </TabsContent>
+
+          <TabsContent value="heating" className="space-y-6">
+            <HeatPumpProductsTable />
             <HeatingInstallationsTable />
-            
+          </TabsContent>
+
+          <TabsContent value="blankets" className="space-y-6">
+            <PoolBlanketProductsTable />
             <BlanketRollerTable />
           </TabsContent>
-          
-          <TabsContent value="pool-cleaners" className="space-y-6 animate-fadeIn">
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Brush className="h-5 w-5 text-primary" />
-                  <CardTitle>Pool Cleaners</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <PoolCleanersTable />
-              </CardContent>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="hardware-upgrades" className="space-y-6 animate-fadeIn">
+
+          <TabsContent value="hardware" className="space-y-6">
             <HardwareUpgradesTable />
           </TabsContent>
-          
-          <TabsContent value="other-addons" className="space-y-6 animate-fadeIn">
-            {/* Lighting table first */}
-            <LightingTable />
-            
-            {/* Hand Grab Rails table second */}
+
+          <TabsContent value="sanitation" className="space-y-6">
+            <PoolManagementTable />
+            <QuantumSanitationTable />
+          </TabsContent>
+
+          <TabsContent value="other" className="space-y-6">
             <HandGrabRailsTable />
-            
-            {/* Spa Jets table third */}
             <SpaJetsTable />
-            
-            {/* Deck Jets table fourth */}
             <DeckJetsTable />
-            
-            {/* Kept the placeholder card for future add-ons */}
-            <Card>
-              <CardHeader className="pb-2">
-                <div className="flex items-center gap-2">
-                  <Droplet className="h-5 w-5 text-primary" />
-                  <CardTitle>Other Pool Add-ons</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="p-6 text-center border border-dashed rounded-lg bg-muted/30">
-                  <h3 className="text-lg font-medium mb-2">Additional Add-ons</h3>
-                  <p className="text-muted-foreground">
-                    This section will contain other pool add-on products.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <LightingTable />
           </TabsContent>
         </Tabs>
       </div>
