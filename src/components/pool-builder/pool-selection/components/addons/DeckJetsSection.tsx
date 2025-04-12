@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Droplet, Search, Plus, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { formatCurrency } from "@/utils/format";
 
 interface DeckJet {
   id: string;
@@ -132,13 +133,6 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
     );
   });
 
-  const formatPrice = (amount: number) => {
-    return new Intl.NumberFormat('en-AU', {
-      style: 'currency',
-      currency: 'AUD'
-    }).format(amount);
-  };
-
   if (isLoading) {
     return (
       <Card className="bg-white mt-6">
@@ -201,9 +195,9 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
                     onClick={() => handleJetSelection(jet.id)}
                   >
                     <TableCell>{jet.quantity} Jets</TableCell>
-                    <TableCell className="text-right">${jet.cost_price.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">${jet.margin.toLocaleString()}</TableCell>
-                    <TableCell className="text-right">${jet.total.toLocaleString()}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(jet.cost_price)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(jet.margin)}</TableCell>
+                    <TableCell className="text-right">{formatCurrency(jet.total)}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button variant="ghost" size="icon">
@@ -236,15 +230,15 @@ export const DeckJetsSection: React.FC<DeckJetsSectionProps> = ({
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Cost:</span>
-                      <span>{formatPrice(selectedJet.cost_price)}</span>
+                      <span>{formatCurrency(selectedJet.cost_price)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Margin:</span>
-                      <span>{formatPrice(selectedJet.margin)}</span>
+                      <span>{formatCurrency(selectedJet.margin)}</span>
                     </div>
                     <div className="flex justify-between font-medium">
                       <span>Total:</span>
-                      <span>{formatPrice(selectedJet.total)}</span>
+                      <span>{formatCurrency(selectedJet.total)}</span>
                     </div>
                   </div>
                 ))}
