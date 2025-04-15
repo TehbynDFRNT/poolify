@@ -2,8 +2,8 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PoolCleanersTable } from "./AddOns/components/poolCleaners/PoolCleanersTable";
-import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/components/HeatPumpTable";
+import { PoolCleanersTable } from "@/pages/AddOns/components/poolCleaners/PoolCleanersTable";
+import { HeatPumpTable } from "./AddOns/components/heat-pumps/components/HeatPumpTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { PoolBlanketProductsTable } from "./AddOns/components/blankets/PoolBlanketProductsTable";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
@@ -12,8 +12,6 @@ import { SpaJetsTable } from "./AddOns/components/spa-jets/SpaJetsTable";
 import { DeckJetsTable } from "./AddOns/components/deck-jets/DeckJetsTable";
 import { LightingTable } from "./AddOns/components/lighting/LightingTable";
 import { HardwareUpgradesTable } from "./AddOns/components/hardware-upgrades/HardwareUpgradesTable";
-import { PoolManagementTable } from "./AddOns/components/hardware-upgrades/PoolManagementTable";
-import { QuantumSanitationTable } from "./AddOns/components/hardware-upgrades/QuantumSanitationTable";
 import { AddOnsPageHeader } from "./AddOns/components/AddOnsPageHeader";
 
 const AddOns = () => {
@@ -39,7 +37,7 @@ const AddOns = () => {
           </TabsContent>
 
           <TabsContent value="heating" className="space-y-6">
-            <HeatPumpProductsTable />
+            <HeatPumpTable />
             <HeatingInstallationsTable />
           </TabsContent>
 
@@ -53,8 +51,7 @@ const AddOns = () => {
           </TabsContent>
 
           <TabsContent value="sanitation" className="space-y-6">
-            <PoolManagementTable />
-            <QuantumSanitationTable />
+            {/* These components will be managed by the HardwareUpgradesTable component */}
           </TabsContent>
 
           <TabsContent value="other" className="space-y-6">

@@ -13,7 +13,7 @@ type QuantumSanitationItem = {
   description: string;
 };
 
-interface QuantumSanitationTableProps {
+export interface QuantumSanitationTableProps {
   items: QuantumSanitationItem[];
 }
 
