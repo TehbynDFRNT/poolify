@@ -264,36 +264,6 @@ export type Database = {
         }
         Relationships: []
       }
-      deck_jets: {
-        Row: {
-          cost_price: number
-          created_at: string
-          description: string
-          id: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Insert: {
-          cost_price: number
-          created_at?: string
-          description: string
-          id?: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Update: {
-          cost_price?: number
-          created_at?: string
-          description?: string
-          id?: string
-          margin?: number
-          model_number?: string
-          total?: number
-        }
-        Relationships: []
-      }
       dig_types: {
         Row: {
           created_at: string
@@ -713,36 +683,6 @@ export type Database = {
           },
         ]
       }
-      hand_grab_rails: {
-        Row: {
-          cost_price: number
-          created_at: string
-          description: string
-          id: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Insert: {
-          cost_price: number
-          created_at?: string
-          description: string
-          id?: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Update: {
-          cost_price?: number
-          created_at?: string
-          description?: string
-          id?: string
-          margin?: number
-          model_number?: string
-          total?: number
-        }
-        Relationships: []
-      }
       handover_kit_package_components: {
         Row: {
           component_id: string
@@ -803,72 +743,6 @@ export type Database = {
         }
         Relationships: []
       }
-      hardware_upgrades: {
-        Row: {
-          category: string
-          cost_price: number
-          created_at: string
-          description: string
-          id: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Insert: {
-          category: string
-          cost_price: number
-          created_at?: string
-          description: string
-          id?: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Update: {
-          category?: string
-          cost_price?: number
-          created_at?: string
-          description?: string
-          id?: string
-          margin?: number
-          model_number?: string
-          total?: number
-        }
-        Relationships: []
-      }
-      heat_pump_pool_compatibility: {
-        Row: {
-          created_at: string
-          heat_pump_id: string
-          hp_description: string
-          hp_sku: string
-          id: string
-          pool_model: string
-          pool_range: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          heat_pump_id: string
-          hp_description: string
-          hp_sku: string
-          id?: string
-          pool_model: string
-          pool_range: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          heat_pump_id?: string
-          hp_description?: string
-          hp_sku?: string
-          id?: string
-          pool_model?: string
-          pool_range?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       heat_pump_products: {
         Row: {
           cost: number
@@ -923,36 +797,6 @@ export type Database = {
           installation_cost?: number
           installation_inclusions?: string
           installation_type?: string
-        }
-        Relationships: []
-      }
-      lighting_options: {
-        Row: {
-          cost_price: number
-          created_at: string
-          description: string
-          id: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Insert: {
-          cost_price: number
-          created_at?: string
-          description: string
-          id?: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Update: {
-          cost_price?: number
-          created_at?: string
-          description?: string
-          id?: string
-          margin?: number
-          model_number?: string
-          total?: number
         }
         Relationships: []
       }
@@ -2049,36 +1893,6 @@ export type Database = {
           total?: number
           type?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      spa_jets: {
-        Row: {
-          cost_price: number
-          created_at: string
-          description: string
-          id: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Insert: {
-          cost_price: number
-          created_at?: string
-          description: string
-          id?: string
-          margin: number
-          model_number: string
-          total: number
-        }
-        Update: {
-          cost_price?: number
-          created_at?: string
-          description?: string
-          id?: string
-          margin?: number
-          model_number?: string
-          total?: number
         }
         Relationships: []
       }
