@@ -5,19 +5,20 @@ import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
 import { HeatPumpTableHeader } from "./HeatPumpTableHeader";
 import { HeatPumpTableRow } from "./HeatPumpTableRow";
 import { EmptyState } from "./EmptyState";
+import { useState } from "react";
 
-interface HeatPumpTableProps {
-  products: HeatPumpProduct[];
-  searchTerm: string;
-  onEdit: (product: HeatPumpProduct) => void;
-  onDelete: (product: HeatPumpProduct) => void;
+export interface HeatPumpTableProps {
+  products?: HeatPumpProduct[];
+  searchTerm?: string;
+  onEdit?: (product: HeatPumpProduct) => void;
+  onDelete?: (product: HeatPumpProduct) => void;
 }
 
 export const HeatPumpTable = ({ 
-  products, 
-  searchTerm, 
-  onEdit, 
-  onDelete 
+  products = [], 
+  searchTerm = "", 
+  onEdit = () => {}, 
+  onDelete = () => {} 
 }: HeatPumpTableProps) => {
   return (
     <Card>

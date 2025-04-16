@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PoolCleanersTable } from "@/pages/AddOns/components/poolCleaners/PoolCleanersTable";
+import { PoolCleanersTable } from "./AddOns/components/poolCleaners/PoolCleanersTable";
 import { HeatPumpTable } from "./AddOns/components/heat-pumps/components/HeatPumpTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { PoolBlanketProductsTable } from "./AddOns/components/blankets/PoolBlanketProductsTable";

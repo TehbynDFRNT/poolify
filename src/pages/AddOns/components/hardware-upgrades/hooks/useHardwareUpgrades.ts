@@ -1,64 +1,80 @@
 
 import { useState } from "react";
 
-// Quantum sanitation data
-const quantumSanitationData = [
-  {
-    id: "4",
-    model_number: "Quantum UV Sanitation",
-    cost_price: 1750,
-    margin: 1350,
-    total: 3100,
-    description: "UV sanitation system for pool water purification"
-  }
-];
+// Types for the hardware upgrades
+type QuantumSanitationItem = {
+  id: string;
+  model_number: string;
+  cost_price: number;
+  margin: number;
+  total: number;
+  description: string;
+};
 
-// Pool management data
-const poolManagementData = [
-  {
-    id: "5",
-    model_number: "THERAPM6002 (Main Controller)",
-    cost_price: 1427,
-    margin: 550,
-    total: 1977,
-    description: "Pool Manager main controller unit"
-  },
-  {
-    id: "6",
-    model_number: "THERAPM6002 plus THERAPM6010E (Ten amp slave)",
-    cost_price: 1677,
-    margin: 700,
-    total: 2377,
-    description: "Pool Manager with ten amp slave unit"
-  },
-  {
-    id: "7",
-    model_number: "THERAPM6002 plus THERAPM6010E + THERAPM6015E(15amp)",
-    cost_price: 1692,
-    margin: 700,
-    total: 2392,
-    description: "Pool Manager with ten amp and fifteen amp slave units"
-  }
-];
+type PoolManagementItem = {
+  id: string;
+  name: string;
+  model: string;
+  cost_price: number;
+  margin: number;
+  total: number;
+  description: string;
+};
 
 export const useHardwareUpgrades = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  
+  // Sample data for quantum sanitation
+  const quantumSanitation: QuantumSanitationItem[] = [
+    {
+      id: "1",
+      model_number: "QUV-25",
+      cost_price: 1250,
+      margin: 625,
+      total: 1875,
+      description: "Quantum UV Sanitizer 25,000L"
+    },
+    {
+      id: "2",
+      model_number: "QUV-50",
+      cost_price: 1875,
+      margin: 925,
+      total: 2800,
+      description: "Quantum UV Sanitizer 50,000L"
+    }
+  ];
 
-  const filteredPoolManagement = poolManagementData.filter((upgrade) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      upgrade.model_number.toLowerCase().includes(search) ||
-      upgrade.description.toLowerCase().includes(search)
-    );
-  });
+  // Sample data for pool management
+  const poolManagement: PoolManagementItem[] = [
+    {
+      id: "1",
+      name: "AquaLink Control System",
+      model: "AQL-PS-4",
+      cost_price: 980,
+      margin: 420,
+      total: 1400,
+      description: "4-device pool and spa automation system"
+    },
+    {
+      id: "2",
+      name: "EasyTouch Control System",
+      model: "ET-8",
+      cost_price: 1150,
+      margin: 550,
+      total: 1700,
+      description: "8-circuit automation control for pool/spa applications"
+    }
+  ];
 
-  const filteredQuantumSanitation = quantumSanitationData.filter((upgrade) => {
-    const search = searchTerm.toLowerCase();
-    return (
-      upgrade.model_number.toLowerCase().includes(search) ||
-      upgrade.description.toLowerCase().includes(search)
-    );
-  });
+  // Filter data based on search term
+  const filteredPoolManagement = poolManagement.filter(item => 
+    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    item.model.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredQuantumSanitation = quantumSanitation.filter(item =>
+    item.model_number.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return {
     searchTerm,
