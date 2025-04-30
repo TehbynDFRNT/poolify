@@ -1,82 +1,21 @@
 
-import React from "react";
-import { TableCell, TableRow } from "@/components/ui/table";
+import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import { Edit2, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
-import { Edit2, Trash2, Thermometer } from "lucide-react";
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface HeatPumpTableRowProps {
   product: HeatPumpProduct;
-  compatiblePools?: {
-    pool_range: string;
-    pool_model: string;
-  }[];
-  onEdit: () => void;
-  onDelete: () => void;
-  onManageCompatibility: () => void;
+  onEdit: (product: HeatPumpProduct) => void;
+  onDelete: (product: HeatPumpProduct) => void;
 }
 
-export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
-  product,
-  compatiblePools = [],
-  onEdit,
-  onDelete,
-  onManageCompatibility,
-}) => {
+export const HeatPumpTableRow = ({ product, onEdit, onDelete }: HeatPumpTableRowProps) => {
   return (
     <TableRow key={product.id} className="hover:bg-muted/30 transition-colors">
-      <TableCell className="font-mono text-sm">{product.hp_sku}</TableCell>
+      <TableCell className="font-mono">{product.hp_sku}</TableCell>
       <TableCell>{product.hp_description}</TableCell>
-      <TableCell>
-        {compatiblePools.length > 0 ? (
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex items-center">
-                  <Button 
-                    variant="ghost" 
-                    className="h-8 p-0 text-blue-600" 
-                    size="sm"
-                    onClick={onManageCompatibility}
-                  >
-                    <Thermometer className="h-4 w-4 mr-1" />
-                    {compatiblePools.length} pool models
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs">
-                <div className="p-1">
-                  <strong className="block mb-1">Compatible pools:</strong>
-                  <ul className="list-disc list-inside text-xs max-h-60 overflow-y-auto">
-                    {compatiblePools.map((pool, index) => (
-                      <li key={index}>
-                        {pool.pool_range}: {pool.pool_model}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 text-gray-400 hover:text-primary"
-            onClick={onManageCompatibility}
-          >
-            <Thermometer className="h-4 w-4 mr-1" />
-            <span className="text-sm italic">Assign pool models</span>
-          </Button>
-        )}
-      </TableCell>
       <TableCell className="text-right">{formatCurrency(product.cost)}</TableCell>
       <TableCell className="text-right">{formatCurrency(product.margin)}</TableCell>
       <TableCell className="text-right">{formatCurrency(product.rrp)}</TableCell>
@@ -86,7 +25,7 @@ export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0"
-            onClick={onEdit}
+            onClick={() => onEdit(product)}
           >
             <Edit2 className="h-4 w-4" />
           </Button>
@@ -94,7 +33,7 @@ export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
             variant="ghost"
             size="sm"
             className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            onClick={onDelete}
+            onClick={() => onDelete(product)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>

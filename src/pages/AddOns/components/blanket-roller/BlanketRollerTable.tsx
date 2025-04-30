@@ -64,18 +64,6 @@ export const BlanketRollerTable = () => {
     setEditingItem(null);
   };
 
-  // Get the common description if all items have the same description
-  const getCommonDescription = () => {
-    if (blanketRollers.length === 0) return null;
-    
-    const firstDescription = blanketRollers[0].description;
-    const allSame = blanketRollers.every(item => item.description === firstDescription);
-    
-    return allSame ? firstDescription : null;
-  };
-
-  const commonDescription = getCommonDescription();
-
   const renderContent = () => {
     if (isLoading) {
       return <LoadingState />;
@@ -91,7 +79,6 @@ export const BlanketRollerTable = () => {
         blanketRoller={item}
         onEdit={() => handleEdit(item)}
         onDelete={() => handleDelete(item)}
-        hideDescription={!!commonDescription}
       />
     ));
   };
@@ -126,12 +113,6 @@ export const BlanketRollerTable = () => {
         </div>
       </CardHeader>
       <CardContent>
-        {commonDescription && (
-          <div className="mb-4 p-3 bg-muted/40 rounded-md text-sm">
-            <span className="font-medium">Product Description: </span>
-            {commonDescription}
-          </div>
-        )}
         <div className="rounded-md border overflow-x-auto">
           <Table>
             <TableHeader>
@@ -139,7 +120,7 @@ export const BlanketRollerTable = () => {
                 <TableHead>Pool Range</TableHead>
                 <TableHead>Pool Model</TableHead>
                 <TableHead>SKU</TableHead>
-                {!commonDescription && <TableHead>Description</TableHead>}
+                <TableHead>Description</TableHead>
                 <TableHead className="text-right">RRP</TableHead>
                 <TableHead className="text-right">Trade</TableHead>
                 <TableHead className="text-right">Margin</TableHead>

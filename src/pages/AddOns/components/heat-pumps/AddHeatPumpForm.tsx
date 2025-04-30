@@ -1,203 +1,189 @@
 
-import React, { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
-import { Loader2 } from "lucide-react";
+
+const formSchema = z.object({
+  hp_sku: z.string().min(1, "SKU is required"),
+  hp_description: z.string().min(1, "Description is required"),
+  cost: z.coerce.number().min(0, "Cost must be a positive number"),
+  rrp: z.coerce.number().min(0, "RRP must be a positive number"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 interface AddHeatPumpFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSubmit: (product: Omit<HeatPumpProduct, "id" | "created_at">) => Promise<void>;
+  onSubmit: (values: FormValues & { margin: number }) => Promise<void>;
   initialValues?: HeatPumpProduct | null;
   isEditMode?: boolean;
 }
 
-export const AddHeatPumpForm: React.FC<AddHeatPumpFormProps> = ({
+export const AddHeatPumpForm = ({
   open,
   onOpenChange,
   onSubmit,
-  initialValues,
-  isEditMode = false
-}) => {
-  const [sku, setSku] = useState(initialValues?.hp_sku || "");
-  const [description, setDescription] = useState(initialValues?.hp_description || "");
-  const [cost, setCost] = useState(initialValues?.cost || 0);
-  const [rrp, setRrp] = useState(initialValues?.rrp || 0);
-  const [margin, setMargin] = useState(initialValues?.margin || 0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  initialValues = null,
+  isEditMode = false,
+}: AddHeatPumpFormProps) => {
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      hp_sku: "",
+      hp_description: "",
+      cost: 0,
+      rrp: 0,
+    },
+  });
 
-  // Calculate margin automatically when cost or rrp changes
-  const handleCostChange = (value: string) => {
-    const newCost = parseFloat(value) || 0;
-    setCost(newCost);
-    const newMargin = rrp - newCost;
-    setMargin(Math.max(0, newMargin));
+  // Calculate margin as RRP - Cost
+  const calculateMargin = (cost: number, rrp: number) => {
+    return Math.max(0, rrp - cost);
   };
 
-  const handleRrpChange = (value: string) => {
-    const newRrp = parseFloat(value) || 0;
-    setRrp(newRrp);
-    const newMargin = newRrp - cost;
-    setMargin(Math.max(0, newMargin));
-  };
+  // Calculate and display the current margin
+  const cost = form.watch("cost");
+  const rrp = form.watch("rrp");
+  const currentMargin = calculateMargin(cost, rrp);
 
-  const resetForm = () => {
-    setSku(initialValues?.hp_sku || "");
-    setDescription(initialValues?.hp_description || "");
-    setCost(initialValues?.cost || 0);
-    setRrp(initialValues?.rrp || 0);
-    setMargin(initialValues?.margin || 0);
-    setFormError(null);
-  };
-
-  React.useEffect(() => {
+  // Reset form when dialog opens/closes or when initialValues change
+  useEffect(() => {
     if (open) {
-      resetForm();
+      if (initialValues) {
+        form.reset({
+          hp_sku: initialValues.hp_sku,
+          hp_description: initialValues.hp_description,
+          cost: initialValues.cost,
+          rrp: initialValues.rrp,
+        });
+      } else {
+        form.reset({
+          hp_sku: "",
+          hp_description: "",
+          cost: 0,
+          rrp: 0,
+        });
+      }
     }
-  }, [open, initialValues]);
+  }, [open, initialValues, form]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate form
-    if (!sku.trim()) {
-      setFormError("SKU is required");
-      return;
-    }
-
-    if (!description.trim()) {
-      setFormError("Description is required");
-      return;
-    }
-
-    setFormError(null);
-    setIsSubmitting(true);
-
+  const handleSubmit = async (values: FormValues) => {
     try {
-      // Ensure we have all required fields before submitting
-      await onSubmit({
-        hp_sku: sku,
-        hp_description: description,
-        cost: cost,
-        rrp: rrp,
-        margin: margin
-      });
-      
+      const margin = calculateMargin(values.cost, values.rrp);
+      await onSubmit({ ...values, margin });
       onOpenChange(false);
     } catch (error) {
-      console.error("Form submission error:", error);
-      setFormError("An error occurred during submission. Please try again.");
-    } finally {
-      setIsSubmitting(false);
+      console.error("Error submitting form:", error);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {isEditMode ? "Edit Heat Pump" : "Add New Heat Pump"}
+            {isEditMode ? "Edit Heat Pump Product" : "Add New Heat Pump Product"}
           </DialogTitle>
+          <DialogDescription>
+            The margin will be automatically calculated as RRP - Cost.
+          </DialogDescription>
         </DialogHeader>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {formError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded text-sm">
-              {formError}
-            </div>
-          )}
-
-          <div className="space-y-2">
-            <Label htmlFor="sku">SKU</Label>
-            <Input 
-              id="sku" 
-              value={sku} 
-              onChange={(e) => setSku(e.target.value)}
-              placeholder="Enter heat pump SKU"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea 
-              id="description" 
-              value={description} 
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter heat pump description"
-              rows={3}
-            />
-          </div>
-
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="cost">Cost ($)</Label>
-              <Input 
-                id="cost" 
-                type="number"
-                value={cost} 
-                onChange={(e) => handleCostChange(e.target.value)}
-                step="0.01"
-                min="0"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="rrp">RRP ($)</Label>
-              <Input 
-                id="rrp" 
-                type="number"
-                value={rrp} 
-                onChange={(e) => handleRrpChange(e.target.value)}
-                step="0.01"
-                min="0"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="margin">Margin ($)</Label>
-              <Input 
-                id="margin" 
-                type="number"
-                value={margin} 
-                readOnly
-                className="bg-slate-50"
-              />
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isEditMode ? "Updating..." : "Creating..."}
-                </>
-              ) : (
-                isEditMode ? "Update" : "Create"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="hp_sku"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>SKU</FormLabel>
+                  <FormControl>
+                    <Input {...field} disabled={isEditMode} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
               )}
-            </Button>
-          </DialogFooter>
-        </form>
+            />
+            <FormField
+              control={form.control}
+              name="hp_description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="cost"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Cost</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        {...field} 
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="rrp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RRP</FormLabel>
+                    <FormControl>
+                      <Input 
+                        type="number" 
+                        step="0.01" 
+                        {...field} 
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="p-3 bg-muted/40 rounded-md border">
+              <div className="flex justify-between">
+                <span className="font-medium">Calculated Margin:</span>
+                <span className="font-bold text-primary">{formatCurrency(currentMargin)}</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">This value is automatically calculated as RRP - Cost.</p>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="mt-4">
+                {isEditMode ? "Update" : "Add"} Heat Pump
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
+};
+
+// Helper function to format currency
+const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('en-AU', {
+    style: 'currency',
+    currency: 'AUD'
+  }).format(amount);
 };
