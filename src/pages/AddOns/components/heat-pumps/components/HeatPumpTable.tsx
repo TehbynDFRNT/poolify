@@ -11,6 +11,7 @@ interface HeatPumpTableProps {
   searchTerm: string;
   onEdit: (product: HeatPumpProduct) => void;
   onDelete: (product: HeatPumpProduct) => void;
+  onManageCompatibility: (product: HeatPumpProduct) => void;
   poolCompatibilities?: Record<string, { pool_range: string; pool_model: string }[]>;
 }
 
@@ -19,6 +20,7 @@ export const HeatPumpTable: React.FC<HeatPumpTableProps> = ({
   searchTerm,
   onEdit,
   onDelete,
+  onManageCompatibility,
   poolCompatibilities = {}
 }) => {
   if (products.length === 0) {
@@ -47,6 +49,7 @@ export const HeatPumpTable: React.FC<HeatPumpTableProps> = ({
                 product={product}
                 onEdit={() => onEdit(product)}
                 onDelete={() => onDelete(product)}
+                onManageCompatibility={() => onManageCompatibility(product)}
                 compatiblePools={poolCompatibilities[product.id] || []}
               />
             ))}

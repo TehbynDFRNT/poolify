@@ -9,6 +9,7 @@ import { LoadingState } from "./components/LoadingState";
 import { DeleteConfirmDialog } from "./components/DeleteConfirmDialog";
 import { AddHeatPumpForm } from "./AddHeatPumpForm";
 import { HeatPumpTableHeader } from "./components/HeatPumpTableHeader";
+import { ManageCompatibilityDialog } from "./components/ManageCompatibilityDialog";
 
 export const HeatPumpProductsTable = () => {
   const { 
@@ -23,14 +24,27 @@ export const HeatPumpProductsTable = () => {
   const { getPoolModelsByHeatPumpId } = useHeatPumpPoolCompatibility();
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isCompatibilityDialogOpen, setIsCompatibilityDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<HeatPumpProduct | null>(null);
+  const [selectedHeatPump, setSelectedHeatPump] = useState<HeatPumpProduct | null>(null);
   const [productToDelete, setProductToDelete] = useState<HeatPumpProduct | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [poolModelsByHeatPump, setPoolModelsByHeatPump] = useState<Record<string, { pool_range: string; pool_model: string }[]>>({});
+  const [availablePools, setAvailablePools] = useState<{ id: string; range: string; model: string }[]>([]);
 
   useEffect(() => {
     fetchHeatPumpProducts();
+    // For demo purposes, we'll add some example available pools
+    // In a real application, you'd fetch this from the database
+    setAvailablePools([
+      { id: "1", range: "Oasis", model: "Ocean 8m" },
+      { id: "2", range: "Oasis", model: "Ocean 10m" },
+      { id: "3", range: "Platinum", model: "Spa 4m" },
+      { id: "4", range: "Platinum", model: "Luxe 6m" },
+      { id: "5", range: "Executive", model: "Gold 8m" },
+      { id: "6", range: "Executive", model: "Diamond 12m" }
+    ]);
   }, []);
 
   // Fetch compatible pools for each heat pump
@@ -64,6 +78,11 @@ export const HeatPumpProductsTable = () => {
     if (editingProduct) {
       await updateHeatPumpProduct(editingProduct.id, product);
     }
+  };
+
+  const handleManageCompatibility = (product: HeatPumpProduct) => {
+    setSelectedHeatPump(product);
+    setIsCompatibilityDialogOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
@@ -107,6 +126,7 @@ export const HeatPumpProductsTable = () => {
         searchTerm={searchTerm}
         onEdit={handleEditProduct}
         onDelete={setProductToDelete}
+        onManageCompatibility={handleManageCompatibility}
         poolCompatibilities={poolModelsByHeatPump}
       />
 
@@ -117,6 +137,14 @@ export const HeatPumpProductsTable = () => {
         onSubmit={editingProduct ? handleUpdateProduct : handleAddProduct}
         initialValues={editingProduct}
         isEditMode={!!editingProduct}
+      />
+
+      {/* Manage Compatibility Dialog */}
+      <ManageCompatibilityDialog
+        open={isCompatibilityDialogOpen}
+        onOpenChange={setIsCompatibilityDialogOpen}
+        heatPump={selectedHeatPump}
+        availablePools={availablePools}
       />
 
       {/* Delete Confirmation Dialog */}

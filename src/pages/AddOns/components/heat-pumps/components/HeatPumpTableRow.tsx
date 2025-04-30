@@ -20,6 +20,7 @@ interface HeatPumpTableRowProps {
   }[];
   onEdit: () => void;
   onDelete: () => void;
+  onManageCompatibility: () => void;
 }
 
 export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
@@ -27,6 +28,7 @@ export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
   compatiblePools = [],
   onEdit,
   onDelete,
+  onManageCompatibility,
 }) => {
   return (
     <TableRow key={product.id} className="hover:bg-muted/30 transition-colors">
@@ -38,7 +40,12 @@ export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <div className="flex items-center">
-                  <Button variant="ghost" className="h-8 p-0 text-blue-600" size="sm">
+                  <Button 
+                    variant="ghost" 
+                    className="h-8 p-0 text-blue-600" 
+                    size="sm"
+                    onClick={onManageCompatibility}
+                  >
                     <Thermometer className="h-4 w-4 mr-1" />
                     {compatiblePools.length} pool models
                   </Button>
@@ -59,7 +66,15 @@ export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <span className="text-gray-400 text-sm italic">No pool models assigned</span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 text-gray-400 hover:text-primary"
+            onClick={onManageCompatibility}
+          >
+            <Thermometer className="h-4 w-4 mr-1" />
+            <span className="text-sm italic">Assign pool models</span>
+          </Button>
         )}
       </TableCell>
       <TableCell className="text-right">{formatCurrency(product.cost)}</TableCell>
