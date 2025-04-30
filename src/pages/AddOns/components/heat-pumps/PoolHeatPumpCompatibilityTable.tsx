@@ -18,14 +18,19 @@ export const PoolHeatPumpCompatibilityTable = () => {
     updateCompatibility
   } = useHeatPumpCompatibility();
   
-  const { products: heatPumpProducts, isLoading: isLoadingProducts, fetchProducts } = useHeatPumpProducts();
+  const { 
+    heatPumpProducts, 
+    isLoading: isLoadingProducts, 
+    fetchHeatPumpProducts 
+  } = useHeatPumpProducts();
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [editingRecord, setEditingRecord] = useState<HeatPumpCompatibility | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchCompatibility();
-    fetchProducts();
+    fetchHeatPumpProducts();
   }, []);
 
   // Filter compatibility based on search term
