@@ -1,4 +1,6 @@
 
+import React from "react";
+import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,35 +11,53 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
+import { Button } from "@/components/ui/button";
+import { Loader2 } from "lucide-react";
 
 interface DeleteConfirmDialogProps {
   product: HeatPumpProduct | null;
-  onOpenChange: (open: boolean) => void;
+  onOpenChange: () => void;
   onConfirm: () => Promise<void>;
+  isDeleting?: boolean;
 }
 
-export const DeleteConfirmDialog = ({ 
-  product, 
-  onOpenChange, 
-  onConfirm 
-}: DeleteConfirmDialogProps) => {
+export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
+  product,
+  onOpenChange,
+  onConfirm,
+  isDeleting = false,
+}) => {
+  const handleConfirm = async () => {
+    await onConfirm();
+  };
+
   return (
-    <AlertDialog open={!!product} onOpenChange={(open) => !open && onOpenChange(false)}>
+    <AlertDialog open={!!product} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+          <AlertDialogTitle>Delete Heat Pump</AlertDialogTitle>
           <AlertDialogDescription>
-            This will permanently delete the heat pump product{" "}
-            <span className="font-semibold">{product?.hp_sku}</span>.
-            This action cannot be undone.
+            Are you sure you want to delete the heat pump{" "}
+            <strong>{product?.hp_sku}</strong>?
+            This action cannot be undone and will remove all pool compatibility data for this product.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground">
-            Delete
-          </AlertDialogAction>
+          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+          <Button 
+            variant="destructive" 
+            onClick={handleConfirm} 
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Deleting...
+              </>
+            ) : (
+              "Delete"
+            )}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
