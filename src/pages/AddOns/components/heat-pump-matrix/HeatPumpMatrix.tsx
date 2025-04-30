@@ -89,7 +89,7 @@ export const HeatPumpMatrix = () => {
               <Button
                 variant="default"
                 onClick={handleCreateMissing}
-                disabled={isCreatingMissing || isLoading}
+                disabled={isCreatingMissing}
               >
                 {isCreatingMissing ? (
                   <>

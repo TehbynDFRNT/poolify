@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePools } from "@/hooks/usePools";
@@ -26,7 +26,7 @@ export const useHeatPumpMatrix = () => {
   const { heatPumpProducts, fetchHeatPumpProducts, isLoading: isLoadingHeatPumps } = useHeatPumpProducts();
   const { data: pools, isLoading: isLoadingPools } = usePools();
 
-  const fetchMatches = async () => {
+  const fetchMatches = useCallback(async () => {
     setIsLoading(true);
     try {
       // Ensure we have heat pump products loaded
@@ -66,7 +66,7 @@ export const useHeatPumpMatrix = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [heatPumpProducts, fetchHeatPumpProducts, toast]);
 
   const addMatch = async (match: Omit<HeatPumpPoolMatch, "id" | "created_at" | "updated_at" | "hp_sku" | "hp_description" | "cost" | "margin" | "rrp">) => {
     try {
@@ -228,12 +228,6 @@ export const useHeatPumpMatrix = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!isLoadingHeatPumps && heatPumpProducts.length > 0) {
-      fetchMatches();
-    }
-  }, [isLoadingHeatPumps, heatPumpProducts]);
 
   return {
     matches,

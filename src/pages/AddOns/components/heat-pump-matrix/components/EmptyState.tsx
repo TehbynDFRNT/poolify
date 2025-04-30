@@ -43,11 +43,11 @@ export const EmptyState = ({ onCreateMissingMatches, hasPoolData, hasHeatPumpDat
         <>
           <p className="text-muted-foreground mb-2">No heat pump assignments found</p>
           <p className="text-sm text-muted-foreground mb-4">
-            Create assignments to match heat pumps with pools
+            Click the button below to create heat pump assignments for all pools
           </p>
           {onCreateMissingMatches && (
             <Button onClick={onCreateMissingMatches}>
-              Create Pool Heat Pump Assignments
+              Create Heat Pump Assignments
             </Button>
           )}
         </>
