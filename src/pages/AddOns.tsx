@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
+import { PoolHeatPumpCompatibilityTable } from "./AddOns/components/heat-pumps/PoolHeatPumpCompatibilityTable";
 
 const AddOns = () => {
   return (
@@ -40,6 +41,8 @@ const AddOns = () => {
                 <HeatPumpProductsTable />
               </CardContent>
             </Card>
+            
+            <PoolHeatPumpCompatibilityTable />
             
             <HeatingInstallationsTable />
             
