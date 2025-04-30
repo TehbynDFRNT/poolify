@@ -12,8 +12,6 @@ import {
 import { Card } from "@/components/ui/card";
 
 const Index = () => {
-  console.log("Index page rendering");
-  
   const modules = [
     {
       title: "Pool Specifications",

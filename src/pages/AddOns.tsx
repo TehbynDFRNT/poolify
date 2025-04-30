@@ -7,7 +7,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HeatPumpProductsTable } from "./AddOns/components/heat-pumps/HeatPumpProductsTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
-import { HeatPumpMatrix } from "./AddOns/components/heat-pump-matrix/HeatPumpMatrix";
 
 const AddOns = () => {
   return (
@@ -45,8 +44,6 @@ const AddOns = () => {
             <HeatingInstallationsTable />
             
             <BlanketRollerTable />
-            
-            <HeatPumpMatrix />
           </TabsContent>
           
           <TabsContent value="other-addons" className="space-y-6 animate-fadeIn">

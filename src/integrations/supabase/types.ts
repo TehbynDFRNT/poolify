@@ -718,6 +718,13 @@ export type Database = {
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "frameless_glass_fencing_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
+          },
         ]
       }
       hand_grab_rails: {
@@ -1098,6 +1105,13 @@ export type Database = {
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pool_costs_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
+          },
         ]
       }
       pool_crane_selections: {
@@ -1137,6 +1151,13 @@ export type Database = {
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pool_crane_selections_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
+          },
         ]
       }
       pool_dig_type_matches: {
@@ -1167,11 +1188,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pool_dig_type_matches_dig_type_id_fkey"
+            columns: ["dig_type_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["dig_id"]
+          },
+          {
             foreignKeyName: "pool_dig_type_matches_pool_id_fkey"
             columns: ["pool_id"]
             isOneToOne: true
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_dig_type_matches_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
           },
         ]
       }
@@ -1276,6 +1311,13 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_margins_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
           },
         ]
       }
@@ -1460,6 +1502,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "fk_extra_paving_category"
+            columns: ["extra_paving_category"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["epc_id"]
+          },
+          {
             foreignKeyName: "pool_projects_bobcat_id_fkey"
             columns: ["bobcat_id"]
             isOneToOne: false
@@ -1479,6 +1528,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_projects_pool_specification_id_fkey"
+            columns: ["pool_specification_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
           },
           {
             foreignKeyName: "pool_projects_traffic_control_id_fkey"
@@ -1556,6 +1612,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_selections_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
           },
         ]
       }
@@ -1639,6 +1702,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "filtration_packages"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_specifications_default_filtration_package_id_fkey"
+            columns: ["default_filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["fp_id"]
           },
           {
             foreignKeyName: "pool_specifications_pool_type_id_fkey"
@@ -1742,6 +1812,13 @@ export type Database = {
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pool_water_features_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
+          },
         ]
       }
       pool_worksheet_items: {
@@ -1824,6 +1901,13 @@ export type Database = {
             referencedRelation: "pool_specifications"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "pool_worksheets_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["spec_id"]
+          },
         ]
       }
       pricing_models: {
@@ -1891,6 +1975,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "extra_paving_costs"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quote_extra_pavings_paving_id_fkey"
+            columns: ["paving_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["epc_id"]
           },
           {
             foreignKeyName: "quote_extra_pavings_quote_id_fkey"
@@ -2197,36 +2288,30 @@ export type Database = {
     Views: {
       proposal_snapshot_v: {
         Row: {
+          bob_display_order: number | null
           bob_size_category: string | null
           bobcat_cost: number | null
-          concrete_cuts_cost: number | null
           concrete_cuts_json: Json | null
-          concrete_pump_needed: boolean | null
-          concrete_pump_quantity: number | null
-          concrete_pump_total_cost: number | null
           crane_cost: number | null
+          crn_display_order: number | null
           crn_name: string | null
+          default_filtration_package_id: string | null
           dig_excavation_hours: number | null
           dig_excavation_rate: number | null
+          dig_id: string | null
           dig_name: string | null
           dig_truck_hours: number | null
           dig_truck_qty: number | null
           dig_truck_rate: number | null
           email: string | null
           epc_category: string | null
+          epc_id: string | null
           epc_margin_cost: number | null
           epc_paver_cost: number | null
           epc_wastage_cost: number | null
-          existing_paving_category: string | null
-          existing_paving_cost: number | null
-          existing_paving_sqm: number | null
-          extra_concreting_cost: number | null
-          extra_concreting_sqm: number | null
-          extra_concreting_type: string | null
-          extra_concreting_unit_price: number | null
-          extra_paving_cost: number | null
-          extra_paving_sqm: number | null
+          fp_display_order: number | null
           fp_filter_price: number | null
+          fp_id: string | null
           fp_light_price: number | null
           fp_name: string | null
           fp_pump_price: number | null
@@ -2238,11 +2323,14 @@ export type Database = {
           pc_beam: number | null
           pc_coping_lay: number | null
           pc_coping_supply: number | null
+          pc_created_at: string | null
+          pc_id: string | null
           pc_install_fee: number | null
           pc_misc: number | null
           pc_pea_gravel: number | null
           pc_salt_bags: number | null
           pc_trucked_water: number | null
+          pc_updated_at: string | null
           phone: string | null
           project_id: string | null
           proposal_name: string | null
@@ -2252,16 +2340,31 @@ export type Database = {
           spec_buy_inc_gst: number | null
           spec_depth_deep_m: number | null
           spec_depth_shallow_m: number | null
+          spec_id: string | null
           spec_length_m: number | null
           spec_name: string | null
           spec_range: string | null
           spec_width_m: number | null
+          tc_display_order: number | null
           tc_name: string | null
           traffic_control_cost: number | null
-          uf_strips_cost: number | null
           uf_strips_raw: Json | null
         }
         Relationships: [
+          {
+            foreignKeyName: "pool_specifications_default_filtration_package_id_fkey"
+            columns: ["default_filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_specifications_default_filtration_package_id_fkey"
+            columns: ["default_filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["fp_id"]
+          },
           {
             foreignKeyName: "pool_specifications_range_fkey"
             columns: ["spec_range"]

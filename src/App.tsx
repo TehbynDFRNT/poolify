@@ -29,8 +29,6 @@ import Electrical from "./pages/ThirdPartyCosts/Electrical";
 import Fencing from "./pages/ThirdPartyCosts/Fencing";
 
 function App() {
-  console.log("App component rendering");
-  
   return (
     <>
       <Routes>
