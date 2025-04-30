@@ -83,7 +83,16 @@ export const AddHeatPumpForm: React.FC<AddHeatPumpFormProps> = ({
   }, [form]);
 
   const handleSubmit = (values: FormValues) => {
-    onSubmit(values);
+    // Ensure all required properties are present and properly typed
+    const productData: Omit<HeatPumpProduct, "id" | "created_at"> = {
+      hp_sku: values.hp_sku,
+      hp_description: values.hp_description,
+      cost: values.cost,
+      rrp: values.rrp,
+      margin: values.margin,
+    };
+    
+    onSubmit(productData);
     onOpenChange(false);
     form.reset();
   };
