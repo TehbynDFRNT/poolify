@@ -30,7 +30,7 @@ export const useHeatPumpCompatibility = () => {
         .from("heat_pump_pool_compatibility")
         .select(`
           *,
-          heat_pump_products!inner(cost, rrp, margin)
+          heat_pump_products(cost, rrp, margin)
         `)
         .order("pool_range", { ascending: true })
         .order("pool_model", { ascending: true });

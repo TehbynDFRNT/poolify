@@ -874,7 +874,15 @@ export type Database = {
           pool_range?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "heat_pump_pool_compatibility_heat_pump_id_fkey"
+            columns: ["heat_pump_id"]
+            isOneToOne: false
+            referencedRelation: "heat_pump_products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       heat_pump_products: {
         Row: {
@@ -2260,6 +2268,13 @@ export type Database = {
           traffic_control_cost: number | null
           uf_strips_cost: number | null
           uf_strips_raw: Json | null
+          water_feature_back_cladding_needed: boolean | null
+          water_feature_front_finish: string | null
+          water_feature_led_blade: string | null
+          water_feature_sides_finish: string | null
+          water_feature_size: string | null
+          water_feature_top_finish: string | null
+          water_feature_total_cost: number | null
         }
         Relationships: [
           {
