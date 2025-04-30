@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -67,48 +66,6 @@ export const useHeatPumpMatrix = () => {
       setIsLoading(false);
     }
   }, [heatPumpProducts, fetchHeatPumpProducts, toast]);
-
-  const addMatch = async (match: Omit<HeatPumpPoolMatch, "id" | "created_at" | "updated_at" | "hp_sku" | "hp_description" | "cost" | "margin" | "rrp">) => {
-    try {
-      // Find the selected heat pump to get its details
-      const selectedHeatPump = heatPumpProducts.find(hp => hp.id === match.heat_pump_id);
-      
-      if (!selectedHeatPump) {
-        throw new Error("Selected heat pump not found");
-      }
-      
-      const { data, error } = await supabase
-        .from("heat_pump_pool_compatibility")
-        .insert({
-          pool_range: match.pool_range,
-          pool_model: match.pool_model,
-          heat_pump_id: match.heat_pump_id,
-          hp_sku: selectedHeatPump.hp_sku,
-          hp_description: selectedHeatPump.hp_description
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      await fetchMatches();
-      toast({
-        title: "Match created",
-        description: `Heat pump match for ${match.pool_model} has been created.`
-      });
-      return data;
-    } catch (error: any) {
-      console.error("Error adding heat pump match:", error);
-      toast({
-        title: "Error adding match",
-        description: error.message,
-        variant: "destructive",
-      });
-      return null;
-    }
-  };
 
   const updateMatch = async (id: string, heatPumpId: string) => {
     try {
@@ -233,7 +190,47 @@ export const useHeatPumpMatrix = () => {
     matches,
     isLoading: isLoading || isLoadingHeatPumps || isLoadingPools,
     fetchMatches,
-    addMatch,
+    addMatch: async (match) => {
+      try {
+        // Find the selected heat pump to get its details
+        const selectedHeatPump = heatPumpProducts.find(hp => hp.id === match.heat_pump_id);
+        
+        if (!selectedHeatPump) {
+          throw new Error("Selected heat pump not found");
+        }
+        
+        const { data, error } = await supabase
+          .from("heat_pump_pool_compatibility")
+          .insert({
+            pool_range: match.pool_range,
+            pool_model: match.pool_model,
+            heat_pump_id: match.heat_pump_id,
+            hp_sku: selectedHeatPump.hp_sku,
+            hp_description: selectedHeatPump.hp_description
+          })
+          .select()
+          .single();
+  
+        if (error) {
+          throw error;
+        }
+  
+        await fetchMatches();
+        toast({
+          title: "Match created",
+          description: `Heat pump match for ${match.pool_model} has been created.`
+        });
+        return data;
+      } catch (error: any) {
+        console.error("Error adding heat pump match:", error);
+        toast({
+          title: "Error adding match",
+          description: error.message,
+          variant: "destructive",
+        });
+        return null;
+      }
+    },
     updateMatch,
     deleteMatch,
     createMissingPoolMatches,
