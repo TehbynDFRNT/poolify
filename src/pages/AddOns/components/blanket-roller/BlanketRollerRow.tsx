@@ -22,7 +22,6 @@ export const BlanketRollerRow: React.FC<BlanketRollerRowProps> = ({
       <TableCell className="font-medium">{blanketRoller.pool_range}</TableCell>
       <TableCell>{blanketRoller.pool_model}</TableCell>
       <TableCell className="font-mono text-sm">{blanketRoller.sku}</TableCell>
-      <TableCell>{blanketRoller.description}</TableCell>
       <TableCell className="text-right">{formatCurrency(blanketRoller.rrp)}</TableCell>
       <TableCell className="text-right">{formatCurrency(blanketRoller.trade)}</TableCell>
       <TableCell className="text-right">{formatCurrency(blanketRoller.margin)}</TableCell>

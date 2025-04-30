@@ -33,8 +33,7 @@ export const BlanketRollerTable = () => {
     return (
       item.pool_range.toLowerCase().includes(search) ||
       item.pool_model.toLowerCase().includes(search) ||
-      item.sku.toLowerCase().includes(search) ||
-      item.description.toLowerCase().includes(search)
+      item.sku.toLowerCase().includes(search)
     );
   });
 
@@ -120,7 +119,6 @@ export const BlanketRollerTable = () => {
                 <TableHead>Pool Range</TableHead>
                 <TableHead>Pool Model</TableHead>
                 <TableHead>SKU</TableHead>
-                <TableHead>Description</TableHead>
                 <TableHead className="text-right">RRP</TableHead>
                 <TableHead className="text-right">Trade</TableHead>
                 <TableHead className="text-right">Margin</TableHead>
