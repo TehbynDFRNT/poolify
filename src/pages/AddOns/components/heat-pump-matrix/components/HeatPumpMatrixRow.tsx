@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Check, Loader2, Trash2 } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import { HeatPumpSelect } from "./HeatPumpSelect";
 import type { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
-import type { HeatPumpPoolMatch } from "@/hooks/useHeatPumpMatrix";
+import type { HeatPumpPoolMatch } from "@/types/heat-pump";
 
 interface HeatPumpMatrixRowProps {
   match: HeatPumpPoolMatch;
