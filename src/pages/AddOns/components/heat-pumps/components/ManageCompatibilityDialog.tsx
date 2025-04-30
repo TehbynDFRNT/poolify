@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
 import { useHeatPumpPoolCompatibility, PoolCompatibility } from "@/hooks/useHeatPumpPoolCompatibility";
 import { usePools } from "@/hooks/usePools";
+import { Pool } from "@/types/pool";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,19 @@ export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps>
   heatPump,
 }) => {
   const { fetchCompatibilities, addCompatibility, deleteCompatibility } = useHeatPumpPoolCompatibility();
-  const { pools, poolsByRange, isLoading: isLoadingPools } = usePools();
+  const poolsQuery = usePools();
+  const pools = poolsQuery.data || [];
+  
+  // Group pools by range
+  const poolsByRange: Record<string, Pool[]> = {};
+  pools.forEach(pool => {
+    if (pool.range) {
+      if (!poolsByRange[pool.range]) {
+        poolsByRange[pool.range] = [];
+      }
+      poolsByRange[pool.range].push(pool);
+    }
+  });
   
   const [compatibilities, setCompatibilities] = useState<PoolCompatibility[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -119,11 +132,11 @@ export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps>
   };
 
   // Convert pools data to the format we need
-  const availablePoolsList = pools?.map(pool => ({
+  const availablePoolsList = pools.map(pool => ({
     id: pool.id,
-    range: pool.range,
+    range: pool.range || "",
     model: pool.name
-  })) || [];
+  }));
 
   const filteredPools = availablePoolsList.filter(pool => {
     if (!searchTerm) return true;
@@ -160,41 +173,43 @@ export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps>
           />
         </div>
         
-        {isLoading || isLoadingPools ? (
+        {isLoading || poolsQuery.isLoading ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <ScrollArea className="h-72">
             <div className="space-y-1 p-1">
-              {Object.entries(poolsByRange || {}).map(([range, poolsInRange]) => (
+              {Object.entries(poolsByRange).map(([range, poolsInRange]) => (
                 <div key={range} className="mb-2">
                   <div className="font-medium text-sm text-primary mb-1">{range}</div>
-                  {poolsInRange.filter(pool => 
-                    !searchTerm || 
-                    pool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    range.toLowerCase().includes(searchTerm.toLowerCase())
-                  ).map((pool) => {
-                    const poolKey = `${range}:${pool.name}`;
-                    return (
-                      <div
-                        key={pool.id}
-                        className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
-                      >
-                        <Checkbox
-                          id={pool.id}
-                          checked={selectedPools.includes(poolKey)}
-                          onCheckedChange={() => handleSelectPool(poolKey)}
-                        />
-                        <Label
-                          htmlFor={pool.id}
-                          className="flex-grow cursor-pointer text-sm"
+                  {poolsInRange
+                    .filter(pool => 
+                      !searchTerm || 
+                      pool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      (pool.range && pool.range.toLowerCase().includes(searchTerm.toLowerCase()))
+                    )
+                    .map((pool) => {
+                      const poolKey = `${pool.range || ""}:${pool.name}`;
+                      return (
+                        <div
+                          key={pool.id}
+                          className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
                         >
-                          {pool.name} ({pool.length}m × {pool.width}m)
-                        </Label>
-                      </div>
-                    );
-                  })}
+                          <Checkbox
+                            id={pool.id}
+                            checked={selectedPools.includes(poolKey)}
+                            onCheckedChange={() => handleSelectPool(poolKey)}
+                          />
+                          <Label
+                            htmlFor={pool.id}
+                            className="flex-grow cursor-pointer text-sm"
+                          >
+                            {pool.name} ({pool.length}m × {pool.width}m)
+                          </Label>
+                        </div>
+                      );
+                    })}
                 </div>
               ))}
               
