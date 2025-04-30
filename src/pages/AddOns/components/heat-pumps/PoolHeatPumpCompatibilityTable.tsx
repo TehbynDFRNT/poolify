@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
+import { formatCurrency } from "@/utils/format";
 
 export const PoolHeatPumpCompatibilityTable = () => {
   const { 
@@ -63,12 +64,15 @@ export const PoolHeatPumpCompatibilityTable = () => {
               <TableHead>Pool Model</TableHead>
               <TableHead>Heat Pump SKU</TableHead>
               <TableHead>Heat Pump Description</TableHead>
+              <TableHead className="text-right">Cost</TableHead>
+              <TableHead className="text-right">RRP</TableHead>
+              <TableHead className="text-right">Margin</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   <div className="flex items-center justify-center">
                     <div className="h-6 w-6 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
                     <span className="ml-2">Loading...</span>
@@ -82,11 +86,14 @@ export const PoolHeatPumpCompatibilityTable = () => {
                   <TableCell>{item.pool_model}</TableCell>
                   <TableCell className="font-mono">{item.hp_sku}</TableCell>
                   <TableCell>{item.hp_description}</TableCell>
+                  <TableCell className="text-right">{item.cost ? formatCurrency(item.cost) : "-"}</TableCell>
+                  <TableCell className="text-right">{item.rrp ? formatCurrency(item.rrp) : "-"}</TableCell>
+                  <TableCell className="text-right">{item.margin ? formatCurrency(item.margin) : "-"}</TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   {searchTerm ? "No matching compatibility records found" : "No compatibility records added yet"}
                 </TableCell>
               </TableRow>

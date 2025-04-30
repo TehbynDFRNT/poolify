@@ -10,6 +10,9 @@ export type HeatPumpCompatibility = {
   heat_pump_id?: string;
   hp_sku: string;
   hp_description: string;
+  cost?: number;
+  rrp?: number;
+  margin?: number;
   created_at?: string;
   updated_at?: string;
 };
@@ -22,9 +25,13 @@ export const useHeatPumpCompatibility = () => {
   const fetchCompatibility = async () => {
     setIsLoading(true);
     try {
+      // Join with heat_pump_products to get pricing information
       const { data, error } = await supabase
         .from("heat_pump_pool_compatibility")
-        .select("*")
+        .select(`
+          *,
+          heat_pump_products!inner(cost, rrp, margin)
+        `)
         .order("pool_range", { ascending: true })
         .order("pool_model", { ascending: true });
 
@@ -32,7 +39,17 @@ export const useHeatPumpCompatibility = () => {
         throw error;
       }
 
-      setCompatibility(data || []);
+      // Format the data to include pricing info from heat pump products
+      const formattedData = (data || []).map(item => ({
+        ...item,
+        cost: item.heat_pump_products?.cost,
+        rrp: item.heat_pump_products?.rrp,
+        margin: item.heat_pump_products?.margin,
+        // Remove the nested heat_pump_products object
+        heat_pump_products: undefined
+      })) as HeatPumpCompatibility[];
+
+      setCompatibility(formattedData);
     } catch (error: any) {
       console.error("Error fetching heat pump compatibility data:", error);
       toast({
