@@ -48,9 +48,19 @@ export const useHeatPumpCompatibility = () => {
   const addCompatibility = async (record: Omit<HeatPumpCompatibility, "id" | "created_at" | "updated_at">) => {
     setIsLoading(true);
     try {
+      // Make sure we're using the Supabase schema requirements - heat_pump_id is nullable in our type
+      // but we need to provide a null value explicitly if it's undefined
+      const insertData = {
+        pool_range: record.pool_range,
+        pool_model: record.pool_model,
+        heat_pump_id: record.heat_pump_id || null,
+        hp_sku: record.hp_sku,
+        hp_description: record.hp_description
+      };
+
       const { data, error } = await supabase
         .from("heat_pump_pool_compatibility")
-        .insert(record)
+        .insert(insertData)
         .select("*")
         .single();
 
