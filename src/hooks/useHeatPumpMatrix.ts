@@ -1,11 +1,20 @@
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { usePools } from "@/hooks/usePools";
 import { useHeatPumpProducts } from "@/hooks/useHeatPumpProducts";
 import type { HeatPumpPoolMatch } from "@/types/heat-pump";
-import { fetchHeatPumpMatches, createHeatPumpMatch, updateHeatPumpMatch, deleteHeatPumpMatch } from "@/services/heatPumpMatrixService";
-import { enrichMatchesWithHeatPumpData, createMissingPoolMatches } from "@/utils/heatPumpMatrixUtils";
+import { 
+  fetchHeatPumpMatches, 
+  createHeatPumpMatch, 
+  updateHeatPumpMatch, 
+  deleteHeatPumpMatch,
+  bulkCreateHeatPumpMatches
+} from "@/services/heatPumpMatrixService";
+import { 
+  enrichMatchesWithHeatPumpData, 
+  defaultHeatPumpMatches 
+} from "@/utils/heatPumpMatrixUtils";
 
 // Use 'export type' when re-exporting types with isolatedModules enabled
 export type { HeatPumpPoolMatch };
@@ -13,6 +22,7 @@ export type { HeatPumpPoolMatch };
 export const useHeatPumpMatrix = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState<HeatPumpPoolMatch[]>([]);
+  const [hasErrored, setHasErrored] = useState(false);
   const { toast } = useToast();
   const { heatPumpProducts, fetchHeatPumpProducts, isLoading: isLoadingHeatPumps } = useHeatPumpProducts();
   const { data: pools, isLoading: isLoadingPools } = usePools();
@@ -25,13 +35,52 @@ export const useHeatPumpMatrix = () => {
         await fetchHeatPumpProducts();
       }
 
-      const data = await fetchHeatPumpMatches();
-      const enrichedData = enrichMatchesWithHeatPumpData(data, heatPumpProducts);
-      setMatches(enrichedData);
+      try {
+        // Try to fetch from database
+        const data = await fetchHeatPumpMatches();
+        
+        if (data && data.length > 0) {
+          // If we got data from database, use it
+          const enrichedData = enrichMatchesWithHeatPumpData(data, heatPumpProducts);
+          setMatches(enrichedData);
+          setHasErrored(false);
+        } else {
+          // If no data in database, use the default data
+          createDefaultMatches();
+        }
+      } catch (error: any) {
+        console.error("Error fetching heat pump matrix:", error);
+        setHasErrored(true);
+        
+        // Use default data with fake IDs since db fetch failed
+        const mockData = defaultHeatPumpMatches.map((match, index) => {
+          const heatPump = heatPumpProducts.find(hp => hp.hp_sku === match.hp_sku) || heatPumpProducts[0];
+          return {
+            id: `default-${index}`,
+            pool_range: match.pool_range,
+            pool_model: match.pool_model,
+            heat_pump_id: heatPump?.id || "default",
+            hp_sku: match.hp_sku,
+            hp_description: match.hp_description,
+            cost: heatPump?.cost || 0,
+            margin: heatPump?.margin || 0,
+            rrp: heatPump?.rrp || 0
+          } as HeatPumpPoolMatch;
+        });
+        
+        setMatches(mockData);
+        
+        toast({
+          title: "Error fetching heat pump matrix",
+          description: "Using default data instead. Changes won't be saved to database.",
+          variant: "destructive",
+        });
+      }
     } catch (error: any) {
-      console.error("Error fetching heat pump matrix:", error);
+      console.error("Error in heat pump matrix setup:", error);
+      setHasErrored(true);
       toast({
-        title: "Error fetching heat pump matrix",
+        title: "Error setting up heat pump matrix",
         description: error.message,
         variant: "destructive",
       });
@@ -39,8 +88,45 @@ export const useHeatPumpMatrix = () => {
       setIsLoading(false);
     }
   }, [heatPumpProducts, fetchHeatPumpProducts, toast]);
+  
+  // Load data when component mounts
+  useEffect(() => {
+    fetchMatches();
+  }, [fetchMatches]);
+
+  const createDefaultMatches = async () => {
+    try {
+      if (heatPumpProducts.length === 0) {
+        throw new Error("No heat pump products available");
+      }
+      
+      await bulkCreateHeatPumpMatches(defaultHeatPumpMatches, heatPumpProducts);
+      toast({
+        title: "Default heat pump matches created",
+        description: "Default heat pump matches have been added to the database."
+      });
+      await fetchMatches();
+    } catch (error: any) {
+      console.error("Error creating default matches:", error);
+      setHasErrored(true);
+      toast({
+        title: "Error creating default matches",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleUpdateMatch = async (id: string, heatPumpId: string) => {
+    if (hasErrored) {
+      toast({
+        title: "Cannot update in offline mode",
+        description: "Database connection is unavailable. Changes won't be saved.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
     try {
       const selectedHeatPump = heatPumpProducts.find(hp => hp.id === heatPumpId);
       
@@ -68,6 +154,15 @@ export const useHeatPumpMatrix = () => {
   };
 
   const handleDeleteMatch = async (id: string) => {
+    if (hasErrored) {
+      toast({
+        title: "Cannot delete in offline mode",
+        description: "Database connection is unavailable. Changes won't be saved.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    
     try {
       await deleteHeatPumpMatch(id);
       setMatches(matches.filter(match => match.id !== id));
@@ -88,44 +183,22 @@ export const useHeatPumpMatrix = () => {
     }
   };
 
-  const handleCreateMissingPoolMatches = async () => {
-    if (!pools || pools.length === 0 || !heatPumpProducts || heatPumpProducts.length === 0) {
-      return;
+  const handleAddMatch = async (
+    match: {
+      pool_range: string;
+      pool_model: string;
+      heat_pump_id: string;
     }
-
-    try {
-      setIsLoading(true);
-      const createdCount = await createMissingPoolMatches(pools, heatPumpProducts, matches);
-      
-      if (createdCount === 0) {
-        toast({
-          title: "No missing matches",
-          description: "All pools already have heat pump assignments."
-        });
-        return;
-      }
-
-      await fetchMatches();
-      
+  ) => {
+    if (hasErrored) {
       toast({
-        title: "Missing matches created",
-        description: `Created assignments for ${createdCount} pool(s).`
-      });
-    } catch (error: any) {
-      console.error("Error creating missing matches:", error);
-      toast({
-        title: "Error creating matches",
-        description: error.message,
+        title: "Cannot add in offline mode",
+        description: "Database connection is unavailable. Changes won't be saved.",
         variant: "destructive",
       });
-    } finally {
-      setIsLoading(false);
+      return null;
     }
-  };
-
-  const handleAddMatch = async (
-    match: Omit<HeatPumpPoolMatch, "id" | "created_at" | "updated_at" | "hp_sku" | "hp_description" | "cost" | "margin" | "rrp">
-  ) => {
+    
     try {
       const selectedHeatPump = heatPumpProducts.find(hp => hp.id === match.heat_pump_id);
       
@@ -133,7 +206,12 @@ export const useHeatPumpMatrix = () => {
         throw new Error("Selected heat pump not found");
       }
       
-      const data = await createHeatPumpMatch(match, selectedHeatPump);
+      const data = await createHeatPumpMatch({
+        ...match,
+        hp_sku: selectedHeatPump.hp_sku,
+        hp_description: selectedHeatPump.hp_description
+      });
+      
       await fetchMatches();
       
       toast({
@@ -155,11 +233,12 @@ export const useHeatPumpMatrix = () => {
   return {
     matches,
     isLoading: isLoading || isLoadingHeatPumps || isLoadingPools,
+    hasErrored,
     fetchMatches,
     addMatch: handleAddMatch,
     updateMatch: handleUpdateMatch,
     deleteMatch: handleDeleteMatch,
-    createMissingPoolMatches: handleCreateMissingPoolMatches,
+    createDefaultMatches,
     heatPumpProducts
   };
 };

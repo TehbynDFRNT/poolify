@@ -1,12 +1,13 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus, Search, Thermometer } from "lucide-react";
+import { Loader2, Plus, Search, Thermometer, RefreshCw } from "lucide-react";
 import { useHeatPumpMatrix } from "@/hooks/useHeatPumpMatrix";
 import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 import { HeatPumpMatrixHeader } from "./components/HeatPumpMatrixHeader";
 import { HeatPumpMatrixRow } from "./components/HeatPumpMatrixRow";
@@ -17,20 +18,16 @@ export const HeatPumpMatrix = () => {
   const { 
     matches, 
     isLoading, 
+    hasErrored,
     updateMatch, 
     deleteMatch, 
-    createMissingPoolMatches,
+    createDefaultMatches,
     heatPumpProducts,
     fetchMatches
   } = useHeatPumpMatrix();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [isCreatingMissing, setIsCreatingMissing] = useState(false);
+  const [searchTerm, setSearchTerm] = React.useState("");
+  const [isCreatingDefault, setIsCreatingDefault] = React.useState(false);
   const { toast } = useToast();
-
-  // Ensure data is fetched on initial load
-  useEffect(() => {
-    fetchMatches();
-  }, [fetchMatches]);
 
   const filteredMatches = matches.filter((match) => {
     const search = searchTerm.toLowerCase();
@@ -42,13 +39,13 @@ export const HeatPumpMatrix = () => {
     );
   });
 
-  const handleCreateMissing = async () => {
-    setIsCreatingMissing(true);
+  const handleCreateDefault = async () => {
+    setIsCreatingDefault(true);
     try {
-      await createMissingPoolMatches();
+      await createDefaultMatches();
       toast({
         title: "Success",
-        description: "Heat pump assignments created for all pools",
+        description: "Default heat pump assignments created",
       });
     } catch (error) {
       toast({
@@ -57,13 +54,21 @@ export const HeatPumpMatrix = () => {
         variant: "destructive",
       });
     } finally {
-      setIsCreatingMissing(false);
+      setIsCreatingDefault(false);
     }
   };
 
-  // Determine if we have pools and heat pumps data
-  const hasPoolData = matches.length > 0 || (heatPumpProducts.length > 0 && !isLoading);
-  const hasHeatPumpData = heatPumpProducts.length > 0;
+  const handleRefresh = async () => {
+    try {
+      await fetchMatches();
+    } catch (error) {
+      toast({
+        title: "Error refreshing data",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
     <Card>
@@ -85,13 +90,24 @@ export const HeatPumpMatrix = () => {
               />
             </div>
             
-            {hasPoolData && hasHeatPumpData && (
+            {hasErrored && (
+              <Button
+                variant="outline"
+                onClick={handleRefresh}
+                title="Try to refresh data from database"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                <span>Refresh</span>
+              </Button>
+            )}
+            
+            {(matches.length === 0 || hasErrored) && (
               <Button
                 variant="default"
-                onClick={handleCreateMissing}
-                disabled={isCreatingMissing}
+                onClick={handleCreateDefault}
+                disabled={isCreatingDefault}
               >
-                {isCreatingMissing ? (
+                {isCreatingDefault ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                     <span>Creating...</span>
@@ -99,13 +115,19 @@ export const HeatPumpMatrix = () => {
                 ) : (
                   <>
                     <Plus className="h-4 w-4 mr-2" />
-                    <span>Add Missing Pool Matches</span>
+                    <span>Add Default Heat Pump Matches</span>
                   </>
                 )}
               </Button>
             )}
           </div>
         </div>
+        
+        {hasErrored && (
+          <div className="mt-2 px-3 py-2 bg-amber-50 border border-amber-200 text-amber-800 rounded-md text-sm">
+            Using fallback data. Database connection is unavailable. Changes won't persist.
+          </div>
+        )}
       </CardHeader>
       <CardContent>
         <div className="rounded-md border overflow-x-auto">
@@ -116,9 +138,9 @@ export const HeatPumpMatrix = () => {
                 <LoadingState />
               ) : filteredMatches.length === 0 ? (
                 <EmptyState 
-                  onCreateMissingMatches={handleCreateMissing} 
-                  hasPoolData={hasPoolData}
-                  hasHeatPumpData={hasHeatPumpData}
+                  onCreateMissingMatches={handleCreateDefault} 
+                  hasPoolData={true}
+                  hasHeatPumpData={heatPumpProducts.length > 0}
                 />
               ) : (
                 filteredMatches.map((match) => (
@@ -128,6 +150,7 @@ export const HeatPumpMatrix = () => {
                     heatPumps={heatPumpProducts}
                     onUpdate={updateMatch}
                     onDelete={deleteMatch}
+                    isOffline={hasErrored}
                   />
                 ))
               )}

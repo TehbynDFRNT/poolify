@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ interface HeatPumpMatrixRowProps {
   heatPumps: HeatPumpProduct[];
   onUpdate: (id: string, heatPumpId: string) => Promise<boolean>;
   onDelete: (id: string) => Promise<boolean>;
+  isOffline?: boolean;
 }
 
 export const HeatPumpMatrixRow: React.FC<HeatPumpMatrixRowProps> = ({
@@ -19,6 +21,7 @@ export const HeatPumpMatrixRow: React.FC<HeatPumpMatrixRowProps> = ({
   heatPumps,
   onUpdate,
   onDelete,
+  isOffline = false,
 }) => {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,6 +63,7 @@ export const HeatPumpMatrixRow: React.FC<HeatPumpMatrixRowProps> = ({
             heatPumps={heatPumps}
             selectedHeatPumpId={match.heat_pump_id}
             onSelect={handleHeatPumpChange}
+            disabled={isOffline}
           />
         )}
       </TableCell>
@@ -73,8 +77,9 @@ export const HeatPumpMatrixRow: React.FC<HeatPumpMatrixRowProps> = ({
           variant="ghost"
           size="icon"
           onClick={handleDelete}
-          disabled={isDeleting || isUpdating}
+          disabled={isDeleting || isUpdating || isOffline}
           className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+          title={isOffline ? "Cannot delete in offline mode" : "Delete this match"}
         >
           {isDeleting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
