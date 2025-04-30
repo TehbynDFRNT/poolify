@@ -139,7 +139,7 @@ export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps>
                 <Badge variant="outline">{heatPump.hp_sku}</Badge>
               </div>
             )}
-          </DialogHeader>
+          </DialogDescription>
         </DialogHeader>
         
         <div className="relative my-2">

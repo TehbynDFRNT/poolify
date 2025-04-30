@@ -3,7 +3,7 @@ import React from "react";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
-import { Edit2, Trash2, Pool } from "lucide-react";
+import { Edit2, Trash2, Thermometer } from "lucide-react";
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
 import { 
   Tooltip,
@@ -39,7 +39,7 @@ export const HeatPumpTableRow: React.FC<HeatPumpTableRowProps> = ({
               <TooltipTrigger asChild>
                 <div className="flex items-center">
                   <Button variant="ghost" className="h-8 p-0 text-blue-600" size="sm">
-                    <Pool className="h-4 w-4 mr-1" />
+                    <Thermometer className="h-4 w-4 mr-1" />
                     {compatiblePools.length} pool models
                   </Button>
                 </div>
