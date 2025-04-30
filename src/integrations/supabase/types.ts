@@ -2177,7 +2177,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_proposal_snapshot: {
+        Args: { p_project_id: string }
+        Returns: Json
+      }
     }
     Enums: {
       fence_item_type: "Fence (per meter)" | "Gate (per unit)" | "Per meter"
