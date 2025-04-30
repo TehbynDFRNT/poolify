@@ -31,20 +31,9 @@ export const HeatPumpProductsTable = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [poolModelsByHeatPump, setPoolModelsByHeatPump] = useState<Record<string, { pool_range: string; pool_model: string }[]>>({});
-  const [availablePools, setAvailablePools] = useState<{ id: string; range: string; model: string }[]>([]);
 
   useEffect(() => {
     fetchHeatPumpProducts();
-    // For demo purposes, we'll add some example available pools
-    // In a real application, you'd fetch this from the database
-    setAvailablePools([
-      { id: "1", range: "Oasis", model: "Ocean 8m" },
-      { id: "2", range: "Oasis", model: "Ocean 10m" },
-      { id: "3", range: "Platinum", model: "Spa 4m" },
-      { id: "4", range: "Platinum", model: "Luxe 6m" },
-      { id: "5", range: "Executive", model: "Gold 8m" },
-      { id: "6", range: "Executive", model: "Diamond 12m" }
-    ]);
   }, []);
 
   // Fetch compatible pools for each heat pump
@@ -144,7 +133,6 @@ export const HeatPumpProductsTable = () => {
         open={isCompatibilityDialogOpen}
         onOpenChange={setIsCompatibilityDialogOpen}
         heatPump={selectedHeatPump}
-        availablePools={availablePools}
       />
 
       {/* Delete Confirmation Dialog */}

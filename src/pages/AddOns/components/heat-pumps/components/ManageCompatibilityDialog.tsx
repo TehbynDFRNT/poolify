@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
 import { useHeatPumpPoolCompatibility, PoolCompatibility } from "@/hooks/useHeatPumpPoolCompatibility";
+import { usePools } from "@/hooks/usePools";
 import {
   Dialog,
   DialogContent,
@@ -22,16 +23,16 @@ interface ManageCompatibilityDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   heatPump: HeatPumpProduct | null;
-  availablePools: { id: string; range: string; model: string }[];
+  availablePools?: { id: string; range: string; model: string }[];
 }
 
 export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps> = ({
   open,
   onOpenChange,
   heatPump,
-  availablePools,
 }) => {
   const { fetchCompatibilities, addCompatibility, deleteCompatibility } = useHeatPumpPoolCompatibility();
+  const { pools, poolsByRange, isLoading: isLoadingPools } = usePools();
   
   const [compatibilities, setCompatibilities] = useState<PoolCompatibility[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -117,7 +118,14 @@ export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps>
     });
   };
 
-  const filteredPools = availablePools.filter(pool => {
+  // Convert pools data to the format we need
+  const availablePoolsList = pools?.map(pool => ({
+    id: pool.id,
+    range: pool.range,
+    model: pool.name
+  })) || [];
+
+  const filteredPools = availablePoolsList.filter(pool => {
     if (!searchTerm) return true;
     
     const searchLower = searchTerm.toLowerCase();
@@ -152,34 +160,43 @@ export const ManageCompatibilityDialog: React.FC<ManageCompatibilityDialogProps>
           />
         </div>
         
-        {isLoading ? (
+        {isLoading || isLoadingPools ? (
           <div className="flex justify-center items-center py-8">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           </div>
         ) : (
           <ScrollArea className="h-72">
             <div className="space-y-1 p-1">
-              {filteredPools.map((pool) => {
-                const poolKey = `${pool.range}:${pool.model}`;
-                return (
-                  <div
-                    key={poolKey}
-                    className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
-                  >
-                    <Checkbox
-                      id={poolKey}
-                      checked={selectedPools.includes(poolKey)}
-                      onCheckedChange={() => handleSelectPool(poolKey)}
-                    />
-                    <Label
-                      htmlFor={poolKey}
-                      className="flex-grow cursor-pointer text-sm"
-                    >
-                      <span className="font-medium">{pool.range}</span>: {pool.model}
-                    </Label>
-                  </div>
-                );
-              })}
+              {Object.entries(poolsByRange || {}).map(([range, poolsInRange]) => (
+                <div key={range} className="mb-2">
+                  <div className="font-medium text-sm text-primary mb-1">{range}</div>
+                  {poolsInRange.filter(pool => 
+                    !searchTerm || 
+                    pool.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    range.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).map((pool) => {
+                    const poolKey = `${range}:${pool.name}`;
+                    return (
+                      <div
+                        key={pool.id}
+                        className="flex items-center space-x-2 rounded-md p-2 hover:bg-muted"
+                      >
+                        <Checkbox
+                          id={pool.id}
+                          checked={selectedPools.includes(poolKey)}
+                          onCheckedChange={() => handleSelectPool(poolKey)}
+                        />
+                        <Label
+                          htmlFor={pool.id}
+                          className="flex-grow cursor-pointer text-sm"
+                        >
+                          {pool.name} ({pool.length}m × {pool.width}m)
+                        </Label>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
               
               {filteredPools.length === 0 && (
                 <div className="py-6 text-center text-sm text-muted-foreground">
