@@ -4,7 +4,7 @@ import { TableRow, TableCell } from "@/components/ui/table";
 export const EmptyState = () => {
   return (
     <TableRow>
-      <TableCell colSpan={7} className="h-24 text-center">
+      <TableCell colSpan={9} className="h-24 text-center">
         <div className="flex flex-col items-center justify-center">
           <p className="text-muted-foreground">No heat pump assignments found</p>
           <p className="text-sm text-muted-foreground mt-1">
