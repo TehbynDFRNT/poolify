@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useHeatPumpCompatibility, type HeatPumpCompatibility } from "@/hooks/useHeatPumpCompatibility";
 import { useHeatPumpProducts } from "@/hooks/useHeatPumpProducts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -33,16 +33,36 @@ export const PoolHeatPumpCompatibilityTable = () => {
     fetchHeatPumpProducts();
   }, []);
 
+  // Get unique combinations of pool_range and pool_model
+  const uniqueCompatibility = useMemo(() => {
+    const uniqueMap = new Map<string, HeatPumpCompatibility>();
+    
+    compatibility.forEach(item => {
+      const key = `${item.pool_range}-${item.pool_model}`;
+      
+      // Only add if this combination doesn't exist yet or update with the newest entry
+      if (!uniqueMap.has(key) || (
+        uniqueMap.get(key)!.created_at! < item.created_at!
+      )) {
+        uniqueMap.set(key, item);
+      }
+    });
+    
+    return Array.from(uniqueMap.values());
+  }, [compatibility]);
+
   // Filter compatibility based on search term
-  const filteredCompatibility = compatibility.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      item.pool_range.toLowerCase().includes(searchLower) ||
-      item.pool_model.toLowerCase().includes(searchLower) ||
-      item.hp_sku.toLowerCase().includes(searchLower) ||
-      item.hp_description.toLowerCase().includes(searchLower)
-    );
-  });
+  const filteredCompatibility = useMemo(() => {
+    return uniqueCompatibility.filter(item => {
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        item.pool_range.toLowerCase().includes(searchLower) ||
+        item.pool_model.toLowerCase().includes(searchLower) ||
+        item.hp_sku.toLowerCase().includes(searchLower) ||
+        item.hp_description.toLowerCase().includes(searchLower)
+      );
+    });
+  }, [uniqueCompatibility, searchTerm]);
 
   const handleEdit = (record: HeatPumpCompatibility) => {
     setEditingRecord(record);
