@@ -1,6 +1,6 @@
 
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
-import { HeatPumpPoolMatch } from "@/types/heat-pump";
+import type { HeatPumpPoolMatch } from "@/types/heat-pump";
 import { Pool } from "@/types/pool";
 import { createHeatPumpMatch } from "@/services/heatPumpMatrixService";
 

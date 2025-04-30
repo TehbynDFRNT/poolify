@@ -1,7 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { HeatPumpProduct } from "@/hooks/useHeatPumpProducts";
-import { HeatPumpPoolMatch } from "@/types/heat-pump";
+import type { HeatPumpPoolMatch } from "@/types/heat-pump";
 
 export async function fetchHeatPumpMatches() {
   const { data, error } = await supabase

@@ -3,11 +3,12 @@ import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { usePools } from "@/hooks/usePools";
 import { useHeatPumpProducts } from "@/hooks/useHeatPumpProducts";
-import { HeatPumpPoolMatch } from "@/types/heat-pump";
+import type { HeatPumpPoolMatch } from "@/types/heat-pump";
 import { fetchHeatPumpMatches, createHeatPumpMatch, updateHeatPumpMatch, deleteHeatPumpMatch } from "@/services/heatPumpMatrixService";
 import { enrichMatchesWithHeatPumpData, createMissingPoolMatches } from "@/utils/heatPumpMatrixUtils";
 
-export { HeatPumpPoolMatch };
+// Use 'export type' when re-exporting types with isolatedModules enabled
+export type { HeatPumpPoolMatch };
 
 export const useHeatPumpMatrix = () => {
   const [isLoading, setIsLoading] = useState(true);
