@@ -59,6 +59,10 @@ export const BlanketRollerSection: React.FC<BlanketRollerSectionProps> = ({
                     <p className="text-sm">Installation Cost:</p>
                     <p className="font-medium">{formatCurrency(installationCost)}</p>
                   </div>
+                  <div className="flex justify-between text-sm text-muted-foreground">
+                    <p>Margin:</p>
+                    <p>{formatCurrency(blanketRoller.margin)}</p>
+                  </div>
                   <div className="flex justify-between border-t pt-1 mt-1">
                     <p className="text-sm font-medium">Total Cost:</p>
                     <p className="font-bold">{formatCurrency(totalCost)}</p>
