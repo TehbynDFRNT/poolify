@@ -1219,6 +1219,54 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_heating_options: {
+        Row: {
+          blanket_roller_cost: number
+          blanket_roller_id: string | null
+          created_at: string
+          customer_id: string
+          heat_pump_cost: number
+          heat_pump_id: string | null
+          id: string
+          include_blanket_roller: boolean
+          include_heat_pump: boolean
+          pool_id: string
+          total_cost: number
+          total_margin: number
+          updated_at: string
+        }
+        Insert: {
+          blanket_roller_cost?: number
+          blanket_roller_id?: string | null
+          created_at?: string
+          customer_id: string
+          heat_pump_cost?: number
+          heat_pump_id?: string | null
+          id?: string
+          include_blanket_roller?: boolean
+          include_heat_pump?: boolean
+          pool_id: string
+          total_cost?: number
+          total_margin?: number
+          updated_at?: string
+        }
+        Update: {
+          blanket_roller_cost?: number
+          blanket_roller_id?: string | null
+          created_at?: string
+          customer_id?: string
+          heat_pump_cost?: number
+          heat_pump_id?: string | null
+          id?: string
+          include_blanket_roller?: boolean
+          include_heat_pump?: boolean
+          pool_id?: string
+          total_cost?: number
+          total_margin?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pool_individual_costs: {
         Row: {
           cost_value: number

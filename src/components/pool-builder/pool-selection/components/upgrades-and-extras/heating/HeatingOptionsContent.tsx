@@ -11,6 +11,7 @@ import { BlanketRollerSection } from "./BlanketRollerSection";
 import { Pool } from "@/types/pool";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { PoolHeatingOptions } from "@/types/heating-options";
 
 interface HeatingOptionsContentProps {
   pool: Pool | null;
@@ -63,25 +64,25 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
   }, [customerId, pool]);
 
   const fetchHeatingOptions = async () => {
-    if (!customerId) return;
+    if (!customerId || !pool?.id) return;
     
     try {
       const { data, error } = await supabase
         .from('pool_heating_options')
         .select('*')
         .eq('customer_id', customerId)
-        .single();
+        .eq('pool_id', pool.id)
+        .maybeSingle();
         
       if (error) {
-        if (error.code !== 'PGRST116') { // Not found error
-          console.error("Error fetching heating options:", error);
-        }
+        console.error("Error fetching heating options:", error);
         return;
       }
       
       if (data) {
-        setIncludeHeatPump(data.include_heat_pump);
-        setIncludeBlanketRoller(data.include_blanket_roller);
+        const heatingOptions = data as PoolHeatingOptions;
+        setIncludeHeatPump(heatingOptions.include_heat_pump);
+        setIncludeBlanketRoller(heatingOptions.include_blanket_roller);
       }
     } catch (error) {
       console.error("Error fetching heating options:", error);
@@ -102,34 +103,35 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         pool_id: pool.id,
         include_heat_pump: includeHeatPump,
         include_blanket_roller: includeBlanketRoller,
-        heat_pump_id: includeHeatPump && compatibleHeatPump ? compatibleHeatPump.id : null,
+        heat_pump_id: includeHeatPump && compatibleHeatPump ? compatibleHeatPump.heat_pump_id : null,
         blanket_roller_id: includeBlanketRoller && blanketRoller ? blanketRoller.id : null,
         heat_pump_cost: heatPumpTotalCost,
         blanket_roller_cost: blanketRollerTotalCost,
         total_cost: totalCost,
-        total_margin: totalMargin,
-        updated_at: new Date()
+        total_margin: totalMargin
       };
       
       // Check if a record already exists
-      const { data, error: fetchError } = await supabase
+      const { data: existingData, error: fetchError } = await supabase
         .from('pool_heating_options')
         .select('id')
         .eq('customer_id', customerId)
+        .eq('pool_id', pool.id)
         .maybeSingle();
         
-      if (fetchError && fetchError.code !== 'PGRST116') {
+      if (fetchError) {
+        console.error("Error checking existing data:", fetchError);
         throw fetchError;
       }
       
       let error;
       
-      if (data?.id) {
+      if (existingData?.id) {
         // Update existing record
         const { error: updateError } = await supabase
           .from('pool_heating_options')
           .update(heatingOptionsData)
-          .eq('id', data.id);
+          .eq('id', existingData.id);
           
         error = updateError;
       } else {
