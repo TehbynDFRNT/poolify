@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Thermometer } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { usePoolHeatingOptions } from "@/hooks/usePoolHeatingOptions";
 import { HeatPumpSection } from "./HeatPumpSection";
 import { BlanketRollerSection } from "./BlanketRollerSection";
 import { Pool } from "@/types/pool";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 interface HeatingOptionsContentProps {
   pool: Pool | null;
@@ -21,6 +23,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
 }) => {
   const [includeHeatPump, setIncludeHeatPump] = useState(false);
   const [includeBlanketRoller, setIncludeBlanketRoller] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const {
     isLoading,
@@ -51,6 +54,103 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
   const heatPumpMargin = includeHeatPump && compatibleHeatPump ? compatibleHeatPump.margin || 0 : 0;
   const blanketRollerMargin = includeBlanketRoller && blanketRoller ? blanketRoller.margin || 0 : 0;
   const totalMargin = heatPumpMargin + blanketRollerMargin;
+
+  // Load existing selections when component mounts
+  useEffect(() => {
+    if (customerId && pool) {
+      fetchHeatingOptions();
+    }
+  }, [customerId, pool]);
+
+  const fetchHeatingOptions = async () => {
+    if (!customerId) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('pool_heating_options')
+        .select('*')
+        .eq('customer_id', customerId)
+        .single();
+        
+      if (error) {
+        if (error.code !== 'PGRST116') { // Not found error
+          console.error("Error fetching heating options:", error);
+        }
+        return;
+      }
+      
+      if (data) {
+        setIncludeHeatPump(data.include_heat_pump);
+        setIncludeBlanketRoller(data.include_blanket_roller);
+      }
+    } catch (error) {
+      console.error("Error fetching heating options:", error);
+    }
+  };
+
+  const saveHeatingOptions = async () => {
+    if (!customerId || !pool) {
+      toast.error("Customer information is required to save heating options");
+      return;
+    }
+    
+    setIsSaving(true);
+    
+    try {
+      const heatingOptionsData = {
+        customer_id: customerId,
+        pool_id: pool.id,
+        include_heat_pump: includeHeatPump,
+        include_blanket_roller: includeBlanketRoller,
+        heat_pump_id: includeHeatPump && compatibleHeatPump ? compatibleHeatPump.id : null,
+        blanket_roller_id: includeBlanketRoller && blanketRoller ? blanketRoller.id : null,
+        heat_pump_cost: heatPumpTotalCost,
+        blanket_roller_cost: blanketRollerTotalCost,
+        total_cost: totalCost,
+        total_margin: totalMargin,
+        updated_at: new Date()
+      };
+      
+      // Check if a record already exists
+      const { data, error: fetchError } = await supabase
+        .from('pool_heating_options')
+        .select('id')
+        .eq('customer_id', customerId)
+        .maybeSingle();
+        
+      if (fetchError && fetchError.code !== 'PGRST116') {
+        throw fetchError;
+      }
+      
+      let error;
+      
+      if (data?.id) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('pool_heating_options')
+          .update(heatingOptionsData)
+          .eq('id', data.id);
+          
+        error = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('pool_heating_options')
+          .insert(heatingOptionsData);
+          
+        error = insertError;
+      }
+      
+      if (error) throw error;
+      
+      toast.success("Heating options saved successfully");
+    } catch (error) {
+      console.error("Error saving heating options:", error);
+      toast.error("Failed to save heating options");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -111,8 +211,11 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
           </div>
           
           <div className="mt-3 flex justify-end">
-            <Button disabled={!customerId}>
-              Save Heating Options
+            <Button 
+              disabled={!customerId || isSaving} 
+              onClick={saveHeatingOptions}
+            >
+              {isSaving ? 'Saving...' : 'Save Heating Options'}
             </Button>
           </div>
         </div>
