@@ -5,13 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { HeatPumpCompatibility } from "@/hooks/useHeatPumpCompatibility";
 import { BlanketRoller } from "@/types/blanket-roller";
 import { useHeatPumpProducts } from "@/hooks/useHeatPumpProducts";
-
-export type HeatingInstallation = {
-  id: string;
-  installation_type: string;
-  installation_cost: number;
-  installation_inclusions: string;
-};
+import { HeatingInstallation } from "@/types/heating-installation";
 
 export const usePoolHeatingOptions = (poolId: string | null, poolModel?: string, poolRange?: string) => {
   const [isLoading, setIsLoading] = useState(true);

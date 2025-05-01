@@ -34,8 +34,8 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
   );
 
   // Calculate costs
-  const heatPumpInstallationCost = getInstallationCost("Heat Pump Installation");
-  const blanketRollerInstallationCost = getInstallationCost("Blanket and Roller");
+  const heatPumpInstallationCost = getInstallationCost("Heat Pump");
+  const blanketRollerInstallationCost = getInstallationCost("Blanket & Roller");
 
   const heatPumpTotalCost = includeHeatPump && compatibleHeatPump 
     ? (compatibleHeatPump.rrp || 0) + heatPumpInstallationCost
