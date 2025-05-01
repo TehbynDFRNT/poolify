@@ -2337,6 +2337,7 @@ export type Database = {
           extra_concreting_unit_price: number | null
           extra_paving_cost: number | null
           extra_paving_sqm: number | null
+          fixed_costs_json: Json | null
           fp_filter_price: number | null
           fp_light_price: number | null
           fp_name: string | null
@@ -2355,6 +2356,7 @@ export type Database = {
           pc_salt_bags: number | null
           pc_trucked_water: number | null
           phone: string | null
+          pool_margin_pct: number | null
           project_id: string | null
           proposal_name: string | null
           resident_homeowner: boolean | null

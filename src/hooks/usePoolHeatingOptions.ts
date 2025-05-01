@@ -88,7 +88,7 @@ export const usePoolHeatingOptions = (
           .select("*")
           .eq("pool_model", poolModel)
           .eq("pool_range", poolRange)
-          .single();
+          .maybeSingle();
 
         if (blanketRollerError) {
           if (blanketRollerError.code !== 'PGRST116') {

@@ -2,6 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/utils/format";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface HeatingOptionsSummaryProps {
   totalCost: number;
@@ -23,27 +25,33 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
   }
 
   return (
-    <div className="bg-primary/10 p-4 rounded-md">
-      <div className="space-y-2">
-        <div className="flex justify-between items-center">
-          <h3 className="font-medium">Total Heating Options:</h3>
-          <p className="text-lg font-bold">{formatCurrency(totalCost)}</p>
+    <Card>
+      <CardContent className="pt-6 space-y-4">
+        <div className="space-y-2">
+          <div className="flex justify-between items-center">
+            <h3 className="font-medium">Total Heating Options:</h3>
+            <p className="text-lg font-bold">{formatCurrency(totalCost)}</p>
+          </div>
+          
+          <div className="flex justify-between items-center text-sm text-muted-foreground">
+            <span>Total Margin:</span>
+            <span>{formatCurrency(totalMargin)}</span>
+          </div>
         </div>
         
-        <div className="flex justify-between items-center text-sm text-muted-foreground">
-          <span>Total Margin:</span>
-          <span>{formatCurrency(totalMargin)}</span>
-        </div>
-      </div>
-      
-      <div className="mt-3 flex justify-end">
-        <Button 
-          disabled={!customerId || isSaving} 
-          onClick={onSave}
-        >
-          {isSaving ? 'Saving...' : 'Save Heating Options'}
-        </Button>
-      </div>
-    </div>
+        {customerId && (
+          <div className="flex justify-end">
+            <Button 
+              disabled={isSaving} 
+              onClick={onSave}
+              className="flex items-center gap-2"
+            >
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              {isSaving ? 'Saving...' : 'Save Heating Options'}
+            </Button>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

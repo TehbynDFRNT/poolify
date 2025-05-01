@@ -22,7 +22,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
 }) => {
   const { isLoading, compatibleHeatPump, blanketRoller, getInstallationCost } = usePoolHeatingOptions(
     pool.id,
-    pool.model,
+    pool.name, // Using name instead of model which doesn't exist on Pool type
     pool.range
   );
 
@@ -98,11 +98,11 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         />
         
         <HeatingOptionsSummary
-          includeHeatPump={includeHeatPump}
-          includeBlanketRoller={includeBlanketRoller}
-          heatPumpTotalCost={heatPumpTotalCost}
-          blanketRollerTotalCost={blanketRollerTotalCost}
           totalCost={totalCost}
+          totalMargin={totalMargin}
+          isSaving={isSaving}
+          onSave={saveHeatingOptions}
+          customerId={customerId}
         />
         
         {customerId && (
