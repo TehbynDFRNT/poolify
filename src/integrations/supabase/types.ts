@@ -1022,6 +1022,51 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_cleaner_selections: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          include_cleaner: boolean
+          pool_cleaner_id: string
+          pool_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          include_cleaner?: boolean
+          pool_cleaner_id: string
+          pool_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          include_cleaner?: boolean
+          pool_cleaner_id?: string
+          pool_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_cleaner_selections_pool_cleaner_id_fkey"
+            columns: ["pool_cleaner_id"]
+            isOneToOne: false
+            referencedRelation: "pool_cleaners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_cleaner_selections_pool_id_fkey"
+            columns: ["pool_id"]
+            isOneToOne: false
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pool_cleaners: {
         Row: {
           cost_price: number | null

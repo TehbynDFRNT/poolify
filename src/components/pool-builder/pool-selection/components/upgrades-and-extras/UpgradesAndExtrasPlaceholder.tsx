@@ -40,10 +40,10 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="general" className="w-full">
+          <Tabs defaultValue="heating-cleaners" className="w-full">
             <TabsList className="mb-4">
               <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="heating">Heating Options</TabsTrigger>
+              <TabsTrigger value="heating-cleaners">Heating & Cleaners</TabsTrigger>
             </TabsList>
             
             <TabsContent value="general" className="space-y-4">
@@ -60,7 +60,7 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
               </div>
             </TabsContent>
             
-            <TabsContent value="heating" className="space-y-6">
+            <TabsContent value="heating-cleaners" className="space-y-6">
               <HeatingOptionsContent pool={pool} customerId={customerId} />
             </TabsContent>
           </Tabs>

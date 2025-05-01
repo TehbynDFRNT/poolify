@@ -1,17 +1,18 @@
 
 import React from "react";
-import { Thermometer } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Pool } from "@/types/pool";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { usePoolHeatingOptions } from "@/hooks/usePoolHeatingOptions";
+import { useHeatingOptionsState } from "@/hooks/useHeatingOptionsState";
 import { HeatPumpSection } from "./HeatPumpSection";
 import { BlanketRollerSection } from "./BlanketRollerSection";
 import { HeatingOptionsSummary } from "./HeatingOptionsSummary";
-import { Pool } from "@/types/pool";
-import { useHeatingOptionsState } from "@/hooks/useHeatingOptionsState";
+import { Loader2, Thermometer, Scroll, Waves } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { PoolCleanersContent } from "../pool-cleaners/PoolCleanersContent";
 
 interface HeatingOptionsContentProps {
-  pool: Pool | null;
+  pool: Pool;
   customerId: string | null;
 }
 
@@ -19,20 +20,14 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
   pool,
   customerId
 }) => {
-  const {
-    isLoading,
-    compatibleHeatPump,
-    blanketRoller,
-    getInstallationCost,
-  } = usePoolHeatingOptions(
-    pool?.id || null,
-    pool?.name,
-    pool?.range
+  const { isLoading, compatibleHeatPump, blanketRoller, getInstallationCost } = usePoolHeatingOptions(
+    pool.id,
+    pool.model,
+    pool.range
   );
 
-  // Calculate installation costs
   const heatPumpInstallationCost = getInstallationCost("Heat Pump");
-  const blanketRollerInstallationCost = getInstallationCost("Blanket & Roller");
+  const blanketRollerInstallationCost = getInstallationCost("Blanket Roller");
 
   const {
     includeHeatPump,
@@ -44,9 +39,11 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     heatPumpTotalCost,
     blanketRollerTotalCost,
     totalCost,
-    totalMargin
+    totalMargin,
+    heatPumpMargin,
+    blanketRollerMargin
   } = useHeatingOptionsState({
-    poolId: pool?.id || null,
+    poolId: pool.id,
     customerId,
     compatibleHeatPump,
     blanketRoller,
@@ -56,56 +53,75 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
+      <div className="flex items-center justify-center py-8">
+        <Loader2 className="h-6 w-6 animate-spin text-primary" />
+        <span className="ml-2">Loading heating options...</span>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Thermometer className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-medium">Pool Heating Options</h3>
-      </div>
+    <Tabs defaultValue="heating" className="w-full">
+      <TabsList className="mb-4">
+        <TabsTrigger value="heating" className="flex items-center gap-2">
+          <Thermometer className="h-4 w-4" />
+          <span>Heating Options</span>
+        </TabsTrigger>
+        <TabsTrigger value="cleaners" className="flex items-center gap-2">
+          <Waves className="h-4 w-4" />
+          <span>Pool Cleaners</span>
+        </TabsTrigger>
+      </TabsList>
       
-      {/* Heat Pump Section */}
-      <Card className="border border-muted">
-        <CardContent className="pt-6">
-          <HeatPumpSection
-            includeHeatPump={includeHeatPump}
-            setIncludeHeatPump={setIncludeHeatPump}
-            compatibleHeatPump={compatibleHeatPump}
-            installationCost={heatPumpInstallationCost}
-            totalCost={heatPumpTotalCost}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Blanket & Roller Section */}
-      <Card className="border border-muted">
-        <CardContent className="pt-6">
-          <BlanketRollerSection
-            includeBlanketRoller={includeBlanketRoller}
-            setIncludeBlanketRoller={setIncludeBlanketRoller}
-            blanketRoller={blanketRoller}
-            installationCost={blanketRollerInstallationCost}
-            totalCost={blanketRollerTotalCost}
-          />
-        </CardContent>
-      </Card>
-
-      {/* Summary Section */}
-      {(includeHeatPump || includeBlanketRoller) && (
-        <HeatingOptionsSummary
-          totalCost={totalCost}
-          totalMargin={totalMargin}
-          isSaving={isSaving}
-          onSave={saveHeatingOptions}
-          customerId={customerId}
+      <TabsContent value="heating" className="space-y-6">
+        <div>
+          <p className="text-sm text-muted-foreground mb-6">
+            Explore heating options to extend your swimming season and enhance your pool experience.
+            Our experts have selected compatible options for your specific pool model.
+          </p>
+        </div>
+        
+        <HeatPumpSection
+          includeHeatPump={includeHeatPump}
+          setIncludeHeatPump={setIncludeHeatPump}
+          compatibleHeatPump={compatibleHeatPump}
+          installationCost={heatPumpInstallationCost}
+          totalCost={heatPumpTotalCost}
         />
-      )}
-    </div>
+        
+        <BlanketRollerSection
+          includeBlanketRoller={includeBlanketRoller}
+          setIncludeBlanketRoller={setIncludeBlanketRoller}
+          blanketRoller={blanketRoller}
+          installationCost={blanketRollerInstallationCost}
+          totalCost={blanketRollerTotalCost}
+        />
+        
+        <HeatingOptionsSummary
+          includeHeatPump={includeHeatPump}
+          includeBlanketRoller={includeBlanketRoller}
+          heatPumpTotalCost={heatPumpTotalCost}
+          blanketRollerTotalCost={blanketRollerTotalCost}
+          totalCost={totalCost}
+        />
+        
+        {customerId && (
+          <div className="flex justify-end mt-6">
+            <Button 
+              onClick={saveHeatingOptions} 
+              disabled={isSaving}
+              className="flex items-center gap-2"
+            >
+              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Save Heating Options
+            </Button>
+          </div>
+        )}
+      </TabsContent>
+      
+      <TabsContent value="cleaners" className="space-y-6">
+        <PoolCleanersContent pool={pool} customerId={customerId} />
+      </TabsContent>
+    </Tabs>
   );
 };
