@@ -4,7 +4,7 @@ import { Thermometer, Check, X } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/utils/format";
-import { HeatPumpCompatibility } from "@/hooks/useHeatPumpCompatibility";
+import { HeatPumpCompatibility } from "@/hooks/usePoolHeatingOptions";
 
 interface HeatPumpSectionProps {
   includeHeatPump: boolean;
