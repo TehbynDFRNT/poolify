@@ -2220,9 +2220,12 @@ export type Database = {
           dig_truck_hours: number | null
           dig_truck_qty: number | null
           dig_truck_rate: number | null
-          elec_fence_earthing: boolean | null
-          elec_heat_pump_circuit: boolean | null
-          elec_standard_power: boolean | null
+          elec_fence_earthing_flag: boolean | null
+          elec_fence_earthing_rate: number | null
+          elec_heat_pump_circuit_flag: boolean | null
+          elec_heat_pump_circuit_rate: number | null
+          elec_standard_power_flag: boolean | null
+          elec_standard_power_rate: number | null
           elec_total_cost: number | null
           email: string | null
           epc_category: string | null
