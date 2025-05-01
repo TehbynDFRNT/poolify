@@ -51,13 +51,27 @@ export const usePoolHeatingOptions = (
         // Fetch compatible heat pump
         const { data: heatPumpData, error: heatPumpError } = await supabase
           .from("heat_pump_pool_compatibility")
-          .select("*")
+          .select(`
+            *,
+            heat_pump_products(cost, rrp, margin)
+          `)
           .eq("pool_model", poolModel)
           .eq("pool_range", poolRange)
           .single();
 
         if (heatPumpError && heatPumpError.code !== 'PGRST116') {
           console.error("Error fetching heat pump compatibility:", heatPumpError);
+        } else if (heatPumpData) {
+          // Format the data to include pricing info from heat pump products
+          const formattedHeatPump = {
+            ...heatPumpData,
+            rrp: heatPumpData.heat_pump_products?.rrp,
+            margin: heatPumpData.heat_pump_products?.margin,
+            // Remove the nested heat_pump_products object
+            heat_pump_products: undefined
+          } as HeatPumpCompatibility;
+          
+          setCompatibleHeatPump(formattedHeatPump);
         }
 
         // Fetch blanket roller
@@ -81,7 +95,6 @@ export const usePoolHeatingOptions = (
           console.error("Error fetching installation options:", installationError);
         }
 
-        setCompatibleHeatPump(heatPumpData);
         setBlanketRoller(blanketRollerData);
         setInstallationOptions(installationData || []);
       } catch (error) {
