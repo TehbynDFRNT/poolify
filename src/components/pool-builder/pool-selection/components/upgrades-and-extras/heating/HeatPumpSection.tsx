@@ -80,4 +80,4 @@ export const HeatPumpSection: React.FC<HeatPumpSectionProps> = ({
       )}
     </div>
   );
-}
+};

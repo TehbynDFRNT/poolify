@@ -48,31 +48,34 @@ export const usePoolHeatingOptions = (
     const fetchHeatingOptions = async () => {
       setIsLoading(true);
       try {
-        // Fetch compatible heat pump
+        // Fetch compatible heat pump with explicit fields selection
         const { data: heatPumpData, error: heatPumpError } = await supabase
           .from("heat_pump_pool_compatibility")
-          .select(`
-            *,
-            heat_pump_products(cost, rrp, margin)
-          `)
+          .select("*, heat_pump_products(cost, rrp, margin)")
           .eq("pool_model", poolModel)
           .eq("pool_range", poolRange)
           .single();
 
         if (heatPumpError) {
+          // Only log if it's not a "no rows returned" error
           if (heatPumpError.code !== 'PGRST116') {
             console.error("Error fetching heat pump compatibility:", heatPumpError);
           }
           setCompatibleHeatPump(null);
         } else if (heatPumpData) {
           // Format the data to include pricing info from heat pump products
-          const formattedHeatPump = {
-            ...heatPumpData,
+          const formattedHeatPump: HeatPumpCompatibility = {
+            id: heatPumpData.id,
+            heat_pump_id: heatPumpData.heat_pump_id,
+            pool_model: heatPumpData.pool_model,
+            pool_range: heatPumpData.pool_range,
+            hp_description: heatPumpData.hp_description,
+            hp_sku: heatPumpData.hp_sku,
+            created_at: heatPumpData.created_at,
+            updated_at: heatPumpData.updated_at,
             rrp: heatPumpData.heat_pump_products?.rrp,
-            margin: heatPumpData.heat_pump_products?.margin,
-            // Remove the nested heat_pump_products object to match our interface
-            heat_pump_products: undefined
-          } as HeatPumpCompatibility;
+            margin: heatPumpData.heat_pump_products?.margin
+          };
           
           setCompatibleHeatPump(formattedHeatPump);
         }
@@ -104,6 +107,7 @@ export const usePoolHeatingOptions = (
         setInstallationOptions(installationData || []);
       } catch (error) {
         console.error("Error in usePoolHeatingOptions:", error);
+        setCompatibleHeatPump(null);
       } finally {
         setIsLoading(false);
       }
