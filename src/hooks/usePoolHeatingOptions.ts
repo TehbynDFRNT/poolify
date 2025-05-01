@@ -48,36 +48,38 @@ export const usePoolHeatingOptions = (
     const fetchHeatingOptions = async () => {
       setIsLoading(true);
       try {
-        // Fetch compatible heat pump with explicit fields selection
+        // Fetch compatible heat pump - using standard select instead of single()
         const { data: heatPumpData, error: heatPumpError } = await supabase
           .from("heat_pump_pool_compatibility")
           .select("*, heat_pump_products(cost, rrp, margin)")
           .eq("pool_model", poolModel)
-          .eq("pool_range", poolRange)
-          .single();
+          .eq("pool_range", poolRange);
 
         if (heatPumpError) {
-          // Only log if it's not a "no rows returned" error
-          if (heatPumpError.code !== 'PGRST116') {
-            console.error("Error fetching heat pump compatibility:", heatPumpError);
-          }
+          console.error("Error fetching heat pump compatibility:", heatPumpError);
           setCompatibleHeatPump(null);
-        } else if (heatPumpData) {
+        } else if (heatPumpData && heatPumpData.length > 0) {
+          // Take the first matching heat pump (most recent)
+          const mostRecentHeatPump = heatPumpData[0];
+          
           // Format the data to include pricing info from heat pump products
           const formattedHeatPump: HeatPumpCompatibility = {
-            id: heatPumpData.id,
-            heat_pump_id: heatPumpData.heat_pump_id,
-            pool_model: heatPumpData.pool_model,
-            pool_range: heatPumpData.pool_range,
-            hp_description: heatPumpData.hp_description,
-            hp_sku: heatPumpData.hp_sku,
-            created_at: heatPumpData.created_at,
-            updated_at: heatPumpData.updated_at,
-            rrp: heatPumpData.heat_pump_products?.rrp,
-            margin: heatPumpData.heat_pump_products?.margin
+            id: mostRecentHeatPump.id,
+            heat_pump_id: mostRecentHeatPump.heat_pump_id,
+            pool_model: mostRecentHeatPump.pool_model,
+            pool_range: mostRecentHeatPump.pool_range,
+            hp_description: mostRecentHeatPump.hp_description,
+            hp_sku: mostRecentHeatPump.hp_sku,
+            created_at: mostRecentHeatPump.created_at,
+            updated_at: mostRecentHeatPump.updated_at,
+            rrp: mostRecentHeatPump.heat_pump_products?.rrp,
+            margin: mostRecentHeatPump.heat_pump_products?.margin
           };
           
           setCompatibleHeatPump(formattedHeatPump);
+        } else {
+          // No heat pump found
+          setCompatibleHeatPump(null);
         }
 
         // Fetch blanket roller
