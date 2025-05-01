@@ -2220,6 +2220,10 @@ export type Database = {
           dig_truck_hours: number | null
           dig_truck_qty: number | null
           dig_truck_rate: number | null
+          elec_fence_earthing: boolean | null
+          elec_heat_pump_circuit: boolean | null
+          elec_standard_power: boolean | null
+          elec_total_cost: number | null
           email: string | null
           epc_category: string | null
           epc_margin_cost: number | null
@@ -2228,7 +2232,10 @@ export type Database = {
           existing_paving_category: string | null
           existing_paving_cost: number | null
           existing_paving_sqm: number | null
-          extra_concreting_cost: number | null
+          extra_concreting_base_price: number | null
+          extra_concreting_calc_total: number | null
+          extra_concreting_margin: number | null
+          extra_concreting_saved_total: number | null
           extra_concreting_sqm: number | null
           extra_concreting_type: string | null
           extra_concreting_unit_price: number | null
