@@ -48,7 +48,6 @@ export const usePoolHeatingOptions = (
     const fetchHeatingOptions = async () => {
       setIsLoading(true);
       try {
-        console.log("Fetching heating options for", poolModel, poolRange);
         // Fetch compatible heat pump
         const { data: heatPumpData, error: heatPumpError } = await supabase
           .from("heat_pump_pool_compatibility")
@@ -63,12 +62,9 @@ export const usePoolHeatingOptions = (
         if (heatPumpError) {
           if (heatPumpError.code !== 'PGRST116') {
             console.error("Error fetching heat pump compatibility:", heatPumpError);
-          } else {
-            console.log("No compatible heat pump found for this pool model");
           }
           setCompatibleHeatPump(null);
         } else if (heatPumpData) {
-          console.log("Found heat pump compatibility data:", heatPumpData);
           // Format the data to include pricing info from heat pump products
           const formattedHeatPump = {
             ...heatPumpData,
@@ -92,8 +88,6 @@ export const usePoolHeatingOptions = (
         if (blanketRollerError) {
           if (blanketRollerError.code !== 'PGRST116') {
             console.error("Error fetching blanket roller:", blanketRollerError);
-          } else {
-            console.log("No compatible blanket roller found for this pool model");
           }
         }
         
