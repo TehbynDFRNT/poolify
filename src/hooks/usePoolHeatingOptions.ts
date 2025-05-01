@@ -48,6 +48,7 @@ export const usePoolHeatingOptions = (
     const fetchHeatingOptions = async () => {
       setIsLoading(true);
       try {
+        console.log("Fetching heating options for", poolModel, poolRange);
         // Fetch compatible heat pump
         const { data: heatPumpData, error: heatPumpError } = await supabase
           .from("heat_pump_pool_compatibility")
@@ -59,15 +60,21 @@ export const usePoolHeatingOptions = (
           .eq("pool_range", poolRange)
           .single();
 
-        if (heatPumpError && heatPumpError.code !== 'PGRST116') {
-          console.error("Error fetching heat pump compatibility:", heatPumpError);
+        if (heatPumpError) {
+          if (heatPumpError.code !== 'PGRST116') {
+            console.error("Error fetching heat pump compatibility:", heatPumpError);
+          } else {
+            console.log("No compatible heat pump found for this pool model");
+          }
+          setCompatibleHeatPump(null);
         } else if (heatPumpData) {
+          console.log("Found heat pump compatibility data:", heatPumpData);
           // Format the data to include pricing info from heat pump products
           const formattedHeatPump = {
             ...heatPumpData,
             rrp: heatPumpData.heat_pump_products?.rrp,
             margin: heatPumpData.heat_pump_products?.margin,
-            // Remove the nested heat_pump_products object
+            // Remove the nested heat_pump_products object to match our interface
             heat_pump_products: undefined
           } as HeatPumpCompatibility;
           
@@ -82,8 +89,12 @@ export const usePoolHeatingOptions = (
           .eq("pool_range", poolRange)
           .single();
 
-        if (blanketRollerError && blanketRollerError.code !== 'PGRST116') {
-          console.error("Error fetching blanket roller:", blanketRollerError);
+        if (blanketRollerError) {
+          if (blanketRollerError.code !== 'PGRST116') {
+            console.error("Error fetching blanket roller:", blanketRollerError);
+          } else {
+            console.log("No compatible blanket roller found for this pool model");
+          }
         }
         
         // Fetch installation options
