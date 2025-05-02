@@ -81,6 +81,13 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     fetchExistingOptions();
   }, [customerId, pool.id]);
 
+  // Reset includeHeatPump if there's no compatible heat pump
+  useEffect(() => {
+    if (!compatibleHeatPump && includeHeatPump) {
+      setIncludeHeatPump(false);
+    }
+  }, [compatibleHeatPump, includeHeatPump]);
+
   const saveHeatingOptions = async () => {
     if (!customerId || !pool.id) return;
 
