@@ -3,13 +3,15 @@ import React, { useState, useEffect } from "react";
 import { Pool } from "@/types/pool";
 import { usePoolHeatingOptions } from "@/hooks/usePoolHeatingOptions";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { HeatingOptionsSummary } from "./HeatingOptionsSummary";
 import { HeatPumpSection } from "./HeatPumpSection";
 import { BlanketRollerSection } from "./BlanketRollerSection";
-import { formatCurrency } from "@/utils/format";
+import { BlanketRoller } from "@/types/blanket-roller";
+import { HeatPumpCompatibility } from "@/hooks/usePoolHeatingOptions";
 
 interface HeatingOptionsContentProps {
   pool: Pool;
@@ -18,66 +20,62 @@ interface HeatingOptionsContentProps {
 
 export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
   pool,
-  customerId,
+  customerId
 }) => {
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
   const [includeHeatPump, setIncludeHeatPump] = useState(false);
   const [includeBlanketRoller, setIncludeBlanketRoller] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
 
-  const { compatibleHeatPump, blanketRoller, getInstallationCost } = usePoolHeatingOptions(
-    pool.id,
-    pool.name,
-    pool.range || ""
-  );
+  const {
+    isLoading,
+    compatibleHeatPump,
+    blanketRoller,
+    getInstallationCost
+  } = usePoolHeatingOptions(pool.id, pool.name || "", pool.range);
 
-  // Calculate the total costs
-  const heatPumpInstallationCost = includeHeatPump ? getInstallationCost("Heat Pump") : 0;
-  const blanketRollerInstallationCost = includeBlanketRoller ? getInstallationCost("Blanket & Roller") : 0;
+  // Calculate costs
+  const heatPumpCost = includeHeatPump && compatibleHeatPump ? compatibleHeatPump.rrp : 0;
+  const blanketRollerCost = includeBlanketRoller && blanketRoller ? blanketRoller.rrp : 0;
+  const heatPumpInstallCost = includeHeatPump ? getInstallationCost('heat_pump') : 0;
+  const blanketRollerInstallCost = includeBlanketRoller ? getInstallationCost('blanket_roller') : 0;
   
-  const heatPumpTotalCost = includeHeatPump && compatibleHeatPump 
-    ? compatibleHeatPump.rrp + heatPumpInstallationCost
-    : 0;
-    
-  const blanketRollerTotalCost = includeBlanketRoller && blanketRoller 
-    ? blanketRoller.rrp + blanketRollerInstallationCost
-    : 0;
-    
-  const totalCost = heatPumpTotalCost + blanketRollerTotalCost;
-  
-  // Calculate the total margin
+  const totalHeatPumpCost = heatPumpCost + heatPumpInstallCost;
+  const totalBlanketRollerCost = blanketRollerCost + blanketRollerInstallCost;
+  const totalCost = totalHeatPumpCost + totalBlanketRollerCost;
+
+  // Calculate margin
   const heatPumpMargin = includeHeatPump && compatibleHeatPump ? compatibleHeatPump.margin : 0;
   const blanketRollerMargin = includeBlanketRoller && blanketRoller ? blanketRoller.margin : 0;
-  const totalMargin = heatPumpMargin + blanketRollerMargin;
+  const totalMargin = (heatPumpMargin + blanketRollerMargin) / 2; // Average margin
 
-  // Fetch existing options on component mount
+  // Load existing selections if customer ID is available
   useEffect(() => {
     const fetchExistingOptions = async () => {
       if (!customerId || !pool.id) return;
-
-      setIsLoading(true);
+      
       try {
         const { data, error } = await supabase
-          .from("pool_heating_options")
-          .select("*")
-          .eq("customer_id", customerId)
-          .eq("pool_id", pool.id)
+          .from('pool_heating_options')
+          .select('*')
+          .eq('customer_id', customerId)
+          .eq('pool_id', pool.id)
           .maybeSingle();
-
-        if (error) throw error;
-
+          
+        if (error) {
+          console.error('Error fetching existing heating options:', error);
+          return;
+        }
+        
         if (data) {
           setIncludeHeatPump(data.include_heat_pump);
           setIncludeBlanketRoller(data.include_blanket_roller);
         }
       } catch (error) {
-        console.error("Error fetching heating options:", error);
-      } finally {
-        setIsLoading(false);
+        console.error('Error in fetchExistingOptions:', error);
       }
     };
-
+    
     fetchExistingOptions();
   }, [customerId, pool.id]);
 
@@ -90,8 +88,9 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
 
   const saveHeatingOptions = async () => {
     if (!customerId || !pool.id) return;
-
+    
     setIsSaving(true);
+    
     try {
       const payload = {
         customer_id: customerId,
@@ -100,55 +99,55 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         include_blanket_roller: includeBlanketRoller,
         heat_pump_id: includeHeatPump && compatibleHeatPump ? compatibleHeatPump.heat_pump_id : null,
         blanket_roller_id: includeBlanketRoller && blanketRoller ? blanketRoller.id : null,
-        heat_pump_cost: heatPumpTotalCost,
-        blanket_roller_cost: blanketRollerTotalCost,
+        heat_pump_cost: totalHeatPumpCost,
+        blanket_roller_cost: totalBlanketRollerCost,
         total_cost: totalCost,
-        total_margin: totalMargin,
+        total_margin: totalMargin
       };
-
-      // Check if a record already exists
+      
+      // Check if an entry already exists
       const { data: existing, error: checkError } = await supabase
-        .from("pool_heating_options")
-        .select("id")
-        .eq("customer_id", customerId)
-        .eq("pool_id", pool.id)
+        .from('pool_heating_options')
+        .select('id')
+        .eq('customer_id', customerId)
+        .eq('pool_id', pool.id)
         .maybeSingle();
-
+        
       if (checkError) throw checkError;
-
+      
       if (existing) {
         // Update existing record
-        const { error } = await supabase
-          .from("pool_heating_options")
+        const { error: updateError } = await supabase
+          .from('pool_heating_options')
           .update(payload)
-          .eq("id", existing.id);
-
-        if (error) throw error;
+          .eq('id', existing.id);
+          
+        if (updateError) throw updateError;
       } else {
         // Insert new record
-        const { error } = await supabase
-          .from("pool_heating_options")
-          .insert(payload);
-
-        if (error) throw error;
+        const { error: insertError } = await supabase
+          .from('pool_heating_options')
+          .insert([payload]);
+          
+        if (insertError) throw insertError;
       }
-
+      
       toast({
         title: "Success",
-        description: "Heating options saved successfully",
+        description: "Heating options saved successfully"
       });
     } catch (error) {
-      console.error("Error saving heating options:", error);
+      console.error('Error saving heating options:', error);
       toast({
         title: "Error",
         description: "Failed to save heating options",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSaving(false);
     }
   };
-
+  
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -160,48 +159,47 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
 
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-medium">Heating Options</h3>
-      
-      <p className="text-sm text-muted-foreground">
-        Extend your swimming season with our heating options. Choose from heat pumps and solar blankets to maintain 
-        comfortable water temperature and reduce energy costs.
+      <p className="text-sm text-muted-foreground mb-6">
+        Choose from our range of heating solutions to extend your swimming season.
+        Our options include energy-efficient heat pumps and solar blankets to maintain
+        your pool temperature while reducing energy costs.
       </p>
-
+      
       <HeatPumpSection
         compatibleHeatPump={compatibleHeatPump}
         includeHeatPump={includeHeatPump}
         setIncludeHeatPump={setIncludeHeatPump}
-        installationCost={heatPumpInstallationCost}
-        totalCost={heatPumpTotalCost}
+        installationCost={heatPumpInstallCost}
+        totalCost={totalHeatPumpCost}
       />
-
+      
       <BlanketRollerSection
         blanketRoller={blanketRoller}
         includeBlanketRoller={includeBlanketRoller}
         setIncludeBlanketRoller={setIncludeBlanketRoller}
-        installationCost={blanketRollerInstallationCost}
-        totalCost={blanketRollerTotalCost}
+        installationCost={blanketRollerInstallCost}
+        totalCost={totalBlanketRollerCost}
       />
-
-      <HeatingOptionsSummary 
-        compatibleHeatPump={compatibleHeatPump}
-        blanketRoller={blanketRoller}
+      
+      <HeatingOptionsSummary
         includeHeatPump={includeHeatPump}
         includeBlanketRoller={includeBlanketRoller}
-        heatPumpInstallationCost={heatPumpInstallationCost}
-        blanketRollerInstallationCost={blanketRollerInstallationCost}
+        heatPumpCost={heatPumpCost}
+        blanketRollerCost={blanketRollerCost}
+        heatPumpInstallCost={heatPumpInstallCost}
+        blanketRollerInstallCost={blanketRollerInstallCost}
         totalCost={totalCost}
       />
-
+      
       {customerId && (
         <div className="flex justify-end mt-6">
-          <Button
-            onClick={saveHeatingOptions}
+          <Button 
+            onClick={saveHeatingOptions} 
             disabled={isSaving}
             className="flex items-center gap-2"
           >
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {isSaving ? "Saving..." : "Save Heating Options"}
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {isSaving ? 'Saving...' : 'Save Heating Options'}
           </Button>
         </div>
       )}

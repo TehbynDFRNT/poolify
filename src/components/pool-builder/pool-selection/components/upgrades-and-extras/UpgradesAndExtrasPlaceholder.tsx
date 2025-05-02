@@ -41,7 +41,7 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="heating" className="w-full">
+          <Tabs defaultValue="general" className="w-full">
             <TabsList className="mb-4">
               <TabsTrigger value="general">General</TabsTrigger>
               <TabsTrigger value="heating">Heating</TabsTrigger>
