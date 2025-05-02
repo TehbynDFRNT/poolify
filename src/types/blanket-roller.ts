@@ -10,3 +10,9 @@ export interface BlanketRoller {
   rrp: number;
   created_at: string;
 }
+
+export const calculateMarginValue = (rrp: number, trade: number): number => {
+  if (rrp <= 0 || trade <= 0) return 0;
+  return Number((rrp - trade).toFixed(2));
+};
+

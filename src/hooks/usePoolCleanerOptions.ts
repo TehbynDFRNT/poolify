@@ -1,153 +1,123 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { PoolCleaner } from "@/types/pool-cleaner";
-import { toast } from "sonner";
 
-interface PoolCleanerSelection {
-  id: string;
-  customer_id: string;
-  pool_id: string;
-  pool_cleaner_id: string;
-  include_cleaner: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-export const usePoolCleanerOptions = (
-  poolId: string | null,
-  customerId: string | null
-) => {
+export const usePoolCleanerOptions = (poolId: string, customerId: string | null) => {
   const [isLoading, setIsLoading] = useState(true);
   const [availableCleaners, setAvailableCleaners] = useState<PoolCleaner[]>([]);
   const [selectedCleaner, setSelectedCleaner] = useState<PoolCleaner | null>(null);
   const [includeCleaner, setIncludeCleaner] = useState(false);
-  const [existingSelection, setExistingSelection] = useState<PoolCleanerSelection | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
 
-  // Fetch available pool cleaners and existing selection
+  // Calculate totals
+  const totalCost = includeCleaner && selectedCleaner ? selectedCleaner.rrp : 0;
+  const margin = includeCleaner && selectedCleaner ? selectedCleaner.margin : 0;
+
   useEffect(() => {
-    if (poolId && customerId) {
-      fetchPoolCleanerOptions();
-    } else {
-      setIsLoading(false);
-    }
-  }, [poolId, customerId]);
+    const fetchPoolCleaners = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch all pool cleaners
+        const { data: cleaners, error } = await supabase
+          .from("pool_cleaners")
+          .select("*");
 
-  // When the selected cleaner changes, update the include cleaner state
-  useEffect(() => {
-    if (selectedCleaner) {
-      setIncludeCleaner(true);
-    } else {
-      setIncludeCleaner(false);
-    }
-  }, [selectedCleaner]);
+        if (error) {
+          throw error;
+        }
 
-  const fetchPoolCleanerOptions = async () => {
-    setIsLoading(true);
-    try {
-      // Fetch all available pool cleaners
-      const { data: cleanersData, error: cleanersError } = await supabase
-        .from("pool_cleaners")
-        .select("*")
-        .order("model_number");
+        setAvailableCleaners(cleaners || []);
 
-      if (cleanersError) {
-        console.error("Error fetching pool cleaners:", cleanersError);
-        toast.error("Failed to load pool cleaners");
-      } else {
-        setAvailableCleaners(cleanersData || []);
-      }
+        // If customerId is provided, fetch existing selection
+        if (customerId) {
+          const { data: existingSelection, error: selectionError } = await supabase
+            .from("pool_cleaner_options")
+            .select("*")
+            .eq("pool_id", poolId)
+            .eq("customer_id", customerId)
+            .single();
 
-      // Fetch existing selection for this customer and pool
-      if (customerId && poolId) {
-        const { data: selectionData, error: selectionError } = await supabase
-          .from("pool_cleaner_selections")
-          .select("*, pool_cleaners(*)")
-          .eq("customer_id", customerId)
-          .eq("pool_id", poolId)
-          .maybeSingle();
-
-        if (selectionError && selectionError.code !== "PGRST116") {
-          console.error("Error fetching pool cleaner selection:", selectionError);
-        } else if (selectionData) {
-          setExistingSelection(selectionData);
-          setIncludeCleaner(selectionData.include_cleaner);
-          
-          // If they have a selected cleaner, find it in the available cleaners
-          if (selectionData.include_cleaner && selectionData.pool_cleaner_id) {
-            const cleaner = cleanersData?.find(c => c.id === selectionData.pool_cleaner_id) || null;
-            setSelectedCleaner(cleaner);
+          if (!selectionError && existingSelection) {
+            setIncludeCleaner(existingSelection.include_cleaner);
+            
+            // Find the selected cleaner
+            if (existingSelection.cleaner_id) {
+              const selected = cleaners?.find(c => c.id === existingSelection.cleaner_id) || null;
+              setSelectedCleaner(selected);
+            }
           }
         }
+      } catch (error) {
+        console.error("Error fetching pool cleaner data:", error);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error("Error in usePoolCleanerOptions:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    };
+
+    fetchPoolCleaners();
+  }, [poolId, customerId]);
 
   const savePoolCleanerSelection = async () => {
-    if (!poolId || !customerId) {
-      toast.error("Pool and customer information required");
-      return;
-    }
-
-    if (includeCleaner && !selectedCleaner) {
-      toast.error("Please select a pool cleaner");
-      return;
-    }
+    if (!customerId) return;
 
     setIsSaving(true);
-
     try {
-      const selectionData = {
+      const payload = {
         customer_id: customerId,
         pool_id: poolId,
-        pool_cleaner_id: selectedCleaner?.id || availableCleaners[0]?.id,
         include_cleaner: includeCleaner,
+        cleaner_id: includeCleaner && selectedCleaner ? selectedCleaner.id : null,
+        cleaner_cost: totalCost,
+        cleaner_margin: margin,
       };
 
-      let error;
-      
-      if (existingSelection) {
-        // Update existing selection
-        const { error: updateError } = await supabase
-          .from("pool_cleaner_selections")
-          .update(selectionData)
-          .eq("id", existingSelection.id);
-          
-        error = updateError;
+      // Check if a record already exists
+      const { data: existing, error: checkError } = await supabase
+        .from("pool_cleaner_options")
+        .select("id")
+        .eq("pool_id", poolId)
+        .eq("customer_id", customerId)
+        .maybeSingle();
+
+      if (checkError) {
+        throw checkError;
+      }
+
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase
+          .from("pool_cleaner_options")
+          .update(payload)
+          .eq("id", existing.id);
+
+        if (error) throw error;
       } else {
-        // Create new selection
-        const { error: insertError } = await supabase
-          .from("pool_cleaner_selections")
-          .insert(selectionData);
-          
-        error = insertError;
+        // Insert new record
+        const { error } = await supabase
+          .from("pool_cleaner_options")
+          .insert(payload);
+
+        if (error) throw error;
       }
 
-      if (error) {
-        throw error;
-      }
-
-      toast.success("Pool cleaner selection saved");
-      // Refresh data
-      fetchPoolCleanerOptions();
+      toast({
+        title: "Success",
+        description: "Pool cleaner options saved successfully",
+      });
     } catch (error) {
-      console.error("Error saving pool cleaner selection:", error);
-      toast.error("Failed to save pool cleaner selection");
+      console.error("Error saving pool cleaner options:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save pool cleaner options",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
   };
-
-  // Calculate total cost (just the price of the cleaner for now)
-  const totalCost = selectedCleaner && includeCleaner ? selectedCleaner.price : 0;
-  
-  // Calculate margin
-  const margin = selectedCleaner && includeCleaner ? selectedCleaner.margin : 0;
 
   return {
     isLoading,
@@ -159,6 +129,6 @@ export const usePoolCleanerOptions = (
     isSaving,
     savePoolCleanerSelection,
     totalCost,
-    margin
+    margin,
   };
 };

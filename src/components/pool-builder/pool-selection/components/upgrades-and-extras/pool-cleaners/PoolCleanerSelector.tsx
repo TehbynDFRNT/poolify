@@ -1,11 +1,10 @@
 
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { formatCurrency } from "@/utils/format";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PoolCleaner } from "@/types/pool-cleaner";
+import { Waves } from "lucide-react";
 
 interface PoolCleanerSelectorProps {
   availableCleaners: PoolCleaner[];
@@ -20,79 +19,61 @@ export const PoolCleanerSelector: React.FC<PoolCleanerSelectorProps> = ({
   selectedCleaner,
   setSelectedCleaner,
   includeCleaner,
-  setIncludeCleaner
+  setIncludeCleaner,
 }) => {
-  // Handle the change in the pool cleaner selection
-  const handleCleanerSelect = (cleanerId: string) => {
-    const cleaner = availableCleaners.find(c => c.id === cleanerId);
-    if (cleaner) {
-      setSelectedCleaner(cleaner);
-    }
+  const handleCleanerChange = (cleanerId: string) => {
+    const cleaner = availableCleaners.find((c) => c.id === cleanerId) || null;
+    setSelectedCleaner(cleaner);
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">Pool Cleaner Options</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex items-center justify-between">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Waves className="h-4 w-4 text-primary" />
           <Label htmlFor="include-cleaner" className="font-medium">
-            Include Automatic Pool Cleaner
+            Would you like to add an automatic pool cleaner?
           </Label>
-          <Switch 
-            id="include-cleaner"
-            checked={includeCleaner}
-            onCheckedChange={setIncludeCleaner}
-          />
         </div>
-        
-        {includeCleaner && (
-          <div className="space-y-4 mt-4">
-            <div className="space-y-2">
-              <Label htmlFor="cleaner-select">Select Pool Cleaner</Label>
-              <Select
-                value={selectedCleaner?.id || ""}
-                onValueChange={handleCleanerSelect}
-                disabled={!includeCleaner}
-              >
-                <SelectTrigger id="cleaner-select">
-                  <SelectValue placeholder="Select a pool cleaner" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableCleaners.length > 0 ? (
-                    availableCleaners.map(cleaner => (
-                      <SelectItem key={cleaner.id} value={cleaner.id}>
-                        <div className="flex justify-between w-full">
-                          <span>{cleaner.name} ({cleaner.model_number})</span>
-                          <span className="text-muted-foreground ml-4">
-                            {formatCurrency(cleaner.price)}
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>No pool cleaners available</SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {selectedCleaner && (
-              <div className="bg-muted p-4 rounded-md">
-                <h4 className="font-medium mb-2">{selectedCleaner.name}</h4>
-                <p className="text-sm text-muted-foreground mb-2">
-                  {selectedCleaner.description || `Model: ${selectedCleaner.model_number}`}
-                </p>
-                <div className="flex justify-between text-sm">
-                  <span>Price:</span>
-                  <span className="font-medium">{formatCurrency(selectedCleaner.price)}</span>
-                </div>
+        <Switch
+          id="include-cleaner"
+          checked={includeCleaner}
+          onCheckedChange={setIncludeCleaner}
+        />
+      </div>
+
+      {includeCleaner && (
+        <div className="pl-6 border-l-2 border-muted p-4">
+          <Label htmlFor="cleaner-select" className="mb-2 block">
+            Select a Pool Cleaner
+          </Label>
+          <Select
+            value={selectedCleaner?.id || ""}
+            onValueChange={handleCleanerChange}
+          >
+            <SelectTrigger className="w-full" id="cleaner-select">
+              <SelectValue placeholder="Select a pool cleaner..." />
+            </SelectTrigger>
+            <SelectContent>
+              {availableCleaners.map((cleaner) => (
+                <SelectItem key={cleaner.id} value={cleaner.id}>
+                  {cleaner.name} - {cleaner.description}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {selectedCleaner && (
+            <div className="mt-4 bg-muted/30 p-4 rounded-md">
+              <div className="space-y-2">
+                <h4 className="font-medium">{selectedCleaner.name}</h4>
+                <p className="text-sm text-muted-foreground">{selectedCleaner.description}</p>
+                <div className="text-xs text-muted-foreground">SKU: {selectedCleaner.sku}</div>
               </div>
-            )}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 };

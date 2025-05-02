@@ -5,4 +5,5 @@ export interface HeatingInstallation {
   installation_cost: number;
   installation_inclusions: string;
   created_at?: string;
+  updated_at?: string;
 }

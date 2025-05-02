@@ -1,11 +1,23 @@
 
 export interface PoolCleaner {
   id: string;
-  model_number: string;
   name: string;
-  price: number;
-  cost_price: number;
+  description: string;
+  sku: string;
+  trade: number;
   margin: number;
-  created_at: string;
-  description?: string;
+  rrp: number;
+  created_at?: string;
+}
+
+export interface PoolCleanerOptions {
+  id?: string;
+  customer_id: string;
+  pool_id: string;
+  include_cleaner: boolean;
+  cleaner_id: string | null;
+  cleaner_cost: number;
+  cleaner_margin: number;
+  created_at?: string;
+  updated_at?: string;
 }
