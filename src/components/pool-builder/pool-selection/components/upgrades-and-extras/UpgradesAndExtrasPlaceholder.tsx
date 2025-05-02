@@ -5,6 +5,7 @@ import { Pool } from "@/types/pool";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
 import { HeatingOptionsContent } from "./heating/HeatingOptionsContent";
+import { PoolCleanersContent } from "./pool-cleaners/PoolCleanersContent";
 
 interface UpgradesAndExtrasPlaceholderProps {
   pool: Pool | null;
@@ -62,6 +63,10 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
             
             <TabsContent value="heating-cleaners" className="space-y-6">
               <HeatingOptionsContent pool={pool} customerId={customerId} />
+              <div className="mt-6 pt-6 border-t">
+                <h3 className="text-lg font-medium mb-4">Pool Cleaners</h3>
+                <PoolCleanersContent pool={pool} customerId={customerId} />
+              </div>
             </TabsContent>
           </Tabs>
         </CardContent>

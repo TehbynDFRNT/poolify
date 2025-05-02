@@ -68,7 +68,7 @@ export const PoolCleanerSelector: React.FC<PoolCleanerSelectorProps> = ({
               <div className="space-y-2">
                 <h4 className="font-medium">{selectedCleaner.name}</h4>
                 <p className="text-sm text-muted-foreground">{selectedCleaner.description}</p>
-                <div className="text-xs text-muted-foreground">SKU: {selectedCleaner.sku}</div>
+                <div className="text-xs text-muted-foreground">SKU: {selectedCleaner.model_number || selectedCleaner.sku}</div>
               </div>
             </div>
           )}

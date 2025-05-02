@@ -33,19 +33,14 @@ export const usePoolHeatingOptions = (
       try {
         // Fetch matching heat pump for the pool model and range
         const { data: heatPumpData, error: heatPumpError } = await supabase
-          .from("pool_heat_pump_compatibility")
+          .from("heat_pump_pool_compatibility")
           .select(`
             id, 
             pool_range, 
             pool_model,
             heat_pump_id,
-            hp_details:heat_pumps(
-              sku, 
-              description, 
-              trade, 
-              margin, 
-              rrp
-            )
+            hp_sku, 
+            hp_description
           `)
           .eq("pool_range", poolRange)
           .eq("pool_model", poolModel)
@@ -54,17 +49,28 @@ export const usePoolHeatingOptions = (
         if (heatPumpError) {
           console.error("Error fetching heat pump compatibility:", heatPumpError);
         } else if (heatPumpData) {
-          setCompatibleHeatPump({
-            id: heatPumpData.id,
-            pool_range: heatPumpData.pool_range,
-            pool_model: heatPumpData.pool_model,
-            heat_pump_id: heatPumpData.heat_pump_id,
-            hp_sku: heatPumpData.hp_details?.sku || "",
-            hp_description: heatPumpData.hp_details?.description || "",
-            rrp: heatPumpData.hp_details?.rrp || 0,
-            trade: heatPumpData.hp_details?.trade || 0,
-            margin: heatPumpData.hp_details?.margin || 0,
-          });
+          // Get the heat pump details separately
+          const { data: heatPumpDetails, error: heatPumpDetailsError } = await supabase
+            .from("heat_pump_products")
+            .select("*")
+            .eq("id", heatPumpData.heat_pump_id)
+            .maybeSingle();
+            
+          if (heatPumpDetailsError) {
+            console.error("Error fetching heat pump details:", heatPumpDetailsError);
+          } else if (heatPumpDetails) {
+            setCompatibleHeatPump({
+              id: heatPumpData.id,
+              pool_range: heatPumpData.pool_range,
+              pool_model: heatPumpData.pool_model,
+              heat_pump_id: heatPumpData.heat_pump_id,
+              hp_sku: heatPumpData.hp_sku || "",
+              hp_description: heatPumpData.hp_description || "",
+              rrp: heatPumpDetails.rrp || 0,
+              trade: heatPumpDetails.cost || 0,
+              margin: heatPumpDetails.margin || 0,
+            });
+          }
         }
 
         // Fetch matching blanket and roller for the pool model and range
@@ -90,7 +96,7 @@ export const usePoolHeatingOptions = (
           console.error("Error fetching heating installations:", installationsError);
         } else {
           // Fix the type issue by making sure the array elements match the HeatingInstallation interface
-          const typedInstallations = installationsData.map((item: any) => ({
+          const typedInstallations: HeatingInstallation[] = installationsData.map((item: any) => ({
             id: item.id,
             installation_type: item.installation_type,
             installation_cost: item.installation_cost,

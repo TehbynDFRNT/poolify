@@ -29,12 +29,27 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
           throw error;
         }
 
-        setAvailableCleaners(cleaners || []);
+        // Map the database fields to match our PoolCleaner interface
+        const mappedCleaners: PoolCleaner[] = cleaners.map((cleaner: any) => ({
+          id: cleaner.id,
+          name: cleaner.name,
+          description: cleaner.description || "",
+          model_number: cleaner.model_number,
+          sku: cleaner.model_number || "", // Using model_number as sku if needed
+          trade: cleaner.cost_price || 0,
+          margin: cleaner.margin || 0,
+          rrp: cleaner.price || 0,
+          price: cleaner.price,
+          cost_price: cleaner.cost_price,
+          created_at: cleaner.created_at
+        }));
+        
+        setAvailableCleaners(mappedCleaners);
 
         // If customerId is provided, fetch existing selection
         if (customerId) {
           const { data: existingSelection, error: selectionError } = await supabase
-            .from("pool_cleaner_options")
+            .from("pool_cleaner_selections")
             .select("*")
             .eq("pool_id", poolId)
             .eq("customer_id", customerId)
@@ -44,8 +59,8 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
             setIncludeCleaner(existingSelection.include_cleaner);
             
             // Find the selected cleaner
-            if (existingSelection.cleaner_id) {
-              const selected = cleaners?.find(c => c.id === existingSelection.cleaner_id) || null;
+            if (existingSelection.pool_cleaner_id) {
+              const selected = mappedCleaners.find(c => c.id === existingSelection.pool_cleaner_id) || null;
               setSelectedCleaner(selected);
             }
           }
@@ -69,14 +84,12 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
         customer_id: customerId,
         pool_id: poolId,
         include_cleaner: includeCleaner,
-        cleaner_id: includeCleaner && selectedCleaner ? selectedCleaner.id : null,
-        cleaner_cost: totalCost,
-        cleaner_margin: margin,
+        pool_cleaner_id: includeCleaner && selectedCleaner ? selectedCleaner.id : null,
       };
 
       // Check if a record already exists
       const { data: existing, error: checkError } = await supabase
-        .from("pool_cleaner_options")
+        .from("pool_cleaner_selections")
         .select("id")
         .eq("pool_id", poolId)
         .eq("customer_id", customerId)
@@ -89,7 +102,7 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
       if (existing) {
         // Update existing record
         const { error } = await supabase
-          .from("pool_cleaner_options")
+          .from("pool_cleaner_selections")
           .update(payload)
           .eq("id", existing.id);
 
@@ -97,7 +110,7 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
       } else {
         // Insert new record
         const { error } = await supabase
-          .from("pool_cleaner_options")
+          .from("pool_cleaner_selections")
           .insert(payload);
 
         if (error) throw error;
