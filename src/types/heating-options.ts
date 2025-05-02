@@ -1,14 +1,6 @@
 
-export interface HeatingInstallation {
-  id: string;
-  installation_type: string;
-  installation_cost: number;
-  installation_inclusions: string;
-  created_at: string;
-}
-
 export interface PoolHeatingOptions {
-  id: string;
+  id?: string;
   customer_id: string;
   pool_id: string;
   include_heat_pump: boolean;
@@ -19,6 +11,14 @@ export interface PoolHeatingOptions {
   blanket_roller_cost: number;
   total_cost: number;
   total_margin: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface HeatingInstallation {
+  id: string;
+  installation_type: string;
+  installation_cost: number;
   created_at: string;
   updated_at: string;
 }

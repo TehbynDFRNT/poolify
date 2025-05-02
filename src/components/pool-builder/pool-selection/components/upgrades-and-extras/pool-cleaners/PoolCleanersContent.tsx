@@ -2,10 +2,11 @@
 import React from "react";
 import { Pool } from "@/types/pool";
 import { usePoolCleanerOptions } from "@/hooks/usePoolCleanerOptions";
+import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import { PoolCleanerSelector } from "./PoolCleanerSelector";
 import { PoolCleanersSummary } from "./PoolCleanersSummary";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
 
 interface PoolCleanersContentProps {
   pool: Pool;
@@ -31,7 +32,7 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
 
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center py-8">
+      <div className="flex items-center justify-center py-8">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
         <span className="ml-2">Loading pool cleaner options...</span>
       </div>
@@ -40,31 +41,25 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Description */}
-      <div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Pool cleaners help maintain your pool by automatically removing debris and keeping the water clean.
-          Select from our range of quality pool cleaners below.
-        </p>
-      </div>
-
-      {/* Pool Cleaner Selector */}
-      <PoolCleanerSelector
+      <p className="text-sm text-muted-foreground mb-6">
+        Select a pool cleaner that best suits your needs. Our range of automatic pool cleaners 
+        help maintain your pool with minimal effort, ensuring clean and clear water.
+      </p>
+      
+      <PoolCleanerSelector 
         availableCleaners={availableCleaners}
         selectedCleaner={selectedCleaner}
         setSelectedCleaner={setSelectedCleaner}
         includeCleaner={includeCleaner}
         setIncludeCleaner={setIncludeCleaner}
       />
-
-      {/* Cost Summary */}
-      <PoolCleanersSummary
+      
+      <PoolCleanersSummary 
         selectedCleaner={selectedCleaner}
         includeCleaner={includeCleaner}
         totalCost={totalCost}
       />
-
-      {/* Save Button */}
+      
       {customerId && (
         <div className="flex justify-end mt-6">
           <Button 
@@ -72,8 +67,8 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
             disabled={isSaving}
             className="flex items-center gap-2"
           >
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-            Save Pool Cleaner Selection
+            {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+            {isSaving ? 'Saving...' : 'Save Pool Cleaner'}
           </Button>
         </div>
       )}

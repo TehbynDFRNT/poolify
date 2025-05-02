@@ -1,11 +1,11 @@
 
 import React from "react";
-import { PoolCleaner } from "@/types/pool-cleaner";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CircleSlash } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { formatCurrency } from "@/utils/format";
+import { PoolCleaner } from "@/types/pool-cleaner";
 
 interface PoolCleanerSelectorProps {
   availableCleaners: PoolCleaner[];
@@ -22,74 +22,77 @@ export const PoolCleanerSelector: React.FC<PoolCleanerSelectorProps> = ({
   includeCleaner,
   setIncludeCleaner
 }) => {
-  const handleSwitchChange = (checked: boolean) => {
-    setIncludeCleaner(checked);
-    if (!checked) {
-      setSelectedCleaner(null);
-    } else if (availableCleaners.length > 0 && !selectedCleaner) {
-      setSelectedCleaner(availableCleaners[0]);
+  // Handle the change in the pool cleaner selection
+  const handleCleanerSelect = (cleanerId: string) => {
+    const cleaner = availableCleaners.find(c => c.id === cleanerId);
+    if (cleaner) {
+      setSelectedCleaner(cleaner);
     }
   };
 
-  const handleSelectChange = (value: string) => {
-    const cleaner = availableCleaners.find(c => c.id === value) || null;
-    setSelectedCleaner(cleaner);
-  };
-
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label htmlFor="include-cleaner" className="font-medium">
-          Include pool cleaner
-        </Label>
-        <Switch 
-          id="include-cleaner" 
-          checked={includeCleaner} 
-          onCheckedChange={handleSwitchChange}
-        />
-      </div>
-
-      {includeCleaner && (
-        <div className="bg-muted/30 p-4 rounded-md space-y-3">
-          <div className="space-y-2">
-            <Label htmlFor="cleaner-select">Select Pool Cleaner</Label>
-            <Select
-              value={selectedCleaner?.id || ""}
-              onValueChange={handleSelectChange}
-            >
-              <SelectTrigger id="cleaner-select" className="w-full">
-                <SelectValue placeholder="Select a pool cleaner" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableCleaners.length > 0 ? (
-                  availableCleaners.map((cleaner) => (
-                    <SelectItem key={cleaner.id} value={cleaner.id}>
-                      {cleaner.name} - {formatCurrency(cleaner.price)}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <div className="flex items-center justify-center px-2 py-4 text-muted-foreground">
-                    <CircleSlash className="h-4 w-4 mr-2" />
-                    No pool cleaners available
-                  </div>
-                )}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {selectedCleaner && (
-            <div className="bg-white rounded-md p-3 text-sm border">
-              <h4 className="font-medium">{selectedCleaner.name}</h4>
-              <div className="text-muted-foreground mt-1">
-                <p>Model: {selectedCleaner.model_number}</p>
-                {selectedCleaner.description && (
-                  <p className="mt-1">{selectedCleaner.description}</p>
-                )}
-              </div>
-            </div>
-          )}
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-lg">Pool Cleaner Options</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="include-cleaner" className="font-medium">
+            Include Automatic Pool Cleaner
+          </Label>
+          <Switch 
+            id="include-cleaner"
+            checked={includeCleaner}
+            onCheckedChange={setIncludeCleaner}
+          />
         </div>
-      )}
-    </div>
+        
+        {includeCleaner && (
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="cleaner-select">Select Pool Cleaner</Label>
+              <Select
+                value={selectedCleaner?.id || ""}
+                onValueChange={handleCleanerSelect}
+                disabled={!includeCleaner}
+              >
+                <SelectTrigger id="cleaner-select">
+                  <SelectValue placeholder="Select a pool cleaner" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCleaners.length > 0 ? (
+                    availableCleaners.map(cleaner => (
+                      <SelectItem key={cleaner.id} value={cleaner.id}>
+                        <div className="flex justify-between w-full">
+                          <span>{cleaner.name} ({cleaner.model_number})</span>
+                          <span className="text-muted-foreground ml-4">
+                            {formatCurrency(cleaner.price)}
+                          </span>
+                        </div>
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="none" disabled>No pool cleaners available</SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            {selectedCleaner && (
+              <div className="bg-muted p-4 rounded-md">
+                <h4 className="font-medium mb-2">{selectedCleaner.name}</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {selectedCleaner.description || `Model: ${selectedCleaner.model_number}`}
+                </p>
+                <div className="flex justify-between text-sm">
+                  <span>Price:</span>
+                  <span className="font-medium">{formatCurrency(selectedCleaner.price)}</span>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };

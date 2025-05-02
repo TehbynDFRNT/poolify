@@ -1,16 +1,12 @@
 
 export interface BlanketRoller {
   id: string;
-  pool_range: string;
   pool_model: string;
-  sku: string;
+  pool_range: string;
   description: string;
-  rrp: number;
+  sku: string;
   trade: number;
   margin: number;
+  rrp: number;
   created_at: string;
 }
-
-export const calculateMarginValue = (rrp: number, trade: number): number => {
-  return rrp - trade;
-};

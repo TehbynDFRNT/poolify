@@ -7,8 +7,7 @@ import { useHeatingOptionsState } from "@/hooks/useHeatingOptionsState";
 import { HeatPumpSection } from "./HeatPumpSection";
 import { BlanketRollerSection } from "./BlanketRollerSection";
 import { HeatingOptionsSummary } from "./HeatingOptionsSummary";
-import { Loader2, Thermometer, Scroll, Waves } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Loader2, Thermometer, Waves } from "lucide-react";
 import { PoolCleanersContent } from "../pool-cleaners/PoolCleanersContent";
 
 interface HeatingOptionsContentProps {
@@ -104,19 +103,6 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
           onSave={saveHeatingOptions}
           customerId={customerId}
         />
-        
-        {customerId && (
-          <div className="flex justify-end mt-6">
-            <Button 
-              onClick={saveHeatingOptions} 
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-              Save Heating Options
-            </Button>
-          </div>
-        )}
       </TabsContent>
       
       <TabsContent value="cleaners" className="space-y-6">
