@@ -165,6 +165,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         includeHeatPump={includeHeatPump}
         setIncludeHeatPump={setIncludeHeatPump}
         installationCost={heatPumpInstallationCost}
+        totalCost={heatPumpTotalCost}
       />
 
       <BlanketRollerSection
@@ -172,6 +173,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         includeBlanketRoller={includeBlanketRoller}
         setIncludeBlanketRoller={setIncludeBlanketRoller}
         installationCost={blanketRollerInstallationCost}
+        totalCost={blanketRollerTotalCost}
       />
 
       <HeatingOptionsSummary 

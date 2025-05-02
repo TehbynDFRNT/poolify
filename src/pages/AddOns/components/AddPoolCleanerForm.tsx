@@ -51,8 +51,12 @@ export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormPro
         name: formData.name,
         price: price,
         cost_price: costPrice,
-        margin: margin, // Send calculated margin
-        description: formData.description || undefined,
+        margin: margin,
+        description: formData.description || "",
+        // Add missing properties required by the PoolCleaner type
+        sku: formData.model_number, // Using model_number as SKU
+        trade: costPrice, // Using cost_price as trade
+        rrp: price, // Using price as rrp
       });
 
       // Reset form and close dialog
