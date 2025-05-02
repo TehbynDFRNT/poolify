@@ -41,10 +41,11 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="heating-cleaners" className="w-full">
+          <Tabs defaultValue="heating" className="w-full">
             <TabsList className="mb-4">
               <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="heating-cleaners">Heating & Cleaners</TabsTrigger>
+              <TabsTrigger value="heating">Heating</TabsTrigger>
+              <TabsTrigger value="cleaners">Pool Cleaners</TabsTrigger>
             </TabsList>
             
             <TabsContent value="general" className="space-y-4">
@@ -61,12 +62,12 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
               </div>
             </TabsContent>
             
-            <TabsContent value="heating-cleaners" className="space-y-6">
+            <TabsContent value="heating" className="space-y-6">
               <HeatingOptionsContent pool={pool} customerId={customerId} />
-              <div className="mt-6 pt-6 border-t">
-                <h3 className="text-lg font-medium mb-4">Pool Cleaners</h3>
-                <PoolCleanersContent pool={pool} customerId={customerId} />
-              </div>
+            </TabsContent>
+
+            <TabsContent value="cleaners" className="space-y-6">
+              <PoolCleanersContent pool={pool} customerId={customerId} />
             </TabsContent>
           </Tabs>
         </CardContent>
