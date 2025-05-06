@@ -2373,12 +2373,38 @@ export type Database = {
           extra_concreting_unit_price: number | null
           extra_paving_cost: number | null
           extra_paving_sqm: number | null
+          fencing_total_cost: number | null
           fixed_costs_json: Json | null
+          fp_filter_description: string | null
+          fp_filter_model: string | null
+          fp_filter_name: string | null
           fp_filter_price: number | null
+          fp_handover_description: string | null
+          fp_handover_kit_price: number | null
+          fp_handover_model: string | null
+          fp_handover_name: string | null
+          fp_light_description: string | null
+          fp_light_model: string | null
+          fp_light_name: string | null
           fp_light_price: number | null
           fp_name: string | null
+          fp_pump_description: string | null
+          fp_pump_model: string | null
+          fp_pump_name: string | null
           fp_pump_price: number | null
+          fp_sanitiser_description: string | null
+          fp_sanitiser_model: string | null
+          fp_sanitiser_name: string | null
           fp_sanitiser_price: number | null
+          glass_complex_panels: number | null
+          glass_earthing_cost: number | null
+          glass_earthing_required: boolean | null
+          glass_fence_cost: number | null
+          glass_fence_total_cost: number | null
+          glass_gate_cost: number | null
+          glass_gates: number | null
+          glass_linear_meters: number | null
+          glass_simple_panels: number | null
           heat_pump_cost: number | null
           heat_pump_description: string | null
           heat_pump_install_cost: number | null
@@ -2392,6 +2418,15 @@ export type Database = {
           include_blanket_roller: boolean | null
           include_heat_pump: boolean | null
           installation_area: string | null
+          metal_complex_panels: number | null
+          metal_earthing_cost: number | null
+          metal_earthing_required: boolean | null
+          metal_fence_cost: number | null
+          metal_fence_total_cost: number | null
+          metal_gate_cost: number | null
+          metal_gates: number | null
+          metal_linear_meters: number | null
+          metal_simple_panels: number | null
           owner1: string | null
           owner2: string | null
           pc_beam: number | null
