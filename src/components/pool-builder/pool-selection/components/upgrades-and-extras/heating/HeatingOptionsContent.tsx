@@ -45,8 +45,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     customerId,
     compatibleHeatPump,
     blanketRoller,
-    heatPumpInstallationCost: heatPumpInstallCost,
-    blanketRollerInstallationCost: blanketRollerInstallCost
+    getInstallationCost: getInstallationCost
   });
 
   const isLoading = isLoadingBaseOptions || isLoadingSelections;

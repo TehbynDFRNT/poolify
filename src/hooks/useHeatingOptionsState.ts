@@ -10,8 +10,7 @@ interface UseHeatingOptionsStateProps {
   customerId: string | null;
   compatibleHeatPump: HeatPumpCompatibility | null;
   blanketRoller: BlanketRoller | null;
-  heatPumpInstallationCost: number;
-  blanketRollerInstallationCost: number;
+  getInstallationCost: (type: 'heat_pump' | 'blanket_roller') => number;
 }
 
 export function useHeatingOptionsState({
@@ -19,8 +18,7 @@ export function useHeatingOptionsState({
   customerId,
   compatibleHeatPump,
   blanketRoller,
-  heatPumpInstallationCost,
-  blanketRollerInstallationCost
+  getInstallationCost
 }: UseHeatingOptionsStateProps) {
   const [includeHeatPump, setIncludeHeatPump] = useState(false);
   const [includeBlanketRoller, setIncludeBlanketRoller] = useState(false);
@@ -34,11 +32,11 @@ export function useHeatingOptionsState({
 
   // Calculate costs based on CURRENT selections and product data (for dynamic updates)
   const currentHeatPumpTotalCost = includeHeatPump && compatibleHeatPump
-    ? (compatibleHeatPump.rrp || 0) + heatPumpInstallationCost
+    ? (compatibleHeatPump.rrp || 0) + getInstallationCost('heat_pump')
     : 0;
 
   const currentBlanketRollerTotalCost = includeBlanketRoller && blanketRoller
-    ? (blanketRoller.rrp || 0) + blanketRollerInstallationCost
+    ? (blanketRoller.rrp || 0) + getInstallationCost('blanket_roller')
     : 0;
 
   const currentTotalCost = currentHeatPumpTotalCost + currentBlanketRollerTotalCost;
