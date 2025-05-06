@@ -1,10 +1,9 @@
-
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { PoolHeatingOptions } from "@/types/heating-options";
-import { toast } from "sonner";
 import { HeatPumpCompatibility } from "@/hooks/usePoolHeatingOptions";
+import { supabase } from "@/integrations/supabase/client";
 import { BlanketRoller } from "@/types/blanket-roller";
+import { PoolProject } from "@/types/pool";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface UseHeatingOptionsStateProps {
   poolId: string | null;
@@ -26,115 +25,130 @@ export function useHeatingOptionsState({
   const [includeHeatPump, setIncludeHeatPump] = useState(false);
   const [includeBlanketRoller, setIncludeBlanketRoller] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoadingProject, setIsLoadingProject] = useState(true);
 
-  // Calculate costs
-  const heatPumpTotalCost = includeHeatPump && compatibleHeatPump 
+  // State for initially loaded costs from DB
+  const [initialHeatPumpCost, setInitialHeatPumpCost] = useState<number>(0);
+  const [initialBlanketRollerCost, setInitialBlanketRollerCost] = useState<number>(0);
+  const [initialTotalCost, setInitialTotalCost] = useState<number>(0);
+
+  // Calculate costs based on CURRENT selections and product data (for dynamic updates)
+  const currentHeatPumpTotalCost = includeHeatPump && compatibleHeatPump
     ? (compatibleHeatPump.rrp || 0) + heatPumpInstallationCost
     : 0;
 
-  const blanketRollerTotalCost = includeBlanketRoller && blanketRoller
-    ? blanketRoller.rrp + blanketRollerInstallationCost
+  const currentBlanketRollerTotalCost = includeBlanketRoller && blanketRoller
+    ? (blanketRoller.rrp || 0) + blanketRollerInstallationCost
     : 0;
 
-  const totalCost = heatPumpTotalCost + blanketRollerTotalCost;
-  
-  // Calculate margins
-  const heatPumpMargin = includeHeatPump && compatibleHeatPump ? compatibleHeatPump.margin || 0 : 0;
-  const blanketRollerMargin = includeBlanketRoller && blanketRoller ? blanketRoller.margin || 0 : 0;
-  const totalMargin = heatPumpMargin + blanketRollerMargin;
+  const currentTotalCost = currentHeatPumpTotalCost + currentBlanketRollerTotalCost;
 
-  // Load existing selections when component mounts
+  // Calculate margins based on CURRENT selections (if needed elsewhere)
+  const currentHeatPumpMargin = includeHeatPump && compatibleHeatPump ? compatibleHeatPump.margin || 0 : 0;
+  const currentBlanketRollerMargin = includeBlanketRoller && blanketRoller ? blanketRoller.margin || 0 : 0;
+  const currentTotalMargin = currentHeatPumpMargin + currentBlanketRollerMargin;
+
+  // Load existing selections AND COSTS from pool_projects table
   useEffect(() => {
-    if (customerId && poolId) {
+    setIsLoadingProject(true);
+    if (customerId) {
       fetchHeatingOptions();
     }
-  }, [customerId, poolId]);
+  }, [customerId]);
 
   const fetchHeatingOptions = async () => {
-    if (!customerId || !poolId) return;
-    
+    if (!customerId) return;
+    setIsLoadingProject(true);
     try {
+      // Fetch relevant fields including costs from pool_projects
       const { data, error } = await supabase
-        .from('pool_heating_options')
-        .select('*')
-        .eq('customer_id', customerId)
-        .eq('pool_id', poolId)
+        .from('pool_projects')
+        .select(`
+          include_heat_pump,
+          include_blanket_roller,
+          heat_pump_cost, 
+          blanket_roller_cost,
+          heating_total_cost
+        `)
+        .eq('id', customerId)
         .maybeSingle();
-        
+
       if (error) {
-        console.error("Error fetching heating options:", error);
+        console.error("Error fetching project heating options:", error);
+        toast.error("Failed to load existing heating selections.");
         return;
       }
-      
+
       if (data) {
-        const heatingOptions = data as PoolHeatingOptions;
-        setIncludeHeatPump(heatingOptions.include_heat_pump);
-        setIncludeBlanketRoller(heatingOptions.include_blanket_roller);
+        const projectData = data as unknown as Partial<PoolProject>;
+        // Set include flags
+        setIncludeHeatPump(projectData.include_heat_pump ?? false);
+        setIncludeBlanketRoller(projectData.include_blanket_roller ?? false);
+        // Set initial costs from DB
+        setInitialHeatPumpCost(projectData.heat_pump_cost ?? 0);
+        setInitialBlanketRollerCost(projectData.blanket_roller_cost ?? 0);
+        setInitialTotalCost(projectData.heating_total_cost ?? 0);
+      } else {
+        // If no data, reset initial costs
+        setInitialHeatPumpCost(0);
+        setInitialBlanketRollerCost(0);
+        setInitialTotalCost(0);
       }
     } catch (error) {
-      console.error("Error fetching heating options:", error);
+      console.error("Error fetching project heating options:", error);
+      toast.error("Failed to load existing heating selections.");
+      // Reset costs on error too?
+      setInitialHeatPumpCost(0);
+      setInitialBlanketRollerCost(0);
+      setInitialTotalCost(0);
+    } finally {
+      setIsLoadingProject(false);
     }
   };
 
   const saveHeatingOptions = async () => {
-    if (!customerId || !poolId) {
+    if (!customerId) {
       toast.error("Customer information is required to save heating options");
       return;
     }
-    
     setIsSaving(true);
-    
     try {
-      const heatingOptionsData = {
-        customer_id: customerId,
-        pool_id: poolId,
+      // Calculate costs TO BE SAVED based on current selections/prices
+      const heatPumpCostToSave = currentHeatPumpTotalCost;
+      const blanketRollerCostToSave = currentBlanketRollerTotalCost;
+      const totalCostToSave = currentTotalCost;
+      const totalMarginToSave = currentTotalMargin; // Calculate margin to save
+
+      const projectUpdateData: Partial<PoolProject> = {
         include_heat_pump: includeHeatPump,
         include_blanket_roller: includeBlanketRoller,
         heat_pump_id: includeHeatPump && compatibleHeatPump ? compatibleHeatPump.heat_pump_id : null,
         blanket_roller_id: includeBlanketRoller && blanketRoller ? blanketRoller.id : null,
-        heat_pump_cost: heatPumpTotalCost,
-        blanket_roller_cost: blanketRollerTotalCost,
-        total_cost: totalCost,
-        total_margin: totalMargin
+        // Save the newly calculated costs
+        heat_pump_cost: heatPumpCostToSave,
+        blanket_roller_cost: blanketRollerCostToSave,
+        heating_total_cost: totalCostToSave,
+        heating_total_margin: totalMarginToSave
       };
-      
-      // Check if a record already exists
-      const { data: existingData, error: fetchError } = await supabase
-        .from('pool_heating_options')
-        .select('id')
-        .eq('customer_id', customerId)
-        .eq('pool_id', poolId)
-        .maybeSingle();
-        
-      if (fetchError) {
-        console.error("Error checking existing data:", fetchError);
-        throw fetchError;
+
+      const { error } = await supabase
+        .from('pool_projects')
+        .update(projectUpdateData)
+        .eq('id', customerId);
+
+      if (error) {
+        console.error("Error updating pool_projects with heating options:", error);
+        throw error;
       }
-      
-      let error;
-      
-      if (existingData?.id) {
-        // Update existing record
-        const { error: updateError } = await supabase
-          .from('pool_heating_options')
-          .update(heatingOptionsData)
-          .eq('id', existingData.id);
-          
-        error = updateError;
-      } else {
-        // Insert new record
-        const { error: insertError } = await supabase
-          .from('pool_heating_options')
-          .insert(heatingOptionsData);
-          
-        error = insertError;
-      }
-      
-      if (error) throw error;
-      
+
+      // After successful save, update the 'initial' costs to match what was just saved
+      setInitialHeatPumpCost(heatPumpCostToSave);
+      setInitialBlanketRollerCost(blanketRollerCostToSave);
+      setInitialTotalCost(totalCostToSave);
+
       toast.success("Heating options saved successfully");
+
     } catch (error) {
-      console.error("Error saving heating options:", error);
       toast.error("Failed to save heating options");
     } finally {
       setIsSaving(false);
@@ -142,17 +156,22 @@ export function useHeatingOptionsState({
   };
 
   return {
+    isLoading: isLoadingProject,
     includeHeatPump,
     setIncludeHeatPump,
     includeBlanketRoller,
     setIncludeBlanketRoller,
     isSaving,
     saveHeatingOptions,
-    heatPumpTotalCost,
-    blanketRollerTotalCost,
-    totalCost,
-    totalMargin,
-    heatPumpMargin,
-    blanketRollerMargin
+    // Return both initial (fetched) and current (recalculated) costs
+    initialHeatPumpCost,
+    initialBlanketRollerCost,
+    initialTotalCost,
+    currentHeatPumpTotalCost,
+    currentBlanketRollerTotalCost,
+    currentTotalCost,
+    currentTotalMargin,
+    currentHeatPumpMargin,
+    currentBlanketRollerMargin
   };
 }

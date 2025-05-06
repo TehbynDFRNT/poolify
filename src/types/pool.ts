@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 export interface Pool {
@@ -29,7 +28,7 @@ export interface Pool {
   notes?: string;
   created_at: string;
   updated_at: string;
-  
+
   // Additional properties from pool_specifications table
   range?: string;
   pool_type_id?: string;
@@ -65,6 +64,14 @@ export interface PoolProject {
   crane_id?: string;
   traffic_control_id?: string;
   bobcat_id?: string;
+  heat_pump_id?: string | null;
+  blanket_roller_id?: string | null;
+  include_heat_pump?: boolean;
+  include_blanket_roller?: boolean;
+  heat_pump_cost?: number;
+  blanket_roller_cost?: number;
+  heating_total_cost?: number;
+  heating_total_margin?: number;
   site_requirements_data?: any[];
   site_requirements_notes?: string;
   created_at: string;

@@ -1382,6 +1382,8 @@ export type Database = {
       }
       pool_projects: {
         Row: {
+          blanket_roller_cost: number
+          blanket_roller_id: string | null
           bobcat_id: string | null
           concrete_cuts: string | null
           concrete_cuts_cost: number | null
@@ -1400,8 +1402,14 @@ export type Database = {
           extra_paving_category: string | null
           extra_paving_square_meters: number | null
           extra_paving_total_cost: number | null
+          heat_pump_cost: number
+          heat_pump_id: string | null
+          heating_total_cost: number
+          heating_total_margin: number
           home_address: string
           id: string
+          include_blanket_roller: boolean
+          include_heat_pump: boolean
           installation_area: string
           owner1: string
           owner2: string | null
@@ -1439,6 +1447,8 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          blanket_roller_cost?: number
+          blanket_roller_id?: string | null
           bobcat_id?: string | null
           concrete_cuts?: string | null
           concrete_cuts_cost?: number | null
@@ -1457,8 +1467,14 @@ export type Database = {
           extra_paving_category?: string | null
           extra_paving_square_meters?: number | null
           extra_paving_total_cost?: number | null
+          heat_pump_cost?: number
+          heat_pump_id?: string | null
+          heating_total_cost?: number
+          heating_total_margin?: number
           home_address: string
           id?: string
+          include_blanket_roller?: boolean
+          include_heat_pump?: boolean
           installation_area: string
           owner1: string
           owner2?: string | null
@@ -1496,6 +1512,8 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          blanket_roller_cost?: number
+          blanket_roller_id?: string | null
           bobcat_id?: string | null
           concrete_cuts?: string | null
           concrete_cuts_cost?: number | null
@@ -1514,8 +1532,14 @@ export type Database = {
           extra_paving_category?: string | null
           extra_paving_square_meters?: number | null
           extra_paving_total_cost?: number | null
+          heat_pump_cost?: number
+          heat_pump_id?: string | null
+          heating_total_cost?: number
+          heating_total_margin?: number
           home_address?: string
           id?: string
+          include_blanket_roller?: boolean
+          include_heat_pump?: boolean
           installation_area?: string
           owner1?: string
           owner2?: string | null
@@ -2298,8 +2322,20 @@ export type Database = {
     Views: {
       proposal_snapshot_v: {
         Row: {
+          blanket_roller_cost: number | null
+          blanket_roller_description: string | null
+          blanket_roller_margin: number | null
+          blanket_roller_rrp: number | null
+          blanket_roller_sku: string | null
           bob_size_category: string | null
           bobcat_cost: number | null
+          br_install_cost: number | null
+          br_install_inclusions: string | null
+          cleaner_cost_price: number | null
+          cleaner_included: boolean | null
+          cleaner_margin: number | null
+          cleaner_name: string | null
+          cleaner_unit_price: number | null
           concrete_cuts_cost: number | null
           concrete_cuts_json: Json | null
           concrete_pump_needed: boolean | null
@@ -2343,7 +2379,18 @@ export type Database = {
           fp_name: string | null
           fp_pump_price: number | null
           fp_sanitiser_price: number | null
+          heat_pump_cost: number | null
+          heat_pump_description: string | null
+          heat_pump_install_cost: number | null
+          heat_pump_install_inclusions: string | null
+          heat_pump_margin: number | null
+          heat_pump_rrp: number | null
+          heat_pump_sku: string | null
+          heating_total_cost: number | null
+          heating_total_margin: number | null
           home_address: string | null
+          include_blanket_roller: boolean | null
+          include_heat_pump: boolean | null
           installation_area: string | null
           owner1: string | null
           owner2: string | null

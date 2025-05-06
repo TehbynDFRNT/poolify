@@ -1,16 +1,17 @@
-
-import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { formatCurrency } from "@/utils/format";
-import { Check, X } from "lucide-react";
 import { HeatPumpCompatibility } from '@/hooks/usePoolHeatingOptions';
 import { BlanketRoller } from '@/types/blanket-roller';
+import { formatCurrency } from "@/utils/format";
+import { Check, X } from "lucide-react";
+import React from 'react';
 
 interface HeatingOptionsSummaryProps {
   compatibleHeatPump: HeatPumpCompatibility | null;
   blanketRoller: BlanketRoller | null;
   includeHeatPump: boolean;
   includeBlanketRoller: boolean;
+  heatPumpRrp: number;
+  blanketRollerRrp: number;
   heatPumpInstallationCost: number;
   blanketRollerInstallationCost: number;
   totalCost: number;
@@ -21,6 +22,8 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
   blanketRoller,
   includeHeatPump,
   includeBlanketRoller,
+  heatPumpRrp,
+  blanketRollerRrp,
   heatPumpInstallationCost,
   blanketRollerInstallationCost,
   totalCost,
@@ -64,7 +67,7 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
                   <div className="text-sm mt-1">
                     <div className="flex justify-between">
                       <span>Heat Pump Cost:</span>
-                      <span>{formatCurrency(compatibleHeatPump.rrp)}</span>
+                      <span>{formatCurrency(heatPumpRrp)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Installation:</span>
@@ -81,7 +84,7 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
                   <div className="text-sm mt-1">
                     <div className="flex justify-between">
                       <span>Blanket & Roller Cost:</span>
-                      <span>{formatCurrency(blanketRoller.rrp)}</span>
+                      <span>{formatCurrency(blanketRollerRrp)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Installation:</span>
@@ -91,7 +94,7 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
                 </div>
               )}
             </div>
-            
+
             <div className="space-y-1">
               <div className="flex justify-between border-t pt-1 mt-1">
                 <p className="text-sm font-medium">Total Cost:</p>
