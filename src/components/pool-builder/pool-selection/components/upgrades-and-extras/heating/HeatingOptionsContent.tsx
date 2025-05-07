@@ -37,8 +37,6 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     saveHeatingOptions,
     initialHeatPumpCost,
     initialBlanketRollerCost,
-    currentHeatPumpTotalCost,
-    currentBlanketRollerTotalCost,
     currentTotalCost,
   } = useHeatingOptionsState({
     poolId: pool.id,
@@ -67,9 +65,6 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     );
   }
 
-  const heatPumpRrp = includeHeatPump && compatibleHeatPump ? compatibleHeatPump.rrp : 0;
-  const blanketRollerRrp = includeBlanketRoller && blanketRoller ? blanketRoller.rrp : 0;
-
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground mb-6">
@@ -95,14 +90,8 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
       />
 
       <HeatingOptionsSummary
-        compatibleHeatPump={compatibleHeatPump}
-        blanketRoller={blanketRoller}
         includeHeatPump={includeHeatPump}
         includeBlanketRoller={includeBlanketRoller}
-        heatPumpRrp={heatPumpRrp}
-        blanketRollerRrp={blanketRollerRrp}
-        heatPumpInstallationCost={heatPumpInstallCost}
-        blanketRollerInstallationCost={blanketRollerInstallCost}
         totalCost={currentTotalCost}
       />
 

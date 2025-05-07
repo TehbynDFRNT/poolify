@@ -1,31 +1,33 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { HeatPumpCompatibility } from '@/hooks/usePoolHeatingOptions';
-import { BlanketRoller } from '@/types/blanket-roller';
+// HeatPumpCompatibility and BlanketRoller types might not be needed if not displaying details
+// import { HeatPumpCompatibility } from '@/hooks/usePoolHeatingOptions'; 
+// import { BlanketRoller } from '@/types/blanket-roller';
 import { formatCurrency } from "@/utils/format";
 import { Check, X } from "lucide-react";
 import React from 'react';
 
 interface HeatingOptionsSummaryProps {
-  compatibleHeatPump: HeatPumpCompatibility | null;
-  blanketRoller: BlanketRoller | null;
-  includeHeatPump: boolean;
-  includeBlanketRoller: boolean;
-  heatPumpRrp: number;
-  blanketRollerRrp: number;
-  heatPumpInstallationCost: number;
-  blanketRollerInstallationCost: number;
-  totalCost: number;
+  // Remove props related to individual item details if only showing total
+  // compatibleHeatPump: HeatPumpCompatibility | null;
+  // blanketRoller: BlanketRoller | null;
+  includeHeatPump: boolean; // Still needed to determine if anything is selected
+  includeBlanketRoller: boolean; // Still needed to determine if anything is selected
+  // heatPumpRrp: number;
+  // blanketRollerRrp: number;
+  // heatPumpInstallationCost: number;
+  // blanketRollerInstallationCost: number;
+  totalCost: number; // This is the main prop we need for the total
 }
 
 export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
-  compatibleHeatPump,
-  blanketRoller,
+  // compatibleHeatPump, // Removed
+  // blanketRoller, // Removed
   includeHeatPump,
   includeBlanketRoller,
-  heatPumpRrp,
-  blanketRollerRrp,
-  heatPumpInstallationCost,
-  blanketRollerInstallationCost,
+  // heatPumpRrp, // Removed
+  // blanketRollerRrp, // Removed
+  // heatPumpInstallationCost, // Removed
+  // blanketRollerInstallationCost, // Removed
   totalCost,
 }) => {
   const hasSelections = includeHeatPump || includeBlanketRoller;
@@ -49,59 +51,17 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
   return (
     <Card>
       <CardContent className="p-4">
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-medium">Selected Heating Options</h3>
-            <div className="flex items-center gap-2 text-green-600">
-              <Check className="h-4 w-4" />
-              <span>Included</span>
-            </div>
+        {/* Simplified content - only total cost */}
+        <div className="flex items-center justify-between">
+          <h3 className="font-medium">Selected Heating Options Total</h3>
+          <div className="flex items-center gap-2 text-green-600">
+            <Check className="h-4 w-4" />
+            <span>Included</span>
           </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              {includeHeatPump && compatibleHeatPump && (
-                <div className="mb-3">
-                  <p className="text-sm font-medium">Heat Pump</p>
-                  <p className="text-sm text-muted-foreground">{compatibleHeatPump.hp_description}</p>
-                  <div className="text-sm mt-1">
-                    <div className="flex justify-between">
-                      <span>Heat Pump Cost:</span>
-                      <span>{formatCurrency(heatPumpRrp)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Installation:</span>
-                      <span>{formatCurrency(heatPumpInstallationCost)}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {includeBlanketRoller && blanketRoller && (
-                <div>
-                  <p className="text-sm font-medium">Blanket & Roller</p>
-                  <p className="text-sm text-muted-foreground">{blanketRoller.description}</p>
-                  <div className="text-sm mt-1">
-                    <div className="flex justify-between">
-                      <span>Blanket & Roller Cost:</span>
-                      <span>{formatCurrency(blanketRollerRrp)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Installation:</span>
-                      <span>{formatCurrency(blanketRollerInstallationCost)}</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex justify-between border-t pt-1 mt-1">
-                <p className="text-sm font-medium">Total Cost:</p>
-                <p className="font-bold">{formatCurrency(totalCost)}</p>
-              </div>
-            </div>
-          </div>
+        </div>
+        <div className="flex justify-between border-t pt-2 mt-2">
+          <p className="text-lg font-semibold">Total Cost:</p>
+          <p className="text-lg font-bold">{formatCurrency(totalCost)}</p>
         </div>
       </CardContent>
     </Card>
