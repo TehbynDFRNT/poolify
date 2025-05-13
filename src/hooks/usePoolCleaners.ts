@@ -10,26 +10,31 @@ export const usePoolCleaners = () => {
   const { data: poolCleaners, isLoading } = useQuery({
     queryKey: ['pool-cleaners'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pool_cleaners' as any)
-        .select('*')
-        .order('model_number');
-      
-      if (error) throw error;
-      return data as unknown as PoolCleaner[];
+      try {
+        const { data, error } = await supabase
+          .from('pool_cleaners')
+          .select('*')
+          .order('model_number');
+        
+        if (error) throw error;
+        return data as PoolCleaner[];
+      } catch (error) {
+        console.error("Error fetching pool cleaners:", error);
+        return [];
+      }
     },
   });
 
   const addMutation = useMutation({
     mutationFn: async (newCleaner: Omit<PoolCleaner, 'id' | 'created_at'>) => {
       const { data, error } = await supabase
-        .from('pool_cleaners' as any)
+        .from('pool_cleaners')
         .insert([newCleaner])
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as PoolCleaner;
+      return data as PoolCleaner;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -44,14 +49,14 @@ export const usePoolCleaners = () => {
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<PoolCleaner> }) => {
       const { data, error } = await supabase
-        .from('pool_cleaners' as any)
+        .from('pool_cleaners')
         .update(updates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as PoolCleaner;
+      return data as PoolCleaner;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -66,7 +71,7 @@ export const usePoolCleaners = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('pool_cleaners' as any)
+        .from('pool_cleaners')
         .delete()
         .eq('id', id);
 

@@ -9,7 +9,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { usePoolCleaners } from "@/hooks/usePoolCleaners";
 import { toast } from "sonner";
@@ -19,7 +18,7 @@ interface AddPoolCleanerFormProps {
   onOpenChange: (open: boolean) => void;
 }
 
-export const AddPoolCleanerForm = ({ open, onOpenChange }: AddPoolCleanerFormProps) => {
+export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormProps) {
   const { addPoolCleaner } = usePoolCleaners();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,7 +33,7 @@ export const AddPoolCleanerForm = ({ open, onOpenChange }: AddPoolCleanerFormPro
     e.preventDefault();
     setIsSubmitting(true);
 
-    if (!formData.model_number || !formData.name || !formData.price || !formData.cost_price) {
+    if (!formData.name || !formData.price || !formData.cost_price) {
       toast.error("Please fill in all required fields");
       setIsSubmitting(false);
       return;
@@ -50,14 +49,11 @@ export const AddPoolCleanerForm = ({ open, onOpenChange }: AddPoolCleanerFormPro
       addPoolCleaner({
         model_number: formData.model_number,
         name: formData.name,
-        price: price,
-        cost_price: costPrice,
+        rrp: price,
+        trade: costPrice,
         margin: margin,
         description: formData.description || "",
-        // Add missing properties required by the PoolCleaner type
         sku: formData.model_number, // Using model_number as SKU
-        trade: costPrice, // Using cost_price as trade
-        rrp: price, // Using price as rrp
       });
 
       // Reset form and close dialog
@@ -149,21 +145,20 @@ export const AddPoolCleanerForm = ({ open, onOpenChange }: AddPoolCleanerFormPro
             />
           </div>
 
-          <DialogFooter className="pt-4">
+          <div className="flex justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
             >
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? "Adding..." : "Add Cleaner"}
             </Button>
-          </DialogFooter>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
   );
-};
+}

@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Table, TableBody } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
 import { usePoolCleaners } from "@/hooks/usePoolCleaners";
-import { AddPoolCleanerForm } from "./AddPoolCleanerForm";
 import { PoolCleanersTableHeader } from "./PoolCleanersTableHeader";
 import { EmptyPoolCleanersState } from "./EmptyPoolCleanersState";
 import { PoolCleanerRow } from "./PoolCleanerRow";
 import { PoolCleanersActions } from "./PoolCleanersActions";
 import { usePoolCleanerEditing } from "../../hooks/usePoolCleanerEditing";
+import { AddPoolCleanerForm } from "./AddPoolCleanerForm";
 
 export const PoolCleanersTable = () => {
   const { poolCleaners, isLoading, deletePoolCleaner } = usePoolCleaners();
@@ -42,7 +42,7 @@ export const PoolCleanersTable = () => {
           <Table>
             <PoolCleanersTableHeader />
             <TableBody>
-              {poolCleaners?.length === 0 ? (
+              {!poolCleaners || poolCleaners.length === 0 ? (
                 <EmptyPoolCleanersState />
               ) : (
                 poolCleaners?.map((cleaner) => (
