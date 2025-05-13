@@ -2,16 +2,26 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Zap } from "lucide-react";
 import type { FiltrationComponentType } from "@/types/filtration";
 
 interface AddComponentFormProps {
@@ -21,7 +31,6 @@ interface AddComponentFormProps {
 }
 
 export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComponentFormProps) {
-  const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
@@ -29,9 +38,6 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
     model_number: "",
     description: "",
     type_id: "",
-    price: "",
-    flow_rate: "",
-    power_consumption: "",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,18 +51,12 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
           model_number: formData.model_number,
           description: formData.description || null,
           type_id: formData.type_id,
-          price: parseFloat(formData.price),
-          flow_rate: formData.flow_rate ? parseFloat(formData.flow_rate) : null,
-          power_consumption: formData.power_consumption ? parseFloat(formData.power_consumption) : null,
         },
       ]);
 
       if (error) throw error;
 
-      toast({
-        title: "Success",
-        description: "Component added successfully",
-      });
+      toast.success("Component added successfully");
 
       // Reset form and close dialog
       setFormData({
@@ -64,28 +64,26 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
         model_number: "",
         description: "",
         type_id: "",
-        price: "",
-        flow_rate: "",
-        power_consumption: "",
       });
       onOpenChange(false);
 
       // Refresh the components list
       queryClient.invalidateQueries({ queryKey: ["filtration-components"] });
     } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to add component",
-        variant: "destructive",
-      });
+      toast.error("Failed to add component");
+      console.error("Error adding component:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, type_id: value }));
   };
 
   return (
@@ -119,68 +117,41 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
 
           <div className="space-y-2">
             <Label htmlFor="type_id">Type *</Label>
-            <select
-              id="type_id"
-              name="type_id"
-              className="w-full px-3 py-2 border rounded-md"
-              value={formData.type_id}
-              onChange={handleChange}
+            <Select 
+              value={formData.type_id} 
+              onValueChange={handleSelectChange}
               required
             >
-              <option value="">Select a type</option>
-              {componentTypes.map((type) => (
-                <option key={type.id} value={type.id}>
-                  {type.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="price">Price *</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="flow_rate">Flow Rate (L/min)</Label>
-            <Input
-              id="flow_rate"
-              name="flow_rate"
-              type="number"
-              step="0.1"
-              value={formData.flow_rate}
-              onChange={handleChange}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="power_consumption">Power Consumption (W)</Label>
-            <Input
-              id="power_consumption"
-              name="power_consumption"
-              type="number"
-              step="0.1"
-              value={formData.power_consumption}
-              onChange={handleChange}
-            />
+              <SelectTrigger id="type_id" className="w-full">
+                <SelectValue placeholder="Select a type" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectGroup>
+                  {componentTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="automation">
+                    <div className="flex items-center">
+                      <Zap className="h-4 w-4 mr-2" />
+                      Automation
+                    </div>
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <textarea
+            <Textarea
               id="description"
               name="description"
-              className="w-full px-3 py-2 border rounded-md h-20"
+              className="bg-white min-h-[80px]"
               value={formData.description}
               onChange={handleChange}
+              rows={4}
             />
           </div>
 
