@@ -38,6 +38,7 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
     model_number: "",
     description: "",
     type_id: "",
+    price: 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,6 +52,7 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
           model_number: formData.model_number,
           description: formData.description || null,
           type_id: formData.type_id,
+          price: formData.price
         },
       ]);
 
@@ -64,6 +66,7 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
         model_number: "",
         description: "",
         type_id: "",
+        price: 0,
       });
       onOpenChange(false);
 
@@ -80,6 +83,11 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: parseFloat(value) || 0 }));
   };
 
   const handleSelectChange = (value: string) => {
@@ -116,6 +124,19 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="price">Price *</Label>
+            <Input
+              id="price"
+              name="price"
+              type="number"
+              step="0.01"
+              value={formData.price}
+              onChange={handleNumberChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="type_id">Type *</Label>
             <Select 
               value={formData.type_id} 
@@ -125,7 +146,7 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
               <SelectTrigger id="type_id" className="w-full">
                 <SelectValue placeholder="Select a type" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent>
                 <SelectGroup>
                   {componentTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id}>
@@ -148,7 +169,7 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
             <Textarea
               id="description"
               name="description"
-              className="bg-white min-h-[80px]"
+              className="min-h-[80px]"
               value={formData.description}
               onChange={handleChange}
               rows={4}
