@@ -49,7 +49,7 @@ export function FiltrationComponentsSection({
     try {
       let value: string | number | null = editingCell.value;
       
-      if (['price', 'flow_rate', 'power_consumption'].includes(editingCell.field)) {
+      if (['price_inc_gst', 'price_ex_gst'].includes(editingCell.field)) {
         value = editingCell.value === '' ? null : parseFloat(editingCell.value.toString());
       }
 

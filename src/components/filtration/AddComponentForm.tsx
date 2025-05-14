@@ -38,7 +38,8 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
     model_number: "",
     description: "",
     type_id: "",
-    price: 0,
+    price_ex_gst: 0,
+    price_inc_gst: 0,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -52,7 +53,8 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
           model_number: formData.model_number,
           description: formData.description || null,
           type_id: formData.type_id,
-          price: formData.price
+          price_ex_gst: formData.price_ex_gst,
+          price_inc_gst: formData.price_inc_gst
         },
       ]);
 
@@ -66,7 +68,8 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
         model_number: "",
         description: "",
         type_id: "",
-        price: 0,
+        price_ex_gst: 0,
+        price_inc_gst: 0,
       });
       onOpenChange(false);
 
@@ -124,13 +127,26 @@ export function AddComponentForm({ open, onOpenChange, componentTypes }: AddComp
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="price">Price *</Label>
+            <Label htmlFor="price_ex_gst">Price (ex GST) *</Label>
             <Input
-              id="price"
-              name="price"
+              id="price_ex_gst"
+              name="price_ex_gst"
               type="number"
               step="0.01"
-              value={formData.price}
+              value={formData.price_ex_gst}
+              onChange={handleNumberChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="price_inc_gst">Price (inc GST) *</Label>
+            <Input
+              id="price_inc_gst"
+              name="price_inc_gst"
+              type="number"
+              step="0.01"
+              value={formData.price_inc_gst}
               onChange={handleNumberChange}
               required
             />

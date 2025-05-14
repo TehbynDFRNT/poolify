@@ -17,16 +17,16 @@ export const useFiltrationPackage = (selectedPool: Pool | undefined) => {
           name,
           display_order,
           light:filtration_components!light_id (
-            id, name, model_number, price
+            id, name, model_number, price_inc_gst
           ),
           pump:filtration_components!pump_id (
-            id, name, model_number, price
+            id, name, model_number, price_inc_gst
           ),
           sanitiser:filtration_components!sanitiser_id (
-            id, name, model_number, price
+            id, name, model_number, price_inc_gst
           ),
           filter:filtration_components!filter_id (
-            id, name, model_number, price
+            id, name, model_number, price_inc_gst
           ),
           handover_kit:handover_kit_packages!handover_kit_id (
             id, 
@@ -41,7 +41,7 @@ export const useFiltrationPackage = (selectedPool: Pool | undefined) => {
                 id,
                 name,
                 model_number,
-                price
+                price_inc_gst
               )
             )
           )

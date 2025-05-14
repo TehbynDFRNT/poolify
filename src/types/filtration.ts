@@ -12,9 +12,8 @@ export interface FiltrationComponent {
   name: string;
   description: string | null;
   type_id: string;
-  price: number;
-  flow_rate: number | null;
-  power_consumption: number | null;
+  price_inc_gst: number;
+  price_ex_gst: number;
   created_at: string;
 }
 
@@ -32,7 +31,7 @@ export interface HandoverKitPackageComponent {
   component_id: string;
   quantity: number;
   created_at: string;
-  component?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'>;
+  component?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price_inc_gst' | 'id'>;
 }
 
 export interface FiltrationPackage {
@@ -51,14 +50,13 @@ export interface PackageWithComponents {
   id: string;
   name: string;
   display_order: number;
-  light?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  pump?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  sanitiser?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
-  filter?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'> | null;
+  light?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price_inc_gst' | 'id'> | null;
+  pump?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price_inc_gst' | 'id'> | null;
+  sanitiser?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price_inc_gst' | 'id'> | null;
+  filter?: Pick<FiltrationComponent, 'name' | 'model_number' | 'price_inc_gst' | 'id'> | null;
   handover_kit?: (Pick<HandoverKitPackage, 'name' | 'id'> & { 
     components: (HandoverKitPackageComponent & {
-      component: Pick<FiltrationComponent, 'name' | 'model_number' | 'price' | 'id'>;
+      component: Pick<FiltrationComponent, 'name' | 'model_number' | 'price_inc_gst' | 'id'>;
     })[];
   }) | null;
 }
-

@@ -1,17 +1,34 @@
 
-import type { PackageWithComponents } from "@/types/filtration";
+import { PackageWithComponents } from "@/types/filtration";
 
-export const calculatePackagePrice = (pkg: PackageWithComponents) => {
-  const componentPrices = [
-    pkg.light?.price || 0,
-    pkg.pump?.price || 0,
-    pkg.sanitiser?.price || 0,
-    pkg.filter?.price || 0,
-  ];
+export const calculatePackagePrice = (filtrationPackage: PackageWithComponents): number => {
+  let totalPrice = 0;
 
-  const handoverKitPrice = pkg.handover_kit?.components.reduce((total, comp) => {
-    return total + ((comp.component?.price || 0) * comp.quantity);
-  }, 0) || 0;
+  // Add component prices
+  if (filtrationPackage.pump) {
+    totalPrice += filtrationPackage.pump.price_inc_gst || 0;
+  }
 
-  return componentPrices.reduce((sum, price) => sum + price, 0) + handoverKitPrice;
+  if (filtrationPackage.filter) {
+    totalPrice += filtrationPackage.filter.price_inc_gst || 0;
+  }
+
+  if (filtrationPackage.sanitiser) {
+    totalPrice += filtrationPackage.sanitiser.price_inc_gst || 0;
+  }
+  
+  if (filtrationPackage.light) {
+    totalPrice += filtrationPackage.light.price_inc_gst || 0;
+  }
+
+  // Add handover kit components
+  if (filtrationPackage.handover_kit?.components) {
+    filtrationPackage.handover_kit.components.forEach(item => {
+      if (item.component) {
+        totalPrice += (item.component.price_inc_gst || 0) * (item.quantity || 1);
+      }
+    });
+  }
+
+  return totalPrice;
 };

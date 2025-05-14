@@ -543,34 +543,31 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
-          flow_rate: number | null
           id: string
           model_number: string
           name: string
-          power_consumption: number | null
-          price: number
+          price_ex_gst: number | null
+          price_inc_gst: number
           type_id: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
-          flow_rate?: number | null
           id?: string
           model_number: string
           name: string
-          power_consumption?: number | null
-          price: number
+          price_ex_gst?: number | null
+          price_inc_gst: number
           type_id?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
-          flow_rate?: number | null
           id?: string
           model_number?: string
           name?: string
-          power_consumption?: number | null
-          price?: number
+          price_ex_gst?: number | null
+          price_inc_gst?: number
           type_id?: string | null
         }
         Relationships: [
