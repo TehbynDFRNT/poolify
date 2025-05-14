@@ -11,7 +11,7 @@ interface PoolExcavationContentProps {
 
 export const PoolExcavationContent: React.FC<PoolExcavationContentProps> = ({ pool }) => {
   // Get excavation data for the selected pool
-  const { excavationDetails, getExcavationCost } = useExcavation(pool.id);
+  const { excavationDetails } = useExcavation(pool.id);
   
   if (!excavationDetails) {
     return (
@@ -22,7 +22,9 @@ export const PoolExcavationContent: React.FC<PoolExcavationContentProps> = ({ po
     );
   }
 
-  const excavationCost = getExcavationCost();
+  // Calculate excavation cost manually
+  const excavationCost = excavationDetails.excavation_hourly_rate * excavationDetails.excavation_hours +
+                         (excavationDetails.truck_hourly_rate * excavationDetails.truck_hours * excavationDetails.truck_quantity);
 
   return (
     <div className="space-y-4">
