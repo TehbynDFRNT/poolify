@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { FiltrationComponent } from "@/types/filtration";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,7 +25,7 @@ interface HandoverKitsSectionProps {
 
 interface EditableCell {
   id: string;
-  field: 'model_number' | 'name' | 'description' | 'price';
+  field: 'model_number' | 'name' | 'description' | 'price_inc_gst';
   value: string | number;
 }
 
@@ -47,7 +48,7 @@ export function HandoverKitsSection({
     if (!editingCell) return;
 
     try {
-      const value = editingCell.field === 'price' 
+      const value = editingCell.field === 'price_inc_gst' 
         ? parseFloat(editingCell.value.toString())
         : editingCell.value;
 
@@ -171,7 +172,7 @@ export function HandoverKitsSection({
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingCell?.id === kit.id && editingCell.field === 'price' ? (
+                  {editingCell?.id === kit.id && editingCell.field === 'price_inc_gst' ? (
                     <div className="flex items-center gap-2 justify-end">
                       <Input
                         type="number"

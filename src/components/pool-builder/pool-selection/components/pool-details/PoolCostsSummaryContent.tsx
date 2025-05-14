@@ -1,10 +1,12 @@
+
 import React from "react";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
+import { PackageWithComponents } from "@/types/filtration";
 
 interface PoolCostsSummaryContentProps {
   pool: Pool;
-  filtrationPackage: any;
+  filtrationPackage: PackageWithComponents | null;
   excavationCost: number | null;
   concreteCost: number | null;
 }
@@ -15,15 +17,15 @@ export const PoolCostsSummaryContent: React.FC<PoolCostsSummaryContentProps> = (
   excavationCost,
   concreteCost,
 }) => {
-  const shellCost = pool.price_with_gst || 0;
+  const shellCost = pool.buy_price_inc_gst || 0;
 
-  // Replace any references to 'price' with 'price_inc_gst' in the component
+  // Use price_inc_gst instead of price
   const filtrationCost = 
-    (filtrationPackage.pump?.price_inc_gst || 0) +
-    (filtrationPackage.filter?.price_inc_gst || 0) +
-    (filtrationPackage.sanitiser?.price_inc_gst || 0) + 
-    (filtrationPackage.light?.price_inc_gst || 0) +
-    (filtrationPackage.handover_kit?.components?.reduce(
+    (filtrationPackage?.pump?.price_inc_gst || 0) +
+    (filtrationPackage?.filter?.price_inc_gst || 0) +
+    (filtrationPackage?.sanitiser?.price_inc_gst || 0) + 
+    (filtrationPackage?.light?.price_inc_gst || 0) +
+    (filtrationPackage?.handover_kit?.components?.reduce(
       (acc, item) => acc + ((item.component?.price_inc_gst || 0) * item.quantity), 0
     ) || 0);
 
