@@ -51,6 +51,32 @@ export function FiltrationComponentsSection({
       
       if (['price_inc_gst', 'price_ex_gst'].includes(editingCell.field)) {
         value = editingCell.value === '' ? null : parseFloat(editingCell.value.toString());
+        
+        // If updating the inc GST price, also update the ex GST price
+        if (editingCell.field === 'price_inc_gst' && value !== null) {
+          // Calculate ex GST price (divide by 1.1 for 10% GST)
+          const exGstValue = parseFloat((value / 1.1).toFixed(2));
+          
+          const { error: exGstError } = await supabase
+            .from('filtration_components')
+            .update({ 'price_ex_gst': exGstValue })
+            .eq('id', editingCell.id);
+          
+          if (exGstError) throw exGstError;
+        }
+        
+        // If updating the ex GST price, also update the inc GST price
+        if (editingCell.field === 'price_ex_gst' && value !== null) {
+          // Calculate inc GST price (multiply by 1.1 for 10% GST)
+          const incGstValue = parseFloat((value * 1.1).toFixed(2));
+          
+          const { error: incGstError } = await supabase
+            .from('filtration_components')
+            .update({ 'price_inc_gst': incGstValue })
+            .eq('id', editingCell.id);
+          
+          if (incGstError) throw incGstError;
+        }
       }
 
       if (editingCell.field === 'type_id') {
@@ -90,11 +116,48 @@ export function FiltrationComponentsSection({
     return component.type_id === selectedTypeId;
   });
 
+  // Update all components to set ex GST price based on inc GST price
+  const updateAllExGstPrices = async () => {
+    try {
+      if (!components || components.length === 0) {
+        toast.error("No components to update");
+        return;
+      }
+
+      const updates = components.map(async (component) => {
+        if (component.price_inc_gst) {
+          const exGstPrice = parseFloat((component.price_inc_gst / 1.1).toFixed(2));
+          
+          return supabase
+            .from('filtration_components')
+            .update({ price_ex_gst: exGstPrice })
+            .eq('id', component.id);
+        }
+        return null;
+      });
+
+      await Promise.all(updates.filter(Boolean));
+      
+      queryClient.invalidateQueries({ queryKey: ["filtration-components"] });
+      toast.success("All ex GST prices updated successfully");
+    } catch (error) {
+      console.error('Error updating ex GST prices:', error);
+      toast.error("Failed to update ex GST prices");
+    }
+  };
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Filtration Components</CardTitle>
         <div className="flex gap-4">
+          <Button 
+            variant="outline"
+            onClick={updateAllExGstPrices}
+            className="bg-amber-100 hover:bg-amber-200 text-amber-800 border-amber-300"
+          >
+            Update Ex GST Prices
+          </Button>
           <select
             className="px-4 py-2 border rounded-md"
             value={selectedTypeId || ""}
