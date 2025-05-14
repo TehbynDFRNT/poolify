@@ -70,7 +70,7 @@ export function PackageComponentRow({
               component.quantity
             )}
           >
-            {formatCurrency((component.component?.price || 0) * component.quantity)}
+            {formatCurrency((component.component?.price_inc_gst || 0) * component.quantity)}
             <span className="text-muted-foreground ml-2">
               (x{component.quantity})
             </span>

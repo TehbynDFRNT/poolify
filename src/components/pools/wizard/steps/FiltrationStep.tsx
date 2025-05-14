@@ -31,7 +31,7 @@ interface FiltrationPackage {
 interface FiltrationComponent {
   id: string;
   name: string;
-  price: number;
+  price_inc_gst: number;
 }
 
 const FiltrationStep: React.FC = () => {
@@ -63,14 +63,14 @@ const FiltrationStep: React.FC = () => {
         // Fetch components to calculate prices
         const { data: componentsData, error: componentsError } = await supabase
           .from("filtration_components")
-          .select("id, name, price");
+          .select("id, name, price_inc_gst");
           
         if (componentsError) throw componentsError;
         
         // Map components to a lookup object
         const componentsMap = new Map<string, FiltrationComponent>();
         componentsData?.forEach((component) => {
-          componentsMap.set(component.id, component);
+          componentsMap.set(component.id, component as FiltrationComponent);
         });
         
         // Calculate package prices
@@ -79,19 +79,19 @@ const FiltrationStep: React.FC = () => {
           
           // Add component prices if they exist
           if (pkg.pump_id && componentsMap.has(pkg.pump_id)) {
-            totalPrice += componentsMap.get(pkg.pump_id)!.price;
+            totalPrice += componentsMap.get(pkg.pump_id)!.price_inc_gst || 0;
           }
           
           if (pkg.filter_id && componentsMap.has(pkg.filter_id)) {
-            totalPrice += componentsMap.get(pkg.filter_id)!.price;
+            totalPrice += componentsMap.get(pkg.filter_id)!.price_inc_gst || 0;
           }
           
           if (pkg.light_id && componentsMap.has(pkg.light_id)) {
-            totalPrice += componentsMap.get(pkg.light_id)!.price;
+            totalPrice += componentsMap.get(pkg.light_id)!.price_inc_gst || 0;
           }
           
           if (pkg.sanitiser_id && componentsMap.has(pkg.sanitiser_id)) {
-            totalPrice += componentsMap.get(pkg.sanitiser_id)!.price;
+            totalPrice += componentsMap.get(pkg.sanitiser_id)!.price_inc_gst || 0;
           }
           
           return {

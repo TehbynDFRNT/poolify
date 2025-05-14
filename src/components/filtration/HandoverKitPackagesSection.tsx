@@ -74,7 +74,7 @@ export function HandoverKitPackagesSection({
             .from("handover_kit_package_components")
             .select(`
               *,
-              component:filtration_components(name, model_number, price)
+              component:filtration_components(id, name, model_number, price_inc_gst)
             `)
             .eq("package_id", pkg.id);
 

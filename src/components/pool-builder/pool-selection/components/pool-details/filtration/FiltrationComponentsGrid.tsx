@@ -15,25 +15,25 @@ export const FiltrationComponentsGrid: React.FC<FiltrationComponentsGridProps> =
       <FiltrationComponentItem 
         title="Pump" 
         name={filtrationPackage.pump?.name} 
-        price={filtrationPackage.pump?.price} 
+        price={filtrationPackage.pump?.price_inc_gst} 
       />
       
       <FiltrationComponentItem 
         title="Filter" 
         name={filtrationPackage.filter?.name} 
-        price={filtrationPackage.filter?.price} 
+        price={filtrationPackage.filter?.price_inc_gst} 
       />
       
       <FiltrationComponentItem 
         title="Light" 
         name={filtrationPackage.light?.name} 
-        price={filtrationPackage.light?.price} 
+        price={filtrationPackage.light?.price_inc_gst} 
       />
       
       <FiltrationComponentItem 
         title="Sanitiser" 
         name={filtrationPackage.sanitiser?.name} 
-        price={filtrationPackage.sanitiser?.price} 
+        price={filtrationPackage.sanitiser?.price_inc_gst} 
       />
     </div>
   );

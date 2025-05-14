@@ -22,7 +22,7 @@ export function PackageHeaderRow({ pkg, onEdit }: PackageHeaderRowProps) {
         {formatCurrency(
           pkg.components?.reduce(
             (total, comp) => 
-              total + (comp.component?.price || 0) * comp.quantity,
+              total + (comp.component?.price_inc_gst || 0) * comp.quantity,
             0
           ) || 0
         )}
@@ -39,4 +39,3 @@ export function PackageHeaderRow({ pkg, onEdit }: PackageHeaderRowProps) {
     </TableRow>
   );
 }
-

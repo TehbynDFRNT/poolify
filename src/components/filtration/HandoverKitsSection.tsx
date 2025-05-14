@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { FiltrationComponent } from "@/types/filtration";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -189,9 +188,9 @@ export function HandoverKitsSection({
                   ) : (
                     <div
                       className="cursor-pointer hover:bg-muted px-2 py-1 rounded flex items-center justify-end gap-2 group"
-                      onClick={() => handleStartEdit(kit, 'price')}
+                      onClick={() => handleStartEdit(kit, 'price_inc_gst')}
                     >
-                      {formatCurrency(kit.price)}
+                      {formatCurrency(kit.price_inc_gst)}
                       <Pencil className="h-4 w-4 opacity-0 group-hover:opacity-100" />
                     </div>
                   )}
