@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { PoolCleaner, mapDbToPoolCleaner } from "@/types/pool-cleaner";
+import { PoolCleaner, mapDbToPoolCleaner } from "@/types/pool-cleaner";
 
 export const usePoolCleaners = () => {
   const queryClient = useQueryClient();
@@ -19,19 +19,7 @@ export const usePoolCleaners = () => {
         if (error) throw error;
         
         // Map database fields to our PoolCleaner interface
-        return data.map((item: any) => ({
-          id: item.id,
-          name: item.name,
-          model_number: item.model_number,
-          description: item.description || "",
-          sku: item.model_number, // Using model_number as SKU
-          trade: item.cost_price || 0,
-          rrp: item.price || 0,
-          margin: item.margin || 0,
-          created_at: item.created_at,
-          price: item.price,
-          cost_price: item.cost_price
-        })) as PoolCleaner[];
+        return data.map(mapDbToPoolCleaner) as PoolCleaner[];
       } catch (error) {
         console.error("Error fetching pool cleaners:", error);
         return [];
@@ -60,19 +48,7 @@ export const usePoolCleaners = () => {
       if (error) throw error;
       
       // Map result back to our PoolCleaner type
-      return {
-        id: data.id,
-        name: data.name,
-        model_number: data.model_number,
-        description: data.description || "",
-        sku: data.model_number,
-        trade: data.cost_price || 0, 
-        rrp: data.price || 0,
-        margin: data.margin || 0,
-        created_at: data.created_at,
-        price: data.price,
-        cost_price: data.cost_price
-      } as PoolCleaner;
+      return mapDbToPoolCleaner(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -111,19 +87,7 @@ export const usePoolCleaners = () => {
       if (error) throw error;
       
       // Map result back to our PoolCleaner type
-      return {
-        id: data.id,
-        name: data.name,
-        model_number: data.model_number,
-        description: data.description || "",
-        sku: data.model_number,
-        trade: data.cost_price || 0, 
-        rrp: data.price || 0,
-        margin: data.margin || 0,
-        created_at: data.created_at,
-        price: data.price,
-        cost_price: data.cost_price
-      } as PoolCleaner;
+      return mapDbToPoolCleaner(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });

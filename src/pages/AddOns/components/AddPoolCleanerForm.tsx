@@ -1,167 +1,170 @@
 
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { usePoolCleaners } from "@/hooks/usePoolCleaners";
-import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { calculateMarginValue } from "@/types/pool-cleaner";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  model_number: z.string().min(1, "Model number is required"),
+  description: z.string().optional(),
+  rrp: z.coerce.number().min(0, "RRP must be a positive number"),
+  trade: z.coerce.number().min(0, "Trade price must be a positive number")
+});
 
 interface AddPoolCleanerFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export function AddPoolCleanerForm({ open, onOpenChange }: AddPoolCleanerFormProps) {
+export const AddPoolCleanerForm = ({ open, onOpenChange }: AddPoolCleanerFormProps) => {
   const { addPoolCleaner } = usePoolCleaners();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formData, setFormData] = useState({
-    model_number: "",
-    name: "",
-    price: "",
-    cost_price: "",
-    description: "",
+  
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      model_number: "",
+      description: "",
+      rrp: 0,
+      trade: 0
+    }
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-
-    if (!formData.model_number || !formData.name || !formData.price || !formData.cost_price) {
-      toast.error("Please fill in all required fields");
-      setIsSubmitting(false);
-      return;
-    }
-
     try {
-      // Calculate margin based on price and cost price
-      const price = parseFloat(formData.price);
-      const costPrice = parseFloat(formData.cost_price);
-      const marginAmount = price - costPrice;
-      const margin = Math.round((marginAmount / price) * 100);
-
+      // Calculate margin before submitting
+      const margin = calculateMarginValue(values.rrp, values.trade);
       addPoolCleaner({
-        model_number: formData.model_number,
-        name: formData.name,
-        price: price,
-        cost_price: costPrice,
-        margin: margin,
-        description: formData.description || "",
-        // Add missing properties required by the PoolCleaner type
-        sku: formData.model_number, // Using model_number as SKU
-        trade: costPrice, // Using cost_price as trade
-        rrp: price, // Using price as rrp
+        name: values.name,
+        model_number: values.model_number,
+        description: values.description,
+        rrp: values.rrp,
+        trade: values.trade,
+        margin: margin
       });
-
-      // Reset form and close dialog
-      setFormData({
-        model_number: "",
-        name: "",
-        price: "",
-        cost_price: "",
-        description: "",
-      });
+      form.reset();
       onOpenChange(false);
     } catch (error) {
       console.error("Error adding pool cleaner:", error);
-      toast.error("Failed to add pool cleaner");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Pool Cleaner</DialogTitle>
+          <DialogTitle className="text-xl font-semibold">Add New Pool Cleaner</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="model_number">Model Number *</Label>
-            <Input
-              id="model_number"
-              name="model_number"
-              value={formData.model_number}
-              onChange={handleChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            <FormField
+              control={form.control}
               name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter pool cleaner name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="price">RRP ($) *</Label>
-            <Input
-              id="price"
-              name="price"
-              type="number"
-              step="0.01"
-              value={formData.price}
-              onChange={handleChange}
-              required
+            <FormField
+              control={form.control}
+              name="model_number"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Model Number</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter model number" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="cost_price">Cost Price ($) *</Label>
-            <Input
-              id="cost_price"
-              name="cost_price"
-              type="number"
-              step="0.01"
-              value={formData.cost_price}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
+            <FormField
+              control={form.control}
               name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Add a description of the pool cleaner"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      placeholder="Enter description" 
+                      className="min-h-[100px] bg-white" 
+                      {...field} 
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
 
-          <div className="flex justify-end gap-2 pt-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Adding..." : "Add Cleaner"}
-            </Button>
-          </div>
-        </form>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                control={form.control}
+                name="rrp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RRP Price ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="trade"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Trade Price ($)</FormLabel>
+                    <FormControl>
+                      <Input type="number" step="0.01" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  "Save Pool Cleaner"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
-}
+};

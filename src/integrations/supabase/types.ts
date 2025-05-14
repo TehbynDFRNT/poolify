@@ -2491,6 +2491,7 @@ export type Database = {
           bobcat_cost: number | null
           br_install_cost: number | null
           br_install_inclusions: string | null
+          change_request_json: Json | null
           cleaner_cost_price: number | null
           cleaner_included: boolean | null
           cleaner_margin: number | null

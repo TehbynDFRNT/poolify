@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { PoolCleaner } from "@/types/pool-cleaner";
+import { PoolCleaner, mapDbToPoolCleaner } from "@/types/pool-cleaner";
 
 export const usePoolCleanerOptions = (poolId: string, customerId: string | null) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -30,19 +30,7 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
         }
 
         // Map the database fields to match our PoolCleaner interface
-        const mappedCleaners: PoolCleaner[] = cleaners.map((cleaner: any) => ({
-          id: cleaner.id,
-          name: cleaner.name,
-          description: cleaner.description || "",
-          model_number: cleaner.model_number,
-          sku: cleaner.model_number || "", // Using model_number as sku if needed
-          trade: cleaner.cost_price || 0,
-          margin: cleaner.margin || 0,
-          rrp: cleaner.price || 0,
-          price: cleaner.price,
-          cost_price: cleaner.cost_price,
-          created_at: cleaner.created_at
-        }));
+        const mappedCleaners: PoolCleaner[] = cleaners.map(mapDbToPoolCleaner);
         
         setAvailableCleaners(mappedCleaners);
 
@@ -53,7 +41,7 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
             .select("*")
             .eq("pool_id", poolId)
             .eq("customer_id", customerId)
-            .single();
+            .maybeSingle();
 
           if (!selectionError && existingSelection) {
             setIncludeCleaner(existingSelection.include_cleaner);
