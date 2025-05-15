@@ -7,6 +7,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import './index.css'
 
+console.log("Lovable: main.tsx execution started");
+
 // Create a client
 const queryClient = new QueryClient()
 
