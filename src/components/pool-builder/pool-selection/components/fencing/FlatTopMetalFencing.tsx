@@ -1,18 +1,17 @@
-
-import React from "react";
-import { Pool } from "@/types/pool";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Fence } from "lucide-react";
-import { Form } from "@/components/ui/form";
-import { useFlatTopMetalFencingForm } from "./hooks/useFlatTopMetalFencingForm";
-import FencingHeader from "./components/FencingHeader";
-import LinearMeterInput from "./components/LinearMeterInput";
-import GateSelector from "./components/GateSelector";
-import FTMPanelSelector from "./components/FTMPanelSelector";
-import EarthingToggle from "./components/EarthingToggle";
-import CostSummary from "./components/CostSummary";
-import InfoBanner from "./components/InfoBanner";
 import { FormActions } from "@/components/pool-builder/pool-selection/components/concrete-paving/FormActions";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { Pool } from "@/types/pool";
+import { Fence } from "lucide-react";
+import React from "react";
+import CostSummary from "./components/CostSummary";
+import EarthingToggle from "./components/EarthingToggle";
+import FencingHeader from "./components/FencingHeader";
+import FTMPanelSelector from "./components/FTMPanelSelector";
+import GateSelector from "./components/GateSelector";
+import InfoBanner from "./components/InfoBanner";
+import LinearMeterInput from "./components/LinearMeterInput";
+import { useFlatTopMetalFencingForm } from "./hooks/useFlatTopMetalFencingForm";
 
 interface FlatTopMetalFencingProps {
   pool: Pool;
@@ -20,21 +19,20 @@ interface FlatTopMetalFencingProps {
   onSaveSuccess?: () => void;
 }
 
-export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({ 
-  pool, 
+export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
+  pool,
   customerId,
-  onSaveSuccess 
+  onSaveSuccess
 }) => {
   const { form, costs, isSubmitting, isDeleting, hasExistingData, onSubmit, onDelete } = useFlatTopMetalFencingForm(
-    customerId, 
-    pool.id,
+    customerId,
     onSaveSuccess
   );
 
   return (
     <div className="space-y-6">
       <FencingHeader title="Flat Top Metal Fencing" />
-      
+
       <Card>
         <CardHeader className="bg-primary/10">
           <div className="flex items-start gap-3">
@@ -52,27 +50,27 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <LinearMeterInput form={form} linearCost={costs.linearCost} unitCost={165} />
-                <GateSelector 
-                  form={form} 
-                  gatesCost={costs.gatesCost} 
+                <GateSelector
+                  form={form}
+                  gatesCost={costs.gatesCost}
                   freeGateDiscount={0}
                   unitCost={297}
                 />
-                <FTMPanelSelector 
-                  form={form} 
+                <FTMPanelSelector
+                  form={form}
                   simplePanelsCost={costs.simplePanelsCost}
                   complexPanelsCost={costs.complexPanelsCost}
                 />
-                <EarthingToggle 
+                <EarthingToggle
                   form={form}
                   isFixedCost={true}
                   perMeterCost={150}
                 />
               </div>
-              
+
               <CostSummary costs={costs} />
-              
-              <FormActions 
+
+              <FormActions
                 onSave={form.handleSubmit(onSubmit)}
                 onDelete={hasExistingData ? onDelete : undefined}
                 isSubmitting={isSubmitting}
@@ -81,7 +79,7 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
                 saveText="Save Fencing"
                 deleteText="Remove Fencing"
               />
-              
+
               <InfoBanner />
             </form>
           </Form>

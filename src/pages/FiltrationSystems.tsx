@@ -1,25 +1,25 @@
-
-import { useState } from "react";
-import { toast } from "sonner";
+import { DashboardLayout } from "@/components/DashboardLayout";
 import { AddComponentForm } from "@/components/filtration/AddComponentForm";
 import { FiltrationComponentsSection } from "@/components/filtration/FiltrationComponentsSection";
-import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
-import { HandoverKitPackagesSection } from "@/components/filtration/HandoverKitPackagesSection";
 import { FiltrationPackagesSection } from "@/components/filtration/FiltrationPackagesSection";
-import { PoolFiltrationMatchingTable } from "@/components/filtration/PoolFiltrationMatchingTable";
 import { FiltrationPageHeader } from "@/components/filtration/FiltrationPageHeader";
-import { usePoolPackages } from "@/hooks/usePoolPackages";
+import { HandoverKitPackagesSection } from "@/components/filtration/HandoverKitPackagesSection";
+import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
+import { PoolFiltrationMatchingTable } from "@/components/filtration/PoolFiltrationMatchingTable";
 import { useFiltrationQueries } from "@/hooks/useFiltrationQueries";
+import { usePoolPackages } from "@/hooks/usePoolPackages";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const FiltrationSystems = () => {
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  
+
   const { poolsWithPackages, isLoading, updatePoolPackageMutation } = usePoolPackages();
-  const { 
-    componentTypes, 
-    components, 
-    handoverKits, 
+  const {
+    componentTypes,
+    components,
+    handoverKits,
     packages,
   } = useFiltrationQueries(selectedTypeId);
 
@@ -49,47 +49,49 @@ const FiltrationSystems = () => {
   };
 
   return (
-    <div className="container mx-auto py-8 space-y-8">
-      <FiltrationPageHeader />
+    <DashboardLayout>
+      <div className="container mx-auto py-8 space-y-8">
+        <FiltrationPageHeader />
 
-      <FiltrationComponentsSection
-        components={components}
-        componentTypes={componentTypes}
-        selectedTypeId={selectedTypeId}
-        onTypeChange={setSelectedTypeId}
-        onAddClick={() => setShowAddForm(true)}
-      />
-
-      <HandoverKitsSection
-        handoverKits={handoverKits}
-        onAddClick={handleAddComponent}
-      />
-
-      <HandoverKitPackagesSection
-        onAddClick={() => setShowAddForm(true)}
-      />
-
-      <FiltrationPackagesSection
-        packages={packages}
-        onAddClick={() => setShowAddForm(true)}
-      />
-
-      <PoolFiltrationMatchingTable
-        pools={poolsWithPackages || []}
-        packages={packages}
-        onUpdatePackage={handleUpdatePackage}
-        isLoading={isLoading}
-        isUpdating={updatePoolPackageMutation.isPending}
-      />
-
-      {componentTypes && (
-        <AddComponentForm
-          open={showAddForm}
-          onOpenChange={setShowAddForm}
+        <FiltrationComponentsSection
+          components={components}
           componentTypes={componentTypes}
+          selectedTypeId={selectedTypeId}
+          onTypeChange={setSelectedTypeId}
+          onAddClick={() => setShowAddForm(true)}
         />
-      )}
-    </div>
+
+        <HandoverKitsSection
+          handoverKits={handoverKits}
+          onAddClick={handleAddComponent}
+        />
+
+        <HandoverKitPackagesSection
+          onAddClick={() => setShowAddForm(true)}
+        />
+
+        <FiltrationPackagesSection
+          packages={packages}
+          onAddClick={() => setShowAddForm(true)}
+        />
+
+        <PoolFiltrationMatchingTable
+          pools={poolsWithPackages || []}
+          packages={packages}
+          onUpdatePackage={handleUpdatePackage}
+          isLoading={isLoading}
+          isUpdating={updatePoolPackageMutation.isPending}
+        />
+
+        {componentTypes && (
+          <AddComponentForm
+            open={showAddForm}
+            onOpenChange={setShowAddForm}
+            componentTypes={componentTypes}
+          />
+        )}
+      </div>
+    </DashboardLayout>
   );
 };
 

@@ -1,13 +1,11 @@
-
-import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { FencingFormValues, CostCalculation } from "../types";
+import { CostCalculation, FencingFormValues } from "../types";
 
 export const useFlatTopMetalFencingForm = (
-  customerId: string, 
-  poolId: string,
+  customerId: string,
   onSaveSuccess?: () => void
 ) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -129,8 +127,7 @@ export const useFlatTopMetalFencingForm = (
             simple_panels: values.simplePanels,
             complex_panels: values.complexPanels,
             earthing_required: values.earthingRequired,
-            total_cost: costs.totalCost,
-            pool_id: poolId
+            total_cost: costs.totalCost
           })
           .eq("id", existingData[0].id) as any; // Type assertion until Supabase types are updated
 
@@ -144,7 +141,6 @@ export const useFlatTopMetalFencingForm = (
           .from("flat_top_metal_fencing")
           .insert({
             customer_id: customerId,
-            pool_id: poolId,
             linear_meters: values.linearMeters,
             gates: values.gates,
             simple_panels: values.simplePanels,
@@ -165,7 +161,7 @@ export const useFlatTopMetalFencingForm = (
       }
 
       toast.success("Flat top metal fencing saved successfully");
-      
+
       // Call the callback if provided
       if (onSaveSuccess) {
         onSaveSuccess();
@@ -198,7 +194,7 @@ export const useFlatTopMetalFencingForm = (
       }
 
       toast.success("Flat top metal fencing removed successfully");
-      
+
       // Reset form after deletion
       form.reset({
         linearMeters: 0,
@@ -207,9 +203,9 @@ export const useFlatTopMetalFencingForm = (
         complexPanels: 0,
         earthingRequired: false
       });
-      
+
       setExistingDataId(null);
-      
+
       // Call the callback if provided
       if (onSaveSuccess) {
         onSaveSuccess();

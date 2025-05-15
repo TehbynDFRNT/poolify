@@ -1,21 +1,22 @@
-import React from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
-import { CheckSquare, ListFilter, MapPin, Layers, Calculator, Fence, Droplets, Zap, Package } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pool } from "@/types/pool";
+import { Calculator, CheckSquare, Droplets, Fence, FileText, Layers, ListFilter, MapPin, Package, Zap } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 // Tab content imports
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
-import PoolSelectionSection from "@/components/pool-builder/pool-selection/PoolSelectionSection";
 import { FormulaReference } from "@/components/pool-builder/FormulaReference";
-import { SiteRequirementsPlaceholder } from "@/components/pool-builder/pool-selection/components/site-requirements/SiteRequirementsPlaceholder";
 import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-selection/components/concrete-paving/ConcreteAndPavingPlaceholder";
-import { RetainingWallsPlaceholder } from "@/components/pool-builder/pool-selection/components/retaining-walls/RetainingWallsPlaceholder";
-import { WaterFeatureSection } from "@/components/pool-builder/pool-selection/components/water-feature/WaterFeatureSection";
-import { FencingPlaceholder } from "@/components/pool-builder/pool-selection/components/fencing/FencingPlaceholder";
 import { ElectricalPlaceholder } from "@/components/pool-builder/pool-selection/components/electrical/ElectricalPlaceholder";
-
+import { FencingPlaceholder } from "@/components/pool-builder/pool-selection/components/fencing/FencingPlaceholder";
+import { RetainingWallsPlaceholder } from "@/components/pool-builder/pool-selection/components/retaining-walls/RetainingWallsPlaceholder";
+import { SiteRequirementsPlaceholder } from "@/components/pool-builder/pool-selection/components/site-requirements/SiteRequirementsPlaceholder";
 import { UpgradesAndExtrasPlaceholder } from "@/components/pool-builder/pool-selection/components/upgrades-and-extras/UpgradesAndExtrasPlaceholder";
+import { WaterFeatureSection } from "@/components/pool-builder/pool-selection/components/water-feature/WaterFeatureSection";
+import PoolSelectionSection from "@/components/pool-builder/pool-selection/PoolSelectionSection";
+import { SummarySection } from "@/components/pool-builder/summary/SummarySection";
 
 interface PoolBuilderTabsProps {
   customerId: string | null;
@@ -27,12 +28,23 @@ interface PoolBuilderTabsProps {
 // Import here to avoid circular dependencies
 import { PoolProject } from "@/types/pool";
 
-export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({ 
-  customerId, 
-  customer, 
-  selectedPool, 
-  loading 
+export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
+  customerId,
+  customer,
+  selectedPool,
+  loading
 }) => {
+  // Use a default tab state to allow navigation from the summary page
+  const [activeTab, setActiveTab] = useState("builder");
+  const location = useLocation();
+
+  // Check for a defaultTab in the location state
+  useEffect(() => {
+    if (location.state && location.state.defaultTab) {
+      setActiveTab(location.state.defaultTab);
+    }
+  }, [location.state]);
+
   if (loading) {
     return (
       <Card className="p-6">
@@ -42,7 +54,7 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
   }
 
   return (
-    <Tabs defaultValue="builder" className="space-y-4">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
       <TabsList>
         <TabsTrigger value="builder" className="flex items-center gap-2">
           <CheckSquare className="h-4 w-4" />
@@ -80,30 +92,34 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           <Package className="h-4 w-4" />
           Upgrades & Extras
         </TabsTrigger>
+        <TabsTrigger value="summary" className="flex items-center gap-2">
+          <FileText className="h-4 w-4" />
+          Summary
+        </TabsTrigger>
         <TabsTrigger value="formula-reference" className="flex items-center gap-2">
           <Calculator className="h-4 w-4" />
           Formula Reference
         </TabsTrigger>
       </TabsList>
-      
+
       <TabsContent value="builder">
         <Card className="p-6">
           <CustomerInformationSection existingCustomer={customer} />
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="pool-selection">
         <Card className="p-6">
           <PoolSelectionSection customerId={customerId} />
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="site-requirements">
         <Card className="p-6">
           {selectedPool ? (
             <SiteRequirementsPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<MapPin className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Site requirements are specific to the pool model. Please select a pool in the Pool Selection tab to view site requirements."
@@ -111,13 +127,13 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           )}
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="concrete-paving">
         <Card className="p-6">
           {selectedPool ? (
             <ConcreteAndPavingPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<Layers className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Concrete and paving options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
@@ -125,13 +141,13 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           )}
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="retaining-walls">
         <Card className="p-6">
           {selectedPool ? (
             <RetainingWallsPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<Fence className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Retaining wall options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
@@ -139,13 +155,13 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           )}
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="fencing">
         <Card className="p-6">
           {selectedPool ? (
             <FencingPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<Fence className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Fencing options are specific to the pool model. Please select a pool in the Pool Selection tab to view fencing options."
@@ -153,13 +169,13 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           )}
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="electrical">
         <Card className="p-6">
           {selectedPool ? (
             <ElectricalPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<Zap className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Electrical requirements are specific to the pool model. Please select a pool in the Pool Selection tab to view electrical options."
@@ -167,13 +183,13 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           )}
         </Card>
       </TabsContent>
-      
+
       <TabsContent value="water-feature">
         <Card className="p-6">
           {selectedPool ? (
             <WaterFeatureSection pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<Droplets className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Water feature options are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
@@ -187,7 +203,7 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           {selectedPool ? (
             <UpgradesAndExtrasPlaceholder pool={selectedPool} customerId={customerId} />
           ) : (
-            <PlaceholderMessage 
+            <PlaceholderMessage
               icon={<Package className="h-12 w-12 text-muted-foreground mx-auto" />}
               title="Please Select a Pool First"
               description="Upgrades and extras are specific to the pool model. Please select a pool in the Pool Selection tab to view options."
@@ -195,7 +211,21 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
           )}
         </Card>
       </TabsContent>
-      
+
+      <TabsContent value="summary">
+        <Card className="p-6">
+          {selectedPool ? (
+            <SummarySection pool={selectedPool} customer={customer} customerId={customerId} />
+          ) : (
+            <PlaceholderMessage
+              icon={<FileText className="h-12 w-12 text-muted-foreground mx-auto" />}
+              title="Please Select a Pool First"
+              description="The summary contains information from all sections. Please select a pool in the Pool Selection tab to view the complete summary."
+            />
+          )}
+        </Card>
+      </TabsContent>
+
       <TabsContent value="formula-reference">
         <FormulaReference />
       </TabsContent>

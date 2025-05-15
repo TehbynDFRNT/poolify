@@ -1,11 +1,10 @@
-
-import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { FencingFormValues, CostCalculation } from "../types";
+import { CostCalculation, FencingFormValues } from "../types";
 
-export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess?: () => void) => {
+export const useFencingForm = (customerId: string, /* poolId: string, */ onSaveSuccess?: () => void) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [existingDataId, setExistingDataId] = useState<string | null>(null);
@@ -126,8 +125,7 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
             simple_panels: values.simplePanels,
             complex_panels: values.complexPanels,
             earthing_required: values.earthingRequired,
-            total_cost: costs.totalCost,
-            pool_id: poolId
+            total_cost: costs.totalCost
           })
           .eq("id", existingData[0].id);
 
@@ -141,7 +139,6 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
           .from("frameless_glass_fencing")
           .insert({
             customer_id: customerId,
-            pool_id: poolId,
             linear_meters: values.linearMeters,
             gates: values.gates,
             simple_panels: values.simplePanels,
@@ -162,7 +159,7 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
       }
 
       toast.success("Frameless glass fencing saved successfully");
-      
+
       // Call the callback if provided
       if (onSaveSuccess) {
         onSaveSuccess();
@@ -195,7 +192,7 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
       }
 
       toast.success("Frameless glass fencing removed successfully");
-      
+
       // Reset form after deletion
       form.reset({
         linearMeters: 0,
@@ -204,9 +201,9 @@ export const useFencingForm = (customerId: string, poolId: string, onSaveSuccess
         complexPanels: 0,
         earthingRequired: false
       });
-      
+
       setExistingDataId(null);
-      
+
       // Call the callback if provided
       if (onSaveSuccess) {
         onSaveSuccess();
