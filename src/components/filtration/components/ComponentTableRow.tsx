@@ -84,39 +84,24 @@ export function ComponentTableRow({
       </TableCell>
       <TableCell className="text-right">
         <EditableCell
-          value={component.flow_rate}
-          isEditing={editingCell?.id === component.id && editingCell.field === 'flow_rate'}
-          onEdit={() => onStartEdit('flow_rate')}
+          value={component.price_ex_gst}
+          isEditing={editingCell?.id === component.id && editingCell.field === 'price_ex_gst'}
+          onEdit={() => onStartEdit('price_ex_gst')}
           onSave={onSaveEdit}
           onCancel={onCancelEdit}
           onChange={onEditValueChange}
           onKeyDown={onKeyDown}
           type="number"
           align="right"
-          format={(v) => v ? `${v} L/min` : '-'}
-          step="0.1"
+          format={formatCurrency}
+          step="0.01"
         />
       </TableCell>
       <TableCell className="text-right">
         <EditableCell
-          value={component.power_consumption}
-          isEditing={editingCell?.id === component.id && editingCell.field === 'power_consumption'}
-          onEdit={() => onStartEdit('power_consumption')}
-          onSave={onSaveEdit}
-          onCancel={onCancelEdit}
-          onChange={onEditValueChange}
-          onKeyDown={onKeyDown}
-          type="number"
-          align="right"
-          format={(v) => v ? `${v}W` : '-'}
-          step="0.1"
-        />
-      </TableCell>
-      <TableCell className="text-right">
-        <EditableCell
-          value={component.price}
-          isEditing={editingCell?.id === component.id && editingCell.field === 'price'}
-          onEdit={() => onStartEdit('price')}
+          value={component.price_inc_gst}
+          isEditing={editingCell?.id === component.id && editingCell.field === 'price_inc_gst'}
+          onEdit={() => onStartEdit('price_inc_gst')}
           onSave={onSaveEdit}
           onCancel={onCancelEdit}
           onChange={onEditValueChange}

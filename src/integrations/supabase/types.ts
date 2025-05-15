@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      "3d": {
+        Row: {
+          created_at: string | null
+          id: string
+          pool_project_id: string | null
+          video_path: string | null
+          video_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          pool_project_id?: string | null
+          video_path?: string | null
+          video_type: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          pool_project_id?: string | null
+          video_path?: string | null
+          video_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "3d_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "3d_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       blanket_rollers: {
         Row: {
           created_at: string
@@ -71,6 +110,35 @@ export type Database = {
           size_category?: string
         }
         Relationships: []
+      }
+      change_requests: {
+        Row: {
+          change_request_id: string
+          change_request_json: Json
+          created_at: string
+          pool_proposal_status_id: string
+        }
+        Insert: {
+          change_request_id?: string
+          change_request_json: Json
+          created_at?: string
+          pool_proposal_status_id: string
+        }
+        Update: {
+          change_request_id?: string
+          change_request_json?: Json
+          created_at?: string
+          pool_proposal_status_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "change_requests_pool_proposal_status_id_fkey"
+            columns: ["pool_proposal_status_id"]
+            isOneToOne: false
+            referencedRelation: "pool_proposal_status"
+            referencedColumns: ["pool_project_id"]
+          },
+        ]
       }
       concrete_costs: {
         Row: {
@@ -475,34 +543,31 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
-          flow_rate: number | null
           id: string
           model_number: string
           name: string
-          power_consumption: number | null
-          price: number
+          price_ex_gst: number | null
+          price_inc_gst: number
           type_id: string | null
         }
         Insert: {
           created_at?: string
           description?: string | null
-          flow_rate?: number | null
           id?: string
           model_number: string
           name: string
-          power_consumption?: number | null
-          price: number
+          price_ex_gst?: number | null
+          price_inc_gst: number
           type_id?: string | null
         }
         Update: {
           created_at?: string
           description?: string | null
-          flow_rate?: number | null
           id?: string
           model_number?: string
           name?: string
-          power_consumption?: number | null
-          price?: number
+          price_ex_gst?: number | null
+          price_inc_gst?: number
           type_id?: string | null
         }
         Relationships: [
@@ -623,7 +688,6 @@ export type Database = {
           gates: number
           id: string
           linear_meters: number
-          pool_id: string
           simple_panels: number
           total_cost: number
           updated_at: string
@@ -636,7 +700,6 @@ export type Database = {
           gates?: number
           id?: string
           linear_meters?: number
-          pool_id: string
           simple_panels?: number
           total_cost?: number
           updated_at?: string
@@ -649,7 +712,6 @@ export type Database = {
           gates?: number
           id?: string
           linear_meters?: number
-          pool_id?: string
           simple_panels?: number
           total_cost?: number
           updated_at?: string
@@ -1417,6 +1479,7 @@ export type Database = {
           pool_color: string | null
           pool_specification_id: string | null
           proposal_name: string
+          render_ready: boolean
           resident_homeowner: boolean
           retaining_wall1_height1: number | null
           retaining_wall1_height2: number | null
@@ -1482,6 +1545,7 @@ export type Database = {
           pool_color?: string | null
           pool_specification_id?: string | null
           proposal_name: string
+          render_ready?: boolean
           resident_homeowner?: boolean
           retaining_wall1_height1?: number | null
           retaining_wall1_height2?: number | null
@@ -1547,6 +1611,7 @@ export type Database = {
           pool_color?: string | null
           pool_specification_id?: string | null
           proposal_name?: string
+          render_ready?: boolean
           resident_homeowner?: boolean
           retaining_wall1_height1?: number | null
           retaining_wall1_height2?: number | null
@@ -1611,6 +1676,57 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "traffic_control_costs"
             referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_proposal_status: {
+        Row: {
+          accepted_datetime: string | null
+          accepted_ip: string | null
+          last_change_requested: string | null
+          last_viewed: string | null
+          pin: string
+          pool_project_id: string
+          render_ready: boolean
+          status: string
+          version: number
+        }
+        Insert: {
+          accepted_datetime?: string | null
+          accepted_ip?: string | null
+          last_change_requested?: string | null
+          last_viewed?: string | null
+          pin: string
+          pool_project_id: string
+          render_ready?: boolean
+          status?: string
+          version?: number
+        }
+        Update: {
+          accepted_datetime?: string | null
+          accepted_ip?: string | null
+          last_change_requested?: string | null
+          last_viewed?: string | null
+          pin?: string
+          pool_project_id?: string
+          render_ready?: boolean
+          status?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_proposal_status_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: true
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_proposal_status_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -1981,6 +2097,45 @@ export type Database = {
         }
         Relationships: []
       }
+      project_site_plan: {
+        Row: {
+          created_at: string
+          id: string
+          plan_path: string | null
+          pool_project_id: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          plan_path?: string | null
+          pool_project_id: string
+          version?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          plan_path?: string | null
+          pool_project_id?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_site_plan_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_site_plan_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       quote_extra_pavings: {
         Row: {
           created_at: string
@@ -2322,6 +2477,8 @@ export type Database = {
     Views: {
       proposal_snapshot_v: {
         Row: {
+          accepted_datetime: string | null
+          accepted_ip: string | null
           blanket_roller_cost: number | null
           blanket_roller_description: string | null
           blanket_roller_margin: number | null
@@ -2331,6 +2488,7 @@ export type Database = {
           bobcat_cost: number | null
           br_install_cost: number | null
           br_install_inclusions: string | null
+          change_request_json: Json | null
           cleaner_cost_price: number | null
           cleaner_included: boolean | null
           cleaner_margin: number | null
@@ -2373,12 +2531,38 @@ export type Database = {
           extra_concreting_unit_price: number | null
           extra_paving_cost: number | null
           extra_paving_sqm: number | null
+          fencing_total_cost: number | null
           fixed_costs_json: Json | null
+          fp_filter_description: string | null
+          fp_filter_model: string | null
+          fp_filter_name: string | null
           fp_filter_price: number | null
+          fp_handover_description: string | null
+          fp_handover_kit_price: number | null
+          fp_handover_model: string | null
+          fp_handover_name: string | null
+          fp_light_description: string | null
+          fp_light_model: string | null
+          fp_light_name: string | null
           fp_light_price: number | null
           fp_name: string | null
+          fp_pump_description: string | null
+          fp_pump_model: string | null
+          fp_pump_name: string | null
           fp_pump_price: number | null
+          fp_sanitiser_description: string | null
+          fp_sanitiser_model: string | null
+          fp_sanitiser_name: string | null
           fp_sanitiser_price: number | null
+          glass_complex_panels: number | null
+          glass_earthing_cost: number | null
+          glass_earthing_required: boolean | null
+          glass_fence_cost: number | null
+          glass_fence_total_cost: number | null
+          glass_gate_cost: number | null
+          glass_gates: number | null
+          glass_linear_meters: number | null
+          glass_simple_panels: number | null
           heat_pump_cost: number | null
           heat_pump_description: string | null
           heat_pump_install_cost: number | null
@@ -2392,6 +2576,17 @@ export type Database = {
           include_blanket_roller: boolean | null
           include_heat_pump: boolean | null
           installation_area: string | null
+          last_change_requested: string | null
+          last_viewed: string | null
+          metal_complex_panels: number | null
+          metal_earthing_cost: number | null
+          metal_earthing_required: boolean | null
+          metal_fence_cost: number | null
+          metal_fence_total_cost: number | null
+          metal_gate_cost: number | null
+          metal_gates: number | null
+          metal_linear_meters: number | null
+          metal_simple_panels: number | null
           owner1: string | null
           owner2: string | null
           pc_beam: number | null
@@ -2403,9 +2598,12 @@ export type Database = {
           pc_salt_bags: number | null
           pc_trucked_water: number | null
           phone: string | null
+          pin: string | null
           pool_margin_pct: number | null
           project_id: string | null
           proposal_name: string | null
+          proposal_status: string | null
+          render_ready: boolean | null
           resident_homeowner: boolean | null
           retaining_wall1_height1: number | null
           retaining_wall1_height2: number | null
@@ -2440,6 +2638,8 @@ export type Database = {
           traffic_control_cost: number | null
           uf_strips_cost: number | null
           uf_strips_raw: Json | null
+          version: number | null
+          videos_json: Json | null
           water_feature_back_cladding_needed: boolean | null
           water_feature_front_finish: string | null
           water_feature_led_blade: string | null

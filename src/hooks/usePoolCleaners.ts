@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { PoolCleaner } from "@/types/pool-cleaner";
+import { PoolCleaner, mapDbToPoolCleaner } from "@/types/pool-cleaner";
 
 export const usePoolCleaners = () => {
   const queryClient = useQueryClient();
@@ -10,26 +10,45 @@ export const usePoolCleaners = () => {
   const { data: poolCleaners, isLoading } = useQuery({
     queryKey: ['pool-cleaners'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('pool_cleaners' as any)
-        .select('*')
-        .order('model_number');
-      
-      if (error) throw error;
-      return data as unknown as PoolCleaner[];
+      try {
+        const { data, error } = await supabase
+          .from('pool_cleaners')
+          .select('*')
+          .order('model_number');
+        
+        if (error) throw error;
+        
+        // Map database fields to our PoolCleaner interface
+        return data.map(mapDbToPoolCleaner) as PoolCleaner[];
+      } catch (error) {
+        console.error("Error fetching pool cleaners:", error);
+        return [];
+      }
     },
   });
 
   const addMutation = useMutation({
     mutationFn: async (newCleaner: Omit<PoolCleaner, 'id' | 'created_at'>) => {
+      // Convert from our app's type to database schema
+      const dbCleaner = {
+        name: newCleaner.name,
+        model_number: newCleaner.model_number,
+        description: newCleaner.description || null,
+        price: newCleaner.rrp,
+        cost_price: newCleaner.trade,
+        margin: newCleaner.margin || 0
+      };
+      
       const { data, error } = await supabase
-        .from('pool_cleaners' as any)
-        .insert([newCleaner])
+        .from('pool_cleaners')
+        .insert([dbCleaner])
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as PoolCleaner;
+      
+      // Map result back to our PoolCleaner type
+      return mapDbToPoolCleaner(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -43,15 +62,32 @@ export const usePoolCleaners = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<PoolCleaner> }) => {
+      // Convert from our app's type to database schema
+      const dbUpdates: any = { ...updates };
+      
+      // Map rrp to price if it exists in the updates
+      if (updates.rrp !== undefined) {
+        dbUpdates.price = updates.rrp;
+        delete dbUpdates.rrp;
+      }
+      
+      // Map trade to cost_price if it exists in the updates
+      if (updates.trade !== undefined) {
+        dbUpdates.cost_price = updates.trade;
+        delete dbUpdates.trade;
+      }
+      
       const { data, error } = await supabase
-        .from('pool_cleaners' as any)
-        .update(updates)
+        .from('pool_cleaners')
+        .update(dbUpdates)
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
-      return data as unknown as PoolCleaner;
+      
+      // Map result back to our PoolCleaner type
+      return mapDbToPoolCleaner(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['pool-cleaners'] });
@@ -66,7 +102,7 @@ export const usePoolCleaners = () => {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('pool_cleaners' as any)
+        .from('pool_cleaners')
         .delete()
         .eq('id', id);
 

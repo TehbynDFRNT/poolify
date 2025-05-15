@@ -19,7 +19,7 @@ export const HandoverKitSection: React.FC<HandoverKitSectionProps> = ({ handover
           <div key={item.id} className="text-sm flex justify-between items-center">
             <span>{item.quantity}x {item.component?.name}</span>
             <span className="text-muted-foreground">
-              {formatCurrency((item.component?.price || 0) * item.quantity)}
+              {formatCurrency((item.component?.price_inc_gst || 0) * item.quantity)}
             </span>
           </div>
         ))}

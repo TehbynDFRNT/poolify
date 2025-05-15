@@ -1,37 +1,47 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { calculateGrandTotal } from "@/utils/digTypeCalculations";
+import { DigType } from "@/types/dig-type";
 
-export const useExcavation = (selectedPoolId: string) => {
-  // Fetch excavation data for the selected pool
-  const { data: excavationDetails } = useQuery({
-    queryKey: ["pool-excavation", selectedPoolId],
+export const useExcavation = (selectedPoolId: string | undefined) => {
+  // Fetch excavation details for the selected pool
+  const { data: excavationDetails, isLoading, error } = useQuery({
+    queryKey: ["excavation", selectedPoolId],
     queryFn: async () => {
       if (!selectedPoolId) return null;
-      
-      const { data, error } = await supabase
-        .from("pool_dig_type_matches")
-        .select(`
-          pool_id,
-          dig_type:dig_types (*)
-        `)
-        .eq('pool_id', selectedPoolId)
+
+      // First get the dig_type_id from the pool specification
+      const { data: pool, error: poolError } = await supabase
+        .from("pool_specifications")
+        .select("dig_type_id")
+        .eq("id", selectedPoolId)
         .single();
-      
-      if (error && error.code !== 'PGRST116') throw error;
-      return data?.dig_type;
+
+      if (poolError) throw poolError;
+
+      if (!pool.dig_type_id) return null;
+
+      // Fetch the dig type details
+      const { data: digType, error: digTypeError } = await supabase
+        .from("dig_types")
+        .select("*")
+        .eq("id", pool.dig_type_id)
+        .single();
+
+      if (digTypeError) throw digTypeError;
+
+      // Calculate excavation price
+      const excavationCost = digType.excavation_hourly_rate * digType.excavation_hours;
+      const truckCost = digType.truck_hourly_rate * digType.truck_hours * digType.truck_quantity;
+      const totalPrice = excavationCost + truckCost;
+
+      return {
+        ...digType as DigType,
+        price: totalPrice.toString()
+      };
     },
     enabled: !!selectedPoolId,
   });
 
-  // Calculate excavation cost
-  const getExcavationCost = () => {
-    return excavationDetails ? calculateGrandTotal(excavationDetails) : 0;
-  };
-
-  return {
-    excavationDetails,
-    getExcavationCost
-  };
+  return { excavationDetails, isLoading, error };
 };

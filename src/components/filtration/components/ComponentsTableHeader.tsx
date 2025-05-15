@@ -8,9 +8,8 @@ export function ComponentsTableHeader() {
         <TableHead>Model Number</TableHead>
         <TableHead>Name</TableHead>
         <TableHead>Type</TableHead>
-        <TableHead className="text-right">Flow Rate</TableHead>
-        <TableHead className="text-right">Power Usage</TableHead>
-        <TableHead className="text-right">Price</TableHead>
+        <TableHead className="text-right">Price (ex GST)</TableHead>
+        <TableHead className="text-right">Price (inc GST)</TableHead>
       </TableRow>
     </TableHeader>
   );

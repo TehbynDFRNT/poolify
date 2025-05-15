@@ -33,16 +33,16 @@ export function FiltrationPackagesSection({
   const calculateHandoverKitPrice = (pkg: PackageWithComponents) => {
     if (!pkg.handover_kit?.components) return 0;
     return pkg.handover_kit.components.reduce((total, comp) => {
-      return total + ((comp.component?.price || 0) * comp.quantity);
+      return total + ((comp.component?.price_inc_gst || 0) * comp.quantity);
     }, 0);
   };
 
   const calculateTotalPrice = (pkg: PackageWithComponents) => {
     return (
-      (pkg.light?.price || 0) +
-      (pkg.pump?.price || 0) +
-      (pkg.sanitiser?.price || 0) +
-      (pkg.filter?.price || 0) +
+      (pkg.light?.price_inc_gst || 0) +
+      (pkg.pump?.price_inc_gst || 0) +
+      (pkg.sanitiser?.price_inc_gst || 0) +
+      (pkg.filter?.price_inc_gst || 0) +
       calculateHandoverKitPrice(pkg)
     );
   };
