@@ -8,13 +8,16 @@ import { SiteRequirementsSummary } from "@/components/pool-builder/summary/SiteR
 import { TotalCostSummary } from "@/components/pool-builder/summary/TotalCostSummary";
 import { UpgradesAndExtrasSummary } from "@/components/pool-builder/summary/UpgradesAndExtrasSummary";
 import { WaterFeatureSummary } from "@/components/pool-builder/summary/WaterFeatureSummary";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
 import { Pool, PoolProject } from "@/types/pool";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2 } from "lucide-react";
-import React from "react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import React, { useState } from "react";
 
 interface SummarySectionProps {
     pool: Pool | null;
@@ -22,11 +25,17 @@ interface SummarySectionProps {
     customerId: string | null;
 }
 
+// Context to share margin visibility across all summary components
+export const MarginVisibilityContext = React.createContext<boolean>(false);
+
 export const SummarySection: React.FC<SummarySectionProps> = ({
     pool,
     customer,
     customerId
 }) => {
+    // State for margin visibility toggle
+    const [showMargins, setShowMargins] = useState(false);
+
     // Get project data from the pool_projects table
     const { data: projectData, isLoading } = useQuery({
         queryKey: ['project-summary', customerId],
@@ -47,14 +56,31 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
             // Fetch additional data for water features if needed
             let waterFeatures = null;
             try {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log("Fetching water features for customer:", customerId, "pool:", pool?.id);
+                }
                 const { data: waterFeatureData, error: waterFeatureError } = await supabase
                     .from('pool_water_features')
                     .select('*')
                     .eq('customer_id', customerId)
-                    .maybeSingle();
+                    .eq('pool_id', pool?.id);
+
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log("Water features fetch result:", { data: waterFeatureData, error: waterFeatureError });
+                }
 
                 if (!waterFeatureError && waterFeatureData) {
-                    waterFeatures = waterFeatureData;
+                    // If multiple records exist, use the first one
+                    if (Array.isArray(waterFeatureData) && waterFeatureData.length > 0) {
+                        waterFeatures = waterFeatureData[0];
+
+                        // Log if multiple records exist
+                        if (waterFeatureData.length > 1) {
+                            console.warn(`Found ${waterFeatureData.length} water feature records for pool ${pool?.id}. Using the first one.`);
+                        }
+                    } else {
+                        waterFeatures = waterFeatureData;
+                    }
                 }
             } catch (err) {
                 console.error('Error fetching water features:', err);
@@ -76,14 +102,70 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 console.error('Error fetching fencing data:', err);
             }
 
+            // Fetch electrical data if available
+            let electrical = null;
+            try {
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log("Fetching electrical data for customer:", customerId, "pool:", pool?.id);
+                }
+                const { data: electricalData, error: electricalError } = await supabase
+                    .from('pool_electrical_requirements')
+                    .select('*')
+                    .eq('pool_id', pool?.id)
+                    .eq('customer_id', customerId)
+                    .maybeSingle();
+
+                if (process.env.NODE_ENV !== 'production') {
+                    console.log("Electrical data fetch result:", { data: electricalData, error: electricalError });
+                }
+
+                if (!electricalError && electricalData) {
+                    electrical = electricalData;
+                }
+            } catch (err) {
+                console.error('Error fetching electrical data:', err);
+            }
+
+            // Fetch pool cleaner selections if available
+            let poolCleaner = null;
+            try {
+                const { data: poolCleanerData, error: poolCleanerError } = await supabase
+                    .from('pool_cleaner_selections')
+                    .select('*, pool_cleaners(*)')
+                    .eq('pool_id', pool?.id)
+                    .eq('customer_id', customerId)
+                    .maybeSingle();
+
+                if (!poolCleanerError && poolCleanerData) {
+                    poolCleaner = poolCleanerData;
+                }
+            } catch (err) {
+                console.error('Error fetching pool cleaner data:', err);
+            }
+
             // Type the data as any to avoid TypeScript errors
             const projectData = data as any;
+
+            // Get heating options data from the project data
+            const heatingOptions = {
+                include_heat_pump: projectData.include_heat_pump || false,
+                include_blanket_roller: projectData.include_blanket_roller || false,
+                heat_pump_id: projectData.heat_pump_id,
+                blanket_roller_id: projectData.blanket_roller_id,
+                heat_pump_cost: projectData.heat_pump_cost || 0,
+                blanket_roller_cost: projectData.blanket_roller_cost || 0,
+                heating_total_cost: projectData.heating_total_cost || 0,
+                heating_total_margin: projectData.heating_total_margin || 0
+            };
 
             // Return combined data
             return {
                 ...projectData,
                 water_features: waterFeatures,
                 fencing: fencing,
+                electrical: electrical,
+                pool_cleaner: poolCleaner,
+                heating_options: heatingOptions,
                 // Group data by section for easier consumption in child components
                 site_requirements: {
                     crane_id: projectData.crane_id,
@@ -147,6 +229,8 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                     (projectData.water_feature_total_cost || 0),
                 fencing_total:
                     (fencing?.total_cost || 0),
+                electrical_total:
+                    (electrical?.total_cost || 0),
                 heating_total:
                     (projectData.heating_total_cost || 0)
             };
@@ -175,85 +259,118 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const customerIdString = customerId as string;
 
     return (
-        <div className="space-y-8 print:space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle>Project Summary</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-8">
-                        <CustomerSummary customer={customer} customerId={customerIdString} />
+        <MarginVisibilityContext.Provider value={showMargins}>
+            <div className="space-y-8 print:space-y-6">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between pb-2">
+                        <CardTitle>Project Summary</CardTitle>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <div className="flex items-center space-x-2">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground"
+                                            onClick={() => setShowMargins(!showMargins)}
+                                        >
+                                            {showMargins ? (
+                                                <Eye className="h-4 w-4" />
+                                            ) : (
+                                                <EyeOff className="h-4 w-4" />
+                                            )}
+                                        </Button>
+                                        <Switch
+                                            checked={showMargins}
+                                            onCheckedChange={setShowMargins}
+                                            className="data-[state=checked]:bg-primary"
+                                        />
+                                    </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="left">
+                                    <p>Toggle margin visibility</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="space-y-8">
+                            <CustomerSummary customer={customer} customerId={customerIdString} />
 
-                        <Separator />
+                            <Separator />
 
-                        <PoolDetailsSummary pool={pool} customerId={customerIdString} />
+                            <PoolDetailsSummary pool={pool} customerId={customerIdString} />
 
-                        <Separator />
+                            <Separator />
 
-                        <SiteRequirementsSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            siteRequirements={projectData?.site_requirements}
-                        />
+                            <SiteRequirementsSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                siteRequirements={projectData?.site_requirements}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <ConcreteAndPavingSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            concretePaving={projectData?.concrete_paving}
-                        />
+                            <ConcreteAndPavingSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                concretePaving={projectData?.concrete_paving}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <RetainingWallsSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            retainingWalls={projectData?.retaining_walls}
-                        />
+                            <RetainingWallsSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                retainingWalls={projectData?.retaining_walls}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <FencingSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            fencing={projectData?.fencing}
-                        />
+                            <FencingSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                fencing={projectData?.fencing}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <ElectricalSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            electrical={{}} // We'll need to search for the correct electrical fields
-                        />
+                            <ElectricalSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                electrical={projectData?.electrical}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <WaterFeatureSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            waterFeatures={projectData?.water_features}
-                        />
+                            <WaterFeatureSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                waterFeatures={projectData?.water_features}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <UpgradesAndExtrasSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            upgradesExtras={{}} // We'll need to search for the correct fields
-                        />
+                            <UpgradesAndExtrasSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                upgradesExtras={{
+                                    heating_options: projectData?.heating_options,
+                                    pool_cleaner: projectData?.pool_cleaner
+                                }}
+                            />
 
-                        <Separator />
+                            <Separator />
 
-                        <TotalCostSummary
-                            pool={pool}
-                            customerId={customerIdString}
-                            projectData={projectData}
-                        />
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+                            <TotalCostSummary
+                                pool={pool}
+                                customerId={customerIdString}
+                                projectData={projectData}
+                            />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+        </MarginVisibilityContext.Provider>
     );
 }; 

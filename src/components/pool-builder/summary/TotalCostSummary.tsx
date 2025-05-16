@@ -3,8 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useContext } from "react";
 import { EditSectionLink } from "./EditSectionLink";
+import { MarginVisibilityContext } from "./SummarySection";
 
 interface TotalCostSummaryProps {
     pool: Pool;
@@ -17,6 +18,9 @@ export const TotalCostSummary: React.FC<TotalCostSummaryProps> = ({
     customerId,
     projectData
 }) => {
+    // Use the margin visibility context
+    const showMargins = useContext(MarginVisibilityContext);
+
     // Fetch margin data for this pool
     const { data: marginData } = useQuery({
         queryKey: ['pool-margin', pool.id],
@@ -155,15 +159,19 @@ export const TotalCostSummary: React.FC<TotalCostSummaryProps> = ({
                                 <p className="font-medium text-lg">{formatCurrency(totalCost)}</p>
                             </div>
 
-                            <div>
-                                <p className="text-sm text-muted-foreground">Margin Percentage</p>
-                                <p className="font-medium text-lg">{marginPercentage}%</p>
-                            </div>
+                            {showMargins && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Margin Percentage</p>
+                                    <p className="font-medium text-lg">{marginPercentage}%</p>
+                                </div>
+                            )}
 
-                            <div>
-                                <p className="text-sm text-muted-foreground">Dollar Margin</p>
-                                <p className="font-medium text-lg">{formatCurrency(dollarMargin)}</p>
-                            </div>
+                            {showMargins && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Dollar Margin</p>
+                                    <p className="font-medium text-lg">{formatCurrency(dollarMargin)}</p>
+                                </div>
+                            )}
 
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Price (RRP)</p>

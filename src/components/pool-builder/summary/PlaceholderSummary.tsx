@@ -1,6 +1,7 @@
 import { Pool } from "@/types/pool";
-import React from "react";
+import React, { useContext } from "react";
 import { EditSectionLink } from "./EditSectionLink";
+import { MarginVisibilityContext } from "./SummarySection";
 
 interface PlaceholderSummaryProps {
     pool: Pool;
@@ -18,6 +19,9 @@ export const PlaceholderSummary: React.FC<PlaceholderSummaryProps> = ({
     customerId,
     sectionId
 }) => {
+    // Get margin visibility from context
+    const showMargins = useContext(MarginVisibilityContext);
+
     if (!data) {
         return (
             <div>
@@ -49,6 +53,11 @@ export const PlaceholderSummary: React.FC<PlaceholderSummaryProps> = ({
 
                     // Skip null or undefined values
                     if (value === null || value === undefined) {
+                        return null;
+                    }
+
+                    // Skip margin-related fields if showMargins is false
+                    if (!showMargins && (key.includes('margin') || key.includes('rrp'))) {
                         return null;
                     }
 
