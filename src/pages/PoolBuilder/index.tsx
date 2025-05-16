@@ -9,7 +9,10 @@ import { PoolBuilderTabs } from "./components/PoolBuilderTabs";
 const PoolBuilder = () => {
   const [searchParams] = useSearchParams();
   const customerId = searchParams.get("customerId");
+  console.log("PoolBuilder: customerId from URL:", customerId);
+
   const { customer, selectedPool, loading } = useCustomerData(customerId);
+  console.log("PoolBuilder: Data from useCustomerData hook:", { customer, selectedPool, loading });
 
   return (
     <DashboardLayout>

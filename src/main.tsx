@@ -7,6 +7,8 @@ import App from './App.tsx'
 import { CostBuilderAuthProvider } from './contexts/CostBuilderAuthContext'
 import './index.css'
 
+console.log("Lovable: main.tsx execution started");
+
 // Create a client
 const queryClient = new QueryClient()
 
