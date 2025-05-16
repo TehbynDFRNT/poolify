@@ -1,3 +1,4 @@
+import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { CheckCircle2, Zap } from "lucide-react";
@@ -18,6 +19,18 @@ export const ElectricalSummary: React.FC<ElectricalSummaryProps> = ({
 }) => {
     // Get margin visibility from context
     const showMargins = useContext(MarginVisibilityContext);
+    // Get margin data
+    const { marginData } = useMargin(pool.id);
+
+    // Calculate RRP using margin formula: Cost / (1 - Margin/100)
+    const calculateRRP = (cost: number, marginPercentage: number) => {
+        if (marginPercentage >= 100) return 0; // Prevent division by zero or negative values
+        return cost / (1 - marginPercentage / 100);
+    };
+
+    // Calculate the electrical cost and RRP
+    const electricalCost = electrical?.total_cost || 0;
+    const electricalRRP = calculateRRP(electricalCost, marginData || 0);
 
     if (!electrical) {
         return (
@@ -82,7 +95,15 @@ export const ElectricalSummary: React.FC<ElectricalSummaryProps> = ({
 
                 <div>
                     <p className="text-sm text-muted-foreground">Total Electrical Cost</p>
-                    <p className="font-medium">{formatCurrency(electrical.total_cost || 0)}</p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(electricalCost)} <span className="text-primary">({formatCurrency(electricalRRP)})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(electricalRRP)}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>

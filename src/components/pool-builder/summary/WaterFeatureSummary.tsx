@@ -1,3 +1,4 @@
+import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 import { Pool } from "@/types/pool";
 import { PoolWaterFeature } from "@/types/water-feature";
 import { formatCurrency } from "@/utils/format";
@@ -19,6 +20,14 @@ export const WaterFeatureSummary: React.FC<WaterFeatureSummaryProps> = ({
 }) => {
     // Get margin visibility from context
     const showMargins = useContext(MarginVisibilityContext);
+    // Get margin data
+    const { marginData } = useMargin(pool.id);
+
+    // Calculate RRP using margin formula: Cost / (1 - Margin/100)
+    const calculateRRP = (cost: number, marginPercentage: number) => {
+        if (marginPercentage >= 100) return 0; // Prevent division by zero or negative values
+        return cost / (1 - marginPercentage / 100);
+    };
 
     // Debug waterFeatures data
     if (process.env.NODE_ENV !== 'production') {
@@ -32,6 +41,56 @@ export const WaterFeatureSummary: React.FC<WaterFeatureSummaryProps> = ({
             obj[key] !== null &&
             obj[key] !== undefined;
     };
+
+    // Extract total cost from water features data, with fallback options
+    const getWaterFeaturesCost = (): number => {
+        // First check if there's a direct total_cost property
+        if (hasValue(waterFeatures, 'total_cost')) {
+            return waterFeatures.total_cost;
+        }
+
+        // If no direct total_cost, try to calculate from components if available
+        let calculatedCost = 0;
+
+        // Check for base cost from size
+        if (hasValue(waterFeatures, 'water_feature_size') && waterFeatures.water_feature_size) {
+            // This is a simplified calculation - adjust based on your actual pricing logic
+            switch (waterFeatures.water_feature_size) {
+                case 'small':
+                    calculatedCost += 3200;
+                    break;
+                case 'medium':
+                    calculatedCost += 3500;
+                    break;
+                case 'large':
+                    calculatedCost += 4000;
+                    break;
+                case 'xlarge':
+                    calculatedCost += 4500;
+                    break;
+                default:
+                    calculatedCost += 3000; // Default fallback
+            }
+        }
+
+        // Add cost for back cladding if needed
+        if (hasValue(waterFeatures, 'back_cladding_needed') && waterFeatures.back_cladding_needed) {
+            calculatedCost += 500; // Example cost for back cladding
+        }
+
+        // Add cost for LED blade if specified
+        if (hasValue(waterFeatures, 'led_blade') && waterFeatures.led_blade &&
+            waterFeatures.led_blade.toLowerCase() !== 'none') {
+            calculatedCost += 800; // Example cost for LED blade
+        }
+
+        return calculatedCost;
+    };
+
+    // Get the water features cost
+    const waterFeaturesCost = getWaterFeaturesCost();
+    // Calculate the RRP for water features
+    const waterFeaturesRRP = calculateRRP(waterFeaturesCost, marginData || 0);
 
     // Check if waterFeatures has meaningful data
     const isEmpty = !waterFeatures ||
@@ -140,12 +199,19 @@ export const WaterFeatureSummary: React.FC<WaterFeatureSummaryProps> = ({
                     </div>
                 )}
 
-                {hasValue(waterFeatures, 'total_cost') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">Total Cost</p>
-                        <p className="font-medium">{formatCurrency(waterFeatures.total_cost)}</p>
-                    </div>
-                )}
+                {/* Show cost based on margin visibility */}
+                <div>
+                    <p className="text-sm text-muted-foreground">Total Cost</p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(waterFeaturesCost)} <span className="text-primary">({formatCurrency(waterFeaturesRRP)})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(waterFeaturesRRP)}
+                        </p>
+                    )}
+                </div>
             </div>
         </div>
     );

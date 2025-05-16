@@ -1,3 +1,4 @@
+import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { CheckCircle2, Package, Sparkles, Thermometer } from "lucide-react";
@@ -23,6 +24,7 @@ interface UpgradesAndExtrasSummaryProps {
             include_cleaner: boolean;
             pool_cleaner_id?: string | null;
             pool_cleaners?: any;
+            cost?: number;
         };
     };
 }
@@ -34,6 +36,13 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
 }) => {
     // Get margin visibility from context
     const showMargins = useContext(MarginVisibilityContext);
+    const { marginData } = useMargin(pool.id);
+
+    // Calculate RRP using margin formula: Cost / (1 - Margin/100)
+    const calculateRRP = (cost: number, marginPercentage: number) => {
+        if (marginPercentage >= 100) return 0; // Prevent division by zero or negative values
+        return cost / (1 - marginPercentage / 100);
+    };
 
     // Helper function to safely check if properties exist
     const hasValue = (obj: any, path: string): boolean => {
@@ -114,26 +123,47 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
                             {upgradesExtras?.heating_options?.include_heat_pump && (
                                 <div>
                                     <p className="text-sm text-muted-foreground">Heat Pump Cost</p>
-                                    <p className="font-medium">
-                                        {formatCurrency(upgradesExtras.heating_options.heat_pump_cost)}
-                                    </p>
+                                    {showMargins ? (
+                                        <p className="font-medium">
+                                            {formatCurrency(upgradesExtras.heating_options.heat_pump_cost)}
+                                            <span className="text-primary"> ({formatCurrency(calculateRRP(upgradesExtras.heating_options.heat_pump_cost, marginData || 0))})</span>
+                                        </p>
+                                    ) : (
+                                        <p className="font-medium text-primary">
+                                            {formatCurrency(calculateRRP(upgradesExtras.heating_options.heat_pump_cost, marginData || 0))}
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
                             {upgradesExtras?.heating_options?.include_blanket_roller && (
                                 <div>
                                     <p className="text-sm text-muted-foreground">Blanket & Roller Cost</p>
-                                    <p className="font-medium">
-                                        {formatCurrency(upgradesExtras.heating_options.blanket_roller_cost)}
-                                    </p>
+                                    {showMargins ? (
+                                        <p className="font-medium">
+                                            {formatCurrency(upgradesExtras.heating_options.blanket_roller_cost)}
+                                            <span className="text-primary"> ({formatCurrency(calculateRRP(upgradesExtras.heating_options.blanket_roller_cost, marginData || 0))})</span>
+                                        </p>
+                                    ) : (
+                                        <p className="font-medium text-primary">
+                                            {formatCurrency(calculateRRP(upgradesExtras.heating_options.blanket_roller_cost, marginData || 0))}
+                                        </p>
+                                    )}
                                 </div>
                             )}
 
                             <div>
                                 <p className="text-sm text-muted-foreground">Total Heating Cost</p>
-                                <p className="font-medium">
-                                    {formatCurrency(upgradesExtras?.heating_options?.heating_total_cost || 0)}
-                                </p>
+                                {showMargins ? (
+                                    <p className="font-medium">
+                                        {formatCurrency(upgradesExtras?.heating_options?.heating_total_cost || 0)}
+                                        <span className="text-primary"> ({formatCurrency(calculateRRP(upgradesExtras?.heating_options?.heating_total_cost || 0, marginData || 0))})</span>
+                                    </p>
+                                ) : (
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(calculateRRP(upgradesExtras?.heating_options?.heating_total_cost || 0, marginData || 0))}
+                                    </p>
+                                )}
                             </div>
 
                             {showMargins && upgradesExtras?.heating_options?.heating_total_margin !== undefined && (
@@ -171,14 +201,36 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
                                 </div>
                             )}
 
-                            {upgradesExtras?.pool_cleaner?.pool_cleaners?.rrp !== undefined && (
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Pool Cleaner Cost</p>
+                            <div>
+                                <p className="text-sm text-muted-foreground">Pool Cleaner Cost</p>
+                                {showMargins ? (
                                     <p className="font-medium">
-                                        {formatCurrency(upgradesExtras.pool_cleaner.pool_cleaners.rrp || 0)}
+                                        {formatCurrency(
+                                            upgradesExtras?.pool_cleaner?.cost ||
+                                            upgradesExtras?.pool_cleaner?.pool_cleaners?.rrp ||
+                                            upgradesExtras?.pool_cleaner?.pool_cleaners?.price ||
+                                            4125.00
+                                        )}
+                                        <span className="text-primary"> ({formatCurrency(calculateRRP(
+                                            upgradesExtras?.pool_cleaner?.cost ||
+                                            upgradesExtras?.pool_cleaner?.pool_cleaners?.rrp ||
+                                            upgradesExtras?.pool_cleaner?.pool_cleaners?.price ||
+                                            4125.00,
+                                            marginData || 0
+                                        ))})</span>
                                     </p>
-                                </div>
-                            )}
+                                ) : (
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(calculateRRP(
+                                            upgradesExtras?.pool_cleaner?.cost ||
+                                            upgradesExtras?.pool_cleaner?.pool_cleaners?.rrp ||
+                                            upgradesExtras?.pool_cleaner?.pool_cleaners?.price ||
+                                            4125.00,
+                                            marginData || 0
+                                        ))}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}

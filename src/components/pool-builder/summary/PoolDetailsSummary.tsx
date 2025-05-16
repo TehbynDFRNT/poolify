@@ -1,9 +1,13 @@
 import { supabase } from "@/integrations/supabase/client";
+import { useExcavation } from "@/pages/Quotes/components/SelectPoolStep/hooks/useExcavation";
+import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/hooks/useFiltrationPackage";
+import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useContext } from "react";
 import { EditSectionLink } from "./EditSectionLink";
+import { MarginVisibilityContext } from "./SummarySection";
 
 interface PoolDetailsSummaryProps {
     pool: Pool;
@@ -11,6 +15,12 @@ interface PoolDetailsSummaryProps {
 }
 
 export const PoolDetailsSummary: React.FC<PoolDetailsSummaryProps> = ({ pool, customerId }) => {
+    // Get margin visibility from context
+    const showMargins = useContext(MarginVisibilityContext);
+
+    // Fetch margin data
+    const { marginData } = useMargin(pool.id);
+
     // Fetch pool type information
     const { data: poolType } = useQuery({
         queryKey: ['pool-type', pool.pool_type_id],
@@ -32,6 +42,35 @@ export const PoolDetailsSummary: React.FC<PoolDetailsSummaryProps> = ({ pool, cu
         },
         enabled: !!pool.pool_type_id,
     });
+
+    // Fetch filtration package and excavation data
+    const { filtrationPackage } = useFiltrationPackage(pool);
+    const { excavationDetails } = useExcavation(pool.id);
+
+    // Calculate filtration cost
+    const filtrationCost =
+        (filtrationPackage?.pump?.price_inc_gst || 0) +
+        (filtrationPackage?.filter?.price_inc_gst || 0) +
+        (filtrationPackage?.sanitiser?.price_inc_gst || 0) +
+        (filtrationPackage?.light?.price_inc_gst || 0) +
+        (filtrationPackage?.handover_kit?.components?.reduce(
+            (acc, item) => acc + ((item.component?.price_inc_gst || 0) * item.quantity), 0
+        ) || 0);
+
+    // Get excavation cost
+    const excavationCost = excavationDetails ? parseFloat(excavationDetails.price) : 0;
+
+    // Set concrete cost - matching the approach in PoolDetailsSection
+    const concreteCost = 0; // This is set to 0 in the pool selection tab as well
+
+    // Calculate the total base cost
+    const totalBasePoolCost = pool.buy_price_inc_gst + excavationCost + concreteCost + filtrationCost;
+
+    // Calculate RRP using margin formula: Cost / (1 - Margin/100)
+    const calculateRRP = (cost: number, marginPercentage: number) => {
+        if (marginPercentage >= 100) return 0; // Prevent division by zero or negative values
+        return cost / (1 - marginPercentage / 100);
+    };
 
     // Helper to get color class for preview
     const getColorClass = (color: string) => {
@@ -99,9 +138,67 @@ export const PoolDetailsSummary: React.FC<PoolDetailsSummaryProps> = ({ pool, cu
 
                 <div>
                     <p className="text-sm text-muted-foreground">Base Price</p>
-                    <p className="font-medium">
-                        {pool.buy_price_inc_gst ? formatCurrency(pool.buy_price_inc_gst) : "N/A"}
-                    </p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(pool.buy_price_inc_gst)} <span className="text-primary">({formatCurrency(calculateRRP(pool.buy_price_inc_gst, marginData || 0))})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(calculateRRP(pool.buy_price_inc_gst, marginData || 0))}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <p className="text-sm text-muted-foreground">Excavation Cost</p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(excavationCost)} <span className="text-primary">({formatCurrency(calculateRRP(excavationCost, marginData || 0))})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(calculateRRP(excavationCost, marginData || 0))}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <p className="text-sm text-muted-foreground">Concrete Cost</p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(concreteCost)} <span className="text-primary">({formatCurrency(calculateRRP(concreteCost, marginData || 0))})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(calculateRRP(concreteCost, marginData || 0))}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <p className="text-sm text-muted-foreground">Filtration Cost</p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(filtrationCost)} <span className="text-primary">({formatCurrency(calculateRRP(filtrationCost, marginData || 0))})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(calculateRRP(filtrationCost, marginData || 0))}
+                        </p>
+                    )}
+                </div>
+
+                <div>
+                    <p className="text-sm text-muted-foreground">Total Base Cost</p>
+                    {showMargins ? (
+                        <p className="font-medium">
+                            {formatCurrency(totalBasePoolCost)} <span className="text-primary">({formatCurrency(calculateRRP(totalBasePoolCost, marginData || 0))})</span>
+                        </p>
+                    ) : (
+                        <p className="font-medium text-primary">
+                            {formatCurrency(calculateRRP(totalBasePoolCost, marginData || 0))}
+                        </p>
+                    )}
                 </div>
             </div>
         </div>
