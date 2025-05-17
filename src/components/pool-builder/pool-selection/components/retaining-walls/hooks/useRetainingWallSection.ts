@@ -1,7 +1,6 @@
-
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RetainingWall } from "@/types/retaining-wall";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface UseRetainingWallSectionProps {
@@ -26,20 +25,14 @@ export const useRetainingWallSection = ({
   const [totalCost, setTotalCost] = useState<number>(0);
   const [selectedWall, setSelectedWall] = useState<RetainingWall | null>(null);
   const [marginAmount, setMarginAmount] = useState<number>(0);
-  
+
   // UI state
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasExistingData, setHasExistingData] = useState<boolean>(false);
-
-  // Database column names for this wall number
-  const typeField = `retaining_wall${wallNumber}_type`;
-  const height1Field = `retaining_wall${wallNumber}_height1`;
-  const height2Field = `retaining_wall${wallNumber}_height2`;
-  const lengthField = `retaining_wall${wallNumber}_length`;
-  const totalCostField = `retaining_wall${wallNumber}_total_cost`;
+  const [retainingWallId, setRetainingWallId] = useState<string | null>(null);
 
   // Fetch existing data when component mounts
   useEffect(() => {
@@ -50,34 +43,44 @@ export const useRetainingWallSection = ({
 
   const fetchExistingData = async () => {
     if (!customerId) return;
-    
+
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('pool_projects')
-        .select(`${typeField}, ${height1Field}, ${height2Field}, ${lengthField}, ${totalCostField}`)
-        .eq('id', customerId)
-        .single();
+      // Find a wall entry for this wall number, using the wall_type field to distinguish
+      // We'll identify wall 1, 2, 3, 4 by a tag in the wall_type string
+      // This is a temporary measure until we have a proper migration to add a wall_number field
+      const wallIdentifier = `Wall ${wallNumber}:`;
 
-      if (error) {
+      const { data, error } = await supabase
+        .from('pool_retaining_walls')
+        .select('*')
+        .eq('pool_project_id', customerId)
+        .like('wall_type', `%${wallIdentifier}%`)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is expected
         console.error(`Error fetching retaining wall ${wallNumber} data:`, error);
       } else if (data) {
-        // Check if we have valid data before trying to set state
-        if (data[typeField]) {
-          setSelectedWallType(data[typeField]);
+        // Store the wall ID for updates
+        setRetainingWallId(data.id);
+
+        // Display the wall type without the identifier
+        if (data.wall_type) {
+          const actualWallType = data.wall_type.replace(wallIdentifier, '').trim();
+          setSelectedWallType(actualWallType);
           setHasExistingData(true);
         }
-        
-        if (data[height1Field] !== null) {
-          setHeight1(data[height1Field]);
+
+        if (data.height1 !== null) {
+          setHeight1(data.height1);
         }
-        
-        if (data[height2Field] !== null) {
-          setHeight2(data[height2Field]);
+
+        if (data.height2 !== null) {
+          setHeight2(data.height2);
         }
-        
-        if (data[lengthField] !== null) {
-          setLength(data[lengthField]);
+
+        if (data.length !== null) {
+          setLength(data.length);
         }
       }
     } catch (error) {
@@ -104,7 +107,7 @@ export const useRetainingWallSection = ({
       // Formula: Square Meters × Total Rate
       const calculatedTotalCost = squareMeters * selectedWall.total;
       setTotalCost(parseFloat(calculatedTotalCost.toFixed(2)));
-      
+
       // Calculate margin amount based on the margin percentage in the selected wall
       const calculatedMarginAmount = squareMeters * selectedWall.margin;
       setMarginAmount(parseFloat(calculatedMarginAmount.toFixed(2)));
@@ -149,25 +152,44 @@ export const useRetainingWallSection = ({
 
     setIsSaving(true);
     try {
-      // Create an update object with the correct field names
-      const updates: Record<string, any> = {
-        [typeField]: selectedWallType,
-        [height1Field]: height1,
-        [height2Field]: height2,
-        [lengthField]: length,
-        [totalCostField]: totalCost
+      // Create a wall record with a type that includes the wall number identifier
+      const wallData = {
+        wall_type: `Wall ${wallNumber}: ${selectedWallType}`,
+        height1,
+        height2,
+        length,
+        total_cost: totalCost,
+        margin: marginAmount // Add the margin amount to be stored in the database
       };
 
-      const { error } = await supabase
-        .from('pool_projects')
-        .update(updates)
-        .eq('id', customerId);
+      let result;
 
-      if (error) throw error;
-      
+      if (retainingWallId) {
+        // Update existing wall record
+        result = await supabase
+          .from('pool_retaining_walls')
+          .update(wallData)
+          .eq('id', retainingWallId);
+      } else {
+        // Create new wall record
+        result = await supabase
+          .from('pool_retaining_walls')
+          .insert({
+            ...wallData,
+            pool_project_id: customerId
+          });
+      }
+
+      if (result.error) throw result.error;
+
+      // If we just inserted a new record, get its ID for future updates
+      if (!retainingWallId && result.data && result.data.length > 0) {
+        setRetainingWallId(result.data[0].id);
+      }
+
       toast.success(`Retaining wall ${wallNumber} details saved successfully`);
       setHasExistingData(true);
-      
+
       // Call the onWallUpdate callback to trigger a refetch in the summary component
       if (onWallUpdate) {
         onWallUpdate();
@@ -181,41 +203,34 @@ export const useRetainingWallSection = ({
   };
 
   const handleDelete = async () => {
-    if (!customerId) {
-      toast.error("No customer ID provided");
+    if (!customerId || !retainingWallId) {
+      toast.error("No wall data to delete");
       return;
     }
 
     setIsDeleting(true);
     try {
-      // Create an update object with null values for this wall's fields
-      const updates: Record<string, any> = {
-        [typeField]: null,
-        [height1Field]: null,
-        [height2Field]: null,
-        [lengthField]: null,
-        [totalCostField]: null
-      };
-
+      // Delete the wall record entirely
       const { error } = await supabase
-        .from('pool_projects')
-        .update(updates)
-        .eq('id', customerId);
+        .from('pool_retaining_walls')
+        .delete()
+        .eq('id', retainingWallId);
 
       if (error) throw error;
-      
-      // Reset form
+
+      // Reset form and state
       setSelectedWallType('');
       setHeight1(0);
       setHeight2(0);
       setLength(0);
       setTotalCost(0);
       setMarginAmount(0);
-      
+      setRetainingWallId(null);
+
       setShowDeleteConfirm(false);
       setHasExistingData(false);
       toast.success(`Retaining wall ${wallNumber} removed successfully`);
-      
+
       // Call the onWallUpdate callback to trigger a refetch in the summary component
       if (onWallUpdate) {
         onWallUpdate();
@@ -243,7 +258,8 @@ export const useRetainingWallSection = ({
     showDeleteConfirm,
     isLoading,
     hasExistingData,
-    
+    retainingWallId,
+
     // Actions
     setSelectedWallType,
     handleHeightChange,

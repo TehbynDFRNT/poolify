@@ -1,15 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardContent } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SaveButton } from "../SaveButton";
-import { Pool } from "@/types/pool";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
-import { calculateExtraConcretingCost } from "@/utils/calculations";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useExtraConcreting } from "@/hooks/useExtraConcreting";
+import { supabase } from "@/integrations/supabase/client";
+import { Pool } from "@/types/pool";
+import { calculateExtraConcretingCost } from "@/utils/calculations";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { SaveButton } from "../SaveButton";
 
 interface ExtraConcretingProps {
   pool: Pool;
@@ -17,15 +18,8 @@ interface ExtraConcretingProps {
   onSaveComplete?: () => void;
 }
 
-// Define concrete types
-const CONCRETE_TYPES = [
-  { id: "cover-crete", label: "Cover Crete", price: 236, margin: 89 },
-  { id: "exposed-aggregate", label: "Exposed Aggregate", price: 180, margin: 70 },
-  { id: "standard", label: "Standard", price: 128, margin: 52 }
-];
-
-export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({ 
-  pool, 
+export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
+  pool,
   customerId,
   onSaveComplete
 }) => {
@@ -36,7 +30,10 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  
+
+  // Use the hook to fetch concrete types from the database
+  const { concretingTypes, isLoading: isLoadingTypes } = useExtraConcreting();
+
   // Fetch existing data when component mounts
   useEffect(() => {
     fetchExistingData();
@@ -46,10 +43,10 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     setIsLoading(true);
     try {
       const { data, error } = await supabase
-        .from('pool_projects')
+        .from('pool_paving_selections')
         .select('extra_concreting_type, extra_concreting_square_meters, extra_concreting_total_cost')
-        .eq('id', customerId)
-        .single();
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
 
       if (error) {
         console.error("Error fetching extra concreting data:", error);
@@ -57,11 +54,11 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
         if (data.extra_concreting_type) {
           setSelectedType(data.extra_concreting_type);
         }
-        
+
         if (data.extra_concreting_square_meters) {
           setMeterage(data.extra_concreting_square_meters);
         }
-        
+
         if (data.extra_concreting_total_cost) {
           setTotalCost(data.extra_concreting_total_cost);
         }
@@ -88,7 +85,8 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
   // Calculate cost based on selected type and meterage
   const calculateCost = (type: string, meter: number) => {
-    const selectedConcrete = CONCRETE_TYPES.find(item => item.id === type);
+    // Use the fetched concrete types instead of hardcoded values
+    const selectedConcrete = concretingTypes.find(item => item.id === type);
     if (selectedConcrete && meter > 0) {
       const costPerMeter = calculateExtraConcretingCost(selectedConcrete.price, selectedConcrete.margin);
       setTotalCost(costPerMeter * meter);
@@ -105,19 +103,45 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
     setIsSaving(true);
     try {
-      const { error } = await supabase
-        .from('pool_projects')
-        .update({
-          extra_concreting_type: selectedType,
-          extra_concreting_square_meters: meterage,
-          extra_concreting_total_cost: totalCost
-        } as any) // Type assertion to bypass TypeScript error temporarily
-        .eq('id', customerId);
+      // First check if a record already exists
+      const { data: existingData } = await supabase
+        .from('pool_paving_selections')
+        .select('id')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
+
+      let error;
+
+      if (existingData?.id) {
+        // Update existing record
+        const { error: updateError } = await supabase
+          .from('pool_paving_selections')
+          .update({
+            extra_concreting_type: selectedType,
+            extra_concreting_square_meters: meterage,
+            extra_concreting_total_cost: totalCost
+          })
+          .eq('id', existingData.id);
+
+        error = updateError;
+      } else {
+        // Insert new record
+        const { error: insertError } = await supabase
+          .from('pool_paving_selections')
+          .insert({
+            pool_project_id: customerId,
+            extra_concreting_type: selectedType,
+            extra_concreting_square_meters: meterage,
+            extra_concreting_total_cost: totalCost
+          });
+
+        error = insertError;
+      }
 
       if (error) throw error;
-      
+
       toast.success("Extra concreting details saved successfully.");
-      
+
       // Call the onSaveComplete callback if provided
       if (onSaveComplete) {
         onSaveComplete();
@@ -133,25 +157,39 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const { error } = await supabase
-        .from('pool_projects')
-        .update({
-          extra_concreting_type: null,
-          extra_concreting_square_meters: null,
-          extra_concreting_total_cost: null
-        } as any) // Type assertion to bypass TypeScript error temporarily
-        .eq('id', customerId);
+      // First check if a record already exists
+      const { data: existingData } = await supabase
+        .from('pool_paving_selections')
+        .select('id')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
+
+      let error;
+
+      if (existingData?.id) {
+        // Update existing record to clear these specific fields
+        const { error: updateError } = await supabase
+          .from('pool_paving_selections')
+          .update({
+            extra_concreting_type: null,
+            extra_concreting_square_meters: null,
+            extra_concreting_total_cost: null
+          })
+          .eq('id', existingData.id);
+
+        error = updateError;
+      }
 
       if (error) throw error;
-      
+
       // Reset form
       setSelectedType('');
       setMeterage(0);
       setTotalCost(0);
-      
+
       setShowDeleteConfirm(false);
       toast.success("Extra concreting removed successfully.");
-      
+
       // Call the onSaveComplete callback if provided
       if (onSaveComplete) {
         onSaveComplete();
@@ -164,9 +202,9 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     }
   };
 
-  // Get selected concrete type details
+  // Get selected concrete type details - updated to use fetched data
   const getSelectedConcreteType = () => {
-    return CONCRETE_TYPES.find(item => item.id === selectedType);
+    return concretingTypes.find(item => item.id === selectedType);
   };
 
   // Get per meter rate
@@ -184,9 +222,9 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             Add extra concrete to your project
           </p>
         </div>
-        
+
         {customerId && (
-          <SaveButton 
+          <SaveButton
             onClick={handleSave}
             isSubmitting={isSaving}
             disabled={!selectedType || meterage <= 0}
@@ -195,7 +233,7 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
           />
         )}
       </CardHeader>
-      
+
       <CardContent className="pt-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
           <div>
@@ -203,21 +241,25 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             <Select
               value={selectedType}
               onValueChange={handleTypeChange}
-              disabled={isLoading}
+              disabled={isLoading || isLoadingTypes}
             >
               <SelectTrigger id="concrete-type" className="mt-2">
                 <SelectValue placeholder="Select concrete type" />
               </SelectTrigger>
               <SelectContent>
-                {CONCRETE_TYPES.map((type) => (
-                  <SelectItem key={type.id} value={type.id}>
-                    {type.label} (${(type.price + type.margin).toFixed(2)}/m²)
-                  </SelectItem>
-                ))}
+                {isLoadingTypes ? (
+                  <SelectItem value="loading" disabled>Loading concrete types...</SelectItem>
+                ) : (
+                  concretingTypes.map((type) => (
+                    <SelectItem key={type.id} value={type.id}>
+                      {type.type} (${(type.price + type.margin).toFixed(2)}/m²)
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
-          
+
           <div>
             <Label htmlFor="meterage">Meterage (m²)</Label>
             <Input
@@ -233,21 +275,21 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             />
           </div>
         </div>
-        
+
         {selectedType && meterage > 0 && (
           <div className="mt-6 bg-gray-50 p-4 rounded-md">
             <h4 className="font-medium mb-2">Cost Summary</h4>
             <div className="grid grid-cols-2 gap-y-2">
               <div>Rate per m²:</div>
               <div className="text-right">${getPerMeterRate().toFixed(2)}</div>
-              
+
               <div>Area:</div>
               <div className="text-right">{meterage} m²</div>
-              
+
               <div className="font-medium border-t pt-2 mt-1">Total Cost:</div>
               <div className="text-right font-medium border-t pt-2 mt-1">${totalCost.toFixed(2)}</div>
             </div>
-            
+
             <div className="mt-4 pt-4 border-t">
               <h4 className="font-medium mb-2">Rate Breakdown</h4>
               <div className="grid grid-cols-4 gap-4">
@@ -257,25 +299,25 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <div>Base Price:</div>
                     <div className="text-right">${getSelectedConcreteType()?.price.toFixed(2)}</div>
-                    
+
                     <div>Margin:</div>
                     <div className="text-right">${getSelectedConcreteType()?.margin.toFixed(2)}</div>
-                    
+
                     <div className="font-medium">Materials Subtotal:</div>
                     <div className="text-right font-medium">${getPerMeterRate().toFixed(2)}</div>
                   </div>
                 </div>
-                
+
                 {/* Total Column (multiplied by square meters) */}
                 <div className="col-span-2">
                   <h5 className="text-sm font-medium mb-2">Total ({meterage} m²)</h5>
                   <div className="grid grid-cols-2 gap-y-2 text-sm">
                     <div>Base Price:</div>
                     <div className="text-right">${((getSelectedConcreteType()?.price || 0) * meterage).toFixed(2)}</div>
-                    
+
                     <div>Margin:</div>
                     <div className="text-right">${((getSelectedConcreteType()?.margin || 0) * meterage).toFixed(2)}</div>
-                    
+
                     <div className="font-medium">Materials Subtotal:</div>
                     <div className="text-right font-medium">${totalCost.toFixed(2)}</div>
                   </div>
@@ -284,7 +326,7 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             </div>
           </div>
         )}
-        
+
         {selectedType && (
           <div className="mt-6">
             <Button
@@ -297,7 +339,7 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
           </div>
         )}
       </CardContent>
-      
+
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
@@ -309,7 +351,7 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-red-600 hover:bg-red-700"

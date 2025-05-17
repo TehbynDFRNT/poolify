@@ -1,8 +1,7 @@
-
-import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Pool, PoolProject } from "@/types/pool";
-import { useToast } from "@/hooks/use-toast";
+import { useEffect, useState } from "react";
 
 export const useCustomerData = (customerId: string | null) => {
   const [customer, setCustomer] = useState<PoolProject | null>(null);
@@ -15,10 +14,22 @@ export const useCustomerData = (customerId: string | null) => {
     try {
       const { data, error } = await supabase
         .from('pool_projects')
-        .select('*')
+        .select(`
+          *,
+          pool_retaining_walls(*),
+          pool_concrete_selections(*),
+          pool_paving_selections(*),
+          pool_fence_concrete_strips(*),
+          pool_equipment_selections(
+            *,
+            crane:crane_id(*),
+            traffic_control:traffic_control_id(*),
+            bobcat:bobcat_id(*)
+          )
+        `)
         .eq('id', id)
         .single();
-        
+
       if (error) {
         console.error("useCustomerData: Error fetching customer:", error);
         toast({
@@ -30,7 +41,7 @@ export const useCustomerData = (customerId: string | null) => {
         // Not re-throwing error here to allow finally block to run setLoading(false)
         return; // Exit if error
       }
-      
+
       if (data) {
         console.log("useCustomerData: Customer data fetched successfully:", data);
         setCustomer(data as PoolProject);
@@ -40,7 +51,7 @@ export const useCustomerData = (customerId: string | null) => {
       }
     } catch (error) {
       console.error("useCustomerData: Catch block in fetchCustomerData:", error);
-      setCustomer(null); 
+      setCustomer(null);
     }
   };
 
@@ -63,7 +74,7 @@ export const useCustomerData = (customerId: string | null) => {
         // setSelectedPool(null); // Already null by default or from previous reset
         return; // Exit if error
       }
-      
+
       if (projectData && projectData.pool_spec) {
         console.log("useCustomerData: Pool data from pool_projects:", projectData.pool_spec);
         setSelectedPool(projectData.pool_spec as Pool);
@@ -92,7 +103,7 @@ export const useCustomerData = (customerId: string | null) => {
         setSelectedPool(null); // Ensure pool is null if not found or error
         return;
       }
-      
+
       if (selectionData && selectionData.pool) {
         console.log("useCustomerData: Pool data from pool_selections:", selectionData.pool);
         setSelectedPool(selectionData.pool as Pool);
@@ -105,7 +116,7 @@ export const useCustomerData = (customerId: string | null) => {
       setSelectedPool(null);
     }
   };
-  
+
   useEffect(() => {
     console.log("useCustomerData: useEffect triggered with customerId:", customerId);
     if (customerId) {
@@ -129,7 +140,7 @@ export const useCustomerData = (customerId: string | null) => {
       setSelectedPool(null);
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [customerId]); // customer and selectedPool should not be dependencies here
 
   return { customer, selectedPool, loading };

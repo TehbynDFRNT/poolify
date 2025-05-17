@@ -1,7 +1,6 @@
-
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { getFirstOrEmpty } from "@/utils/poolProjectHelpers";
+import { useEffect, useState } from "react";
 
 export const useSiteRequirements = (customerId: string) => {
   const [craneId, setCraneId] = useState<string | undefined>(undefined);
@@ -20,48 +19,53 @@ export const useSiteRequirements = (customerId: string) => {
   useEffect(() => {
     const fetchExistingRequirements = async () => {
       if (!customerId) return;
-      
+
       try {
         setIsLoading(true);
         const { data, error } = await supabase
           .from('pool_projects')
           .select(`
-            crane_id,
-            traffic_control_id,
-            bobcat_id,
             site_requirements_data,
-            site_requirements_notes
+            site_requirements_notes,
+            pool_equipment_selections(
+              crane_id,
+              traffic_control_id,
+              bobcat_id
+            )
           `)
           .eq('id', customerId)
           .single();
-        
+
         if (error) {
           console.error("Error fetching site requirements:", error);
           return;
         }
-        
+
         if (data) {
+          // Extract equipment data from the junction table
+          const equipmentData = getFirstOrEmpty(data.pool_equipment_selections);
+
           // Set the form state from the loaded data
-          setCraneId(data.crane_id || undefined);
-          setTrafficControlId(data.traffic_control_id || 'none');
-          setBobcatId(data.bobcat_id || 'none');
-          
+          setCraneId(equipmentData.crane_id || undefined);
+          setTrafficControlId(equipmentData.traffic_control_id || 'none');
+          setBobcatId(equipmentData.bobcat_id || 'none');
+
           // Safely handle the custom requirements data with proper type checking
           if (data.site_requirements_data && Array.isArray(data.site_requirements_data)) {
             // First convert to unknown, then to the specific type
             const requirementsData = data.site_requirements_data as unknown;
             // Validate the shape of each item in the array before setting the state
-            const validRequirements = (requirementsData as any[]).filter(item => 
-              typeof item === 'object' && 
-              item !== null && 
-              'id' in item && 
-              'description' in item && 
+            const validRequirements = (requirementsData as any[]).filter(item =>
+              typeof item === 'object' &&
+              item !== null &&
+              'id' in item &&
+              'description' in item &&
               'price' in item
             ) as CustomRequirement[];
-            
+
             setCustomRequirements(validRequirements);
           }
-          
+
           setNotes(data.site_requirements_notes || "");
         }
       } catch (error) {
@@ -83,12 +87,12 @@ export const useSiteRequirements = (customerId: string) => {
         .select('id, price')
         .eq('name', 'Franna Crane-S20T-L1')
         .single();
-      
+
       if (error) {
         console.error("Error fetching default crane cost:", error);
         return;
       }
-      
+
       if (data) {
         setDefaultCraneCost(data.price);
         setDefaultCraneId(data.id);
@@ -109,14 +113,14 @@ export const useSiteRequirements = (customerId: string) => {
             .select('price')
             .eq('id', craneId)
             .single();
-          
+
           if (craneData) {
             setCraneCost(craneData.price);
           }
         } else {
           setCraneCost(0);
         }
-        
+
         // Fetch traffic control cost if selected
         if (trafficControlId && trafficControlId !== 'none') {
           const { data: trafficData } = await supabase
@@ -124,14 +128,14 @@ export const useSiteRequirements = (customerId: string) => {
             .select('price')
             .eq('id', trafficControlId)
             .single();
-          
+
           if (trafficData) {
             setTrafficControlCost(trafficData.price);
           }
         } else {
           setTrafficControlCost(0);
         }
-        
+
         // Fetch bobcat cost if selected
         if (bobcatId && bobcatId !== 'none') {
           const { data: bobcatData } = await supabase
@@ -139,7 +143,7 @@ export const useSiteRequirements = (customerId: string) => {
             .select('price')
             .eq('id', bobcatId)
             .single();
-          
+
           if (bobcatData) {
             setBobcatCost(bobcatData.price);
           }
@@ -150,13 +154,13 @@ export const useSiteRequirements = (customerId: string) => {
         console.error("Error fetching costs:", error);
       }
     };
-    
+
     fetchCosts();
   }, [craneId, trafficControlId, bobcatId]);
 
   // Calculate costs and related properties
   const customRequirementsTotal = customRequirements.reduce(
-    (total, req) => total + (req.price || 0), 
+    (total, req) => total + (req.price || 0),
     0
   );
 

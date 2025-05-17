@@ -1,7 +1,5 @@
-
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { PackageWithComponents } from "@/types/filtration";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 export const usePoolPackages = () => {
@@ -27,16 +25,16 @@ export const usePoolPackages = () => {
             name,
             display_order,
             light:filtration_components!light_id (
-              id, name, model_number, price
+              id, name, model_number, price_inc_gst
             ),
             pump:filtration_components!pump_id (
-              id, name, model_number, price
+              id, name, model_number, price_inc_gst
             ),
             sanitiser:filtration_components!sanitiser_id (
-              id, name, model_number, price
+              id, name, model_number, price_inc_gst
             ),
             filter:filtration_components!filter_id (
-              id, name, model_number, price
+              id, name, model_number, price_inc_gst
             ),
             handover_kit:handover_kit_packages!handover_kit_id (
               id,
@@ -44,7 +42,7 @@ export const usePoolPackages = () => {
               components:handover_kit_package_components (
                 quantity,
                 component:filtration_components!component_id (
-                  id, name, model_number, price
+                  id, name, model_number, price_inc_gst
                 )
               )
             )
@@ -84,7 +82,7 @@ export const usePoolPackages = () => {
       queryClient.invalidateQueries({ queryKey: ["pools-with-packages"] });
       queryClient.invalidateQueries({ queryKey: ["filtration-package", variables.packageId] });
       queryClient.invalidateQueries({ queryKey: ["pool", variables.poolId] });
-      
+
       toast.success("Package updated successfully");
     },
     onError: (error) => {

@@ -1,33 +1,40 @@
+import {
+  PoolConcreteSelection,
+  PoolEquipmentSelection,
+  PoolFenceConcreteStrip,
+  PoolPavingSelection,
+  PoolRetainingWall
+} from "@/integrations/supabase/types";
 import { z } from "zod";
 
 export interface Pool {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   length: number;
   width: number;
   depth_shallow: number;
   depth_deep: number;
-  volume: number;
-  perimeter: number;
-  surface_area: number;
-  price_base: number;
-  price_excavation: number;
-  price_plumbing: number;
-  price_electrical: number;
-  price_installation: number;
-  price_coping: number;
-  price_equipment: number;
-  price_filtration: number;
-  price_heater: number;
-  price_lights: number;
-  price_cleaning: number;
-  price_chemicals: number;
-  price_winterizing: number;
-  price_warranty: number;
+  volume?: number;
+  perimeter?: number;
+  surface_area?: number;
+  price_base?: number;
+  price_excavation?: number;
+  price_plumbing?: number;
+  price_electrical?: number;
+  price_installation?: number;
+  price_coping?: number;
+  price_equipment?: number;
+  price_filtration?: number;
+  price_heater?: number;
+  price_lights?: number;
+  price_cleaning?: number;
+  price_chemicals?: number;
+  price_winterizing?: number;
+  price_warranty?: number;
   notes?: string;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
 
   // Additional properties from pool_specifications table
   range?: string;
@@ -46,6 +53,12 @@ export interface Pool {
   dig_level?: string;
   dig_type_id?: string;
   outline_image_url?: string;
+
+  // Optional computed properties that might be added in components
+  filtration_package_cost?: number;
+  excavation_cost?: number;
+  fixed_costs?: number;
+  dimensions?: string;
 }
 
 export interface PoolProject {
@@ -61,21 +74,20 @@ export interface PoolProject {
   resident_homeowner: boolean;
   pool_specification_id?: string;
   pool_color?: string;
-  crane_id?: string;
-  traffic_control_id?: string;
-  bobcat_id?: string;
-  heat_pump_id?: string | null;
-  blanket_roller_id?: string | null;
-  include_heat_pump?: boolean;
-  include_blanket_roller?: boolean;
-  heat_pump_cost?: number;
-  blanket_roller_cost?: number;
-  heating_total_cost?: number;
-  heating_total_margin?: number;
   site_requirements_data?: any[];
   site_requirements_notes?: string;
   created_at: string;
   updated_at: string;
+
+  // Optional computed fields
+  water_feature_total_cost?: number;
+
+  // Junction table relations - will be populated by separate queries
+  pool_retaining_walls?: PoolRetainingWall[];
+  pool_concrete_selections?: PoolConcreteSelection[];
+  pool_paving_selections?: PoolPavingSelection[];
+  pool_fence_concrete_strips?: PoolFenceConcreteStrip[];
+  pool_equipment_selections?: PoolEquipmentSelection[];
 }
 
 export interface PoolSelection {

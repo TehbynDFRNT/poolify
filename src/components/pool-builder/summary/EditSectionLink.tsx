@@ -1,7 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Edit } from "lucide-react";
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import { Button } from '@/components/ui/button';
+import { PencilIcon } from 'lucide-react';
+import React from 'react';
 
 interface EditSectionLinkProps {
     section: string;
@@ -9,21 +8,14 @@ interface EditSectionLinkProps {
 }
 
 export const EditSectionLink: React.FC<EditSectionLinkProps> = ({ section, customerId }) => {
-    const navigate = useNavigate();
-
-    const handleNavigation = () => {
-        navigate(`/pool-builder?customerId=${customerId}`, { state: { defaultTab: section } });
-    };
-
     return (
-        <Button
-            variant="ghost"
-            size="sm"
-            className="h-8 px-2 flex items-center gap-1 text-muted-foreground hover:text-foreground"
-            onClick={handleNavigation}
-        >
-            <Edit className="h-3.5 w-3.5" />
-            <span className="text-xs">Edit</span>
+        <Button variant="ghost" size="sm" asChild>
+            <a href={`/pool-builder/${customerId}/${section}`} className="flex items-center gap-1">
+                <PencilIcon className="h-4 w-4" />
+                <span>Edit</span>
+            </a>
         </Button>
     );
-}; 
+};
+
+export default EditSectionLink; 
