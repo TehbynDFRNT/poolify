@@ -67,13 +67,19 @@ export const usePoolPackages = () => {
 
   const updatePoolPackageMutation = useMutation({
     mutationFn: async ({ poolId, packageId }: { poolId: string; packageId: string }) => {
+      // Upsert into pool_project_filtration_packages
       const { error } = await supabase
-        .from("pool_specifications")
-        .update({ default_filtration_package_id: packageId })
-        .eq("id", poolId);
+        .from("pool_project_filtration_packages")
+        .upsert([
+          {
+            pool_project_id: poolId,
+            filtration_package_id: packageId,
+            updated_at: new Date().toISOString(),
+          },
+        ], { onConflict: ["pool_project_id"] });
 
       if (error) {
-        console.error("Error updating pool package:", error);
+        console.error("Error updating pool project filtration package:", error);
         throw error;
       }
     },

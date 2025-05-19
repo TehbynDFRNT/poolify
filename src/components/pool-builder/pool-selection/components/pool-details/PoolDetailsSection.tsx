@@ -1,19 +1,18 @@
-
-import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useExcavation } from "@/pages/Quotes/components/SelectPoolStep/hooks/useExcavation";
+import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/hooks/useFiltrationPackage";
 import { Pool } from "@/types/pool";
+import React from "react";
+import { PoolCostsSummaryContent } from "./PoolCostsSummaryContent";
+import { PoolCraneContent } from "./PoolCraneContent";
 import { PoolDetailsContent } from "./PoolDetailsContent";
 import { PoolDimensionsContent } from "./PoolDimensionsContent";
-import { PoolPricingContent } from "./PoolPricingContent";
-import { PoolFixedCostsContent } from "./PoolFixedCostsContent";
-import { PoolFiltrationContent } from "./PoolFiltrationContent";
-import { PoolCraneContent } from "./PoolCraneContent";
 import { PoolExcavationContent } from "./PoolExcavationContent";
+import { PoolFiltrationContent } from "./PoolFiltrationContent";
+import { PoolFixedCostsContent } from "./PoolFixedCostsContent";
 import { PoolIndividualCostsContent } from "./PoolIndividualCostsContent";
-import { PoolCostsSummaryContent } from "./PoolCostsSummaryContent";
+import { PoolPricingContent } from "./PoolPricingContent";
 import { PoolWebRRPContent } from "./PoolWebRRPContent";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/hooks/useFiltrationPackage";
-import { useExcavation } from "@/pages/Quotes/components/SelectPoolStep/hooks/useExcavation";
 
 interface PoolDetailsSectionProps {
   pool: Pool;
@@ -21,19 +20,21 @@ interface PoolDetailsSectionProps {
   sectionId: string;
   title: string;
   className?: string;
+  customerId?: string;
 }
 
-export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({ 
-  pool, 
-  selectedColor, 
-  sectionId, 
+export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
+  pool,
+  selectedColor,
+  sectionId,
   title,
-  className
+  className,
+  customerId
 }) => {
   // Fetch filtration package and excavation data for costs summary
   const { filtrationPackage } = useFiltrationPackage(pool);
   const { excavationDetails } = useExcavation(pool.id);
-  
+
   // Mock concrete cost - this would ideally come from a concrete cost hook
   const concreteCost = 0; // Default to 0 for now
 
@@ -49,7 +50,7 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
       case "fixed-costs":
         return <PoolFixedCostsContent pool={pool} />;
       case "filtration":
-        return <PoolFiltrationContent pool={pool} />;
+        return <PoolFiltrationContent pool={pool} customerId={customerId} />;
       case "crane":
         return <PoolCraneContent pool={pool} />;
       case "excavation":
@@ -58,9 +59,9 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
         return <PoolIndividualCostsContent pool={pool} />;
       case "costs-summary":
         return (
-          <PoolCostsSummaryContent 
-            pool={pool} 
-            filtrationPackage={filtrationPackage} 
+          <PoolCostsSummaryContent
+            pool={pool}
+            filtrationPackage={filtrationPackage}
             excavationCost={excavationDetails ? parseFloat(excavationDetails.price) : 0}
             concreteCost={concreteCost}
           />

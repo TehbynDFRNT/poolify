@@ -1,11 +1,10 @@
-
-import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Save } from "lucide-react";
 import { Pool } from "@/types/pool";
-import { PoolModelSelector } from "./PoolModelSelector";
+import { CheckCircle, Save } from "lucide-react";
+import React from "react";
 import { ColorSelector } from "./ColorSelector";
 import { PoolDetailsSections } from "./PoolDetailsSections";
+import { PoolModelSelector } from "./PoolModelSelector";
 import { SaveButton } from "./SaveButton";
 
 interface PoolSelectionContentProps {
@@ -39,9 +38,9 @@ export const PoolSelectionContent: React.FC<PoolSelectionContentProps> = ({
     <Card className="mb-6">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Select a Pool Model</CardTitle>
-        
+
         {customerId && selectedPoolId && (
-          <SaveButton 
+          <SaveButton
             onClick={handleSavePoolSelection}
             isSubmitting={isSubmitting}
             disabled={false}
@@ -62,12 +61,12 @@ export const PoolSelectionContent: React.FC<PoolSelectionContentProps> = ({
           </div>
         ) : (
           <>
-            <PoolModelSelector 
-              poolsByRange={poolsByRange} 
-              selectedPoolId={selectedPoolId} 
+            <PoolModelSelector
+              poolsByRange={poolsByRange}
+              selectedPoolId={selectedPoolId}
               onSelect={(value) => {
                 setSelectedPoolId(value);
-              }} 
+              }}
             />
 
             {selectedPoolId && selectedPool && (
@@ -76,23 +75,24 @@ export const PoolSelectionContent: React.FC<PoolSelectionContentProps> = ({
                   <CheckCircle className="h-5 w-5 text-primary" />
                   <h3 className="font-medium text-lg">Selected Pool: {selectedPool.name}</h3>
                 </div>
-                
+
                 <div className="mb-6">
                   <h3 className="font-medium mb-2">Select Color</h3>
-                  <ColorSelector 
-                    selectedColor={selectedColor} 
-                    onChange={setSelectedColor} 
+                  <ColorSelector
+                    selectedColor={selectedColor}
+                    onChange={setSelectedColor}
                   />
                 </div>
-                
+
                 {/* Pool Details Section with vertical flow */}
-                <PoolDetailsSections 
+                <PoolDetailsSections
                   pool={selectedPool}
                   selectedColor={selectedColor}
+                  customerId={customerId || undefined}
                 />
               </div>
             )}
-            
+
             {!customerId && selectedPoolId && (
               <div className="mt-4 p-3 bg-amber-50 text-amber-800 rounded-md text-sm">
                 <p>To save this pool selection, please save customer information first.</p>

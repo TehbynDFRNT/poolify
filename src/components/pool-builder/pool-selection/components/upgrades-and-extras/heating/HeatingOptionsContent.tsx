@@ -27,6 +27,11 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
   const heatPumpInstallCost = getInstallationCost('heat_pump');
   const blanketRollerInstallCost = getInstallationCost('blanket_roller');
 
+  console.log('Installation costs:', {
+    heatPump: heatPumpInstallCost,
+    blanketRoller: blanketRollerInstallCost
+  });
+
   const {
     isLoading: isLoadingSelections,
     includeHeatPump,
@@ -37,13 +42,25 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     saveHeatingOptions,
     initialHeatPumpCost,
     initialBlanketRollerCost,
+    currentHeatPumpTotalCost,
+    currentBlanketRollerTotalCost,
     currentTotalCost,
   } = useHeatingOptionsState({
     poolId: pool.id,
     customerId,
     compatibleHeatPump,
     blanketRoller,
-    getInstallationCost: getInstallationCost
+    getInstallationCost: (type) => {
+      if (type === 'heat_pump') return heatPumpInstallCost;
+      if (type === 'blanket_roller') return blanketRollerInstallCost;
+      return 0;
+    }
+  });
+
+  console.log('Calculated costs:', {
+    heatPump: currentHeatPumpTotalCost,
+    blanketRoller: currentBlanketRollerTotalCost,
+    total: currentTotalCost
   });
 
   const isLoading = isLoadingBaseOptions || isLoadingSelections;
@@ -78,7 +95,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         includeHeatPump={includeHeatPump}
         setIncludeHeatPump={setIncludeHeatPump}
         installationCost={heatPumpInstallCost}
-        totalCost={initialHeatPumpCost}
+        totalCost={currentHeatPumpTotalCost || initialHeatPumpCost}
       />
 
       <BlanketRollerSection
@@ -86,7 +103,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         includeBlanketRoller={includeBlanketRoller}
         setIncludeBlanketRoller={setIncludeBlanketRoller}
         installationCost={blanketRollerInstallCost}
-        totalCost={initialBlanketRollerCost}
+        totalCost={currentBlanketRollerTotalCost || initialBlanketRollerCost}
       />
 
       <HeatingOptionsSummary

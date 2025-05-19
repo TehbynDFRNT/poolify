@@ -1,23 +1,23 @@
-
-import React from "react";
 import { Button } from "@/components/ui/button";
-import { useFiltrationQueries } from "@/hooks/useFiltrationQueries";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from "@/components/ui/select";
-import { AlertCircle } from "lucide-react";
+import { useFiltrationQueries } from "@/hooks/useFiltrationQueries";
 import { usePoolPackages } from "@/hooks/usePoolPackages";
 import { Pool } from "@/types/pool";
+import { AlertCircle } from "lucide-react";
+import React from "react";
 
 interface NoFiltrationPackageProps {
   pool?: Pool;
+  customerId?: string;
 }
 
-export const NoFiltrationPackage: React.FC<NoFiltrationPackageProps> = ({ pool }) => {
+export const NoFiltrationPackage: React.FC<NoFiltrationPackageProps> = ({ pool, customerId }) => {
   const { packages } = useFiltrationQueries(null);
   const { updatePoolPackageMutation } = usePoolPackages();
   const [selectedPackageId, setSelectedPackageId] = React.useState<string>("");
@@ -32,9 +32,10 @@ export const NoFiltrationPackage: React.FC<NoFiltrationPackageProps> = ({ pool }
   }
 
   const handleAssignPackage = () => {
-    if (selectedPackageId && pool.id) {
+    const projectId = customerId || pool?.id;
+    if (selectedPackageId && projectId) {
       updatePoolPackageMutation.mutate({
-        poolId: pool.id,
+        poolId: projectId,
         packageId: selectedPackageId
       });
     }
@@ -55,12 +56,12 @@ export const NoFiltrationPackage: React.FC<NoFiltrationPackageProps> = ({ pool }
         <AlertCircle className="h-5 w-5" />
         <p>No default filtration package assigned to this pool.</p>
       </div>
-      
+
       <div className="space-y-4 p-4 border border-border rounded-md">
         <h3 className="font-medium">Assign a filtration package:</h3>
-        
-        <Select 
-          value={selectedPackageId} 
+
+        <Select
+          value={selectedPackageId}
           onValueChange={setSelectedPackageId}
         >
           <SelectTrigger className="w-full">
@@ -74,8 +75,8 @@ export const NoFiltrationPackage: React.FC<NoFiltrationPackageProps> = ({ pool }
             ))}
           </SelectContent>
         </Select>
-        
-        <Button 
+
+        <Button
           onClick={handleAssignPackage}
           disabled={!selectedPackageId || updatePoolPackageMutation.isPending}
         >

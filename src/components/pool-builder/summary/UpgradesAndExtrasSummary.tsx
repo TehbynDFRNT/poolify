@@ -19,6 +19,8 @@ interface UpgradesAndExtrasSummaryProps {
             blanket_roller_cost: number;
             heating_total_cost: number;
             heating_total_margin?: number;
+            heat_pump_installation_cost?: number;
+            blanket_roller_installation_cost?: number;
         };
         pool_cleaner?: {
             include_cleaner: boolean;
@@ -136,6 +138,15 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
                                 </div>
                             )}
 
+                            {upgradesExtras?.heating_options?.include_heat_pump && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Heat Pump Installation</p>
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(upgradesExtras.heating_options.heat_pump_installation_cost || 605.00)}
+                                    </p>
+                                </div>
+                            )}
+
                             {upgradesExtras?.heating_options?.include_blanket_roller && (
                                 <div>
                                     <p className="text-sm text-muted-foreground">Blanket & Roller Cost</p>
@@ -149,6 +160,15 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
                                             {formatCurrency(calculateRRP(upgradesExtras.heating_options.blanket_roller_cost, marginData || 0))}
                                         </p>
                                     )}
+                                </div>
+                            )}
+
+                            {upgradesExtras?.heating_options?.include_blanket_roller && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Blanket & Roller Installation</p>
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(upgradesExtras.heating_options.blanket_roller_installation_cost || 155.00)}
+                                    </p>
                                 </div>
                             )}
 

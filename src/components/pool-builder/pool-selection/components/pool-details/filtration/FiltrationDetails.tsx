@@ -1,32 +1,33 @@
-
-import React, { useState, useEffect } from "react";
-import { PackageWithComponents } from "@/types/filtration";
-import { FiltrationComponentsGrid } from "./FiltrationComponentsGrid";
-import { HandoverKitSection } from "./HandoverKitSection";
-import { FiltrationTotalPrice } from "./FiltrationTotalPrice";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { useFiltrationQueries } from "@/hooks/useFiltrationQueries";
 import { usePoolPackages } from "@/hooks/usePoolPackages";
+import { PackageWithComponents } from "@/types/filtration";
 import { Pool } from "@/types/pool";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Edit2 } from "lucide-react";
-import { SaveButton } from "../../../components/SaveButton";
 import { useQueryClient } from "@tanstack/react-query";
+import { Edit2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { SaveButton } from "../../../components/SaveButton";
+import { FiltrationComponentsGrid } from "./FiltrationComponentsGrid";
+import { FiltrationTotalPrice } from "./FiltrationTotalPrice";
+import { HandoverKitSection } from "./HandoverKitSection";
 
 interface FiltrationDetailsProps {
   filtrationPackage: PackageWithComponents;
   pool?: Pool;
+  customerId?: string;
 }
 
-export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({ 
+export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
   filtrationPackage: initialPackage,
-  pool
+  pool,
+  customerId
 }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [selectedPackageId, setSelectedPackageId] = useState(initialPackage.id);
@@ -52,9 +53,11 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
   }, [selectedPackageId, packages, currentPackage.id]);
 
   const handleUpdatePackage = () => {
-    if (pool?.id && selectedPackageId !== initialPackage.id) {
+    // Use customerId directly if provided, otherwise fall back to pool.id
+    const projectId = customerId || pool?.id;
+    if (projectId && selectedPackageId !== initialPackage.id) {
       updatePoolPackageMutation.mutate({
-        poolId: pool.id,
+        poolId: projectId,
         packageId: selectedPackageId
       }, {
         onSuccess: () => {
@@ -79,13 +82,13 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
         <h3 className="font-medium text-lg">
           Filtration Package - Option {currentPackage.display_order}
         </h3>
-        
+
         {pool && (
           isEditing ? (
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => {
                   setSelectedPackageId(initialPackage.id);
                   setCurrentPackage(initialPackage);
@@ -95,7 +98,7 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
               >
                 Cancel
               </Button>
-              <SaveButton 
+              <SaveButton
                 onClick={handleUpdatePackage}
                 isSubmitting={updatePoolPackageMutation.isPending}
                 disabled={selectedPackageId === initialPackage.id}
@@ -104,9 +107,9 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
               />
             </div>
           ) : (
-            <Button 
-              size="sm" 
-              variant="outline" 
+            <Button
+              size="sm"
+              variant="outline"
               onClick={() => setIsEditing(true)}
             >
               <Edit2 className="h-4 w-4 mr-1" />
@@ -118,8 +121,8 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
 
       {isEditing && packages ? (
         <div className="p-4 border border-border rounded-md">
-          <Select 
-            value={selectedPackageId} 
+          <Select
+            value={selectedPackageId}
             onValueChange={setSelectedPackageId}
           >
             <SelectTrigger className="w-full">
@@ -135,13 +138,13 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
           </Select>
         </div>
       ) : null}
-      
+
       <FiltrationComponentsGrid filtrationPackage={currentPackage} />
-      
+
       {currentPackage.handover_kit && (
         <HandoverKitSection handoverKit={currentPackage.handover_kit} />
       )}
-      
+
       <FiltrationTotalPrice filtrationPackage={currentPackage} />
     </div>
   );

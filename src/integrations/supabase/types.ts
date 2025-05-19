@@ -2715,6 +2715,128 @@ export type Database = {
           }
         ]
       }
+      pool_project_blanket_rollers: {
+        Row: {
+          id: string
+          pool_project_id: string
+          blanket_roller_id: string
+          include_blanket_roller: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          pool_project_id: string
+          blanket_roller_id: string
+          include_blanket_roller?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          pool_project_id?: string
+          blanket_roller_id?: string
+          include_blanket_roller?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_blanket_rollers_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_project_blanket_rollers_blanket_roller_id_fkey"
+            columns: ["blanket_roller_id"]
+            isOneToOne: false
+            referencedRelation: "blanket_rollers"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      pool_project_filtration_packages: {
+        Row: {
+          id: string
+          pool_project_id: string
+          filtration_package_id: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          pool_project_id: string
+          filtration_package_id: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          pool_project_id?: string
+          filtration_package_id?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_filtration_packages_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_project_filtration_packages_filtration_package_id_fkey"
+            columns: ["filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      pool_project_heat_pumps: {
+        Row: {
+          created_at: string
+          heat_pump_id: string
+          hp_description: string
+          hp_sku: string
+          id: string
+          pool_model: string
+          pool_range: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          heat_pump_id: string
+          hp_description: string
+          hp_sku: string
+          id?: string
+          pool_model: string
+          pool_range: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          heat_pump_id?: string
+          hp_description?: string
+          hp_sku?: string
+          id?: string
+          pool_model?: string
+          pool_range?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_heat_pumps_heat_pump_id_fkey"
+            columns: ["heat_pump_id"]
+            isOneToOne: false
+            referencedRelation: "heat_pump_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       proposal_snapshot_v: {
@@ -3035,3 +3157,4 @@ export type PoolConcreteSelection = Database['public']['Tables']['pool_concrete_
 export type PoolPavingSelection = Database['public']['Tables']['pool_paving_selections']['Row']
 export type PoolFenceConcreteStrip = Database['public']['Tables']['pool_fence_concrete_strips']['Row']
 export type PoolEquipmentSelection = Database['public']['Tables']['pool_equipment_selections']['Row']
+export type PoolProjectFiltrationPackage = Database['public']['Tables']['pool_project_filtration_packages']['Row']

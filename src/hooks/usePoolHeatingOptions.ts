@@ -1,8 +1,7 @@
-
-import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { HeatingInstallation } from "@/types/heating-installation";
 import { BlanketRoller } from "@/types/blanket-roller";
+import { HeatingInstallation } from "@/types/heating-installation";
+import { useEffect, useState } from "react";
 
 export interface HeatPumpCompatibility {
   id: string;
@@ -29,7 +28,7 @@ export const usePoolHeatingOptions = (
   useEffect(() => {
     const fetchHeatingOptions = async () => {
       setIsLoading(true);
-      
+
       try {
         // Fetch matching heat pump for the pool model and range
         // Fix 1: Use select() instead of maybeSingle() when expecting multiple results
@@ -51,14 +50,14 @@ export const usePoolHeatingOptions = (
         } else if (heatPumpData && heatPumpData.length > 0) {
           // Fix 2: Take first result if multiple found
           const matchingData = heatPumpData[0];
-          
+
           // Get the heat pump details separately
           const { data: heatPumpDetails, error: heatPumpDetailsError } = await supabase
             .from("heat_pump_products")
             .select("*")
             .eq("id", matchingData.heat_pump_id)
             .maybeSingle();
-            
+
           if (heatPumpDetailsError) {
             console.error("Error fetching heat pump details:", heatPumpDetailsError);
           } else if (heatPumpDetails) {
@@ -109,7 +108,7 @@ export const usePoolHeatingOptions = (
             created_at: item.created_at,
             updated_at: item.updated_at || undefined
           }));
-          
+
           setHeatingInstallations(typedInstallations);
         }
 
@@ -126,9 +125,25 @@ export const usePoolHeatingOptions = (
   }, [poolId, poolModel, poolRange]);
 
   const getInstallationCost = (installationType: string): number => {
+    // Log the available installations to debug
+    console.log('Available heating installations:', heatingInstallations);
+
+    // Map our internal types to the database types
+    let dbInstallationType = installationType;
+    if (installationType === 'heat_pump') {
+      dbInstallationType = 'Heat Pump';
+    } else if (installationType === 'blanket_roller') {
+      dbInstallationType = 'Blanket & Roller';
+    }
+
+    // Find the matching installation
     const installation = heatingInstallations.find(
-      (item) => item.installation_type === installationType
+      (item) => item.installation_type === dbInstallationType
     );
+
+    // Log what we found
+    console.log(`Looking for installation type: ${dbInstallationType}, found:`, installation);
+
     return installation?.installation_cost || 0;
   };
 

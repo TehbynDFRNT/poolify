@@ -1,6 +1,5 @@
-
-import React from "react";
 import { Pool } from "@/types/pool";
+import React from "react";
 import { PoolDetailsSection } from "./pool-details/PoolDetailsSection";
 
 interface PoolDetailsTabProps {
@@ -9,14 +8,16 @@ interface PoolDetailsTabProps {
   activeTab: string;
   tabId: string;
   title: string;
+  customerId?: string;
 }
 
-export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({ 
-  pool, 
-  selectedColor, 
-  activeTab, 
-  tabId, 
-  title 
+export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
+  pool,
+  selectedColor,
+  activeTab,
+  tabId,
+  title,
+  customerId
 }) => {
   return (
     <PoolDetailsSection
@@ -25,6 +26,7 @@ export const PoolDetailsTab: React.FC<PoolDetailsTabProps> = ({
       sectionId={tabId}
       title={title}
       className="mt-0 shadow-none border-0 bg-transparent"
+      customerId={customerId}
     />
   );
 };

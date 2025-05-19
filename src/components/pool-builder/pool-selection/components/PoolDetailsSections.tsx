@@ -1,14 +1,13 @@
-
-import React from "react";
 import { Pool } from "@/types/pool";
 import { PoolDetailsSection } from "./pool-details/PoolDetailsSection";
 
 interface PoolDetailsSectionsProps {
   pool: Pool;
   selectedColor?: string;
+  customerId?: string;
 }
 
-export const PoolDetailsSections = ({ pool, selectedColor }: PoolDetailsSectionsProps) => {
+export const PoolDetailsSections = ({ pool, selectedColor, customerId }: PoolDetailsSectionsProps) => {
   const sections = [
     {
       id: "details",
@@ -62,6 +61,7 @@ export const PoolDetailsSections = ({ pool, selectedColor }: PoolDetailsSections
           sectionId={section.id}
           title={section.title}
           className="w-full"
+          customerId={customerId}
         />
       ))}
     </div>

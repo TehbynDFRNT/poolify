@@ -1,4 +1,3 @@
-
 export interface PoolHeatingOptions {
   id?: string;
   customer_id: string;
@@ -9,6 +8,8 @@ export interface PoolHeatingOptions {
   blanket_roller_id: string | null;
   heat_pump_cost: number;
   blanket_roller_cost: number;
+  heat_pump_installation_cost: number;
+  blanket_roller_installation_cost: number;
   total_cost: number;
   total_margin: number;
   created_at?: string;

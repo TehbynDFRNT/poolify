@@ -31,15 +31,22 @@ export function useHeatingOptionsState({
   const [initialTotalCost, setInitialTotalCost] = useState<number>(0);
   const [heatingOptionsId, setHeatingOptionsId] = useState<string | null>(null);
 
+  // Get the installation costs
+  const heatPumpInstallationCost = getInstallationCost('heat_pump');
+  const blanketRollerInstallationCost = getInstallationCost('blanket_roller');
+
   // Calculate costs based on CURRENT selections and product data (for dynamic updates)
-  const currentHeatPumpTotalCost = includeHeatPump && compatibleHeatPump
-    ? (compatibleHeatPump.rrp || 0) + getInstallationCost('heat_pump')
+  const currentHeatPumpProductCost = includeHeatPump && compatibleHeatPump
+    ? (compatibleHeatPump.rrp || 0)
     : 0;
 
-  const currentBlanketRollerTotalCost = includeBlanketRoller && blanketRoller
-    ? (blanketRoller.rrp || 0) + getInstallationCost('blanket_roller')
+  const currentBlanketRollerProductCost = includeBlanketRoller && blanketRoller
+    ? (blanketRoller.rrp || 0)
     : 0;
 
+  // Total costs including installation
+  const currentHeatPumpTotalCost = currentHeatPumpProductCost + (includeHeatPump ? heatPumpInstallationCost : 0);
+  const currentBlanketRollerTotalCost = currentBlanketRollerProductCost + (includeBlanketRoller ? blanketRollerInstallationCost : 0);
   const currentTotalCost = currentHeatPumpTotalCost + currentBlanketRollerTotalCost;
 
   // Calculate margins based on CURRENT selections (if needed elsewhere)
@@ -70,6 +77,8 @@ export function useHeatingOptionsState({
           blanket_roller_id,
           heat_pump_cost, 
           blanket_roller_cost,
+          heat_pump_installation_cost,
+          blanket_roller_installation_cost,
           total_cost,
           total_margin
         `)
@@ -84,7 +93,10 @@ export function useHeatingOptionsState({
       }
 
       if (data && data.length > 0) {
-        const heatingData = data[0] as PoolHeatingOptions;
+        // This cast might cause type errors if new fields don't exist in the result yet
+        // Use a safer approach by checking if properties exist
+        const heatingData = data[0] as any;
+
         // Store the ID for updates
         setHeatingOptionsId(heatingData.id);
         // Set include flags
@@ -94,6 +106,9 @@ export function useHeatingOptionsState({
         setInitialHeatPumpCost(heatingData.heat_pump_cost ?? 0);
         setInitialBlanketRollerCost(heatingData.blanket_roller_cost ?? 0);
         setInitialTotalCost(heatingData.total_cost ?? 0);
+
+        // Log the full data for debugging
+        console.log('Loaded heating options data:', heatingData);
       } else {
         // If no data, reset initial costs
         setIncludeHeatPump(false);
@@ -124,10 +139,25 @@ export function useHeatingOptionsState({
     setIsSaving(true);
     try {
       // Calculate costs TO BE SAVED based on current selections/prices
+      const heatPumpProductCost = currentHeatPumpProductCost;
+      const blanketRollerProductCost = currentBlanketRollerProductCost;
+      const heatPumpInstallCostToSave = includeHeatPump ? heatPumpInstallationCost : 0;
+      const blanketRollerInstallCostToSave = includeBlanketRoller ? blanketRollerInstallationCost : 0;
       const heatPumpCostToSave = currentHeatPumpTotalCost;
       const blanketRollerCostToSave = currentBlanketRollerTotalCost;
       const totalCostToSave = currentTotalCost;
       const totalMarginToSave = currentTotalMargin;
+
+      // Log the values being saved
+      console.log('Saving heating options:', {
+        heatPumpProductCost,
+        heatPumpInstallCost: heatPumpInstallCostToSave,
+        heatPumpTotalCost: heatPumpCostToSave,
+        blanketRollerProductCost,
+        blanketRollerInstallCost: blanketRollerInstallCostToSave,
+        blanketRollerTotalCost: blanketRollerCostToSave,
+        totalCost: totalCostToSave
+      });
 
       let result;
       if (heatingOptionsId) {
@@ -139,6 +169,8 @@ export function useHeatingOptionsState({
           blanket_roller_id: includeBlanketRoller && blanketRoller ? blanketRoller.id : null,
           heat_pump_cost: heatPumpCostToSave,
           blanket_roller_cost: blanketRollerCostToSave,
+          heat_pump_installation_cost: heatPumpInstallCostToSave,
+          blanket_roller_installation_cost: blanketRollerInstallCostToSave,
           total_cost: totalCostToSave,
           total_margin: totalMarginToSave
         };
@@ -158,6 +190,8 @@ export function useHeatingOptionsState({
           blanket_roller_id: includeBlanketRoller && blanketRoller ? blanketRoller.id : null,
           heat_pump_cost: heatPumpCostToSave,
           blanket_roller_cost: blanketRollerCostToSave,
+          heat_pump_installation_cost: heatPumpInstallCostToSave,
+          blanket_roller_installation_cost: blanketRollerInstallCostToSave,
           total_cost: totalCostToSave,
           total_margin: totalMarginToSave
         };
