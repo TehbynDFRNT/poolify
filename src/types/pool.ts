@@ -78,6 +78,8 @@ export interface PoolProject {
   site_requirements_notes?: string;
   created_at: string;
   updated_at: string;
+  status: string;
+  render_requested?: string;
 
   // Optional computed fields
   water_feature_total_cost?: number;

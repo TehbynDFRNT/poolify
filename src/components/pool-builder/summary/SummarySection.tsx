@@ -18,6 +18,7 @@ import { validateUuid } from '@/utils/validators';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, FileText, Loader2, User } from 'lucide-react';
 import React, { createContext, useState } from 'react';
+import { ProjectSubmitButton } from './ProjectSubmitButton';
 
 // Define the shape of the snapshot data from proposal_snapshot_v
 interface ProjectSnapshot {
@@ -1054,8 +1055,11 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 <h3 className="text-xl font-bold text-primary">GRAND TOTAL</h3>
                                 <p className="text-sm text-slate-500">Total Price Including All Components</p>
                             </div>
-                            <div className="text-2xl font-bold text-primary">
-                                {formatCurrency(basePriceTotal + siteRequirementsTotalWithMargin + concretePavingTotal + retainingWallsTotal + rawFencingTotal + (snapshot.elec_total_cost || 0) + waterFeaturesTotal + upgradesExtrasTotal)}
+                            <div className="flex items-center gap-4">
+                                <div className="text-2xl font-bold text-primary">
+                                    {formatCurrency(basePriceTotal + siteRequirementsTotalWithMargin + concretePavingTotal + retainingWallsTotal + rawFencingTotal + (snapshot.elec_total_cost || 0) + waterFeaturesTotal + upgradesExtrasTotal)}
+                                </div>
+                                <ProjectSubmitButton projectId={customerId} />
                             </div>
                         </div>
                     </CardContent>
