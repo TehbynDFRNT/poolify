@@ -32,7 +32,7 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
   customerId
 }) => {
   // Fetch filtration package and excavation data for costs summary
-  const { filtrationPackage } = useFiltrationPackage(pool);
+  const { filtrationPackage } = useFiltrationPackage(pool, customerId);
   const { excavationDetails } = useExcavation(pool.id);
 
   // Mock concrete cost - this would ideally come from a concrete cost hook

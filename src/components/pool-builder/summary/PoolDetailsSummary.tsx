@@ -4,6 +4,7 @@ import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/h
 import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
+import { calculatePackagePrice } from "@/utils/package-calculations";
 import { useQuery } from "@tanstack/react-query";
 import React, { useContext } from "react";
 import { EditSectionLink } from "./EditSectionLink";
@@ -42,20 +43,13 @@ export const PoolDetailsSummary: React.FC<PoolDetailsSummaryProps> = ({ pool, cu
         },
         enabled: !!pool.pool_type_id,
     });
-
+    console.log(customerId);
     // Fetch filtration package and excavation data
-    const { filtrationPackage } = useFiltrationPackage(pool);
+    const { filtrationPackage } = useFiltrationPackage(pool, customerId || undefined);
     const { excavationDetails } = useExcavation(pool.id);
 
-    // Calculate filtration cost
-    const filtrationCost =
-        (filtrationPackage?.pump?.price_inc_gst || 0) +
-        (filtrationPackage?.filter?.price_inc_gst || 0) +
-        (filtrationPackage?.sanitiser?.price_inc_gst || 0) +
-        (filtrationPackage?.light?.price_inc_gst || 0) +
-        (filtrationPackage?.handover_kit?.components?.reduce(
-            (acc, item) => acc + ((item.component?.price_inc_gst || 0) * item.quantity), 0
-        ) || 0);
+    // Calculate filtration cost using consistent calculation method
+    const filtrationCost = filtrationPackage ? calculatePackagePrice(filtrationPackage) : 0;
 
     // Get excavation cost
     const excavationCost = excavationDetails ? parseFloat(excavationDetails.price) : 0;

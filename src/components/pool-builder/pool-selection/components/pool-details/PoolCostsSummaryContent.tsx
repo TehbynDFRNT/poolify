@@ -1,8 +1,8 @@
-
-import React from "react";
+import { PackageWithComponents } from "@/types/filtration";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
-import { PackageWithComponents } from "@/types/filtration";
+import { calculatePackagePrice } from "@/utils/package-calculations";
+import React from "react";
 
 interface PoolCostsSummaryContentProps {
   pool: Pool;
@@ -19,15 +19,8 @@ export const PoolCostsSummaryContent: React.FC<PoolCostsSummaryContentProps> = (
 }) => {
   const shellCost = pool.buy_price_inc_gst || 0;
 
-  // Use price_inc_gst instead of price
-  const filtrationCost = 
-    (filtrationPackage?.pump?.price_inc_gst || 0) +
-    (filtrationPackage?.filter?.price_inc_gst || 0) +
-    (filtrationPackage?.sanitiser?.price_inc_gst || 0) + 
-    (filtrationPackage?.light?.price_inc_gst || 0) +
-    (filtrationPackage?.handover_kit?.components?.reduce(
-      (acc, item) => acc + ((item.component?.price_inc_gst || 0) * item.quantity), 0
-    ) || 0);
+  // Use the same calculation method as in FiltrationTotalPrice component
+  const filtrationCost = filtrationPackage ? calculatePackagePrice(filtrationPackage) : 0;
 
   const totalCost =
     shellCost +
