@@ -1,15 +1,18 @@
 import { useMargin } from "@/pages/Quotes/components/SelectPoolStep/hooks/useMargin";
 import { Pool } from "@/types/pool";
+import { PoolGeneralExtra } from "@/types/pool-general-extra";
+import { fetchPoolGeneralExtras } from "@/utils/fetch-pool-general-extras";
 import { formatCurrency } from "@/utils/format";
-import { CheckCircle2, Package, Sparkles, Thermometer } from "lucide-react";
-import React, { useContext } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { CheckCircle2, Flame, Package, Sparkles } from "lucide-react";
+import React, { useContext, useEffect, useState } from "react";
 import { EditSectionLink } from "./EditSectionLink";
 import { MarginVisibilityContext } from "./SummarySection";
 
 interface UpgradesAndExtrasSummaryProps {
     pool: Pool;
-    customerId: string;
-    upgradesExtras?: {
+    customerId: string | null;
+    upgradesExtras: {
         heating_options?: {
             include_heat_pump: boolean;
             include_blanket_roller: boolean;
@@ -24,8 +27,12 @@ interface UpgradesAndExtrasSummaryProps {
         };
         pool_cleaner?: {
             include_cleaner: boolean;
-            pool_cleaner_id?: string | null;
-            pool_cleaners?: any;
+            pool_cleaners?: {
+                id: string;
+                name: string;
+                rrp: number;
+                price: number;
+            };
             cost?: number;
         };
     };
@@ -39,6 +46,24 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
     // Get margin visibility from context
     const showMargins = useContext(MarginVisibilityContext);
     const { marginData } = useMargin(pool.id);
+    const [generalExtras, setGeneralExtras] = useState<PoolGeneralExtra[]>([]);
+
+    // Fetch general extras data
+    const { data: fetchedGeneralExtras, isLoading: isLoadingGeneralExtras } = useQuery<PoolGeneralExtra[]>({
+        queryKey: ['pool-general-extras-summary', customerId],
+        queryFn: async () => {
+            if (!customerId) return [];
+            return fetchPoolGeneralExtras(customerId);
+        },
+        enabled: !!customerId,
+    });
+
+    // Update state when data is fetched
+    useEffect(() => {
+        if (fetchedGeneralExtras) {
+            setGeneralExtras(fetchedGeneralExtras);
+        }
+    }, [fetchedGeneralExtras]);
 
     // Calculate RRP using margin formula: Cost / (1 - Margin/100)
     const calculateRRP = (cost: number, marginPercentage: number) => {
@@ -71,8 +96,18 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
     const hasPoolCleaner = hasValue(upgradesExtras, 'pool_cleaner') &&
         upgradesExtras?.pool_cleaner?.include_cleaner;
 
+    // Check if general extras are included
+    const hasGeneralExtras = generalExtras && generalExtras.length > 0;
+
+    // Group general extras by type
+    const generalExtrasByType = {
+        spaJets: generalExtras.filter(item => item.type === 'Spa Jets'),
+        deckJets: generalExtras.filter(item => item.type === 'Deck Jets'),
+        misc: generalExtras.filter(item => item.type === 'Misc')
+    };
+
     // If no data is available, show placeholder
-    const hasUpgradesExtras = hasHeatingOptions || hasPoolCleaner;
+    const hasUpgradesExtras = hasHeatingOptions || hasPoolCleaner || hasGeneralExtras;
 
     if (!hasUpgradesExtras) {
         return (
@@ -101,7 +136,7 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
                 {hasHeatingOptions && (
                     <div>
                         <h4 className="text-base font-medium flex items-center mb-2">
-                            <Thermometer className="h-4 w-4 mr-1" /> Heating Options
+                            <Flame className="h-4 w-4 mr-1" /> Heating Options
                         </h4>
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             {upgradesExtras?.heating_options?.include_heat_pump && (
@@ -250,6 +285,73 @@ export const UpgradesAndExtrasSummary: React.FC<UpgradesAndExtrasSummaryProps> =
                                         ))}
                                     </p>
                                 )}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* General extras section */}
+                {hasGeneralExtras && (
+                    <div>
+                        <h4 className="text-base font-medium flex items-center mb-2">
+                            <Package className="h-4 w-4 mr-1" /> General Extras
+                        </h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            {/* Spa Jets */}
+                            {generalExtrasByType.spaJets.length > 0 && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Spa Jets</p>
+                                    <p className="font-medium flex items-center">
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                                        {generalExtrasByType.spaJets[0].name}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        {generalExtrasByType.spaJets[0].quantity} jets
+                                    </p>
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(generalExtrasByType.spaJets[0].total_rrp)}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Deck Jets */}
+                            {generalExtrasByType.deckJets.length > 0 && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Deck Jets</p>
+                                    <p className="font-medium flex items-center">
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                                        {generalExtrasByType.deckJets[0].name}
+                                    </p>
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(generalExtrasByType.deckJets[0].total_rrp)}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Misc Items */}
+                            {generalExtrasByType.misc.length > 0 && (
+                                <div>
+                                    <p className="text-sm text-muted-foreground">Additional Items</p>
+                                    <p className="font-medium flex items-center">
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                                        {generalExtrasByType.misc.length} item{generalExtrasByType.misc.length !== 1 ? 's' : ''}
+                                    </p>
+                                    <p className="font-medium text-primary">
+                                        {formatCurrency(
+                                            generalExtrasByType.misc.reduce((sum, item) => sum + item.total_rrp, 0)
+                                        )}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* General Extras Total */}
+                            <div>
+                                <p className="text-sm text-muted-foreground">General Extras Total</p>
+                                <p className="font-medium text-primary">
+                                    {formatCurrency(
+                                        generalExtras.reduce((sum, item) => sum + item.total_rrp, 0)
+                                    )}
+                                </p>
                             </div>
                         </div>
                     </div>

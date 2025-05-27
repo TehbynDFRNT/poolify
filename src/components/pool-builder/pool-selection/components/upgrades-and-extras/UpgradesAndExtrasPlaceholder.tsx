@@ -1,9 +1,9 @@
-
-import React from "react";
-import { Package } from "lucide-react";
-import { Pool } from "@/types/pool";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsContent, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Pool } from "@/types/pool";
+import { Package } from "lucide-react";
+import React from "react";
+import { GeneralOptionsContent } from "./general/GeneralOptionsContent";
 import { HeatingOptionsContent } from "./heating/HeatingOptionsContent";
 import { PoolCleanersContent } from "./pool-cleaners/PoolCleanersContent";
 
@@ -12,9 +12,9 @@ interface UpgradesAndExtrasPlaceholderProps {
   customerId: string | null;
 }
 
-export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholderProps> = ({ 
-  pool, 
-  customerId 
+export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholderProps> = ({
+  pool,
+  customerId
 }) => {
   if (!pool) {
     return (
@@ -47,21 +47,11 @@ export const UpgradesAndExtrasPlaceholder: React.FC<UpgradesAndExtrasPlaceholder
               <TabsTrigger value="heating">Heating</TabsTrigger>
               <TabsTrigger value="cleaners">Pool Cleaners</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="general" className="space-y-4">
-              <p className="text-sm text-muted-foreground mb-6">
-                Explore and select optional upgrades and extras to enhance your pool experience.
-                These options can be customized to fit your specific needs and preferences.
-              </p>
-              
-              {/* Placeholder for future upgrade and extras form/content */}
-              <div className="bg-slate-50 rounded-lg p-6 border text-center">
-                <p className="text-muted-foreground">
-                  Upgrades and extras configuration coming soon.
-                </p>
-              </div>
+              <GeneralOptionsContent pool={pool} customerId={customerId} />
             </TabsContent>
-            
+
             <TabsContent value="heating" className="space-y-6">
               <HeatingOptionsContent pool={pool} customerId={customerId} />
             </TabsContent>

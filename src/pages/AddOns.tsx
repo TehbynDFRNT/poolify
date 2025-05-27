@@ -1,11 +1,11 @@
-
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PoolBlanketsTable } from "./AddOns/components/blankets/PoolBlanketsTable";
+import { Bath, Package, Scroll, Thermometer, Wrench } from "lucide-react";
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
+import { PoolBlanketsTable } from "./AddOns/components/blankets/PoolBlanketsTable";
+import { GeneralExtrasTable } from "./AddOns/components/general-extras/GeneralExtrasTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { PoolCleanersTable } from "./AddOns/components/poolCleaners/PoolCleanersTable";
-import { Thermometer, Scroll, Wrench, Bath } from "lucide-react";
 
 const AddOns = () => {
   return (
@@ -15,9 +15,13 @@ const AddOns = () => {
         <p className="text-muted-foreground">
           Manage pool add-ons and optional features including heating options, blankets, rollers, and pool cleaners.
         </p>
-        
-        <Tabs defaultValue="blankets" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">
+
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 md:grid-cols-5">
+            <TabsTrigger value="general" className="flex items-center gap-2">
+              <Package className="h-4 w-4" />
+              <span>General Extras</span>
+            </TabsTrigger>
             <TabsTrigger value="blankets" className="flex items-center gap-2">
               <Thermometer className="h-4 w-4" />
               <span>Heating & Blankets</span>
@@ -35,20 +39,24 @@ const AddOns = () => {
               <span>Pool Cleaners</span>
             </TabsTrigger>
           </TabsList>
-          
+
           <div className="mt-6">
+            <TabsContent value="general">
+              <GeneralExtrasTable />
+            </TabsContent>
+
             <TabsContent value="blankets">
               <PoolBlanketsTable />
             </TabsContent>
-            
+
             <TabsContent value="rollers">
               <BlanketRollerTable />
             </TabsContent>
-            
+
             <TabsContent value="installations">
               <HeatingInstallationsTable />
             </TabsContent>
-            
+
             <TabsContent value="cleaners">
               <PoolCleanersTable />
             </TabsContent>

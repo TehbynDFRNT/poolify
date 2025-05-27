@@ -4,6 +4,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { supabase } from '@/integrations/supabase/client';
 import { PackageWithComponents } from '@/types/filtration';
 import { Pool } from '@/types/pool';
+import { PoolGeneralExtra } from "@/types/pool-general-extra";
 import {
     calculateConcreteCutsMargin,
     calculateConcretePumpMargin,
@@ -12,6 +13,7 @@ import {
     calculateUnderFenceStripsMargin
 } from '@/utils/concrete-margin-calculations';
 import { fetchConcreteAndPavingData } from '@/utils/concrete-paving-data';
+import { fetchPoolGeneralExtras } from "@/utils/fetch-pool-general-extras";
 import { formatCurrency } from '@/utils/format';
 import { calculatePackagePrice } from '@/utils/package-calculations';
 import { validateUuid } from '@/utils/validators';
@@ -657,6 +659,27 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         enabled: !!customerId
     });
 
+    // Add general extras data fetching
+    const { data: generalExtras, isLoading: isLoadingGeneralExtras } = useQuery<PoolGeneralExtra[]>({
+        queryKey: ['pool-general-extras', customerId],
+        queryFn: async () => {
+            if (!customerId || !isValidUuid) return [];
+
+            return fetchPoolGeneralExtras(customerId);
+        },
+        enabled: !!customerId && isValidUuid,
+    });
+
+    // Calculate general extras total
+    const generalExtrasTotal = generalExtras?.reduce((sum, item) => sum + item.total_rrp, 0) || 0;
+
+    // Group general extras by type
+    const generalExtrasByType = {
+        spaJets: generalExtras?.filter(item => item.type === 'Spa Jets') || [],
+        deckJets: generalExtras?.filter(item => item.type === 'Deck Jets') || [],
+        misc: generalExtras?.filter(item => item.type === 'Misc') || []
+    };
+
     // Show loading state while fetching data
     if (isLoading && isValidUuid) {
         return (
@@ -1011,7 +1034,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const heatingTotal = heatPumpTotal + blanketRollerTotal;
 
     // Overall upgrades total - use the value from snapshot if available
-    const upgradesExtrasTotal = snapshot.upgrades_extras_total || (heatingTotal + cleanerTotal);
+    const upgradesExtrasTotal = snapshot.upgrades_extras_total || (heatingTotal + cleanerTotal + generalExtrasTotal);
 
     console.log(snapshot)
 
@@ -1720,7 +1743,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             )}
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(0)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(generalExtrasTotal)}</span>
                             {expandedSections.upgradesExtrasGeneral ? (
                                 <ChevronUp className="h-5 w-5 text-primary" />
                             ) : (
@@ -1734,11 +1757,45 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             <div className="p-0">
                                 <table className="w-full">
                                     <tbody>
-                                        <tr className="border-b border-slate-100">
-                                            <td className="p-2 text-center text-muted-foreground" colSpan={3}>
-                                                No general upgrades or extras selected
-                                            </td>
-                                        </tr>
+                                        {generalExtrasTotal === 0 ? (
+                                            <tr className="border-b border-slate-100">
+                                                <td className="p-2 text-center text-muted-foreground" colSpan={3}>
+                                                    No general upgrades or extras selected
+                                                </td>
+                                            </tr>
+                                        ) : (
+                                            <>
+                                                {generalExtrasByType.spaJets.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Spa Jets - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
+                                                    />
+                                                ))}
+
+                                                {generalExtrasByType.deckJets.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Deck Jets - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? item.description : null}
+                                                    />
+                                                ))}
+
+                                                {generalExtrasByType.misc.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Additional - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
+                                                    />
+                                                ))}
+                                            </>
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
