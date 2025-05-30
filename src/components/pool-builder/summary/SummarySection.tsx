@@ -87,57 +87,58 @@ export const MarginVisibilityContext = createContext<boolean>(false);
 
 interface SummarySectionProps {
     showMargins?: boolean;
+    hideSubmitButton?: boolean;
 }
 
 // Line item component for detailed cost breakdowns
 const LineItem = ({ label, code, value, breakdown = null }) => (
-    <tr className="border-b border-slate-100">
-        <td className="p-2 text-left">
+    <tr className="border-b border-gray-100">
+        <td className="py-3 px-4 text-left">
             {label} {code && code.indexOf('_') === -1 && <span className="text-muted-foreground text-sm">({code})</span>}
         </td>
-        <td className="p-2 text-right">{formatCurrency(value)}</td>
-        {breakdown && <td className="p-2 text-left text-muted-foreground text-sm">{breakdown}</td>}
+        <td className="py-3 px-4 text-right">{formatCurrency(value)}</td>
+        {breakdown && <td className="py-3 px-4 text-left text-muted-foreground text-sm">{breakdown}</td>}
         {!breakdown && <td></td>}
     </tr>
 );
 
 // Subtotal row for sections
 const SubtotalRow = ({ label, value }) => (
-    <tr className="border-b border-slate-200 font-medium">
-        <td className="p-2 text-left">{label}</td>
-        <td className="p-2 text-right">{formatCurrency(value)}</td>
+    <tr className="border-b border-gray-200 font-medium">
+        <td className="py-3 px-4 text-left">{label}</td>
+        <td className="py-3 px-4 text-right">{formatCurrency(value)}</td>
         <td></td>
     </tr>
 );
 
 // Margin row showing percentage and calculation
 const MarginRow = ({ percentage, formula = "Formula: Cost ÷ (1 - margin %)" }) => (
-    <tr className="border-b border-slate-100">
-        <td className="p-2 text-left">Margin Applied</td>
-        <td className="p-2 text-right">{percentage}%</td>
-        <td className="p-2 text-left text-muted-foreground text-sm">{formula}</td>
+    <tr className="border-b border-gray-100">
+        <td className="py-3 px-4 text-left">Margin Applied</td>
+        <td className="py-3 px-4 text-right">{percentage}%</td>
+        <td className="py-3 px-4 text-left text-muted-foreground text-sm">{formula}</td>
     </tr>
 );
 
 // Total row with background highlight
 const TotalRow = ({ label, value }) => (
-    <tr className="bg-slate-200 font-bold">
-        <td className="p-2 text-left">{label}</td>
-        <td className="p-2 text-right text-primary">{formatCurrency(value)}</td>
+    <tr className="bg-gray-50 font-bold">
+        <td className="py-3 px-4 text-left">{label}</td>
+        <td className="py-3 px-4 text-right text-gray-900 font-semibold">{formatCurrency(value)}</td>
         <td></td>
     </tr>
 );
 
 // Section card component for each section (Pool, Installation, etc)
 const SectionCard = ({ title, children, marginIncluded = false }) => (
-    <Card className="mb-6 shadow-sm">
-        <CardHeader className="py-3 px-4 bg-white border-b border-slate-200">
-            <CardTitle className="text-primary text-lg">
-                {title} {marginIncluded && "(Margin Included)"}
-            </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-            <div className="p-0">
+    <Card className="mb-6 shadow-none">
+        <CardContent className="pt-6">
+            <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                    {title} {marginIncluded && "(Margin Included)"}
+                </h3>
+            </div>
+            <div className="space-y-4">
                 <table className="w-full">
                     <tbody>
                         {children}
@@ -153,7 +154,7 @@ const HandoverKitItems = ({ components }) => {
     if (!components || components.length === 0) return null;
 
     return (
-        <div className="text-sm text-slate-600">
+        <div className="text-sm text-muted-foreground">
             {components.map((item, idx) => (
                 <span key={idx}>
                     {item.hk_component_name} ({item.hk_component_price_inc_gst} × {item.hk_component_quantity}){idx < components.length - 1 ? ', ' : ''}
@@ -166,6 +167,7 @@ const HandoverKitItems = ({ components }) => {
 // Main section component
 export const SummarySection: React.FC<SummarySectionProps> = ({
     showMargins = false,
+    hideSubmitButton = false,
 }) => {
     // Add state for view mode - default to Customer View
     const [isCustomerView, setIsCustomerView] = useState(true);
@@ -1017,9 +1019,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
     return (
         <MarginVisibilityContext.Provider value={showMargins && !isCustomerView}>
-            <div className="container mx-auto px-4 py-6 max-w-5xl">
+            <div className="space-y-6">
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-primary">Pool Project Price Summary</h2>
+                    <h2 className="text-2xl font-bold text-gray-900">Pool Project Price Summary</h2>
                     <div className="flex items-center">
                         <TooltipProvider>
                             <Tooltip>
@@ -1032,8 +1034,8 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         />
                                         <div className="ml-2">
                                             {isCustomerView ?
-                                                <User className="h-4 w-4 text-primary" /> :
-                                                <FileText className="h-4 w-4 text-primary" />
+                                                <User className="h-4 w-4 text-gray-600" /> :
+                                                <FileText className="h-4 w-4 text-gray-600" />
                                             }
                                         </div>
                                     </div>
@@ -1045,53 +1047,53 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                         </TooltipProvider>
                     </div>
                 </div>
-                <p className="text-slate-600 mb-6">Complete breakdown of all price components for this pool project</p>
+                <p className="text-muted-foreground mb-6">Complete breakdown of all price components for this pool project</p>
 
                 {/* GRAND TOTAL */}
-                <Card className="mb-8 shadow-md border-primary/20">
+                <Card className="mb-8 shadow-none">
                     <CardContent className="py-6">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h3 className="text-xl font-bold text-primary">GRAND TOTAL</h3>
-                                <p className="text-sm text-slate-500">Total Price Including All Components</p>
+                                <h3 className="text-xl font-bold text-gray-900">GRAND TOTAL</h3>
+                                <p className="text-sm text-muted-foreground">Total Price Including All Components</p>
                             </div>
                             <div className="flex items-center gap-4">
-                                <div className="text-2xl font-bold text-primary">
+                                <div className="text-2xl font-bold text-gray-900">
                                     {formatCurrency(basePriceTotal + siteRequirementsTotalWithMargin + concretePavingTotal + retainingWallsTotal + rawFencingTotal + (snapshot.elec_total_cost || 0) + waterFeaturesTotal + upgradesExtrasTotal)}
                                 </div>
-                                <ProjectSubmitButton projectId={customerId} />
+                                {!hideSubmitButton && <ProjectSubmitButton projectId={customerId} />}
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
                 {/* BASE PRICE SECTION */}
-                <Card className="mb-6 shadow-sm">
-                    <div
-                        className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleSection('basePrice')}
-                    >
-                        <div>
-                            <h3 className="text-primary text-lg font-medium">Base Price</h3>
-                            {!isCustomerView && (
-                                <p className="text-sm text-slate-500">
-                                    Margin: {marginPct}% ({formatCurrency(marginAmount)})
-                                </p>
-                            )}
+                <Card className="mb-6 shadow-none">
+                    <CardContent className="pt-6">
+                        <div
+                            className={`flex justify-between items-center cursor-pointer ${expandedSections.basePrice ? 'mb-4' : ''}`}
+                            onClick={() => toggleSection('basePrice')}
+                        >
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">Base Price</h3>
+                                {!isCustomerView && (
+                                    <p className="text-sm text-muted-foreground">
+                                        Margin: {marginPct}% ({formatCurrency(marginAmount)})
+                                    </p>
+                                )}
+                            </div>
+                            <div className="flex items-center">
+                                <span className="mr-4 font-semibold">{formatCurrency(basePriceTotal)}</span>
+                                {expandedSections.basePrice ? (
+                                    <ChevronUp className="h-5 w-5 text-gray-600" />
+                                ) : (
+                                    <ChevronDown className="h-5 w-5 text-gray-600" />
+                                )}
+                            </div>
                         </div>
-                        <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(basePriceTotal)}</span>
-                            {expandedSections.basePrice ? (
-                                <ChevronUp className="h-5 w-5 text-primary" />
-                            ) : (
-                                <ChevronDown className="h-5 w-5 text-primary" />
-                            )}
-                        </div>
-                    </div>
 
-                    {expandedSections.basePrice && (
-                        <CardContent className="p-0">
-                            <div className="p-0">
+                        {expandedSections.basePrice && (
+                            <div className="space-y-4">
                                 <table className="w-full">
                                     <tbody>
                                         <LineItem
@@ -1145,38 +1147,38 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     </tbody>
                                 </table>
                             </div>
-                        </CardContent>
-                    )}
+                        )}
+                    </CardContent>
                 </Card>
 
                 {/* SITE REQUIREMENTS SECTION */}
                 {siteRequirementsBeforeMargin > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('siteRequirements')}
-                        >
-                            <div>
-                                <h3 className="text-primary text-lg font-medium">Site Requirements</h3>
-                                {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
-                                        Margin: {marginPct}% ({formatCurrency(siteRequirementsMarginAmount)})
-                                    </p>
-                                )}
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.siteRequirements ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('siteRequirements')}
+                            >
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Site Requirements</h3>
+                                    {!isCustomerView && (
+                                        <p className="text-sm text-muted-foreground">
+                                            Margin: {marginPct}% ({formatCurrency(siteRequirementsMarginAmount)})
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-4 font-semibold">{formatCurrency(siteRequirementsTotalWithMargin)}</span>
+                                    {expandedSections.siteRequirements ? (
+                                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                                    ) : (
+                                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(siteRequirementsTotalWithMargin)}</span>
-                                {expandedSections.siteRequirements ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
-                                ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
-                                )}
-                            </div>
-                        </div>
 
-                        {expandedSections.siteRequirements && (
-                            <CardContent className="p-0">
-                                <div className="p-0">
+                            {expandedSections.siteRequirements && (
+                                <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
                                             {adjustedCraneCost > 0 && (
@@ -1258,41 +1260,41 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
-                        )}
+                            )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* CONCRETE & PAVING SECTION */}
                 {concretePavingTotal > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('concretePaving')}
-                        >
-                            <div>
-                                <h3 className="text-primary text-lg font-medium">Concrete & Paving</h3>
-                                {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
-                                        (Margin Already Included)
-                                        {concretePavingMarginData?.totalMargin > 0 &&
-                                            ` (${formatCurrency(concretePavingMarginData.totalMargin)} margin)`}
-                                    </p>
-                                )}
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.concretePaving ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('concretePaving')}
+                            >
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Concrete & Paving</h3>
+                                    {!isCustomerView && (
+                                        <p className="text-sm text-muted-foreground">
+                                            (Margin Already Included)
+                                            {concretePavingMarginData?.totalMargin > 0 &&
+                                                ` (${formatCurrency(concretePavingMarginData.totalMargin)} margin)`}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-4 font-semibold">{formatCurrency(concretePavingTotal)}</span>
+                                    {expandedSections.concretePaving ? (
+                                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                                    ) : (
+                                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(concretePavingTotal)}</span>
-                                {expandedSections.concretePaving ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
-                                ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
-                                )}
-                            </div>
-                        </div>
 
-                        {expandedSections.concretePaving && (
-                            <CardContent className="p-0">
-                                <div className="p-0">
+                            {expandedSections.concretePaving && (
+                                <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
                                             {concreteCutsCost > 0 && (
@@ -1353,41 +1355,41 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
-                        )}
+                            )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* RETAINING WALLS SECTION */}
                 {retainingWallsTotal > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('retainingWalls')}
-                        >
-                            <div>
-                                <h3 className="text-primary text-lg font-medium">Retaining Walls</h3>
-                                {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
-                                        (Margin Already Included)
-                                        {retainingWallsMarginData?.totalMargin > 0 &&
-                                            ` (${formatCurrency(retainingWallsMarginData.totalMargin)} margin)`}
-                                    </p>
-                                )}
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.retainingWalls ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('retainingWalls')}
+                            >
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Retaining Walls</h3>
+                                    {!isCustomerView && (
+                                        <p className="text-sm text-muted-foreground">
+                                            (Margin Already Included)
+                                            {retainingWallsMarginData?.totalMargin > 0 &&
+                                                ` (${formatCurrency(retainingWallsMarginData.totalMargin)} margin)`}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-4 font-semibold">{formatCurrency(retainingWallsTotal)}</span>
+                                    {expandedSections.retainingWalls ? (
+                                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                                    ) : (
+                                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(retainingWallsTotal)}</span>
-                                {expandedSections.retainingWalls ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
-                                ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
-                                )}
-                            </div>
-                        </div>
 
-                        {expandedSections.retainingWalls && (
-                            <CardContent className="p-0">
-                                <div className="p-0">
+                            {expandedSections.retainingWalls && (
+                                <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
                                             {Array.isArray(retainingWalls) && retainingWalls.map((wall, index) => (
@@ -1406,45 +1408,45 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
-                        )}
+                            )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* FENCING SECTION */}
                 {snapshot.fencing_total_cost > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('fencing')}
-                        >
-                            <div>
-                                <h3 className="text-primary text-lg font-medium">Fencing</h3>
-                                {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
-                                        (Margin Already Included)
-                                    </p>
-                                )}
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.fencing ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('fencing')}
+                            >
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Fencing</h3>
+                                    {!isCustomerView && (
+                                        <p className="text-sm text-muted-foreground">
+                                            (Margin Already Included)
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-4 font-semibold">{formatCurrency(rawFencingTotal)}</span>
+                                    {expandedSections.fencing ? (
+                                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                                    ) : (
+                                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(rawFencingTotal)}</span>
-                                {expandedSections.fencing ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
-                                ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
-                                )}
-                            </div>
-                        </div>
 
-                        {expandedSections.fencing && (
-                            <CardContent className="p-0">
-                                <div className="p-0">
+                            {expandedSections.fencing && (
+                                <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
                                             {/* Frameless Glass Fencing */}
                                             {fencingData?.framelessGlassData?.linear_meters > 0 && (
                                                 <>
-                                                    <tr className="border-b border-slate-100 font-medium">
+                                                    <tr className="border-b border-gray-100 font-medium">
                                                         <td className="p-2 text-left" colSpan={3}>Frameless Glass Fencing</td>
                                                     </tr>
 
@@ -1503,7 +1505,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                             {/* Flat Top Metal Fencing */}
                                             {fencingData?.flatTopMetalData?.linear_meters > 0 && (
                                                 <>
-                                                    <tr className="border-b border-slate-100 font-medium mt-2">
+                                                    <tr className="border-b border-gray-100 font-medium mt-2">
                                                         <td className="p-2 text-left" colSpan={3}>Flat Top Metal Fencing</td>
                                                     </tr>
 
@@ -1566,39 +1568,39 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
-                        )}
+                            )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* ELECTRICAL SECTION */}
                 {snapshot.elec_total_cost > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('electrical')}
-                        >
-                            <div>
-                                <h3 className="text-primary text-lg font-medium">Electrical</h3>
-                                {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
-                                        (Margin Already Included)
-                                    </p>
-                                )}
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.electrical ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('electrical')}
+                            >
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Electrical</h3>
+                                    {!isCustomerView && (
+                                        <p className="text-sm text-muted-foreground">
+                                            (Margin Already Included)
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-4 font-semibold">{formatCurrency(snapshot.elec_total_cost)}</span>
+                                    {expandedSections.electrical ? (
+                                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                                    ) : (
+                                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(snapshot.elec_total_cost)}</span>
-                                {expandedSections.electrical ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
-                                ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
-                                )}
-                            </div>
-                        </div>
 
-                        {expandedSections.electrical && (
-                            <CardContent className="p-0">
-                                <div className="p-0">
+                            {expandedSections.electrical && (
+                                <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
                                             {snapshot.elec_standard_power_flag && (snapshot.elec_standard_power_rate || 0) > 0 && (
@@ -1632,40 +1634,40 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
-                        )}
+                            )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* WATER FEATURES SECTION */}
                 {waterFeaturesTotal > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('waterFeatures')}
-                        >
-                            <div>
-                                <h3 className="text-primary text-lg font-medium">Water Features</h3>
-                                {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
-                                        (Margin Already Included)
-                                        {` (${formatCurrency(1300)} margin)`}
-                                    </p>
-                                )}
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.waterFeatures ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('waterFeatures')}
+                            >
+                                <div>
+                                    <h3 className="text-lg font-medium text-gray-900">Water Features</h3>
+                                    {!isCustomerView && (
+                                        <p className="text-sm text-muted-foreground">
+                                            (Margin Already Included)
+                                            {` (${formatCurrency(1300)} margin)`}
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="flex items-center">
+                                    <span className="mr-4 font-semibold">{formatCurrency(waterFeaturesTotal)}</span>
+                                    {expandedSections.waterFeatures ? (
+                                        <ChevronUp className="h-5 w-5 text-gray-600" />
+                                    ) : (
+                                        <ChevronDown className="h-5 w-5 text-gray-600" />
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(waterFeaturesTotal)}</span>
-                                {expandedSections.waterFeatures ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
-                                ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
-                                )}
-                            </div>
-                        </div>
 
-                        {expandedSections.waterFeatures && (
-                            <CardContent className="p-0">
-                                <div className="p-0">
+                            {expandedSections.waterFeatures && (
+                                <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
                                             <LineItem
@@ -1691,7 +1693,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                 value={waterFeaturesTotal}
                                             />
                                             {!isCustomerView && (
-                                                <tr className="bg-slate-50 text-sm text-slate-500">
+                                                <tr className="bg-gray-50 text-sm text-muted-foreground">
                                                     <td colSpan={3} className="p-2 text-center italic">
                                                         All prices include margin — no additional markup needed
                                                     </td>
@@ -1700,41 +1702,41 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
-                        )}
+                            )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* UPGRADES & EXTRAS - GENERAL SECTION */}
-                <Card className="mb-6 shadow-sm">
-                    <div
-                        className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                        onClick={() => toggleSection('upgradesExtrasGeneral')}
-                    >
-                        <div>
-                            <h3 className="text-primary text-lg font-medium">Upgrades & Extras - General</h3>
-                            {!isCustomerView && (
-                                <p className="text-sm text-slate-500">
-                                    (Margin Already Included)
-                                </p>
-                            )}
+                <Card className="mb-6 shadow-none">
+                    <CardContent className="pt-6">
+                        <div
+                            className={`flex justify-between items-center cursor-pointer ${expandedSections.upgradesExtrasGeneral ? 'mb-4' : ''}`}
+                            onClick={() => toggleSection('upgradesExtrasGeneral')}
+                        >
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">Upgrades & Extras - General</h3>
+                                {!isCustomerView && (
+                                    <p className="text-sm text-muted-foreground">
+                                        (Margin Already Included)
+                                    </p>
+                                )}
+                            </div>
+                            <div className="flex items-center">
+                                <span className="mr-4 font-semibold">{formatCurrency(0)}</span>
+                                {expandedSections.upgradesExtrasGeneral ? (
+                                    <ChevronUp className="h-5 w-5 text-gray-600" />
+                                ) : (
+                                    <ChevronDown className="h-5 w-5 text-gray-600" />
+                                )}
+                            </div>
                         </div>
-                        <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(0)}</span>
-                            {expandedSections.upgradesExtrasGeneral ? (
-                                <ChevronUp className="h-5 w-5 text-primary" />
-                            ) : (
-                                <ChevronDown className="h-5 w-5 text-primary" />
-                            )}
-                        </div>
-                    </div>
 
-                    {expandedSections.upgradesExtrasGeneral && (
-                        <CardContent className="p-0">
-                            <div className="p-0">
+                        {expandedSections.upgradesExtrasGeneral && (
+                            <div className="space-y-4">
                                 <table className="w-full">
                                     <tbody>
-                                        <tr className="border-b border-slate-100">
+                                        <tr className="border-b border-gray-100">
                                             <td className="p-2 text-center text-muted-foreground" colSpan={3}>
                                                 No general upgrades or extras selected
                                             </td>
@@ -1742,21 +1744,22 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     </tbody>
                                 </table>
                             </div>
-                        </CardContent>
-                    )}
+                        )}
+                    </CardContent>
                 </Card>
 
                 {/* UPGRADES & EXTRAS - HEATING SECTION */}
                 {heatingTotal > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('upgradesExtrasHeating')}
-                        >
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.upgradesExtrasHeating ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('upgradesExtrasHeating')}
+                            >
                             <div>
-                                <h3 className="text-primary text-lg font-medium">Upgrades & Extras - Heating</h3>
+                                <h3 className="text-gray-900 text-lg font-medium">Upgrades & Extras - Heating</h3>
                                 {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
+                                    <p className="text-sm text-muted-foreground">
                                         (Margin Already Included)
                                         {upgradesExtrasMargin > 0 && ` (${formatCurrency(upgradesExtrasMargin)} margin)`}
                                     </p>
@@ -1765,15 +1768,15 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             <div className="flex items-center">
                                 <span className="mr-4 font-semibold">{formatCurrency(heatingTotal)}</span>
                                 {expandedSections.upgradesExtrasHeating ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
+                                    <ChevronUp className="h-5 w-5 text-gray-600" />
                                 ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
+                                    <ChevronDown className="h-5 w-5 text-gray-600" />
                                 )}
                             </div>
                         </div>
 
                         {expandedSections.upgradesExtrasHeating && (
-                            <CardContent className="p-0">
+                            <div className="space-y-4">
                                 <div className="p-0">
                                     <table className="w-full">
                                         <tbody>
@@ -1816,22 +1819,24 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
+                            </div>
                         )}
+                        </CardContent>
                     </Card>
                 )}
 
                 {/* UPGRADES & EXTRAS - POOL CLEANER SECTION */}
                 {cleanerTotal > 0 && (
-                    <Card className="mb-6 shadow-sm">
-                        <div
-                            className="py-3 px-4 bg-white border-b border-slate-200 flex justify-between items-center cursor-pointer"
-                            onClick={() => toggleSection('upgradesExtrasCleaner')}
-                        >
+                    <Card className="mb-6 shadow-none">
+                        <CardContent className="pt-6">
+                            <div
+                                className={`flex justify-between items-center cursor-pointer ${expandedSections.upgradesExtrasCleaner ? 'mb-4' : ''}`}
+                                onClick={() => toggleSection('upgradesExtrasCleaner')}
+                            >
                             <div>
-                                <h3 className="text-primary text-lg font-medium">Upgrades & Extras - Pool Cleaner</h3>
+                                <h3 className="text-gray-900 text-lg font-medium">Upgrades & Extras - Pool Cleaner</h3>
                                 {!isCustomerView && (
-                                    <p className="text-sm text-slate-500">
+                                    <p className="text-sm text-muted-foreground">
                                         (Margin Already Included)
                                         {upgradesExtrasMargin > 0 && ` (${formatCurrency(upgradesExtrasMargin)} margin)`}
                                     </p>
@@ -1840,15 +1845,15 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             <div className="flex items-center">
                                 <span className="mr-4 font-semibold">{formatCurrency(cleanerTotal)}</span>
                                 {expandedSections.upgradesExtrasCleaner ? (
-                                    <ChevronUp className="h-5 w-5 text-primary" />
+                                    <ChevronUp className="h-5 w-5 text-gray-600" />
                                 ) : (
-                                    <ChevronDown className="h-5 w-5 text-primary" />
+                                    <ChevronDown className="h-5 w-5 text-gray-600" />
                                 )}
                             </div>
                         </div>
 
                         {expandedSections.upgradesExtrasCleaner && (
-                            <CardContent className="p-0">
+                            <div className="space-y-4">
                                 <div className="p-0">
                                     <table className="w-full">
                                         <tbody>
@@ -1869,8 +1874,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         </tbody>
                                     </table>
                                 </div>
-                            </CardContent>
+                            </div>
                         )}
+                        </CardContent>
                     </Card>
                 )}
 

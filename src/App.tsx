@@ -1,6 +1,7 @@
 import { Toaster } from "@/components/ui/sonner";
 import { Route, Routes } from "react-router-dom";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { usePageTitle } from "./hooks/usePageTitle";
 
 import AddOns from "./pages/AddOns";
 import ConstructionCosts from "./pages/ConstructionCosts";
@@ -9,10 +10,12 @@ import FiltrationSystems from "./pages/FiltrationSystems";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import PoolBuilder from "./pages/PoolBuilder";
+import ContractBuilder from "./pages/ContractBuilder";
 import PoolCreationWizard from "./pages/PoolCreationWizard";
 import PoolSpecifications from "./pages/PoolSpecifications";
 import PoolWorksheet from "./pages/PoolWorksheet";
 import ThirdPartyCosts from "./pages/ThirdPartyCosts";
+import FormulaReferences from "./pages/FormulaReferences";
 
 // Import construction costs sub-pages
 import BobcatCosts from "./pages/ConstructionCosts/BobcatCosts";
@@ -30,11 +33,13 @@ import Fencing from "./pages/ThirdPartyCosts/Fencing";
 
 function App() {
   console.log("Lovable: App component rendering");
+  usePageTitle();
   return (
     <>
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/pool-builder" element={<PoolBuilder />} />
+        <Route path="/contract-builder" element={<ContractBuilder />} />
         <Route path="/customers" element={<Customers />} />
         <Route path="/pool-specifications" element={<ProtectedRoute><PoolSpecifications /></ProtectedRoute>} />
         <Route path="/construction-costs" element={<ProtectedRoute><ConstructionCosts /></ProtectedRoute>} />
@@ -43,6 +48,7 @@ function App() {
         <Route path="/add-ons" element={<ProtectedRoute><AddOns /></ProtectedRoute>} />
         <Route path="/pool-worksheet" element={<ProtectedRoute><PoolWorksheet /></ProtectedRoute>} />
         <Route path="/pool-creation-wizard" element={<ProtectedRoute><PoolCreationWizard /></ProtectedRoute>} />
+        <Route path="/formula-references" element={<ProtectedRoute><FormulaReferences /></ProtectedRoute>} />
 
         {/* Construction Costs Sub-routes */}
         <Route path="/construction-costs/excavation" element={<ProtectedRoute><Excavation /></ProtectedRoute>} />

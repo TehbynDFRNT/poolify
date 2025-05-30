@@ -10,6 +10,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Link } from "react-router-dom";
+import { DollarSign } from "lucide-react";
 import { usePoolCosts } from "./hooks/usePoolCosts";
 import { usePoolSpecifications } from "./hooks/usePoolSpecifications";
 import { PoolCostsTable } from "./components/PoolCostsTable";
@@ -79,13 +80,11 @@ const PoolIndividualCosts = () => {
 
   return (
     <DashboardLayout>
-      <div className="container mx-auto py-8 space-y-8">
-        <Breadcrumb>
+      <div className="max-w-7xl mx-auto py-8 px-4">
+        <Breadcrumb className="mb-6">
           <BreadcrumbList>
             <BreadcrumbItem>
-              <Link to="/" className="transition-colors hover:text-foreground">
-                Home
-              </Link>
+              <Link to="/" className="transition-colors hover:text-foreground">Home</Link>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
@@ -95,10 +94,20 @@ const PoolIndividualCosts = () => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              Pool Individual Costs
+              <Link to="/construction-costs/pool-individual-costs" className="transition-colors hover:text-foreground">
+                Pool Individual Costs
+              </Link>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-2xl font-semibold text-gray-900">Pool Individual Costs</h1>
+            <p className="text-gray-500 mt-1">Manage individual costs for different pool specifications</p>
+          </div>
+          <DollarSign className="h-6 w-6 text-gray-500" />
+        </div>
 
         <Card>
           <CardHeader>

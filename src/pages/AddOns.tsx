@@ -5,16 +5,14 @@ import { PoolBlanketsTable } from "./AddOns/components/blankets/PoolBlanketsTabl
 import { BlanketRollerTable } from "./AddOns/components/blanket-roller/BlanketRollerTable";
 import { HeatingInstallationsTable } from "./AddOns/components/heating-installations/HeatingInstallationsTable";
 import { PoolCleanersTable } from "./AddOns/components/poolCleaners/PoolCleanersTable";
+import { AddOnsHeader } from "@/components/headers/AddOnsHeader";
 import { Thermometer, Scroll, Wrench, Bath } from "lucide-react";
 
 const AddOns = () => {
   return (
     <DashboardLayout>
-      <div className="container py-6 space-y-6">
-        <h1 className="text-3xl font-bold tracking-tight">Pool Add-Ons</h1>
-        <p className="text-muted-foreground">
-          Manage pool add-ons and optional features including heating options, blankets, rollers, and pool cleaners.
-        </p>
+      <div className="container mx-auto py-8">
+        <AddOnsHeader />
         
         <Tabs defaultValue="blankets" className="w-full">
           <TabsList className="grid w-full grid-cols-2 md:grid-cols-4">

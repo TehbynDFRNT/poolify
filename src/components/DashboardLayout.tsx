@@ -21,18 +21,31 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
               collapsed ? "w-20" : "w-64"
             )}
           >
-            <div className="px-4 py-6 flex items-center justify-between">
+            <div className="px-4 py-6 flex items-center">
               <Link to="/" className="flex items-center">
                 {collapsed ? (
-                  <h1 className="text-3xl font-bold text-primary">P</h1>
+                  <img 
+                    src="/Poolify_Logo.png" 
+                    alt="Poolify" 
+                    className="h-10 w-10 object-contain"
+                  />
                 ) : (
                   <h1 className="text-3xl font-bold text-primary">Poolify</h1>
                 )}
               </Link>
+            </div>
+            
+            {/* Use the MainNav component */}
+            <div className="px-2 mt-2 flex-1">
+              <MainNav />
+            </div>
+
+            {/* Collapse/Expand Button */}
+            <div className="px-4 py-4 border-t">
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-2"
+                className="w-full"
                 onClick={() => setCollapsed(!collapsed)}
               >
                 {collapsed ? (
@@ -41,11 +54,6 @@ export const DashboardLayout = ({ children }: { children: React.ReactNode }) => 
                   <ChevronLeft className="h-4 w-4" />
                 )}
               </Button>
-            </div>
-            
-            {/* Use the MainNav component */}
-            <div className="px-2 mt-2">
-              <MainNav />
             </div>
           </div>
 

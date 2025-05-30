@@ -2,17 +2,13 @@
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Link } from "react-router-dom";
 import { BarChart4, Construction, Building, Hammer, Wrench, Layers, Droplets } from "lucide-react";
+import { ConstructionCostsHeader } from "@/components/headers/ConstructionCostsHeader";
 
 const ConstructionCosts = () => {
   return (
     <DashboardLayout>
-      <div className="container mx-auto px-4 py-6">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-2">Construction Costs</h1>
-          <p className="text-gray-500">
-            Manage construction costs including retaining walls, excavation, fixed costs, and individual pool costs.
-          </p>
-        </div>
+      <div className="container mx-auto py-8">
+        <ConstructionCostsHeader />
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           <Link to="/construction-costs/excavation" className="block">

@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { 
   Home, 
@@ -11,15 +11,63 @@ import {
   Wand2,
   ClipboardList,
   Waves,
-  UserRound
+  UserRound,
+  FileText,
+  ChevronDown,
+  ChevronRight,
+  Calculator
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
+
+const EXPANDED_ITEMS_KEY = "poolify-nav-expanded-items";
 
 const MainNav: React.FC = () => {
   const location = useLocation();
   
-  // Define navigation with Cost Builder and Pool Builder as parents
+  // Initialize state from localStorage
+  const [expandedItems, setExpandedItems] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(EXPANDED_ITEMS_KEY);
+      // If we have saved state, use it; otherwise default to Cost Builder expanded
+      return saved ? JSON.parse(saved) : ["/"];
+    } catch {
+      // Default to Cost Builder expanded if there's an error
+      return ["/"];
+    }
+  });
+  
+  // Persist state to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem(EXPANDED_ITEMS_KEY, JSON.stringify(expandedItems));
+    } catch (error) {
+      console.error("Failed to save navigation state:", error);
+    }
+  }, [expandedItems]);
+  
+  // Define navigation with reordered menu
   const navigation = [
+    { 
+      icon: <UserRound className="h-5 w-5" />, 
+      label: "Customers", 
+      path: "/customers", 
+      isParent: true,
+      subItems: []
+    },
+    { 
+      icon: <Waves className="h-5 w-5" />, 
+      label: "Pool Builder", 
+      path: "/pool-builder", 
+      isParent: true,
+      subItems: []
+    },
+    { 
+      icon: <FileText className="h-5 w-5" />, 
+      label: "Contract Builder", 
+      path: "/contract-builder", 
+      isParent: true,
+      subItems: []
+    },
     { 
       icon: <Home className="h-5 w-5" />, 
       label: "Cost Builder", 
@@ -68,21 +116,13 @@ const MainNav: React.FC = () => {
           path: "/pool-worksheet", 
           isParent: false 
         },
+        { 
+          icon: <Calculator className="h-5 w-5" />, 
+          label: "Formula References", 
+          path: "/formula-references", 
+          isParent: false 
+        },
       ]
-    },
-    { 
-      icon: <Waves className="h-5 w-5" />, 
-      label: "Pool Builder", 
-      path: "/pool-builder", 
-      isParent: true,
-      subItems: []
-    },
-    { 
-      icon: <UserRound className="h-5 w-5" />, 
-      label: "Customers", 
-      path: "/customers", 
-      isParent: true,
-      subItems: []
     }
   ];
 
@@ -92,6 +132,16 @@ const MainNav: React.FC = () => {
     }
     return item.path !== "/" && location.pathname.startsWith(item.path);
   };
+
+  const toggleExpanded = (itemPath: string) => {
+    setExpandedItems(prev => 
+      prev.includes(itemPath) 
+        ? prev.filter(path => path !== itemPath)
+        : [...prev, itemPath]
+    );
+  };
+
+  const isExpanded = (itemPath: string) => expandedItems.includes(itemPath);
 
   return (
     <nav className="space-y-1">
@@ -103,10 +153,13 @@ const MainNav: React.FC = () => {
             to={item.path}
             active={isActive(item)}
             isParent={item.isParent}
+            hasSubItems={item.subItems && item.subItems.length > 0}
+            isExpanded={isExpanded(item.path)}
+            onToggle={() => toggleExpanded(item.path)}
           />
           
-          {/* Render sub-items */}
-          {item.subItems?.map((subItem) => (
+          {/* Render sub-items only if expanded */}
+          {isExpanded(item.path) && item.subItems?.map((subItem) => (
             <NavItem
               key={subItem.path}
               icon={subItem.icon}

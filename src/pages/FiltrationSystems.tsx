@@ -6,6 +6,7 @@ import { FiltrationPageHeader } from "@/components/filtration/FiltrationPageHead
 import { HandoverKitPackagesSection } from "@/components/filtration/HandoverKitPackagesSection";
 import { HandoverKitsSection } from "@/components/filtration/HandoverKitsSection";
 import { PoolFiltrationMatchingTable } from "@/components/filtration/PoolFiltrationMatchingTable";
+import { FiltrationSystemsHeader } from "@/components/headers/FiltrationSystemsHeader";
 import { useFiltrationQueries } from "@/hooks/useFiltrationQueries";
 import { usePoolPackages } from "@/hooks/usePoolPackages";
 import { useState } from "react";
@@ -51,7 +52,7 @@ const FiltrationSystems = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8 space-y-8">
-        <FiltrationPageHeader />
+        <FiltrationSystemsHeader />
 
         <FiltrationComponentsSection
           components={components}
