@@ -65,7 +65,7 @@ a, button, input, select, textarea {
 
 /* Glass morphism utility classes */
 .glass {
-  @apply bg-white/80 backdrop-blur-sm border border-white/20 shadow-sm;
+  @apply bg-white backdrop-blur-sm border border-white/20 shadow-sm;
 }
 
 .glass-hover {

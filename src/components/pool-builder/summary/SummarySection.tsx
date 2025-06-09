@@ -2,8 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
-import { PackageWithComponents } from '@/types/filtration';
-import { Pool } from '@/types/pool';
 import {
     calculateConcreteCutsMargin,
     calculateConcretePumpMargin,
@@ -13,75 +11,13 @@ import {
 } from '@/utils/concrete-margin-calculations';
 import { fetchConcreteAndPavingData } from '@/utils/concrete-paving-data';
 import { formatCurrency } from '@/utils/format';
-import { calculatePackagePrice } from '@/utils/package-calculations';
 import { validateUuid } from '@/utils/validators';
+import { usePriceCalculator } from '@/hooks/calculations/use-calculator-totals';
+import type { ProposalSnapshot } from '@/types/snapshot';
 import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, FileText, Loader2, User } from 'lucide-react';
 import React, { createContext, useState } from 'react';
 import { ProjectSubmitButton } from './ProjectSubmitButton';
-
-// Define the shape of the snapshot data from proposal_snapshot_v
-interface ProjectSnapshot {
-    id: string;
-    project_id: string;
-    pool_specification_id: string;
-    pool_margin_pct: number;
-    spec_buy_inc_gst: number;
-    fixed_costs: number;
-    fixed_costs_json: string;
-    pc_beam: number;
-    pc_coping_supply: number;
-    pc_coping_lay: number;
-    pc_salt_bags: number;
-    pc_trucked_water: number;
-    pc_misc: number;
-    pc_pea_gravel: number;
-    pc_install_fee: number;
-    crane_cost: number;
-    bobcat_cost: number;
-    traffic_control_cost: number;
-    dig_excavation_rate: number;
-    dig_excavation_hours: number;
-    dig_truck_rate: number;
-    dig_truck_hours: number;
-    dig_truck_qty: number;
-    site_requirements_total: number;
-    elec_total_cost: number;
-    elec_standard_power_flag: boolean;
-    elec_fence_earthing_flag: boolean;
-    elec_heat_pump_circuit_flag: boolean;
-    elec_standard_power_rate: number;
-    elec_fence_earthing_rate: number;
-    elec_heat_pump_circuit_rate: number;
-    pump_price_inc_gst: number;
-    filter_price_inc_gst: number;
-    sanitiser_price_inc_gst: number;
-    light_price_inc_gst: number;
-    handover_components: string;
-    concrete_cuts_cost: number;
-    concrete_cuts_json: string;
-    extra_paving_cost: number;
-    existing_paving_cost: number;
-    extra_concreting_cost: number;
-    concrete_pump_total_cost: number;
-    uf_strips_cost: number;
-    fencing_total_cost: number;
-    water_feature_total_cost: number;
-    retaining_walls_json: string;
-    cleaner_included: boolean;
-    cleaner_unit_price: number;
-    cleaner_cost_price: number;
-    include_heat_pump: boolean;
-    include_blanket_roller: boolean;
-    heat_pump_cost: number;
-    blanket_roller_cost: number;
-    upgrades_extras_total: number;
-    site_requirements_data: string;
-    heat_pump_rrp: number;
-    heat_pump_installation_cost: number;
-    blanket_roller_rrp: number;
-    blanket_roller_installation_cost: number;
-};
 
 export const MarginVisibilityContext = createContext<boolean>(false);
 
@@ -202,7 +138,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const isValidUuid = validateUuid(customerId);
 
     // Fetch project snapshot data
-    const { data: snapshot, isLoading, error } = useQuery<ProjectSnapshot | null>({
+    const { data: snapshot, isLoading, error } = useQuery<ProposalSnapshot | null>({
         queryKey: ['project-snapshot', customerId],
         queryFn: async () => {
             if (!customerId || !isValidUuid) return null;
@@ -222,7 +158,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 }
 
                 console.log("Successfully fetched project snapshot");
-                return data as unknown as ProjectSnapshot;
+                return data as unknown as ProposalSnapshot;
             } catch (error) {
                 console.error("Error in project snapshot query:", error);
                 return null;
@@ -231,32 +167,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         enabled: !!customerId && isValidUuid,
     });
 
-    // Get pool specification data if a specification is selected
-    const { data: pool } = useQuery({
-        queryKey: ['pool-specification', snapshot?.pool_specification_id],
-        queryFn: async () => {
-            if (!snapshot?.pool_specification_id) return null;
-
-            try {
-                const { data, error } = await supabase
-                    .from('pool_specifications')
-                    .select('*')
-                    .eq('id', snapshot.pool_specification_id)
-                    .single();
-
-                if (error) {
-                    console.error("Error fetching pool specification:", error);
-                    return null;
-                }
-
-                return data as Pool;
-            } catch (error) {
-                console.error("Error fetching pool specification:", error);
-                return null;
-            }
-        },
-        enabled: !!snapshot?.pool_specification_id,
-    });
+    // Pool specification data is already in the snapshot, no need to fetch separately
 
     // Fetch equipment names from database using direct selection queries
     const { data: equipmentData } = useQuery({
@@ -467,6 +378,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     });
 
     console.log("Concrete pump data:", concretePumpData);
+
+    // Use the price calculator hook to get consistent calculations (must be called before any early returns)
+    const priceCalculatorResult = usePriceCalculator(snapshot);
 
     // Fetch concrete and paving margin data
     const { data: concretePavingMarginData } = useQuery({
@@ -713,9 +627,8 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         );
     }
 
-    // Helper functions for price calculations
-    const calcMargin = (cost, pct) => cost * (pct / 100);
-    const calcTotal = (cost, pct) => cost / (1 - (pct / 100));
+    // Extract breakdown from the price calculator result
+    const { basePoolBreakdown, siteRequirementsBreakdown } = priceCalculatorResult;
 
     // Extract margin percentage from the snapshot
     const marginPct = snapshot.pool_margin_pct || 0;
@@ -792,117 +705,10 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     console.log("Bobcat details:", bobcatDetails);
     console.log("Traffic control details:", trafficControlDetails);
 
-    // Fixed costs total
-    const fixedCostsTotal = fixedCosts.reduce((sum, cost) => sum + (cost.price || 0), 0);
-
-    // Simplified data for site requirements display
-    const siteRequirementsTotal = snapshot.site_requirements_total || 0;
-
-    // Calculations for base price components
+    // Base crane cost constant
     const BASE_CRANE_COST = 700;
 
-    // Calculate components before applying margin
-    const poolShellCost = snapshot.spec_buy_inc_gst || 0;
-
-    const digCost = (snapshot.dig_excavation_rate || 0) * (snapshot.dig_excavation_hours || 0) +
-        ((snapshot.dig_truck_rate || 0) * (snapshot.dig_truck_hours || 0) * (snapshot.dig_truck_qty || 0));
-
-    // Create a temporary package object to use with calculatePackagePrice
-    const packageObj: PackageWithComponents = {
-        id: 'temp-id',
-        name: 'Temporary Package',
-        display_order: 0,
-        pump: snapshot.pump_price_inc_gst ? {
-            id: 'pump-id',
-            name: 'Pump',
-            model_number: '',
-            price_inc_gst: snapshot.pump_price_inc_gst || 0
-        } : null,
-        filter: snapshot.filter_price_inc_gst ? {
-            id: 'filter-id',
-            name: 'Filter',
-            model_number: '',
-            price_inc_gst: snapshot.filter_price_inc_gst || 0
-        } : null,
-        sanitiser: snapshot.sanitiser_price_inc_gst ? {
-            id: 'sanitiser-id',
-            name: 'Sanitiser',
-            model_number: '',
-            price_inc_gst: snapshot.sanitiser_price_inc_gst || 0
-        } : null,
-        light: snapshot.light_price_inc_gst ? {
-            id: 'light-id',
-            name: 'Light',
-            model_number: '',
-            price_inc_gst: snapshot.light_price_inc_gst || 0
-        } : null,
-        handover_kit: handoverComponents.length ? {
-            id: 'handover-kit-id',
-            name: 'Handover Kit',
-            components: handoverComponents.map(comp => ({
-                id: comp.id || 'component-id',
-                package_id: 'package-id',
-                component_id: comp.id || 'component-id',
-                quantity: comp.hk_component_quantity || 0,
-                created_at: '',
-                component: {
-                    id: comp.id || 'component-id',
-                    name: comp.hk_component_name || '',
-                    model_number: '',
-                    price_inc_gst: comp.hk_component_price_inc_gst || 0
-                }
-            }))
-        } : null
-    };
-
-    // Use the consistent calculatePackagePrice function
-    const filtrationCost = calculatePackagePrice(packageObj);
-
-    const individualCosts = (snapshot.pc_beam || 0) +
-        (snapshot.pc_coping_supply || 0) +
-        (snapshot.pc_coping_lay || 0) +
-        (snapshot.pc_salt_bags || 0) +
-        (snapshot.pc_trucked_water || 0) +
-        (snapshot.pc_misc || 0) +
-        (snapshot.pc_pea_gravel || 0) +
-        (snapshot.pc_install_fee || 0);
-
-    // Calculate total base price before margin
-    const basePriceBeforeMargin =
-        poolShellCost +
-        digCost +
-        filtrationCost +
-        individualCosts +
-        fixedCostsTotal;
-
-    // Apply margin to each component using calcTotal function
-    const poolShellPrice = calcTotal(poolShellCost, marginPct);
-    const digPrice = calcTotal(digCost, marginPct);
-    const filtrationPrice = calcTotal(filtrationCost, marginPct);
-    const individualCostsTotal = calcTotal(individualCosts, marginPct);
-
-    // Calculate margin amount
-    const marginAmount = basePriceBeforeMargin * (marginPct / (100 - marginPct));
-
-    // Calculate base price total with margin using calcTotal function
-    const basePriceTotal = calcTotal(basePriceBeforeMargin, marginPct);
-
-    // Site Requirements calculations
-    const craneCost = snapshot.crane_cost || 0;
-
-    // If crane cost is > 0 but not exactly equal to BASE_CRANE_COST, 
-    // calculate the difference (additional cost beyond base)
-    let adjustedCraneCost = 0;
-    if (craneCost > 0) {
-        // Subtract base crane cost (only if it's more than the base cost)
-        adjustedCraneCost = craneCost > BASE_CRANE_COST ? craneCost - BASE_CRANE_COST : craneCost;
-    }
-
-    const bobcatCost = snapshot.bobcat_cost || 0;
-    const trafficControlCost = snapshot.traffic_control_cost || 0;
-
     // Check if siteRequirementsData is in proper format and extract custom requirements
-    // Include all items that don't have a specific type (crane, bobcat, traffic-control) as custom
     const customSiteRequirements = Array.isArray(siteRequirementsData) ?
         siteRequirementsData.filter(item => {
             const isStandardType = item.type === 'crane' || item.type === 'bobcat' || item.type === 'traffic-control';
@@ -911,89 +717,14 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
     console.log("Custom Site Requirements:", customSiteRequirements);
 
-    // Calculate total of custom site requirements
-    const customSiteRequirementsCost = customSiteRequirements.reduce((total, item) => {
-        const itemCostRaw = typeof item.price === 'string' ?
-            parseFloat(item.price || '0') :
-            (typeof item.price === 'number' ? item.price : 0);
+    // Get totals from the price calculator
+    const concretePavingTotal = priceCalculatorResult.totals.concreteTotal;
+    const retainingWallsTotal = priceCalculatorResult.totals.retainingWallsTotal;
+    const rawFencingTotal = priceCalculatorResult.totals.fencingTotal;
+    const waterFeaturesTotal = priceCalculatorResult.totals.waterFeatureTotal;
+    const upgradesExtrasTotal = priceCalculatorResult.totals.extrasTotal;
 
-        console.log(`Custom Item: ${item.description || item.name || "Custom Requirement"}, Price: ${itemCostRaw}`);
-        return total + itemCostRaw;
-    }, 0);
-
-    console.log("Custom Site Requirements Total Cost:", customSiteRequirementsCost);
-
-    // Calculate total additional site requirements (those not covered by individual items)
-    const additionalSiteRequirementsCost = snapshot.site_requirements_total ?
-        snapshot.site_requirements_total - customSiteRequirementsCost : 0;
-
-    // Total cost before margin
-    const siteRequirementsBeforeMargin =
-        adjustedCraneCost +
-        bobcatCost +
-        trafficControlCost +
-        customSiteRequirementsCost +
-        (additionalSiteRequirementsCost > 0 ? additionalSiteRequirementsCost : 0);
-
-    // Apply margin to components
-    const cranePriceWithMargin = calcTotal(adjustedCraneCost, marginPct);
-    const bobcatPriceWithMargin = calcTotal(bobcatCost, marginPct);
-    const trafficControlPriceWithMargin = calcTotal(trafficControlCost, marginPct);
-    const customSiteRequirementsPriceWithMargin = calcTotal(customSiteRequirementsCost, marginPct);
-    const additionalSiteRequirementsPriceWithMargin = additionalSiteRequirementsCost > 0 ?
-        calcTotal(additionalSiteRequirementsCost, marginPct) : 0;
-
-    // Calculate site requirements total with margin
-    const siteRequirementsTotalWithMargin = calcTotal(siteRequirementsBeforeMargin, marginPct);
-
-    // Calculate site requirements margin amount
-    const siteRequirementsMarginAmount = siteRequirementsBeforeMargin * (marginPct / (100 - marginPct));
-
-    // Concrete & Paving calculations
-    const concreteCutsCost = snapshot.concrete_cuts_cost || 0;
-    const extraPavingCost = snapshot.extra_paving_cost || 0;
-    const existingPavingCost = snapshot.existing_paving_cost || 0;
-    const extraConcretingCost = snapshot.extra_concreting_cost || 0;
-    const concretePumpTotalCost = snapshot.concrete_pump_total_cost || 0;
-    const ufStripsCost = snapshot.uf_strips_cost || 0;
-
-    // Log the values to debug
-    console.log("Concrete & Paving Values:", {
-        concreteCutsCost,
-        extraPavingCost,
-        existingPavingCost,
-        extraConcretingCost,
-        concretePumpTotalCost,
-        ufStripsCost,
-        fullSnapshot: snapshot
-    });
-
-    // Calculate total concrete & paving cost
-    const concretePavingTotal =
-        concreteCutsCost +
-        extraPavingCost +
-        existingPavingCost +
-        extraConcretingCost +
-        concretePumpTotalCost +
-        ufStripsCost;
-
-    // Calculate total retaining walls cost
-    const retainingWallsTotal = snapshot.retaining_walls_json ?
-        Array.isArray(retainingWalls) ?
-            retainingWalls.reduce((sum, wall) => sum + (wall.total_cost || 0), 0)
-            : 0
-        : 0;
-
-    console.log("Retaining walls total:", retainingWallsTotal);
-
-    // Calculate raw fencing total (without margin)
-    const rawFencingTotal = (fencingData?.framelessGlassData?.total_cost || 0) +
-        (fencingData?.flatTopMetalData?.total_cost || 0);
-
-    // Get water features total from snapshot
-    const waterFeaturesTotal = snapshot.water_feature_total_cost || 0;
-
-    // Calculate subtotals for upgrades and extras
+    // Calculate subtotals for upgrades and extras display
     const heatPumpRRP = snapshot.include_heat_pump ? (snapshot.heat_pump_rrp || 0) : 0;
     const heatPumpInstallation = snapshot.include_heat_pump ? (snapshot.heat_pump_installation_cost || 0) : 0;
     const heatPumpTotal = heatPumpRRP + heatPumpInstallation;
@@ -1003,17 +734,10 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const blanketRollerTotal = blanketRollerRRP + blanketRollerInstallation;
 
     const cleanerTotal = snapshot.cleaner_included ? (snapshot.cleaner_unit_price || 0) : 0;
-
-    // Use the total margin from the snapshot
-    const upgradesExtrasMargin = snapshot.upgrades_extras_total
-        ? Math.round((snapshot.upgrades_extras_total * 0.25)) // Assuming 25% margin, adjust if needed
-        : 0;
-
-    // Calculate subtotals by category
     const heatingTotal = heatPumpTotal + blanketRollerTotal;
 
-    // Overall upgrades total - use the value from snapshot if available
-    const upgradesExtrasTotal = snapshot.upgrades_extras_total || (heatingTotal + cleanerTotal);
+    // Calculate upgrades extras margin based on individual components
+    const upgradesExtrasMargin = 0; // Margin is already included in RRP prices
 
     console.log(snapshot)
 
@@ -1059,7 +783,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="text-2xl font-bold text-gray-900">
-                                    {formatCurrency(basePriceTotal + siteRequirementsTotalWithMargin + concretePavingTotal + retainingWallsTotal + rawFencingTotal + (snapshot.elec_total_cost || 0) + waterFeaturesTotal + upgradesExtrasTotal)}
+                                    {formatCurrency(priceCalculatorResult.grandTotal)}
                                 </div>
                                 {!hideSubmitButton && <ProjectSubmitButton projectId={customerId} />}
                             </div>
@@ -1078,12 +802,12 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 <h3 className="text-lg font-medium text-gray-900">Base Price</h3>
                                 {!isCustomerView && (
                                     <p className="text-sm text-muted-foreground">
-                                        Margin: {marginPct}% ({formatCurrency(marginAmount)})
+                                        Margin: {marginPct}% ({formatCurrency(basePoolBreakdown.totalBeforeMargin * (marginPct / (100 - marginPct)))})
                                     </p>
                                 )}
                             </div>
                             <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(basePriceTotal)}</span>
+                                <span className="mr-4 font-semibold">{formatCurrency(priceCalculatorResult.totals.basePoolTotal)}</span>
                                 {expandedSections.basePrice ? (
                                     <ChevronUp className="h-5 w-5 text-gray-600" />
                                 ) : (
@@ -1099,40 +823,47 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                         <LineItem
                                             label="Pool Shell"
                                             code=""
-                                            value={poolShellPrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(poolShellCost)}` : null}
+                                            value={basePoolBreakdown.poolShellPrice}
+                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.poolShellCost)}` : null}
                                         />
                                         <LineItem
                                             label="Excavation & Truck"
                                             code=""
-                                            value={digPrice}
+                                            value={basePoolBreakdown.digPrice}
                                             breakdown={!isCustomerView ?
-                                                `Cost: ${formatCurrency(digCost)} ($${snapshot.dig_excavation_rate || 0} × ${snapshot.dig_excavation_hours || 0} hrs + $${snapshot.dig_truck_rate || 0} × ${snapshot.dig_truck_hours || 0} hrs × ${snapshot.dig_truck_qty || 0} trucks)`
+                                                `Cost: ${formatCurrency(basePoolBreakdown.digCost)}`
                                                 : null}
                                         />
                                         <LineItem
                                             label="Filtration Package"
                                             code=""
-                                            value={filtrationPrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(filtrationCost)}` : null}
+                                            value={basePoolBreakdown.filtrationPrice}
+                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.filtrationCost)}` : null}
                                         />
                                         <LineItem
                                             label="Individual Components"
                                             code=""
-                                            value={individualCostsTotal}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(individualCosts)}` : null}
+                                            value={basePoolBreakdown.individualCostsPrice}
+                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.individualCosts)}` : null}
                                         />
                                         <LineItem
                                             label="Fixed Costs"
                                             code=""
-                                            value={fixedCostsTotal}
+                                            value={basePoolBreakdown.fixedCostsPrice}
+                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.fixedCostsTotal)}` : null}
+                                        />
+                                        <LineItem
+                                            label="Standard Crane Allowance"
+                                            code=""
+                                            value={basePoolBreakdown.craneAllowancePrice}
+                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.craneAllowance)}` : null}
                                         />
 
                                         {!isCustomerView && (
                                             <>
                                                 <SubtotalRow
                                                     label="Base Price Before Margin"
-                                                    value={basePriceBeforeMargin}
+                                                    value={basePoolBreakdown.totalBeforeMargin}
                                                 />
                                                 <MarginRow
                                                     percentage={marginPct}
@@ -1142,7 +873,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
                                         <TotalRow
                                             label="Base Price Total"
-                                            value={basePriceTotal}
+                                            value={priceCalculatorResult.totals.basePoolTotal}
                                         />
                                     </tbody>
                                 </table>
@@ -1152,7 +883,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 </Card>
 
                 {/* SITE REQUIREMENTS SECTION */}
-                {siteRequirementsBeforeMargin > 0 && (
+                {siteRequirementsBreakdown.totalBeforeMargin > 0 && (
                     <Card className="mb-6 shadow-none">
                         <CardContent className="pt-6">
                             <div
@@ -1163,12 +894,12 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Site Requirements</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            Margin: {marginPct}% ({formatCurrency(siteRequirementsMarginAmount)})
+                                            Margin: {marginPct}% ({formatCurrency(siteRequirementsBreakdown.totalBeforeMargin * (marginPct / (100 - marginPct)))})
                                         </p>
                                     )}
                                 </div>
                                 <div className="flex items-center">
-                                    <span className="mr-4 font-semibold">{formatCurrency(siteRequirementsTotalWithMargin)}</span>
+                                    <span className="mr-4 font-semibold">{formatCurrency(priceCalculatorResult.totals.siteRequirementsTotal)}</span>
                                     {expandedSections.siteRequirements ? (
                                         <ChevronUp className="h-5 w-5 text-gray-600" />
                                     ) : (
@@ -1181,71 +912,49 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
-                                            {adjustedCraneCost > 0 && (
+                                            {siteRequirementsBreakdown.craneCost > 0 && (
                                                 <LineItem
                                                     label={`Crane${craneData?.name ? `: ${craneData.name}` : ''}`}
                                                     code=""
-                                                    value={cranePriceWithMargin}
+                                                    value={siteRequirementsBreakdown.cranePrice}
                                                     breakdown={!isCustomerView ?
-                                                        `Cost: ${formatCurrency(adjustedCraneCost)}`
+                                                        `Cost: ${formatCurrency(siteRequirementsBreakdown.craneCost)}`
                                                         : null}
                                                 />
                                             )}
-                                            {bobcatCost > 0 && (
+                                            {siteRequirementsBreakdown.bobcatCost > 0 && (
                                                 <LineItem
                                                     label={`Bobcat${bobcatData ? `: ${bobcatData?.size_category || ''} - ${bobcatData?.day_code || ''}` : ''}`}
                                                     code=""
-                                                    value={bobcatPriceWithMargin}
+                                                    value={siteRequirementsBreakdown.bobcatPrice}
                                                     breakdown={!isCustomerView ?
-                                                        `Cost: ${formatCurrency(bobcatCost)}`
+                                                        `Cost: ${formatCurrency(siteRequirementsBreakdown.bobcatCost)}`
                                                         : null}
                                                 />
                                             )}
-                                            {trafficControlCost > 0 && (
+                                            {siteRequirementsBreakdown.trafficControlCost > 0 && (
                                                 <LineItem
                                                     label={`Traffic Control${trafficControlData?.name ? `: ${trafficControlData?.name}` : ''}`}
                                                     code=""
-                                                    value={trafficControlPriceWithMargin}
+                                                    value={siteRequirementsBreakdown.trafficControlPrice}
                                                     breakdown={!isCustomerView ?
-                                                        `Cost: ${formatCurrency(trafficControlCost)}`
+                                                        `Cost: ${formatCurrency(siteRequirementsBreakdown.trafficControlCost)}`
                                                         : null}
                                                 />
                                             )}
-                                            {customSiteRequirements.length > 0 && customSiteRequirements.map((item, index) => {
-                                                const itemCost = typeof item.price === 'string' ?
-                                                    parseFloat(item.price || '0') :
-                                                    (typeof item.price === 'number' ? item.price : 0);
-
-                                                const itemDescription = item.description ||
-                                                    item.name ||
-                                                    "Custom Requirement";
-
-                                                const itemPriceWithMargin = calcTotal(itemCost, marginPct);
-
-                                                return itemCost > 0 ? (
-                                                    <LineItem
-                                                        key={`custom-req-${index}`}
-                                                        label={itemDescription}
-                                                        code=""
-                                                        value={itemPriceWithMargin}
-                                                        breakdown={!isCustomerView ? `Cost: ${formatCurrency(itemCost)}` : null}
-                                                    />
-                                                ) : null;
-                                            })}
-                                            {additionalSiteRequirementsCost > 0 && (
+                                            {siteRequirementsBreakdown.customRequirementsCost > 0 && (
                                                 <LineItem
-                                                    label="Additional Requirements"
+                                                    label="Custom Requirements"
                                                     code=""
-                                                    value={additionalSiteRequirementsPriceWithMargin}
-                                                    breakdown={!isCustomerView ? `Cost: ${formatCurrency(additionalSiteRequirementsCost)}` : null}
+                                                    value={siteRequirementsBreakdown.customRequirementsPrice}
+                                                    breakdown={!isCustomerView ? `Cost: ${formatCurrency(siteRequirementsBreakdown.customRequirementsCost)}` : null}
                                                 />
                                             )}
-
                                             {!isCustomerView && (
                                                 <>
                                                     <SubtotalRow
                                                         label="Site Requirements Before Margin"
-                                                        value={siteRequirementsBeforeMargin}
+                                                        value={siteRequirementsBreakdown.totalBeforeMargin}
                                                     />
                                                     <MarginRow
                                                         percentage={marginPct}
@@ -1255,7 +964,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
                                             <TotalRow
                                                 label="Site Requirements Total"
-                                                value={siteRequirementsTotalWithMargin}
+                                                value={priceCalculatorResult.totals.siteRequirementsTotal}
                                             />
                                         </tbody>
                                     </table>
@@ -1297,54 +1006,54 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 <div className="space-y-4">
                                     <table className="w-full">
                                         <tbody>
-                                            {concreteCutsCost > 0 && (
+                                            {(snapshot.concrete_cuts_cost || 0) > 0 && (
                                                 <LineItem
                                                     label="Concrete Cuts"
                                                     code=""
-                                                    value={concreteCutsCost}
+                                                    value={snapshot.concrete_cuts_cost || 0}
                                                     breakdown={!isCustomerView && concreteCutsData && concreteCutsData.length > 0 ?
                                                         concreteCutsData.map(cut => cut.cut_type).join(', ') :
                                                         null}
                                                 />
                                             )}
-                                            {extraPavingCost > 0 && (
+                                            {(snapshot.extra_paving_cost || 0) > 0 && (
                                                 <LineItem
                                                     label={`Extra Paving${pavingData?.extraPavingCategory ? `: ${pavingData.extraPavingCategory}` : ''}`}
                                                     code=""
-                                                    value={extraPavingCost}
+                                                    value={snapshot.extra_paving_cost || 0}
                                                     breakdown={null}
                                                 />
                                             )}
-                                            {existingPavingCost > 0 && (
+                                            {(snapshot.existing_paving_cost || 0) > 0 && (
                                                 <LineItem
                                                     label={`Paving on Existing Concrete${pavingData?.existingPavingCategory ? `: ${pavingData.existingPavingCategory}` : ''}`}
                                                     code=""
-                                                    value={existingPavingCost}
+                                                    value={snapshot.existing_paving_cost || 0}
                                                     breakdown={null}
                                                 />
                                             )}
-                                            {extraConcretingCost > 0 && (
+                                            {(snapshot.extra_concreting_cost || 0) > 0 && (
                                                 <LineItem
                                                     label={`Extra Concreting${pavingData?.extraConcretingType ? `: ${pavingData.extraConcretingType}` : ''}`}
                                                     code=""
-                                                    value={extraConcretingCost}
+                                                    value={snapshot.extra_concreting_cost || 0}
                                                     breakdown={null}
                                                 />
                                             )}
-                                            {concretePumpTotalCost > 0 && (
+                                            {(snapshot.concrete_pump_total_cost || 0) > 0 && (
                                                 <LineItem
                                                     label="Concrete Pump"
                                                     code=""
-                                                    value={concretePumpTotalCost}
+                                                    value={snapshot.concrete_pump_total_cost || 0}
                                                     breakdown={!isCustomerView && concretePumpData?.concrete_pump_quantity ?
                                                         `${concretePumpData.concrete_pump_quantity} pump setup${concretePumpData.concrete_pump_quantity > 1 ? 's' : ''}` : null}
                                                 />
                                             )}
-                                            {ufStripsCost > 0 && (
+                                            {(snapshot.uf_strips_cost || 0) > 0 && (
                                                 <LineItem
                                                     label="Under Fence Strips"
                                                     code=""
-                                                    value={ufStripsCost}
+                                                    value={snapshot.uf_strips_cost || 0}
                                                     breakdown={null}
                                                 />
                                             )}

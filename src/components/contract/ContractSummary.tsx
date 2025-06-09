@@ -117,8 +117,8 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
 
     // contractData now comes from the useContractSummaryLineItems hook
 
-    // Use the calculated contract grand total
-    const grandTotal = contractGrandTotal;
+    // Use the calculated contract grand total plus HWI insurance
+    const grandTotal = contractGrandTotal
 
     // Calculate HWI insurance cost based on rounded down total
     const hwiLookupAmount = getHWILookupAmount(grandTotal);
@@ -170,19 +170,19 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         </div>
                     </div>
                     
-                    {/* HWI Cost Subitem */}
+                    {/* Contract Summary Grand Total Comparison */}
                     <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex justify-between items-center">
                             <div>
-                                <span className="text-sm font-medium text-gray-700">HWI Cost (Included)</span>
+                                <span className="text-sm font-medium text-gray-700">Contract Summary Total</span>
                                 {!isCustomerView && (
                                     <p className="text-xs text-muted-foreground">
-                                        Lookup amount: {formatCurrency(hwiLookupAmount)}
+                                        Delta: {formatCurrency(Math.abs(grandTotal - contractData.contractSummaryGrandTotal))}
                                     </p>
                                 )}
                             </div>
                             <div className="text-sm font-semibold text-gray-900">
-                                {formatCurrency(hwiInsuranceCost)}
+                                {formatCurrency(contractData.contractSummaryGrandTotal)}
                             </div>
                         </div>
                     </div>
@@ -267,10 +267,16 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Pool Shell"
+                                        label="Equipment & Upgrades"
                                         code=""
-                                        value={contractData.poolShellSupply}
-                                        breakdown={!isCustomerView ? "Pool shell materials and supply" : null}
+                                        value={contractData.equipmentOnly}
+                                        breakdown={!isCustomerView ? "Pool cleaners, heat pumps, blanket rollers, and other upgrades" : null}
+                                    />
+                                    <LineItem
+                                        label="Shell Value"
+                                        code=""
+                                        value={contractData.shellValueInContract}
+                                        breakdown={!isCustomerView ? "Core pool shell value excluding itemized components" : null}
                                     />
                                     <TotalRow
                                         label="Pool Shell Supply Total"
@@ -308,10 +314,28 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Installation Labor"
+                                        label="Crane"
                                         code=""
-                                        value={contractData.poolShellInstallation}
-                                        breakdown={!isCustomerView ? "Pool shell installation and setup" : null}
+                                        value={contractData.craneCost}
+                                        breakdown={!isCustomerView ? "Crane services for pool installation" : null}
+                                    />
+                                    <LineItem
+                                        label="Traffic Control"
+                                        code=""
+                                        value={contractData.trafficControlInstallationCost}
+                                        breakdown={!isCustomerView ? "Traffic management during installation" : null}
+                                    />
+                                    <LineItem
+                                        label="Install Fee"
+                                        code=""
+                                        value={contractData.installFeeCost}
+                                        breakdown={!isCustomerView ? "Pool installation service fee" : null}
+                                    />
+                                    <LineItem
+                                        label="Pea Gravel / Backfill"
+                                        code=""
+                                        value={contractData.peaGravelBackfillCost}
+                                        breakdown={!isCustomerView ? "Pea gravel and backfill materials" : null}
                                     />
                                     <TotalRow
                                         label="Pool Shell Installation Total"
@@ -351,8 +375,20 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Excavation & Truck"
                                         code=""
-                                        value={contractData.excavation}
+                                        value={contractData.excavationTotal}
                                         breakdown={!isCustomerView ? "Site excavation and material removal" : null}
+                                    />
+                                    <LineItem
+                                        label="Bobcat"
+                                        code=""
+                                        value={contractData.bobcatCost}
+                                        breakdown={!isCustomerView ? "Bobcat equipment for site preparation" : null}
+                                    />
+                                    <LineItem
+                                        label="Custom Site Requirements"
+                                        code=""
+                                        value={contractData.customSiteRequirementsCost}
+                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
                                     />
                                     <TotalRow
                                         label="Excavation Total"
@@ -392,7 +428,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Structural Beam"
                                         code=""
-                                        value={contractData.engineeredBeam}
+                                        value={contractData.beamCost}
                                         breakdown={!isCustomerView ? "Engineered structural beam components" : null}
                                     />
                                     <TotalRow
@@ -431,10 +467,10 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Additional Concrete Work"
+                                        label="Extra Concreting"
                                         code=""
-                                        value={contractData.extraConcreting}
-                                        breakdown={!isCustomerView ? "Extra concrete requirements" : null}
+                                        value={contractData.extraConcretingCost}
+                                        breakdown={!isCustomerView ? "Additional concrete work requirements" : null}
                                     />
                                     <TotalRow
                                         label="Extra Concreting Total"
@@ -472,16 +508,46 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Paving Work"
+                                        label="Extra Paving + Concrete"
                                         code=""
-                                        value={contractData.pavingCoping * 0.7}
-                                        breakdown={!isCustomerView ? "Paving around pool area" : null}
+                                        value={contractData.extraPavingCost}
+                                        breakdown={!isCustomerView ? "Additional paving and concrete work" : null}
                                     />
                                     <LineItem
-                                        label="Coping"
+                                        label="Extra Paving on Existing Concrete"
                                         code=""
-                                        value={contractData.pavingCoping * 0.3}
-                                        breakdown={!isCustomerView ? "Pool edge coping" : null}
+                                        value={contractData.existingPavingCost}
+                                        breakdown={!isCustomerView ? "Paving work on existing concrete surfaces" : null}
+                                    />
+                                    <LineItem
+                                        label="Concrete Pump"
+                                        code=""
+                                        value={contractData.concretePumpCost}
+                                        breakdown={!isCustomerView ? "Concrete pumping services" : null}
+                                    />
+                                    <LineItem
+                                        label="Under-fence Concrete Strips"
+                                        code=""
+                                        value={contractData.underFenceConcreteStripsCost}
+                                        breakdown={!isCustomerView ? "Concrete strips under fencing" : null}
+                                    />
+                                    <LineItem
+                                        label="Coping Supply"
+                                        code=""
+                                        value={contractData.copingSupplyCost}
+                                        breakdown={!isCustomerView ? "Pool edge coping materials" : null}
+                                    />
+                                    <LineItem
+                                        label="Coping Lay"
+                                        code=""
+                                        value={contractData.copingLayCost}
+                                        breakdown={!isCustomerView ? "Pool edge coping installation" : null}
+                                    />
+                                    <LineItem
+                                        label="Concrete Cuts"
+                                        code=""
+                                        value={contractData.concreteCutsCopingCost}
+                                        breakdown={!isCustomerView ? "Concrete cutting and preparation work" : null}
                                     />
                                     <TotalRow
                                         label="Paving / Coping Total"
@@ -521,13 +587,13 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Retaining Walls"
                                         code=""
-                                        value={contractData.retainingWalls * 0.8}
+                                        value={contractData.retainingWallsCost}
                                         breakdown={!isCustomerView ? "Structural retaining walls" : null}
                                     />
                                     <LineItem
                                         label="Water Feature"
                                         code=""
-                                        value={contractData.retainingWalls * 0.2}
+                                        value={contractData.waterFeatureCost}
                                         breakdown={!isCustomerView ? "Water feature installation" : null}
                                     />
                                     <TotalRow
