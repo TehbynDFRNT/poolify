@@ -101,41 +101,23 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
       .eq('pool_project_id', customerId)
       .maybeSingle();
 
-    let success;
+    // Prepare data to save
+    const dataToSave = {
+      concrete_pump_needed: isPumpNeeded,
+      concrete_pump_quantity: isPumpNeeded ? quantity : null,
+      concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
+    };
 
-    if (existingData?.id) {
-      // Update existing record
-      const updateData = {
-        concrete_pump_needed: isPumpNeeded,
-        concrete_pump_quantity: isPumpNeeded ? quantity : null,
-        concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
-      };
-      success = await handleSave(updateData, 'pool_concrete_selections');
-    } else {
-      // For new records, we need to handle the insert differently
-      try {
-        const { error } = await supabase
-          .from('pool_concrete_selections')
-          .insert({
-            pool_project_id: customerId,
-            concrete_pump_needed: isPumpNeeded,
-            concrete_pump_quantity: isPumpNeeded ? quantity : null,
-            concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
-          });
+    // Use the guarded handleSave for both insert and update
+    const result = await handleSave(dataToSave, 'pool_concrete_selections', existingData?.id || null);
 
-        if (error) throw error;
-
+    if (result.success) {
+      if (!existingData?.id) {
         toast.success("Concrete pump details saved successfully.");
-        success = true;
-      } catch (error) {
-        console.error("Error saving concrete pump details:", error);
-        toast.error("Failed to save concrete pump details.");
-        success = false;
       }
-    }
-
-    if (success && onSaveComplete) {
-      onSaveComplete();
+      if (onSaveComplete) {
+        onSaveComplete();
+      }
     }
   };
 

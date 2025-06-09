@@ -1,13 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Pool } from "@/types/pool";
-import { Calculator, CheckSquare, Droplets, Fence, FileText, Layers, ListFilter, MapPin, Package, Zap } from "lucide-react";
+import { CheckSquare, Droplets, Fence, FileText, Layers, ListFilter, MapPin, Package, Zap } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 // Tab content imports
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
-import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import { ConcreteAndPavingPlaceholder } from "@/components/pool-builder/pool-selection/components/concrete-paving/ConcreteAndPavingPlaceholder";
 import { ElectricalPlaceholder } from "@/components/pool-builder/pool-selection/components/electrical/ElectricalPlaceholder";
 import { FencingPlaceholder } from "@/components/pool-builder/pool-selection/components/fencing/FencingPlaceholder";
@@ -95,10 +94,6 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
         <TabsTrigger value="summary" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
           Summary
-        </TabsTrigger>
-        <TabsTrigger value="formula-reference" className="flex items-center gap-2">
-          <Calculator className="h-4 w-4" />
-          Formula Reference
         </TabsTrigger>
       </TabsList>
 
@@ -226,9 +221,6 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
         </Card>
       </TabsContent>
 
-      <TabsContent value="formula-reference">
-        <FormulaReference />
-      </TabsContent>
     </Tabs>
   );
 };

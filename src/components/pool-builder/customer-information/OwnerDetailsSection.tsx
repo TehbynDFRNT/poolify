@@ -14,6 +14,7 @@ interface OwnerDetailsSectionProps {
   setPhone: (value: string) => void;
   email: string;
   setEmail: (value: string) => void;
+  readonly?: boolean;
 }
 
 const OwnerDetailsSection: React.FC<OwnerDetailsSectionProps> = ({
@@ -25,6 +26,7 @@ const OwnerDetailsSection: React.FC<OwnerDetailsSectionProps> = ({
   setPhone,
   email,
   setEmail,
+  readonly = false,
 }) => {
   return (
     <Card>
@@ -40,9 +42,11 @@ const OwnerDetailsSection: React.FC<OwnerDetailsSectionProps> = ({
             <Input
               id="owner1"
               value={owner1}
-              onChange={(e) => setOwner1(e.target.value)}
+              onChange={readonly ? undefined : (e) => setOwner1(e.target.value)}
               placeholder="Primary Owner's Full Name"
               required
+              readOnly={readonly}
+              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
           </div>
           
@@ -51,8 +55,10 @@ const OwnerDetailsSection: React.FC<OwnerDetailsSectionProps> = ({
             <Input
               id="owner2"
               value={owner2}
-              onChange={(e) => setOwner2(e.target.value)}
+              onChange={readonly ? undefined : (e) => setOwner2(e.target.value)}
               placeholder="Secondary Owner's Full Name"
+              readOnly={readonly}
+              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
           </div>
           
@@ -62,9 +68,11 @@ const OwnerDetailsSection: React.FC<OwnerDetailsSectionProps> = ({
               id="phone"
               type="tel"
               value={phone}
-              onChange={(e) => setPhone(e.target.value)}
+              onChange={readonly ? undefined : (e) => setPhone(e.target.value)}
               placeholder="Phone Number"
               required
+              readOnly={readonly}
+              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
           </div>
           
@@ -74,9 +82,11 @@ const OwnerDetailsSection: React.FC<OwnerDetailsSectionProps> = ({
               id="email"
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={readonly ? undefined : (e) => setEmail(e.target.value)}
               placeholder="Email Address"
               required
+              readOnly={readonly}
+              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
           </div>
         </div>

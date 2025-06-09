@@ -164,15 +164,8 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
     const dataToSave = {
       extra_paving_category: selectedCategory, // This is the ID
       extra_paving_square_meters: squareMeters,
-      extra_paving_total_cost: totalCost,
-      // Null out other potentially conflicting fields for this specific save.
-      // The hook handles pool_project_id for inserts if pavingSelectionId is null.
-      existing_concrete_paving_category: null,
-      existing_concrete_paving_square_meters: null,
-      existing_concrete_paving_total_cost: null,
-      extra_concreting_type: null, // Assuming this component doesn't handle extra_concreting
-      extra_concreting_square_meters: null,
-      extra_concreting_total_cost: null
+      extra_paving_total_cost: totalCost
+      // No longer nulling out other fields, as the hook now preserves existing data
     };
     console.log('[ExtraPavingConcrete] Prepared dataToSave for DB (should contain category ID):', JSON.stringify(dataToSave));
     console.log('[ExtraPavingConcrete] Current pavingSelectionId:', pavingSelectionId);

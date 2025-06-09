@@ -2,12 +2,7 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import AddPoolForm from "@/components/pools/AddPoolForm";
 import { PoolRangeManager } from "@/components/pools/PoolRangeManager";
 import { PoolTable } from "@/components/pools/PoolTable";
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbList,
-  BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb";
+import { PoolSpecificationsHeader } from "@/components/headers/PoolSpecificationsHeader";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
@@ -88,19 +83,7 @@ const PoolSpecifications = () => {
   return (
     <DashboardLayout>
       <div className="container mx-auto py-8 space-y-8">
-        <Breadcrumb>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <Link to="/" className="transition-colors hover:text-foreground">
-                Home
-              </Link>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              Pool Specifications
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
+        <PoolSpecificationsHeader />
 
         <Card>
           <CardHeader>

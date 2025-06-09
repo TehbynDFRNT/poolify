@@ -11,9 +11,10 @@ import ProposalInfoSection from "./ProposalInfoSection";
 
 interface CustomerInformationSectionProps {
   existingCustomer?: any; // Consider using a more specific type like PoolProject | null
+  readonly?: boolean;
 }
 
-const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({ existingCustomer }) => {
+const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({ existingCustomer, readonly = false }) => {
   console.log("CustomerInformationSection: Component rendered. Received existingCustomer prop:", existingCustomer);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -167,7 +168,7 @@ const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({
   return (
     <div className="space-y-6">
       <h2 className="text-2xl font-bold">
-        {existingCustomer ? "Edit Customer Information" : "New Customer Information"}
+        {readonly ? "Proposal Customer Information" : existingCustomer ? "Edit Customer Information" : "New Customer Information"}
       </h2>
       
       <OwnerDetailsSection
@@ -179,6 +180,7 @@ const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({
         setPhone={setPhone}
         email={email}
         setEmail={setEmail}
+        readonly={readonly}
       />
       
       <PropertyDetailsSection
@@ -190,6 +192,7 @@ const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({
         setInstallationArea={setInstallationArea}
         isResidentHomeowner={isResidentHomeowner}
         setIsResidentHomeowner={setIsResidentHomeowner}
+        readonly={readonly}
       />
       
       <ProposalInfoSection
@@ -197,21 +200,24 @@ const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({
         owner2={owner2}
         proposalName={proposalName}
         setProposalName={setProposalName}
+        readonly={readonly}
       />
       
-      <Card className="p-6">
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleSubmit} 
-            disabled={isSubmitting}
-            className="bg-primary hover:bg-primary-400" // Ensure 'primary' is defined in your Tailwind config or use a standard color like 'bg-blue-600 hover:bg-blue-700'
-          >
-            {isSubmitting ? "Saving..." : (existingCustomer && existingCustomer.id)
-              ? "Update Customer Information" 
-              : "Save Customer Information"}
-          </Button>
-        </div>
-      </Card>
+      {!readonly && (
+        <Card className="p-6">
+          <div className="flex justify-end">
+            <Button 
+              onClick={handleSubmit} 
+              disabled={isSubmitting}
+              className="bg-primary hover:bg-primary-400" // Ensure 'primary' is defined in your Tailwind config or use a standard color like 'bg-blue-600 hover:bg-blue-700'
+            >
+              {isSubmitting ? "Saving..." : (existingCustomer && existingCustomer.id)
+                ? "Update Customer Information" 
+                : "Save Customer Information"}
+            </Button>
+          </div>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,4 +1,3 @@
-import { FormulaReference } from "@/components/pool-builder/FormulaReference";
 import { useGuardedMutation } from "@/hooks/useGuardedMutation";
 import { Pool } from "@/types/pool";
 import React, { useCallback, useState } from "react";
@@ -90,7 +89,6 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
         pool={pool}
         customerId={customerId}
       />
-      <FormulaReference />
 
       <div className="flex justify-end mt-8">
         <SaveAllButton

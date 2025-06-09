@@ -20,7 +20,26 @@ export const useConcretePavingActionsGuarded = (customerId: string | null | unde
 
             if (recordIdToUpdate) {
                 console.log(`[GuardedHook] Attempting UPDATE on ${tableName} for id=${recordIdToUpdate}`);
-                const { error } = await supabase.from(tableName as any).update(data).eq('id', recordIdToUpdate);
+
+                // First fetch the existing record to preserve data
+                const { data: existingRecord, error: fetchError } = await supabase
+                    .from(tableName as any)
+                    .select('*')
+                    .eq('id', recordIdToUpdate)
+                    .single();
+
+                if (fetchError) {
+                    console.error(`[GuardedHook] Error fetching existing record from ${tableName} for id=${recordIdToUpdate}:`, fetchError);
+                    throw fetchError;
+                }
+
+                // Merge the new data with the existing data, preserving existing fields
+                // Use Record<string, any> to ensure we can spread the object
+                const existingData = existingRecord as Record<string, any>;
+                const mergedData = { ...existingData, ...data };
+
+                // Update with the merged data
+                const { error } = await supabase.from(tableName as any).update(mergedData).eq('id', recordIdToUpdate);
                 if (error) {
                     console.error(`[GuardedHook] Error updating ${tableName} for id=${recordIdToUpdate}:`, error);
                     throw error;

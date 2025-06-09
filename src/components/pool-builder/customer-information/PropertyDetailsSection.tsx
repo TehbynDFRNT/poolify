@@ -16,6 +16,7 @@ interface PropertyDetailsSectionProps {
   setInstallationArea: (value: string) => void;
   isResidentHomeowner: boolean;
   setIsResidentHomeowner: (value: boolean) => void;
+  readonly?: boolean;
 }
 
 const INSTALLATION_AREAS = [
@@ -37,6 +38,7 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
   setInstallationArea,
   isResidentHomeowner,
   setIsResidentHomeowner,
+  readonly = false,
 }) => {
   return (
     <Card>
@@ -52,9 +54,11 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
             <Input
               id="homeAddress"
               value={homeAddress}
-              onChange={(e) => setHomeAddress(e.target.value)}
+              onChange={readonly ? undefined : (e) => setHomeAddress(e.target.value)}
               placeholder="Home Address"
               required
+              readOnly={readonly}
+              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
           </div>
           
@@ -65,28 +69,39 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
             <Input
               id="siteAddress"
               value={siteAddress}
-              onChange={(e) => setSiteAddress(e.target.value)}
+              onChange={readonly ? undefined : (e) => setSiteAddress(e.target.value)}
               placeholder="Site Address (optional)"
+              readOnly={readonly}
+              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
           </div>
           
           <div className="grid gap-2">
             <Label htmlFor="installationArea">Installation Area <span className="text-destructive">*</span></Label>
-            <Select 
-              value={installationArea} 
-              onValueChange={setInstallationArea}
-            >
-              <SelectTrigger id="installationArea">
-                <SelectValue placeholder="Select installation area" />
-              </SelectTrigger>
-              <SelectContent>
-                {INSTALLATION_AREAS.map((area) => (
-                  <SelectItem key={area} value={area}>
-                    {area}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {readonly ? (
+              <Input
+                id="installationArea"
+                value={installationArea}
+                readOnly
+                className="bg-gray-50 cursor-not-allowed"
+              />
+            ) : (
+              <Select 
+                value={installationArea} 
+                onValueChange={setInstallationArea}
+              >
+                <SelectTrigger id="installationArea">
+                  <SelectValue placeholder="Select installation area" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INSTALLATION_AREAS.map((area) => (
+                    <SelectItem key={area} value={area}>
+                      {area}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           
           <div className="flex items-center justify-between pt-2">
@@ -94,7 +109,8 @@ const PropertyDetailsSection: React.FC<PropertyDetailsSectionProps> = ({
             <Switch
               id="residentHomeowner"
               checked={isResidentHomeowner}
-              onCheckedChange={setIsResidentHomeowner}
+              onCheckedChange={readonly ? undefined : setIsResidentHomeowner}
+              disabled={readonly}
             />
           </div>
         </div>

@@ -185,47 +185,26 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
 
     console.log('[UnderFenceStrips] handleSaveClick: Existing record check result - existingData:', existingData);
 
-    let success;
+    // Prepare data to save
+    const dataToSave = {
+      pool_project_id: customerId,
+      strip_data: selectedStrips, // This is an array of objects
+      total_cost: totalCost
+    };
 
-    if (existingData?.id) {
-      console.log('[UnderFenceStrips] handleSaveClick: Attempting UPDATE for existing record ID:', existingData.id);
-      const updateData = {
-        strip_data: selectedStrips, // This is an array of objects
-        total_cost: totalCost
-      };
-      console.log('[UnderFenceStrips] handleSaveClick: UPDATE payload:', JSON.stringify(updateData));
-      success = await handleSave(updateData, 'pool_fence_concrete_strips');
-    } else {
-      console.log('[UnderFenceStrips] handleSaveClick: Attempting INSERT for new record.');
-      try {
-        const insertData = {
-          pool_project_id: customerId,
-          strip_data: selectedStrips, // This is an array of objects
-          total_cost: totalCost
-        };
-        console.log('[UnderFenceStrips] handleSaveClick: INSERT payload:', JSON.stringify(insertData));
-        const { error } = await supabase
-          .from('pool_fence_concrete_strips')
-          .insert(insertData);
+    // Use the handleSave function for both updates and inserts
+    // This ensures we're using the same logic as other components and preventing duplicates
+    const result = await handleSave(dataToSave, 'pool_fence_concrete_strips', existingData?.id || null);
 
-        if (error) {
-          console.error("[UnderFenceStrips] handleSaveClick: Supabase insert error:", error);
-          throw error;
-        }
+    console.log('[UnderFenceStrips] handleSaveClick: Save operation result:', result);
 
-        toast.success("Under fence concrete strips saved successfully.");
-        success = true;
-      } catch (error) {
-        // Error already logged by the specific catch if it's from Supabase
-        // console.error("Error saving under fence concrete strips (insert general catch):", error);
-        toast.error("Failed to save under fence concrete strips.");
-        success = false;
+    if (result.success) {
+      toast.success("Under fence concrete strips saved successfully.");
+      if (onSaveComplete) {
+        onSaveComplete();
       }
-    }
-    console.log('[UnderFenceStrips] handleSaveClick: Save operation success status:', success);
-
-    if (success && onSaveComplete) {
-      onSaveComplete();
+    } else {
+      toast.error("Failed to save under fence concrete strips.");
     }
   };
 
