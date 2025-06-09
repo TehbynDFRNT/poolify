@@ -4,12 +4,12 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useExtraConcreting } from "@/hooks/useExtraConcreting";
 import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
-import { calculateExtraConcretingCost } from "@/utils/calculations";
+import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
 import { SaveButton } from "../SaveButton";
 
 interface ExtraConcretingProps {
@@ -26,31 +26,59 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   const [selectedType, setSelectedType] = useState<string>("");
   const [meterage, setMeterage] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(0);
-  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Use the hook to fetch concrete types from the database
-  const { concretingTypes, isLoading: isLoadingTypes } = useExtraConcreting();
+  // Use the guarded actions hook
+  const {
+    handleSave,
+    handleDelete,
+    isSubmitting,
+    StatusWarningDialog
+  } = useConcretePavingActionsGuarded(customerId);
+
+  // Fetch concrete types from the database
+  const { data: concretingTypes = [], isLoading: isTypesLoading } = useQuery({
+    queryKey: ['concrete-types'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('extra_concreting')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   // Fetch existing data when component mounts
   useEffect(() => {
-    fetchExistingData();
+    if (customerId) {
+      fetchExistingData();
+    }
   }, [customerId]);
 
+  // Calculate extra concreting cost with margin
+  const calculateExtraConcretingCost = (price: number, margin: number) => {
+    return price * (1 + margin / 100);
+  };
+
+  // Fetch existing extra concreting data for this customer
   const fetchExistingData = async () => {
-    setIsLoading(true);
     try {
+      setIsLoading(true);
       const { data, error } = await supabase
         .from('pool_paving_selections')
-        .select('extra_concreting_type, extra_concreting_square_meters, extra_concreting_total_cost')
+        .select('*')
         .eq('pool_project_id', customerId)
         .maybeSingle();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error("Error fetching extra concreting data:", error);
-      } else if (data) {
+        return;
+      }
+
+      if (data) {
         if (data.extra_concreting_type) {
           setSelectedType(data.extra_concreting_type);
         }
@@ -64,16 +92,10 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
         }
       }
     } catch (error) {
-      console.error("Error fetching extra concreting data:", error);
+      console.error("Error in fetchExistingData:", error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Handle select change
-  const handleTypeChange = (value: string) => {
-    setSelectedType(value);
-    calculateCost(value, meterage);
   };
 
   // Handle meterage change
@@ -95,110 +117,53 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     }
   };
 
-  const handleSave = async () => {
+  // Handle save using the guarded hook
+  const handleSaveClick = async () => {
     if (!selectedType || meterage <= 0) {
       toast.error("Please select a concrete type and enter a valid meterage.");
       return;
     }
 
-    setIsSaving(true);
-    try {
-      // First check if a record already exists
-      const { data: existingData } = await supabase
-        .from('pool_paving_selections')
-        .select('id')
-        .eq('pool_project_id', customerId)
-        .maybeSingle();
+    // First check if a record already exists
+    const { data: existingData } = await supabase
+      .from('pool_paving_selections')
+      .select('id')
+      .eq('pool_project_id', customerId)
+      .maybeSingle();
 
-      let error;
+    const dataToSave = {
+      extra_concreting_type: selectedType,
+      extra_concreting_square_meters: meterage,
+      extra_concreting_total_cost: totalCost
+    };
 
-      if (existingData?.id) {
-        // Update existing record
-        const { error: updateError } = await supabase
-          .from('pool_paving_selections')
-          .update({
-            extra_concreting_type: selectedType,
-            extra_concreting_square_meters: meterage,
-            extra_concreting_total_cost: totalCost
-          })
-          .eq('id', existingData.id);
+    // Use the guarded handleSave for both insert and update
+    const result = await handleSave(dataToSave, 'pool_paving_selections', existingData?.id || null);
 
-        error = updateError;
-      } else {
-        // Insert new record
-        const { error: insertError } = await supabase
-          .from('pool_paving_selections')
-          .insert({
-            pool_project_id: customerId,
-            extra_concreting_type: selectedType,
-            extra_concreting_square_meters: meterage,
-            extra_concreting_total_cost: totalCost
-          });
-
-        error = insertError;
+    if (result.success) {
+      if (result.newId && !existingData?.id) {
+        toast.success("Extra concreting details saved successfully.");
       }
-
-      if (error) throw error;
-
-      toast.success("Extra concreting details saved successfully.");
-
-      // Call the onSaveComplete callback if provided
       if (onSaveComplete) {
         onSaveComplete();
       }
-    } catch (error) {
-      console.error("Error saving extra concreting:", error);
-      toast.error("Failed to save extra concreting details.");
-    } finally {
-      setIsSaving(false);
     }
   };
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
-    try {
-      // First check if a record already exists
-      const { data: existingData } = await supabase
-        .from('pool_paving_selections')
-        .select('id')
-        .eq('pool_project_id', customerId)
-        .maybeSingle();
+  // Handle delete using the guarded hook
+  const handleDeleteClick = async () => {
+    const success = await handleDelete('extra_concreting_type', 'pool_paving_selections');
 
-      let error;
-
-      if (existingData?.id) {
-        // Update existing record to clear these specific fields
-        const { error: updateError } = await supabase
-          .from('pool_paving_selections')
-          .update({
-            extra_concreting_type: null,
-            extra_concreting_square_meters: null,
-            extra_concreting_total_cost: null
-          })
-          .eq('id', existingData.id);
-
-        error = updateError;
-      }
-
-      if (error) throw error;
-
+    if (success) {
       // Reset form
       setSelectedType('');
       setMeterage(0);
       setTotalCost(0);
-
       setShowDeleteConfirm(false);
-      toast.success("Extra concreting removed successfully.");
 
-      // Call the onSaveComplete callback if provided
       if (onSaveComplete) {
         onSaveComplete();
       }
-    } catch (error) {
-      console.error("Error removing extra concreting:", error);
-      toast.error("Failed to remove extra concreting.");
-    } finally {
-      setIsDeleting(false);
     }
   };
 
@@ -225,8 +190,8 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
         {customerId && (
           <SaveButton
-            onClick={handleSave}
-            isSubmitting={isSaving}
+            onClick={handleSaveClick}
+            isSubmitting={isSubmitting}
             disabled={!selectedType || meterage <= 0}
             buttonText="Save Details"
             className="bg-primary"
@@ -240,19 +205,22 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             <Label htmlFor="concrete-type">Concrete Type</Label>
             <Select
               value={selectedType}
-              onValueChange={handleTypeChange}
-              disabled={isLoading || isLoadingTypes}
+              onValueChange={(value) => {
+                setSelectedType(value);
+                calculateCost(value, meterage);
+              }}
+              disabled={isLoading || isTypesLoading}
             >
               <SelectTrigger id="concrete-type" className="mt-2">
                 <SelectValue placeholder="Select concrete type" />
               </SelectTrigger>
               <SelectContent>
-                {isLoadingTypes ? (
+                {isTypesLoading ? (
                   <SelectItem value="loading" disabled>Loading concrete types...</SelectItem>
                 ) : (
                   concretingTypes.map((type) => (
                     <SelectItem key={type.id} value={type.id}>
-                      {type.type} (${(type.price + type.margin).toFixed(2)}/m²)
+                      {type.type} (${calculateExtraConcretingCost(type.price, type.margin).toFixed(2)}/m²)
                     </SelectItem>
                   ))
                 )}
@@ -332,9 +300,9 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             <Button
               onClick={() => setShowDeleteConfirm(true)}
               className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isDeleting || isLoading}
+              disabled={isSubmitting}
             >
-              {isDeleting ? "Removing..." : "Remove"}
+              Remove
             </Button>
           </div>
         )}
@@ -350,17 +318,19 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogCancel disabled={isSubmitting}>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
+              onClick={handleDeleteClick}
+              disabled={isSubmitting}
               className="bg-red-600 hover:bg-red-700"
             >
-              {isDeleting ? "Removing..." : "Remove"}
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <StatusWarningDialog />
     </Card>
   );
 };

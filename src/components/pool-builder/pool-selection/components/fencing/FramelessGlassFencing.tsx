@@ -11,7 +11,7 @@ import GateSelector from "./components/GateSelector";
 import InfoBanner from "./components/InfoBanner";
 import LinearMeterInput from "./components/LinearMeterInput";
 import PanelSelector from "./components/PanelSelector";
-import { useFencingForm } from "./hooks/useFencingForm";
+import { useFencingFormGuarded } from "./hooks/useFencingFormGuarded";
 
 interface FramelessGlassFencingProps {
   pool: Pool;
@@ -24,9 +24,20 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({
   customerId,
   onSaveSuccess
 }) => {
-  const { form, costs, isSubmitting, isDeleting, hasExistingData, onSubmit, onDelete } = useFencingForm(
+  const {
+    form,
+    costs,
+    isSubmitting,
+    isDeleting,
+    hasExistingData,
+    onSubmit,
+    onDelete,
+    StatusWarningDialog,
+    DeleteStatusWarningDialog
+  } = useFencingFormGuarded(
     customerId,
-    onSaveSuccess
+    onSaveSuccess,
+    pool.id
   );
 
   return (
@@ -80,6 +91,10 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({
           </Form>
         </CardContent>
       </Card>
+
+      {/* Status Warning Dialogs */}
+      <StatusWarningDialog />
+      <DeleteStatusWarningDialog />
     </div>
   );
 };

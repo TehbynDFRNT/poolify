@@ -70,6 +70,16 @@ export function ProjectSubmitButton({ projectId }: ProjectSubmitButtonProps) {
         enabled: !!projectId,
     });
 
+    // Clear status guard acknowledgment token
+    const clearStatusGuardToken = () => {
+        try {
+            const sessionKey = `project_status_acknowledged_${projectId}`;
+            sessionStorage.removeItem(sessionKey);
+        } catch (error) {
+            console.error('Error clearing status guard token:', error);
+        }
+    };
+
     // Handle project submission
     const handleSubmit = async () => {
         setIsSubmitting(true);
@@ -95,6 +105,9 @@ export function ProjectSubmitButton({ projectId }: ProjectSubmitButtonProps) {
                     throw renderError;
                 }
             }
+
+            // Clear the status guard acknowledgment token since project is now submitted
+            clearStatusGuardToken();
 
             setSubmitDialogOpen(false);
             toast.success("Project Submitted", {

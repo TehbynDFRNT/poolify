@@ -11,6 +11,7 @@ import { formatCurrency } from "@/utils/format";
 import { Sparkles } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
 import { SaveButton } from "../SaveButton";
 
 interface ExtraPavingConcreteProps {
@@ -33,50 +34,100 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
   customerId,
   onSaveComplete
 }) => {
+  console.log('[ExtraPavingConcrete] Component mounted/rendered. CustomerId:', customerId);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [isDeleting, setIsDeleting] = useState<boolean>(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [pavingSelectionId, setPavingSelectionId] = useState<string | null>(null);
-  const { pavingCategoryTotals, labourCostWithMargin, isLoading: isCategoriesLoading } = useFormulaCalculations();
+  const { pavingCategoryTotals, labourCostWithMargin, isLoading: isCategoriesLoading, concreteCostPerMeter } = useFormulaCalculations();
 
-  // Fetch existing data when component mounts
   useEffect(() => {
-    if (customerId) {
-      fetchExistingData();
+    if (!isCategoriesLoading && pavingCategoryTotals && pavingCategoryTotals.length > 0) {
+      // console.log('[ExtraPavingConcrete] pavingCategoryTotals is ready. First item:', pavingCategoryTotals[0]);
+    } else if (isCategoriesLoading) {
+      // console.log('[ExtraPavingConcrete] pavingCategoryTotals is still loading...');
     }
-  }, [customerId]);
+  }, [pavingCategoryTotals, isCategoriesLoading]);
 
-  // Fetch existing extra paving data for this customer
+  const {
+    handleSave,
+    handleDelete,
+    isSubmitting,
+    isDeleting,
+    StatusWarningDialog
+  } = useConcretePavingActionsGuarded(customerId);
+
+  useEffect(() => {
+    if (customerId && !isCategoriesLoading && pavingCategoryTotals && pavingCategoryTotals.length > 0) {
+      // console.log('[ExtraPavingConcrete] Conditions met: Fetching existing data.');
+      fetchExistingData();
+    } else {
+      // console.log('[ExtraPavingConcrete] Deferring fetch: customerId or categories not ready.');
+      if (!isCategoriesLoading && (!pavingCategoryTotals || pavingCategoryTotals.length === 0)) {
+        setIsLoading(false);
+      }
+    }
+  }, [customerId, isCategoriesLoading, pavingCategoryTotals]);
+
   const fetchExistingData = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('pool_paving_selections')
-        .select('*')
-        .eq('pool_project_id', customerId)
-        .maybeSingle(); // Use maybeSingle to handle both existing and non-existing records
-
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "no rows returned" which is expected if no selection exists
-        console.error("Error fetching extra paving data:", error);
+      if (!pavingCategoryTotals || pavingCategoryTotals.length === 0) {
+        // console.log('[ExtraPavingConcrete] Deferring DB fetch: pavingCategoryTotals not ready or empty.');
+        setIsLoading(false);
         return;
       }
 
-      if (data) {
-        setPavingSelectionId(data.id);
+      const { data, error } = await supabase
+        .from('pool_paving_selections')
+        .select('id, extra_paving_category, extra_paving_square_meters')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
 
+      if (error && error.code !== 'PGRST116') {
+        console.error("[ExtraPavingConcrete] DB Error fetching extra paving data:", error);
+        setSelectedCategory("");
+        setSquareMeters(0);
+        setPavingSelectionId(null);
+      } else if (data) {
+        // console.log('[ExtraPavingConcrete] Raw DB data:', data);
+        let foundCategoryIdForState = "";
         if (data.extra_paving_category) {
-          setSelectedCategory(data.extra_paving_category);
-        }
+          const dbCategoryValue = data.extra_paving_category;
 
-        if (data.extra_paving_square_meters) {
-          setSquareMeters(data.extra_paving_square_meters);
+          // Attempt to match as an ID first
+          const categoryById = pavingCategoryTotals.find(cat => cat.id === dbCategoryValue);
+          if (categoryById) {
+            // console.log('[ExtraPavingConcrete] Matched DB extra_paving_category as an ID:', dbCategoryValue);
+            foundCategoryIdForState = dbCategoryValue; // Directly use the ID from DB
+          } else {
+            // If not an ID, attempt to match as a Name
+            // console.log('[ExtraPavingConcrete] DB extra_paving_category not an ID, trying to match as Name:', dbCategoryValue);
+            const categoryByName = pavingCategoryTotals.find(cat => cat.category === dbCategoryValue);
+            if (categoryByName) {
+              // console.log('[ExtraPavingConcrete] Matched DB extra_paving_category as a Name:', dbCategoryValue, 'Mapped to ID:', categoryByName.id);
+              foundCategoryIdForState = categoryByName.id;
+            } else {
+              console.warn('[ExtraPavingConcrete] DB extra_paving_category value:', dbCategoryValue, 'does not match any ID or Name in pavingCategoryTotals. UI will show no selection.');
+            }
+          }
         }
+        setSelectedCategory(foundCategoryIdForState);
+        setSquareMeters(data.extra_paving_square_meters || 0);
+        setPavingSelectionId(data.id || null);
+        // console.log('[ExtraPavingConcrete] Set state: selectedCategory=', foundCategoryIdForState, ', squareMeters=', data.extra_paving_square_meters || 0);
+      } else {
+        // console.log('[ExtraPavingConcrete] No data object returned from DB (e.g., PGRST116 or new project). Resetting form.');
+        setSelectedCategory("");
+        setSquareMeters(0);
+        setPavingSelectionId(null);
       }
-    } catch (error) {
-      console.error("Error in fetchExistingData:", error);
+    } catch (err) {
+      console.error("[ExtraPavingConcrete] CATCH block error in fetchExistingData:", err);
+      setSelectedCategory("");
+      setSquareMeters(0);
+      setPavingSelectionId(null);
     } finally {
       setIsLoading(false);
     }
@@ -98,275 +149,223 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
     setSquareMeters(isNaN(value) ? 0 : value);
   };
 
-  // Handle save
-  const handleSave = async () => {
-    if (!customerId) {
-      toast.error("Customer information required to save");
-      return;
-    }
+  // Handle save using the guarded hook
+  const handleSaveClick = async () => {
+    console.log('[ExtraPavingConcrete] handleSaveClick: Initiated.');
+    console.log('[ExtraPavingConcrete] States at save: selectedCategory (ID):', selectedCategory, ', squareMeters:', squareMeters, ', totalCost:', totalCost);
 
     if (!selectedCategory || squareMeters <= 0) {
       toast.error("Please select a category and enter square meters");
+      console.warn('[ExtraPavingConcrete] Save validation failed: Category or Sqr Meters missing.');
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      // Save to database with type-safe update object
-      const updateData = {
-        extra_paving_category: selectedCategory,
-        extra_paving_square_meters: squareMeters,
-        extra_paving_total_cost: totalCost
-      };
+    // Data for this section: ensure category ID is saved.
+    const dataToSave = {
+      extra_paving_category: selectedCategory, // This is the ID
+      extra_paving_square_meters: squareMeters,
+      extra_paving_total_cost: totalCost,
+      // Null out other potentially conflicting fields for this specific save.
+      // The hook handles pool_project_id for inserts if pavingSelectionId is null.
+      existing_concrete_paving_category: null,
+      existing_concrete_paving_square_meters: null,
+      existing_concrete_paving_total_cost: null,
+      extra_concreting_type: null, // Assuming this component doesn't handle extra_concreting
+      extra_concreting_square_meters: null,
+      extra_concreting_total_cost: null
+    };
+    console.log('[ExtraPavingConcrete] Prepared dataToSave for DB (should contain category ID):', JSON.stringify(dataToSave));
+    console.log('[ExtraPavingConcrete] Current pavingSelectionId:', pavingSelectionId);
 
-      let result;
+    // Use the guarded handleSave for both insert and update
+    const result = await handleSave(dataToSave, 'pool_paving_selections', pavingSelectionId);
 
-      if (pavingSelectionId) {
-        // Update existing record
-        result = await supabase
-          .from('pool_paving_selections')
-          .update(updateData)
-          .eq('id', pavingSelectionId);
-      } else {
-        // Create new record
-        result = await supabase
-          .from('pool_paving_selections')
-          .insert({
-            ...updateData,
-            pool_project_id: customerId,
-            // Set default values for other fields to prevent null issues
-            existing_concrete_paving_category: null,
-            existing_concrete_paving_square_meters: 0,
-            existing_concrete_paving_total_cost: 0,
-            extra_concreting_type: null,
-            extra_concreting_square_meters: 0,
-            extra_concreting_total_cost: 0
-          });
+    console.log('[ExtraPavingConcrete] Save result from hook:', result);
+
+    if (result.success) {
+      if (result.newId && !pavingSelectionId) {
+        setPavingSelectionId(result.newId);
+        toast.success("Extra paving & concreting saved successfully."); // Specific toast for new insert
+      } else if (pavingSelectionId) {
+        // Update success toast is handled by the hook now
+        // toast.success("Extra paving & concreting updated successfully.");
       }
-
-      if (result.error) throw result.error;
-
-      // If we just inserted a new record, get its ID
-      if (!pavingSelectionId && result.data) {
-        setPavingSelectionId(result.data[0]?.id);
-      }
-
-      toast.success("Extra paving & concreting saved successfully");
-
-      // Call the onSaveComplete callback if provided
       if (onSaveComplete) {
+        console.log('[ExtraPavingConcrete] Calling onSaveComplete due to successful save.');
         onSaveComplete();
       }
-    } catch (error) {
-      console.error("Error saving extra paving:", error);
-      toast.error("Failed to save extra paving details");
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      // Error toast is handled by the hook or useGuardedMutation's onError
+      // toast.error("Failed to save extra paving & concreting. Check console for details.");
+      console.error('[ExtraPavingConcrete] Save failed. Result from hook:', result);
     }
   };
 
-  // Handle delete
-  const handleDelete = async () => {
-    if (!customerId || !pavingSelectionId) {
+  // Handle delete using the guarded hook
+  const handleDeleteClick = async () => {
+    if (!pavingSelectionId) {
       toast.error("No data to delete");
       return;
     }
 
-    setIsDeleting(true);
-    try {
-      // We don't actually delete the row, just clear the specific fields
-      // This preserves any other paving selection data
-      const updateData = {
-        extra_paving_category: null,
-        extra_paving_square_meters: 0,
-        extra_paving_total_cost: 0
-      };
+    const success = await handleDelete('extra_paving_category', 'pool_paving_selections');
 
-      const { error } = await supabase
-        .from('pool_paving_selections')
-        .update(updateData)
-        .eq('id', pavingSelectionId);
-
-      if (error) throw error;
-
+    if (success) {
       // Reset the form
       setSelectedCategory("");
       setSquareMeters(0);
-
-      toast.success("Extra paving & concreting removed successfully");
       setShowDeleteConfirm(false);
 
-      // Call the onSaveComplete callback if provided
       if (onSaveComplete) {
         onSaveComplete();
       }
-    } catch (error) {
-      console.error("Error removing extra paving:", error);
-      toast.error("Failed to remove extra paving details");
-    } finally {
-      setIsDeleting(false);
     }
   };
 
   return (
-    <Card>
-      <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Extra Paving & Concreting</h3>
-          </div>
-          <p className="text-muted-foreground">
-            Add extra paving and concreting to your pool project
-          </p>
-        </div>
-
-        {customerId && (
-          <SaveButton
-            onClick={handleSave}
-            isSubmitting={isSubmitting}
-            disabled={!selectedCategory || squareMeters <= 0}
-            buttonText="Save Details"
-            className="bg-primary"
-          />
-        )}
-      </CardHeader>
-
-      <CardContent className="pt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+    <>
+      <Card>
+        <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
           <div>
-            <Label htmlFor="paving-category">Paving Category</Label>
-            <Select
-              value={selectedCategory}
-              onValueChange={setSelectedCategory}
-              disabled={isLoading || isCategoriesLoading}
-            >
-              <SelectTrigger id="paving-category" className="mt-2">
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                {pavingCategoryTotals.map((category) => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="square-meters">Square Meters</Label>
-            <Input
-              id="square-meters"
-              type="number"
-              step="0.1"
-              min="0"
-              value={squareMeters || ""}
-              onChange={handleSquareMetersChange}
-              placeholder="Enter area in square meters"
-              className="mt-2"
-              disabled={!selectedCategory || isLoading}
-            />
-          </div>
-        </div>
-
-        {selectedCategoryDetails && squareMeters > 0 && (
-          <div className="mt-6 bg-gray-50 p-4 rounded-md">
-            <h4 className="font-medium mb-2">Cost Summary</h4>
-            <div className="grid grid-cols-2 gap-y-2">
-              <div>Rate per m²:</div>
-              <div className="text-right">{formatCurrency(selectedCategoryDetails.totalRate)}</div>
-
-              <div>Area:</div>
-              <div className="text-right">{squareMeters} m²</div>
-
-              <div className="font-medium border-t pt-2 mt-1">Total Cost:</div>
-              <div className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</div>
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              <h3 className="text-xl font-semibold">Extra Paving & Concreting</h3>
             </div>
+            <p className="text-muted-foreground">
+              Add extra paving and concreting to your pool project
+            </p>
+          </div>
 
-            <div className="mt-4 pt-4 border-t">
-              <h4 className="font-medium mb-2">Rate Breakdown</h4>
-              <div className="grid grid-cols-4 gap-4">
-                {/* Per m² Column */}
-                <div className="col-span-2">
-                  <h5 className="text-sm font-medium mb-2">Per m²</h5>
-                  <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    <div>Paver Cost:</div>
-                    <div className="text-right">{formatCurrency(selectedCategoryDetails.paverCost)}</div>
+          {customerId && (
+            <SaveButton
+              onClick={handleSaveClick}
+              isSubmitting={isSubmitting}
+              disabled={!selectedCategory || squareMeters <= 0}
+              buttonText="Save Details"
+              className="bg-primary"
+            />
+          )}
+        </CardHeader>
 
-                    <div>Wastage Cost:</div>
-                    <div className="text-right">{formatCurrency(selectedCategoryDetails.wastageCost)}</div>
-
-                    <div>Margin Cost:</div>
-                    <div className="text-right">{formatCurrency(selectedCategoryDetails.marginCost)}</div>
-
-                    <div className="font-medium">Materials Subtotal:</div>
-                    <div className="text-right font-medium">{formatCurrency(selectedCategoryDetails.categoryTotal)}</div>
-
-                    <div>Labour Cost:</div>
-                    <div className="text-right">{formatCurrency(labourCostWithMargin)}</div>
-                  </div>
+        <CardContent className="pt-4">
+          {isLoading ? (
+            <div className="flex justify-center py-8">
+              <p>Loading...</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1 min-w-0">
+                  <Label htmlFor="paving-category">Paving Category</Label>
+                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <SelectTrigger id="paving-category">
+                      <SelectValue placeholder="Select a paving category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {pavingCategoryTotals.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.category} - {formatCurrency(category.totalRate)}/m²
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
-                {/* Total Column (multiplied by square meters) */}
-                <div className="col-span-2">
-                  <h5 className="text-sm font-medium mb-2">Total ({squareMeters} m²)</h5>
-                  <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    <div>Paver Cost:</div>
-                    <div className="text-right">{formatCurrency(selectedCategoryDetails.paverCost * squareMeters)}</div>
-
-                    <div>Wastage Cost:</div>
-                    <div className="text-right">{formatCurrency(selectedCategoryDetails.wastageCost * squareMeters)}</div>
-
-                    <div>Margin Cost:</div>
-                    <div className="text-right">{formatCurrency(selectedCategoryDetails.marginCost * squareMeters)}</div>
-
-                    <div className="font-medium">Materials Subtotal:</div>
-                    <div className="text-right font-medium">{formatCurrency(selectedCategoryDetails.categoryTotal * squareMeters)}</div>
-
-                    <div>Labour Cost:</div>
-                    <div className="text-right">{formatCurrency(labourCostWithMargin * squareMeters)}</div>
-                  </div>
+                <div className="flex-1 min-w-0">
+                  <Label htmlFor="square-meters">Square Meters</Label>
+                  <Input
+                    id="square-meters"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={squareMeters || ""}
+                    onChange={handleSquareMetersChange}
+                    placeholder="Enter square meters"
+                  />
                 </div>
               </div>
+
+              {selectedCategoryDetails && squareMeters > 0 && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg space-y-4">
+                  <div>
+                    <h4 className="font-medium text-lg mb-2">Cost Summary</h4>
+                    <div className="space-y-1 text-sm">
+                      <div className="flex justify-between">
+                        <span>Rate per m²:</span>
+                        <span>{formatCurrency(selectedCategoryDetails.totalRate)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Area:</span>
+                        <span>{squareMeters.toFixed(2)} m²</span>
+                      </div>
+                      <div className="flex justify-between font-semibold border-t pt-2 mt-2">
+                        <span>Total Cost:</span>
+                        <span>{formatCurrency(totalCost)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="font-medium text-lg mb-2">Rate Breakdown</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 text-sm">
+                      <div>
+                        <p className="font-medium mb-1">Per m²</p>
+                        <div className="flex justify-between"><span>Paver Cost:</span> <span>{formatCurrency(selectedCategoryDetails.paverCost)}</span></div>
+                        <div className="flex justify-between"><span>Wastage Cost:</span> <span>{formatCurrency(selectedCategoryDetails.wastageCost)}</span></div>
+                        <div className="flex justify-between"><span>Margin Cost:</span> <span>{formatCurrency(selectedCategoryDetails.marginCost)}</span></div>
+                        <div className="flex justify-between font-semibold border-t pt-1 mt-1"><span>Materials Subtotal:</span> <span>{formatCurrency(selectedCategoryDetails.categoryTotal)}</span></div>
+                        <div className="flex justify-between"><span>Labour Cost:</span> <span>{formatCurrency(labourCostWithMargin)}</span></div>
+                      </div>
+
+                      <div>
+                        <p className="font-medium mb-1">Total ({squareMeters.toFixed(2)} m²)</p>
+                        <div className="flex justify-between"><span>Paver Cost:</span> <span>{formatCurrency(selectedCategoryDetails.paverCost * squareMeters)}</span></div>
+                        <div className="flex justify-between"><span>Wastage Cost:</span> <span>{formatCurrency(selectedCategoryDetails.wastageCost * squareMeters)}</span></div>
+                        <div className="flex justify-between"><span>Margin Cost:</span> <span>{formatCurrency(selectedCategoryDetails.marginCost * squareMeters)}</span></div>
+                        <div className="flex justify-between font-semibold border-t pt-1 mt-1"><span>Materials Subtotal:</span> <span>{formatCurrency(selectedCategoryDetails.categoryTotal * squareMeters)}</span></div>
+                        <div className="flex justify-between"><span>Labour Cost:</span> <span>{formatCurrency(labourCostWithMargin * squareMeters)}</span></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {pavingSelectionId && (
+                <div className="flex justify-start mt-4">
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setShowDeleteConfirm(true)}
+                    disabled={isDeleting}
+                  >
+                    {isDeleting ? "Removing..." : "Remove"}
+                  </Button>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )}
+        </CardContent>
+      </Card>
 
-        {selectedCategory && (
-          <div className="mt-6">
-            <Button
-              onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={isDeleting || isLoading}
-            >
-              {isDeleting ? "Removing..." : "Remove"}
-            </Button>
-          </div>
-        )}
-      </CardContent>
-
-      {/* Delete Confirmation Dialog */}
+      {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove Extra Paving & Concreting</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove the extra paving & concreting data? This action cannot be undone.
+              Are you sure you want to remove the extra paving & concreting selection? This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {isDeleting ? "Removing..." : "Remove"}
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteClick} className="bg-destructive hover:bg-destructive/90">
+              Remove
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Card>
+
+      <StatusWarningDialog />
+    </>
   );
 };

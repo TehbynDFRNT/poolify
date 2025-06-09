@@ -11,7 +11,7 @@ import FTMPanelSelector from "./components/FTMPanelSelector";
 import GateSelector from "./components/GateSelector";
 import InfoBanner from "./components/InfoBanner";
 import LinearMeterInput from "./components/LinearMeterInput";
-import { useFlatTopMetalFencingForm } from "./hooks/useFlatTopMetalFencingForm";
+import { useFlatTopMetalFencingFormGuarded } from "./hooks/useFlatTopMetalFencingFormGuarded";
 
 interface FlatTopMetalFencingProps {
   pool: Pool;
@@ -24,9 +24,20 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
   customerId,
   onSaveSuccess
 }) => {
-  const { form, costs, isSubmitting, isDeleting, hasExistingData, onSubmit, onDelete } = useFlatTopMetalFencingForm(
+  const {
+    form,
+    costs,
+    isSubmitting,
+    isDeleting,
+    hasExistingData,
+    onSubmit,
+    onDelete,
+    StatusWarningDialog,
+    DeleteStatusWarningDialog
+  } = useFlatTopMetalFencingFormGuarded(
     customerId,
-    onSaveSuccess
+    onSaveSuccess,
+    pool.id
   );
 
   return (
@@ -85,6 +96,10 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
           </Form>
         </CardContent>
       </Card>
+
+      {/* Status Warning Dialogs */}
+      <StatusWarningDialog />
+      <DeleteStatusWarningDialog />
     </div>
   );
 };

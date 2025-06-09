@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useHeatingOptionsState } from "@/hooks/useHeatingOptionsState";
+import { useHeatingOptionsStateGuarded } from "@/hooks/useHeatingOptionsStateGuarded";
 import { usePoolHeatingOptions } from "@/hooks/usePoolHeatingOptions";
 import { Pool } from "@/types/pool";
 import { Loader2 } from "lucide-react";
@@ -45,7 +45,8 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     currentHeatPumpTotalCost,
     currentBlanketRollerTotalCost,
     currentTotalCost,
-  } = useHeatingOptionsState({
+    StatusWarningDialog
+  } = useHeatingOptionsStateGuarded({
     poolId: pool.id,
     customerId,
     compatibleHeatPump,
@@ -124,6 +125,9 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
           </Button>
         </div>
       )}
+
+      {/* Status Warning Dialog */}
+      <StatusWarningDialog />
     </div>
   );
 };

@@ -9,6 +9,7 @@ import { formatCurrency } from "@/utils/format";
 import { Truck } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
 import { SaveButton } from "../SaveButton";
 
 interface ConcretePumpSelectorProps {
@@ -22,11 +23,17 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
   customerId,
   onSaveComplete
 }) => {
-  const [isPumpNeeded, setIsPumpNeeded] = useState(false);
+  const [isPumpNeeded, setIsPumpNeeded] = useState<boolean>(false);
   const [quantity, setQuantity] = useState<number>(1);
   const [totalCost, setTotalCost] = useState<number>(0);
-  const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Use the guarded actions hook
+  const {
+    handleSave,
+    isSubmitting,
+    StatusWarningDialog
+  } = useConcretePavingActionsGuarded(customerId);
 
   // Get concrete pump base rate from database
   const { concretePump, isLoading: isPumpLoading } = useConcretePump();
@@ -85,34 +92,29 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
     setQuantity(isNaN(value) || value < 1 ? 1 : value);
   };
 
-  // Save concrete pump data
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // First check if a record already exists
-      const { data: existingData } = await supabase
-        .from('pool_concrete_selections')
-        .select('id')
-        .eq('pool_project_id', customerId)
-        .maybeSingle();
+  // Save concrete pump data using the guarded hook
+  const handleSaveClick = async () => {
+    // First check if a record already exists
+    const { data: existingData } = await supabase
+      .from('pool_concrete_selections')
+      .select('id')
+      .eq('pool_project_id', customerId)
+      .maybeSingle();
 
-      let error;
+    let success;
 
-      if (existingData?.id) {
-        // Update existing record
-        const { error: updateError } = await supabase
-          .from('pool_concrete_selections')
-          .update({
-            concrete_pump_needed: isPumpNeeded,
-            concrete_pump_quantity: isPumpNeeded ? quantity : null,
-            concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
-          })
-          .eq('id', existingData.id);
-
-        error = updateError;
-      } else {
-        // Insert new record
-        const { error: insertError } = await supabase
+    if (existingData?.id) {
+      // Update existing record
+      const updateData = {
+        concrete_pump_needed: isPumpNeeded,
+        concrete_pump_quantity: isPumpNeeded ? quantity : null,
+        concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
+      };
+      success = await handleSave(updateData, 'pool_concrete_selections');
+    } else {
+      // For new records, we need to handle the insert differently
+      try {
+        const { error } = await supabase
           .from('pool_concrete_selections')
           .insert({
             pool_project_id: customerId,
@@ -121,106 +123,107 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
             concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
           });
 
-        error = insertError;
+        if (error) throw error;
+
+        toast.success("Concrete pump details saved successfully.");
+        success = true;
+      } catch (error) {
+        console.error("Error saving concrete pump details:", error);
+        toast.error("Failed to save concrete pump details.");
+        success = false;
       }
+    }
 
-      if (error) throw error;
-
-      toast.success("Concrete pump details saved successfully.");
-
-      // Call the onSaveComplete callback if provided
-      if (onSaveComplete) {
-        onSaveComplete();
-      }
-    } catch (error) {
-      console.error("Error saving concrete pump details:", error);
-      toast.error("Failed to save concrete pump details.");
-    } finally {
-      setIsSaving(false);
+    if (success && onSaveComplete) {
+      onSaveComplete();
     }
   };
 
   return (
-    <Card>
-      <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Truck className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Concrete Pump</h3>
+    <>
+      <Card>
+        <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Truck className="h-5 w-5 text-primary" />
+              <h3 className="text-xl font-semibold">Concrete Pump</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Specify if a concrete pump is required for your project
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            Specify if a concrete pump is required for your project
-          </p>
-        </div>
 
-        {customerId && (
-          <SaveButton
-            onClick={handleSave}
-            isSubmitting={isSaving}
-            disabled={false}
-            buttonText="Save Details"
-            className="bg-primary"
-          />
-        )}
-      </CardHeader>
-
-      <CardContent className="pt-4">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="pump-needed"
-              checked={isPumpNeeded}
-              onCheckedChange={handlePumpToggle}
-              disabled={isLoading}
+          {customerId && (
+            <SaveButton
+              onClick={handleSaveClick}
+              isSubmitting={isSubmitting}
+              disabled={false}
+              buttonText="Save Details"
+              className="bg-primary"
             />
-            <Label htmlFor="pump-needed" className="font-medium">
-              Concrete Pump Required
-            </Label>
-          </div>
+          )}
+        </CardHeader>
 
-          <div className="text-sm text-muted-foreground">
-            Base rate: {formatCurrency(pumpRate)}/day
-          </div>
-        </div>
-
-        {isPumpNeeded && (
-          <>
-            <div className="mt-4">
-              <Label htmlFor="pump-quantity" className="font-medium">
-                Number of Days/Instances Required
-              </Label>
-              <Input
-                id="pump-quantity"
-                type="number"
-                min="1"
-                value={quantity}
-                onChange={handleQuantityChange}
-                className="mt-2 w-full md:w-1/3"
-                disabled={isLoading || !isPumpNeeded}
+        <CardContent className="pt-4">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="pump-needed"
+                checked={isPumpNeeded}
+                onCheckedChange={handlePumpToggle}
+                disabled={isLoading}
               />
+              <Label htmlFor="pump-needed" className="font-medium">
+                Concrete Pump Required
+              </Label>
             </div>
 
-            <div className="mt-6 bg-gray-50 p-4 rounded-md">
-              <h4 className="font-medium mb-2">Cost Summary</h4>
-              <div className="grid grid-cols-2 gap-y-2">
-                <div>Rate per day:</div>
-                <div className="text-right">{formatCurrency(pumpRate)}</div>
-
-                <div>Number of days:</div>
-                <div className="text-right">{quantity}</div>
-
-                <div className="font-medium border-t pt-2 mt-1">Total Cost:</div>
-                <div className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</div>
-              </div>
-
-              <div className="mt-4 text-sm text-muted-foreground">
-                <p>This is based on the standard formula: Rate × Number of Days</p>
-                <p className="mt-1">Example: {formatCurrency(pumpRate)} × {quantity} = {formatCurrency(totalCost)}</p>
-              </div>
+            <div className="text-sm text-muted-foreground">
+              Base rate: {formatCurrency(pumpRate)}/day
             </div>
-          </>
-        )}
-      </CardContent>
-    </Card>
+          </div>
+
+          {isPumpNeeded && (
+            <>
+              <div className="mt-4">
+                <Label htmlFor="pump-quantity" className="font-medium">
+                  Number of Days/Instances Required
+                </Label>
+                <Input
+                  id="pump-quantity"
+                  type="number"
+                  min="1"
+                  value={quantity}
+                  onChange={handleQuantityChange}
+                  className="mt-2 w-full md:w-1/3"
+                  disabled={isLoading || !isPumpNeeded}
+                />
+              </div>
+
+              <div className="mt-6 bg-gray-50 p-4 rounded-md">
+                <h4 className="font-medium mb-2">Cost Summary</h4>
+                <div className="grid grid-cols-2 gap-y-2">
+                  <div>Rate per day:</div>
+                  <div className="text-right">{formatCurrency(pumpRate)}</div>
+
+                  <div>Number of days:</div>
+                  <div className="text-right">{quantity}</div>
+
+                  <div className="font-medium border-t pt-2 mt-1">Total Cost:</div>
+                  <div className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(totalCost)}</div>
+                </div>
+
+                <div className="mt-4 text-sm text-muted-foreground">
+                  <p>This is based on the standard formula: Rate × Number of Days</p>
+                  <p className="mt-1">Example: {formatCurrency(pumpRate)} × {quantity} = {formatCurrency(totalCost)}</p>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <StatusWarningDialog />
+    </>
   );
 };

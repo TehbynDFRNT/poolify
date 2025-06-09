@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { usePoolGeneralExtras } from "@/hooks/usePoolGeneralExtras";
+import { usePoolGeneralExtrasGuarded } from "@/hooks/usePoolGeneralExtrasGuarded";
 import { Pool } from "@/types/pool";
 import { Loader2 } from "lucide-react";
 import React from "react";
@@ -32,8 +32,9 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
         addMiscItem,
         removeMiscItem,
         updateMiscItemQuantity,
-        getExtraById
-    } = usePoolGeneralExtras(pool.id, customerId);
+        getExtraById,
+        StatusWarningDialog
+    } = usePoolGeneralExtrasGuarded(pool.id, customerId);
 
     if (isLoading) {
         return (
@@ -100,6 +101,9 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                     </Button>
                 </div>
             )}
+
+            {/* Status Warning Dialog */}
+            <StatusWarningDialog />
         </div>
     );
 }; 

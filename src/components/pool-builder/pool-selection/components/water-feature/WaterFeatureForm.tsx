@@ -1,15 +1,3 @@
-
-import React from "react";
-import { Pool } from "@/types/pool";
-import { Form } from "@/components/ui/form";
-import { Card, CardContent } from "@/components/ui/card";
-import { SaveButton } from "../SaveButton";
-import { useWaterFeature } from "./useWaterFeature";
-import { WaterFeatureCostSummary } from "./WaterFeatureCostSummary";
-import { WaterFeatureFormFields } from "./components/WaterFeatureFormFields";
-import { WaterFeatureFormValues } from "@/types/water-feature";
-import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,6 +9,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Form } from "@/components/ui/form";
+import { Pool } from "@/types/pool";
+import { WaterFeatureFormValues } from "@/types/water-feature";
+import { Trash2 } from "lucide-react";
+import React from "react";
+import { SaveButton } from "../SaveButton";
+import { WaterFeatureFormFields } from "./components/WaterFeatureFormFields";
+import { useWaterFeatureGuarded } from "./useWaterFeatureGuarded";
+import { WaterFeatureCostSummary } from "./WaterFeatureCostSummary";
 
 interface WaterFeatureFormProps {
   pool: Pool;
@@ -31,16 +30,18 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
   pool,
   customerId,
 }) => {
-  const { 
-    form, 
-    summary, 
-    isSubmitting, 
+  const {
+    form,
+    summary,
+    isSubmitting,
     isDeleting,
-    isLoading, 
+    isLoading,
     existingData,
     saveWaterFeature,
-    deleteWaterFeature 
-  } = useWaterFeature(customerId, pool?.id);
+    deleteWaterFeature,
+    SaveStatusWarningDialog,
+    DeleteStatusWarningDialog
+  } = useWaterFeatureGuarded(customerId, pool?.id);
 
   const onSubmit = async (data: WaterFeatureFormValues) => {
     if (!customerId || !pool) {
@@ -80,9 +81,9 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
                 {existingData && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button 
-                        type="button" 
-                        variant="destructive" 
+                      <Button
+                        type="button"
+                        variant="destructive"
                         size="sm"
                         disabled={isDeleting}
                         className="flex items-center gap-2"
@@ -109,9 +110,9 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
                     </AlertDialogContent>
                   </AlertDialog>
                 )}
-                
+
                 <div className={existingData ? "ml-auto" : ""}>
-                  <SaveButton 
+                  <SaveButton
                     onClick={form.handleSubmit(onSubmit)}
                     isSubmitting={isSubmitting}
                     disabled={!form.formState.isDirty && existingData !== null}
@@ -127,11 +128,15 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
       {/* Cost Summary */}
       <div className="space-y-2">
         <h3 className="text-lg font-medium">Cost Summary</h3>
-        <WaterFeatureCostSummary 
+        <WaterFeatureCostSummary
           summary={summary}
           hasBackCladding={form.getValues().backCladdingNeeded}
         />
       </div>
+
+      {/* Status Warning Dialogs */}
+      <SaveStatusWarningDialog />
+      <DeleteStatusWarningDialog />
     </div>
   );
 };

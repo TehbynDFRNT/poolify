@@ -4,12 +4,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
-import { ConcreteStripData } from "@/types/concrete-paving-summary";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { Fence } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
 import { SaveButton } from "../SaveButton";
 
 interface UnderFenceConcreteStripsProps {
@@ -18,18 +18,36 @@ interface UnderFenceConcreteStripsProps {
   onSaveComplete?: () => void;
 }
 
+interface Strip {
+  id: string;
+  type: string;
+  cost: number;
+  margin: number;
+}
+
+interface SelectedStrip {
+  id: string;
+  length: number;
+}
+
 export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> = ({
   pool,
   customerId,
   onSaveComplete
 }) => {
+  const [strips, setStrips] = useState<Strip[]>([]);
+  const [selectedStrips, setSelectedStrips] = useState<SelectedStrip[]>([]);
+  const [totalCost, setTotalCost] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [strips, setStrips] = useState<any[]>([]);
-  const [selectedStrips, setSelectedStrips] = useState<ConcreteStripData[]>([]);
-  const [totalCost, setTotalCost] = useState(0);
-  const [isSaving, setIsSaving] = useState(false);
 
-  // Fetch strips data on component mount
+  // Use the guarded actions hook
+  const {
+    handleSave,
+    isSubmitting,
+    StatusWarningDialog
+  } = useConcretePavingActionsGuarded(customerId);
+
+  // Fetch strips and existing data on component mount
   useEffect(() => {
     fetchStrips();
     if (customerId) {
@@ -50,48 +68,64 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
         setStrips(data);
       }
     } catch (error) {
-      console.error("Error fetching under fence concrete strips:", error);
-    } finally {
-      setIsLoading(false);
+      console.error("Error fetching concrete strips:", error);
     }
   };
 
   const fetchExistingData = async () => {
-    setIsLoading(true);
+    // console.log(`[UnderFenceStrips] FETCHING FOR CUSTOMER: ${customerId} - Time: ${new Date().toLocaleTimeString()}`);
     try {
       const { data, error } = await supabase
-        .from('pool_fence_concrete_strips')
-        .select('strip_data, total_cost')
+        .from('pool_fence_concrete_strips') // Table for selected strips
+        .select('*') // Selecting all columns to inspect
         .eq('pool_project_id', customerId)
         .maybeSingle();
 
-      if (error) {
-        console.error("Error fetching existing under fence strips data:", error);
-      } else if (data) {
-        if (data.strip_data) {
-          try {
-            // Parse the data based on its type
-            let parsedData;
-            if (typeof data.strip_data === 'string') {
-              parsedData = JSON.parse(data.strip_data);
-            } else {
-              // If it's already an object/array, use it directly
-              parsedData = data.strip_data;
-            }
-            setSelectedStrips(parsedData);
-          } catch (e) {
-            console.error("Error parsing under fence strips data:", e);
-          }
-        }
+      // console.log('[UnderFenceStrips] RAW DB DATA for selected strips:', JSON.stringify(data));
+      // console.log('[UnderFenceStrips] DB Error (if any):', error);
 
-        if (data.total_cost) {
-          setTotalCost(data.total_cost);
-        }
+      if (error && error.code !== 'PGRST116') {
+        // console.error("[UnderFenceStrips] DB Error fetching existing strips data:", error);
+        setSelectedStrips([]);
+        setTotalCost(0);
+        return; // Early exit on significant DB error
       }
-    } catch (error) {
-      console.error("Error fetching existing under fence strips data:", error);
+
+      if (data) {
+        // console.log('[UnderFenceStrips] Data found in pool_fence_concrete_strips.');
+        if (data.strip_data) {
+          // console.log('[UnderFenceStrips] data.strip_data (type:', typeof data.strip_data, '):', JSON.stringify(data.strip_data));
+          // Ensure strip_data is an array before setting state
+          if (Array.isArray(data.strip_data)) {
+            setSelectedStrips(data.strip_data);
+            // console.log('[UnderFenceStrips] setSelectedStrips with:', data.strip_data);
+          } else {
+            // console.warn('[UnderFenceStrips] data.strip_data is not an array. Setting selectedStrips to empty array.');
+            setSelectedStrips([]);
+          }
+        } else {
+          // console.log('[UnderFenceStrips] No strip_data field in fetched data or it is null. Setting selectedStrips to empty array.');
+          setSelectedStrips([]);
+        }
+        if (data.total_cost !== undefined && data.total_cost !== null) {
+          // console.log('[UnderFenceStrips] data.total_cost:', data.total_cost);
+          setTotalCost(data.total_cost);
+        } else {
+          // console.log('[UnderFenceStrips] No total_cost field in fetched data or it is null/undefined. Setting totalCost to 0.');
+          setTotalCost(0);
+        }
+      } else {
+        // console.log('[UnderFenceStrips] No data object returned from DB (PGRST116 or other). Resetting form.');
+        setSelectedStrips([]);
+        setTotalCost(0);
+      }
+    } catch (err) {
+      // console.error("[UnderFenceStrips] CATCH block error in fetchExistingData:", err);
+      setSelectedStrips([]);
+      setTotalCost(0);
     } finally {
-      setIsLoading(false);
+      setIsLoading(false); // This was already here, ensures loading is always turned off.
+      // console.log(`[UnderFenceStrips] fetchExistingData finished. Current state - selectedStrips count: ${selectedStrips.length}, totalCost: ${totalCost}`);
     }
   };
 
@@ -130,56 +164,68 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     setTotalCost(total);
   }, [selectedStrips, strips]);
 
-  // Save strips data
-  const handleSave = async () => {
-    setIsSaving(true);
-    try {
-      // First check if a record already exists
-      const { data: existingData } = await supabase
-        .from('pool_fence_concrete_strips')
-        .select('id')
-        .eq('pool_project_id', customerId)
-        .maybeSingle();
+  // Save strips data using the guarded hook
+  const handleSaveClick = async () => {
+    console.log('[UnderFenceStrips] handleSaveClick: Initiated.');
+    console.log('[UnderFenceStrips] handleSaveClick: Current selectedStrips STATE:', JSON.stringify(selectedStrips));
+    console.log('[UnderFenceStrips] handleSaveClick: Current totalCost STATE:', totalCost);
 
-      let error;
+    // First check if a record already exists
+    const { data: existingData, error: checkError } = await supabase
+      .from('pool_fence_concrete_strips')
+      .select('id')
+      .eq('pool_project_id', customerId)
+      .maybeSingle();
 
-      if (existingData?.id) {
-        // Update existing record
-        const { error: updateError } = await supabase
+    if (checkError) {
+      console.error('[UnderFenceStrips] handleSaveClick: Error checking for existing record:', checkError);
+      toast.error("Error checking existing data. Please try again.");
+      return;
+    }
+
+    console.log('[UnderFenceStrips] handleSaveClick: Existing record check result - existingData:', existingData);
+
+    let success;
+
+    if (existingData?.id) {
+      console.log('[UnderFenceStrips] handleSaveClick: Attempting UPDATE for existing record ID:', existingData.id);
+      const updateData = {
+        strip_data: selectedStrips, // This is an array of objects
+        total_cost: totalCost
+      };
+      console.log('[UnderFenceStrips] handleSaveClick: UPDATE payload:', JSON.stringify(updateData));
+      success = await handleSave(updateData, 'pool_fence_concrete_strips');
+    } else {
+      console.log('[UnderFenceStrips] handleSaveClick: Attempting INSERT for new record.');
+      try {
+        const insertData = {
+          pool_project_id: customerId,
+          strip_data: selectedStrips, // This is an array of objects
+          total_cost: totalCost
+        };
+        console.log('[UnderFenceStrips] handleSaveClick: INSERT payload:', JSON.stringify(insertData));
+        const { error } = await supabase
           .from('pool_fence_concrete_strips')
-          .update({
-            strip_data: selectedStrips,
-            total_cost: totalCost
-          })
-          .eq('id', existingData.id);
+          .insert(insertData);
 
-        error = updateError;
-      } else {
-        // Insert new record
-        const { error: insertError } = await supabase
-          .from('pool_fence_concrete_strips')
-          .insert({
-            pool_project_id: customerId,
-            strip_data: selectedStrips,
-            total_cost: totalCost
-          });
+        if (error) {
+          console.error("[UnderFenceStrips] handleSaveClick: Supabase insert error:", error);
+          throw error;
+        }
 
-        error = insertError;
+        toast.success("Under fence concrete strips saved successfully.");
+        success = true;
+      } catch (error) {
+        // Error already logged by the specific catch if it's from Supabase
+        // console.error("Error saving under fence concrete strips (insert general catch):", error);
+        toast.error("Failed to save under fence concrete strips.");
+        success = false;
       }
+    }
+    console.log('[UnderFenceStrips] handleSaveClick: Save operation success status:', success);
 
-      if (error) throw error;
-
-      toast.success("Under fence concrete strips saved successfully.");
-
-      // Call onSaveComplete callback to refresh the summary
-      if (onSaveComplete) {
-        onSaveComplete();
-      }
-    } catch (error) {
-      console.error("Error saving under fence concrete strips:", error);
-      toast.error("Failed to save under fence concrete strips.");
-    } finally {
-      setIsSaving(false);
+    if (success && onSaveComplete) {
+      onSaveComplete();
     }
   };
 
@@ -193,132 +239,134 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
   };
 
   return (
-    <Card>
-      <CardHeader className="pb-2 flex flex-row items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            <Fence className="h-5 w-5 text-primary" />
-            <h3 className="text-xl font-semibold">Under Fence Concrete Strips</h3>
+    <>
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <Fence className="h-5 w-5 text-primary" />
+              <h3 className="text-xl font-semibold">Under Fence Concrete Strips</h3>
+            </div>
+            <p className="text-muted-foreground">
+              Select concrete strips under the fence for your project
+            </p>
           </div>
-          <p className="text-muted-foreground">
-            Select concrete strips under the fence for your project
-          </p>
-        </div>
 
-        <div className="flex gap-2">
-          {selectedStrips.length > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleClearAll}
-            >
-              Clear All
-            </Button>
-          )}
-
-          {customerId && (
-            <SaveButton
-              onClick={handleSave}
-              isSubmitting={isSaving}
-              disabled={false}
-              buttonText="Save Strips"
-              className="bg-primary"
-            />
-          )}
-        </div>
-      </CardHeader>
-
-      <CardContent className="pt-4">
-        {isLoading ? (
-          <div className="text-center py-6 text-muted-foreground">
-            Loading concrete strip types...
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {strips.map((strip) => {
-              const selectedStrip = selectedStrips.find(s => s.id === strip.id);
-              const isSelected = !!selectedStrip;
-              const price = strip.cost + strip.margin;
-
-              return (
-                <div key={strip.id} className="border rounded-md hover:bg-slate-50 p-4">
-                  <div className="flex items-start space-x-3">
-                    <Checkbox
-                      id={`strip-${strip.id}`}
-                      checked={isSelected}
-                      onCheckedChange={(checked) => handleStripSelection(strip.id, checked === true)}
-                      className="mt-1"
-                    />
-                    <div className="flex-1">
-                      <Label htmlFor={`strip-${strip.id}`} className="font-medium">
-                        {strip.type}
-                      </Label>
-                      <p className="text-sm text-muted-foreground">
-                        {formatCurrency(price)} per L/M
-                      </p>
-                    </div>
-
-                    {isSelected && (
-                      <div className="flex items-end space-x-2">
-                        <div>
-                          <Label htmlFor={`length-${strip.id}`} className="text-sm">Meters</Label>
-                          <Input
-                            id={`length-${strip.id}`}
-                            type="number"
-                            min="0.1"
-                            step="0.1"
-                            value={selectedStrip.length || 1}
-                            onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 1)}
-                            className="w-20 h-8"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-
+          <div className="flex gap-2">
             {selectedStrips.length > 0 && (
-              <div className="mt-6 bg-gray-50 p-4 rounded-md">
-                <h4 className="font-medium mb-2">Cost Summary</h4>
-                <div className="space-y-2">
-                  {selectedStrips.map(selectedStrip => {
-                    const strip = strips.find(s => s.id === selectedStrip.id);
-                    if (!strip) return null;
-
-                    const length = selectedStrip.length || 1;
-                    const unitPrice = strip.cost + strip.margin;
-                    const itemTotal = unitPrice * length;
-
-                    return (
-                      <div key={selectedStrip.id} className="grid grid-cols-3 gap-y-1 text-sm">
-                        <span>{strip.type}</span>
-                        <span className="text-right">{length} m × {formatCurrency(unitPrice)}</span>
-                        <span className="text-right">{formatCurrency(itemTotal)}</span>
-                      </div>
-                    );
-                  })}
-
-                  <div className="grid grid-cols-3 gap-y-1 pt-2 border-t mt-2 font-medium">
-                    <span>Total</span>
-                    <span></span>
-                    <span className="text-right">{formatCurrency(totalCost)}</span>
-                  </div>
-                </div>
-              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearAll}
+              >
+                Clear All
+              </Button>
             )}
 
-            {strips.length === 0 && (
-              <div className="text-center py-6 border rounded-md bg-muted/10">
-                <p className="text-muted-foreground">
-                  No under fence concrete strip types available
-                </p>
-              </div>
+            {customerId && (
+              <SaveButton
+                onClick={handleSaveClick}
+                isSubmitting={isSubmitting}
+                disabled={false}
+                buttonText="Save Strips"
+                className="bg-primary"
+              />
             )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+
+        <CardContent className="pt-4">
+          {isLoading ? (
+            <div className="text-center py-6 text-muted-foreground">
+              Loading concrete strip types...
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {strips.map((strip) => {
+                const selectedStrip = selectedStrips.find(s => s.id === strip.id);
+                const isSelected = !!selectedStrip;
+                const price = strip.cost + strip.margin;
+
+                return (
+                  <div key={strip.id} className="border rounded-md hover:bg-slate-50 p-4">
+                    <div className="flex items-start space-x-3">
+                      <Checkbox
+                        id={`strip-${strip.id}`}
+                        checked={isSelected}
+                        onCheckedChange={(checked) => handleStripSelection(strip.id, checked === true)}
+                        className="mt-1"
+                      />
+                      <div className="flex-1">
+                        <Label htmlFor={`strip-${strip.id}`} className="font-medium">
+                          {strip.type}
+                        </Label>
+                        <p className="text-sm text-muted-foreground">
+                          {formatCurrency(price)} per L/M
+                        </p>
+                      </div>
+
+                      {isSelected && (
+                        <div className="flex items-end space-x-2">
+                          <div>
+                            <Label htmlFor={`length-${strip.id}`} className="text-sm">Meters</Label>
+                            <Input
+                              id={`length-${strip.id}`}
+                              type="number"
+                              min="0.1"
+                              step="0.1"
+                              value={selectedStrip.length || 1}
+                              onChange={(e) => handleLengthChange(strip.id, parseFloat(e.target.value) || 1)}
+                              className="w-20 h-8"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {selectedStrips.length > 0 && (
+                <div className="mt-6 bg-gray-50 p-4 rounded-md">
+                  <h4 className="font-medium mb-2">Cost Summary</h4>
+                  <div className="space-y-2">
+                    {selectedStrips.map(selectedStrip => {
+                      const strip = strips.find(s => s.id === selectedStrip.id);
+                      if (!strip) return null;
+
+                      const length = selectedStrip.length || 1;
+                      const unitPrice = strip.cost + strip.margin;
+                      const itemTotal = unitPrice * length;
+
+                      return (
+                        <div key={selectedStrip.id} className="grid grid-cols-3 gap-y-1 text-sm">
+                          <span>{strip.type}</span>
+                          <span className="text-right">{length} m × {formatCurrency(unitPrice)}</span>
+                          <span className="text-right">{formatCurrency(itemTotal)}</span>
+                        </div>
+                      );
+                    })}
+
+                    <div className="grid grid-cols-3 gap-y-1 pt-2 border-t mt-2 font-medium">
+                      <span>Total</span>
+                      <span></span>
+                      <span className="text-right">{formatCurrency(totalCost)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {strips.length === 0 && (
+                <div className="text-center py-6 text-muted-foreground">
+                  No concrete strip types available
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      <StatusWarningDialog />
+    </>
   );
 };

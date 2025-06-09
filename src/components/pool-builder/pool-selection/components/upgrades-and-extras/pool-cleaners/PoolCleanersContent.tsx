@@ -1,12 +1,10 @@
-
-import React from "react";
+import { Button } from "@/components/ui/button";
+import { usePoolCleanerOptionsGuarded } from "@/hooks/usePoolCleanerOptionsGuarded";
 import { Pool } from "@/types/pool";
-import { usePoolCleanerOptions } from "@/hooks/usePoolCleanerOptions";
-import { Card } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import React from "react";
 import { PoolCleanerSelector } from "./PoolCleanerSelector";
 import { PoolCleanersSummary } from "./PoolCleanersSummary";
-import { Button } from "@/components/ui/button";
 
 interface PoolCleanersContentProps {
   pool: Pool;
@@ -27,8 +25,9 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
     isSaving,
     savePoolCleanerSelection,
     totalCost,
-    margin
-  } = usePoolCleanerOptions(pool.id, customerId);
+    margin,
+    StatusWarningDialog
+  } = usePoolCleanerOptionsGuarded(pool.id, customerId);
 
   if (isLoading) {
     return (
@@ -42,28 +41,28 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
   return (
     <div className="space-y-6">
       <p className="text-sm text-muted-foreground mb-6">
-        Select a pool cleaner that best suits your needs. Our range of automatic pool cleaners 
+        Select a pool cleaner that best suits your needs. Our range of automatic pool cleaners
         help maintain your pool with minimal effort, ensuring clean and clear water.
       </p>
-      
-      <PoolCleanerSelector 
+
+      <PoolCleanerSelector
         availableCleaners={availableCleaners}
         selectedCleaner={selectedCleaner}
         setSelectedCleaner={setSelectedCleaner}
         includeCleaner={includeCleaner}
         setIncludeCleaner={setIncludeCleaner}
       />
-      
-      <PoolCleanersSummary 
+
+      <PoolCleanersSummary
         selectedCleaner={selectedCleaner}
         includeCleaner={includeCleaner}
         totalCost={totalCost}
       />
-      
+
       {customerId && (
         <div className="flex justify-end mt-6">
-          <Button 
-            onClick={savePoolCleanerSelection} 
+          <Button
+            onClick={savePoolCleanerSelection}
             disabled={isSaving}
             className="flex items-center gap-2"
           >
@@ -72,6 +71,9 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
           </Button>
         </div>
       )}
+
+      {/* Status Warning Dialog */}
+      <StatusWarningDialog />
     </div>
   );
 };

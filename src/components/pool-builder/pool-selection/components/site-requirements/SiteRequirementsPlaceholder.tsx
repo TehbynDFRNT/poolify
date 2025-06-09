@@ -1,10 +1,9 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
+import { useSiteRequirementsGuarded } from "@/hooks/useSiteRequirementsGuarded";
 import { Pool } from "@/types/pool";
 import { Construction, MapPin, Save } from "lucide-react";
-import React, { useState } from "react";
+import React from "react";
 import { toast } from "sonner";
 import { SiteRequirementsForm } from "./SiteRequirementsForm";
 
@@ -17,7 +16,7 @@ export const SiteRequirementsPlaceholder: React.FC<SiteRequirementsPlaceholderPr
   pool,
   customerId
 }) => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { saveSiteRequirements, isSubmitting, StatusWarningDialog } = useSiteRequirementsGuarded(customerId || '');
 
   const handleSave = async (formData: any) => {
     if (!customerId) {
@@ -25,61 +24,7 @@ export const SiteRequirementsPlaceholder: React.FC<SiteRequirementsPlaceholderPr
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      // Start a transaction to update both tables
-
-      // 1. First check if we already have an equipment selection record
-      const { data: existingEquipment } = await supabase
-        .from('pool_equipment_selections')
-        .select('id')
-        .eq('pool_project_id', customerId)
-        .maybeSingle();
-
-      if (existingEquipment?.id) {
-        // Update existing equipment selections
-        const { error: equipmentError } = await supabase
-          .from('pool_equipment_selections')
-          .update({
-            crane_id: formData.craneId === 'none' ? null : formData.craneId,
-            traffic_control_id: formData.trafficControlId === 'none' ? null : formData.trafficControlId,
-            bobcat_id: formData.bobcatId === 'none' ? null : formData.bobcatId
-          })
-          .eq('id', existingEquipment.id);
-
-        if (equipmentError) throw equipmentError;
-      } else {
-        // Create new equipment selections record
-        const { error: equipmentError } = await supabase
-          .from('pool_equipment_selections')
-          .insert({
-            pool_project_id: customerId,
-            crane_id: formData.craneId === 'none' ? null : formData.craneId,
-            traffic_control_id: formData.trafficControlId === 'none' ? null : formData.trafficControlId,
-            bobcat_id: formData.bobcatId === 'none' ? null : formData.bobcatId
-          });
-
-        if (equipmentError) throw equipmentError;
-      }
-
-      // 2. Update site requirements data and notes in pool_projects
-      const { error: projectError } = await supabase
-        .from('pool_projects')
-        .update({
-          site_requirements_data: formData.customRequirements,
-          site_requirements_notes: formData.notes
-        })
-        .eq('id', customerId);
-
-      if (projectError) throw projectError;
-
-      toast.success("Site requirements saved successfully");
-    } catch (error) {
-      console.error("Error saving site requirements:", error);
-      toast.error("Failed to save site requirements");
-    } finally {
-      setIsSubmitting(false);
-    }
+    await saveSiteRequirements(formData);
   };
 
   return (
@@ -125,6 +70,7 @@ export const SiteRequirementsPlaceholder: React.FC<SiteRequirementsPlaceholderPr
           )}
         </CardContent>
       </Card>
+      <StatusWarningDialog />
     </div>
   );
 };

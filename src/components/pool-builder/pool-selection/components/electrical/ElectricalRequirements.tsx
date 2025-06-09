@@ -1,12 +1,11 @@
-
-import React from "react";
-import { Pool } from "@/types/pool";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Zap, CheckCircle, Save, PlugZap, Bolt } from "lucide-react";
-import { useElectricalRequirements } from "./hooks/useElectricalRequirements";
+import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
+import { Bolt, CheckCircle, PlugZap, Save, Zap } from "lucide-react";
+import React from "react";
+import { useElectricalRequirementsGuarded } from "./hooks/useElectricalRequirementsGuarded";
 
 interface ElectricalRequirementsProps {
   pool: Pool;
@@ -21,7 +20,8 @@ export const ElectricalRequirements: React.FC<ElectricalRequirementsProps> = ({ 
     toggleOption,
     saveElectricalRequirements,
     isSaving,
-  } = useElectricalRequirements(pool.id, customerId);
+    StatusWarningDialog,
+  } = useElectricalRequirementsGuarded(pool.id, customerId);
 
   const getIconForOption = (description: string) => {
     const lowerDesc = description.toLowerCase();
@@ -38,7 +38,7 @@ export const ElectricalRequirements: React.FC<ElectricalRequirementsProps> = ({ 
           <Zap className="h-5 w-5 text-primary" />
           <h2 className="text-2xl font-bold">Electrical Requirements</h2>
         </div>
-        
+
         <Card className="p-6">
           <div className="flex justify-center items-center h-40">
             <div className="animate-pulse flex space-x-4">
@@ -66,7 +66,7 @@ export const ElectricalRequirements: React.FC<ElectricalRequirementsProps> = ({ 
         <Zap className="h-5 w-5 text-primary" />
         <h2 className="text-2xl font-bold">Electrical Requirements</h2>
       </div>
-      
+
       <Card>
         <CardHeader className="bg-primary/10">
           <div className="flex items-start gap-3">
@@ -137,6 +137,9 @@ export const ElectricalRequirements: React.FC<ElectricalRequirementsProps> = ({ 
           </div>
         </CardContent>
       </Card>
+
+      {/* Status Warning Dialog */}
+      <StatusWarningDialog />
     </div>
   );
 };

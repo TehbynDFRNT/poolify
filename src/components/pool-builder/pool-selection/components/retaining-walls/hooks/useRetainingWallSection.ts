@@ -1,3 +1,4 @@
+import { useGuardedMutation } from "@/hooks/useGuardedMutation";
 import { supabase } from "@/integrations/supabase/client";
 import { RetainingWall } from "@/types/retaining-wall";
 import { useEffect, useState } from "react";
@@ -33,6 +34,126 @@ export const useRetainingWallSection = ({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasExistingData, setHasExistingData] = useState<boolean>(false);
   const [retainingWallId, setRetainingWallId] = useState<string | null>(null);
+
+  // Guarded save mutation
+  const {
+    mutateAsync: saveRetainingWallAsync,
+    isPending: isSavingGuarded,
+    StatusWarningDialog: SaveStatusWarningDialog
+  } = useGuardedMutation({
+    projectId: customerId || '',
+    mutationFn: async () => {
+      if (!customerId) {
+        throw new Error("No customer ID provided");
+      }
+
+      if (!selectedWallType || !height1 || !height2 || !length) {
+        throw new Error("Please fill in all required fields");
+      }
+
+      // Create a wall record with a type that includes the wall number identifier
+      const wallData = {
+        wall_type: `Wall ${wallNumber}: ${selectedWallType}`,
+        height1,
+        height2,
+        length,
+        total_cost: totalCost,
+        margin: marginAmount // Add the margin amount to be stored in the database
+      };
+
+      let result;
+
+      if (retainingWallId) {
+        // Update existing wall record
+        result = await supabase
+          .from('pool_retaining_walls')
+          .update(wallData)
+          .eq('id', retainingWallId);
+      } else {
+        // Create new wall record
+        result = await supabase
+          .from('pool_retaining_walls')
+          .insert({
+            ...wallData,
+            pool_project_id: customerId
+          });
+      }
+
+      if (result.error) throw result.error;
+
+      // If we just inserted a new record, get its ID for future updates
+      if (!retainingWallId && result.data && result.data.length > 0) {
+        setRetainingWallId(result.data[0].id);
+      }
+
+      setHasExistingData(true);
+
+      return { success: true };
+    },
+    mutationOptions: {
+      onSuccess: () => {
+        toast.success(`Retaining wall ${wallNumber} details saved successfully`);
+
+        // Call the onWallUpdate callback to trigger a refetch in the summary component
+        if (onWallUpdate) {
+          onWallUpdate();
+        }
+      },
+      onError: (error) => {
+        console.error(`Error saving retaining wall ${wallNumber} data:`, error);
+        toast.error(`Failed to save retaining wall ${wallNumber} details`);
+      }
+    }
+  });
+
+  // Guarded delete mutation
+  const {
+    mutateAsync: deleteRetainingWallAsync,
+    isPending: isDeletingGuarded,
+    StatusWarningDialog: DeleteStatusWarningDialog
+  } = useGuardedMutation({
+    projectId: customerId || '',
+    mutationFn: async () => {
+      if (!customerId || !retainingWallId) {
+        throw new Error("No wall data to delete");
+      }
+
+      // Delete the wall record entirely
+      const { error } = await supabase
+        .from('pool_retaining_walls')
+        .delete()
+        .eq('id', retainingWallId);
+
+      if (error) throw error;
+
+      return { success: true };
+    },
+    mutationOptions: {
+      onSuccess: () => {
+        // Reset form and state
+        setSelectedWallType('');
+        setHeight1(0);
+        setHeight2(0);
+        setLength(0);
+        setTotalCost(0);
+        setMarginAmount(0);
+        setRetainingWallId(null);
+
+        setShowDeleteConfirm(false);
+        setHasExistingData(false);
+        toast.success(`Retaining wall ${wallNumber} removed successfully`);
+
+        // Call the onWallUpdate callback to trigger a refetch in the summary component
+        if (onWallUpdate) {
+          onWallUpdate();
+        }
+      },
+      onError: (error) => {
+        console.error(`Error removing retaining wall ${wallNumber} data:`, error);
+        toast.error(`Failed to remove retaining wall ${wallNumber}`);
+      }
+    }
+  });
 
   // Fetch existing data when component mounts
   useEffect(() => {
@@ -152,51 +273,9 @@ export const useRetainingWallSection = ({
 
     setIsSaving(true);
     try {
-      // Create a wall record with a type that includes the wall number identifier
-      const wallData = {
-        wall_type: `Wall ${wallNumber}: ${selectedWallType}`,
-        height1,
-        height2,
-        length,
-        total_cost: totalCost,
-        margin: marginAmount // Add the margin amount to be stored in the database
-      };
-
-      let result;
-
-      if (retainingWallId) {
-        // Update existing wall record
-        result = await supabase
-          .from('pool_retaining_walls')
-          .update(wallData)
-          .eq('id', retainingWallId);
-      } else {
-        // Create new wall record
-        result = await supabase
-          .from('pool_retaining_walls')
-          .insert({
-            ...wallData,
-            pool_project_id: customerId
-          });
-      }
-
-      if (result.error) throw result.error;
-
-      // If we just inserted a new record, get its ID for future updates
-      if (!retainingWallId && result.data && result.data.length > 0) {
-        setRetainingWallId(result.data[0].id);
-      }
-
-      toast.success(`Retaining wall ${wallNumber} details saved successfully`);
-      setHasExistingData(true);
-
-      // Call the onWallUpdate callback to trigger a refetch in the summary component
-      if (onWallUpdate) {
-        onWallUpdate();
-      }
+      await saveRetainingWallAsync();
     } catch (error) {
-      console.error(`Error saving retaining wall ${wallNumber} data:`, error);
-      toast.error(`Failed to save retaining wall ${wallNumber} details`);
+      console.error(`Error in handleSave for retaining wall ${wallNumber}:`, error);
     } finally {
       setIsSaving(false);
     }
@@ -210,34 +289,9 @@ export const useRetainingWallSection = ({
 
     setIsDeleting(true);
     try {
-      // Delete the wall record entirely
-      const { error } = await supabase
-        .from('pool_retaining_walls')
-        .delete()
-        .eq('id', retainingWallId);
-
-      if (error) throw error;
-
-      // Reset form and state
-      setSelectedWallType('');
-      setHeight1(0);
-      setHeight2(0);
-      setLength(0);
-      setTotalCost(0);
-      setMarginAmount(0);
-      setRetainingWallId(null);
-
-      setShowDeleteConfirm(false);
-      setHasExistingData(false);
-      toast.success(`Retaining wall ${wallNumber} removed successfully`);
-
-      // Call the onWallUpdate callback to trigger a refetch in the summary component
-      if (onWallUpdate) {
-        onWallUpdate();
-      }
+      await deleteRetainingWallAsync();
     } catch (error) {
-      console.error(`Error removing retaining wall ${wallNumber} data:`, error);
-      toast.error(`Failed to remove retaining wall ${wallNumber}`);
+      console.error(`Error in handleDelete for retaining wall ${wallNumber}:`, error);
     } finally {
       setIsDeleting(false);
     }
@@ -253,8 +307,8 @@ export const useRetainingWallSection = ({
     totalCost,
     selectedWall,
     marginAmount,
-    isSaving,
-    isDeleting,
+    isSaving: isSaving || isSavingGuarded,
+    isDeleting: isDeleting || isDeletingGuarded,
     showDeleteConfirm,
     isLoading,
     hasExistingData,
@@ -266,6 +320,10 @@ export const useRetainingWallSection = ({
     handleLengthChange,
     handleSave,
     handleDelete,
-    setShowDeleteConfirm
+    setShowDeleteConfirm,
+
+    // Status Warning Dialogs
+    SaveStatusWarningDialog,
+    DeleteStatusWarningDialog
   };
 };
