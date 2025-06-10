@@ -224,7 +224,7 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, on
               <SaveButton
                 onClick={handleSaveClick}
                 isSubmitting={isSubmitting}
-                disabled={selectedCuts.length === 0}
+                disabled={false}
                 buttonText="Save Cuts"
                 className="bg-primary"
               />

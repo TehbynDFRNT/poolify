@@ -155,15 +155,16 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
 
   // Handle save using the guarded hook or direct insert
   const handleSaveClick = async () => {
-    if (!selectedCategory || squareMeters <= 0) {
-      toast.error("Please select a category and enter square meters");
-      return;
-    }
+    // Allow saving empty selections
+    // if (!selectedCategory || squareMeters <= 0) {
+    //   toast.error("Please select a category and enter square meters");
+    //   return;
+    // }
 
     const dataToSave = {
-      existing_concrete_paving_category: selectedCategory, // This is the ID
-      existing_concrete_paving_square_meters: squareMeters,
-      existing_concrete_paving_total_cost: totalCost
+      existing_concrete_paving_category: selectedCategory || null, // Set to null if empty
+      existing_concrete_paving_square_meters: squareMeters || null, // Set to null if 0
+      existing_concrete_paving_total_cost: totalCost || null // Set to null if 0
       // No longer nulling out other fields, as the hook now preserves existing data
     };
 
@@ -225,7 +226,7 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
             <SaveButton
               onClick={handleSaveClick}
               isSubmitting={isSubmitting}
-              disabled={!selectedCategory || squareMeters <= 0}
+              disabled={false}
               buttonText="Save Details"
               className="bg-primary"
             />

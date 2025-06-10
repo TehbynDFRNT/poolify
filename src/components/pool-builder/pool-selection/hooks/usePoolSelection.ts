@@ -82,7 +82,20 @@ export const usePoolSelection = (customerId?: string | null) => {
     setIsSubmitting(true);
 
     try {
-      // Update the customer record with the selected pool and color
+      /* -----------------------------------------------------------
+       * 1) Remove any cleaner-selection rows tied to this project
+       *    (via customer_id) before we change the pool.
+       * ----------------------------------------------------------- */
+      const { error: delErr } = await supabase
+        .from("pool_cleaner_selections")
+        .delete()
+        .eq("customer_id", customerId);
+
+      if (delErr) throw delErr;
+
+      /* -----------------------------------------------------------
+       * 2) Update the project with the new pool spec + colour
+       * ----------------------------------------------------------- */
       const { error } = await supabase
         .from('pool_projects')
         .update({

@@ -119,10 +119,11 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
   // Handle save using the guarded hook
   const handleSaveClick = async () => {
-    if (!selectedType || meterage <= 0) {
-      toast.error("Please select a concrete type and enter a valid meterage.");
-      return;
-    }
+    // Allow saving empty selections
+    // if (!selectedType || meterage <= 0) {
+    //   toast.error("Please select a concrete type and enter a valid meterage.");
+    //   return;
+    // }
 
     // First check if a record already exists
     const { data: existingData } = await supabase
@@ -132,9 +133,9 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
       .maybeSingle();
 
     const dataToSave = {
-      extra_concreting_type: selectedType,
-      extra_concreting_square_meters: meterage,
-      extra_concreting_total_cost: totalCost
+      extra_concreting_type: selectedType || null, // Set to null if empty
+      extra_concreting_square_meters: meterage || null, // Set to null if 0
+      extra_concreting_total_cost: totalCost || null // Set to null if 0
     };
 
     // Use the guarded handleSave for both insert and update
@@ -192,7 +193,7 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
           <SaveButton
             onClick={handleSaveClick}
             isSubmitting={isSubmitting}
-            disabled={!selectedType || meterage <= 0}
+            disabled={false}
             buttonText="Save Details"
             className="bg-primary"
           />

@@ -52,6 +52,11 @@ export interface ContractSummaryData {
   copingSupplyCost: number;
   copingLayCost: number;
   concreteCutsCopingCost: number;
+  // Paving breakdown components
+  pavingCopingCost: number;
+  pavingLayingCost: number;
+  pavingAndConcretingLayingTotal: number;
+  pavingOnExistingConcreteLayingTotal: number;
   // Retaining Walls / Water Feature breakdown
   retainingWallsCost: number;
   waterFeatureCost: number;
@@ -69,7 +74,7 @@ export interface ContractSummaryLineItems {
  * @returns Calculated line items for contract summary
  */
 export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | undefined): ContractSummaryLineItems {
-  const { contractGrandTotal, totals } = usePriceCalculator(snapshot);
+  const { contractGrandTotal, totals, basePoolBreakdown } = usePriceCalculator(snapshot);
 
   console.log('🔥 useContractSummaryLineItems hook fired', { 
     snapshot: !!snapshot, 
@@ -121,6 +126,10 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
           concreteCutsCopingCost: 0,
           retainingWallsCost: 0,
           waterFeatureCost: 0,
+          pavingCopingCost: 0,
+          pavingLayingCost: 0,
+          pavingAndConcretingLayingTotal: 0,
+          pavingOnExistingConcreteLayingTotal: 0,
         }
       };
     }
@@ -144,8 +153,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     // Calculate value displayed in contract (correlating snapshot values)
     const form15Price = form15Item ? parseFloat(form15Item.price) : 0;
     
-    const excavationTotal = ((snapshot.dig_excavation_rate || 0) * (snapshot.dig_excavation_hours || 0)) + 
-                           ((snapshot.dig_truck_rate || 0) * (snapshot.dig_truck_hours || 0) * (snapshot.dig_truck_qty || 0));
+    const excavationTotal = basePoolBreakdown.digCost;
     
     // Calculate Handover cost from fixed costs
     const handoverItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Handover" || fc.name.includes("Handover"));
@@ -157,7 +165,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
 
     const valueDisplayedInContract = 
       (snapshot.pc_pea_gravel || 0) + // Pea Gravel/Backfill
-      (snapshot.crane_cost || 0) + // Crane
+      basePoolBreakdown.craneAllowance + // Crane allowance ($700)
       (snapshot.pc_install_fee || 0) + // Install Fee
       (snapshot.pc_coping_supply || 0) + // Supply Coping
       (snapshot.pc_beam || 0) + // BEAM Fixed
@@ -170,7 +178,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     // Get equipment extras total from use-calculator-totals.ts
     const equipmentOnly = totals.extrasTotal;
 
-    // Calculate shell value in contract: (Base Price - valueDisplayedInContract) + Temporary Safety Barrier
+    // Calculate shell value in contract: (RRP/Web Price - $ Displayed in Contract) + Temporary Safety Barrier
     const shellValueInContract = (basePoolTotal - valueDisplayedInContract) + tempSafetyBarrierCost;
     
     // Calculate pool shell supply equipment total: Equipment + Shell Value In Contract
@@ -180,8 +188,11 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     // 3. POOL SHELL INSTALLATION CALCULATION
     // ==================================================================================
     // Calculate Pool Shell Installation components from snapshot
-    const craneCost = snapshot.crane_cost || 0;
-    const trafficControlInstallationCost = snapshot.traffic_control_cost || 0;
+    // Note: $700 crane allowance is already included in basePoolTotal with margin
+    // Only the excess over $700 should be added here, with margin applied
+    const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
+    const craneCost = ((snapshot.crane_cost || 0) > 700 ? (snapshot.crane_cost || 0) - 700 : 0) * marginMultiplier;
+    const trafficControlInstallationCost = (snapshot.traffic_control_cost || 0) * marginMultiplier;
     const installFeeCost = snapshot.pc_install_fee || 0; // Install fee from individual pool costs
     const peaGravelBackfillCost = snapshot.pc_pea_gravel || 0;
 
@@ -192,14 +203,16 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     // 4. EXCAVATION CALCULATION
     // ==================================================================================
     // Calculate Excavation components from snapshot
-    const bobcatCost = snapshot.bobcat_cost || 0;
+    // Apply margin to site requirements to match proposal calculator logic
+    const bobcatCost = (snapshot.bobcat_cost || 0) * marginMultiplier;
     
     // Calculate custom site requirements cost from site_requirements_data
-    const customSiteRequirementsCost = snapshot.site_requirements_data 
+    const customSiteRequirementsCostRaw = snapshot.site_requirements_data 
       ? (typeof snapshot.site_requirements_data === 'string'
          ? JSON.parse(snapshot.site_requirements_data)
          : snapshot.site_requirements_data).reduce((sum: number, item: any) => sum + (Number(item.price) || 0), 0)
       : 0;
+    const customSiteRequirementsCost = customSiteRequirementsCostRaw * marginMultiplier;
 
     // Calculate total Excavation cost
     const excavationContractTotal = excavationTotal + bobcatCost + customSiteRequirementsCost;
@@ -231,8 +244,21 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     const copingLayCost = snapshot.pc_coping_lay || 0;
     const concreteCutsCopingCost = snapshot.concrete_cuts_cost || 0; // Same as concreteCutsCost but for paving section
 
-    // Calculate total Paving / Coping cost using concreteTotal from calculator minus extra concreting, plus coping costs
-    const pavingCopingTotal = totals.concreteTotal - (snapshot.extra_concreting_cost || 0) + copingSupplyCost + copingLayCost;
+    // Calculate Paving / Coping cost using specified components:
+    // "Supply Coping" + "Paving and Concreting Total" + "Concrete Pump Total" + "Paving On Existing Concrete Total" + "Under Fence Concrete Total"
+    const pavingCopingCost = copingSupplyCost + extraPavingCost + concretePumpCost + existingPavingCost + underFenceConcreteStripsCost;
+
+    // Calculate Paving / Laying cost using specified components:
+    // "Paving and Concreting Laying Total (Sqm * 130)" + "Concrete Cuts Total" + "Lay Pavers" + "Paving on Existing Concrete Laying Total (Sqm * 130)"
+    const pavingAndConcretingLayingTotal = (snapshot.extra_paving_sqm || 0) * 130;
+    const concreteCutsTotal = concreteCutsCopingCost; // concrete_cuts_cost (covers both round pool cuts and diagonal cuts)
+    const layPaversTotal = copingLayCost; // pc_coping_lay
+    const pavingOnExistingConcreteLayingTotal = (snapshot.existing_paving_sqm || 0) * 130;
+    
+    const pavingLayingCost = pavingAndConcretingLayingTotal + concreteCutsTotal + layPaversTotal + pavingOnExistingConcreteLayingTotal;
+
+    // Calculate total Paving cost (Coping + Laying)
+    const pavingTotal = pavingCopingCost + pavingLayingCost;
 
     // ==================================================================================
     // 8. RETAINING WALLS / WATER FEATURE CALCULATION
@@ -266,7 +292,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       excavationContractTotal + 
       beamCost + 
       extraConcretingTotal + 
-      pavingCopingTotal + 
+      pavingTotal + 
       retainingWallsWaterFeatureTotal + 
       0 + // specialInclusions (currently 0)
       handoverCost;
@@ -309,7 +335,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       extraConcreting: extraConcretingTotal,
       
       // 7. PAVING / COPING: Extra Paving + Existing Paving + Concrete Pump + Under-fence Strips + Coping Supply + Coping Lay + Concrete Cuts
-      pavingCoping: pavingCopingTotal,
+      pavingCoping: pavingTotal,
       
       // 8. RETAINING WALLS / WATER FEATURE: Retaining Walls + Water Feature
       retainingWalls: retainingWallsWaterFeatureTotal,
@@ -342,6 +368,10 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       concreteCutsCopingCost,
       retainingWallsCost,
       waterFeatureCost,
+      pavingCopingCost,
+      pavingLayingCost,
+      pavingAndConcretingLayingTotal,
+      pavingOnExistingConcreteLayingTotal,
     };
 
     const result = {

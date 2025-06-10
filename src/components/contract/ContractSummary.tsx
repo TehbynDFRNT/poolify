@@ -289,7 +289,60 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                 </CardContent>
             </Card>
 
-            {/* 3. POOL SHELL INSTALLATION SECTION */}
+            {/* 3. EXCAVATION SECTION */}
+            <Card className="mb-6 shadow-none">
+                <CardContent className="pt-6">
+                    <div
+                        className={`flex justify-between items-center cursor-pointer ${expandedSections.excavation ? 'mb-4' : ''}`}
+                        onClick={() => toggleSection('excavation')}
+                    >
+                        <div>
+                            <h3 className="text-lg font-medium text-gray-900">3. Excavation</h3>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="mr-4 font-semibold">{formatCurrency(contractData.excavation)}</span>
+                            {expandedSections.excavation ? (
+                                <ChevronUp className="h-5 w-5 text-gray-600" />
+                            ) : (
+                                <ChevronDown className="h-5 w-5 text-gray-600" />
+                            )}
+                        </div>
+                    </div>
+
+                    {expandedSections.excavation && (
+                        <div className="space-y-4">
+                            <table className="w-full">
+                                <tbody>
+                                    <LineItem
+                                        label="Excavation & Truck"
+                                        code=""
+                                        value={contractData.excavationTotal}
+                                        breakdown={!isCustomerView ? "Site excavation and material removal" : null}
+                                    />
+                                    <LineItem
+                                        label="Bobcat"
+                                        code=""
+                                        value={contractData.bobcatCost}
+                                        breakdown={!isCustomerView ? "Bobcat equipment for site preparation" : null}
+                                    />
+                                    <LineItem
+                                        label="Custom Site Requirements"
+                                        code=""
+                                        value={contractData.customSiteRequirementsCost}
+                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
+                                    />
+                                    <TotalRow
+                                        label="Excavation Total"
+                                        value={contractData.excavation}
+                                    />
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* 4. POOL SHELL INSTALLATION SECTION */}
             <Card className="mb-6 shadow-none">
                 <CardContent className="pt-6">
                     <div
@@ -297,7 +350,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         onClick={() => toggleSection('poolShellInstallation')}
                     >
                         <div>
-                            <h3 className="text-lg font-medium text-gray-900">3. Pool Shell Installation</h3>
+                            <h3 className="text-lg font-medium text-gray-900">4. Pool Shell Installation</h3>
                         </div>
                         <div className="flex items-center">
                             <span className="mr-4 font-semibold">{formatCurrency(contractData.poolShellInstallation)}</span>
@@ -340,59 +393,6 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <TotalRow
                                         label="Pool Shell Installation Total"
                                         value={contractData.poolShellInstallation}
-                                    />
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* 4. EXCAVATION SECTION */}
-            <Card className="mb-6 shadow-none">
-                <CardContent className="pt-6">
-                    <div
-                        className={`flex justify-between items-center cursor-pointer ${expandedSections.excavation ? 'mb-4' : ''}`}
-                        onClick={() => toggleSection('excavation')}
-                    >
-                        <div>
-                            <h3 className="text-lg font-medium text-gray-900">4. Excavation</h3>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.excavation)}</span>
-                            {expandedSections.excavation ? (
-                                <ChevronUp className="h-5 w-5 text-gray-600" />
-                            ) : (
-                                <ChevronDown className="h-5 w-5 text-gray-600" />
-                            )}
-                        </div>
-                    </div>
-
-                    {expandedSections.excavation && (
-                        <div className="space-y-4">
-                            <table className="w-full">
-                                <tbody>
-                                    <LineItem
-                                        label="Excavation & Truck"
-                                        code=""
-                                        value={contractData.excavationTotal}
-                                        breakdown={!isCustomerView ? "Site excavation and material removal" : null}
-                                    />
-                                    <LineItem
-                                        label="Bobcat"
-                                        code=""
-                                        value={contractData.bobcatCost}
-                                        breakdown={!isCustomerView ? "Bobcat equipment for site preparation" : null}
-                                    />
-                                    <LineItem
-                                        label="Custom Site Requirements"
-                                        code=""
-                                        value={contractData.customSiteRequirementsCost}
-                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
-                                    />
-                                    <TotalRow
-                                        label="Excavation Total"
-                                        value={contractData.excavation}
                                     />
                                 </tbody>
                             </table>
@@ -507,48 +507,82 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         <div className="space-y-4">
                             <table className="w-full">
                                 <tbody>
+                                    {/* Paving / Coping Subsection */}
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
+                                            Paving / Coping Components
+                                        </td>
+                                    </tr>
                                     <LineItem
-                                        label="Extra Paving + Concrete"
-                                        code=""
-                                        value={contractData.extraPavingCost}
-                                        breakdown={!isCustomerView ? "Additional paving and concrete work" : null}
-                                    />
-                                    <LineItem
-                                        label="Extra Paving on Existing Concrete"
-                                        code=""
-                                        value={contractData.existingPavingCost}
-                                        breakdown={!isCustomerView ? "Paving work on existing concrete surfaces" : null}
-                                    />
-                                    <LineItem
-                                        label="Concrete Pump"
-                                        code=""
-                                        value={contractData.concretePumpCost}
-                                        breakdown={!isCustomerView ? "Concrete pumping services" : null}
-                                    />
-                                    <LineItem
-                                        label="Under-fence Concrete Strips"
-                                        code=""
-                                        value={contractData.underFenceConcreteStripsCost}
-                                        breakdown={!isCustomerView ? "Concrete strips under fencing" : null}
-                                    />
-                                    <LineItem
-                                        label="Coping Supply"
+                                        label="Supply Coping"
                                         code=""
                                         value={contractData.copingSupplyCost}
                                         breakdown={!isCustomerView ? "Pool edge coping materials" : null}
                                     />
                                     <LineItem
-                                        label="Coping Lay"
+                                        label="Paving and Concreting Total"
+                                        code=""
+                                        value={contractData.extraPavingCost}
+                                        breakdown={!isCustomerView ? "Additional paving and concrete work" : null}
+                                    />
+                                    <LineItem
+                                        label="Concrete Pump Total"
+                                        code=""
+                                        value={contractData.concretePumpCost}
+                                        breakdown={!isCustomerView ? "Concrete pumping services" : null}
+                                    />
+                                    <LineItem
+                                        label="Paving On Existing Concrete Total"
+                                        code=""
+                                        value={contractData.existingPavingCost}
+                                        breakdown={!isCustomerView ? "Paving work on existing concrete surfaces" : null}
+                                    />
+                                    <LineItem
+                                        label="Under Fence Concrete Total"
+                                        code=""
+                                        value={contractData.underFenceConcreteStripsCost}
+                                        breakdown={!isCustomerView ? "Concrete strips under fencing" : null}
+                                    />
+                                    <SubtotalRow
+                                        label="Paving / Coping Subtotal"
+                                        value={contractData.pavingCopingCost}
+                                    />
+
+                                    {/* Paving / Laying Subsection */}
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
+                                            Paving / Laying Components
+                                        </td>
+                                    </tr>
+                                    <LineItem
+                                        label="Paving and Concreting Laying Total"
+                                        code=""
+                                        value={contractData.pavingAndConcretingLayingTotal}
+                                        breakdown={!isCustomerView ? "Sqm × $130" : null}
+                                    />
+                                    <LineItem
+                                        label="Concrete Cuts Total"
+                                        code=""
+                                        value={contractData.concreteCutsCopingCost}
+                                        breakdown={!isCustomerView ? "Concrete cutting and preparation work" : null}
+                                    />
+                                    <LineItem
+                                        label="Lay Pavers"
                                         code=""
                                         value={contractData.copingLayCost}
                                         breakdown={!isCustomerView ? "Pool edge coping installation" : null}
                                     />
                                     <LineItem
-                                        label="Concrete Cuts"
+                                        label="Paving on Existing Concrete Laying Total"
                                         code=""
-                                        value={contractData.concreteCutsCopingCost}
-                                        breakdown={!isCustomerView ? "Concrete cutting and preparation work" : null}
+                                        value={contractData.pavingOnExistingConcreteLayingTotal}
+                                        breakdown={!isCustomerView ? "Sqm × $130" : null}
                                     />
+                                    <SubtotalRow
+                                        label="Paving / Laying Subtotal"
+                                        value={contractData.pavingLayingCost}
+                                    />
+
                                     <TotalRow
                                         label="Paving / Coping Total"
                                         value={contractData.pavingCoping}

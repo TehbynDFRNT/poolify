@@ -154,17 +154,18 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
     console.log('[ExtraPavingConcrete] handleSaveClick: Initiated.');
     console.log('[ExtraPavingConcrete] States at save: selectedCategory (ID):', selectedCategory, ', squareMeters:', squareMeters, ', totalCost:', totalCost);
 
-    if (!selectedCategory || squareMeters <= 0) {
-      toast.error("Please select a category and enter square meters");
-      console.warn('[ExtraPavingConcrete] Save validation failed: Category or Sqr Meters missing.');
-      return;
-    }
+    // Allow saving empty selections
+    // if (!selectedCategory || squareMeters <= 0) {
+    //   toast.error("Please select a category and enter square meters");
+    //   console.warn('[ExtraPavingConcrete] Save validation failed: Category or Sqr Meters missing.');
+    //   return;
+    // }
 
     // Data for this section: ensure category ID is saved.
     const dataToSave = {
-      extra_paving_category: selectedCategory, // This is the ID
-      extra_paving_square_meters: squareMeters,
-      extra_paving_total_cost: totalCost
+      extra_paving_category: selectedCategory || null, // Set to null if empty
+      extra_paving_square_meters: squareMeters || null, // Set to null if 0
+      extra_paving_total_cost: totalCost || null // Set to null if 0
       // No longer nulling out other fields, as the hook now preserves existing data
     };
     console.log('[ExtraPavingConcrete] Prepared dataToSave for DB (should contain category ID):', JSON.stringify(dataToSave));
@@ -233,7 +234,7 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
             <SaveButton
               onClick={handleSaveClick}
               isSubmitting={isSubmitting}
-              disabled={!selectedCategory || squareMeters <= 0}
+              disabled={false}
               buttonText="Save Details"
               className="bg-primary"
             />
