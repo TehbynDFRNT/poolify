@@ -86,12 +86,34 @@ export const usePoolCleanerOptionsGuarded = (poolId: string, customerId: string 
                 throw new Error("Customer and pool information is required");
             }
 
-            // Remove total_cost as it doesn't exist in the database table
+            console.log('Saving pool cleaner data, includeCleaner:', includeCleaner);
+
+            // If includeCleaner is false, delete the record
+            if (!includeCleaner) {
+                console.log('Deleting pool cleaner selection record');
+                const { error: delErr } = await supabase
+                    .from("pool_cleaner_selections")
+                    .delete()
+                    .eq("customer_id", customerId)
+                    .eq("pool_id", poolId);
+
+                if (delErr) {
+                    console.error('Error deleting pool cleaner selection:', delErr);
+                    throw delErr;
+                }
+
+                // Reset local state
+                setSavedSelectionId(null);
+                console.log('Pool cleaner selection deleted successfully');
+                return true;
+            }
+
+            // If includeCleaner is true, proceed with save logic
             const dataToSave = {
                 customer_id: customerId,
                 pool_id: poolId,
                 include_cleaner: includeCleaner,
-                pool_cleaner_id: includeCleaner && selectedCleaner ? selectedCleaner.id : null
+                pool_cleaner_id: selectedCleaner ? selectedCleaner.id : null
             };
 
             console.log('Saving pool cleaner data:', dataToSave);

@@ -68,12 +68,39 @@ export const usePoolCleanerOptions = (poolId: string, customerId: string | null)
 
     setIsSaving(true);
     try {
+      console.log('Saving pool cleaner data, includeCleaner:', includeCleaner);
+
+      // If includeCleaner is false, delete the record
+      if (!includeCleaner) {
+        console.log('Deleting pool cleaner selection record');
+        const { error: delErr } = await supabase
+          .from("pool_cleaner_selections")
+          .delete()
+          .eq("customer_id", customerId)
+          .eq("pool_id", poolId);
+
+        if (delErr) {
+          console.error('Error deleting pool cleaner selection:', delErr);
+          throw delErr;
+        }
+
+        console.log('Pool cleaner selection deleted successfully');
+        toast({
+          title: "Success",
+          description: "Pool cleaner options saved successfully",
+        });
+        return;
+      }
+
+      // If includeCleaner is true, proceed with save logic
       const payload = {
         customer_id: customerId,
         pool_id: poolId,
         include_cleaner: includeCleaner,
-        pool_cleaner_id: includeCleaner && selectedCleaner ? selectedCleaner.id : null,
+        pool_cleaner_id: selectedCleaner ? selectedCleaner.id : null,
       };
+
+      console.log('Saving pool cleaner data:', payload);
 
       // Check if a record already exists
       const { data: existing, error: checkError } = await supabase
