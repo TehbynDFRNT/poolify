@@ -1,12 +1,14 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { FileText, FileBarChart, MapPin, Shovel, Shield, AlertTriangle, Settings, Package, DollarSign } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSnapshots } from "@/hooks/useSnapshots";
 import { useSnapshot } from "@/hooks/useSnapshot";
+import { useContractDetailsConfirmed } from "@/components/contract/hooks/useContractDetailsConfirmed";
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
 import { SummarySection } from "@/components/pool-builder/summary/SummarySection";
 import { Button } from "@/components/ui/button";
@@ -63,6 +65,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   const [selectedProposal, setSelectedProposal] = useState<PoolProject | null>(null);
   const [selectedProposalId, setSelectedProposalId] = useState<string>("");
   const [proposalsLoading, setProposalsLoading] = useState(true);
+  const [contractSignatoryDiffers, setContractSignatoryDiffers] = useState(false);
   const navigate = useNavigate();
   
   // Get proposal IDs for snapshot fetching
@@ -71,6 +74,9 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   
   // Get full snapshot data for selected customer
   const { snapshot: customerSnapshot, loading: customerSnapshotLoading } = useSnapshot(customerId || "");
+  
+  // Check if contract customer details have been confirmed
+  const { isConfirmed: contractDetailsConfirmed, isLoading: contractDetailsLoading, refreshConfirmationStatus } = useContractDetailsConfirmed(customerId);
   
   useEffect(() => {
     fetchProposals();
@@ -302,9 +308,9 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
           <FileText className="h-4 w-4" />
           Customer Details
         </TabsTrigger>
-        <TabsTrigger value="summary" className="flex items-center gap-2">
-          <FileBarChart className="h-4 w-4" />
-          Proposal Summary
+        <TabsTrigger value="contractsummary" className="flex items-center gap-2">
+          <DollarSign className="h-4 w-4" />
+          Contract Summary
         </TabsTrigger>
         <TabsTrigger value="basics" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
@@ -329,10 +335,6 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         <TabsTrigger value="inclusions" className="flex items-center gap-2">
           <Package className="h-4 w-4" />
           Inclusions
-        </TabsTrigger>
-        <TabsTrigger value="contractsummary" className="flex items-center gap-2">
-          <DollarSign className="h-4 w-4" />
-          Contract Summary
         </TabsTrigger>
       </TabsList>
 
@@ -403,10 +405,28 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
           {/* Customer Information Card - only show when customer is selected */}
           {customerId && selectedProposal && (
             <Card className="p-6">
-              <CustomerInformationSection 
-                existingCustomer={selectedProposal}
-                readonly={true}
-              />
+              <div className="space-y-6">
+                {/* Toggle for contract signatory details */}
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="space-y-1">
+                    <label className="text-sm font-medium text-blue-900">
+                      Contract signatory details differ from the Proposal?
+                    </label>
+                    <p className="text-xs text-blue-700">
+                      Enable editing if the contract signatory details need to be different from the proposal
+                    </p>
+                  </div>
+                  <Switch
+                    checked={contractSignatoryDiffers}
+                    onCheckedChange={setContractSignatoryDiffers}
+                  />
+                </div>
+                
+                <CustomerInformationSection 
+                  existingCustomer={selectedProposal}
+                  readonly={!contractSignatoryDiffers}
+                />
+              </div>
             </Card>
           )}
         </div>
@@ -415,7 +435,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       {/* Contract Basics Tab */}
       <TabsContent value="basics">
         <div className="space-y-6">
-          {customerId && selectedProposal ? (
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
             <ContractBasicsSection
               data={formData.contractBasics}
               onChange={updateContractBasics}
@@ -426,9 +446,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
               <div className="text-center space-y-4">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold">No Customer Selected</h3>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
                   <p className="text-muted-foreground">
-                    Please select a customer to complete the contract basics.
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to complete the contract basics."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
                   </p>
                 </div>
               </div>
@@ -440,7 +468,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       {/* Site Details Tab */}
       <TabsContent value="site">
         <div className="space-y-6">
-          {customerId && selectedProposal ? (
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
             <>
               <AccessSiteConditionsSection
                 data={formData.accessSiteConditions}
@@ -473,9 +501,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
               <div className="text-center space-y-4">
                 <MapPin className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold">No Customer Selected</h3>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
                   <p className="text-muted-foreground">
-                    Please select a customer to complete the site details.
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to complete the site details."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
                   </p>
                 </div>
               </div>
@@ -487,7 +523,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       {/* Safety and Temporary Works Tab */}
       <TabsContent value="safety">
         <div className="space-y-6">
-          {customerId && selectedProposal ? (
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
             <SafetyTemporaryWorksSection
               data={formData.safetyTemporaryWorks}
               onChange={updateSafetyTemporaryWorks}
@@ -498,9 +534,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
               <div className="text-center space-y-4">
                 <Shield className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold">No Customer Selected</h3>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
                   <p className="text-muted-foreground">
-                    Please select a customer to complete safety and temporary works details.
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to complete safety and temporary works details."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
                   </p>
                 </div>
               </div>
@@ -512,7 +556,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       {/* Extra Cost Risks Tab */}
       <TabsContent value="risks">
         <div className="space-y-6">
-          {customerId && selectedProposal ? (
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
             <ExtraCostRiskFlagsSection
               data={formData.extraCostRiskFlags}
               onChange={updateExtraCostRiskFlags}
@@ -523,9 +567,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
               <div className="text-center space-y-4">
                 <AlertTriangle className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold">No Customer Selected</h3>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
                   <p className="text-muted-foreground">
-                    Please select a customer to complete extra cost risk assessment.
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to complete extra cost risk assessment."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
                   </p>
                 </div>
               </div>
@@ -537,7 +589,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       {/* Special Considerations Tab */}
       <TabsContent value="special">
         <div className="space-y-6">
-          {customerId && selectedProposal ? (
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
             <>
               <SpecialWorkInstructionsSection
                 data={formData.specialWorkInstructions}
@@ -555,9 +607,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
               <div className="text-center space-y-4">
                 <Settings className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold">No Customer Selected</h3>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
                   <p className="text-muted-foreground">
-                    Please select a customer to complete special considerations.
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to complete special considerations."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
                   </p>
                 </div>
               </div>
@@ -569,7 +629,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       {/* Inclusions Tab */}
       <TabsContent value="inclusions">
         <div className="space-y-6">
-          {customerId && selectedProposal ? (
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
             <InclusionsSection
               data={formData.inclusions}
               onChange={updateInclusions}
@@ -580,9 +640,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
               <div className="text-center space-y-4">
                 <Package className="h-12 w-12 text-muted-foreground mx-auto" />
                 <div>
-                  <h3 className="text-lg font-semibold">No Customer Selected</h3>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
                   <p className="text-muted-foreground">
-                    Please select a customer to complete inclusions and exclusions.
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to complete inclusions and exclusions."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
                   </p>
                 </div>
               </div>
@@ -592,39 +660,13 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       </TabsContent>
 
 
-      <TabsContent value="summary">
-        <Card className="p-6">
-          {selectedProposal ? (
-            <SummarySection showMargins={false} hideSubmitButton={true} />
-          ) : (
-            <div className="text-center space-y-4">
-              <FileBarChart className="h-12 w-12 text-muted-foreground mx-auto" />
-              <div>
-                <h3 className="text-lg font-semibold">No Proposal Selected</h3>
-                <p className="text-muted-foreground">
-                  Please select a proposal to view the summary.
-                </p>
-              </div>
-            </div>
-          )}
-        </Card>
-      </TabsContent>
-
       <TabsContent value="contractsummary">
         <Card className="p-6">
           {selectedProposal ? (
-            <>
-              {console.log('🎯 ContractBuilderTabs rendering ContractSummary', { 
-                selectedProposal: selectedProposal.id, 
-                customerSnapshot,
-                customerSnapshotLoading,
-                customerId
-              })}
-              <ContractSummary 
-                snapshot={customerSnapshot} 
-                showMargins={false} 
-              />
-            </>
+            <ContractSummary 
+              snapshot={customerSnapshot} 
+              showMargins={false} 
+            />
           ) : (
             <div className="text-center space-y-4">
               <DollarSign className="h-12 w-12 text-muted-foreground mx-auto" />

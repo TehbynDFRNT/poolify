@@ -1,29 +1,162 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Shield } from "lucide-react";
+import { Shield, X } from "lucide-react";
 import { SafetyTemporaryWorks, R1_OPTIONS, R5_OPTIONS } from "@/types/contract-qa";
+import { useContractSafety } from "@/components/contract/hooks/useContractSafety";
+import { useSearchParams } from "react-router-dom";
 
 interface SafetyTemporaryWorksSectionProps {
-  data: SafetyTemporaryWorks;
-  onChange: (data: SafetyTemporaryWorks) => void;
+  data?: SafetyTemporaryWorks; // Make optional since we'll manage state internally
+  onChange?: (data: SafetyTemporaryWorks) => void; // Make optional
   readonly?: boolean;
   onSave?: () => void;
 }
 
 export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionProps> = ({
-  data,
-  onChange,
+  data: parentData,
+  onChange: parentOnChange,
   readonly = false,
   onSave,
 }) => {
+  const [searchParams] = useSearchParams();
+  const customerId = searchParams.get('customerId');
+  const [hasExistingRecord, setHasExistingRecord] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Manage form state internally
+  const [formData, setFormData] = useState<SafetyTemporaryWorks>({
+    tempPoolSafetyBarrier: "",
+    tempSafetyBarrierType: "",
+    powerConnectionProvided: "",
+    hardCoverRequired: "",
+    permPoolSafetyBarrier: "",
+    tempFenceProvided: "",
+  });
+  
+  const { saveContractSafety, loadContractSafety, isSubmitting } = useContractSafety();
+
+  // Load safety data on initial mount only
+  useEffect(() => {
+    if (!customerId || isInitialized) return;
+
+    const loadData = async () => {
+      try {
+        console.log('🔍 Loading safety data for customer:', customerId);
+        const existingData = await loadContractSafety(customerId);
+        
+        if (existingData) {
+          console.log('✅ Found existing safety data:', existingData);
+          setHasExistingRecord(true);
+          // Map database fields to form fields
+          const mappedData: SafetyTemporaryWorks = {
+            tempPoolSafetyBarrier: existingData.tpc_tpsb || "",
+            tempSafetyBarrierType: existingData.tpc_temporary_barrier_type || "",
+            powerConnectionProvided: existingData.tpc_power_connection || "",
+            hardCoverRequired: existingData.tpc_hardcover || "",
+            permPoolSafetyBarrier: existingData.tpc_ppsb || "",
+            tempFenceProvided: existingData.tpc_temp_fence || "",
+          };
+          setFormData(mappedData);
+        } else {
+          console.log('📝 No existing safety data found - component will mount with empty form');
+          setHasExistingRecord(false);
+        }
+      } catch (error) {
+        console.warn('⚠️ Error loading safety data (component will mount with empty form):', error);
+        setHasExistingRecord(false);
+        // Don't throw error - just continue with empty form
+      } finally {
+        setIsInitialized(true);
+      }
+    };
+
+    loadData();
+  }, [customerId, isInitialized]);
+
+  // Reset initialization state on unmount
+  useEffect(() => {
+    return () => {
+      setIsInitialized(false);
+    };
+  }, []);
+
   const handleFieldChange = (field: keyof SafetyTemporaryWorks, value: any) => {
-    onChange({
-      ...data,
-      [field]: value,
+    // Update internal state
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+      
+      // If temp pool safety barrier is not "Yes", clear the barrier type field
+      if (field === "tempPoolSafetyBarrier" && value !== "Yes") {
+        newData.tempSafetyBarrierType = "";
+      }
+      
+      return newData;
     });
+  };
+
+  // Check if all required fields are filled
+  const isFormValid = () => {
+    // All main fields are required
+    const requiredFields = [
+      formData.tempPoolSafetyBarrier,
+      formData.powerConnectionProvided,
+      formData.hardCoverRequired,
+      formData.permPoolSafetyBarrier,
+      formData.tempFenceProvided
+    ];
+    
+    // Check if all required fields have values
+    const allFieldsFilled = requiredFields.every(field => field !== "");
+    
+    // If temp pool safety barrier is "Yes", then barrier type is also required
+    if (formData.tempPoolSafetyBarrier === "Yes" && formData.tempSafetyBarrierType === "") {
+      return false;
+    }
+    
+    return allFieldsFilled;
+  };
+
+  const handleSave = async () => {
+    if (!customerId) {
+      console.error('No customer ID available');
+      return;
+    }
+
+    try {
+      // Map form fields to database fields using internal formData state
+      // Always include barrier type field so it gets nullified when barrier not required
+      const safetyData = {
+        tpc_tpsb: formData.tempPoolSafetyBarrier,
+        tpc_temporary_barrier_type: formData.tempPoolSafetyBarrier === "Yes" ? formData.tempSafetyBarrierType : "",
+        tpc_power_connection: formData.powerConnectionProvided,
+        tpc_hardcover: formData.hardCoverRequired,
+        tpc_ppsb: formData.permPoolSafetyBarrier,
+        tpc_temp_fence: formData.tempFenceProvided,
+      };
+
+      const result = await saveContractSafety(customerId, safetyData);
+      if (result && !hasExistingRecord) {
+        setHasExistingRecord(true);
+      }
+      
+      // Update parent with saved data if onChange is provided
+      if (parentOnChange) {
+        parentOnChange(formData);
+      }
+      
+      // Call the original onSave callback if provided
+      if (onSave) {
+        onSave();
+      }
+    } catch (error) {
+      console.error('Error saving safety data:', error);
+    }
   };
 
   return (
@@ -40,11 +173,23 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
         
         <div className="grid gap-6">
           <div className="grid gap-3">
-            <Label htmlFor="tempPoolSafetyBarrier" className="text-base font-medium">
-              Temporary pool safety barrier required? <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-start">
+              <Label htmlFor="tempPoolSafetyBarrier" className="text-base font-medium">
+                Temporary pool safety barrier required? <span className="text-destructive">*</span>
+              </Label>
+              {formData.tempPoolSafetyBarrier && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("tempPoolSafetyBarrier", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
             <Select
-              value={data.tempPoolSafetyBarrier}
+              value={formData.tempPoolSafetyBarrier}
               onValueChange={(value) => handleFieldChange("tempPoolSafetyBarrier", value)}
               disabled={readonly}
             >
@@ -61,13 +206,25 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
             </Select>
           </div>
 
-          {data.tempPoolSafetyBarrier === "Yes" && (
+          {formData.tempPoolSafetyBarrier === "Yes" && (
             <div className="grid gap-3">
-              <Label htmlFor="tempSafetyBarrierType" className="text-base font-medium">
-                Type of temporary safety barrier <span className="text-destructive">*</span>
-              </Label>
+              <div className="flex justify-between items-start">
+                <Label htmlFor="tempSafetyBarrierType" className="text-base font-medium">
+                  Type of temporary safety barrier <span className="text-destructive">*</span>
+                </Label>
+                {formData.tempSafetyBarrierType && !readonly && (
+                  <button
+                    type="button"
+                    onClick={() => handleFieldChange("tempSafetyBarrierType", "")}
+                    className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Remove Value
+                  </button>
+                )}
+              </div>
               <Select
-                value={data.tempSafetyBarrierType}
+                value={formData.tempSafetyBarrierType}
                 onValueChange={(value) => handleFieldChange("tempSafetyBarrierType", value)}
                 disabled={readonly}
               >
@@ -86,11 +243,23 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
           )}
 
           <div className="grid gap-3">
-            <Label htmlFor="powerConnectionProvided" className="text-base font-medium">
-              Power connection (temp‐works) <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-start">
+              <Label htmlFor="powerConnectionProvided" className="text-base font-medium">
+                Power connection (temp‐works) <span className="text-destructive">*</span>
+              </Label>
+              {formData.powerConnectionProvided && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("powerConnectionProvided", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
             <Select
-              value={data.powerConnectionProvided}
+              value={formData.powerConnectionProvided}
               onValueChange={(value) => handleFieldChange("powerConnectionProvided", value)}
               disabled={readonly}
             >
@@ -108,11 +277,23 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
           </div>
 
           <div className="grid gap-3">
-            <Label htmlFor="hardCoverRequired" className="text-base font-medium">
-              Hard cover over pool shell required? <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-start">
+              <Label htmlFor="hardCoverRequired" className="text-base font-medium">
+                Hard cover over pool shell required? <span className="text-destructive">*</span>
+              </Label>
+              {formData.hardCoverRequired && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("hardCoverRequired", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
             <Select
-              value={data.hardCoverRequired}
+              value={formData.hardCoverRequired}
               onValueChange={(value) => handleFieldChange("hardCoverRequired", value)}
               disabled={readonly}
             >
@@ -130,11 +311,23 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
           </div>
 
           <div className="grid gap-3">
-            <Label htmlFor="permPoolSafetyBarrier" className="text-base font-medium">
-              Permanent pool safety barrier included? <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-start">
+              <Label htmlFor="permPoolSafetyBarrier" className="text-base font-medium">
+                Permanent pool safety barrier included? <span className="text-destructive">*</span>
+              </Label>
+              {formData.permPoolSafetyBarrier && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("permPoolSafetyBarrier", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
             <Select
-              value={data.permPoolSafetyBarrier}
+              value={formData.permPoolSafetyBarrier}
               onValueChange={(value) => handleFieldChange("permPoolSafetyBarrier", value)}
               disabled={readonly}
             >
@@ -152,11 +345,23 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
           </div>
 
           <div className="grid gap-3">
-            <Label htmlFor="tempFenceProvided" className="text-base font-medium">
-              Temporary fence supplied? <span className="text-destructive">*</span>
-            </Label>
+            <div className="flex justify-between items-start">
+              <Label htmlFor="tempFenceProvided" className="text-base font-medium">
+                Temporary fence supplied? <span className="text-destructive">*</span>
+              </Label>
+              {formData.tempFenceProvided && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("tempFenceProvided", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
             <Select
-              value={data.tempFenceProvided}
+              value={formData.tempFenceProvided}
               onValueChange={(value) => handleFieldChange("tempFenceProvided", value)}
               disabled={readonly}
             >
@@ -177,10 +382,14 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
         {!readonly && (
           <div className="flex justify-end pt-4 border-t">
             <Button 
-              onClick={onSave}
+              onClick={handleSave}
+              disabled={isSubmitting || !isFormValid()}
               className="min-w-[140px]"
             >
-              Save Safety & Temporary Works
+              {isSubmitting ? 
+                (hasExistingRecord ? "Updating..." : "Saving...") : 
+                (hasExistingRecord ? "Update Safety & Temporary Works" : "Save Safety & Temporary Works")
+              }
             </Button>
           </div>
         )}

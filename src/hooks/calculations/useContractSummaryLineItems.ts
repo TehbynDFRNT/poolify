@@ -10,61 +10,53 @@ import { usePriceCalculator } from './use-calculator-totals';
 import { getHWIInsuranceCost } from '@/types/hwi-insurance';
 
 export interface DepositBreakdown {
+  fireAntCost: number;
   hwiCost: number;
   form15Cost: number;
   depositRemainder: number;
   totalDeposit: number;
 }
 
-export interface ContractSummaryData {
-  deposit: number;
-  poolShellSupply: number;
-  poolShellInstallation: number;
-  excavation: number;
-  engineeredBeam: number;
-  extraConcreting: number;
-  pavingCoping: number;
-  retainingWalls: number;
+
+export interface ContractSummaryLineItems {
+  deposit: DepositBreakdown;
+  // Section totals
+  totalDeposit: number;
+  poolShellSupplyEquipmentTotal: number;
+  poolShellInstallationTotal: number;
+  excavationContractTotal: number;
+  beamCost: number;
+  extraConcretingTotal: number;
+  pavingTotal: number;
+  retainingWallsWaterFeatureTotal: number;
   specialInclusions: number;
-  handover: number;
+  handoverTotal: number;
   contractSummaryGrandTotal: number;
-  // Pool Shell Supply breakdown
+  contractTotalExcludingHWI: number;
+  // Breakdown values
   equipmentOnly: number;
   shellValueInContract: number;
-  // Pool Shell Installation breakdown
-  craneCost: number;
-  trafficControlInstallationCost: number;
-  installFeeCost: number;
-  peaGravelBackfillCost: number;
-  // Excavation breakdown
-  excavationTotal: number;
-  bobcatCost: number;
-  customSiteRequirementsCost: number;
-  // Engineered Beam breakdown
-  beamCost: number;
-  // Extra Concreting breakdown
-  extraConcretingCost: number;
-  // Paving / Coping breakdown
+  marginAppliedCraneCost: number;
+  marginAppliedTrafficControlCost: number;
+  marginAppliedPcInstallFee: number;
+  marginAppliedPcPeaGravel: number;
+  marginAppliedPipeFittingCost: number;
+  marginAppliedFilterSlabCost: number;
+  marginAppliedDigCost: number;
+  marginAppliedBobcatCost: number;
+  marginAppliedCustomSiteRequirementsCost: number;
+  marginAppliedAgLineCost: number;
   extraPavingCost: number;
   existingPavingCost: number;
   concretePumpCost: number;
   underFenceConcreteStripsCost: number;
-  copingSupplyCost: number;
-  copingLayCost: number;
-  concreteCutsCopingCost: number;
-  // Paving breakdown components
-  pavingCopingCost: number;
-  pavingLayingCost: number;
-  pavingAndConcretingLayingTotal: number;
-  pavingOnExistingConcreteLayingTotal: number;
-  // Retaining Walls / Water Feature breakdown
+  marginAppliedPcCopingSupply: number;
+  marginAppliedPcCopingLay: number;
+  concreteCutsCost: number;
   retainingWallsCost: number;
   waterFeatureCost: number;
-}
-
-export interface ContractSummaryLineItems {
-  deposit: DepositBreakdown;
-  contractData: ContractSummaryData;
+  includedPavingCoping: number;
+  extraPaving: number;
 }
 
 /**
@@ -89,176 +81,231 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     if (!snapshot) {
       return {
         deposit: {
+          fireAntCost: 0,
           hwiCost: 0,
           form15Cost: 0,
           depositRemainder: 0,
           totalDeposit: 0
         },
-        contractData: {
-          deposit: 0,
-          poolShellSupply: 0,
-          poolShellInstallation: 0,
-          excavation: 0,
-          engineeredBeam: 0,
-          extraConcreting: 0,
-          pavingCoping: 0,
-          retainingWalls: 0,
-          specialInclusions: 0,
-          handover: 0,
-          contractSummaryGrandTotal: 0,
-          equipmentOnly: 0,
-          shellValueInContract: 0,
-          craneCost: 0,
-          trafficControlInstallationCost: 0,
-          installFeeCost: 0,
-          peaGravelBackfillCost: 0,
-          excavationTotal: 0,
-          bobcatCost: 0,
-          customSiteRequirementsCost: 0,
-          beamCost: 0,
-          extraConcretingCost: 0,
-          extraPavingCost: 0,
-          existingPavingCost: 0,
-          concretePumpCost: 0,
-          underFenceConcreteStripsCost: 0,
-          copingSupplyCost: 0,
-          copingLayCost: 0,
-          concreteCutsCopingCost: 0,
-          retainingWallsCost: 0,
-          waterFeatureCost: 0,
-          pavingCopingCost: 0,
-          pavingLayingCost: 0,
-          pavingAndConcretingLayingTotal: 0,
-          pavingOnExistingConcreteLayingTotal: 0,
-        }
+        // Section totals
+        totalDeposit: 0,
+        poolShellSupplyEquipmentTotal: 0,
+        poolShellInstallationTotal: 0,
+        excavationContractTotal: 0,
+        beamCost: 0,
+        extraConcretingTotal: 0,
+        pavingTotal: 0,
+        retainingWallsWaterFeatureTotal: 0,
+        specialInclusions: 0,
+        handoverTotal: 0,
+        contractSummaryGrandTotal: 0,
+        contractTotalExcludingHWI: 0,
+        // Breakdown values
+        equipmentOnly: 0,
+        shellValueInContract: 0,
+        marginAppliedCraneCost: 0,
+        marginAppliedTrafficControlCost: 0,
+        marginAppliedPcInstallFee: 0,
+        marginAppliedPcPeaGravel: 0,
+        marginAppliedPipeFittingCost: 0,
+        marginAppliedFilterSlabCost: 0,
+        marginAppliedDigCost: 0,
+        marginAppliedBobcatCost: 0,
+        marginAppliedCustomSiteRequirementsCost: 0,
+        marginAppliedAgLineCost: 0,
+        extraPavingCost: 0,
+        existingPavingCost: 0,
+        concretePumpCost: 0,
+        underFenceConcreteStripsCost: 0,
+        marginAppliedPcCopingSupply: 0,
+        marginAppliedPcCopingLay: 0,
+        concreteCutsCost: 0,
+        retainingWallsCost: 0,
+        waterFeatureCost: 0,
+        includedPavingCoping: 0,
+        extraPaving: 0,
       };
     }
     // ==================================================================================
-    // 1. DEPOSIT COMPONENTS (Calculated Later)
+    // MARGIN CALCULATIONS
     // ==================================================================================
-    // Get HWI insurance cost based on contract grand total
-    const hwiCost = getHWIInsuranceCost(contractGrandTotal);
-    
-    // Get Form 15 cost from fixed costs
+    // Prepare margin multiplier for post-margin calculations
+    const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
+
+    // Get all fixed cost items
+    const fireAntItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Fire Ant");
+    const fireAntCost = fireAntItem ? parseFloat(fireAntItem.price) : 0;
     const form15Item = snapshot.fixed_costs_json?.find(fc => fc.name === "Form 15");
     const form15Cost = form15Item ? parseFloat(form15Item.price) : 0;
-    
-
-    // ==================================================================================
-    // 2. POOL SHELL SUPPLY CALCULATION
-    // ==================================================================================
-    // Get base pool total from use-calculator-totals.ts
-    const basePoolTotal = totals.basePoolTotal;
-
-    // Calculate value displayed in contract (correlating snapshot values)
-    const form15Price = form15Item ? parseFloat(form15Item.price) : 0;
-    
-    const excavationTotal = basePoolBreakdown.digCost;
-    
-    // Calculate Handover cost from fixed costs
-    const handoverItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Handover" || fc.name.includes("Handover"));
+    const freightItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Freight");
+    const freightCost = freightItem ? parseFloat(freightItem.price) : 0;
+    const miscFixedItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Miscellaneous");
+    const miscFixedCost = miscFixedItem ? parseFloat(miscFixedItem.price) : 0;
+    const handoverItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Handover");
     const handoverCost = handoverItem ? parseFloat(handoverItem.price) : 0;
-
-    // Find Temporary Safety Barrier from fixed costs
-    const tempSafetyBarrierItem = snapshot.fixed_costs_json?.find(fc => fc.name.includes("Temporary Safety Barrier") || fc.name.includes("Safety Barrier"));
+    const earthbondItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Earthbond");
+    const earthbondCost = earthbondItem ? parseFloat(earthbondItem.price) : 0;
+    const agLineItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Ag Line");
+    const agLineCost = agLineItem ? parseFloat(agLineItem.price) : 0;
+    const pipeFittingItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Pipe Fitting + 3 Way Valve");
+    const pipeFittingCost = pipeFittingItem ? parseFloat(pipeFittingItem.price) : 0;
+    const filterSlabItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Filter Slab");
+    const filterSlabCost = filterSlabItem ? parseFloat(filterSlabItem.price) : 0;
+    const tempSafetyBarrierItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Temporary Safety Barrier");
     const tempSafetyBarrierCost = tempSafetyBarrierItem ? parseFloat(tempSafetyBarrierItem.price) : 0;
 
-    const valueDisplayedInContract = 
-      (snapshot.pc_pea_gravel || 0) + // Pea Gravel/Backfill
-      basePoolBreakdown.craneAllowance + // Crane allowance ($700)
-      (snapshot.pc_install_fee || 0) + // Install Fee
-      (snapshot.pc_coping_supply || 0) + // Supply Coping
-      (snapshot.pc_beam || 0) + // BEAM Fixed
-      (snapshot.pc_coping_lay || 0) + // Lay Pavers
-      tempSafetyBarrierCost + // Temporary Safety Barrier
-      form15Price + // Council/Form 15
-      excavationTotal + // Excavation
-      handoverCost; // Handover
-
-    // Get equipment extras total from use-calculator-totals.ts
-    const equipmentOnly = totals.extrasTotal;
-
-    // Calculate shell value in contract: (RRP/Web Price - $ Displayed in Contract) + Temporary Safety Barrier
-    const shellValueInContract = (basePoolTotal - valueDisplayedInContract) + tempSafetyBarrierCost;
+    // Apply margin to relevant items
+    const marginAppliedFireAntCost = fireAntCost * marginMultiplier;
+    const marginAppliedForm15Cost = form15Cost * marginMultiplier;
+    const marginAppliedFreightCost = freightCost * marginMultiplier;
+    const marginAppliedMiscFixedCost = miscFixedCost * marginMultiplier;
+    const marginAppliedHandoverCost = handoverCost * marginMultiplier;
+    const marginAppliedEarthbondCost = earthbondCost * marginMultiplier;
+    const marginAppliedAgLineCost = agLineCost * marginMultiplier;
+    const marginAppliedPipeFittingCost = pipeFittingCost * marginMultiplier;
+    const marginAppliedFilterSlabCost = filterSlabCost * marginMultiplier;
+    const marginAppliedTempSafetyBarrierCost = tempSafetyBarrierCost * marginMultiplier;
     
-    // Calculate pool shell supply equipment total: Equipment + Shell Value In Contract
-    const poolShellSupplyEquipmentTotal = equipmentOnly + shellValueInContract;
+    // Margin-applied pool shell cost
+    const poolShellCost = snapshot.spec_buy_inc_gst || 0;
+    const marginAppliedPoolShellCost = poolShellCost * marginMultiplier;
 
-    // ==================================================================================
-    // 3. POOL SHELL INSTALLATION CALCULATION
-    // ==================================================================================
-    // Calculate Pool Shell Installation components from snapshot
-    // Note: $700 crane allowance is already included in basePoolTotal with margin
-    // Only the excess over $700 should be added here, with margin applied
-    const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
-    const craneCost = ((snapshot.crane_cost || 0) > 700 ? (snapshot.crane_cost || 0) - 700 : 0) * marginMultiplier;
-    const trafficControlInstallationCost = (snapshot.traffic_control_cost || 0) * marginMultiplier;
-    const installFeeCost = snapshot.pc_install_fee || 0; // Install fee from individual pool costs
-    const peaGravelBackfillCost = snapshot.pc_pea_gravel || 0;
+    // Dig / Excavation
+    const digCost = 
+      (snapshot.dig_excavation_rate   || 0) * (snapshot.dig_excavation_hours || 0)
+    + (snapshot.dig_truck_rate        || 0) * (snapshot.dig_truck_hours     || 0) * (snapshot.dig_truck_qty || 0);
+    const marginAppliedDigCost = digCost * marginMultiplier;
 
-    // Calculate Pool Shell Installation total
-    const poolShellInstallationTotal = craneCost + trafficControlInstallationCost + installFeeCost + peaGravelBackfillCost;
+    // Filtration & Handover-components
+    const filtrationPackage =
+      (snapshot.pump_price_inc_gst     || 0)
+    + (snapshot.filter_price_inc_gst   || 0)
+    + (snapshot.sanitiser_price_inc_gst|| 0)
+    + (snapshot.light_price_inc_gst    || 0)
+    + (snapshot.handover_components || [])
+        .reduce((sum, c) => sum + (c.hk_component_price_inc_gst||0) * (c.hk_component_quantity||0), 0);
+    const marginAppliedFiltrationPackage = filtrationPackage * marginMultiplier;
 
-    // ==================================================================================
-    // 4. EXCAVATION CALCULATION
-    // ==================================================================================
-    // Calculate Excavation components from snapshot
-    // Apply margin to site requirements to match proposal calculator logic
-    const bobcatCost = (snapshot.bobcat_cost || 0) * marginMultiplier;
-    
-    // Calculate custom site requirements cost from site_requirements_data
+    // Individual "pc_…" extras - each component separately
+    const pcBeam = snapshot.pc_beam || 0;
+    const pcCopingSupply = snapshot.pc_coping_supply || 0;
+    const pcCopingLay = snapshot.pc_coping_lay || 0;
+    const pcSaltBags = snapshot.pc_salt_bags || 0;
+    const pcTruckedWater = snapshot.pc_trucked_water || 0;
+    const pcMisc = snapshot.pc_misc || 0;
+    const pcPeaGravel = snapshot.pc_pea_gravel || 0;
+    const pcInstallFee = snapshot.pc_install_fee || 0;
+
+    // Apply margin to each individual cost
+    const marginAppliedPcBeam = pcBeam * marginMultiplier;
+    const marginAppliedPcCopingSupply = pcCopingSupply * marginMultiplier;
+    const marginAppliedPcCopingLay = pcCopingLay * marginMultiplier;
+    const marginAppliedPcSaltBags = pcSaltBags * marginMultiplier;
+    const marginAppliedPcTruckedWater = pcTruckedWater * marginMultiplier;
+    const marginAppliedPcMisc = pcMisc * marginMultiplier;
+    const marginAppliedPcPeaGravel = pcPeaGravel * marginMultiplier;
+    const marginAppliedPcInstallFee = pcInstallFee * marginMultiplier;
+
+
+    // Bobcat cost
+    const bobcatCost = snapshot.bobcat_cost || 0;
+    const marginAppliedBobcatCost = bobcatCost * marginMultiplier;
+
+    // Custom site requirements cost
     const customSiteRequirementsCostRaw = snapshot.site_requirements_data 
       ? (typeof snapshot.site_requirements_data === 'string'
          ? JSON.parse(snapshot.site_requirements_data)
          : snapshot.site_requirements_data).reduce((sum: number, item: any) => sum + (Number(item.price) || 0), 0)
       : 0;
-    const customSiteRequirementsCost = customSiteRequirementsCostRaw * marginMultiplier;
+    const marginAppliedCustomSiteRequirementsCost = customSiteRequirementsCostRaw * marginMultiplier;
 
-    // Calculate total Excavation cost
-    const excavationContractTotal = excavationTotal + bobcatCost + customSiteRequirementsCost;
+    // Crane cost
+    const craneCost = snapshot.crane_cost || 0;
+    const marginAppliedCraneCost = craneCost * marginMultiplier;
 
+    // Traffic control cost
+    const trafficControlCost = snapshot.traffic_control_cost || 0;
+    const marginAppliedTrafficControlCost = trafficControlCost * marginMultiplier;
+
+    // ==================================================================================
+    // 1. DEPOSIT COMPONENTS (Calculated Later)
+    // ==================================================================================
+    // Get HWI insurance cost based on contract grand total
+    const hwiCost = getHWIInsuranceCost(contractGrandTotal);
+
+    // ==================================================================================
+    // 2. POOL SHELL SUPPLY CALCULATION
+    // ==================================================================================
+    // Build the "hidden" shell value on a post–margin basis
+    const shellValueInContract =
+      marginAppliedPoolShellCost
+    + marginAppliedFreightCost
+    + marginAppliedMiscFixedCost;
+
+    // Equipment kit: margin-applied filtration package + any extras
+    const equipmentOnly = marginAppliedFiltrationPackage + totals.extrasTotal;
+
+    // Final Pool Shell Supply total
+    const poolShellSupplyEquipmentTotal = equipmentOnly + shellValueInContract;
+
+    // ==================================================================================
+    // 3. EXCAVATION CALCULATION
+    // ==================================================================================
+    // Calculate total Excavation cost including all margin-applied site-prep items
+    const excavationContractTotal =
+        marginAppliedDigCost
+      + marginAppliedBobcatCost
+      + marginAppliedAgLineCost;
+
+
+    // ==================================================================================
+    // 4. POOL SHELL INSTALLATION CALCULATION
+    // ==================================================================================
+    // Calculate Pool Shell Installation total using margin-applied values
+    const poolShellInstallationTotal =
+        marginAppliedCraneCost
+      + marginAppliedTrafficControlCost
+      + marginAppliedPcInstallFee
+      + marginAppliedPcPeaGravel
+      + marginAppliedPipeFittingCost
+      + marginAppliedFilterSlabCost
+      + marginAppliedPcSaltBags
+      + marginAppliedPcTruckedWater
+      + marginAppliedPcMisc
+      + marginAppliedEarthbondCost
+      + marginAppliedTempSafetyBarrierCost;
+    
     // ==================================================================================
     // 5. ENGINEERED BEAM CALCULATION
     // ==================================================================================
-    // Calculate Engineered Beam cost from snapshot
-    const beamCost = snapshot.pc_beam || 0;
+    // Engineered Beam cost is already margin-applied from pc_beam
+    const beamCost = marginAppliedPcBeam;
 
     // ==================================================================================
     // 6. EXTRA CONCRETING CALCULATION
     // ==================================================================================
-    // Calculate Extra Concreting components from snapshot
-    const extraConcretingCost = snapshot.extra_concreting_cost || 0;
-
-    // Calculate total Extra Concreting cost (just extra concreting, no cuts)
-    const extraConcretingTotal = extraConcretingCost;
+    // Structural concrete pours, pumping, strips & cuts (no margin applied here)
+    const extraConcretingTotal =
+        (snapshot.extra_concreting_cost    || 0)
+      + (snapshot.concrete_pump_total_cost || 0)
+      + (snapshot.uf_strips_cost           || 0)
+      + (snapshot.concrete_cuts_cost       || 0);
 
     // ==================================================================================
     // 7. PAVING / COPING CALCULATION
     // ==================================================================================
-    // Calculate Paving / Coping components from snapshot
-    const extraPavingCost = snapshot.extra_paving_cost || 0;
-    const existingPavingCost = snapshot.existing_paving_cost || 0;
-    const concretePumpCost = snapshot.concrete_pump_total_cost || 0;
-    const underFenceConcreteStripsCost = snapshot.uf_strips_cost || 0;
-    const copingSupplyCost = snapshot.pc_coping_supply || 0;
-    const copingLayCost = snapshot.pc_coping_lay || 0;
-    const concreteCutsCopingCost = snapshot.concrete_cuts_cost || 0; // Same as concreteCutsCost but for paving section
+    // Included Paving & Coping (with margin)
+    const includedPavingCoping =
+        marginAppliedPcCopingSupply
+      + marginAppliedPcCopingLay;
 
-    // Calculate Paving / Coping cost using specified components:
-    // "Supply Coping" + "Paving and Concreting Total" + "Concrete Pump Total" + "Paving On Existing Concrete Total" + "Under Fence Concrete Total"
-    const pavingCopingCost = copingSupplyCost + extraPavingCost + concretePumpCost + existingPavingCost + underFenceConcreteStripsCost;
+    // Extra Paving (without margin)
+    const extraPaving =
+        (snapshot.extra_paving_cost    || 0)
+      + (snapshot.existing_paving_cost || 0);
 
-    // Calculate Paving / Laying cost using specified components:
-    // "Paving and Concreting Laying Total (Sqm * 130)" + "Concrete Cuts Total" + "Lay Pavers" + "Paving on Existing Concrete Laying Total (Sqm * 130)"
-    const pavingAndConcretingLayingTotal = (snapshot.extra_paving_sqm || 0) * 130;
-    const concreteCutsTotal = concreteCutsCopingCost; // concrete_cuts_cost (covers both round pool cuts and diagonal cuts)
-    const layPaversTotal = copingLayCost; // pc_coping_lay
-    const pavingOnExistingConcreteLayingTotal = (snapshot.existing_paving_sqm || 0) * 130;
-    
-    const pavingLayingCost = pavingAndConcretingLayingTotal + concreteCutsTotal + layPaversTotal + pavingOnExistingConcreteLayingTotal;
-
-    // Calculate total Paving cost (Coping + Laying)
-    const pavingTotal = pavingCopingCost + pavingLayingCost;
+    // Final Paving total
+    const pavingTotal = includedPavingCoping + extraPaving;
 
     // ==================================================================================
     // 8. RETAINING WALLS / WATER FEATURE CALCULATION
@@ -271,31 +318,37 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     const retainingWallsWaterFeatureTotal = retainingWallsCost + waterFeatureCost;
 
     // ==================================================================================
-    // 9. SPECIAL INCLUSIONS CALCULATION (Currently 0)
+    // 9. SPECIAL INCLUSIONS CALCULATION
     // ==================================================================================
-    // TODO: Replace with actual calculation when requirements are defined
+    // Special inclusions include custom site requirements
+    const specialInclusions = marginAppliedCustomSiteRequirementsCost;
 
     // ==================================================================================
-    // 10. HANDOVER CALCULATION (Already calculated above in section 2)
+    // 10. HANDOVER CALCULATION
     // ==================================================================================
-    // handoverCost is calculated from fixed costs in section 2
+    // Handover cost from fixed costs with margin applied
+    const handoverTotal = marginAppliedHandoverCost;
 
     // ==================================================================================
     // CONTRACT SUMMARY GRAND TOTAL CALCULATION
     // ==================================================================================
     // Calculate Contract Summary Grand Total (sum of all contract line item subtotals)
     const contractSummaryGrandTotal = 
-      form15Cost +
+      marginAppliedFireAntCost +
+      marginAppliedForm15Cost +
       hwiCost +
       poolShellSupplyEquipmentTotal + 
-      poolShellInstallationTotal + 
       excavationContractTotal + 
+      poolShellInstallationTotal + 
       beamCost + 
       extraConcretingTotal + 
       pavingTotal + 
       retainingWallsWaterFeatureTotal + 
-      0 + // specialInclusions (currently 0)
-      handoverCost;
+      specialInclusions + 
+      handoverTotal;
+
+    // Calculate Contract Total Excluding HWI
+    const contractTotalExcludingHWI = contractSummaryGrandTotal - hwiCost;
 
     // ==================================================================================
     // 11. DEPOSIT CALCULATION
@@ -303,80 +356,53 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     
     // Calculate deposit as simply 10% of contract summary grand total
     const totalDeposit = contractSummaryGrandTotal * 0.1;
-
     const deposit: DepositBreakdown = {
+      fireAntCost: marginAppliedFireAntCost,
       hwiCost,
-      form15Cost,
-      depositRemainder: 0, // No longer calculating remainder
+      form15Cost: marginAppliedForm15Cost,
+      depositRemainder: totalDeposit - marginAppliedFireAntCost - hwiCost - marginAppliedForm15Cost,
       totalDeposit
     };
 
-    // ==================================================================================
-    // CONTRACT DATA ASSEMBLY
-    // ==================================================================================
-    // Calculate contract summary data using actual calculated values
-    const contractData: ContractSummaryData = {
-      // 1. DEPOSIT
-      deposit: totalDeposit,
-      
-      // 2. POOL SHELL SUPPLY: Equipment + Shell Value In Contract
-      poolShellSupply: poolShellSupplyEquipmentTotal,
-      
-      // 3. POOL SHELL INSTALLATION: Crane + Traffic Control + Install Fee + Pea Gravel
-      poolShellInstallation: poolShellInstallationTotal,
-      
-      // 4. EXCAVATION: Excavation + Bobcat + Custom Site Requirements
-      excavation: excavationContractTotal,
-      
-      // 5. ENGINEERED BEAM: pc_beam from variable costs
-      engineeredBeam: beamCost,
-      
-      // 6. EXTRA CONCRETING: Extra Concreting only (no cuts)
-      extraConcreting: extraConcretingTotal,
-      
-      // 7. PAVING / COPING: Extra Paving + Existing Paving + Concrete Pump + Under-fence Strips + Coping Supply + Coping Lay + Concrete Cuts
-      pavingCoping: pavingTotal,
-      
-      // 8. RETAINING WALLS / WATER FEATURE: Retaining Walls + Water Feature
-      retainingWalls: retainingWallsWaterFeatureTotal,
-      
-      // 9. SPECIAL INCLUSIONS: Currently 0
-      specialInclusions: 0,
-      
-      // 10. HANDOVER: Handover cost from fixed costs
-      handover: handoverCost,
-      
-      // CONTRACT SUMMARY GRAND TOTAL: Sum of all contract line item subtotals
+    const result: ContractSummaryLineItems = {
+      deposit,
+      // Section totals
+      totalDeposit,
+      poolShellSupplyEquipmentTotal,
+      poolShellInstallationTotal,
+      excavationContractTotal,
+      beamCost,
+      extraConcretingTotal,
+      pavingTotal,
+      retainingWallsWaterFeatureTotal,
+      specialInclusions,
+      handoverTotal,
       contractSummaryGrandTotal,
+      contractTotalExcludingHWI,
+      // Breakdown values
       equipmentOnly,
       shellValueInContract,
-      craneCost,
-      trafficControlInstallationCost,
-      installFeeCost,
-      peaGravelBackfillCost,
-      excavationTotal,
-      bobcatCost,
-      customSiteRequirementsCost,
-      beamCost,
-      extraConcretingCost,
-      extraPavingCost,
-      existingPavingCost,
-      concretePumpCost,
-      underFenceConcreteStripsCost,
-      copingSupplyCost,
-      copingLayCost,
-      concreteCutsCopingCost,
+      marginAppliedCraneCost,
+      marginAppliedTrafficControlCost,
+      marginAppliedPcInstallFee,
+      marginAppliedPcPeaGravel,
+      marginAppliedPipeFittingCost,
+      marginAppliedFilterSlabCost,
+      marginAppliedDigCost,
+      marginAppliedBobcatCost,
+      marginAppliedCustomSiteRequirementsCost,
+      marginAppliedAgLineCost,
+      extraPavingCost: (snapshot.extra_paving_cost || 0),
+      existingPavingCost: (snapshot.existing_paving_cost || 0),
+      concretePumpCost: (snapshot.concrete_pump_total_cost || 0),
+      underFenceConcreteStripsCost: (snapshot.uf_strips_cost || 0),
+      marginAppliedPcCopingSupply,
+      marginAppliedPcCopingLay,
+      concreteCutsCost: (snapshot.concrete_cuts_cost || 0),
       retainingWallsCost,
       waterFeatureCost,
-      pavingCopingCost,
-      pavingLayingCost,
-      pavingAndConcretingLayingTotal,
-      pavingOnExistingConcreteLayingTotal,
-    };
-
-    const result = {
-      deposit,
-      contractData
+      includedPavingCoping,
+      extraPaving,
     };
     
     console.log('✅ useContractSummaryLineItems result:', result);

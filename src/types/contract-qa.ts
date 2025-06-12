@@ -64,18 +64,18 @@ export interface SafetyTemporaryWorks {
 
 // Extra-Cost Risk Flags Section
 export interface ExtraCostRiskFlags {
-  locatingBoundaries: R1Values;
-  difficultAccess: R1Values;
-  ownerInterference: R1Values;
-  primeCostVariance: R1Values;
-  statutoryVariations: R1Values;
-  delayedProgress: R1Values;
-  latentConditions: R1Values;
-  suspensionCosts: R1Values;
-  excavatedFillCartage: R1Values;
-  productSubstitution: R1Values;
-  specialConditions: R1Values;
-  thirdPartyComponents: R1Values;
+  locatingBoundaries: R1Values | "";
+  difficultAccess: R1Values | "";
+  ownerInterference: R1Values | "";
+  primeCostVariance: R1Values | "";
+  statutoryVariations: R1Values | "";
+  delayedProgress: R1Values | "";
+  latentConditions: R1Values | "";
+  suspensionCosts: R1Values | "";
+  excavatedFillCartage: R1Values | "";
+  productSubstitution: R1Values | "";
+  specialConditions: R1Values | "";
+  thirdPartyComponents: R1Values | "";
 }
 
 // Owner-Supplied Items Section
@@ -175,68 +175,68 @@ export const S1_OPTIONS: S1Values[] = ["Yes", "No", "Unknown"];
 export const IE_OPTIONS: IEValues[] = ["Included", "Not Included"];
 export const EC_OPTIONS: ECValues[] = ["Not Included", "10amp - Plug In", "15amp - Plug In", "20amp - Plug In", "25amp - Hardwired", "32amp - Hardwired", "40amp - Hardwired"];
 
-// Default values for extra cost risk flags (all default to "No")
+// Default values for extra cost risk flags (all default to empty for independent state management)
 export const DEFAULT_EXTRA_COST_RISK_FLAGS: ExtraCostRiskFlags = {
-  locatingBoundaries: "No",
-  difficultAccess: "No",
-  ownerInterference: "No",
-  primeCostVariance: "No",
-  statutoryVariations: "No",
-  delayedProgress: "No",
-  latentConditions: "No",
-  suspensionCosts: "No",
-  excavatedFillCartage: "No",
-  productSubstitution: "No",
-  specialConditions: "No",
-  thirdPartyComponents: "No",
+  locatingBoundaries: "",
+  difficultAccess: "",
+  ownerInterference: "",
+  primeCostVariance: "",
+  statutoryVariations: "",
+  delayedProgress: "",
+  latentConditions: "",
+  suspensionCosts: "",
+  excavatedFillCartage: "",
+  productSubstitution: "",
+  specialConditions: "",
+  thirdPartyComponents: "",
 };
 
-// Default values for inclusions (based on docs/inclusions.md defaults)
+// Default values for inclusions (all default to empty for independent state management)
 export const DEFAULT_CONTRACT_INCLUSIONS: ContractInclusions = {
-  a: "Not Included",
-  b: "Not Included",
-  c: "Not Included",
-  d: "Not Included",
-  e: "Not Included",
-  f: "Not Included",
-  g: "Not Included",
-  h: "Not Included",
-  i: "Not Included",
-  j: "Not Included",
-  k: "Not Included",
-  l: "Not Included",
-  m: "Not Included",
-  n: "Not Included",
-  o: "Not Included",
-  p: "Not Included",
-  q: "Not Included",
-  r: "Not Included",
-  s: "Not Included",
-  t: "Not Included",
-  u: "Not Included",
-  v: "Not Included",
-  w: "Not Included",
-  x: "Not Included",
-  y: "Not Included",
-  z: "Not Included",
-  aa: "10amp - Plug In", // Special default for electrical connection
-  bb: "Not Included",
-  cc: "Not Included",
-  dd: "Not Included",
-  ee: "Not Included",
-  ff: "Not Included",
-  gg: "Not Included",
-  hh: "Not Included",
-  jj: "Not Included",
-  kk: "Not Included",
-  ll: "Not Included",
-  mm: "Not Included",
-  nn: "Not Included",
-  oo: "Not Included",
-  pp: "Not Included",
-  qq: "Not Included",
-  rr: "Not Included",
-  ss: "Not Included",
-  tt: "Not Included",
-  uu: "Not Included",
+  a: "",
+  b: "",
+  c: "",
+  d: "",
+  e: "",
+  f: "",
+  g: "",
+  h: "",
+  i: "",
+  j: "",
+  k: "",
+  l: "",
+  m: "",
+  n: "",
+  o: "",
+  p: "",
+  q: "",
+  r: "",
+  s: "",
+  t: "",
+  u: "",
+  v: "",
+  w: "",
+  x: "",
+  y: "",
+  z: "",
+  aa: "",
+  bb: "",
+  cc: "",
+  dd: "",
+  ee: "",
+  ff: "",
+  gg: "",
+  hh: "",
+  jj: "",
+  kk: "",
+  ll: "",
+  mm: "",
+  nn: "",
+  oo: "",
+  pp: "",
+  qq: "",
+  rr: "",
+  ss: "",
+  tt: "",
+  uu: "",
 };

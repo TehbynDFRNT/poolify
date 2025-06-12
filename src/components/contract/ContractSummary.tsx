@@ -91,16 +91,15 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
     };
 
     // Get calculated totals from price calculator hook
-    const { contractGrandTotal, totals, fmt } = usePriceCalculator(snapshot);
+    const { contractGrandTotal, grandTotal, totals, fmt } = usePriceCalculator(snapshot);
     
     // Get contract summary line items
-    const { deposit, contractData } = useContractSummaryLineItems(snapshot);
+    const lineItems = useContractSummaryLineItems(snapshot);
     
     console.log('🏗️ ContractSummary rendered', { 
         snapshot: !!snapshot, 
         snapshotId: snapshot?.project_id,
-        deposit, 
-        contractData 
+        lineItems 
     });
     
     // Handle loading state when snapshot is not available
@@ -115,14 +114,14 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
         );
     }
 
-    // contractData now comes from the useContractSummaryLineItems hook
+    // lineItems now comes from the useContractSummaryLineItems hook
 
-    // Use the calculated contract grand total plus HWI insurance
-    const grandTotal = contractGrandTotal
+    // Use the calculated grand total from price calculator (includes third party costs)
+    const proposalGrandTotal = grandTotal
 
     // Calculate HWI insurance cost based on rounded down total
-    const hwiLookupAmount = getHWILookupAmount(grandTotal);
-    const hwiInsuranceCost = getHWIInsuranceCost(grandTotal);
+    const hwiLookupAmount = getHWILookupAmount(proposalGrandTotal);
+    const hwiInsuranceCost = getHWIInsuranceCost(proposalGrandTotal);
 
     return (
         <div className="space-y-6">
@@ -160,12 +159,29 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                 <CardContent className="py-6">
                     <div className="flex justify-between items-center">
                         <div>
-                            <h3 className="text-xl font-bold text-gray-900">CONTRACT TOTAL</h3>
-                            <p className="text-sm text-muted-foreground">Total Contract Price Including All Components</p>
+                            <h3 className="text-xl font-bold text-gray-900">Contract Grand Total</h3>
+                            <p className="text-sm text-muted-foreground">Total Contract Price Including HWI</p>
                         </div>
                         <div className="flex items-center gap-4">
                             <div className="text-2xl font-bold text-gray-900">
-                                {formatCurrency(grandTotal)}
+                                {formatCurrency(lineItems.contractSummaryGrandTotal)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Contract Total Excluding HWI */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <span className="text-sm font-medium text-gray-700">Contract Total Excluding HWI</span>
+                                {!isCustomerView && (
+                                    <p className="text-xs text-muted-foreground">
+                                        Contract total without HWI insurance component
+                                    </p>
+                                )}
+                            </div>
+                            <div className="text-sm font-semibold text-gray-900">
+                                {formatCurrency(lineItems.contractTotalExcludingHWI)}
                             </div>
                         </div>
                     </div>
@@ -174,16 +190,40 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                     <div className="mt-4 pt-4 border-t border-gray-200">
                         <div className="flex justify-between items-center">
                             <div>
-                                <span className="text-sm font-medium text-gray-700">Contract Summary Total</span>
-                                {!isCustomerView && (
-                                    <p className="text-xs text-muted-foreground">
-                                        Delta: {formatCurrency(Math.abs(grandTotal - contractData.contractSummaryGrandTotal))}
-                                    </p>
-                                )}
+                                <span className="text-sm font-medium text-gray-700">Total Proposal Cost</span>
+                                <p className="text-xs text-muted-foreground">
+                                    (Includes Third Party Fencing & Electrical)
+                                </p>
                             </div>
                             <div className="text-sm font-semibold text-gray-900">
-                                {formatCurrency(contractData.contractSummaryGrandTotal)}
+                                {formatCurrency(proposalGrandTotal)}
                             </div>
+                        </div>
+                        
+                        {/* Third Party Costs Breakdown */}
+                        <div className="mt-3 ml-4 space-y-1">
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-muted-foreground">Fencing Total</span>
+                                <span className="text-muted-foreground">{formatCurrency(totals.fencingTotal)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-muted-foreground">Electrical Total</span>
+                                <span className="text-muted-foreground">{formatCurrency(totals.electricalTotal)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs border-t pt-1">
+                                <span className="text-muted-foreground font-medium">Third Party Subtotal</span>
+                                <span className="text-muted-foreground font-medium">{formatCurrency(totals.fencingTotal + totals.electricalTotal)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-xs pt-1">
+                                <span className="text-muted-foreground">Third Party Subtotal - HWI Cost</span>
+                                <span className="text-muted-foreground">{formatCurrency((totals.fencingTotal + totals.electricalTotal) - lineItems.deposit.hwiCost)}</span>
+                            </div>
+                            {!isCustomerView && (
+                                <div className="flex justify-between items-center text-xs pt-1">
+                                    <span className="text-muted-foreground">Delta vs Contract Total (Debug)</span>
+                                    <span className="text-muted-foreground">{formatCurrency(proposalGrandTotal - lineItems.contractSummaryGrandTotal)}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </CardContent>
@@ -200,7 +240,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">1. Deposit</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.deposit)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.totalDeposit)}</span>
                             {expandedSections.deposit ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -214,26 +254,32 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
+                                        label="Fire Ant"
+                                        code=""
+                                        value={lineItems.deposit.fireAntCost}
+                                        breakdown={!isCustomerView ? "Fire ant treatment included in deposit" : null}
+                                    />
+                                    <LineItem
                                         label="HWI Insurance Cost"
                                         code=""
-                                        value={deposit.hwiCost}
+                                        value={lineItems.deposit.hwiCost}
                                         breakdown={!isCustomerView ? "Home Warranty Insurance included in deposit" : null}
                                     />
                                     <LineItem
                                         label="Form 15"
                                         code=""
-                                        value={deposit.form15Cost}
+                                        value={lineItems.deposit.form15Cost}
                                         breakdown={!isCustomerView ? "Building permit and compliance costs" : null}
                                     />
                                     <LineItem
                                         label="Deposit Remainder"
                                         code=""
-                                        value={deposit.depositRemainder}
+                                        value={lineItems.deposit.depositRemainder}
                                         breakdown={!isCustomerView ? "Additional deposit component to reach 10% total" : null}
                                     />
                                     <TotalRow
                                         label="Deposit Total"
-                                        value={deposit.totalDeposit}
+                                        value={lineItems.deposit.totalDeposit}
                                     />
                                 </tbody>
                             </table>
@@ -253,7 +299,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">2. Pool Shell Supply</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.poolShellSupply)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.poolShellSupplyEquipmentTotal)}</span>
                             {expandedSections.poolShellSupply ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -267,20 +313,26 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Equipment & Upgrades"
+                                        label="Filtration Package"
                                         code=""
-                                        value={contractData.equipmentOnly}
-                                        breakdown={!isCustomerView ? "Pool cleaners, heat pumps, blanket rollers, and other upgrades" : null}
+                                        value={lineItems.equipmentOnly - totals.extrasTotal}
+                                        breakdown={!isCustomerView ? "Pump, filter, sanitiser, light, and handover components (margin applied)" : null}
+                                    />
+                                    <LineItem
+                                        label="Equipment Upgrades"
+                                        code=""
+                                        value={totals.extrasTotal}
+                                        breakdown={!isCustomerView ? "Optional upgrades (cleaners, heat pumps, blanket rollers)" : null}
                                     />
                                     <LineItem
                                         label="Shell Value"
                                         code=""
-                                        value={contractData.shellValueInContract}
-                                        breakdown={!isCustomerView ? "Core pool shell value excluding itemized components" : null}
+                                        value={lineItems.shellValueInContract}
+                                        breakdown={!isCustomerView ? "Pool shell, freight, and miscellaneous costs (margin applied)" : null}
                                     />
                                     <TotalRow
                                         label="Pool Shell Supply Total"
-                                        value={contractData.poolShellSupply}
+                                        value={lineItems.poolShellSupplyEquipmentTotal}
                                     />
                                 </tbody>
                             </table>
@@ -300,7 +352,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">3. Excavation</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.excavation)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.excavationContractTotal)}</span>
                             {expandedSections.excavation ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -316,24 +368,24 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Excavation & Truck"
                                         code=""
-                                        value={contractData.excavationTotal}
+                                        value={lineItems.marginAppliedDigCost}
                                         breakdown={!isCustomerView ? "Site excavation and material removal" : null}
                                     />
                                     <LineItem
                                         label="Bobcat"
                                         code=""
-                                        value={contractData.bobcatCost}
+                                        value={lineItems.marginAppliedBobcatCost}
                                         breakdown={!isCustomerView ? "Bobcat equipment for site preparation" : null}
                                     />
                                     <LineItem
-                                        label="Custom Site Requirements"
+                                        label="AG Line"
                                         code=""
-                                        value={contractData.customSiteRequirementsCost}
-                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
+                                        value={lineItems.marginAppliedAgLineCost}
+                                        breakdown={!isCustomerView ? "Site conduit and electrical preparation" : null}
                                     />
                                     <TotalRow
                                         label="Excavation Total"
-                                        value={contractData.excavation}
+                                        value={lineItems.excavationContractTotal}
                                     />
                                 </tbody>
                             </table>
@@ -353,7 +405,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">4. Pool Shell Installation</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.poolShellInstallation)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.poolShellInstallationTotal)}</span>
                             {expandedSections.poolShellInstallation ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -369,30 +421,42 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Crane"
                                         code=""
-                                        value={contractData.craneCost}
+                                        value={lineItems.marginAppliedCraneCost}
                                         breakdown={!isCustomerView ? "Crane services for pool installation" : null}
                                     />
                                     <LineItem
                                         label="Traffic Control"
                                         code=""
-                                        value={contractData.trafficControlInstallationCost}
+                                        value={lineItems.marginAppliedTrafficControlCost}
                                         breakdown={!isCustomerView ? "Traffic management during installation" : null}
                                     />
                                     <LineItem
                                         label="Install Fee"
                                         code=""
-                                        value={contractData.installFeeCost}
+                                        value={lineItems.marginAppliedPcInstallFee}
                                         breakdown={!isCustomerView ? "Pool installation service fee" : null}
                                     />
                                     <LineItem
                                         label="Pea Gravel / Backfill"
                                         code=""
-                                        value={contractData.peaGravelBackfillCost}
+                                        value={lineItems.marginAppliedPcPeaGravel}
                                         breakdown={!isCustomerView ? "Pea gravel and backfill materials" : null}
+                                    />
+                                    <LineItem
+                                        label="Pipe Fitting + 3 Way Valve"
+                                        code=""
+                                        value={lineItems.marginAppliedPipeFittingCost}
+                                        breakdown={!isCustomerView ? "Plumbing fittings and valve installation" : null}
+                                    />
+                                    <LineItem
+                                        label="Filter Slab"
+                                        code=""
+                                        value={lineItems.marginAppliedFilterSlabCost}
+                                        breakdown={!isCustomerView ? "Concrete slab for filtration equipment" : null}
                                     />
                                     <TotalRow
                                         label="Pool Shell Installation Total"
-                                        value={contractData.poolShellInstallation}
+                                        value={lineItems.poolShellInstallationTotal}
                                     />
                                 </tbody>
                             </table>
@@ -412,7 +476,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">5. Engineered Beam</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.engineeredBeam)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.beamCost)}</span>
                             {expandedSections.engineeredBeam ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -428,12 +492,12 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Structural Beam"
                                         code=""
-                                        value={contractData.beamCost}
+                                        value={lineItems.beamCost}
                                         breakdown={!isCustomerView ? "Engineered structural beam components" : null}
                                     />
                                     <TotalRow
                                         label="Engineered Beam Total"
-                                        value={contractData.engineeredBeam}
+                                        value={lineItems.beamCost}
                                     />
                                 </tbody>
                             </table>
@@ -453,7 +517,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">6. Extra Concreting</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.extraConcreting)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.extraConcretingTotal)}</span>
                             {expandedSections.extraConcreting ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -467,14 +531,14 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Extra Concreting"
+                                        label="Structural Concrete Work"
                                         code=""
-                                        value={contractData.extraConcretingCost}
-                                        breakdown={!isCustomerView ? "Additional concrete work requirements" : null}
+                                        value={lineItems.extraConcretingTotal}
+                                        breakdown={!isCustomerView ? "Includes concrete pours, pumping, strips & cuts (no margin)" : null}
                                     />
                                     <TotalRow
                                         label="Extra Concreting Total"
-                                        value={contractData.extraConcreting}
+                                        value={lineItems.extraConcretingTotal}
                                     />
                                 </tbody>
                             </table>
@@ -494,7 +558,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">7. Paving / Coping</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.pavingCoping)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.pavingTotal)}</span>
                             {expandedSections.pavingCoping ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -507,85 +571,55 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         <div className="space-y-4">
                             <table className="w-full">
                                 <tbody>
-                                    {/* Paving / Coping Subsection */}
+                                    {/* Included Paving & Coping Subsection */}
                                     <tr className="border-b border-gray-200 bg-gray-50">
                                         <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
-                                            Paving / Coping Components
+                                            Included Paving & Coping
                                         </td>
                                     </tr>
                                     <LineItem
                                         label="Supply Coping"
                                         code=""
-                                        value={contractData.copingSupplyCost}
-                                        breakdown={!isCustomerView ? "Pool edge coping materials" : null}
-                                    />
-                                    <LineItem
-                                        label="Paving and Concreting Total"
-                                        code=""
-                                        value={contractData.extraPavingCost}
-                                        breakdown={!isCustomerView ? "Additional paving and concrete work" : null}
-                                    />
-                                    <LineItem
-                                        label="Concrete Pump Total"
-                                        code=""
-                                        value={contractData.concretePumpCost}
-                                        breakdown={!isCustomerView ? "Concrete pumping services" : null}
-                                    />
-                                    <LineItem
-                                        label="Paving On Existing Concrete Total"
-                                        code=""
-                                        value={contractData.existingPavingCost}
-                                        breakdown={!isCustomerView ? "Paving work on existing concrete surfaces" : null}
-                                    />
-                                    <LineItem
-                                        label="Under Fence Concrete Total"
-                                        code=""
-                                        value={contractData.underFenceConcreteStripsCost}
-                                        breakdown={!isCustomerView ? "Concrete strips under fencing" : null}
-                                    />
-                                    <SubtotalRow
-                                        label="Paving / Coping Subtotal"
-                                        value={contractData.pavingCopingCost}
-                                    />
-
-                                    {/* Paving / Laying Subsection */}
-                                    <tr className="border-b border-gray-200 bg-gray-50">
-                                        <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
-                                            Paving / Laying Components
-                                        </td>
-                                    </tr>
-                                    <LineItem
-                                        label="Paving and Concreting Laying Total"
-                                        code=""
-                                        value={contractData.pavingAndConcretingLayingTotal}
-                                        breakdown={!isCustomerView ? "Sqm × $130" : null}
-                                    />
-                                    <LineItem
-                                        label="Concrete Cuts Total"
-                                        code=""
-                                        value={contractData.concreteCutsCopingCost}
-                                        breakdown={!isCustomerView ? "Concrete cutting and preparation work" : null}
+                                        value={lineItems.marginAppliedPcCopingSupply}
+                                        breakdown={!isCustomerView ? "Pool edge coping materials (margin applied)" : null}
                                     />
                                     <LineItem
                                         label="Lay Pavers"
                                         code=""
-                                        value={contractData.copingLayCost}
-                                        breakdown={!isCustomerView ? "Pool edge coping installation" : null}
-                                    />
-                                    <LineItem
-                                        label="Paving on Existing Concrete Laying Total"
-                                        code=""
-                                        value={contractData.pavingOnExistingConcreteLayingTotal}
-                                        breakdown={!isCustomerView ? "Sqm × $130" : null}
+                                        value={lineItems.marginAppliedPcCopingLay}
+                                        breakdown={!isCustomerView ? "Pool edge coping installation (margin applied)" : null}
                                     />
                                     <SubtotalRow
-                                        label="Paving / Laying Subtotal"
-                                        value={contractData.pavingLayingCost}
+                                        label="Included Paving & Coping Subtotal"
+                                        value={lineItems.includedPavingCoping}
+                                    />
+
+                                    {/* Extra Paving Subsection */}
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
+                                            Extra Paving
+                                        </td>
+                                    </tr>
+                                    <LineItem
+                                        label="Paving and Concreting"
+                                        code=""
+                                        value={lineItems.extraPavingCost}
+                                        breakdown={!isCustomerView ? "Additional paving and concrete work" : null}
+                                    />
+                                    <LineItem
+                                        label="Paving On Existing Concrete"
+                                        code=""
+                                        value={lineItems.existingPavingCost}
+                                        breakdown={!isCustomerView ? "Paving work on existing concrete surfaces" : null}
+                                    />
+                                    <SubtotalRow
+                                        label="Extra Paving Subtotal"
+                                        value={lineItems.extraPaving}
                                     />
 
                                     <TotalRow
                                         label="Paving / Coping Total"
-                                        value={contractData.pavingCoping}
+                                        value={lineItems.pavingTotal}
                                     />
                                 </tbody>
                             </table>
@@ -605,7 +639,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">8. Retaining Walls / Drop Edge Retaining / Water Feature</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.retainingWalls)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.retainingWallsWaterFeatureTotal)}</span>
                             {expandedSections.retainingWalls ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -621,18 +655,18 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Retaining Walls"
                                         code=""
-                                        value={contractData.retainingWallsCost}
+                                        value={lineItems.retainingWallsCost}
                                         breakdown={!isCustomerView ? "Structural retaining walls" : null}
                                     />
                                     <LineItem
                                         label="Water Feature"
                                         code=""
-                                        value={contractData.waterFeatureCost}
+                                        value={lineItems.waterFeatureCost}
                                         breakdown={!isCustomerView ? "Water feature installation" : null}
                                     />
                                     <TotalRow
                                         label="Retaining Walls / Water Feature Total"
-                                        value={contractData.retainingWalls}
+                                        value={lineItems.retainingWallsWaterFeatureTotal}
                                     />
                                 </tbody>
                             </table>
@@ -652,7 +686,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">9. Special Inclusions</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.specialInclusions)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.specialInclusions)}</span>
                             {expandedSections.specialInclusions ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -666,14 +700,14 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Special Items"
+                                        label="Custom Site Requirements"
                                         code=""
-                                        value={contractData.specialInclusions}
-                                        breakdown={!isCustomerView ? "Project-specific inclusions" : null}
+                                        value={lineItems.marginAppliedCustomSiteRequirementsCost}
+                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
                                     />
                                     <TotalRow
                                         label="Special Inclusions Total"
-                                        value={contractData.specialInclusions}
+                                        value={lineItems.specialInclusions}
                                     />
                                 </tbody>
                             </table>
@@ -693,7 +727,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">10. Handover</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(contractData.handover)}</span>
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.handoverTotal)}</span>
                             {expandedSections.handover ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -709,12 +743,12 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     <LineItem
                                         label="Project Handover"
                                         code=""
-                                        value={contractData.handover}
+                                        value={lineItems.handoverTotal}
                                         breakdown={!isCustomerView ? "Final project handover and documentation" : null}
                                     />
                                     <TotalRow
                                         label="Handover Total"
-                                        value={contractData.handover}
+                                        value={lineItems.handoverTotal}
                                     />
                                 </tbody>
                             </table>
