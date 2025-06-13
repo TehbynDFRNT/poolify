@@ -36,10 +36,18 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
     isResidentOwner: "",
     contractSubjectToFinance: "",
     lenderName: "",
+    interestRate: "",
     workPeriodDays: "",
     anticipatedCommWeek: "",
     inclementWeatherDays: "",
     weekendDays: "",
+    thirdPartyComponents: "",
+    // Additional date fields
+    accessFencingEquipmentDate: "",
+    specificationsDate: "",
+    sitePlanDate: "",
+    permissionToEnterDate: "",
+    otherDate: "",
   });
   
   const { saveContractBasics, loadContractBasics, isSubmitting } = useContractBasics();
@@ -61,10 +69,18 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
             isResidentOwner: existingData.resident_owner || "",
             contractSubjectToFinance: existingData.finance_needed || "",
             lenderName: existingData.lender_name || "",
+            interestRate: existingData.interest_rate || "",
             workPeriodDays: existingData.work_period_days || "",
             anticipatedCommWeek: existingData.commencement_week || "",
             inclementWeatherDays: existingData.weather_days || "",
             weekendDays: existingData.weekends_public_holidays || "",
+            thirdPartyComponents: existingData.third_party_components || "",
+            // Additional date fields
+            accessFencingEquipmentDate: existingData.access_fencing_equipment_date || "",
+            specificationsDate: existingData.specifications_date || "",
+            sitePlanDate: existingData.site_plan_date || "",
+            permissionToEnterDate: existingData.permission_to_enter_date || "",
+            otherDate: existingData.other_date || "",
           };
           setFormData(mappedData);
         } else {
@@ -92,10 +108,20 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
 
   const handleFieldChange = (field: keyof ContractBasics, value: any) => {
     // Update internal state
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+      
+      // Clear finance-related fields if finance_needed is not "Yes"
+      if (field === 'contractSubjectToFinance' && value !== 'Yes') {
+        newData.lenderName = "";
+        newData.interestRate = "";
+      }
+      
+      return newData;
+    });
   };
 
   const handleDateSelect = (date: Date | undefined) => {
@@ -116,10 +142,18 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
         resident_owner: formData.isResidentOwner,
         finance_needed: formData.contractSubjectToFinance,
         lender_name: formData.lenderName || undefined,
+        interest_rate: typeof formData.interestRate === 'number' ? formData.interestRate : undefined,
         work_period_days: typeof formData.workPeriodDays === 'number' ? formData.workPeriodDays : undefined,
         commencement_week: formData.anticipatedCommWeek || undefined,
         weather_days: typeof formData.inclementWeatherDays === 'number' ? formData.inclementWeatherDays : undefined,
         weekends_public_holidays: typeof formData.weekendDays === 'number' ? formData.weekendDays : undefined,
+        third_party_components: formData.thirdPartyComponents || undefined,
+        // Additional date fields
+        access_fencing_equipment_date: formData.accessFencingEquipmentDate || undefined,
+        specifications_date: formData.specificationsDate || undefined,
+        site_plan_date: formData.sitePlanDate || undefined,
+        permission_to_enter_date: formData.permissionToEnterDate || undefined,
+        other_date: formData.otherDate || undefined,
       };
 
       const result = await saveContractBasics(customerId, basicsData);
@@ -222,30 +256,62 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
             </Select>
           </div>
 
-          <div className="grid gap-3">
-            <div className="flex justify-between items-start">
-              <Label htmlFor="lenderName" className="text-base font-medium">Who is the Lender?</Label>
-              {formData.lenderName && !readonly && (
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange("lenderName", "")}
-                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
-                >
-                  <X className="h-3 w-3" />
-                  Remove Value
-                </button>
-              )}
-            </div>
-            <Input
-              id="lenderName"
-              value={formData.lenderName}
-              onChange={readonly ? undefined : (e) => handleFieldChange("lenderName", e.target.value)}
-              placeholder="Lender name"
-              maxLength={100}
-              readOnly={readonly}
-              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
-            />
-          </div>
+          {formData.contractSubjectToFinance === "Yes" && (
+            <>
+              <div className="grid gap-3">
+                <div className="flex justify-between items-start">
+                  <Label htmlFor="lenderName" className="text-base font-medium">Who is the Lender?</Label>
+                  {formData.lenderName && !readonly && (
+                    <button
+                      type="button"
+                      onClick={() => handleFieldChange("lenderName", "")}
+                      className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" />
+                      Remove Value
+                    </button>
+                  )}
+                </div>
+                <Input
+                  id="lenderName"
+                  value={formData.lenderName}
+                  onChange={readonly ? undefined : (e) => handleFieldChange("lenderName", e.target.value)}
+                  placeholder="Lender name"
+                  maxLength={100}
+                  readOnly={readonly}
+                  className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
+                />
+              </div>
+
+              <div className="grid gap-3">
+                <div className="flex justify-between items-start">
+                  <Label htmlFor="interestRate" className="text-base font-medium">Interest Rate (%)</Label>
+                  {formData.interestRate !== "" && !readonly && (
+                    <button
+                      type="button"
+                      onClick={() => handleFieldChange("interestRate", "")}
+                      className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" />
+                      Remove Value
+                    </button>
+                  )}
+                </div>
+                <Input
+                  id="interestRate"
+                  type="number"
+                  value={formData.interestRate}
+                  onChange={readonly ? undefined : (e) => handleFieldChange("interestRate", parseFloat(e.target.value) || "")}
+                  placeholder="Interest rate percentage"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  readOnly={readonly}
+                  className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
+                />
+              </div>
+            </>
+          )}
 
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
@@ -369,6 +435,296 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
               readOnly={readonly}
               className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label htmlFor="totalDelayAllowance" className="text-base font-medium">Total Delay Allowance</Label>
+            </div>
+            <Input
+              id="totalDelayAllowance"
+              type="number"
+              value={(() => {
+                const weather = parseInt(String(formData.inclementWeatherDays)) || 0;
+                const weekend = parseInt(String(formData.weekendDays)) || 0;
+                return weather + weekend;
+              })()}
+              placeholder="Automatically calculated"
+              readOnly
+              className="bg-gray-50 cursor-not-allowed"
+            />
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label htmlFor="thirdPartyComponents" className="text-base font-medium">Third Party Components</Label>
+              {formData.thirdPartyComponents && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("thirdPartyComponents", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Select
+              value={formData.thirdPartyComponents}
+              onValueChange={(value) => handleFieldChange("thirdPartyComponents", value)}
+              disabled={readonly}
+            >
+              <SelectTrigger className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}>
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {R1_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label className="text-base font-medium">Access, Fencing, Equipment Date</Label>
+              {formData.accessFencingEquipmentDate && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("accessFencingEquipmentDate", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.accessFencingEquipmentDate && "text-muted-foreground",
+                    readonly && "bg-gray-50 cursor-not-allowed"
+                  )}
+                  disabled={readonly}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.accessFencingEquipmentDate ? (
+                    format(new Date(formData.accessFencingEquipmentDate), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={formData.accessFencingEquipmentDate ? new Date(formData.accessFencingEquipmentDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      handleFieldChange("accessFencingEquipmentDate", format(date, "yyyy-MM-dd"));
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label className="text-base font-medium">Specifications Date</Label>
+              {formData.specificationsDate && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("specificationsDate", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.specificationsDate && "text-muted-foreground",
+                    readonly && "bg-gray-50 cursor-not-allowed"
+                  )}
+                  disabled={readonly}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.specificationsDate ? (
+                    format(new Date(formData.specificationsDate), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={formData.specificationsDate ? new Date(formData.specificationsDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      handleFieldChange("specificationsDate", format(date, "yyyy-MM-dd"));
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label className="text-base font-medium">Site Plan Date</Label>
+              {formData.sitePlanDate && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("sitePlanDate", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.sitePlanDate && "text-muted-foreground",
+                    readonly && "bg-gray-50 cursor-not-allowed"
+                  )}
+                  disabled={readonly}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.sitePlanDate ? (
+                    format(new Date(formData.sitePlanDate), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={formData.sitePlanDate ? new Date(formData.sitePlanDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      handleFieldChange("sitePlanDate", format(date, "yyyy-MM-dd"));
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label className="text-base font-medium">Permission to Enter Date</Label>
+              {formData.permissionToEnterDate && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("permissionToEnterDate", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.permissionToEnterDate && "text-muted-foreground",
+                    readonly && "bg-gray-50 cursor-not-allowed"
+                  )}
+                  disabled={readonly}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.permissionToEnterDate ? (
+                    format(new Date(formData.permissionToEnterDate), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={formData.permissionToEnterDate ? new Date(formData.permissionToEnterDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      handleFieldChange("permissionToEnterDate", format(date, "yyyy-MM-dd"));
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label className="text-base font-medium">Other Date</Label>
+              {formData.otherDate && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("otherDate", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.otherDate && "text-muted-foreground",
+                    readonly && "bg-gray-50 cursor-not-allowed"
+                  )}
+                  disabled={readonly}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.otherDate ? (
+                    format(new Date(formData.otherDate), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={formData.otherDate ? new Date(formData.otherDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      handleFieldChange("otherDate", format(date, "yyyy-MM-dd"));
+                    }
+                  }}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
         

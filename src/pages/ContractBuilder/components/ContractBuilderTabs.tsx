@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { FileText, FileBarChart, MapPin, Shovel, Shield, AlertTriangle, Settings, Package, DollarSign } from "lucide-react";
+import { FileText, FileBarChart, MapPin, Shovel, Shield, AlertTriangle, Settings, Package, DollarSign, FileCheck } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -25,6 +25,7 @@ import { SiteDueDiligenceSection } from "../../../components/contract/qa-section
 import { SpecialWorkInstructionsSection } from "../../../components/contract/qa-sections/SpecialWorkInstructionsSection";
 import { SurveyReferenceSection } from "../../../components/contract/qa-sections/SurveyReferenceSection";
 import { InclusionsSection } from "../../../components/contract/qa-sections/InclusionsSection";
+import { SubmissionSection } from "../../../components/contract/qa-sections/SubmissionSection";
 import { ContractSummary } from "../../../components/contract/ContractSummary";
 
 import {
@@ -335,6 +336,10 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         <TabsTrigger value="inclusions" className="flex items-center gap-2">
           <Package className="h-4 w-4" />
           Inclusions
+        </TabsTrigger>
+        <TabsTrigger value="submission" className="flex items-center gap-2">
+          <FileCheck className="h-4 w-4" />
+          Submission
         </TabsTrigger>
       </TabsList>
 
@@ -659,6 +664,37 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         </div>
       </TabsContent>
 
+      {/* Submission Tab */}
+      <TabsContent value="submission">
+        <div className="space-y-6">
+          {customerId && selectedProposal && contractDetailsConfirmed ? (
+            <SubmissionSection
+              customer={selectedProposal}
+              snapshot={customerSnapshot}
+            />
+          ) : (
+            <Card className="p-6">
+              <div className="text-center space-y-4">
+                <FileCheck className="h-12 w-12 text-muted-foreground mx-auto" />
+                <div>
+                  <h3 className="text-lg font-semibold">
+                    {!customerId || !selectedProposal 
+                      ? "No Customer Selected" 
+                      : "Contract Details Not Confirmed"
+                    }
+                  </h3>
+                  <p className="text-muted-foreground">
+                    {!customerId || !selectedProposal 
+                      ? "Please select a customer to submit the contract."
+                      : "Please confirm the contract customer details before proceeding."
+                    }
+                  </p>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
+      </TabsContent>
 
       <TabsContent value="contractsummary">
         <Card className="p-6">

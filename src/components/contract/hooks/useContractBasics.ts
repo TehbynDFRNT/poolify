@@ -10,10 +10,19 @@ export interface ContractBasicsData {
   resident_owner?: string;     // R1 values (Yes/No/N/A)
   finance_needed?: string;     // R1 values (Yes/No/N/A)
   lender_name?: string;
+  interest_rate?: number;      // Interest rate percentage
   work_period_days?: number;
   commencement_week?: string; // Date string in YYYY-MM-DD format
   weather_days?: number;
   weekends_public_holidays?: number;
+  third_party_components?: string; // R1 values (Yes/No/N/A)
+  total_delays?: number;      // Calculated field: weather_days + weekends_public_holidays
+  // Additional date fields
+  access_fencing_equipment_date?: string; // Date string in YYYY-MM-DD format
+  specifications_date?: string; // Date string in YYYY-MM-DD format
+  site_plan_date?: string; // Date string in YYYY-MM-DD format
+  permission_to_enter_date?: string; // Date string in YYYY-MM-DD format
+  other_date?: string; // Date string in YYYY-MM-DD format
 }
 
 export function useContractBasics() {
@@ -31,16 +40,30 @@ export function useContractBasics() {
       console.log('💾 Saving contract basics for contractId:', contractId);
       console.log('📋 Contract basics data:', basicsData);
       
+      // Calculate total delays
+      const weatherDays = basicsData.weather_days || 0;
+      const weekendDays = basicsData.weekends_public_holidays || 0;
+      const totalDelays = weatherDays + weekendDays;
+      
       // Prepare data for pool_project_contract_basics table
       const dataToSave = {
         contract_id: contractId,
         resident_owner: basicsData.resident_owner || null,
         finance_needed: basicsData.finance_needed || null,
         lender_name: basicsData.lender_name || null,
+        interest_rate: basicsData.interest_rate || null,
         work_period_days: basicsData.work_period_days || null,
         commencement_week: basicsData.commencement_week || null,
         weather_days: basicsData.weather_days || null,
         weekends_public_holidays: basicsData.weekends_public_holidays || null,
+        third_party_components: basicsData.third_party_components || null,
+        total_delays: totalDelays,
+        // Additional date fields
+        access_fencing_equipment_date: basicsData.access_fencing_equipment_date || null,
+        specifications_date: basicsData.specifications_date || null,
+        site_plan_date: basicsData.site_plan_date || null,
+        permission_to_enter_date: basicsData.permission_to_enter_date || null,
+        other_date: basicsData.other_date || null,
       };
 
       // Check if contract basics record already exists

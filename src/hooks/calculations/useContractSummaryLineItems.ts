@@ -22,8 +22,12 @@ export interface ContractSummaryLineItems {
   deposit: DepositBreakdown;
   // Section totals
   totalDeposit: number;
+  pcContractBOD: number;
   poolShellSupplyEquipmentTotal: number;
   poolShellInstallationTotal: number;
+  pcShellInstallCraneHire: number;
+  pcShellInstallBackfill: number;
+  pcShellInstallRemainder: number;
   excavationContractTotal: number;
   beamCost: number;
   extraConcretingTotal: number;
@@ -89,8 +93,12 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
         },
         // Section totals
         totalDeposit: 0,
+        pcContractBOD: 0,
         poolShellSupplyEquipmentTotal: 0,
         poolShellInstallationTotal: 0,
+        pcShellInstallCraneHire: 0,
+        pcShellInstallBackfill: 0,
+        pcShellInstallRemainder: 0,
         excavationContractTotal: 0,
         beamCost: 0,
         extraConcretingTotal: 0,
@@ -275,6 +283,11 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       + marginAppliedEarthbondCost
       + marginAppliedTempSafetyBarrierCost;
     
+    // Shell Installation breakdown for PC contract
+    const pcShellInstallCraneHire = marginAppliedCraneCost + marginAppliedTrafficControlCost;
+    const pcShellInstallBackfill = marginAppliedPcPeaGravel; // Pea gravel is used for backfill
+    const pcShellInstallRemainder = poolShellInstallationTotal - pcShellInstallCraneHire - pcShellInstallBackfill;
+    
     // ==================================================================================
     // 5. ENGINEERED BEAM CALCULATION
     // ==================================================================================
@@ -364,12 +377,19 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       totalDeposit
     };
 
+    // PC Contract BOD: Total deposit minus only HWI and Form 15 (fire ant stays in BOD)
+    const pcContractBOD = totalDeposit - hwiCost - marginAppliedForm15Cost;
+
     const result: ContractSummaryLineItems = {
       deposit,
       // Section totals
       totalDeposit,
+      pcContractBOD,
       poolShellSupplyEquipmentTotal,
       poolShellInstallationTotal,
+      pcShellInstallCraneHire,
+      pcShellInstallBackfill,
+      pcShellInstallRemainder,
       excavationContractTotal,
       beamCost,
       extraConcretingTotal,

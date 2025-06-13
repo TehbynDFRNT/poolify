@@ -20,6 +20,7 @@ export interface ContractSiteDetailsData {
   afe_item_8_q1_overburden_preparation?: string;    // R2 values
   afe_item_8_q2_excavation_required?: string;       // R2 values
   afe_item_8_q3_excavation_method?: string;         // R3 values
+  afe_exc_combo_size?: string;              // Excavator/Combo size (3T Excavator/5T Excavator)
   afe_item_8_q4_service_relocation?: string;        // S1 values (Yes/No/Unknown)
   afe_item_8_q5_service_relocation_party?: string;  // R2 values
   afe_item_8_q6_material_left_on_site?: string;     // R1 values (Yes/No/N/A)
@@ -93,6 +94,9 @@ export function useContractSiteDetails() {
       }
       if (siteDetailsData.afe_item_8_q3_excavation_method !== undefined) {
         dataToSave.afe_item_8_q3_excavation_method = siteDetailsData.afe_item_8_q3_excavation_method || null;
+      }
+      if (siteDetailsData.afe_exc_combo_size !== undefined) {
+        dataToSave.afe_exc_combo_size = siteDetailsData.afe_exc_combo_size || null;
       }
       if (siteDetailsData.afe_item_8_q4_service_relocation !== undefined) {
         dataToSave.afe_item_8_q4_service_relocation = siteDetailsData.afe_item_8_q4_service_relocation || null;

@@ -23,6 +23,8 @@ export const useSiteRequirementsGuarded = (customerId: string) => {
                 throw new Error("Customer ID is required");
             }
 
+            console.log('Saving site requirements with data:', formData);
+
             // Start a transaction to update both tables
 
             // 1. First check if we already have an equipment selection record
@@ -34,13 +36,17 @@ export const useSiteRequirementsGuarded = (customerId: string) => {
 
             if (existingEquipment?.id) {
                 // Update existing equipment selections
+                const updateData = {
+                    crane_id: formData.craneId === 'none' ? null : formData.craneId,
+                    traffic_control_id: formData.trafficControlId === 'none' ? null : formData.trafficControlId,
+                    bobcat_id: formData.bobcatId === 'none' ? null : formData.bobcatId
+                };
+                
+                console.log('Updating equipment selections with:', updateData);
+                
                 const { error: equipmentError } = await supabase
                     .from('pool_equipment_selections')
-                    .update({
-                        crane_id: formData.craneId === 'none' ? null : formData.craneId,
-                        traffic_control_id: formData.trafficControlId === 'none' ? null : formData.trafficControlId,
-                        bobcat_id: formData.bobcatId === 'none' ? null : formData.bobcatId
-                    })
+                    .update(updateData)
                     .eq('id', existingEquipment.id);
 
                 if (equipmentError) throw equipmentError;

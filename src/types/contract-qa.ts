@@ -5,6 +5,7 @@ export type R3Values = "By Machine" | "Manually";
 export type R4Values = "Included" | "Not Included";
 export type R5Values = "Fence" | "Hard Cover";
 export type S1Values = "Yes" | "No" | "Unknown";
+export type ExcavatorSizeValues = "3T Excavator" | "5T Excavator";
 
 // Inclusions enums from docs/inclusions.md
 export type IEValues = "Included" | "Not Included";
@@ -15,10 +16,18 @@ export interface ContractBasics {
   isResidentOwner: R1Values | "";
   contractSubjectToFinance: R1Values | "";
   lenderName: string;
+  interestRate: number | "";
   workPeriodDays: number | "";
   anticipatedCommWeek: string; // ISO date string
   inclementWeatherDays: number | "";
   weekendDays: number | "";
+  thirdPartyComponents: R1Values | "";
+  // Additional date fields
+  accessFencingEquipmentDate: string; // ISO date string
+  specificationsDate: string; // ISO date string
+  sitePlanDate: string; // ISO date string
+  permissionToEnterDate: string; // ISO date string
+  otherDate: string; // ISO date string
 }
 
 // Access & Site Conditions Section
@@ -37,6 +46,7 @@ export interface SitePreparationExcavation {
   overburdenRemovalResp: R2Values | "";
   excavationRequiredBy: R2Values | "";
   excavationMethod: R3Values | "";
+  excavatorComboSize: ExcavatorSizeValues | "";
   serviceLinesRelocationNeeded: S1Values | "";
   serviceLinesRelocatedBy: R2Values | "";
   excavatedMaterialLeftOnSite: R1Values | "";
@@ -174,6 +184,7 @@ export const R5_OPTIONS: R5Values[] = ["Fence", "Hard Cover"];
 export const S1_OPTIONS: S1Values[] = ["Yes", "No", "Unknown"];
 export const IE_OPTIONS: IEValues[] = ["Included", "Not Included"];
 export const EC_OPTIONS: ECValues[] = ["Not Included", "10amp - Plug In", "15amp - Plug In", "20amp - Plug In", "25amp - Hardwired", "32amp - Hardwired", "40amp - Hardwired"];
+export const EXCAVATOR_SIZE_OPTIONS: ExcavatorSizeValues[] = ["3T Excavator", "5T Excavator"];
 
 // Default values for extra cost risk flags (all default to empty for independent state management)
 export const DEFAULT_EXTRA_COST_RISK_FLAGS: ExtraCostRiskFlags = {

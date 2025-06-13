@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shovel, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { SitePreparationExcavation, R1_OPTIONS, R2_OPTIONS, R3_OPTIONS, S1_OPTIONS } from "@/types/contract-qa";
+import { SitePreparationExcavation, R1_OPTIONS, R2_OPTIONS, R3_OPTIONS, S1_OPTIONS, EXCAVATOR_SIZE_OPTIONS } from "@/types/contract-qa";
 import { useContractSiteDetails } from "@/components/contract/hooks/useContractSiteDetails";
 import { useSearchParams } from "react-router-dom";
 
@@ -32,6 +32,7 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
     overburdenRemovalResp: "",
     excavationRequiredBy: "",
     excavationMethod: "",
+    excavatorComboSize: "",
     serviceLinesRelocationNeeded: "",
     serviceLinesRelocatedBy: "",
     excavatedMaterialLeftOnSite: "",
@@ -59,6 +60,7 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
             overburdenRemovalResp: existingData.afe_item_8_q1_overburden_preparation || "",
             excavationRequiredBy: existingData.afe_item_8_q2_excavation_required || "",
             excavationMethod: existingData.afe_item_8_q3_excavation_method || "",
+            excavatorComboSize: existingData.afe_exc_combo_size || "",
             serviceLinesRelocationNeeded: existingData.afe_item_8_q4_service_relocation || "",
             serviceLinesRelocatedBy: existingData.afe_item_8_q5_service_relocation_party || "",
             excavatedMaterialLeftOnSite: existingData.afe_item_8_q6_material_left_on_site || "",
@@ -110,6 +112,7 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
         afe_item_8_q1_overburden_preparation: formData.overburdenRemovalResp,
         afe_item_8_q2_excavation_required: formData.excavationRequiredBy,
         afe_item_8_q3_excavation_method: formData.excavationMethod,
+        afe_exc_combo_size: formData.excavatorComboSize,
         afe_item_8_q4_service_relocation: formData.serviceLinesRelocationNeeded,
         afe_item_8_q5_service_relocation_party: formData.serviceLinesRelocatedBy,
         afe_item_8_q6_material_left_on_site: formData.excavatedMaterialLeftOnSite,
@@ -273,6 +276,40 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
               </SelectTrigger>
               <SelectContent className="bg-white">
                 {R3_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label htmlFor="excavatorComboSize" className="text-base font-medium">
+                Excavator/Combo Size
+              </Label>
+              {formData.excavatorComboSize && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("excavatorComboSize", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Select
+              value={formData.excavatorComboSize}
+              onValueChange={(value) => handleFieldChange("excavatorComboSize", value)}
+              disabled={readonly}
+            >
+              <SelectTrigger className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}>
+                <SelectValue placeholder="Select an option" />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                {EXCAVATOR_SIZE_OPTIONS.map((option) => (
                   <SelectItem key={option} value={option}>
                     {option}
                   </SelectItem>

@@ -156,11 +156,11 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
       700 // Standard crane allowance
     ) / (1 - (snapshot.pool_margin_pct || 0) / 100));
 
-    const siteRequirementsTotal = (((snapshot.crane_cost || 0) > 700 ? (snapshot.crane_cost || 0) - 700 : 0) + (snapshot.bobcat_cost || 0) + (snapshot.traffic_control_cost || 0) + (snapshot.site_requirements_data 
+    const siteRequirementsTotal = ((snapshot.crane_cost || 0) > 700 ? (snapshot.crane_cost || 0) - 700 : 0) + (snapshot.bobcat_cost || 0) + (snapshot.traffic_control_cost || 0) + (snapshot.site_requirements_data 
       ? (typeof snapshot.site_requirements_data === 'string'
          ? JSON.parse(snapshot.site_requirements_data)
          : snapshot.site_requirements_data).reduce((sum: number, item: any) => sum + (Number(item.price) || 0), 0)
-      : 0)) / (1 - (snapshot.pool_margin_pct || 0) / 100);
+      : 0);
 
     const electricalTotal = snapshot.elec_total_cost || 0;
 
