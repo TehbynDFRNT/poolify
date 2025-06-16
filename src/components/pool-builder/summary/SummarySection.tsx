@@ -1,10 +1,14 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { usePriceCalculator } from '@/hooks/calculations/use-calculator-totals';
+import { usePoolDiscounts } from '@/hooks/usePoolDiscounts';
 import { supabase } from '@/integrations/supabase/client';
 import { PoolGeneralExtra } from "@/types/pool-general-extra";
 import type { ProposalSnapshot } from '@/types/snapshot';
+import type { DiscountPromotion } from '@/types/discount-promotion';
 import {
     calculateConcreteCutsMargin,
     calculateConcretePumpMargin,
@@ -17,7 +21,7 @@ import { fetchPoolGeneralExtras } from "@/utils/fetch-pool-general-extras";
 import { formatCurrency } from '@/utils/format';
 import { validateUuid } from '@/utils/validators';
 import { useQuery } from '@tanstack/react-query';
-import { ChevronDown, ChevronUp, FileText, Loader2, User } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, Loader2, User, Percent, X } from 'lucide-react';
 import React, { createContext, useState } from 'react';
 import { ProjectSubmitButton } from './ProjectSubmitButton';
 
@@ -120,8 +124,12 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         waterFeatures: false,
         upgradesExtrasGeneral: false,
         upgradesExtrasHeating: false,
-        upgradesExtrasCleaner: false
+        upgradesExtrasCleaner: false,
+        discounts: false
     });
+
+    // Add state for discount selection
+    const [selectedDiscountId, setSelectedDiscountId] = useState<string>('');
 
     // Toggle expansion for a section
     const toggleSection = (section: string) => {
@@ -138,6 +146,20 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
     // Validate UUID format
     const isValidUuid = validateUuid(customerId);
+
+    // Initialize pool discounts hook
+    const {
+        poolDiscounts,
+        availablePromotions,
+        isLoadingPoolDiscounts,
+        isLoadingPromotions,
+        addDiscount,
+        removeDiscount,
+        isAddingDiscount,
+        isRemovingDiscount,
+        isDiscountApplied,
+        getAppliedDiscountsWithDetails,
+    } = usePoolDiscounts(customerId);
 
     // Fetch project snapshot data
     const { data: snapshot, isLoading, error } = useQuery<ProposalSnapshot | null>({
@@ -382,7 +404,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     console.log("Concrete pump data:", concretePumpData);
 
     // Use the price calculator hook to get consistent calculations (must be called before any early returns)
-    const priceCalculatorResult = usePriceCalculator(snapshot);
+    const priceCalculatorResult = usePriceCalculator(snapshot, getAppliedDiscountsWithDetails() as any);
 
     // Fetch concrete and paving margin data
     const { data: concretePavingMarginData } = useQuery({
@@ -796,19 +818,57 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 <p className="text-muted-foreground mb-6">Complete breakdown of all price components for this pool project</p>
 
                 {/* GRAND TOTAL */}
-                <Card className="mb-8 shadow-none">
+                <Card className="mb-8 shadow-none border-2 border-primary">
                     <CardContent className="py-6">
-                        <div className="flex justify-between items-center">
-                            <div>
-                                <h3 className="text-xl font-bold text-gray-900">GRAND TOTAL</h3>
-                                <p className="text-sm text-muted-foreground">Total Price Including All Components</p>
-                            </div>
-                            <div className="flex items-center gap-4">
-                                <div className="text-2xl font-bold text-gray-900">
-                                    {formatCurrency(priceCalculatorResult.grandTotal)}
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">GRAND TOTAL</h3>
+                                    <p className="text-sm text-muted-foreground">Total Price Including All Components</p>
                                 </div>
-                                {!hideSubmitButton && <ProjectSubmitButton projectId={customerId} />}
+                                <div className="flex items-center gap-4">
+                                    <div className="text-right">
+                                        <div className="text-2xl font-bold text-gray-900">
+                                            {formatCurrency(priceCalculatorResult.grandTotal)}
+                                        </div>
+                                        {priceCalculatorResult.totals.discountTotal > 0 && (
+                                            <div className="text-sm text-muted-foreground">
+                                                Before discounts: {formatCurrency(priceCalculatorResult.grandTotalWithoutDiscounts)}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {!hideSubmitButton && <ProjectSubmitButton projectId={customerId} />}
+                                </div>
                             </div>
+                            
+                            {/* Discount Breakdown in Grand Total */}
+                            {priceCalculatorResult.discountBreakdown.discountDetails.length > 0 && (
+                                <div className="pt-4 border-t border-gray-200">
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Applied Discounts:</h4>
+                                    <div className="space-y-1">
+                                        {priceCalculatorResult.discountBreakdown.discountDetails.map((discount, index) => (
+                                            <div key={index} className="flex justify-between items-center text-sm">
+                                                <div className="flex items-center gap-2 text-red-600">
+                                                    <Percent className="h-3 w-3" />
+                                                    <span>{discount.name}</span>
+                                                    {discount.type === 'percentage' && (
+                                                        <span className="text-xs text-muted-foreground">
+                                                            ({discount.value}%)
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <span className="text-red-600 font-medium">
+                                                    -{formatCurrency(discount.calculatedAmount)}
+                                                </span>
+                                            </div>
+                                        ))}
+                                        <div className="flex justify-between items-center text-sm font-medium text-red-600 pt-1 border-t border-red-100">
+                                            <span>Total Savings:</span>
+                                            <span>-{formatCurrency(priceCalculatorResult.totals.discountTotal)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
                 </Card>
@@ -1657,6 +1717,139 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                         </CardContent>
                     </Card>
                 )}
+
+                {/* DISCOUNTS SECTION */}
+                <Card className="mb-6 shadow-none">
+                    <CardContent className="pt-6">
+                        <div
+                            className={`flex justify-between items-center cursor-pointer ${expandedSections.discounts ? 'mb-4' : ''}`}
+                            onClick={() => toggleSection('discounts')}
+                        >
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">Discounts</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Select promotional discounts to apply to this pool project
+                                </p>
+                            </div>
+                            <div className="flex items-center">
+                                <span className="mr-4 font-semibold">
+                                    {getAppliedDiscountsWithDetails()?.length || 0} Applied
+                                </span>
+                                {expandedSections.discounts ? (
+                                    <ChevronUp className="h-5 w-5 text-gray-600" />
+                                ) : (
+                                    <ChevronDown className="h-5 w-5 text-gray-600" />
+                                )}
+                            </div>
+                        </div>
+
+                        {expandedSections.discounts && (
+                            <div className="space-y-4">
+                                {/* Discount Selection */}
+                                <div className="flex gap-4 items-end">
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                                            Select Discount Promotion
+                                        </label>
+                                        <Select 
+                                            value={selectedDiscountId} 
+                                            onValueChange={setSelectedDiscountId}
+                                            disabled={isLoadingPromotions}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Choose a discount promotion" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {availablePromotions?.filter(promotion => 
+                                                    !isDiscountApplied(promotion.uuid)
+                                                ).map((promotion) => (
+                                                    <SelectItem key={promotion.uuid} value={promotion.uuid}>
+                                                        <div className="flex items-center justify-between w-full">
+                                                            <span>{promotion.discount_name}</span>
+                                                            <div className="flex items-center gap-2 ml-4">
+                                                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                                                                    promotion.discount_type === 'dollar' 
+                                                                        ? 'bg-green-100 text-green-800' 
+                                                                        : 'bg-blue-100 text-blue-800'
+                                                                }`}>
+                                                                    {promotion.discount_type === 'dollar' ? 'Dollar' : 'Percentage'}
+                                                                </span>
+                                                                <span className="font-semibold">
+                                                                    {promotion.discount_type === 'dollar' 
+                                                                        ? formatCurrency(promotion.dollar_value || 0)
+                                                                        : `${promotion.percentage_value || 0}%`
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                    <Button 
+                                        onClick={() => {
+                                            if (selectedDiscountId && customerId) {
+                                                addDiscount({
+                                                    pool_project_id: customerId,
+                                                    discount_promotion_uuid: selectedDiscountId
+                                                });
+                                                setSelectedDiscountId('');
+                                            }
+                                        }}
+                                        disabled={!selectedDiscountId || isAddingDiscount || !customerId}
+                                    >
+                                        {isAddingDiscount ? "Adding..." : "Add Discount"}
+                                    </Button>
+                                </div>
+
+                                {/* Applied Discounts List */}
+                                <div className="space-y-2">
+                                    <h4 className="text-sm font-medium text-gray-700">Applied Discounts</h4>
+                                    {isLoadingPoolDiscounts ? (
+                                        <div className="text-sm text-gray-500">Loading applied discounts...</div>
+                                    ) : getAppliedDiscountsWithDetails()?.length === 0 ? (
+                                        <div className="text-sm text-gray-500 italic">No discounts applied yet</div>
+                                    ) : (
+                                        <div className="space-y-2">
+                                            {getAppliedDiscountsWithDetails()?.map((poolDiscount: any) => {
+                                                const promotion = poolDiscount.discount_promotion;
+                                                return (
+                                                    <div 
+                                                        key={poolDiscount.id} 
+                                                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <Percent className="h-4 w-4 text-gray-600" />
+                                                            <div>
+                                                                <div className="font-medium">{promotion.discount_name}</div>
+                                                                <div className="text-sm text-gray-600">
+                                                                    {promotion.discount_type === 'dollar' 
+                                                                        ? `${formatCurrency(promotion.dollar_value || 0)} discount`
+                                                                        : `${promotion.percentage_value || 0}% discount`
+                                                                    }
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => removeDiscount(poolDiscount.id)}
+                                                            disabled={isRemovingDiscount}
+                                                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                                        >
+                                                            <X className="h-4 w-4" />
+                                                        </Button>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
 
             </div>
         </MarginVisibilityContext.Provider>

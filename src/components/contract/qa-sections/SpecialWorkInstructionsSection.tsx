@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Settings, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SpecialWorkInstructions } from "@/types/contract-qa";
@@ -28,7 +29,10 @@ export const SpecialWorkInstructionsSection: React.FC<SpecialWorkInstructionsSec
   
   // Manage form state internally
   const [formData, setFormData] = useState<SpecialWorkInstructions>({
+    specialConsiderations: "",
     extraOrSpecialWork: "",
+    specialAccess: "",
+    specialAccessNotes: "",
   });
   
   const { saveContractSpecialWork, loadContractSpecialWork, isSubmitting } = useContractSpecialWork();
@@ -47,7 +51,10 @@ export const SpecialWorkInstructionsSection: React.FC<SpecialWorkInstructionsSec
           setHasExistingRecord(true);
           // Map database fields to form fields
           const mappedData: SpecialWorkInstructions = {
+            specialConsiderations: existingData.special_considerations || "",
             extraOrSpecialWork: existingData.extra_special_notes || "",
+            specialAccess: existingData.special_access || "",
+            specialAccessNotes: existingData.special_access_notes || "",
           };
           setFormData(mappedData);
         } else {
@@ -90,7 +97,10 @@ export const SpecialWorkInstructionsSection: React.FC<SpecialWorkInstructionsSec
     try {
       // Map form fields to database fields using internal formData state
       const specialWorkData = {
+        special_considerations: formData.specialConsiderations,
         extra_special_notes: formData.extraOrSpecialWork,
+        special_access: formData.specialAccess,
+        special_access_notes: formData.specialAccessNotes,
       };
 
       const result = await saveContractSpecialWork(customerId, specialWorkData);
@@ -117,44 +127,151 @@ export const SpecialWorkInstructionsSection: React.FC<SpecialWorkInstructionsSec
       <CardContent className="pt-6">
         <div className="flex items-center gap-2 mb-4">
           <Settings className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Special-Work Instructions</h3>
+          <h3 className="text-lg font-medium">Special Work & Conditions</h3>
         </div>
         
-        <p className="text-sm text-gray-600 mb-6">
-          Describe any additional work, specialized materials, or unique requirements beyond the standard pool installation. Use this section to detail custom features or special instructions that affect the contract scope.
-        </p>
-        
-        <div className="grid gap-6">
-          <div className="grid gap-3">
-            <div className="flex justify-between items-start">
-              <Label htmlFor="extraOrSpecialWork" className="text-base font-medium">
-                Extra or special work details
-              </Label>
-              {formData.extraOrSpecialWork && !readonly && (
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange("extraOrSpecialWork", "")}
-                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
-                >
-                  <X className="h-3 w-3" />
-                  Remove Value
-                </button>
+        <div className="space-y-8">
+          {/* Schedule 1 - Special Conditions Section */}
+          <div className="space-y-4">
+            <h4 className="text-md font-semibold text-gray-900 border-b pb-2">Schedule 1 - SPECIAL CONDITIONS</h4>
+            <p className="text-sm text-gray-600">
+              Refer to ADDENDUM, titled 'SPECIAL CONDITIONS'
+            </p>
+            <div className="grid gap-3">
+              <div className="flex justify-between items-start">
+                <Label htmlFor="specialConsiderations" className="text-base font-medium">
+                  Special Considerations
+                </Label>
+                {formData.specialConsiderations && !readonly && (
+                  <button
+                    type="button"
+                    onClick={() => handleFieldChange("specialConsiderations", "")}
+                    className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Remove Value
+                  </button>
+                )}
+              </div>
+              <Textarea
+                id="specialConsiderations"
+                value={formData.specialConsiderations}
+                onChange={readonly ? undefined : (e) => handleFieldChange("specialConsiderations", e.target.value)}
+                placeholder="Enter special considerations as referenced in the addendum"
+                rows={6}
+                readOnly={readonly}
+                className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
+              />
+            </div>
+          </div>
+
+          {/* Schedule 6 - Special Work / Miscellaneous Equipment Section */}
+          <div className="space-y-4">
+            <h4 className="text-md font-semibold text-gray-900 border-b pb-2">Schedule 6 - SPECIAL WORK / MISCELLANEOUS EQUIPMENT</h4>
+            <p className="text-sm text-gray-600">
+              Extra of special work to be carried out, or materials or equipment to be supplied or included in the Contract Price, is detailed below:
+            </p>
+            <div className="grid gap-3">
+              <div className="flex justify-between items-start">
+                <Label htmlFor="extraOrSpecialWork" className="text-base font-medium">
+                  Extra or Special Work Details
+                </Label>
+                {formData.extraOrSpecialWork && !readonly && (
+                  <button
+                    type="button"
+                    onClick={() => handleFieldChange("extraOrSpecialWork", "")}
+                    className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Remove Value
+                  </button>
+                )}
+              </div>
+              <Textarea
+                id="extraOrSpecialWork"
+                value={formData.extraOrSpecialWork}
+                onChange={readonly ? undefined : (e) => handleFieldChange("extraOrSpecialWork", e.target.value)}
+                placeholder="Enter details of extra or special work to be carried out, or materials/equipment to be supplied or included in the Contract Price"
+                rows={6}
+                readOnly={readonly}
+                className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
+              />
+            </div>
+          </div>
+
+          {/* Schedule 8 - Additional Access Work / Organisation Required Section */}
+          <div className="space-y-4">
+            <h4 className="text-md font-semibold text-gray-900 border-b pb-2">Schedule 8 - ADDITIONAL ACCESS WORK / ORGANISATION REQUIRED</h4>
+            <p className="text-sm text-gray-600">
+              This includes fences to be taken down, items to be moved for access, and arranging for use of neighbour's land including council land.
+            </p>
+            <div className="grid gap-6">
+              <div className="grid gap-3">
+                <div className="flex justify-between items-start">
+                  <Label htmlFor="specialAccess" className="text-base font-medium">
+                    Special Access Required
+                  </Label>
+                  {formData.specialAccess && !readonly && (
+                    <button
+                      type="button"
+                      onClick={() => handleFieldChange("specialAccess", "")}
+                      className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" />
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <Select value={formData.specialAccess} onValueChange={(value) => {
+                  handleFieldChange("specialAccess", value);
+                  // Clear notes when "No" is selected
+                  if (value === "No") {
+                    handleFieldChange("specialAccessNotes", "");
+                  }
+                }} disabled={readonly}>
+                  <SelectTrigger className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}>
+                    <SelectValue placeholder="Select if special access is required" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {formData.specialAccess === "Yes" && (
+              <div className="grid gap-3">
+                <div className="flex justify-between items-start">
+                  <Label htmlFor="specialAccessNotes" className="text-base font-medium">
+                    Special Access Notes
+                  </Label>
+                  {formData.specialAccessNotes && !readonly && (
+                    <button
+                      type="button"
+                      onClick={() => handleFieldChange("specialAccessNotes", "")}
+                      className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                    >
+                      <X className="h-3 w-3" />
+                      Remove Value
+                    </button>
+                  )}
+                </div>
+                <Textarea
+                  id="specialAccessNotes"
+                  value={formData.specialAccessNotes}
+                  onChange={readonly ? undefined : (e) => handleFieldChange("specialAccessNotes", e.target.value)}
+                  placeholder="Enter details about special access requirements"
+                  rows={4}
+                  readOnly={readonly}
+                  className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
+                />
+              </div>
               )}
             </div>
-            <Textarea
-              id="extraOrSpecialWork"
-              value={formData.extraOrSpecialWork}
-              onChange={readonly ? undefined : (e) => handleFieldChange("extraOrSpecialWork", e.target.value)}
-              placeholder="Enter details of extra or special work to be carried out, or materials/equipment to be supplied or included in the Contract Price"
-              rows={6}
-              readOnly={readonly}
-              className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
-            />
           </div>
         </div>
         
         {!readonly && (
-          <div className="flex justify-end pt-4 border-t">
+          <div className="flex justify-end pt-4 border-t mt-8">
             <Button 
               onClick={handleSave}
               disabled={isSubmitting}

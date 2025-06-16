@@ -13,7 +13,6 @@ export type ECValues = "Not Included" | "10amp - Plug In" | "15amp - Plug In" | 
 
 // Contract Basics Section
 export interface ContractBasics {
-  isResidentOwner: R1Values | "";
   contractSubjectToFinance: R1Values | "";
   lenderName: string;
   interestRate: number | "";
@@ -37,12 +36,10 @@ export interface AccessSiteConditions {
   minAccessHeightMm: number | "";
   craneRequired: R1Values | "";
   minCraneClearanceMm: number | "";
-  fencesInAccessPath: R1Values | "";
 }
 
 // Site Preparation & Excavation Section
 export interface SitePreparationExcavation {
-  treesOrWallsRemovalNeeded: R1Values | "";
   overburdenRemovalResp: R2Values | "";
   excavationRequiredBy: R2Values | "";
   excavationMethod: R3Values | "";
@@ -56,8 +53,10 @@ export interface SitePreparationExcavation {
 
 // Responsibilities Section
 export interface Responsibilities {
+  fencesInAccessPath: R1Values | "";
   fenceRemovalBy: R2Values | "";
   fenceReinstatementBy: R2Values | "";
+  treesOrWallsRemovalNeeded: R1Values | "";
   treeRemovalBy: R2Values | "";
   treeReinstatementBy: R2Values | "";
 }
@@ -66,6 +65,7 @@ export interface Responsibilities {
 export interface SafetyTemporaryWorks {
   tempPoolSafetyBarrier: R1Values | "";
   tempSafetyBarrierType: R5Values | "";
+  tempSafetyBarrierHirePeriodWeeks: number | "";
   powerConnectionProvided: R1Values | "";
   hardCoverRequired: R1Values | "";
   permPoolSafetyBarrier: R1Values | "";
@@ -102,7 +102,10 @@ export interface SiteDueDiligenceNotes {
 
 // Special-Work Instructions Section
 export interface SpecialWorkInstructions {
+  specialConsiderations: string;
   extraOrSpecialWork: string;
+  specialAccess: string;
+  specialAccessNotes: string;
 }
 
 // Survey Reference Section

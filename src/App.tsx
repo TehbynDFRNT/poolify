@@ -16,6 +16,7 @@ import PoolSpecifications from "./pages/PoolSpecifications";
 import PoolWorksheet from "./pages/PoolWorksheet";
 import ThirdPartyCosts from "./pages/ThirdPartyCosts";
 import FormulaReferences from "./pages/FormulaReferences";
+import DiscountPromotions from "./pages/DiscountPromotions/DiscountPromotions";
 
 // Import construction costs sub-pages
 import BobcatCosts from "./pages/ConstructionCosts/BobcatCosts";
@@ -49,6 +50,7 @@ function App() {
         <Route path="/pool-worksheet" element={<ProtectedRoute><PoolWorksheet /></ProtectedRoute>} />
         <Route path="/pool-creation-wizard" element={<ProtectedRoute><PoolCreationWizard /></ProtectedRoute>} />
         <Route path="/formula-references" element={<ProtectedRoute><FormulaReferences /></ProtectedRoute>} />
+        <Route path="/discount-promotions" element={<ProtectedRoute><DiscountPromotions /></ProtectedRoute>} />
 
         {/* Construction Costs Sub-routes */}
         <Route path="/construction-costs/excavation" element={<ProtectedRoute><Excavation /></ProtectedRoute>} />

@@ -8,8 +8,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface ContractSpecialWorkData {
-  // Special-Work Instructions
+  // Special Conditions (Schedule 1)
+  special_considerations?: string;           // Special considerations (TEXT)
+  
+  // Special Work / Miscellaneous Equipment (Schedule 6)
   extra_special_notes?: string;              // Extra or special work details (TEXT)
+  
+  // Additional Access Work / Organisation Required (Schedule 8)
+  special_access?: string;                   // Special access required (TEXT - Yes/No)
+  special_access_notes?: string;             // Special access notes (TEXT)
   
   // Owner-Supplied Items
   c_item_17_osi_description_1?: string;      // Owner-supplied item #1 (TEXT)
@@ -40,8 +47,17 @@ export function useContractSpecialWork() {
 
       // Only add fields that are explicitly provided (not undefined) to prevent data overwrites
       // For provided fields, empty strings become null, but undefined fields are not included at all
+      if (specialWorkData.special_considerations !== undefined) {
+        dataToSave.special_considerations = specialWorkData.special_considerations || null;
+      }
       if (specialWorkData.extra_special_notes !== undefined) {
         dataToSave.extra_special_notes = specialWorkData.extra_special_notes || null;
+      }
+      if (specialWorkData.special_access !== undefined) {
+        dataToSave.special_access = specialWorkData.special_access || null;
+      }
+      if (specialWorkData.special_access_notes !== undefined) {
+        dataToSave.special_access_notes = specialWorkData.special_access_notes || null;
       }
       if (specialWorkData.c_item_17_osi_description_1 !== undefined) {
         dataToSave.c_item_17_osi_description_1 = specialWorkData.c_item_17_osi_description_1 || null;

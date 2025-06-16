@@ -10,6 +10,7 @@ export interface ContractSafetyData {
   // Safety & Temporary Works fields
   tpc_tpsb?: string;           // Temporary pool safety barrier required? (R1 values: Yes/No/N/A)
   tpc_temporary_barrier_type?: string; // Type of temporary safety barrier (R5 values: Fence/Hard Cover)
+  tpc_temp_barrier_hire_period_weeks?: number | string; // Temporary safety barrier hire period in weeks
   tpc_power_connection?: string; // Power connection (temp-works) (R1 values: Yes/No/N/A)
   tpc_hardcover?: string;      // Hard cover over pool shell required? (R1 values: Yes/No/N/A)
   tpc_ppsb?: string;           // Permanent pool safety barrier included? (R1 values: Yes/No/N/A)
@@ -45,6 +46,9 @@ export function useContractSafety() {
       }
       if (safetyData.tpc_temporary_barrier_type !== undefined) {
         dataToSave.tpc_temporary_barrier_type = safetyData.tpc_temporary_barrier_type || null;
+      }
+      if (safetyData.tpc_temp_barrier_hire_period_weeks !== undefined) {
+        dataToSave.tpc_temp_barrier_hire_period_weeks = safetyData.tpc_temp_barrier_hire_period_weeks || null;
       }
       if (safetyData.tpc_power_connection !== undefined) {
         dataToSave.tpc_power_connection = safetyData.tpc_power_connection || null;

@@ -15,7 +15,8 @@ import {
   FileText,
   ChevronDown,
   ChevronRight,
-  Calculator
+  Calculator,
+  Percent
 } from "lucide-react";
 import NavItem from "@/components/Navigation/NavItem";
 
@@ -120,6 +121,12 @@ const MainNav: React.FC = () => {
           icon: <Calculator className="h-5 w-5" />, 
           label: "Formula References", 
           path: "/formula-references", 
+          isParent: false 
+        },
+        { 
+          icon: <Percent className="h-5 w-5" />, 
+          label: "Discount Promotions", 
+          path: "/discount-promotions", 
           isParent: false 
         },
       ]

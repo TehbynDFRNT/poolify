@@ -86,6 +86,9 @@ export interface ContractDataPayload {
   // Snapshot Data (raw proposal data)
   snapshot: ProposalSnapshot | null;
   
+  // Calculator Data (price calculations)
+  calculator: any;
+  
   // Metadata
   metadata: {
     submission_timestamp: string;
@@ -173,7 +176,6 @@ export function useContractDataCollection() {
         pci_2_qty: 0,
         pci_2_allowance: 0,
         pci_total: 0,
-        margin_applied_temp_safety_barrier_cost: 0,
       };
       
       // Load contract Q&A data from all sections
@@ -266,6 +268,7 @@ export function useContractDataCollection() {
         financials: financialData,
         contract_qa: contractQAData,
         snapshot,
+        calculator: calculatorData,
         metadata,
       };
       

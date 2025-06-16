@@ -39,6 +39,32 @@ export interface ContractSiteDetailsData {
   
   // Survey Reference
   datum_point_mm?: number;
+  
+  // Minimum Hire Charges
+  afe_i10_exc_rate?: number;           // Excavator hourly rate (AUD)
+  afe_i10_exc_mcharge?: number;        // Excavator minimum charge (AUD)
+  afe_i10_truck_rate?: number;         // Truck hourly rate (AUD)
+  afe_i10_truck_mcharge?: number;      // Truck minimum charge (AUD)
+  afe_i10_rock_rate?: number;          // Rock Breaking hourly rate (AUD)
+  afe_i10_rock_mcharge?: number;       // Rock Breaking minimum charge (AUD)
+  afe_i10_cartage_rate?: number;       // Cartage hourly rate (AUD)
+  afe_i10_cartage_mcharge?: number;    // Cartage minimum charge (AUD)
+  afe_i10_pipe_rate?: number;          // Pipe/Drainage hourly rate (AUD)
+  afe_i10_pipe_mcharge?: number;       // Pipe/Drainage minimum charge (AUD)
+  afe_i10_supvis_rate?: number;        // Supervision hourly rate (AUD)
+  afe_i10_supvis_mcharge?: number;     // Supervision minimum charge (AUD)
+  afe_i10_bcat_rate?: number;          // Bobcat hourly rate (AUD)
+  afe_i10_bcat_mcharge?: number;       // Bobcat minimum charge (AUD)
+  
+  // Machinery (AFE Item 7)
+  afe_item7_bobcat_needed?: string;    // Bobcat needed (Yes/No)
+  afe_item7_bobcat_size?: string;      // Size of bobcat
+  afe_item7_crane_needed?: string;     // Crane needed (Yes/No)
+  afe_item7_crane_size?: string;       // Size of crane
+  afe_item7_truck_needed?: string;     // Trucks needed (Yes/No)
+  afe_item7_trucks_num?: number;       // Number of trucks
+  afe_item7_trucks_size?: string;      // Size of trucks
+  afe_item7_mach_notes?: string;       // Machinery notes
 }
 
 export function useContractSiteDetails() {
@@ -69,16 +95,16 @@ export function useContractSiteDetails() {
         dataToSave.afe_item_2_sketch_provided = siteDetailsData.afe_item_2_sketch_provided || null;
       }
       if (siteDetailsData.afe_min_access_width_mm !== undefined) {
-        dataToSave.afe_min_access_width_mm = (siteDetailsData.afe_min_access_width_mm === "" || siteDetailsData.afe_min_access_width_mm === null) ? null : siteDetailsData.afe_min_access_width_mm;
+        dataToSave.afe_min_access_width_mm = (siteDetailsData.afe_min_access_width_mm === null || siteDetailsData.afe_min_access_width_mm === 0) ? null : siteDetailsData.afe_min_access_width_mm;
       }
       if (siteDetailsData.afe_min_access_height_mm !== undefined) {
-        dataToSave.afe_min_access_height_mm = (siteDetailsData.afe_min_access_height_mm === "" || siteDetailsData.afe_min_access_height_mm === null) ? null : siteDetailsData.afe_min_access_height_mm;
+        dataToSave.afe_min_access_height_mm = (siteDetailsData.afe_min_access_height_mm === null || siteDetailsData.afe_min_access_height_mm === 0) ? null : siteDetailsData.afe_min_access_height_mm;
       }
       if (siteDetailsData.afe_crane_required !== undefined) {
         dataToSave.afe_crane_required = siteDetailsData.afe_crane_required || null;
       }
       if (siteDetailsData.afe_min_crane_clearance_mm !== undefined) {
-        dataToSave.afe_min_crane_clearance_mm = (siteDetailsData.afe_min_crane_clearance_mm === "" || siteDetailsData.afe_min_crane_clearance_mm === null) ? null : siteDetailsData.afe_min_crane_clearance_mm;
+        dataToSave.afe_min_crane_clearance_mm = (siteDetailsData.afe_min_crane_clearance_mm === null || siteDetailsData.afe_min_crane_clearance_mm === 0) ? null : siteDetailsData.afe_min_crane_clearance_mm;
       }
       if (siteDetailsData.afe_item_4_fnp_fences_near_access_path !== undefined) {
         dataToSave.afe_item_4_fnp_fences_near_access_path = siteDetailsData.afe_item_4_fnp_fences_near_access_path || null;
@@ -132,7 +158,73 @@ export function useContractSiteDetails() {
         dataToSave.afe_item_1_description_2_other_matters = siteDetailsData.afe_item_1_description_2_other_matters || null;
       }
       if (siteDetailsData.datum_point_mm !== undefined) {
-        dataToSave.datum_point_mm = (siteDetailsData.datum_point_mm === "" || siteDetailsData.datum_point_mm === null) ? null : siteDetailsData.datum_point_mm;
+        dataToSave.datum_point_mm = (siteDetailsData.datum_point_mm === null || siteDetailsData.datum_point_mm === 0) ? null : siteDetailsData.datum_point_mm;
+      }
+      if (siteDetailsData.afe_i10_exc_rate !== undefined) {
+        dataToSave.afe_i10_exc_rate = (siteDetailsData.afe_i10_exc_rate === null || siteDetailsData.afe_i10_exc_rate === 0) ? null : siteDetailsData.afe_i10_exc_rate;
+      }
+      if (siteDetailsData.afe_i10_exc_mcharge !== undefined) {
+        dataToSave.afe_i10_exc_mcharge = (siteDetailsData.afe_i10_exc_mcharge === null || siteDetailsData.afe_i10_exc_mcharge === 0) ? null : siteDetailsData.afe_i10_exc_mcharge;
+      }
+      if (siteDetailsData.afe_i10_truck_rate !== undefined) {
+        dataToSave.afe_i10_truck_rate = (siteDetailsData.afe_i10_truck_rate === null || siteDetailsData.afe_i10_truck_rate === 0) ? null : siteDetailsData.afe_i10_truck_rate;
+      }
+      if (siteDetailsData.afe_i10_truck_mcharge !== undefined) {
+        dataToSave.afe_i10_truck_mcharge = (siteDetailsData.afe_i10_truck_mcharge === null || siteDetailsData.afe_i10_truck_mcharge === 0) ? null : siteDetailsData.afe_i10_truck_mcharge;
+      }
+      if (siteDetailsData.afe_i10_rock_rate !== undefined) {
+        dataToSave.afe_i10_rock_rate = (siteDetailsData.afe_i10_rock_rate === null || siteDetailsData.afe_i10_rock_rate === 0) ? null : siteDetailsData.afe_i10_rock_rate;
+      }
+      if (siteDetailsData.afe_i10_rock_mcharge !== undefined) {
+        dataToSave.afe_i10_rock_mcharge = (siteDetailsData.afe_i10_rock_mcharge === null || siteDetailsData.afe_i10_rock_mcharge === 0) ? null : siteDetailsData.afe_i10_rock_mcharge;
+      }
+      if (siteDetailsData.afe_i10_cartage_rate !== undefined) {
+        dataToSave.afe_i10_cartage_rate = (siteDetailsData.afe_i10_cartage_rate === null || siteDetailsData.afe_i10_cartage_rate === 0) ? null : siteDetailsData.afe_i10_cartage_rate;
+      }
+      if (siteDetailsData.afe_i10_cartage_mcharge !== undefined) {
+        dataToSave.afe_i10_cartage_mcharge = (siteDetailsData.afe_i10_cartage_mcharge === null || siteDetailsData.afe_i10_cartage_mcharge === 0) ? null : siteDetailsData.afe_i10_cartage_mcharge;
+      }
+      if (siteDetailsData.afe_i10_pipe_rate !== undefined) {
+        dataToSave.afe_i10_pipe_rate = (siteDetailsData.afe_i10_pipe_rate === null || siteDetailsData.afe_i10_pipe_rate === 0) ? null : siteDetailsData.afe_i10_pipe_rate;
+      }
+      if (siteDetailsData.afe_i10_pipe_mcharge !== undefined) {
+        dataToSave.afe_i10_pipe_mcharge = (siteDetailsData.afe_i10_pipe_mcharge === null || siteDetailsData.afe_i10_pipe_mcharge === 0) ? null : siteDetailsData.afe_i10_pipe_mcharge;
+      }
+      if (siteDetailsData.afe_i10_supvis_rate !== undefined) {
+        dataToSave.afe_i10_supvis_rate = (siteDetailsData.afe_i10_supvis_rate === null || siteDetailsData.afe_i10_supvis_rate === 0) ? null : siteDetailsData.afe_i10_supvis_rate;
+      }
+      if (siteDetailsData.afe_i10_supvis_mcharge !== undefined) {
+        dataToSave.afe_i10_supvis_mcharge = (siteDetailsData.afe_i10_supvis_mcharge === null || siteDetailsData.afe_i10_supvis_mcharge === 0) ? null : siteDetailsData.afe_i10_supvis_mcharge;
+      }
+      if (siteDetailsData.afe_i10_bcat_rate !== undefined) {
+        dataToSave.afe_i10_bcat_rate = (siteDetailsData.afe_i10_bcat_rate === null || siteDetailsData.afe_i10_bcat_rate === 0) ? null : siteDetailsData.afe_i10_bcat_rate;
+      }
+      if (siteDetailsData.afe_i10_bcat_mcharge !== undefined) {
+        dataToSave.afe_i10_bcat_mcharge = (siteDetailsData.afe_i10_bcat_mcharge === null || siteDetailsData.afe_i10_bcat_mcharge === 0) ? null : siteDetailsData.afe_i10_bcat_mcharge;
+      }
+      if (siteDetailsData.afe_item7_bobcat_needed !== undefined) {
+        dataToSave.afe_item7_bobcat_needed = siteDetailsData.afe_item7_bobcat_needed || null;
+      }
+      if (siteDetailsData.afe_item7_bobcat_size !== undefined) {
+        dataToSave.afe_item7_bobcat_size = siteDetailsData.afe_item7_bobcat_size || null;
+      }
+      if (siteDetailsData.afe_item7_crane_needed !== undefined) {
+        dataToSave.afe_item7_crane_needed = siteDetailsData.afe_item7_crane_needed || null;
+      }
+      if (siteDetailsData.afe_item7_crane_size !== undefined) {
+        dataToSave.afe_item7_crane_size = siteDetailsData.afe_item7_crane_size || null;
+      }
+      if (siteDetailsData.afe_item7_truck_needed !== undefined) {
+        dataToSave.afe_item7_truck_needed = siteDetailsData.afe_item7_truck_needed || null;
+      }
+      if (siteDetailsData.afe_item7_trucks_num !== undefined) {
+        dataToSave.afe_item7_trucks_num = (siteDetailsData.afe_item7_trucks_num === null || siteDetailsData.afe_item7_trucks_num === 0) ? null : siteDetailsData.afe_item7_trucks_num;
+      }
+      if (siteDetailsData.afe_item7_trucks_size !== undefined) {
+        dataToSave.afe_item7_trucks_size = siteDetailsData.afe_item7_trucks_size || null;
+      }
+      if (siteDetailsData.afe_item7_mach_notes !== undefined) {
+        dataToSave.afe_item7_mach_notes = siteDetailsData.afe_item7_mach_notes || null;
       }
 
       // Check if site details record already exists

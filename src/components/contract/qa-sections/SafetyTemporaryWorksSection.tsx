@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Shield, X } from "lucide-react";
@@ -30,6 +31,7 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
   const [formData, setFormData] = useState<SafetyTemporaryWorks>({
     tempPoolSafetyBarrier: "",
     tempSafetyBarrierType: "",
+    tempSafetyBarrierHirePeriodWeeks: "",
     powerConnectionProvided: "",
     hardCoverRequired: "",
     permPoolSafetyBarrier: "",
@@ -54,6 +56,7 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
           const mappedData: SafetyTemporaryWorks = {
             tempPoolSafetyBarrier: existingData.tpc_tpsb || "",
             tempSafetyBarrierType: existingData.tpc_temporary_barrier_type || "",
+            tempSafetyBarrierHirePeriodWeeks: existingData.tpc_temp_barrier_hire_period_weeks || "",
             powerConnectionProvided: existingData.tpc_power_connection || "",
             hardCoverRequired: existingData.tpc_hardcover || "",
             permPoolSafetyBarrier: existingData.tpc_ppsb || "",
@@ -91,9 +94,10 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
         [field]: value,
       };
       
-      // If temp pool safety barrier is not "Yes", clear the barrier type field
+      // If temp pool safety barrier is not "Yes", clear the barrier type and hire period fields
       if (field === "tempPoolSafetyBarrier" && value !== "Yes") {
         newData.tempSafetyBarrierType = "";
+        newData.tempSafetyBarrierHirePeriodWeeks = "";
       }
       
       return newData;
@@ -130,10 +134,11 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
 
     try {
       // Map form fields to database fields using internal formData state
-      // Always include barrier type field so it gets nullified when barrier not required
+      // Always include barrier type and hire period fields so they get nullified when barrier not required
       const safetyData = {
         tpc_tpsb: formData.tempPoolSafetyBarrier,
         tpc_temporary_barrier_type: formData.tempPoolSafetyBarrier === "Yes" ? formData.tempSafetyBarrierType : "",
+        tpc_temp_barrier_hire_period_weeks: formData.tempPoolSafetyBarrier === "Yes" ? formData.tempSafetyBarrierHirePeriodWeeks : "",
         tpc_power_connection: formData.powerConnectionProvided,
         tpc_hardcover: formData.hardCoverRequired,
         tpc_ppsb: formData.permPoolSafetyBarrier,
@@ -164,11 +169,11 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
       <CardContent className="pt-6">
         <div className="flex items-center gap-2 mb-4">
           <Shield className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Safety & Temporary Works</h3>
+          <h3 className="text-lg font-medium">Third Party Components</h3>
         </div>
         
         <p className="text-sm text-gray-600 mb-6">
-          Specify safety requirements and temporary installations needed during construction, including barriers, power connections, and protective covers. These measures ensure compliance with safety regulations and protect the work site.
+          Define components and services provided by third party contractors, including safety barriers, power connections, and protective covers. These elements are typically sourced externally and require clear responsibility allocation.
         </p>
         
         <div className="grid gap-6">
@@ -239,6 +244,37 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
                   ))}
                 </SelectContent>
               </Select>
+            </div>
+          )}
+
+          {formData.tempPoolSafetyBarrier === "Yes" && (
+            <div className="grid gap-3">
+              <div className="flex justify-between items-start">
+                <Label htmlFor="tempSafetyBarrierHirePeriodWeeks" className="text-base font-medium">
+                  Temporary safety barrier hire period (weeks):
+                </Label>
+                {formData.tempSafetyBarrierHirePeriodWeeks !== "" && !readonly && (
+                  <button
+                    type="button"
+                    onClick={() => handleFieldChange("tempSafetyBarrierHirePeriodWeeks", "")}
+                    className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                  >
+                    <X className="h-3 w-3" />
+                    Remove Value
+                  </button>
+                )}
+              </div>
+              <Input
+                id="tempSafetyBarrierHirePeriodWeeks"
+                type="number"
+                value={formData.tempSafetyBarrierHirePeriodWeeks}
+                onChange={readonly ? undefined : (e) => handleFieldChange("tempSafetyBarrierHirePeriodWeeks", parseInt(e.target.value) || "")}
+                placeholder="Number of weeks"
+                min="1"
+                step="1"
+                readOnly={readonly}
+                className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
+              />
             </div>
           )}
 
@@ -388,7 +424,7 @@ export const SafetyTemporaryWorksSection: React.FC<SafetyTemporaryWorksSectionPr
             >
               {isSubmitting ? 
                 (hasExistingRecord ? "Updating..." : "Saving...") : 
-                (hasExistingRecord ? "Update Safety & Temporary Works" : "Save Safety & Temporary Works")
+                (hasExistingRecord ? "Update Third Party Components" : "Save Third Party Components")
               }
             </Button>
           </div>

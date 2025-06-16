@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useSnapshots } from "@/hooks/useSnapshots";
 import { useSnapshot } from "@/hooks/useSnapshot";
+import { usePriceCalculator } from "@/hooks/calculations/use-calculator-totals";
 import { useContractDetailsConfirmed } from "@/components/contract/hooks/useContractDetailsConfirmed";
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
 import { SummarySection } from "@/components/pool-builder/summary/SummarySection";
@@ -26,6 +27,8 @@ import { SpecialWorkInstructionsSection } from "../../../components/contract/qa-
 import { SurveyReferenceSection } from "../../../components/contract/qa-sections/SurveyReferenceSection";
 import { InclusionsSection } from "../../../components/contract/qa-sections/InclusionsSection";
 import { SubmissionSection } from "../../../components/contract/qa-sections/SubmissionSection";
+import { MinimumHireChargesSection } from "../../../components/contract/qa-sections/MinimumHireChargesSection";
+import { MachinerySection } from "../../../components/contract/qa-sections/MachinerySection";
 import { ContractSummary } from "../../../components/contract/ContractSummary";
 
 import {
@@ -75,6 +78,9 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   
   // Get full snapshot data for selected customer
   const { snapshot: customerSnapshot, loading: customerSnapshotLoading } = useSnapshot(customerId || "");
+  
+  // Get calculator data from snapshot
+  const calculatorData = usePriceCalculator(customerSnapshot);
   
   // Check if contract customer details have been confirmed
   const { isConfirmed: contractDetailsConfirmed, isLoading: contractDetailsLoading, refreshConfirmationStatus } = useContractDetailsConfirmed(customerId);
@@ -148,13 +154,12 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       minAccessHeightMm: "",
       craneRequired: "",
       minCraneClearanceMm: "",
-      fencesInAccessPath: "",
     },
     sitePreparationExcavation: {
-      treesOrWallsRemovalNeeded: "",
       overburdenRemovalResp: "",
       excavationRequiredBy: "",
       excavationMethod: "",
+      excavatorComboSize: "",
       serviceLinesRelocationNeeded: "",
       serviceLinesRelocatedBy: "",
       excavatedMaterialLeftOnSite: "",
@@ -162,14 +167,17 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       excavatedMaterialRemovedBy: "",
     },
     responsibilities: {
+      fencesInAccessPath: "",
       fenceRemovalBy: "",
       fenceReinstatementBy: "",
+      treesOrWallsRemovalNeeded: "",
       treeRemovalBy: "",
       treeReinstatementBy: "",
     },
     safetyTemporaryWorks: {
       tempPoolSafetyBarrier: "",
       tempSafetyBarrierType: "",
+      tempSafetyBarrierHirePeriodWeeks: "",
       powerConnectionProvided: "",
       hardCoverRequired: "",
       permPoolSafetyBarrier: "",
@@ -315,15 +323,15 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger value="basics" className="flex items-center gap-2">
           <FileText className="h-4 w-4" />
-          Contract Basics
+          Contract Particulars
         </TabsTrigger>
         <TabsTrigger value="site" className="flex items-center gap-2">
           <MapPin className="h-4 w-4" />
-          Site Details
+          AFE
         </TabsTrigger>
         <TabsTrigger value="safety" className="flex items-center gap-2">
           <Shield className="h-4 w-4" />
-          Safety & Temporary Works
+          3rd Party
         </TabsTrigger>
         <TabsTrigger value="risks" className="flex items-center gap-2">
           <AlertTriangle className="h-4 w-4" />
@@ -331,7 +339,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         </TabsTrigger>
         <TabsTrigger value="special" className="flex items-center gap-2">
           <Settings className="h-4 w-4" />
-          Special Considerations
+          Special Work
         </TabsTrigger>
         <TabsTrigger value="inclusions" className="flex items-center gap-2">
           <Package className="h-4 w-4" />
@@ -441,11 +449,18 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       <TabsContent value="basics">
         <div className="space-y-6">
           {customerId && selectedProposal && contractDetailsConfirmed ? (
-            <ContractBasicsSection
-              data={formData.contractBasics}
-              onChange={updateContractBasics}
-              onSave={handleSaveContractBasics}
-            />
+            <>
+              <ContractBasicsSection
+                data={formData.contractBasics}
+                onChange={updateContractBasics}
+                onSave={handleSaveContractBasics}
+              />
+              <SurveyReferenceSection
+                data={formData.surveyReference}
+                onChange={updateSurveyReference}
+                onSave={handleSaveSurveyReference}
+              />
+            </>
           ) : (
             <Card className="p-6">
               <div className="text-center space-y-4">
@@ -459,7 +474,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
                   </h3>
                   <p className="text-muted-foreground">
                     {!customerId || !selectedProposal 
-                      ? "Please select a customer to complete the contract basics."
+                      ? "Please select a customer to complete the contract particulars."
                       : "Please confirm the contract customer details before proceeding."
                     }
                   </p>
@@ -475,30 +490,30 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         <div className="space-y-6">
           {customerId && selectedProposal && contractDetailsConfirmed ? (
             <>
+              <SiteDueDiligenceSection
+                data={formData.siteDueDiligenceNotes}
+                onChange={updateSiteDueDiligenceNotes}
+                onSave={handleSaveSiteDueDiligenceNotes}
+              />
               <AccessSiteConditionsSection
                 data={formData.accessSiteConditions}
                 onChange={updateAccessSiteConditions}
                 onSave={handleSaveAccessSiteConditions}
-              />
-              <SitePreparationExcavationSection
-                data={formData.sitePreparationExcavation}
-                onChange={updateSitePreparationExcavation}
-                onSave={handleSaveSitePreparationExcavation}
               />
               <ResponsibilitiesSection
                 data={formData.responsibilities}
                 onChange={updateResponsibilities}
                 onSave={handleSaveResponsibilities}
               />
-              <SiteDueDiligenceSection
-                data={formData.siteDueDiligenceNotes}
-                onChange={updateSiteDueDiligenceNotes}
-                onSave={handleSaveSiteDueDiligenceNotes}
+              <SitePreparationExcavationSection
+                data={formData.sitePreparationExcavation}
+                onChange={updateSitePreparationExcavation}
+                onSave={handleSaveSitePreparationExcavation}
               />
-              <SurveyReferenceSection
-                data={formData.surveyReference}
-                onChange={updateSurveyReference}
-                onSave={handleSaveSurveyReference}
+              <MachinerySection snapshot={customerSnapshot} />
+              <MinimumHireChargesSection 
+                snapshot={customerSnapshot}
+                calculatorData={calculatorData}
               />
             </>
           ) : (
@@ -514,7 +529,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
                   </h3>
                   <p className="text-muted-foreground">
                     {!customerId || !selectedProposal 
-                      ? "Please select a customer to complete the site details."
+                      ? "Please select a customer to complete the access, fencing & equipment details."
                       : "Please confirm the contract customer details before proceeding."
                     }
                   </p>
@@ -547,7 +562,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
                   </h3>
                   <p className="text-muted-foreground">
                     {!customerId || !selectedProposal 
-                      ? "Please select a customer to complete safety and temporary works details."
+                      ? "Please select a customer to complete third party components details."
                       : "Please confirm the contract customer details before proceeding."
                     }
                   </p>
@@ -620,7 +635,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
                   </h3>
                   <p className="text-muted-foreground">
                     {!customerId || !selectedProposal 
-                      ? "Please select a customer to complete special considerations."
+                      ? "Please select a customer to complete special work details."
                       : "Please confirm the contract customer details before proceeding."
                     }
                   </p>

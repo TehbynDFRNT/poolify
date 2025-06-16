@@ -120,7 +120,7 @@ export const SiteDueDiligenceSection: React.FC<SiteDueDiligenceSectionProps> = (
       <CardContent className="pt-6">
         <div className="flex items-center gap-2 mb-4">
           <Search className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Site Due-Diligence Notes</h3>
+          <h3 className="text-lg font-medium">Matters Affecting The Site</h3>
         </div>
         
         <p className="text-sm text-gray-600 mb-6">

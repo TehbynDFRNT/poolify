@@ -7,7 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 export interface ContractBasicsData {
-  resident_owner?: string;     // R1 values (Yes/No/N/A)
   finance_needed?: string;     // R1 values (Yes/No/N/A)
   lender_name?: string;
   interest_rate?: number;      // Interest rate percentage
@@ -48,7 +47,6 @@ export function useContractBasics() {
       // Prepare data for pool_project_contract_basics table
       const dataToSave = {
         contract_id: contractId,
-        resident_owner: basicsData.resident_owner || null,
         finance_needed: basicsData.finance_needed || null,
         lender_name: basicsData.lender_name || null,
         interest_rate: basicsData.interest_rate || null,

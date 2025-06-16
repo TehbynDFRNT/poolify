@@ -18,6 +18,15 @@ interface ExtraConcretingProps {
   onSaveComplete?: () => void;
 }
 
+// Concrete finish options
+const CONCRETE_FINISH_OPTIONS = [
+  "Brushed - Ready for Future Paving",
+  "Brushed - Second Pour",
+  "Second Pour",
+  "Smooth - Ready for Imitation Turf",
+  "Smooth - Second Pour"
+];
+
 export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   pool,
   customerId,
@@ -26,6 +35,8 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   const [selectedType, setSelectedType] = useState<string>("");
   const [meterage, setMeterage] = useState<number>(0);
   const [totalCost, setTotalCost] = useState<number>(0);
+  const [concreteFinishOne, setConcreteFinishOne] = useState<string>("");
+  const [concreteFinishTwo, setConcreteFinishTwo] = useState<string>("");
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -90,6 +101,14 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
         if (data.extra_concreting_total_cost) {
           setTotalCost(data.extra_concreting_total_cost);
         }
+
+        if ((data as any).extra_concrete_finish_one) {
+          setConcreteFinishOne((data as any).extra_concrete_finish_one);
+        }
+
+        if ((data as any).extra_concrete_finish_two) {
+          setConcreteFinishTwo((data as any).extra_concrete_finish_two);
+        }
       }
     } catch (error) {
       console.error("Error in fetchExistingData:", error);
@@ -135,7 +154,9 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     const dataToSave = {
       extra_concreting_type: selectedType || null, // Set to null if empty
       extra_concreting_square_meters: meterage || null, // Set to null if 0
-      extra_concreting_total_cost: totalCost || null // Set to null if 0
+      extra_concreting_total_cost: totalCost || null, // Set to null if 0
+      extra_concrete_finish_one: concreteFinishOne || null, // Set to null if empty
+      extra_concrete_finish_two: concreteFinishTwo || null // Set to null if empty
     };
 
     // Use the guarded handleSave for both insert and update
@@ -160,6 +181,8 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
       setSelectedType('');
       setMeterage(0);
       setTotalCost(0);
+      setConcreteFinishOne('');
+      setConcreteFinishTwo('');
       setShowDeleteConfirm(false);
 
       if (onSaveComplete) {
@@ -242,6 +265,46 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
               className="mt-2"
               disabled={!selectedType || isLoading}
             />
+          </div>
+
+          <div>
+            <Label htmlFor="concrete-finish-one">Concrete Finish 1</Label>
+            <Select
+              value={concreteFinishOne}
+              onValueChange={setConcreteFinishOne}
+              disabled={isLoading}
+            >
+              <SelectTrigger id="concrete-finish-one" className="mt-2">
+                <SelectValue placeholder="Select finish option" />
+              </SelectTrigger>
+              <SelectContent>
+                {CONCRETE_FINISH_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="concrete-finish-two">Concrete Finish 2</Label>
+            <Select
+              value={concreteFinishTwo}
+              onValueChange={setConcreteFinishTwo}
+              disabled={isLoading}
+            >
+              <SelectTrigger id="concrete-finish-two" className="mt-2">
+                <SelectValue placeholder="Select finish option" />
+              </SelectTrigger>
+              <SelectContent>
+                {CONCRETE_FINISH_OPTIONS.map((option) => (
+                  <SelectItem key={option} value={option}>
+                    {option}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

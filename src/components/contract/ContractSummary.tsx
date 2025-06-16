@@ -6,7 +6,7 @@ import { getHWIInsuranceCost, getHWILookupAmount } from '@/types/hwi-insurance';
 import { usePriceCalculator } from '@/hooks/calculations/use-calculator-totals';
 import { useContractSummaryLineItems } from '@/hooks/calculations/useContractSummaryLineItems';
 import type { ProposalSnapshot } from '@/types/snapshot';
-import { ChevronDown, ChevronUp, FileText, User } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, User, Percent } from 'lucide-react';
 import React, { useState } from 'react';
 
 // Line item component for detailed cost breakdowns
@@ -93,7 +93,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
     // Get calculated totals from price calculator hook
     const { contractGrandTotal, grandTotal, totals, fmt } = usePriceCalculator(snapshot);
     
-    // Get contract summary line items
+    // Get contract summary line items (now pulls discounts from snapshot internally)
     const lineItems = useContractSummaryLineItems(snapshot);
     
     console.log('🏗️ ContractSummary rendered', { 
@@ -155,7 +155,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
             <p className="text-muted-foreground mb-6">Complete breakdown of all contract components for this pool project</p>
 
             {/* GRAND TOTAL */}
-            <Card className="mb-8 shadow-none">
+            <Card className={`mb-8 shadow-none ${lineItems.totalDiscountAmount > 0 ? 'border-2 border-primary' : ''}`}>
                 <CardContent className="py-6">
                     <div className="flex justify-between items-center">
                         <div>
@@ -163,11 +163,53 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <p className="text-sm text-muted-foreground">Total Contract Price Including HWI</p>
                         </div>
                         <div className="flex items-center gap-4">
-                            <div className="text-2xl font-bold text-gray-900">
-                                {formatCurrency(lineItems.contractSummaryGrandTotal)}
+                            <div className="text-right">
+                                <div className="text-2xl font-bold text-gray-900">
+                                    {formatCurrency(lineItems.contractSummaryGrandTotalAfterDiscount)}
+                                </div>
+                                {lineItems.totalDiscountAmount > 0 && (
+                                    <div className="text-sm text-muted-foreground">
+                                        Before discounts: {formatCurrency(lineItems.contractSummaryGrandTotal)}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
+                    
+                    {/* Discount Breakdown */}
+                    {lineItems.totalDiscountAmount > 0 && snapshot?.applied_discounts_json && snapshot.applied_discounts_json.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-200">
+                            <h4 className="text-sm font-medium text-gray-700 mb-2">Applied Discounts:</h4>
+                            <div className="space-y-1">
+                                {snapshot.applied_discounts_json.map((discount, index) => {
+                                    const discountAmount = discount.discount_type === 'dollar'
+                                        ? discount.dollar_value || 0
+                                        : (lineItems.contractSummaryGrandTotal * (discount.percentage_value || 0)) / 100;
+                                    
+                                    return (
+                                        <div key={index} className="flex justify-between items-center text-sm">
+                                            <div className="flex items-center gap-2 text-red-600">
+                                                <Percent className="h-3 w-3" />
+                                                <span>{discount.discount_name}</span>
+                                                {discount.discount_type === 'percentage' && (
+                                                    <span className="text-xs text-muted-foreground">
+                                                        ({discount.percentage_value}% of {formatCurrency(lineItems.contractSummaryGrandTotal)})
+                                                    </span>
+                                                )}
+                                            </div>
+                                            <span className="text-red-600 font-medium">
+                                                -{formatCurrency(discountAmount)}
+                                            </span>
+                                        </div>
+                                    );
+                                })}
+                                <div className="flex justify-between items-center text-sm font-medium text-red-600 pt-1 border-t border-red-100">
+                                    <span>Total Discount:</span>
+                                    <span>-{formatCurrency(lineItems.totalDiscountAmount)}</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     
                     {/* Contract Total Excluding HWI */}
                     <div className="mt-4 pt-4 border-t border-gray-200">
@@ -299,7 +341,11 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <h3 className="text-lg font-medium text-gray-900">2. Pool Shell Supply</h3>
                         </div>
                         <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.poolShellSupplyEquipmentTotal)}</span>
+                            <span className="mr-4 font-semibold">
+                                {formatCurrency(lineItems.totalDiscountAmount > 0 
+                                    ? lineItems.poolShellSupplyAfterDiscount 
+                                    : lineItems.poolShellSupplyEquipmentTotal)}
+                            </span>
                             {expandedSections.poolShellSupply ? (
                                 <ChevronUp className="h-5 w-5 text-gray-600" />
                             ) : (
@@ -330,9 +376,28 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                         value={lineItems.shellValueInContract}
                                         breakdown={!isCustomerView ? "Pool shell, freight, and miscellaneous costs (margin applied)" : null}
                                     />
+                                    {lineItems.totalDiscountAmount > 0 && (
+                                        <>
+                                            <SubtotalRow
+                                                label="Pool Shell Supply Subtotal"
+                                                value={lineItems.poolShellSupplyEquipmentTotal}
+                                            />
+                                            <tr className="border-b border-gray-100 text-red-600">
+                                                <td className="py-3 px-4 text-left">
+                                                    Discount Applied
+                                                </td>
+                                                <td className="py-3 px-4 text-right">-{formatCurrency(lineItems.totalDiscountAmount)}</td>
+                                                <td className="py-3 px-4 text-left text-sm text-muted-foreground">
+                                                    {!isCustomerView && "Discount taken from pool shell supply line item"}
+                                                </td>
+                                            </tr>
+                                        </>
+                                    )}
                                     <TotalRow
                                         label="Pool Shell Supply Total"
-                                        value={lineItems.poolShellSupplyEquipmentTotal}
+                                        value={lineItems.totalDiscountAmount > 0 
+                                            ? lineItems.poolShellSupplyAfterDiscount 
+                                            : lineItems.poolShellSupplyEquipmentTotal}
                                     />
                                 </tbody>
                             </table>

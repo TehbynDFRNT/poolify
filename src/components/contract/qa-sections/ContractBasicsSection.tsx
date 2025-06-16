@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 import { ContractBasics, R1_OPTIONS } from "@/types/contract-qa";
 import { useContractBasics } from "@/components/contract/hooks/useContractBasics";
 import { useSearchParams } from "react-router-dom";
-
 interface ContractBasicsSectionProps {
   data?: ContractBasics; // Make optional since we'll manage state internally
   onChange?: (data: ContractBasics) => void; // Make optional
@@ -33,7 +32,6 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
   
   // Manage form state internally
   const [formData, setFormData] = useState<ContractBasics>({
-    isResidentOwner: "",
     contractSubjectToFinance: "",
     lenderName: "",
     interestRate: "",
@@ -66,7 +64,6 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
           setHasExistingRecord(true);
           // Map database fields to form fields
           const mappedData: ContractBasics = {
-            isResidentOwner: existingData.resident_owner || "",
             contractSubjectToFinance: existingData.finance_needed || "",
             lenderName: existingData.lender_name || "",
             interestRate: existingData.interest_rate || "",
@@ -139,7 +136,6 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
     try {
       // Map form fields to database fields using internal formData state
       const basicsData = {
-        resident_owner: formData.isResidentOwner,
         finance_needed: formData.contractSubjectToFinance,
         lender_name: formData.lenderName || undefined,
         interest_rate: typeof formData.interestRate === 'number' ? formData.interestRate : undefined,
@@ -176,52 +172,20 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
   };
 
   return (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center gap-2 mb-4">
-          <FileText className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Contract Basics</h3>
-        </div>
-        
-        <p className="text-sm text-gray-600 mb-6">
-          Define fundamental contract terms including financing arrangements, work schedules, and completion timelines. These details form the foundation of the construction agreement.
-        </p>
+    <div className="space-y-6">
+      {/* Contract Particulars Section */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-medium">Contract Particulars</h3>
+          </div>
+          
+          <p className="text-sm text-gray-600 mb-6">
+            Specify essential contract particulars including ownership details, financing arrangements, and work schedules. These particulars establish the fundamental terms and conditions of the construction agreement.
+          </p>
         
         <div className="grid gap-6">
-          <div className="grid gap-3">
-            <div className="flex justify-between items-start">
-              <Label htmlFor="isResidentOwner" className="text-base font-medium">
-                Is the Owner the "Resident Owner"? <span className="text-destructive">*</span>
-              </Label>
-              {formData.isResidentOwner && !readonly && (
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange("isResidentOwner", "")}
-                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
-                >
-                  <X className="h-3 w-3" />
-                  Remove Value
-                </button>
-              )}
-            </div>
-            <Select
-              value={formData.isResidentOwner}
-              onValueChange={(value) => handleFieldChange("isResidentOwner", value)}
-              disabled={readonly}
-            >
-              <SelectTrigger className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}>
-                <SelectValue placeholder="Select an option" />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                {R1_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
               <Label htmlFor="contractSubjectToFinance" className="text-base font-medium">
@@ -343,50 +307,6 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
 
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
-              <Label className="text-base font-medium">Anticipated commencement week</Label>
-              {formData.anticipatedCommWeek && !readonly && (
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange("anticipatedCommWeek", "")}
-                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
-                >
-                  <X className="h-3 w-3" />
-                  Remove Value
-                </button>
-              )}
-            </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-full justify-start text-left font-normal",
-                    !formData.anticipatedCommWeek && "text-muted-foreground",
-                    readonly && "bg-gray-50 cursor-not-allowed"
-                  )}
-                  disabled={readonly}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formData.anticipatedCommWeek ? (
-                    format(new Date(formData.anticipatedCommWeek), "PPP")
-                  ) : (
-                    <span>Pick a date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-white">
-                <Calendar
-                  mode="single"
-                  selected={formData.anticipatedCommWeek ? new Date(formData.anticipatedCommWeek) : undefined}
-                  onSelect={handleDateSelect}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div className="grid gap-3">
-            <div className="flex justify-between items-start">
               <Label htmlFor="inclementWeatherDays" className="text-base font-medium">Inclement weather allowance</Label>
               {formData.inclementWeatherDays !== "" && !readonly && (
                 <button
@@ -486,7 +406,67 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
               </SelectContent>
             </Select>
           </div>
+        </div>
+        </CardContent>
+      </Card>
+
+      {/* Commencement and Other Document Dates Section */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-medium">Commencement And Other Document Dates</h3>
+          </div>
           
+          <p className="text-sm text-gray-600 mb-6">
+            Define key project dates including document provision deadlines and commencement schedules. These dates establish critical milestones and delivery requirements for the construction project.
+          </p>
+        
+        <div className="grid gap-6">
+          <div className="grid gap-3">
+            <div className="flex justify-between items-start">
+              <Label className="text-base font-medium">Anticipated commencement week</Label>
+              {formData.anticipatedCommWeek && !readonly && (
+                <button
+                  type="button"
+                  onClick={() => handleFieldChange("anticipatedCommWeek", "")}
+                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  Remove Value
+                </button>
+              )}
+            </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-full justify-start text-left font-normal",
+                    !formData.anticipatedCommWeek && "text-muted-foreground",
+                    readonly && "bg-gray-50 cursor-not-allowed"
+                  )}
+                  disabled={readonly}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.anticipatedCommWeek ? (
+                    format(new Date(formData.anticipatedCommWeek), "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 bg-white">
+                <Calendar
+                  mode="single"
+                  selected={formData.anticipatedCommWeek ? new Date(formData.anticipatedCommWeek) : undefined}
+                  onSelect={handleDateSelect}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
               <Label className="text-base font-medium">Access, Fencing, Equipment Date</Label>
@@ -727,22 +707,24 @@ export const ContractBasicsSection: React.FC<ContractBasicsSectionProps> = ({
             </Popover>
           </div>
         </div>
-        
-        {!readonly && (
-          <div className="flex justify-end pt-4 border-t">
-            <Button 
-              onClick={handleSave}
-              disabled={isSubmitting}
-              className="min-w-[140px]"
-            >
-              {isSubmitting ? 
-                (hasExistingRecord ? "Updating..." : "Saving...") : 
-                (hasExistingRecord ? "Update Contract Basics" : "Save Contract Basics")
-              }
-            </Button>
-          </div>
-        )}
       </CardContent>
     </Card>
+    
+    {/* Single Save Button for Both Sections */}
+    {!readonly && (
+      <div className="flex justify-end">
+        <Button 
+          onClick={handleSave}
+          disabled={isSubmitting}
+          className="min-w-[140px]"
+        >
+          {isSubmitting ? 
+            (hasExistingRecord ? "Updating..." : "Saving...") : 
+            (hasExistingRecord ? "Update Contract Particulars" : "Save Contract Particulars")
+          }
+        </Button>
+      </div>
+    )}
+  </div>
   );
 };

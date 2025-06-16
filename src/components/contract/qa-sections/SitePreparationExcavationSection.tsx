@@ -28,7 +28,6 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
   
   // Manage form state internally
   const [formData, setFormData] = useState<SitePreparationExcavation>({
-    treesOrWallsRemovalNeeded: "",
     overburdenRemovalResp: "",
     excavationRequiredBy: "",
     excavationMethod: "",
@@ -56,7 +55,6 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
           setHasExistingRecord(true);
           // Map database fields to form fields
           const mappedData: SitePreparationExcavation = {
-            treesOrWallsRemovalNeeded: existingData.afe_item_6_tree_removal || "",
             overburdenRemovalResp: existingData.afe_item_8_q1_overburden_preparation || "",
             excavationRequiredBy: existingData.afe_item_8_q2_excavation_required || "",
             excavationMethod: existingData.afe_item_8_q3_excavation_method || "",
@@ -108,7 +106,6 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
     try {
       // Map form fields to database fields using internal formData state
       const siteDetailsData = {
-        afe_item_6_tree_removal: formData.treesOrWallsRemovalNeeded,
         afe_item_8_q1_overburden_preparation: formData.overburdenRemovalResp,
         afe_item_8_q2_excavation_required: formData.excavationRequiredBy,
         afe_item_8_q3_excavation_method: formData.excavationMethod,
@@ -144,7 +141,7 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
       <CardContent className="pt-6">
         <div className="flex items-center gap-2 mb-4">
           <Shovel className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-medium">Site Preparation & Excavation</h3>
+          <h3 className="text-lg font-medium">Excavation</h3>
         </div>
         
         <p className="text-sm text-gray-600 mb-6">
@@ -152,40 +149,6 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
         </p>
         
         <div className="grid gap-6">
-          <div className="grid gap-3">
-            <div className="flex justify-between items-start">
-              <Label htmlFor="treesOrWallsRemovalNeeded" className="text-base font-medium">
-                Trees / landscaping / walls require removal? <span className="text-destructive">*</span>
-              </Label>
-              {formData.treesOrWallsRemovalNeeded && !readonly && (
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange("treesOrWallsRemovalNeeded", "")}
-                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
-                >
-                  <X className="h-3 w-3" />
-                  Remove Value
-                </button>
-              )}
-            </div>
-            <Select
-              value={formData.treesOrWallsRemovalNeeded}
-              onValueChange={(value) => handleFieldChange("treesOrWallsRemovalNeeded", value)}
-              disabled={readonly}
-            >
-              <SelectTrigger className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}>
-                <SelectValue placeholder="Select an option" />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                {R1_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
               <Label htmlFor="overburdenRemovalResp" className="text-base font-medium">Removal of over-burden & site prep</Label>
@@ -494,7 +457,7 @@ export const SitePreparationExcavationSection: React.FC<SitePreparationExcavatio
             >
               {isSubmitting ? 
                 (hasExistingRecord ? "Updating..." : "Saving...") : 
-                (hasExistingRecord ? "Update Site Preparation & Excavation" : "Save Site Preparation & Excavation")
+                (hasExistingRecord ? "Update Excavation" : "Save Excavation")
               }
             </Button>
           </div>

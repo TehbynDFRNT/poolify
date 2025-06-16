@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { MapPin, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AccessSiteConditions, R1_OPTIONS } from "@/types/contract-qa";
-import { useContractSiteDetails } from "@/components/contract/hooks/useContractSiteDetails";
+import { useContractSiteDetails, type ContractSiteDetailsData } from "@/components/contract/hooks/useContractSiteDetails";
 import { useSearchParams } from "react-router-dom";
 
 interface AccessSiteConditionsSectionProps {
@@ -34,7 +34,6 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
     minAccessHeightMm: "",
     craneRequired: "",
     minCraneClearanceMm: "",
-    fencesInAccessPath: "",
   });
   
   const { saveContractSiteDetails, loadContractSiteDetails, isSubmitting } = useContractSiteDetails();
@@ -58,7 +57,6 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
             minAccessHeightMm: existingData.afe_min_access_height_mm || "",
             craneRequired: existingData.afe_crane_required || "",
             minCraneClearanceMm: existingData.afe_min_crane_clearance_mm || "",
-            fencesInAccessPath: existingData.afe_item_4_fnp_fences_near_access_path || "",
           };
           setFormData(mappedData);
         } else {
@@ -111,13 +109,12 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
       // Map form fields to database fields using internal formData state
       // Always include crane clearance field so it gets nullified when crane not required
       const siteDetailsData = {
-        afe_item_2_sketch_provided: formData.accessVideoProvided,
-        afe_min_access_width_mm: formData.minAccessWidthMm,
-        afe_min_access_height_mm: formData.minAccessHeightMm,
-        afe_crane_required: formData.craneRequired,
-        afe_min_crane_clearance_mm: formData.craneRequired === "Yes" ? formData.minCraneClearanceMm : "",
-        afe_item_4_fnp_fences_near_access_path: formData.fencesInAccessPath,
-      };
+        afe_item_2_sketch_provided: formData.accessVideoProvided || null,
+        afe_min_access_width_mm: formData.minAccessWidthMm !== "" && formData.minAccessWidthMm !== null ? Number(formData.minAccessWidthMm) : null,
+        afe_min_access_height_mm: formData.minAccessHeightMm !== "" && formData.minAccessHeightMm !== null ? Number(formData.minAccessHeightMm) : null,
+        afe_crane_required: formData.craneRequired || null,
+        afe_min_crane_clearance_mm: formData.craneRequired === "Yes" && formData.minCraneClearanceMm !== "" && formData.minCraneClearanceMm !== null ? Number(formData.minCraneClearanceMm) : null,
+      } as ContractSiteDetailsData;
 
       const result = await saveContractSiteDetails(customerId, siteDetailsData);
       if (result && !hasExistingRecord) {
@@ -188,7 +185,7 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
               <Label htmlFor="minAccessWidthMm" className="text-base font-medium">
-                Minimum access width (mm) <span className="text-destructive">*</span>
+                Minimum access width (metres) <span className="text-destructive">*</span>
               </Label>
               {formData.minAccessWidthMm !== "" && !readonly && (
                 <button
@@ -205,9 +202,20 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
               id="minAccessWidthMm"
               type="number"
               value={formData.minAccessWidthMm}
-              onChange={readonly ? undefined : (e) => handleFieldChange("minAccessWidthMm", parseInt(e.target.value) || "")}
-              placeholder="Width in millimeters"
-              min="1"
+              onChange={readonly ? undefined : (e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  handleFieldChange("minAccessWidthMm", "");
+                } else {
+                  const parsed = parseFloat(value);
+                  if (!isNaN(parsed)) {
+                    handleFieldChange("minAccessWidthMm", parsed);
+                  }
+                }
+              }}
+              placeholder="Width in metres"
+              min="0.1"
+              step="0.1"
               readOnly={readonly}
               className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
@@ -216,7 +224,7 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
           <div className="grid gap-3">
             <div className="flex justify-between items-start">
               <Label htmlFor="minAccessHeightMm" className="text-base font-medium">
-                Minimum access height (mm) <span className="text-destructive">*</span>
+                Minimum access height (metres) <span className="text-destructive">*</span>
               </Label>
               {formData.minAccessHeightMm !== "" && !readonly && (
                 <button
@@ -233,9 +241,20 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
               id="minAccessHeightMm"
               type="number"
               value={formData.minAccessHeightMm}
-              onChange={readonly ? undefined : (e) => handleFieldChange("minAccessHeightMm", parseInt(e.target.value) || "")}
-              placeholder="Height in millimeters"
-              min="1"
+              onChange={readonly ? undefined : (e) => {
+                const value = e.target.value;
+                if (value === "") {
+                  handleFieldChange("minAccessHeightMm", "");
+                } else {
+                  const parsed = parseFloat(value);
+                  if (!isNaN(parsed)) {
+                    handleFieldChange("minAccessHeightMm", parsed);
+                  }
+                }
+              }}
+              placeholder="Height in metres"
+              min="0.1"
+              step="0.1"
               readOnly={readonly}
               className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
             />
@@ -279,7 +298,7 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
             <div className="grid gap-3">
               <div className="flex justify-between items-start">
                 <Label htmlFor="minCraneClearanceMm" className="text-base font-medium">
-                  Minimum crane clearance (mm) <span className="text-destructive">*</span>
+                  Minimum crane clearance (metres) <span className="text-destructive">*</span>
                 </Label>
                 {formData.minCraneClearanceMm !== "" && !readonly && (
                   <button
@@ -296,48 +315,25 @@ export const AccessSiteConditionsSection: React.FC<AccessSiteConditionsSectionPr
                 id="minCraneClearanceMm"
                 type="number"
                 value={formData.minCraneClearanceMm}
-                onChange={readonly ? undefined : (e) => handleFieldChange("minCraneClearanceMm", parseInt(e.target.value) || "")}
-                placeholder="Clearance in millimeters"
-                min="1"
+                onChange={readonly ? undefined : (e) => {
+                  const value = e.target.value;
+                  if (value === "") {
+                    handleFieldChange("minCraneClearanceMm", "");
+                  } else {
+                    const parsed = parseFloat(value);
+                    if (!isNaN(parsed)) {
+                      handleFieldChange("minCraneClearanceMm", parsed);
+                    }
+                  }
+                }}
+                placeholder="Clearance in metres"
+                min="0.1"
+                step="0.1"
                 readOnly={readonly}
                 className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}
               />
             </div>
           )}
-
-          <div className="grid gap-3">
-            <div className="flex justify-between items-start">
-              <Label htmlFor="fencesInAccessPath" className="text-base font-medium">
-                Are fences in / near the access path? <span className="text-destructive">*</span>
-              </Label>
-              {formData.fencesInAccessPath && !readonly && (
-                <button
-                  type="button"
-                  onClick={() => handleFieldChange("fencesInAccessPath", "")}
-                  className="text-xs text-destructive hover:text-destructive/80 underline inline-flex items-center gap-1"
-                >
-                  <X className="h-3 w-3" />
-                  Remove Value
-                </button>
-              )}
-            </div>
-            <Select
-              value={formData.fencesInAccessPath}
-              onValueChange={(value) => handleFieldChange("fencesInAccessPath", value)}
-              disabled={readonly}
-            >
-              <SelectTrigger className={readonly ? "bg-gray-50 cursor-not-allowed" : ""}>
-                <SelectValue placeholder="Select an option" />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                {R1_OPTIONS.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
         
         {!readonly && (
