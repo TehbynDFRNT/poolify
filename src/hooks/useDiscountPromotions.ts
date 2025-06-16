@@ -14,7 +14,7 @@ export const useDiscountPromotions = () => {
     queryKey: ["discount-promotions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("discount_promotions")
+        .from("discount_promotions" as any)
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -47,7 +47,7 @@ export const useDiscountPromotions = () => {
         : { percentage_value: newValue };
 
       const { error } = await supabase
-        .from("discount_promotions")
+        .from("discount_promotions" as any)
         .update(updateData)
         .eq("uuid", promotion.uuid);
 

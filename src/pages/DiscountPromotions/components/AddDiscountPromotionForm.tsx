@@ -53,7 +53,7 @@ export const AddDiscountPromotionForm = ({ onSuccess }: AddDiscountPromotionForm
       };
 
       const { error } = await supabase
-        .from("discount_promotions")
+        .from("discount_promotions" as any)
         .insert([insertData]);
 
       if (error) throw error;

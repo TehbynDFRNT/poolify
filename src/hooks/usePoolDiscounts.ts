@@ -1,7 +1,16 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import type { PoolDiscount, EditablePoolDiscount, DiscountPromotion } from "@/types/discount-promotion";
+import type { EditablePoolDiscount, DiscountPromotion } from "@/types/discount-promotion";
+
+// Local type definition for pool discounts with joined data
+interface PoolDiscountWithPromotion {
+  id: string;
+  pool_project_id: string;
+  discount_promotion_uuid: string;
+  created_at: string;
+  discount_promotion?: DiscountPromotion;
+}
 
 export const usePoolDiscounts = (poolProjectId?: string) => {
   const queryClient = useQueryClient();
@@ -13,11 +22,8 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
       if (!poolProjectId) return [];
       
       const { data, error } = await supabase
-        .from("pool_discounts")
-        .select(`
-          *,
-          discount_promotion:discount_promotions!discount_promotion_uuid(*)
-        `)
+        .from("pool_discounts" as any)
+        .select("*")
         .eq("pool_project_id", poolProjectId)
         .order("created_at", { ascending: false });
 
@@ -25,7 +31,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
         throw error;
       }
 
-      return data;
+      return data as any as PoolDiscountWithPromotion[];
     },
     enabled: !!poolProjectId,
   });
@@ -35,7 +41,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
     queryKey: ["discount-promotions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("discount_promotions")
+        .from("discount_promotions" as any)
         .select("*")
         .order("discount_name");
 
@@ -43,7 +49,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
         throw error;
       }
 
-      return data as DiscountPromotion[];
+      return data as any as DiscountPromotion[];
     },
   });
 
@@ -51,7 +57,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
   const addDiscountMutation = useMutation({
     mutationFn: async (data: EditablePoolDiscount) => {
       const { error } = await supabase
-        .from("pool_discounts")
+        .from("pool_discounts" as any)
         .insert([data]);
 
       if (error) throw error;
@@ -70,7 +76,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
   const removeDiscountMutation = useMutation({
     mutationFn: async (discountId: string) => {
       const { error } = await supabase
-        .from("pool_discounts")
+        .from("pool_discounts" as any)
         .delete()
         .eq("id", discountId);
 
