@@ -24,6 +24,7 @@ export interface ContractSummaryLineItems {
   totalDeposit: number;
   pcContractBOD: number;
   poolShellSupplyEquipmentTotal: number;
+  poolShellSupplyAfterDiscount: number;
   poolShellInstallationTotal: number;
   pcShellInstallCraneHire: number;
   pcShellInstallBackfill: number;
@@ -36,7 +37,9 @@ export interface ContractSummaryLineItems {
   specialInclusions: number;
   handoverTotal: number;
   contractSummaryGrandTotal: number;
+  contractSummaryGrandTotalAfterDiscount: number;
   contractTotalExcludingHWI: number;
+  totalDiscountAmount: number;
   // Breakdown values
   equipmentOnly: number;
   shellValueInContract: number;
@@ -50,6 +53,7 @@ export interface ContractSummaryLineItems {
   marginAppliedBobcatCost: number;
   marginAppliedCustomSiteRequirementsCost: number;
   marginAppliedAgLineCost: number;
+  marginAppliedTempSafetyBarrierCost: number;
   extraPavingCost: number;
   existingPavingCost: number;
   concretePumpCost: number;
@@ -69,7 +73,9 @@ export interface ContractSummaryLineItems {
  * @param snapshot - The proposal snapshot containing all pricing data
  * @returns Calculated line items for contract summary
  */
-export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | undefined): ContractSummaryLineItems {
+export function useContractSummaryLineItems(
+  snapshot: ProposalSnapshot | null | undefined
+): ContractSummaryLineItems {
   const { contractGrandTotal, totals, basePoolBreakdown } = usePriceCalculator(snapshot);
 
   console.log('🔥 useContractSummaryLineItems hook fired', { 
@@ -95,6 +101,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
         totalDeposit: 0,
         pcContractBOD: 0,
         poolShellSupplyEquipmentTotal: 0,
+        poolShellSupplyAfterDiscount: 0,
         poolShellInstallationTotal: 0,
         pcShellInstallCraneHire: 0,
         pcShellInstallBackfill: 0,
@@ -107,7 +114,9 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
         specialInclusions: 0,
         handoverTotal: 0,
         contractSummaryGrandTotal: 0,
+        contractSummaryGrandTotalAfterDiscount: 0,
         contractTotalExcludingHWI: 0,
+        totalDiscountAmount: 0,
         // Breakdown values
         equipmentOnly: 0,
         shellValueInContract: 0,
@@ -121,6 +130,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
         marginAppliedBobcatCost: 0,
         marginAppliedCustomSiteRequirementsCost: 0,
         marginAppliedAgLineCost: 0,
+        marginAppliedTempSafetyBarrierCost: 0,
         extraPavingCost: 0,
         existingPavingCost: 0,
         concretePumpCost: 0,
@@ -217,7 +227,6 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
 
     // Bobcat cost
     const bobcatCost = snapshot.bobcat_cost || 0;
-    const marginAppliedBobcatCost = bobcatCost * marginMultiplier;
 
     // Custom site requirements cost
     const customSiteRequirementsCostRaw = snapshot.site_requirements_data 
@@ -229,16 +238,14 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
 
     // Crane cost
     const craneCost = snapshot.crane_cost || 0;
-    const marginAppliedCraneCost = craneCost * marginMultiplier;
 
     // Traffic control cost
     const trafficControlCost = snapshot.traffic_control_cost || 0;
-    const marginAppliedTrafficControlCost = trafficControlCost * marginMultiplier;
 
     // ==================================================================================
     // 1. DEPOSIT COMPONENTS (Calculated Later)
     // ==================================================================================
-    // Get HWI insurance cost based on contract grand total
+    // Get HWI insurance cost based on contract grand total (using original total, not discounted)
     const hwiCost = getHWIInsuranceCost(contractGrandTotal);
 
     // ==================================================================================
@@ -259,20 +266,20 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     // ==================================================================================
     // 3. EXCAVATION CALCULATION
     // ==================================================================================
-    // Calculate total Excavation cost including all margin-applied site-prep items
+    // Calculate total Excavation cost including bobcat at non-margin applied rate
     const excavationContractTotal =
         marginAppliedDigCost
-      + marginAppliedBobcatCost
+      + bobcatCost
       + marginAppliedAgLineCost;
 
 
     // ==================================================================================
     // 4. POOL SHELL INSTALLATION CALCULATION
     // ==================================================================================
-    // Calculate Pool Shell Installation total using margin-applied values
+    // Calculate Pool Shell Installation total using non-margin applied values for crane, traffic control, and bobcat
     const poolShellInstallationTotal =
-        marginAppliedCraneCost
-      + marginAppliedTrafficControlCost
+        craneCost
+      + trafficControlCost
       + marginAppliedPcInstallFee
       + marginAppliedPcPeaGravel
       + marginAppliedPipeFittingCost
@@ -284,7 +291,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       + marginAppliedTempSafetyBarrierCost;
     
     // Shell Installation breakdown for PC contract
-    const pcShellInstallCraneHire = marginAppliedCraneCost + marginAppliedTrafficControlCost;
+    const pcShellInstallCraneHire = craneCost + trafficControlCost;
     const pcShellInstallBackfill = marginAppliedPcPeaGravel; // Pea gravel is used for backfill
     const pcShellInstallRemainder = poolShellInstallationTotal - pcShellInstallCraneHire - pcShellInstallBackfill;
     
@@ -364,11 +371,39 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
     const contractTotalExcludingHWI = contractSummaryGrandTotal - hwiCost;
 
     // ==================================================================================
+    // DISCOUNT CALCULATION
+    // ==================================================================================
+    let totalDiscountAmount = 0;
+    
+    // Get discounts from snapshot
+    const appliedDiscounts = snapshot.applied_discounts_json;
+    
+    if (appliedDiscounts && appliedDiscounts.length > 0) {
+      appliedDiscounts.forEach(discount => {
+        if (discount && discount.discount_type) {
+          if (discount.discount_type === 'dollar' && discount.dollar_value) {
+            totalDiscountAmount += discount.dollar_value;
+          } else if (discount.discount_type === 'percentage' && discount.percentage_value) {
+            // Calculate percentage discount based on contractSummaryGrandTotal
+            const percentageAmount = (contractSummaryGrandTotal * discount.percentage_value) / 100;
+            totalDiscountAmount += percentageAmount;
+          }
+        }
+      });
+    }
+
+    // Apply discount to pool shell supply line item
+    const poolShellSupplyAfterDiscount = poolShellSupplyEquipmentTotal - totalDiscountAmount;
+    
+    // Calculate grand total after discount
+    const contractSummaryGrandTotalAfterDiscount = contractSummaryGrandTotal - totalDiscountAmount;
+
+    // ==================================================================================
     // 11. DEPOSIT CALCULATION
     // ==================================================================================
     
-    // Calculate deposit as simply 10% of contract summary grand total
-    const totalDeposit = contractSummaryGrandTotal * 0.1;
+    // Calculate deposit as 10% of the grand total after discounts
+    const totalDeposit = contractSummaryGrandTotalAfterDiscount * 0.1;
     const deposit: DepositBreakdown = {
       fireAntCost: marginAppliedFireAntCost,
       hwiCost,
@@ -386,6 +421,7 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       totalDeposit,
       pcContractBOD,
       poolShellSupplyEquipmentTotal,
+      poolShellSupplyAfterDiscount,
       poolShellInstallationTotal,
       pcShellInstallCraneHire,
       pcShellInstallBackfill,
@@ -398,20 +434,23 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       specialInclusions,
       handoverTotal,
       contractSummaryGrandTotal,
+      contractSummaryGrandTotalAfterDiscount,
       contractTotalExcludingHWI,
+      totalDiscountAmount,
       // Breakdown values
       equipmentOnly,
       shellValueInContract,
-      marginAppliedCraneCost,
-      marginAppliedTrafficControlCost,
+      marginAppliedCraneCost: craneCost,
+      marginAppliedTrafficControlCost: trafficControlCost,
       marginAppliedPcInstallFee,
       marginAppliedPcPeaGravel,
       marginAppliedPipeFittingCost,
       marginAppliedFilterSlabCost,
       marginAppliedDigCost,
-      marginAppliedBobcatCost,
+      marginAppliedBobcatCost: bobcatCost,
       marginAppliedCustomSiteRequirementsCost,
       marginAppliedAgLineCost,
+      marginAppliedTempSafetyBarrierCost,
       extraPavingCost: (snapshot.extra_paving_cost || 0),
       existingPavingCost: (snapshot.existing_paving_cost || 0),
       concretePumpCost: (snapshot.concrete_pump_total_cost || 0),
@@ -425,7 +464,16 @@ export function useContractSummaryLineItems(snapshot: ProposalSnapshot | null | 
       extraPaving,
     };
     
-    console.log('✅ useContractSummaryLineItems result:', result);
+    console.log('✅ useContractSummaryLineItems result:', {
+      ...result,
+      discountDetails: {
+        totalDiscountAmount,
+        poolShellSupplyOriginal: poolShellSupplyEquipmentTotal,
+        poolShellSupplyAfterDiscount,
+        contractGrandTotalOriginal: contractSummaryGrandTotal,
+        contractGrandTotalAfterDiscount: contractSummaryGrandTotalAfterDiscount
+      }
+    });
     
     return result;
   }, [snapshot, contractGrandTotal]);

@@ -6,6 +6,7 @@
  */
 import { useMemo } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
+import type { PoolDiscount } from '@/types/discount-promotion';
 
 export interface PriceBreakdown {
   basePoolPrice: number;
@@ -34,6 +35,7 @@ export interface DebugPriceTotals {
   retainingWallsTotal: number;
   extrasTotal: number;
   grandTotalCalculated: number;
+  discountTotal: number;
 }
 
 export interface BasePoolBreakdown {
@@ -64,22 +66,48 @@ export interface SiteRequirementsBreakdown {
   customRequirementsPrice: number;
 }
 
+export interface DiscountBreakdown {
+  totalDollarDiscount: number;
+  totalPercentageDiscount: number;
+  discountDetails: Array<{
+    name: string;
+    type: 'dollar' | 'percentage';
+    value: number;
+    calculatedAmount: number;
+  }>;
+}
+
 export interface PriceCalculatorResult {
   fmt: (n: number | null | undefined) => string;
   grandTotal: number;
+  grandTotalWithoutDiscounts: number;
   contractGrandTotal: number;
   totals: DebugPriceTotals;
   basePoolBreakdown: BasePoolBreakdown;
   siteRequirementsBreakdown: SiteRequirementsBreakdown;
+  discountBreakdown: DiscountBreakdown;
 }
 
 /**
  * Hook for calculating all price components for a proposal
  * 
  * @param snapshot - The proposal snapshot containing all pricing data
+ * @param appliedDiscounts - Array of applied discount promotions with details
  * @returns Formatted prices, grand total, and detailed breakdown
  */
-export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined): PriceCalculatorResult {
+export function usePriceCalculator(
+  snapshot: ProposalSnapshot | null | undefined, 
+  appliedDiscounts?: Array<{
+    id: string;
+    discount_promotion: {
+      uuid: string;
+      discount_name: string;
+      discount_type: 'dollar' | 'percentage';
+      dollar_value?: number;
+      percentage_value?: number;
+    };
+  }>
+): PriceCalculatorResult {
   return useMemo(() => {
     console.log('💰 usePriceCalculator called', { 
       snapshot: !!snapshot, 
@@ -96,6 +124,7 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
           return n.toLocaleString('en-AU', { style: 'currency', currency: 'AUD' });
         },
         grandTotal: 0,
+        grandTotalWithoutDiscounts: 0,
         contractGrandTotal: 0,
         totals: {
           basePoolTotal: 0,
@@ -106,7 +135,8 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
           waterFeatureTotal: 0,
           retainingWallsTotal: 0,
           extrasTotal: 0,
-          grandTotalCalculated: 0
+          grandTotalCalculated: 0,
+          discountTotal: 0
         },
         basePoolBreakdown: {
           poolShellCost: 0,
@@ -133,6 +163,11 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
           bobcatPrice: 0,
           trafficControlPrice: 0,
           customRequirementsPrice: 0,
+        },
+        discountBreakdown: {
+          totalDollarDiscount: 0,
+          totalPercentageDiscount: 0,
+          discountDetails: []
         }
       };
     }
@@ -177,6 +212,44 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
     const grandTotalCalculated = basePoolTotal + siteRequirementsTotal + electricalTotal + concreteTotal + fencingTotal + waterFeatureTotal + retainingWallsTotal + extrasTotal;
     
     const contractGrandTotal = basePoolTotal + siteRequirementsTotal + concreteTotal + waterFeatureTotal + retainingWallsTotal + extrasTotal;
+
+    // Calculate discount breakdown with null safety
+    const discountBreakdown: DiscountBreakdown = {
+      totalDollarDiscount: 0,
+      totalPercentageDiscount: 0,
+      discountDetails: []
+    };
+
+    if (appliedDiscounts && appliedDiscounts.length > 0) {
+      appliedDiscounts.forEach(poolDiscount => {
+        const promotion = poolDiscount.discount_promotion;
+        if (promotion && promotion.discount_type) {
+          if (promotion.discount_type === 'dollar' && promotion.dollar_value) {
+            discountBreakdown.totalDollarDiscount += promotion.dollar_value;
+            discountBreakdown.discountDetails.push({
+              name: promotion.discount_name,
+              type: 'dollar',
+              value: promotion.dollar_value,
+              calculatedAmount: promotion.dollar_value
+            });
+          } else if (promotion.discount_type === 'percentage' && promotion.percentage_value) {
+            // Calculate percentage based on total excluding fencing and electrical
+            const totalExcludingFencingAndElectrical = grandTotalCalculated - fencingTotal - electricalTotal;
+            const percentageAmount = (totalExcludingFencingAndElectrical * promotion.percentage_value) / 100;
+            discountBreakdown.totalPercentageDiscount += percentageAmount;
+            discountBreakdown.discountDetails.push({
+              name: promotion.discount_name,
+              type: 'percentage',
+              value: promotion.percentage_value,
+              calculatedAmount: percentageAmount
+            });
+          }
+        }
+      });
+    }
+
+    const totalDiscountAmount = discountBreakdown.totalDollarDiscount + discountBreakdown.totalPercentageDiscount;
+    const finalGrandTotal = grandTotalCalculated - totalDiscountAmount;
 
     // Calculate individual component costs and prices
     const poolShellCost = snapshot.spec_buy_inc_gst || 0;
@@ -236,7 +309,8 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
     
     return {
       fmt,
-      grandTotal: grandTotalCalculated,
+      grandTotal: finalGrandTotal,
+      grandTotalWithoutDiscounts: grandTotalCalculated,
       contractGrandTotal,
       totals: {
         basePoolTotal,
@@ -247,10 +321,12 @@ export function usePriceCalculator(snapshot: ProposalSnapshot | null | undefined
         waterFeatureTotal,
         retainingWallsTotal,
         extrasTotal,
-        grandTotalCalculated
+        grandTotalCalculated,
+        discountTotal: totalDiscountAmount
       },
       basePoolBreakdown,
-      siteRequirementsBreakdown
+      siteRequirementsBreakdown,
+      discountBreakdown
     };
-  }, [snapshot]);
+  }, [snapshot, appliedDiscounts]);
 }
