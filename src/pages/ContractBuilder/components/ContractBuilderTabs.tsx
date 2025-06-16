@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { FileText, FileBarChart, MapPin, Shovel, Shield, AlertTriangle, Settings, Package, DollarSign, FileCheck } from "lucide-react";
+import { FileText, MapPin, Shield, AlertTriangle, Settings, Package, DollarSign, FileCheck } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,7 +11,6 @@ import { useSnapshot } from "@/hooks/useSnapshot";
 import { usePriceCalculator } from "@/hooks/calculations/use-calculator-totals";
 import { useContractDetailsConfirmed } from "@/components/contract/hooks/useContractDetailsConfirmed";
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
-import { SummarySection } from "@/components/pool-builder/summary/SummarySection";
 import { Button } from "@/components/ui/button";
 
 // Import individual Q&A section components
@@ -60,8 +59,8 @@ import { PoolProject, Pool } from "@/types/pool";
 
 export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   customerId,
-  customer,
-  selectedPool,
+  customer: _customer,
+  selectedPool: _selectedPool,
   loading
 }) => {
   const [activeTab, setActiveTab] = useState("contract");
@@ -77,13 +76,13 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   const { snapshots = new Map(), loading: snapshotsLoading } = useSnapshots(proposalIds);
   
   // Get full snapshot data for selected customer
-  const { snapshot: customerSnapshot, loading: customerSnapshotLoading } = useSnapshot(customerId || "");
+  const { snapshot: customerSnapshot } = useSnapshot(customerId || "");
   
   // Get calculator data from snapshot
-  const calculatorData = usePriceCalculator(customerSnapshot);
+  const calculatorData = usePriceCalculator(customerSnapshot as any);
   
   // Check if contract customer details have been confirmed
-  const { isConfirmed: contractDetailsConfirmed, isLoading: contractDetailsLoading, refreshConfirmationStatus } = useContractDetailsConfirmed(customerId);
+  const { isConfirmed: contractDetailsConfirmed } = useContractDetailsConfirmed(customerId);
   
   useEffect(() => {
     fetchProposals();
@@ -140,13 +139,19 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   // Q&A Form state management
   const [formData, setFormData] = useState<ContractQAFormData>({
     contractBasics: {
-      isResidentOwner: "",
       contractSubjectToFinance: "",
       lenderName: "",
+      interestRate: "",
       workPeriodDays: "",
       anticipatedCommWeek: "",
       inclementWeatherDays: "",
       weekendDays: "",
+      thirdPartyComponents: "",
+      accessFencingEquipmentDate: "",
+      specificationsDate: "",
+      sitePlanDate: "",
+      permissionToEnterDate: "",
+      otherDate: "",
     },
     accessSiteConditions: {
       accessVideoProvided: "",
@@ -193,7 +198,10 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
       mattersAffectingSiteOwner: "",
     },
     specialWorkInstructions: {
+      specialConsiderations: "",
       extraOrSpecialWork: "",
+      specialAccess: "",
+      specialAccessNotes: "",
     },
     surveyReference: {
       datumPoint: "",
@@ -510,9 +518,9 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
                 onChange={updateSitePreparationExcavation}
                 onSave={handleSaveSitePreparationExcavation}
               />
-              <MachinerySection snapshot={customerSnapshot} />
+              <MachinerySection snapshot={customerSnapshot as any} />
               <MinimumHireChargesSection 
-                snapshot={customerSnapshot}
+                snapshot={customerSnapshot as any}
                 calculatorData={calculatorData}
               />
             </>
@@ -685,7 +693,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
           {customerId && selectedProposal && contractDetailsConfirmed ? (
             <SubmissionSection
               customer={selectedProposal}
-              snapshot={customerSnapshot}
+              snapshot={customerSnapshot as any}
             />
           ) : (
             <Card className="p-6">
@@ -715,7 +723,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         <Card className="p-6">
           {selectedProposal ? (
             <ContractSummary 
-              snapshot={customerSnapshot} 
+              snapshot={customerSnapshot as any} 
               showMargins={false} 
             />
           ) : (

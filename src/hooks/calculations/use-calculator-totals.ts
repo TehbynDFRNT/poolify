@@ -6,7 +6,6 @@
  */
 import { useMemo } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
-import type { PoolDiscount } from '@/types/discount-promotion';
 
 export interface PriceBreakdown {
   basePoolPrice: number;
