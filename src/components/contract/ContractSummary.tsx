@@ -2,7 +2,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { formatCurrency } from '@/utils/format';
-import { getHWIInsuranceCost, getHWILookupAmount } from '@/types/hwi-insurance';
 import { usePriceCalculator } from '@/hooks/calculations/use-calculator-totals';
 import { useContractSummaryLineItems } from '@/hooks/calculations/useContractSummaryLineItems';
 import type { ProposalSnapshot } from '@/types/snapshot';
@@ -39,32 +38,13 @@ const TotalRow = ({ label, value }) => (
     </tr>
 );
 
-// Section card component for each section
-const SectionCard = ({ title, children }) => (
-    <Card className="mb-6 shadow-none">
-        <CardContent className="pt-6">
-            <div className="flex items-center gap-2 mb-4">
-                <h3 className="text-lg font-medium text-gray-900">{title}</h3>
-            </div>
-            <div className="space-y-4">
-                <table className="w-full">
-                    <tbody>
-                        {children}
-                    </tbody>
-                </table>
-            </div>
-        </CardContent>
-    </Card>
-);
 
 interface ContractSummaryProps {
     snapshot: ProposalSnapshot | null | undefined;
-    showMargins?: boolean;
 }
 
 export const ContractSummary: React.FC<ContractSummaryProps> = ({
-    snapshot,
-    showMargins = false,
+    snapshot
 }) => {
     // Add state for view mode - default to Customer View
     const [isCustomerView, setIsCustomerView] = useState(true);
@@ -90,8 +70,19 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
         }));
     };
 
-    // Get calculated totals from price calculator hook
-    const { contractGrandTotal, grandTotal, totals, fmt } = usePriceCalculator(snapshot);
+    // Get calculated totals from price calculator hook with discount information
+    const appliedDiscounts = snapshot?.applied_discounts_json?.map(discount => ({
+        id: discount.id || 'unknown',
+        discount_promotion: {
+            uuid: discount.discount_promotion_uuid || 'unknown',
+            discount_name: discount.discount_name || 'Unnamed Discount',
+            discount_type: discount.discount_type as 'dollar' | 'percentage',
+            dollar_value: discount.dollar_value,
+            percentage_value: discount.percentage_value
+        }
+    })) || [];
+    
+    const { grandTotal, totals } = usePriceCalculator(snapshot, appliedDiscounts);
     
     // Get contract summary line items (now pulls discounts from snapshot internally)
     const lineItems = useContractSummaryLineItems(snapshot);
@@ -117,11 +108,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
     // lineItems now comes from the useContractSummaryLineItems hook
 
     // Use the calculated grand total from price calculator (includes third party costs)
-    const proposalGrandTotal = grandTotal
-
-    // Calculate HWI insurance cost based on rounded down total
-    const hwiLookupAmount = getHWILookupAmount(proposalGrandTotal);
-    const hwiInsuranceCost = getHWIInsuranceCost(proposalGrandTotal);
+    const proposalGrandTotal = grandTotal;
 
     return (
         <div className="space-y-6">
@@ -263,7 +250,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             {!isCustomerView && (
                                 <div className="flex justify-between items-center text-xs pt-1">
                                     <span className="text-muted-foreground">Delta vs Contract Total (Debug)</span>
-                                    <span className="text-muted-foreground">{formatCurrency(proposalGrandTotal - lineItems.contractSummaryGrandTotal)}</span>
+                                    <span className="text-muted-foreground">{formatCurrency(proposalGrandTotal - lineItems.contractSummaryGrandTotalAfterDiscount)}</span>
                                 </div>
                             )}
                         </div>

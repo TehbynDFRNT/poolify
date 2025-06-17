@@ -398,6 +398,33 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_promotions: {
+        Row: {
+          created_at: string | null
+          discount_name: string
+          discount_type: string
+          dollar_value: number | null
+          percentage_value: number | null
+          uuid: string
+        }
+        Insert: {
+          created_at?: string | null
+          discount_name: string
+          discount_type?: string
+          dollar_value?: number | null
+          percentage_value?: number | null
+          uuid?: string
+        }
+        Update: {
+          created_at?: string | null
+          discount_name?: string
+          discount_type?: string
+          dollar_value?: number | null
+          percentage_value?: number | null
+          uuid?: string
+        }
+        Relationships: []
+      }
       electrical_costs: {
         Row: {
           created_at: string
@@ -727,6 +754,7 @@ export type Database = {
           gates: number
           id: string
           linear_meters: number
+          pool_id: string
           simple_panels: number
           total_cost: number
           updated_at: string
@@ -739,6 +767,7 @@ export type Database = {
           gates?: number
           id?: string
           linear_meters?: number
+          pool_id: string
           simple_panels?: number
           total_cost?: number
           updated_at?: string
@@ -751,6 +780,7 @@ export type Database = {
           gates?: number
           id?: string
           linear_meters?: number
+          pool_id?: string
           simple_panels?: number
           total_cost?: number
           updated_at?: string
@@ -778,6 +808,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      general_extras: {
+        Row: {
+          cost: number
+          created_at: string
+          description: string | null
+          id: string
+          margin: number
+          name: string
+          rrp: number
+          sku: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          margin: number
+          name: string
+          rrp: number
+          sku: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          description?: string | null
+          id?: string
+          margin?: number
+          name?: string
+          rrp?: number
+          sku?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       hand_grab_rails: {
         Row: {
@@ -1111,6 +1180,20 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "pool_cleaner_selections_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_cleaner_selections_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+          {
             foreignKeyName: "pool_cleaner_selections_pool_cleaner_id_fkey"
             columns: ["pool_cleaner_id"]
             isOneToOne: false
@@ -1158,6 +1241,57 @@ export type Database = {
           price?: number
         }
         Relationships: []
+      }
+      pool_concrete_selections: {
+        Row: {
+          concrete_cuts: string | null
+          concrete_cuts_cost: number | null
+          concrete_pump_needed: boolean | null
+          concrete_pump_quantity: number | null
+          concrete_pump_total_cost: number | null
+          created_at: string
+          id: string
+          pool_project_id: string
+          updated_at: string
+        }
+        Insert: {
+          concrete_cuts?: string | null
+          concrete_cuts_cost?: number | null
+          concrete_pump_needed?: boolean | null
+          concrete_pump_quantity?: number | null
+          concrete_pump_total_cost?: number | null
+          created_at?: string
+          id?: string
+          pool_project_id: string
+          updated_at?: string
+        }
+        Update: {
+          concrete_cuts?: string | null
+          concrete_cuts_cost?: number | null
+          concrete_pump_needed?: boolean | null
+          concrete_pump_quantity?: number | null
+          concrete_pump_total_cost?: number | null
+          created_at?: string
+          id?: string
+          pool_project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_concrete_selections_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_concrete_selections_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
       }
       pool_costs: {
         Row: {
@@ -1287,6 +1421,49 @@ export type Database = {
           },
         ]
       }
+      pool_discounts: {
+        Row: {
+          created_at: string | null
+          discount_promotion_uuid: string
+          id: string
+          pool_project_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          discount_promotion_uuid: string
+          id?: string
+          pool_project_id: string
+        }
+        Update: {
+          created_at?: string | null
+          discount_promotion_uuid?: string
+          id?: string
+          pool_project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_discounts_discount_promotion_uuid_fkey"
+            columns: ["discount_promotion_uuid"]
+            isOneToOne: false
+            referencedRelation: "discount_promotions"
+            referencedColumns: ["uuid"]
+          },
+          {
+            foreignKeyName: "pool_discounts_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_discounts_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       pool_electrical_requirements: {
         Row: {
           created_at: string
@@ -1323,14 +1500,203 @@ export type Database = {
         }
         Relationships: []
       }
+      pool_equipment_selections: {
+        Row: {
+          bobcat_id: string | null
+          crane_id: string | null
+          created_at: string
+          id: string
+          pool_project_id: string
+          traffic_control_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          bobcat_id?: string | null
+          crane_id?: string | null
+          created_at?: string
+          id?: string
+          pool_project_id: string
+          traffic_control_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bobcat_id?: string | null
+          crane_id?: string | null
+          created_at?: string
+          id?: string
+          pool_project_id?: string
+          traffic_control_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_equipment_selections_bobcat_id_fkey"
+            columns: ["bobcat_id"]
+            isOneToOne: false
+            referencedRelation: "bobcat_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_equipment_selections_crane_id_fkey"
+            columns: ["crane_id"]
+            isOneToOne: false
+            referencedRelation: "crane_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_equipment_selections_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_equipment_selections_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+          {
+            foreignKeyName: "pool_equipment_selections_traffic_control_id_fkey"
+            columns: ["traffic_control_id"]
+            isOneToOne: false
+            referencedRelation: "traffic_control_costs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_fence_concrete_strips: {
+        Row: {
+          created_at: string
+          id: string
+          pool_project_id: string
+          strip_data: Json | null
+          total_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pool_project_id: string
+          strip_data?: Json | null
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pool_project_id?: string
+          strip_data?: Json | null
+          total_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_fence_concrete_strips_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_fence_concrete_strips_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      pool_general_extras: {
+        Row: {
+          cost: number
+          created_at: string | null
+          description: string | null
+          general_extra_id: string
+          id: string
+          margin: number
+          name: string
+          pool_project_id: string
+          quantity: number
+          rrp: number
+          sku: string
+          total_cost: number | null
+          total_margin: number | null
+          total_rrp: number | null
+          type: string
+          updated_at: string | null
+        }
+        Insert: {
+          cost: number
+          created_at?: string | null
+          description?: string | null
+          general_extra_id: string
+          id?: string
+          margin: number
+          name: string
+          pool_project_id: string
+          quantity?: number
+          rrp: number
+          sku: string
+          total_cost?: number | null
+          total_margin?: number | null
+          total_rrp?: number | null
+          type: string
+          updated_at?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string | null
+          description?: string | null
+          general_extra_id?: string
+          id?: string
+          margin?: number
+          name?: string
+          pool_project_id?: string
+          quantity?: number
+          rrp?: number
+          sku?: string
+          total_cost?: number | null
+          total_margin?: number | null
+          total_rrp?: number | null
+          type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_general_extras_general_extra_id_fkey"
+            columns: ["general_extra_id"]
+            isOneToOne: false
+            referencedRelation: "general_extras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_general_extras_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_general_extras_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       pool_heating_options: {
         Row: {
           blanket_roller_cost: number
           blanket_roller_id: string | null
+          blanket_roller_installation_cost: number | null
           created_at: string
           customer_id: string
           heat_pump_cost: number
           heat_pump_id: string | null
+          heat_pump_installation_cost: number | null
           id: string
           include_blanket_roller: boolean
           include_heat_pump: boolean
@@ -1342,10 +1708,12 @@ export type Database = {
         Insert: {
           blanket_roller_cost?: number
           blanket_roller_id?: string | null
+          blanket_roller_installation_cost?: number | null
           created_at?: string
           customer_id: string
           heat_pump_cost?: number
           heat_pump_id?: string | null
+          heat_pump_installation_cost?: number | null
           id?: string
           include_blanket_roller?: boolean
           include_heat_pump?: boolean
@@ -1357,10 +1725,12 @@ export type Database = {
         Update: {
           blanket_roller_cost?: number
           blanket_roller_id?: string | null
+          blanket_roller_installation_cost?: number | null
           created_at?: string
           customer_id?: string
           heat_pump_cost?: number
           heat_pump_id?: string | null
+          heat_pump_installation_cost?: number | null
           id?: string
           include_blanket_roller?: boolean
           include_heat_pump?: boolean
@@ -1439,7 +1809,830 @@ export type Database = {
           },
         ]
       }
+      pool_paving_selections: {
+        Row: {
+          coping_category: string | null
+          created_at: string
+          existing_concrete_paving_category: string | null
+          existing_concrete_paving_square_meters: number | null
+          existing_concrete_paving_total_cost: number | null
+          extra_concrete_finish_one: string | null
+          extra_concrete_finish_two: string | null
+          extra_concreting_square_meters: number | null
+          extra_concreting_total_cost: number | null
+          extra_concreting_type: string | null
+          extra_paving_category: string | null
+          extra_paving_square_meters: number | null
+          extra_paving_total_cost: number | null
+          grout_colour: string | null
+          id: string
+          pool_project_id: string
+          updated_at: string
+        }
+        Insert: {
+          coping_category?: string | null
+          created_at?: string
+          existing_concrete_paving_category?: string | null
+          existing_concrete_paving_square_meters?: number | null
+          existing_concrete_paving_total_cost?: number | null
+          extra_concrete_finish_one?: string | null
+          extra_concrete_finish_two?: string | null
+          extra_concreting_square_meters?: number | null
+          extra_concreting_total_cost?: number | null
+          extra_concreting_type?: string | null
+          extra_paving_category?: string | null
+          extra_paving_square_meters?: number | null
+          extra_paving_total_cost?: number | null
+          grout_colour?: string | null
+          id?: string
+          pool_project_id: string
+          updated_at?: string
+        }
+        Update: {
+          coping_category?: string | null
+          created_at?: string
+          existing_concrete_paving_category?: string | null
+          existing_concrete_paving_square_meters?: number | null
+          existing_concrete_paving_total_cost?: number | null
+          extra_concrete_finish_one?: string | null
+          extra_concrete_finish_two?: string | null
+          extra_concreting_square_meters?: number | null
+          extra_concreting_total_cost?: number | null
+          extra_concreting_type?: string | null
+          extra_paving_category?: string | null
+          extra_paving_square_meters?: number | null
+          extra_paving_total_cost?: number | null
+          grout_colour?: string | null
+          id?: string
+          pool_project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_paving_selections_extra_paving_category_fkey"
+            columns: ["extra_paving_category"]
+            isOneToOne: false
+            referencedRelation: "extra_paving_costs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_paving_selections_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_paving_selections_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      pool_project_contract: {
+        Row: {
+          created_at: string
+          email: string | null
+          home_address: string | null
+          id: string
+          owner1: string | null
+          owner2: string | null
+          phone: string | null
+          resident_homeowner: boolean | null
+          site_address: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          home_address?: string | null
+          id: string
+          owner1?: string | null
+          owner2?: string | null
+          phone?: string | null
+          resident_homeowner?: boolean | null
+          site_address?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          home_address?: string | null
+          id?: string
+          owner1?: string | null
+          owner2?: string | null
+          phone?: string | null
+          resident_homeowner?: boolean | null
+          site_address?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_project_contract_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
+      pool_project_contract_basics: {
+        Row: {
+          access_fencing_equipment_date: string | null
+          commencement_week: string | null
+          contract_id: string
+          created_at: string | null
+          finance_needed: string | null
+          id: string
+          interest_rate: number | null
+          lender_name: string | null
+          other_date: string | null
+          permission_to_enter_date: string | null
+          site_plan_date: string | null
+          specifications_date: string | null
+          third_party_components: string | null
+          total_delays: number | null
+          updated_at: string | null
+          weather_days: number | null
+          weekends_public_holidays: number | null
+          work_period_days: number | null
+        }
+        Insert: {
+          access_fencing_equipment_date?: string | null
+          commencement_week?: string | null
+          contract_id: string
+          created_at?: string | null
+          finance_needed?: string | null
+          id?: string
+          interest_rate?: number | null
+          lender_name?: string | null
+          other_date?: string | null
+          permission_to_enter_date?: string | null
+          site_plan_date?: string | null
+          specifications_date?: string | null
+          third_party_components?: string | null
+          total_delays?: number | null
+          updated_at?: string | null
+          weather_days?: number | null
+          weekends_public_holidays?: number | null
+          work_period_days?: number | null
+        }
+        Update: {
+          access_fencing_equipment_date?: string | null
+          commencement_week?: string | null
+          contract_id?: string
+          created_at?: string | null
+          finance_needed?: string | null
+          id?: string
+          interest_rate?: number | null
+          lender_name?: string | null
+          other_date?: string | null
+          permission_to_enter_date?: string | null
+          site_plan_date?: string | null
+          specifications_date?: string | null
+          third_party_components?: string | null
+          total_delays?: number | null
+          updated_at?: string | null
+          weather_days?: number | null
+          weekends_public_holidays?: number | null
+          work_period_days?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_basics_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: true
+            referencedRelation: "pool_project_contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_project_contract_extracosts: {
+        Row: {
+          created_at: string
+          id: number
+          pool_project_contract_id: string
+          rfc_q1_siteboundaries: string
+          rfc_q10_product_substitution: string
+          rfc_q2_accessthesite: string
+          rfc_q3_ownerinterference: string
+          rfc_q4_primecost_variance: string
+          rfc_q5_statutory_variations: string
+          rfc_q6_commencement_delay: string
+          rfc_q7_latent_conditions: string
+          rfc_q8_works_suspension: string
+          rfc_q9_excavated_fill_dumping: string
+          rfc_total_special_conditions: string
+          third_party_components: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          pool_project_contract_id: string
+          rfc_q1_siteboundaries: string
+          rfc_q10_product_substitution: string
+          rfc_q2_accessthesite: string
+          rfc_q3_ownerinterference: string
+          rfc_q4_primecost_variance: string
+          rfc_q5_statutory_variations: string
+          rfc_q6_commencement_delay: string
+          rfc_q7_latent_conditions: string
+          rfc_q8_works_suspension: string
+          rfc_q9_excavated_fill_dumping: string
+          rfc_total_special_conditions: string
+          third_party_components: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          pool_project_contract_id?: string
+          rfc_q1_siteboundaries?: string
+          rfc_q10_product_substitution?: string
+          rfc_q2_accessthesite?: string
+          rfc_q3_ownerinterference?: string
+          rfc_q4_primecost_variance?: string
+          rfc_q5_statutory_variations?: string
+          rfc_q6_commencement_delay?: string
+          rfc_q7_latent_conditions?: string
+          rfc_q8_works_suspension?: string
+          rfc_q9_excavated_fill_dumping?: string
+          rfc_total_special_conditions?: string
+          third_party_components?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_extracosts_pool_project_contract_id_fkey"
+            columns: ["pool_project_contract_id"]
+            isOneToOne: true
+            referencedRelation: "pool_project_contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_project_contract_inclusions_exclusions: {
+        Row: {
+          created_at: string | null
+          id: number
+          pool_project_contract_id: string
+          s7_inc_or_ex_a: string | null
+          s7_inc_or_ex_aa_plugin: string | null
+          s7_inc_or_ex_b: string | null
+          s7_inc_or_ex_bb: string | null
+          s7_inc_or_ex_c: string | null
+          s7_inc_or_ex_cc: string | null
+          s7_inc_or_ex_d: string | null
+          s7_inc_or_ex_dd: string | null
+          s7_inc_or_ex_e: string | null
+          s7_inc_or_ex_ee: string | null
+          s7_inc_or_ex_f: string | null
+          s7_inc_or_ex_ff: string | null
+          s7_inc_or_ex_g: string | null
+          s7_inc_or_ex_gg: string | null
+          s7_inc_or_ex_h: string | null
+          s7_inc_or_ex_hh: string | null
+          s7_inc_or_ex_i: string | null
+          s7_inc_or_ex_j: string | null
+          s7_inc_or_ex_jj: string | null
+          s7_inc_or_ex_k: string | null
+          s7_inc_or_ex_kk: string | null
+          s7_inc_or_ex_l: string | null
+          s7_inc_or_ex_ll: string | null
+          s7_inc_or_ex_m: string | null
+          s7_inc_or_ex_mm: string | null
+          s7_inc_or_ex_n: string | null
+          s7_inc_or_ex_nn: string | null
+          s7_inc_or_ex_o: string | null
+          s7_inc_or_ex_oo: string | null
+          s7_inc_or_ex_p: string | null
+          s7_inc_or_ex_pp: string | null
+          s7_inc_or_ex_q: string | null
+          s7_inc_or_ex_qq: string | null
+          s7_inc_or_ex_r: string | null
+          s7_inc_or_ex_rr: string | null
+          s7_inc_or_ex_s: string | null
+          s7_inc_or_ex_ss: string | null
+          s7_inc_or_ex_t: string | null
+          s7_inc_or_ex_tt: string | null
+          s7_inc_or_ex_u: string | null
+          s7_inc_or_ex_uu: string | null
+          s7_inc_or_ex_v: string | null
+          s7_inc_or_ex_w: string | null
+          s7_inc_or_ex_x: string | null
+          s7_inc_or_ex_y: string | null
+          s7_inc_or_ex_z: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          pool_project_contract_id: string
+          s7_inc_or_ex_a?: string | null
+          s7_inc_or_ex_aa_plugin?: string | null
+          s7_inc_or_ex_b?: string | null
+          s7_inc_or_ex_bb?: string | null
+          s7_inc_or_ex_c?: string | null
+          s7_inc_or_ex_cc?: string | null
+          s7_inc_or_ex_d?: string | null
+          s7_inc_or_ex_dd?: string | null
+          s7_inc_or_ex_e?: string | null
+          s7_inc_or_ex_ee?: string | null
+          s7_inc_or_ex_f?: string | null
+          s7_inc_or_ex_ff?: string | null
+          s7_inc_or_ex_g?: string | null
+          s7_inc_or_ex_gg?: string | null
+          s7_inc_or_ex_h?: string | null
+          s7_inc_or_ex_hh?: string | null
+          s7_inc_or_ex_i?: string | null
+          s7_inc_or_ex_j?: string | null
+          s7_inc_or_ex_jj?: string | null
+          s7_inc_or_ex_k?: string | null
+          s7_inc_or_ex_kk?: string | null
+          s7_inc_or_ex_l?: string | null
+          s7_inc_or_ex_ll?: string | null
+          s7_inc_or_ex_m?: string | null
+          s7_inc_or_ex_mm?: string | null
+          s7_inc_or_ex_n?: string | null
+          s7_inc_or_ex_nn?: string | null
+          s7_inc_or_ex_o?: string | null
+          s7_inc_or_ex_oo?: string | null
+          s7_inc_or_ex_p?: string | null
+          s7_inc_or_ex_pp?: string | null
+          s7_inc_or_ex_q?: string | null
+          s7_inc_or_ex_qq?: string | null
+          s7_inc_or_ex_r?: string | null
+          s7_inc_or_ex_rr?: string | null
+          s7_inc_or_ex_s?: string | null
+          s7_inc_or_ex_ss?: string | null
+          s7_inc_or_ex_t?: string | null
+          s7_inc_or_ex_tt?: string | null
+          s7_inc_or_ex_u?: string | null
+          s7_inc_or_ex_uu?: string | null
+          s7_inc_or_ex_v?: string | null
+          s7_inc_or_ex_w?: string | null
+          s7_inc_or_ex_x?: string | null
+          s7_inc_or_ex_y?: string | null
+          s7_inc_or_ex_z?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          pool_project_contract_id?: string
+          s7_inc_or_ex_a?: string | null
+          s7_inc_or_ex_aa_plugin?: string | null
+          s7_inc_or_ex_b?: string | null
+          s7_inc_or_ex_bb?: string | null
+          s7_inc_or_ex_c?: string | null
+          s7_inc_or_ex_cc?: string | null
+          s7_inc_or_ex_d?: string | null
+          s7_inc_or_ex_dd?: string | null
+          s7_inc_or_ex_e?: string | null
+          s7_inc_or_ex_ee?: string | null
+          s7_inc_or_ex_f?: string | null
+          s7_inc_or_ex_ff?: string | null
+          s7_inc_or_ex_g?: string | null
+          s7_inc_or_ex_gg?: string | null
+          s7_inc_or_ex_h?: string | null
+          s7_inc_or_ex_hh?: string | null
+          s7_inc_or_ex_i?: string | null
+          s7_inc_or_ex_j?: string | null
+          s7_inc_or_ex_jj?: string | null
+          s7_inc_or_ex_k?: string | null
+          s7_inc_or_ex_kk?: string | null
+          s7_inc_or_ex_l?: string | null
+          s7_inc_or_ex_ll?: string | null
+          s7_inc_or_ex_m?: string | null
+          s7_inc_or_ex_mm?: string | null
+          s7_inc_or_ex_n?: string | null
+          s7_inc_or_ex_nn?: string | null
+          s7_inc_or_ex_o?: string | null
+          s7_inc_or_ex_oo?: string | null
+          s7_inc_or_ex_p?: string | null
+          s7_inc_or_ex_pp?: string | null
+          s7_inc_or_ex_q?: string | null
+          s7_inc_or_ex_qq?: string | null
+          s7_inc_or_ex_r?: string | null
+          s7_inc_or_ex_rr?: string | null
+          s7_inc_or_ex_s?: string | null
+          s7_inc_or_ex_ss?: string | null
+          s7_inc_or_ex_t?: string | null
+          s7_inc_or_ex_tt?: string | null
+          s7_inc_or_ex_u?: string | null
+          s7_inc_or_ex_uu?: string | null
+          s7_inc_or_ex_v?: string | null
+          s7_inc_or_ex_w?: string | null
+          s7_inc_or_ex_x?: string | null
+          s7_inc_or_ex_y?: string | null
+          s7_inc_or_ex_z?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_inclusions__pool_project_contract_id_fkey"
+            columns: ["pool_project_contract_id"]
+            isOneToOne: false
+            referencedRelation: "pool_project_contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_project_contract_safety: {
+        Row: {
+          created_at: string
+          id: number
+          pool_project_contract_id: string
+          tpc_hardcover: string
+          tpc_power_connection: string
+          tpc_ppsb: string
+          tpc_temp_barrier_hire_period_weeks: number | null
+          tpc_temp_fence: string
+          tpc_temporary_barrier_type: string
+          tpc_tpsb: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          pool_project_contract_id: string
+          tpc_hardcover: string
+          tpc_power_connection: string
+          tpc_ppsb: string
+          tpc_temp_barrier_hire_period_weeks?: number | null
+          tpc_temp_fence: string
+          tpc_temporary_barrier_type: string
+          tpc_tpsb: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          pool_project_contract_id?: string
+          tpc_hardcover?: string
+          tpc_power_connection?: string
+          tpc_ppsb?: string
+          tpc_temp_barrier_hire_period_weeks?: number | null
+          tpc_temp_fence?: string
+          tpc_temporary_barrier_type?: string
+          tpc_tpsb?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_safety_pool_project_contract_id_fkey"
+            columns: ["pool_project_contract_id"]
+            isOneToOne: true
+            referencedRelation: "pool_project_contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_project_contract_site_details: {
+        Row: {
+          afe_crane_required: string | null
+          afe_exc_combo_size: string | null
+          afe_i10_bcat_mcharge: number | null
+          afe_i10_bcat_rate: number | null
+          afe_i10_cartage_mcharge: number | null
+          afe_i10_cartage_rate: number | null
+          afe_i10_exc_mcharge: number | null
+          afe_i10_exc_rate: number | null
+          afe_i10_pipe_mcharge: number | null
+          afe_i10_pipe_rate: number | null
+          afe_i10_rock_mcharge: number | null
+          afe_i10_rock_rate: number | null
+          afe_i10_supvis_mcharge: number | null
+          afe_i10_supvis_rate: number | null
+          afe_i10_truck_mcharge: number | null
+          afe_i10_truck_rate: number | null
+          afe_item_1_description_1_byd_findings: string | null
+          afe_item_1_description_2_other_matters: string | null
+          afe_item_2_sketch_provided: string | null
+          afe_item_4_fnp_fences_near_access_path: string | null
+          afe_item_4_rfm_removal_party: string | null
+          afe_item_4_rrf_reinstatement_party: string | null
+          afe_item_6_tree_removal: string | null
+          afe_item_6_tree_removal_party: string | null
+          afe_item_6_tree_replacement_party: string | null
+          afe_item_8_q1_overburden_preparation: string | null
+          afe_item_8_q2_excavation_required: string | null
+          afe_item_8_q3_excavation_method: string | null
+          afe_item_8_q4_service_relocation: string | null
+          afe_item_8_q5_service_relocation_party: string | null
+          afe_item_8_q6_material_left_on_site: string | null
+          afe_item_8_q7_material_removed: string | null
+          afe_item_8_q8_excavated_removal_party: string | null
+          afe_item7_bobcat_needed: string | null
+          afe_item7_bobcat_size: string | null
+          afe_item7_crane_needed: string | null
+          afe_item7_crane_size: string | null
+          afe_item7_mach_notes: string | null
+          afe_item7_truck_needed: string | null
+          afe_item7_trucks_num: number | null
+          afe_item7_trucks_size: string | null
+          afe_min_access_height_mm: number | null
+          afe_min_access_width_mm: number | null
+          afe_min_crane_clearance_mm: number | null
+          created_at: string
+          datum_point_mm: number | null
+          id: number
+          pool_project_contract_id: string
+          updated_at: string
+        }
+        Insert: {
+          afe_crane_required?: string | null
+          afe_exc_combo_size?: string | null
+          afe_i10_bcat_mcharge?: number | null
+          afe_i10_bcat_rate?: number | null
+          afe_i10_cartage_mcharge?: number | null
+          afe_i10_cartage_rate?: number | null
+          afe_i10_exc_mcharge?: number | null
+          afe_i10_exc_rate?: number | null
+          afe_i10_pipe_mcharge?: number | null
+          afe_i10_pipe_rate?: number | null
+          afe_i10_rock_mcharge?: number | null
+          afe_i10_rock_rate?: number | null
+          afe_i10_supvis_mcharge?: number | null
+          afe_i10_supvis_rate?: number | null
+          afe_i10_truck_mcharge?: number | null
+          afe_i10_truck_rate?: number | null
+          afe_item_1_description_1_byd_findings?: string | null
+          afe_item_1_description_2_other_matters?: string | null
+          afe_item_2_sketch_provided?: string | null
+          afe_item_4_fnp_fences_near_access_path?: string | null
+          afe_item_4_rfm_removal_party?: string | null
+          afe_item_4_rrf_reinstatement_party?: string | null
+          afe_item_6_tree_removal?: string | null
+          afe_item_6_tree_removal_party?: string | null
+          afe_item_6_tree_replacement_party?: string | null
+          afe_item_8_q1_overburden_preparation?: string | null
+          afe_item_8_q2_excavation_required?: string | null
+          afe_item_8_q3_excavation_method?: string | null
+          afe_item_8_q4_service_relocation?: string | null
+          afe_item_8_q5_service_relocation_party?: string | null
+          afe_item_8_q6_material_left_on_site?: string | null
+          afe_item_8_q7_material_removed?: string | null
+          afe_item_8_q8_excavated_removal_party?: string | null
+          afe_item7_bobcat_needed?: string | null
+          afe_item7_bobcat_size?: string | null
+          afe_item7_crane_needed?: string | null
+          afe_item7_crane_size?: string | null
+          afe_item7_mach_notes?: string | null
+          afe_item7_truck_needed?: string | null
+          afe_item7_trucks_num?: number | null
+          afe_item7_trucks_size?: string | null
+          afe_min_access_height_mm?: number | null
+          afe_min_access_width_mm?: number | null
+          afe_min_crane_clearance_mm?: number | null
+          created_at?: string
+          datum_point_mm?: number | null
+          id?: number
+          pool_project_contract_id: string
+          updated_at?: string
+        }
+        Update: {
+          afe_crane_required?: string | null
+          afe_exc_combo_size?: string | null
+          afe_i10_bcat_mcharge?: number | null
+          afe_i10_bcat_rate?: number | null
+          afe_i10_cartage_mcharge?: number | null
+          afe_i10_cartage_rate?: number | null
+          afe_i10_exc_mcharge?: number | null
+          afe_i10_exc_rate?: number | null
+          afe_i10_pipe_mcharge?: number | null
+          afe_i10_pipe_rate?: number | null
+          afe_i10_rock_mcharge?: number | null
+          afe_i10_rock_rate?: number | null
+          afe_i10_supvis_mcharge?: number | null
+          afe_i10_supvis_rate?: number | null
+          afe_i10_truck_mcharge?: number | null
+          afe_i10_truck_rate?: number | null
+          afe_item_1_description_1_byd_findings?: string | null
+          afe_item_1_description_2_other_matters?: string | null
+          afe_item_2_sketch_provided?: string | null
+          afe_item_4_fnp_fences_near_access_path?: string | null
+          afe_item_4_rfm_removal_party?: string | null
+          afe_item_4_rrf_reinstatement_party?: string | null
+          afe_item_6_tree_removal?: string | null
+          afe_item_6_tree_removal_party?: string | null
+          afe_item_6_tree_replacement_party?: string | null
+          afe_item_8_q1_overburden_preparation?: string | null
+          afe_item_8_q2_excavation_required?: string | null
+          afe_item_8_q3_excavation_method?: string | null
+          afe_item_8_q4_service_relocation?: string | null
+          afe_item_8_q5_service_relocation_party?: string | null
+          afe_item_8_q6_material_left_on_site?: string | null
+          afe_item_8_q7_material_removed?: string | null
+          afe_item_8_q8_excavated_removal_party?: string | null
+          afe_item7_bobcat_needed?: string | null
+          afe_item7_bobcat_size?: string | null
+          afe_item7_crane_needed?: string | null
+          afe_item7_crane_size?: string | null
+          afe_item7_mach_notes?: string | null
+          afe_item7_truck_needed?: string | null
+          afe_item7_trucks_num?: number | null
+          afe_item7_trucks_size?: string | null
+          afe_min_access_height_mm?: number | null
+          afe_min_access_width_mm?: number | null
+          afe_min_crane_clearance_mm?: number | null
+          created_at?: string
+          datum_point_mm?: number | null
+          id?: number
+          pool_project_contract_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_site_detail_pool_project_contract_id_fkey"
+            columns: ["pool_project_contract_id"]
+            isOneToOne: true
+            referencedRelation: "pool_project_contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_project_contract_special_work: {
+        Row: {
+          c_item_17_osi_description_1: string | null
+          c_item_17_osi_description_2: string | null
+          created_at: string
+          extra_special_notes: string | null
+          id: number
+          pool_project_contract_id: string
+          special_access: string | null
+          special_access_notes: string | null
+          special_considerations: string | null
+          updated_at: string
+        }
+        Insert: {
+          c_item_17_osi_description_1?: string | null
+          c_item_17_osi_description_2?: string | null
+          created_at?: string
+          extra_special_notes?: string | null
+          id?: number
+          pool_project_contract_id: string
+          special_access?: string | null
+          special_access_notes?: string | null
+          special_considerations?: string | null
+          updated_at?: string
+        }
+        Update: {
+          c_item_17_osi_description_1?: string | null
+          c_item_17_osi_description_2?: string | null
+          created_at?: string
+          extra_special_notes?: string | null
+          id?: number
+          pool_project_contract_id?: string
+          special_access?: string | null
+          special_access_notes?: string | null
+          special_considerations?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_contract_special_wor_pool_project_contract_id_fkey"
+            columns: ["pool_project_contract_id"]
+            isOneToOne: true
+            referencedRelation: "pool_project_contract"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_project_filtration_packages: {
+        Row: {
+          created_at: string
+          filtration_package_id: string
+          id: string
+          pool_project_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          filtration_package_id: string
+          id?: string
+          pool_project_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          filtration_package_id?: string
+          id?: string
+          pool_project_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_project_filtration_packages_filtration_package_id_fkey"
+            columns: ["filtration_package_id"]
+            isOneToOne: false
+            referencedRelation: "filtration_packages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_project_filtration_packages_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: true
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_project_filtration_packages_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: true
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       pool_projects: {
+        Row: {
+          created_at: string
+          email: string
+          home_address: string
+          id: string
+          installation_area: string
+          owner1: string
+          owner2: string | null
+          phone: string
+          pool_color: string | null
+          pool_specification_id: string | null
+          proposal_name: string
+          render_ready: boolean
+          render_requested: string | null
+          resident_homeowner: boolean
+          site_address: string | null
+          site_requirements_data: Json | null
+          site_requirements_notes: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          home_address: string
+          id?: string
+          installation_area: string
+          owner1: string
+          owner2?: string | null
+          phone: string
+          pool_color?: string | null
+          pool_specification_id?: string | null
+          proposal_name: string
+          render_ready?: boolean
+          render_requested?: string | null
+          resident_homeowner?: boolean
+          site_address?: string | null
+          site_requirements_data?: Json | null
+          site_requirements_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          home_address?: string
+          id?: string
+          installation_area?: string
+          owner1?: string
+          owner2?: string | null
+          phone?: string
+          pool_color?: string | null
+          pool_specification_id?: string | null
+          proposal_name?: string
+          render_ready?: boolean
+          render_requested?: string | null
+          resident_homeowner?: boolean
+          site_address?: string | null
+          site_requirements_data?: Json | null
+          site_requirements_notes?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_projects_pool_specification_id_fkey"
+            columns: ["pool_specification_id"]
+            isOneToOne: false
+            referencedRelation: "pool_specifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pool_projects_backup: {
         Row: {
           blanket_roller_cost: number
           blanket_roller_id: string | null
@@ -1638,41 +2831,44 @@ export type Database = {
           under_fence_concrete_strips_data?: Json | null
           updated_at?: string
         }
+        Relationships: []
+      }
+      pool_proposal_snapshots: {
+        Row: {
+          created_at: string
+          id: string
+          pool_project_id: string
+          snapshot_data: Json
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pool_project_id: string
+          snapshot_data: Json
+          version: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pool_project_id?: string
+          snapshot_data?: Json
+          version?: number
+        }
         Relationships: [
           {
-            foreignKeyName: "fk_extra_paving_category"
-            columns: ["extra_paving_category"]
+            foreignKeyName: "pool_proposal_snapshots_pool_project_id_fkey"
+            columns: ["pool_project_id"]
             isOneToOne: false
-            referencedRelation: "extra_paving_costs"
+            referencedRelation: "pool_projects"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pool_projects_bobcat_id_fkey"
-            columns: ["bobcat_id"]
+            foreignKeyName: "pool_proposal_snapshots_pool_project_id_fkey"
+            columns: ["pool_project_id"]
             isOneToOne: false
-            referencedRelation: "bobcat_costs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_projects_crane_id_fkey"
-            columns: ["crane_id"]
-            isOneToOne: false
-            referencedRelation: "crane_costs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_projects_pool_specification_id_fkey"
-            columns: ["pool_specification_id"]
-            isOneToOne: false
-            referencedRelation: "pool_specifications"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_projects_traffic_control_id_fkey"
-            columns: ["traffic_control_id"]
-            isOneToOne: false
-            referencedRelation: "traffic_control_costs"
-            referencedColumns: ["id"]
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
           },
         ]
       }
@@ -1685,6 +2881,7 @@ export type Database = {
           pin: string
           pool_project_id: string
           render_ready: boolean
+          render_requested: string | null
           status: string
           version: number
         }
@@ -1696,6 +2893,7 @@ export type Database = {
           pin: string
           pool_project_id: string
           render_ready?: boolean
+          render_requested?: string | null
           status?: string
           version?: number
         }
@@ -1707,6 +2905,7 @@ export type Database = {
           pin?: string
           pool_project_id?: string
           render_ready?: boolean
+          render_requested?: string | null
           status?: string
           version?: number
         }
@@ -1747,6 +2946,60 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      pool_retaining_walls: {
+        Row: {
+          created_at: string
+          height1: number | null
+          height2: number | null
+          id: string
+          length: number | null
+          margin: number | null
+          pool_project_id: string
+          total_cost: number | null
+          updated_at: string
+          wall_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          height1?: number | null
+          height2?: number | null
+          id?: string
+          length?: number | null
+          margin?: number | null
+          pool_project_id: string
+          total_cost?: number | null
+          updated_at?: string
+          wall_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          height1?: number | null
+          height2?: number | null
+          id?: string
+          length?: number | null
+          margin?: number | null
+          pool_project_id?: string
+          total_cost?: number | null
+          updated_at?: string
+          wall_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pool_retaining_walls_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pool_retaining_walls_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
       }
       pool_selections: {
         Row: {
@@ -2133,6 +3386,42 @@ export type Database = {
           },
         ]
       }
+      project_status_log: {
+        Row: {
+          changed_at: string
+          id: string
+          pool_project_id: string
+          status: string
+        }
+        Insert: {
+          changed_at?: string
+          id?: string
+          pool_project_id: string
+          status: string
+        }
+        Update: {
+          changed_at?: string
+          id?: string
+          pool_project_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_status_log_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "project_status_log_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       quote_extra_pavings: {
         Row: {
           created_at: string
@@ -2317,6 +3606,39 @@ export type Database = {
           },
         ]
       }
+      render_requested_log: {
+        Row: {
+          id: string
+          pool_project_id: string
+          requested_at: string
+        }
+        Insert: {
+          id?: string
+          pool_project_id: string
+          requested_at?: string
+        }
+        Update: {
+          id?: string
+          pool_project_id?: string
+          requested_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "render_requested_log_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "pool_projects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "render_requested_log_pool_project_id_fkey"
+            columns: ["pool_project_id"]
+            isOneToOne: false
+            referencedRelation: "proposal_snapshot_v"
+            referencedColumns: ["project_id"]
+          },
+        ]
+      }
       retaining_walls: {
         Row: {
           created_at: string
@@ -2470,387 +3792,23 @@ export type Database = {
         }
         Relationships: []
       }
-      pool_retaining_walls: {
-        Row: {
-          id: string
-          pool_project_id: string
-          wall_type: string | null
-          height1: number
-          height2: number
-          length: number
-          total_cost: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          wall_type?: string | null
-          height1?: number
-          height2?: number
-          length?: number
-          total_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          wall_type?: string | null
-          height1?: number
-          height2?: number
-          length?: number
-          total_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_retaining_walls_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_concrete_selections: {
-        Row: {
-          id: string
-          pool_project_id: string
-          concrete_pump_needed: boolean
-          concrete_pump_quantity: number | null
-          concrete_pump_total_cost: number
-          concrete_cuts: string | null
-          concrete_cuts_cost: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          concrete_pump_needed?: boolean
-          concrete_pump_quantity?: number | null
-          concrete_pump_total_cost?: number
-          concrete_cuts?: string | null
-          concrete_cuts_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          concrete_pump_needed?: boolean
-          concrete_pump_quantity?: number | null
-          concrete_pump_total_cost?: number
-          concrete_cuts?: string | null
-          concrete_cuts_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_concrete_selections_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_paving_selections: {
-        Row: {
-          id: string
-          pool_project_id: string
-          extra_paving_category: string | null
-          extra_paving_square_meters: number
-          extra_paving_total_cost: number
-          existing_concrete_paving_category: string | null
-          existing_concrete_paving_square_meters: number
-          existing_concrete_paving_total_cost: number
-          extra_concreting_type: string | null
-          extra_concreting_square_meters: number
-          extra_concreting_total_cost: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          extra_paving_category?: string | null
-          extra_paving_square_meters?: number
-          extra_paving_total_cost?: number
-          existing_concrete_paving_category?: string | null
-          existing_concrete_paving_square_meters?: number
-          existing_concrete_paving_total_cost?: number
-          extra_concreting_type?: string | null
-          extra_concreting_square_meters?: number
-          extra_concreting_total_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          extra_paving_category?: string | null
-          extra_paving_square_meters?: number
-          extra_paving_total_cost?: number
-          existing_concrete_paving_category?: string | null
-          existing_concrete_paving_square_meters?: number
-          existing_concrete_paving_total_cost?: number
-          extra_concreting_type?: string | null
-          extra_concreting_square_meters?: number
-          extra_concreting_total_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_paving_selections_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_paving_selections_extra_paving_category_fkey"
-            columns: ["extra_paving_category"]
-            isOneToOne: false
-            referencedRelation: "extra_paving_costs"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_fence_concrete_strips: {
-        Row: {
-          id: string
-          pool_project_id: string
-          strip_data: any
-          total_cost: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          strip_data?: any
-          total_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          strip_data?: any
-          total_cost?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_fence_concrete_strips_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_equipment_selections: {
-        Row: {
-          id: string
-          pool_project_id: string
-          crane_id: string | null
-          traffic_control_id: string | null
-          bobcat_id: string | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          crane_id?: string | null
-          traffic_control_id?: string | null
-          bobcat_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          crane_id?: string | null
-          traffic_control_id?: string | null
-          bobcat_id?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_equipment_selections_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_equipment_selections_crane_id_fkey"
-            columns: ["crane_id"]
-            isOneToOne: false
-            referencedRelation: "crane_costs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_equipment_selections_traffic_control_id_fkey"
-            columns: ["traffic_control_id"]
-            isOneToOne: false
-            referencedRelation: "traffic_control_costs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_equipment_selections_bobcat_id_fkey"
-            columns: ["bobcat_id"]
-            isOneToOne: false
-            referencedRelation: "bobcat_costs"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_project_blanket_rollers: {
-        Row: {
-          id: string
-          pool_project_id: string
-          blanket_roller_id: string
-          include_blanket_roller: boolean
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          blanket_roller_id: string
-          include_blanket_roller?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          blanket_roller_id?: string
-          include_blanket_roller?: boolean
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_project_blanket_rollers_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_project_blanket_rollers_blanket_roller_id_fkey"
-            columns: ["blanket_roller_id"]
-            isOneToOne: false
-            referencedRelation: "blanket_rollers"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_project_filtration_packages: {
-        Row: {
-          id: string
-          pool_project_id: string
-          filtration_package_id: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          pool_project_id: string
-          filtration_package_id: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          pool_project_id?: string
-          filtration_package_id?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_project_filtration_packages_pool_project_id_fkey"
-            columns: ["pool_project_id"]
-            isOneToOne: false
-            referencedRelation: "pool_projects"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pool_project_filtration_packages_filtration_package_id_fkey"
-            columns: ["filtration_package_id"]
-            isOneToOne: false
-            referencedRelation: "filtration_packages"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
-      pool_project_heat_pumps: {
-        Row: {
-          created_at: string
-          heat_pump_id: string
-          hp_description: string
-          hp_sku: string
-          id: string
-          pool_model: string
-          pool_range: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          heat_pump_id: string
-          hp_description: string
-          hp_sku: string
-          id?: string
-          pool_model: string
-          pool_range: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          heat_pump_id?: string
-          hp_description?: string
-          hp_sku?: string
-          id?: string
-          pool_model?: string
-          pool_range?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pool_project_heat_pumps_heat_pump_id_fkey"
-            columns: ["heat_pump_id"]
-            isOneToOne: false
-            referencedRelation: "heat_pump_products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       proposal_snapshot_v: {
         Row: {
           accepted_datetime: string | null
           accepted_ip: string | null
+          applied_discounts_json: Json | null
           blanket_roller_cost: number | null
           blanket_roller_description: string | null
+          blanket_roller_installation_cost: number | null
           blanket_roller_margin: number | null
           blanket_roller_rrp: number | null
           blanket_roller_sku: string | null
+          bob_day_code: string | null
           bob_size_category: string | null
           bobcat_cost: number | null
-          br_install_cost: number | null
+          br_install_cost_reference: number | null
           br_install_inclusions: string | null
           change_request_json: Json | null
           cleaner_cost_price: number | null
@@ -2860,10 +3818,12 @@ export type Database = {
           cleaner_unit_price: number | null
           concrete_cuts_cost: number | null
           concrete_cuts_json: Json | null
+          concrete_pump_hours: number | null
           concrete_pump_needed: boolean | null
-          concrete_pump_quantity: number | null
           concrete_pump_total_cost: number | null
+          coping_category: string | null
           crane_cost: number | null
+          created_at: string | null
           crn_name: string | null
           dig_excavation_hours: number | null
           dig_excavation_rate: number | null
@@ -2885,52 +3845,45 @@ export type Database = {
           epc_wastage_cost: number | null
           existing_paving_category: string | null
           existing_paving_cost: number | null
+          existing_paving_name: string | null
           existing_paving_sqm: number | null
+          extra_concrete_finish_one: string | null
+          extra_concrete_finish_two: string | null
           extra_concreting_base_price: number | null
-          extra_concreting_calc_total: number | null
+          extra_concreting_cost: number | null
           extra_concreting_margin: number | null
-          extra_concreting_saved_total: number | null
+          extra_concreting_name: string | null
           extra_concreting_sqm: number | null
           extra_concreting_type: string | null
           extra_concreting_unit_price: number | null
           extra_paving_cost: number | null
+          extra_paving_name: string | null
           extra_paving_sqm: number | null
+          extras_total_cost: number | null
+          extras_total_margin: number | null
+          extras_total_rrp: number | null
+          fencing_costs_json: Json | null
           fencing_total_cost: number | null
+          filter_model: string | null
+          filter_name: string | null
+          filter_price_inc_gst: number | null
+          filtration_package_id: string | null
+          filtration_package_name: string | null
           fixed_costs_json: Json | null
-          fp_filter_description: string | null
-          fp_filter_model: string | null
-          fp_filter_name: string | null
-          fp_filter_price: number | null
-          fp_handover_description: string | null
-          fp_handover_kit_price: number | null
-          fp_handover_model: string | null
-          fp_handover_name: string | null
-          fp_light_description: string | null
-          fp_light_model: string | null
-          fp_light_name: string | null
-          fp_light_price: number | null
-          fp_name: string | null
-          fp_pump_description: string | null
-          fp_pump_model: string | null
-          fp_pump_name: string | null
-          fp_pump_price: number | null
-          fp_sanitiser_description: string | null
-          fp_sanitiser_model: string | null
-          fp_sanitiser_name: string | null
-          fp_sanitiser_price: number | null
           glass_complex_panels: number | null
-          glass_earthing_cost: number | null
           glass_earthing_required: boolean | null
-          glass_fence_cost: number | null
-          glass_fence_total_cost: number | null
-          glass_gate_cost: number | null
           glass_gates: number | null
           glass_linear_meters: number | null
           glass_simple_panels: number | null
+          glass_total_cost: number | null
+          grout_colour: string | null
+          handover_components: Json | null
+          handover_package_name: string | null
           heat_pump_cost: number | null
           heat_pump_description: string | null
-          heat_pump_install_cost: number | null
+          heat_pump_install_cost_reference: number | null
           heat_pump_install_inclusions: string | null
+          heat_pump_installation_cost: number | null
           heat_pump_margin: number | null
           heat_pump_rrp: number | null
           heat_pump_sku: string | null
@@ -2942,15 +3895,15 @@ export type Database = {
           installation_area: string | null
           last_change_requested: string | null
           last_viewed: string | null
+          light_model: string | null
+          light_name: string | null
+          light_price_inc_gst: number | null
           metal_complex_panels: number | null
-          metal_earthing_cost: number | null
           metal_earthing_required: boolean | null
-          metal_fence_cost: number | null
-          metal_fence_total_cost: number | null
-          metal_gate_cost: number | null
           metal_gates: number | null
           metal_linear_meters: number | null
           metal_simple_panels: number | null
+          metal_total_cost: number | null
           owner1: string | null
           owner2: string | null
           pc_beam: number | null
@@ -2963,33 +3916,24 @@ export type Database = {
           pc_trucked_water: number | null
           phone: string | null
           pin: string | null
+          pool_color: string | null
           pool_margin_pct: number | null
           project_id: string | null
           proposal_name: string | null
           proposal_status: string | null
+          pump_model: string | null
+          pump_name: string | null
+          pump_price_inc_gst: number | null
           render_ready: boolean | null
           resident_homeowner: boolean | null
-          retaining_wall1_height1: number | null
-          retaining_wall1_height2: number | null
-          retaining_wall1_length: number | null
-          retaining_wall1_total_cost: number | null
-          retaining_wall1_type: string | null
-          retaining_wall2_height1: number | null
-          retaining_wall2_height2: number | null
-          retaining_wall2_length: number | null
-          retaining_wall2_total_cost: number | null
-          retaining_wall2_type: string | null
-          retaining_wall3_height1: number | null
-          retaining_wall3_height2: number | null
-          retaining_wall3_length: number | null
-          retaining_wall3_total_cost: number | null
-          retaining_wall3_type: string | null
-          retaining_wall4_height1: number | null
-          retaining_wall4_height2: number | null
-          retaining_wall4_length: number | null
-          retaining_wall4_total_cost: number | null
-          retaining_wall4_type: string | null
+          retaining_walls_json: Json | null
+          sanitiser_model: string | null
+          sanitiser_name: string | null
+          sanitiser_price_inc_gst: number | null
+          selected_extras_json: Json | null
           site_address: string | null
+          site_requirements_data: Json | null
+          site_requirements_notes: string | null
           spec_buy_ex_gst: number | null
           spec_buy_inc_gst: number | null
           spec_depth_deep_m: number | null
@@ -3001,7 +3945,8 @@ export type Database = {
           tc_name: string | null
           traffic_control_cost: number | null
           uf_strips_cost: number | null
-          uf_strips_raw: Json | null
+          uf_strips_data: Json | null
+          updated_at: string | null
           version: number | null
           videos_json: Json | null
           water_feature_back_cladding_needed: boolean | null
@@ -3042,106 +3987,106 @@ type DefaultSchema = Database[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
-  | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-  | { schema: keyof Database },
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-  ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-  : never = never,
+    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-    Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
-  ? R
-  : never
+    ? R
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])
-  ? (DefaultSchema["Tables"] &
-    DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-      Row: infer R
-    }
-  ? R
-  : never
-  : never
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof Database },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
+      Insert: infer I
+    }
+    ? I
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Insert: infer I
-  }
-  ? I
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-  | keyof DefaultSchema["Tables"]
-  | { schema: keyof Database },
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof Database },
   TableName extends DefaultSchemaTableNameOrOptions extends {
     schema: keyof Database
   }
-  ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-  : never = never,
+    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
 > = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-    Update: infer U
-  }
-  ? U
-  : never
+      Update: infer U
+    }
+    ? U
+    : never
   : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-  ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-    Update: infer U
-  }
-  ? U
-  : never
-  : never
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-  | keyof DefaultSchema["Enums"]
-  | { schema: keyof Database },
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof Database },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
     schema: keyof Database
   }
-  ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-  : never = never,
+    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
 > = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
   ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-  ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-  : never
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
 
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
-  | keyof DefaultSchema["CompositeTypes"]
-  | { schema: keyof Database },
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof Database },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
     schema: keyof Database
   }
-  ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-  : never = never,
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
 > = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
   ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-  ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-  : never
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
 
 export const Constants = {
   public: {
@@ -3150,11 +4095,3 @@ export const Constants = {
     },
   },
 } as const
-
-// Create new types for the junction tables
-export type PoolRetainingWall = Database['public']['Tables']['pool_retaining_walls']['Row']
-export type PoolConcreteSelection = Database['public']['Tables']['pool_concrete_selections']['Row']
-export type PoolPavingSelection = Database['public']['Tables']['pool_paving_selections']['Row']
-export type PoolFenceConcreteStrip = Database['public']['Tables']['pool_fence_concrete_strips']['Row']
-export type PoolEquipmentSelection = Database['public']['Tables']['pool_equipment_selections']['Row']
-export type PoolProjectFiltrationPackage = Database['public']['Tables']['pool_project_filtration_packages']['Row']

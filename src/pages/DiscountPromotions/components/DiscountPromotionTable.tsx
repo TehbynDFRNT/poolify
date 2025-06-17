@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Trash2 } from "lucide-react";
 import { formatCurrency } from "@/utils/format";
 import type { DiscountPromotion } from "@/types/discount-promotion";
 
@@ -19,6 +20,8 @@ interface DiscountPromotionTableProps {
   onSave: (promotion: DiscountPromotion) => void;
   onCancel: () => void;
   onValueChange: (value: string) => void;
+  onDelete: (promotionUuid: string) => void;
+  isDeletingPromotion: boolean;
 }
 
 export const DiscountPromotionTable = ({
@@ -29,6 +32,8 @@ export const DiscountPromotionTable = ({
   onSave,
   onCancel,
   onValueChange,
+  onDelete,
+  isDeletingPromotion,
 }: DiscountPromotionTableProps) => {
 
   return (
@@ -38,7 +43,7 @@ export const DiscountPromotionTable = ({
           <TableHead>Discount Name</TableHead>
           <TableHead>Type</TableHead>
           <TableHead className="text-right">Value</TableHead>
-          <TableHead className="w-[100px]"></TableHead>
+          <TableHead className="w-[140px]">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -90,13 +95,23 @@ export const DiscountPromotionTable = ({
                   </Button>
                 </div>
               ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onEdit(promotion)}
-                >
-                  Edit
-                </Button>
+                <div className="flex justify-end gap-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onEdit(promotion)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    onClick={() => onDelete(promotion.uuid)}
+                    disabled={isDeletingPromotion}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
               )}
             </TableCell>
           </TableRow>

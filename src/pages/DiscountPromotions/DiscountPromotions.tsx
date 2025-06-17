@@ -23,6 +23,8 @@ const DiscountPromotions = () => {
     handleSave,
     handleCancel,
     setEditingValue,
+    handleDelete,
+    isDeletingPromotion,
   } = useDiscountPromotions();
 
   return (
@@ -61,6 +63,8 @@ const DiscountPromotions = () => {
           onSave={handleSave}
           onCancel={handleCancel}
           onValueChange={setEditingValue}
+          onDelete={handleDelete}
+          isDeletingPromotion={isDeletingPromotion}
           AddForm={AddDiscountPromotionForm}
         />
       </div>

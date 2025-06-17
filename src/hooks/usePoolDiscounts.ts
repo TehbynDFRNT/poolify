@@ -3,14 +3,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { EditablePoolDiscount, DiscountPromotion } from "@/types/discount-promotion";
 
-// Local type definition for pool discounts with joined data
-interface PoolDiscountWithPromotion {
-  id: string;
-  pool_project_id: string;
-  discount_promotion_uuid: string;
-  created_at: string;
-  discount_promotion?: DiscountPromotion;
-}
 
 export const usePoolDiscounts = (poolProjectId?: string) => {
   const queryClient = useQueryClient();
@@ -22,16 +14,20 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
       if (!poolProjectId) return [];
       
       const { data, error } = await supabase
-        .from("pool_discounts" as any)
-        .select("*")
+        .from("pool_discounts")
+        .select(`
+          *,
+          discount_promotion:discount_promotions!pool_discounts_discount_promotion_uuid_fkey(*)
+        `)
         .eq("pool_project_id", poolProjectId)
         .order("created_at", { ascending: false });
 
       if (error) {
+        console.error("Error fetching pool discounts:", error);
         throw error;
       }
 
-      return data as any as PoolDiscountWithPromotion[];
+      return data || [];
     },
     enabled: !!poolProjectId,
   });
@@ -41,11 +37,12 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
     queryKey: ["discount-promotions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("discount_promotions" as any)
+        .from("discount_promotions")
         .select("*")
         .order("discount_name");
 
       if (error) {
+        console.error("Error fetching discount promotions:", error);
         throw error;
       }
 
@@ -53,22 +50,25 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
     },
   });
 
-  // Add discount to pool
+  // Add discount to pool (replaces existing discount if any)
   const addDiscountMutation = useMutation({
     mutationFn: async (data: EditablePoolDiscount) => {
       const { error } = await supabase
         .from("pool_discounts" as any)
-        .insert([data]);
+        .upsert(data, { onConflict: "pool_project_id,discount_promotion_uuid" });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error adding pool discount:", error);
+        throw error;
+      }
     },
     onSuccess: () => {
-      toast.success("Discount added to pool successfully");
+      toast.success("Discount applied to pool successfully");
       queryClient.invalidateQueries({ queryKey: ["pool-discounts", poolProjectId] });
     },
     onError: (error) => {
-      toast.error("Failed to add discount to pool");
-      console.error("Error adding pool discount:", error);
+      toast.error("Failed to apply discount to pool");
+      console.error("Error applying pool discount:", error);
     },
   });
 
@@ -76,7 +76,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
   const removeDiscountMutation = useMutation({
     mutationFn: async (discountId: string) => {
       const { error } = await supabase
-        .from("pool_discounts" as any)
+        .from("pool_discounts")
         .delete()
         .eq("id", discountId);
 
@@ -97,9 +97,25 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
     return poolDiscounts?.some(pd => pd.discount_promotion_uuid === promotionUuid) || false;
   };
 
-  // Helper function to get applied discounts with promotion details
+  // Helper function to get the currently applied discount (only one allowed)
+  const getCurrentlyAppliedDiscount = () => {
+    return poolDiscounts?.[0] || null;
+  };
+
+  // Helper function to get applied discounts with promotion details (now returns single discount)
   const getAppliedDiscountsWithDetails = () => {
-    return poolDiscounts?.filter(pd => pd.discount_promotion) || [];
+    const discounts = poolDiscounts?.filter(pd => pd.discount_promotion) || [];
+    // Map to ensure proper typing for the calculator
+    return discounts.map(d => ({
+      id: d.id,
+      discount_promotion: {
+        uuid: d.discount_promotion.uuid,
+        discount_name: d.discount_promotion.discount_name,
+        discount_type: d.discount_promotion.discount_type as 'dollar' | 'percentage',
+        dollar_value: d.discount_promotion.dollar_value || undefined,
+        percentage_value: d.discount_promotion.percentage_value || undefined,
+      }
+    }));
   };
 
   return {
@@ -112,6 +128,7 @@ export const usePoolDiscounts = (poolProjectId?: string) => {
     isAddingDiscount: addDiscountMutation.isPending,
     isRemovingDiscount: removeDiscountMutation.isPending,
     isDiscountApplied,
+    getCurrentlyAppliedDiscount,
     getAppliedDiscountsWithDetails,
   };
 };

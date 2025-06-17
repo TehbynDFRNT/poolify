@@ -13,6 +13,8 @@ interface DiscountPromotionSectionProps {
   onSave: (promotion: DiscountPromotion) => void;
   onCancel: () => void;
   onValueChange: (value: string) => void;
+  onDelete: (promotionUuid: string) => void;
+  isDeletingPromotion: boolean;
   AddForm: React.ComponentType<{ onSuccess: () => void }>;
 }
 
@@ -27,6 +29,8 @@ export const DiscountPromotionSection = ({
   onSave,
   onCancel,
   onValueChange,
+  onDelete,
+  isDeletingPromotion,
   AddForm,
 }: DiscountPromotionSectionProps) => {
   return (
@@ -58,6 +62,8 @@ export const DiscountPromotionSection = ({
           onSave={onSave}
           onCancel={onCancel}
           onValueChange={onValueChange}
+          onDelete={onDelete}
+          isDeletingPromotion={isDeletingPromotion}
         />
       )}
     </div>

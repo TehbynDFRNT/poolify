@@ -33,7 +33,10 @@ export interface ContractDataPayload {
   // Financial Summary
   financials: {
     contract_grand_total: number;
+    contract_grand_total_after_discount: number;
     contract_total_excluding_hwi: number;
+    contract_discount_title: string;
+    contract_discount_value: number;
     deposit_total: number;
     pc_contract_bod: number;
     fire_ant_cost: number;
@@ -41,6 +44,7 @@ export interface ContractDataPayload {
     form15_cost: number;
     deposit_remainder: number;
     pool_shell_supply_total: number;
+    pool_shell_supply_after_discount: number;
     excavation_total: number;
     pool_shell_installation_total: number;
     pc_shell_install_crane_hire: number;
@@ -140,7 +144,10 @@ export function useContractDataCollection() {
       // Prepare financial data
       const financialData = {
         contract_grand_total: lineItems?.contractSummaryGrandTotal || 0,
+        contract_grand_total_after_discount: lineItems?.contractSummaryGrandTotalAfterDiscount || 0,
         contract_total_excluding_hwi: lineItems?.contractTotalExcludingHWI || 0,
+        contract_discount_title: snapshot?.applied_discounts_json?.[0]?.discount_name || "",
+        contract_discount_value: lineItems?.totalDiscountAmount || 0,
         deposit_total: lineItems?.totalDeposit || 0,
         pc_contract_bod: lineItems?.pcContractBOD || 0,
         fire_ant_cost: lineItems?.deposit?.fireAntCost || 0,
@@ -148,6 +155,7 @@ export function useContractDataCollection() {
         form15_cost: lineItems?.deposit?.form15Cost || 0,
         deposit_remainder: lineItems?.deposit?.depositRemainder || 0,
         pool_shell_supply_total: lineItems?.poolShellSupplyEquipmentTotal || 0,
+        pool_shell_supply_after_discount: lineItems?.poolShellSupplyAfterDiscount || 0,
         excavation_total: lineItems?.excavationContractTotal || 0,
         pool_shell_installation_total: lineItems?.poolShellInstallationTotal || 0,
         pc_shell_install_crane_hire: lineItems?.pcShellInstallCraneHire || 0,

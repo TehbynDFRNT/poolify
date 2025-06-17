@@ -5,7 +5,9 @@ import { Loader2 } from "lucide-react";
 import React from "react";
 import { DeckJetsSection } from "./DeckJetsSection";
 import { GeneralOptionsSummary } from "./GeneralOptionsSummary";
+import { HandGrabRailSection } from "./HandGrabRailSection";
 import { MiscItemsSection } from "./MiscItemsSection";
+import { PoolAutomationSection } from "./PoolAutomationSection";
 import { SpaJetsSection } from "./SpaJetsSection";
 
 interface GeneralOptionsContentProps {
@@ -29,6 +31,14 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
         setSpaJetsQuantity,
         setDeckJetsSelected,
         setDeckJetsExtraId,
+        setHandGrabRailSelected,
+        setHandGrabRailExtraId,
+        setAutomationSelected,
+        setAutomationExtraId,
+        setChemistrySelected,
+        setChemistryExtraId,
+        setBundleSelected,
+        setBundleExtraId,
         addMiscItem,
         removeMiscItem,
         updateMiscItemQuantity,
@@ -52,6 +62,7 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                 These extras can be customized to fit your specific needs and preferences.
             </p>
 
+
             <SpaJetsSection
                 key={`spa-jets-${state.spaJets.selected}`}
                 spaJets={filteredExtras.spaJets}
@@ -71,6 +82,34 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                 selectedId={state.deckJets.extraId}
                 onSetSelected={setDeckJetsSelected}
                 onSetSelectedId={setDeckJetsExtraId}
+                getExtraById={getExtraById}
+            />
+
+            <HandGrabRailSection
+                key={`hand-grab-rail-${state.handGrabRail.selected}`}
+                handGrabRails={filteredExtras.handGrabRail}
+                selected={state.handGrabRail.selected}
+                selectedId={state.handGrabRail.extraId}
+                onSetSelected={setHandGrabRailSelected}
+                onSetSelectedId={setHandGrabRailExtraId}
+                getExtraById={getExtraById}
+            />
+
+            <PoolAutomationSection
+                automationExtras={filteredExtras.automation}
+                chemistryExtras={filteredExtras.chemistry}
+                bundleExtras={filteredExtras.bundle}
+                state={{
+                    automation: state.automation,
+                    chemistry: state.chemistry,
+                    bundle: state.bundle
+                }}
+                onSetAutomationSelected={setAutomationSelected}
+                onSetAutomationId={setAutomationExtraId}
+                onSetChemistrySelected={setChemistrySelected}
+                onSetChemistryId={setChemistryExtraId}
+                onSetBundleSelected={setBundleSelected}
+                onSetBundleId={setBundleExtraId}
                 getExtraById={getExtraById}
             />
 

@@ -1,4 +1,5 @@
 import { useGuardedMutation } from "@/hooks/useGuardedMutation";
+import { type ExtraConcretingType } from "@/hooks/useExtraConcreting";
 import { supabase } from "@/integrations/supabase/client";
 import React, { useState } from "react";
 import { toast } from "sonner";
@@ -33,6 +34,25 @@ export const useConcretePavingActionsGuarded = (customerId: string | null | unde
                     throw fetchError;
                 }
 
+                // Map slug ➞ UUID for extra_concreting_type before merging
+                if (tableName === "pool_paving_selections" && data.extra_concreting_type) {
+                  try {
+                    const { data: concretingTypes, error } = await supabase
+                      .from("extra_concreting")
+                      .select("id, type")
+                      .order("display_order", { ascending: true });
+                    
+                    if (!error && concretingTypes) {
+                      const found = concretingTypes.find((o: ExtraConcretingType) =>
+                        o.id === data.extra_concreting_type ||
+                        o.type.toLowerCase().replace(/\s+/g, "-") === data.extra_concreting_type.toLowerCase()
+                      );
+                      if (found) data.extra_concreting_type = found.id;
+                    }
+                  } catch (error) {
+                    console.warn("Could not fetch concreting types for slug mapping:", error);
+                  }
+                }
                 // Merge the new data with the existing data, preserving existing fields
                 // Use Record<string, any> to ensure we can spread the object
                 const existingData = existingRecord as Record<string, any>;
@@ -47,6 +67,25 @@ export const useConcretePavingActionsGuarded = (customerId: string | null | unde
                 return { success: true };
             } else {
                 console.log(`[GuardedHook] Attempting INSERT on ${tableName}`);
+                // Map slug ➞ UUID for extra_concreting_type before insert
+                if (tableName === "pool_paving_selections" && data.extra_concreting_type) {
+                  try {
+                    const { data: concretingTypes, error } = await supabase
+                      .from("extra_concreting")
+                      .select("id, type")
+                      .order("display_order", { ascending: true });
+                    
+                    if (!error && concretingTypes) {
+                      const found = concretingTypes.find((o: ExtraConcretingType) =>
+                        o.id === data.extra_concreting_type ||
+                        o.type.toLowerCase().replace(/\s+/g, "-") === data.extra_concreting_type.toLowerCase()
+                      );
+                      if (found) data.extra_concreting_type = found.id;
+                    }
+                  } catch (error) {
+                    console.warn("Could not fetch concreting types for slug mapping:", error);
+                  }
+                }
                 const insertData = { ...data };
                 if (poolProjectIdForInsert && !insertData.pool_project_id) {
                     insertData.pool_project_id = poolProjectIdForInsert;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { DiscountPromotion } from "@/types/discount-promotion";
@@ -14,7 +14,7 @@ export const useDiscountPromotions = () => {
     queryKey: ["discount-promotions"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("discount_promotions" as any)
+        .from("discount_promotions")
         .select("*")
         .order("created_at", { ascending: false });
 
@@ -47,7 +47,7 @@ export const useDiscountPromotions = () => {
         : { percentage_value: newValue };
 
       const { error } = await supabase
-        .from("discount_promotions" as any)
+        .from("discount_promotions")
         .update(updateData)
         .eq("uuid", promotion.uuid);
 
@@ -69,6 +69,47 @@ export const useDiscountPromotions = () => {
     setEditingValue("");
   };
 
+  // Delete discount promotion
+  const deleteDiscountMutation = useMutation({
+    mutationFn: async (promotionUuid: string) => {
+      // First, delete all pool_discounts that reference this promotion
+      const { error: poolDiscountsError } = await supabase
+        .from("pool_discounts")
+        .delete()
+        .eq("discount_promotion_uuid", promotionUuid);
+
+      if (poolDiscountsError) {
+        console.error("Error deleting pool discounts:", poolDiscountsError);
+        throw poolDiscountsError;
+      }
+
+      // Then delete the discount promotion itself
+      const { error } = await supabase
+        .from("discount_promotions")
+        .delete()
+        .eq("uuid", promotionUuid);
+
+      if (error) {
+        console.error("Error deleting discount promotion:", error);
+        throw error;
+      }
+    },
+    onSuccess: () => {
+      toast.success("Discount promotion deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["discount-promotions"] });
+      // Also invalidate pool discounts queries to refresh any affected pools
+      queryClient.invalidateQueries({ queryKey: ["pool-discounts"] });
+    },
+    onError: (error) => {
+      toast.error("Failed to delete discount promotion");
+      console.error("Error deleting discount promotion:", error);
+    },
+  });
+
+  const handleDelete = async (promotionUuid: string) => {
+    deleteDiscountMutation.mutate(promotionUuid);
+  };
+
   return {
     discountPromotions,
     isLoading,
@@ -80,5 +121,7 @@ export const useDiscountPromotions = () => {
     handleSave,
     handleCancel,
     setEditingValue,
+    handleDelete,
+    isDeletingPromotion: deleteDiscountMutation.isPending,
   };
 };

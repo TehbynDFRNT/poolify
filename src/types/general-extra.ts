@@ -1,4 +1,4 @@
-export type GeneralExtraType = 'Spa Jets' | 'Deck Jets' | 'Misc';
+export type GeneralExtraType = 'Spa Jets' | 'Deck Jets' | 'Misc' | 'Hand Grab Rail' | 'Automation' | 'Chemistry' | 'Bundle';
 
 export interface GeneralExtra {
     id: string;

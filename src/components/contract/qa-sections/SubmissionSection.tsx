@@ -178,7 +178,7 @@ export const SubmissionSection: React.FC<SubmissionSectionProps> = ({
                   <p className="text-sm text-blue-700">Total Contract Price Including HWI</p>
                 </div>
                 <div className="text-2xl font-bold text-blue-900">
-                  {formatCurrency(lineItems.contractSummaryGrandTotal)}
+                  {formatCurrency(lineItems.contractSummaryGrandTotalAfterDiscount)}
                 </div>
               </div>
             </div>
@@ -188,7 +188,7 @@ export const SubmissionSection: React.FC<SubmissionSectionProps> = ({
               <table className="w-full">
                 <tbody>
                   <SummaryRow label="1. Deposit" value={lineItems.totalDeposit} />
-                  <SummaryRow label="2. Pool Shell Supply" value={lineItems.poolShellSupplyEquipmentTotal} />
+                  <SummaryRow label="2. Pool Shell Supply" value={lineItems.totalDiscountAmount > 0 ? lineItems.poolShellSupplyAfterDiscount : lineItems.poolShellSupplyEquipmentTotal} />
                   <SummaryRow label="3. Excavation" value={lineItems.excavationContractTotal} />
                   <SummaryRow label="4. Pool Shell Installation" value={lineItems.poolShellInstallationTotal} />
                   <SummaryRow label="5. Engineered Beam" value={lineItems.beamCost} />
@@ -270,7 +270,7 @@ export const SubmissionSection: React.FC<SubmissionSectionProps> = ({
                       <br /><br />
                       <strong>Customer:</strong> {customer.owner1}{customer.owner2 ? ` & ${customer.owner2}` : ''}
                       <br />
-                      <strong>Contract Total:</strong> {formatCurrency(lineItems.contractSummaryGrandTotal)}
+                      <strong>Contract Total:</strong> {formatCurrency(lineItems.contractSummaryGrandTotalAfterDiscount)}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

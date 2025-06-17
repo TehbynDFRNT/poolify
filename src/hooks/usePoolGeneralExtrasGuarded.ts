@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { GeneralExtra } from "@/types/general-extra";
 import { PoolGeneralExtra, PoolGeneralExtraInsert, PoolGeneralExtrasState, mapDbToPoolGeneralExtra } from "@/types/pool-general-extra";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useGeneralExtras } from "./useGeneralExtras";
 
@@ -18,6 +18,22 @@ export const usePoolGeneralExtrasGuarded = (poolId: string, customerId: string |
             quantity: 4 // Default to 4 jets
         },
         deckJets: {
+            selected: false,
+            extraId: null
+        },
+        handGrabRail: {
+            selected: false,
+            extraId: null
+        },
+        automation: {
+            selected: false,
+            extraId: null
+        },
+        chemistry: {
+            selected: false,
+            extraId: null
+        },
+        bundle: {
             selected: false,
             extraId: null
         },
@@ -62,45 +78,132 @@ export const usePoolGeneralExtrasGuarded = (poolId: string, customerId: string |
     const extrasByType = {
         spaJets: poolExtras?.filter(extra => extra.type === 'Spa Jets') || [],
         deckJets: poolExtras?.filter(extra => extra.type === 'Deck Jets') || [],
+        handGrabRail: poolExtras?.filter(extra => extra.type === 'Hand Grab Rail') || [],
         misc: poolExtras?.filter(extra => extra.type === 'Misc') || []
     };
 
+    // Track if initial load has been done to prevent re-initialization
+    const hasInitializedRef = useRef(false);
+    const prevPoolExtrasRef = useRef<string>('');
+
     // Initialize state based on existing selections
     useEffect(() => {
-        if (poolExtras && generalExtras) {
-            // Group extras by type inside the effect to avoid circular dependency
-            const spaJets = poolExtras.filter(extra => extra.type === 'Spa Jets');
-            const deckJets = poolExtras.filter(extra => extra.type === 'Deck Jets');
-            const miscItems = poolExtras.filter(extra => extra.type === 'Misc');
-
-            // Find Spa Jets
-            const spaJet = spaJets[0]; // Assuming only one selected
-
-            // Find Deck Jets
-            const deckJet = deckJets[0]; // Assuming only one selected
-
-            // Map misc items
-            const miscItemsState = miscItems.map(item => ({
-                extraId: item.general_extra_id,
-                quantity: item.quantity
-            }));
-
-            setState({
-                spaJets: {
-                    selected: !!spaJet,
-                    extraId: spaJet?.general_extra_id || null,
-                    quantity: spaJet?.quantity || 4
-                },
-                deckJets: {
-                    selected: !!deckJet,
-                    extraId: deckJet?.general_extra_id || null
-                },
-                miscItems: {
-                    items: miscItemsState
-                }
-            });
+        if (!poolExtras || !generalExtras) {
+            return;
         }
-    }, [poolExtras, generalExtras]);
+
+        // Create a stable key for poolExtras to detect actual changes
+        const poolExtrasKey = JSON.stringify(poolExtras.map(e => ({ id: e.id, type: e.type, general_extra_id: e.general_extra_id })));
+        
+        // Skip if we've already initialized with this exact data
+        if (hasInitializedRef.current && prevPoolExtrasRef.current === poolExtrasKey) {
+            return;
+        }
+
+        console.log('🔄 Initializing state from poolExtras:', poolExtras);
+        
+        // Group extras by type inside the effect to avoid circular dependency
+        const spaJets = poolExtras.filter(extra => extra.type === 'Spa Jets');
+        const deckJets = poolExtras.filter(extra => extra.type === 'Deck Jets');
+        const handGrabRails = poolExtras.filter(extra => extra.type === 'Hand Grab Rail');
+        const automationItems = poolExtras.filter(extra => extra.type === 'Automation');
+        const chemistryItems = poolExtras.filter(extra => extra.type === 'Chemistry');
+        const bundleItems = poolExtras.filter(extra => extra.type === 'Bundle');
+        const miscItems = poolExtras.filter(extra => extra.type === 'Misc');
+
+        console.log('📊 Found items by type:', {
+            spaJets: spaJets.length,
+            deckJets: deckJets.length,
+            handGrabRails: handGrabRails.length,
+            automationItems: automationItems.length,
+            chemistryItems: chemistryItems.length,
+            bundleItems: bundleItems.length,
+            miscItems: miscItems.length
+        });
+
+        // Find Spa Jets
+        const spaJet = spaJets[0]; // Assuming only one selected
+
+        // Find Deck Jets
+        const deckJet = deckJets[0]; // Assuming only one selected
+
+        // Find Hand Grab Rail
+        const handGrabRail = handGrabRails[0]; // Assuming only one selected
+
+        // Find automation, chemistry, bundle
+        const automation = automationItems[0];
+        const chemistry = chemistryItems[0];
+        const bundle = bundleItems[0];
+
+        console.log('🤖 Automation data:', automation);
+        console.log('🧪 Chemistry data:', chemistry);
+        console.log('📦 Bundle data:', bundle);
+        
+        // Log the raw items to debug
+        if (automationItems.length > 0) {
+            console.log('🤖 Raw automation items from DB:', automationItems);
+        }
+        if (chemistryItems.length > 0) {
+            console.log('🧪 Raw chemistry items from DB:', chemistryItems);
+        }
+        if (bundleItems.length > 0) {
+            console.log('📦 Raw bundle items from DB:', bundleItems);
+        }
+
+        // Map misc items
+        const miscItemsState = miscItems.map(item => ({
+            extraId: item.general_extra_id,
+            quantity: item.quantity
+        }));
+
+        // Create new state object
+        const newState = {
+            spaJets: {
+                selected: !!spaJet,
+                extraId: spaJet?.general_extra_id || null,
+                quantity: spaJet?.quantity || 4
+            },
+            deckJets: {
+                selected: !!deckJet,
+                extraId: deckJet?.general_extra_id || null
+            },
+            handGrabRail: {
+                selected: !!handGrabRail,
+                extraId: handGrabRail?.general_extra_id || null
+            },
+            automation: {
+                // If bundle exists, automation is selected
+                selected: !!automation || !!bundle,
+                // Use existing automation ID, or set to first available if bundle exists
+                extraId: automation?.general_extra_id || 
+                        (bundle && generalExtras?.find(e => e.type === 'Automation')?.id) || 
+                        null
+            },
+            chemistry: {
+                // If bundle exists, chemistry is selected  
+                selected: !!chemistry || !!bundle,
+                // Use existing chemistry ID, or set to first available if bundle exists
+                extraId: chemistry?.general_extra_id || 
+                        (bundle && generalExtras?.find(e => e.type === 'Chemistry')?.id) || 
+                        null
+            },
+            bundle: {
+                selected: !!bundle,
+                extraId: bundle?.general_extra_id || null
+            },
+            miscItems: {
+                items: miscItemsState
+            }
+        };
+
+        console.log('📝 New state to set:', newState);
+        setState(newState);
+        
+        // Mark as initialized and store the key
+        hasInitializedRef.current = true;
+        prevPoolExtrasRef.current = poolExtrasKey;
+        
+    }, [poolExtras?.length, generalExtras?.length]); // Use lengths as stable dependencies
 
     // Guarded save mutation
     const {
@@ -160,6 +263,85 @@ export const usePoolGeneralExtrasGuarded = (poolId: string, customerId: string |
                 }
             }
 
+            // Add Hand Grab Rail if selected
+            if (state.handGrabRail.selected && state.handGrabRail.extraId) {
+                const extra = generalExtras.find(e => e.id === state.handGrabRail.extraId);
+                if (extra) {
+                    toInsert.push({
+                        pool_project_id: customerId,
+                        general_extra_id: extra.id,
+                        name: extra.name,
+                        sku: extra.sku,
+                        type: extra.type,
+                        description: extra.description,
+                        quantity: 1,
+                        cost: extra.cost,
+                        margin: extra.margin,
+                        rrp: extra.rrp
+                    });
+                }
+            }
+
+            // Handle Automation/Chemistry/Bundle logic
+            if (state.bundle.selected && state.bundle.extraId) {
+                // If bundle is selected, ONLY add the bundle
+                const extra = generalExtras.find(e => e.id === state.bundle.extraId);
+                if (extra) {
+                    toInsert.push({
+                        pool_project_id: customerId,
+                        general_extra_id: extra.id,
+                        name: extra.name,
+                        sku: extra.sku,
+                        type: extra.type,
+                        description: extra.description,
+                        quantity: 1,
+                        cost: extra.cost,
+                        margin: extra.margin,
+                        rrp: extra.rrp
+                    });
+                }
+            } else {
+                // If bundle is NOT selected, add individual selections
+                
+                // Add Automation if selected
+                if (state.automation.selected && state.automation.extraId) {
+                    const extra = generalExtras.find(e => e.id === state.automation.extraId);
+                    if (extra) {
+                        toInsert.push({
+                            pool_project_id: customerId,
+                            general_extra_id: extra.id,
+                            name: extra.name,
+                            sku: extra.sku,
+                            type: extra.type,
+                            description: extra.description,
+                            quantity: 1,
+                            cost: extra.cost,
+                            margin: extra.margin,
+                            rrp: extra.rrp
+                        });
+                    }
+                }
+
+                // Add Chemistry if selected
+                if (state.chemistry.selected && state.chemistry.extraId) {
+                    const extra = generalExtras.find(e => e.id === state.chemistry.extraId);
+                    if (extra) {
+                        toInsert.push({
+                            pool_project_id: customerId,
+                            general_extra_id: extra.id,
+                            name: extra.name,
+                            sku: extra.sku,
+                            type: extra.type,
+                            description: extra.description,
+                            quantity: 1,
+                            cost: extra.cost,
+                            margin: extra.margin,
+                            rrp: extra.rrp
+                        });
+                    }
+                }
+            }
+
             // Add Misc items
             for (const item of state.miscItems.items) {
                 const extra = generalExtras.find(e => e.id === item.extraId);
@@ -214,7 +396,11 @@ export const usePoolGeneralExtrasGuarded = (poolId: string, customerId: string |
     const filteredExtras = {
         spaJets: generalExtras?.filter(extra => extra.type === 'Spa Jets') || [],
         deckJets: generalExtras?.filter(extra => extra.type === 'Deck Jets') || [],
-        misc: generalExtras?.filter(extra => extra.type === 'Misc') || []
+        handGrabRail: generalExtras?.filter(extra => extra.type === 'Hand Grab Rail') || [],
+        misc: generalExtras?.filter(extra => extra.type === 'Misc') || [],
+        automation: generalExtras?.filter(extra => extra.type === 'Automation') || [],
+        chemistry: generalExtras?.filter(extra => extra.type === 'Chemistry') || [],
+        bundle: generalExtras?.filter(extra => extra.type === 'Bundle') || []
     };
 
     // Helper functions to update state
@@ -271,6 +457,86 @@ export const usePoolGeneralExtrasGuarded = (poolId: string, customerId: string |
         }));
     };
 
+    const setHandGrabRailSelected = (selected: boolean) => {
+        setState(prev => ({
+            ...prev,
+            handGrabRail: {
+                ...prev.handGrabRail,
+                selected
+            }
+        }));
+    };
+
+    const setHandGrabRailExtraId = (extraId: string | null) => {
+        setState(prev => ({
+            ...prev,
+            handGrabRail: {
+                ...prev.handGrabRail,
+                extraId
+            }
+        }));
+    };
+
+    const setAutomationSelected = (selected: boolean) => {
+        setState(prev => ({
+            ...prev,
+            automation: {
+                ...prev.automation,
+                selected
+            }
+        }));
+    };
+
+    const setAutomationExtraId = (extraId: string | null) => {
+        setState(prev => ({
+            ...prev,
+            automation: {
+                ...prev.automation,
+                extraId
+            }
+        }));
+    };
+
+    const setChemistrySelected = (selected: boolean) => {
+        setState(prev => ({
+            ...prev,
+            chemistry: {
+                ...prev.chemistry,
+                selected
+            }
+        }));
+    };
+
+    const setChemistryExtraId = (extraId: string | null) => {
+        setState(prev => ({
+            ...prev,
+            chemistry: {
+                ...prev.chemistry,
+                extraId
+            }
+        }));
+    };
+
+    const setBundleSelected = (selected: boolean) => {
+        setState(prev => ({
+            ...prev,
+            bundle: {
+                ...prev.bundle,
+                selected
+            }
+        }));
+    };
+
+    const setBundleExtraId = (extraId: string | null) => {
+        setState(prev => ({
+            ...prev,
+            bundle: {
+                ...prev.bundle,
+                extraId
+            }
+        }));
+    };
+
     const addMiscItem = (extraId: string, quantity: number = 1) => {
         setState(prev => ({
             ...prev,
@@ -318,6 +584,14 @@ export const usePoolGeneralExtrasGuarded = (poolId: string, customerId: string |
         setSpaJetsQuantity,
         setDeckJetsSelected,
         setDeckJetsExtraId,
+        setHandGrabRailSelected,
+        setHandGrabRailExtraId,
+        setAutomationSelected,
+        setAutomationExtraId,
+        setChemistrySelected,
+        setChemistryExtraId,
+        setBundleSelected,
+        setBundleExtraId,
         addMiscItem,
         removeMiscItem,
         updateMiscItemQuantity,

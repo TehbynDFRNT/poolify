@@ -257,6 +257,7 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     pav.extra_concrete_finish_two,
     pav.coping_category,
     pav.grout_colour,
+    pav.recess_drainage,
     con.concrete_pump_needed,
     con.concrete_pump_quantity AS concrete_pump_hours,
     con.concrete_pump_total_cost,
@@ -375,7 +376,7 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
      LEFT JOIN extra_paving_costs epc  ON epc.id  = pav.extra_paving_category
      -- add normalized lookup for existing paving
      LEFT JOIN extra_paving_costs epc2 ON nullif(pav.existing_concrete_paving_category, '')::uuid = epc2.id
-     LEFT JOIN extra_concreting ec ON lower(replace(ec.type, ' '::text, '-'::text)) = lower(pav.extra_concreting_type)
+     LEFT JOIN extra_concreting ec ON ec.id = NULLIF(pav.extra_concreting_type, '')::uuid
      LEFT JOIN pwf_latest ON pwf_latest.customer_id = pj.id
      LEFT JOIN LATERAL ( SELECT f.linear_meters AS glass_linear_meters,
             f.gates AS glass_gates,

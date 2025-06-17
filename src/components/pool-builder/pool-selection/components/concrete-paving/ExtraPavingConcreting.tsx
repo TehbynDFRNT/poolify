@@ -45,6 +45,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
   // Included Coping Options state
   const [copingCategory, setCopingCategory] = useState<string>("");
   const [groutColour, setGroutColour] = useState<string>("");
+  const [recessDraining, setRecessDraining] = useState<string>("");
   const [isLoadingCoping, setIsLoadingCoping] = useState(true);
 
   const refreshSummary = useCallback(() => {
@@ -71,7 +72,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
       setIsLoadingCoping(true);
       const { data, error } = await supabase
         .from('pool_paving_selections')
-        .select('coping_category, grout_colour')
+        .select('coping_category, grout_colour, recess_drainage')
         .eq('pool_project_id', customerId)
         .maybeSingle();
 
@@ -86,6 +87,9 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
         }
         if (data.grout_colour) {
           setGroutColour(data.grout_colour);
+        }
+        if (data.recess_drainage) {
+          setRecessDraining(data.recess_drainage);
         }
       }
     } catch (error) {
@@ -106,7 +110,8 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
 
     const dataToSave = {
       coping_category: copingCategory || null,
-      grout_colour: groutColour || null
+      grout_colour: groutColour || null,
+      recess_drainage: recessDraining || null
     };
 
     // Use the guarded handleSave for both insert and update
@@ -181,7 +186,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
               <p>Loading...</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <Label htmlFor="coping-category">Coping Category</Label>
                 <Select
@@ -218,6 +223,23 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
                         {option}
                       </SelectItem>
                     ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="recess-draining">Recess Draining</Label>
+                <Select
+                  value={recessDraining}
+                  onValueChange={setRecessDraining}
+                  disabled={isLoadingCoping}
+                >
+                  <SelectTrigger id="recess-draining" className="mt-2">
+                    <SelectValue placeholder="Select yes or no" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Yes">Yes</SelectItem>
+                    <SelectItem value="No">No</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

@@ -228,16 +228,15 @@ export function useContractSummaryLineItems(
     // Bobcat cost
     const bobcatCost = snapshot.bobcat_cost || 0;
 
-    // Custom site requirements cost
-    const customSiteRequirementsCostRaw = snapshot.site_requirements_data 
+    // Custom site requirements cost (no margin applied)
+    const customSiteRequirementsCost = snapshot.site_requirements_data 
       ? (typeof snapshot.site_requirements_data === 'string'
          ? JSON.parse(snapshot.site_requirements_data)
          : snapshot.site_requirements_data).reduce((sum: number, item: any) => sum + (Number(item.price) || 0), 0)
       : 0;
-    const marginAppliedCustomSiteRequirementsCost = customSiteRequirementsCostRaw * marginMultiplier;
 
-    // Crane cost
-    const craneCost = snapshot.crane_cost || 0;
+    // Crane cost with margin applied
+    const craneCost = (snapshot.crane_cost || 0) * marginMultiplier;
 
     // Traffic control cost
     const trafficControlCost = snapshot.traffic_control_cost || 0;
@@ -245,8 +244,7 @@ export function useContractSummaryLineItems(
     // ==================================================================================
     // 1. DEPOSIT COMPONENTS (Calculated Later)
     // ==================================================================================
-    // Get HWI insurance cost based on contract grand total (using original total, not discounted)
-    const hwiCost = getHWIInsuranceCost(contractGrandTotal);
+    // HWI cost will be calculated after discount is applied
 
     // ==================================================================================
     // 2. POOL SHELL SUPPLY CALCULATION
@@ -276,9 +274,12 @@ export function useContractSummaryLineItems(
     // ==================================================================================
     // 4. POOL SHELL INSTALLATION CALCULATION
     // ==================================================================================
-    // Calculate Pool Shell Installation total using non-margin applied values for crane, traffic control, and bobcat
+    // Calculate crane for pool shell installation (crane cost with margin minus crane allowance with margin)
+    const craneForInstallation = craneCost
+    
+    // Calculate Pool Shell Installation total
     const poolShellInstallationTotal =
-        craneCost
+        craneForInstallation
       + trafficControlCost
       + marginAppliedPcInstallFee
       + marginAppliedPcPeaGravel
@@ -291,7 +292,7 @@ export function useContractSummaryLineItems(
       + marginAppliedTempSafetyBarrierCost;
     
     // Shell Installation breakdown for PC contract
-    const pcShellInstallCraneHire = craneCost + trafficControlCost;
+    const pcShellInstallCraneHire = craneForInstallation + trafficControlCost;
     const pcShellInstallBackfill = marginAppliedPcPeaGravel; // Pea gravel is used for backfill
     const pcShellInstallRemainder = poolShellInstallationTotal - pcShellInstallCraneHire - pcShellInstallBackfill;
     
@@ -341,7 +342,7 @@ export function useContractSummaryLineItems(
     // 9. SPECIAL INCLUSIONS CALCULATION
     // ==================================================================================
     // Special inclusions include custom site requirements
-    const specialInclusions = marginAppliedCustomSiteRequirementsCost;
+    const specialInclusions = customSiteRequirementsCost;
 
     // ==================================================================================
     // 10. HANDOVER CALCULATION
@@ -352,11 +353,10 @@ export function useContractSummaryLineItems(
     // ==================================================================================
     // CONTRACT SUMMARY GRAND TOTAL CALCULATION
     // ==================================================================================
-    // Calculate Contract Summary Grand Total (sum of all contract line item subtotals)
-    const contractSummaryGrandTotal = 
+    // Calculate Contract Summary Grand Total WITHOUT HWI first (sum of all contract line item subtotals except HWI)
+    const contractSummaryGrandTotalWithoutHWI = 
       marginAppliedFireAntCost +
       marginAppliedForm15Cost +
-      hwiCost +
       poolShellSupplyEquipmentTotal + 
       excavationContractTotal + 
       poolShellInstallationTotal + 
@@ -366,9 +366,6 @@ export function useContractSummaryLineItems(
       retainingWallsWaterFeatureTotal + 
       specialInclusions + 
       handoverTotal;
-
-    // Calculate Contract Total Excluding HWI
-    const contractTotalExcludingHWI = contractSummaryGrandTotal - hwiCost;
 
     // ==================================================================================
     // DISCOUNT CALCULATION
@@ -384,19 +381,29 @@ export function useContractSummaryLineItems(
           if (discount.discount_type === 'dollar' && discount.dollar_value) {
             totalDiscountAmount += discount.dollar_value;
           } else if (discount.discount_type === 'percentage' && discount.percentage_value) {
-            // Calculate percentage discount based on contractSummaryGrandTotal
-            const percentageAmount = (contractSummaryGrandTotal * discount.percentage_value) / 100;
+            // Calculate percentage discount based on contractSummaryGrandTotalWithoutHWI
+            const percentageAmount = (contractSummaryGrandTotalWithoutHWI * discount.percentage_value) / 100;
             totalDiscountAmount += percentageAmount;
           }
         }
       });
     }
 
+    // Calculate total after discount (without HWI)
+    const contractTotalWithoutHWIAfterDiscount = contractSummaryGrandTotalWithoutHWI - totalDiscountAmount;
+    
+    // Now calculate HWI based on the discounted total
+    const hwiCost = getHWIInsuranceCost(contractTotalWithoutHWIAfterDiscount);
+    
+    // Calculate final totals including HWI
+    const contractSummaryGrandTotal = contractSummaryGrandTotalWithoutHWI + hwiCost;
+    const contractSummaryGrandTotalAfterDiscount = contractTotalWithoutHWIAfterDiscount + hwiCost;
+    
     // Apply discount to pool shell supply line item
     const poolShellSupplyAfterDiscount = poolShellSupplyEquipmentTotal - totalDiscountAmount;
     
-    // Calculate grand total after discount
-    const contractSummaryGrandTotalAfterDiscount = contractSummaryGrandTotal - totalDiscountAmount;
+    // Calculate Contract Total Excluding HWI
+    const contractTotalExcludingHWI = contractSummaryGrandTotalAfterDiscount - hwiCost;
 
     // ==================================================================================
     // 11. DEPOSIT CALCULATION
@@ -440,7 +447,7 @@ export function useContractSummaryLineItems(
       // Breakdown values
       equipmentOnly,
       shellValueInContract,
-      marginAppliedCraneCost: craneCost,
+      marginAppliedCraneCost: craneForInstallation,
       marginAppliedTrafficControlCost: trafficControlCost,
       marginAppliedPcInstallFee,
       marginAppliedPcPeaGravel,
@@ -448,7 +455,7 @@ export function useContractSummaryLineItems(
       marginAppliedFilterSlabCost,
       marginAppliedDigCost,
       marginAppliedBobcatCost: bobcatCost,
-      marginAppliedCustomSiteRequirementsCost,
+      marginAppliedCustomSiteRequirementsCost: customSiteRequirementsCost,
       marginAppliedAgLineCost,
       marginAppliedTempSafetyBarrierCost,
       extraPavingCost: (snapshot.extra_paving_cost || 0),

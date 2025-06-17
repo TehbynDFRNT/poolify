@@ -122,6 +122,7 @@ export interface ProposalSnapshot {
   // Included coping options
   coping_category: string | null; // Options: "Cat1", "Cat2", "Cat3", "Cat4"
   grout_colour: string | null; // Options: "White", "Grey", "Custom"
+  recess_drainage: string | null; // Options: "Yes", "No"
   
   // Concrete pump
   concrete_pump_needed: boolean;

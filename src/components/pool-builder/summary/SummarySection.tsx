@@ -404,7 +404,8 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     console.log("Concrete pump data:", concretePumpData);
 
     // Use the price calculator hook to get consistent calculations (must be called before any early returns)
-    const priceCalculatorResult = usePriceCalculator(snapshot, getAppliedDiscountsWithDetails() as any);
+    const appliedDiscounts = getAppliedDiscountsWithDetails();
+    const priceCalculatorResult = usePriceCalculator(snapshot, appliedDiscounts);
 
     // Fetch concrete and paving margin data
     const { data: concretePavingMarginData } = useQuery({
@@ -615,6 +616,10 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const generalExtrasByType = {
         spaJets: generalExtras?.filter(item => item.type === 'Spa Jets') || [],
         deckJets: generalExtras?.filter(item => item.type === 'Deck Jets') || [],
+        handGrabRail: generalExtras?.filter(item => item.type === 'Hand Grab Rail') || [],
+        automation: generalExtras?.filter(item => item.type === 'Automation') || [],
+        chemistry: generalExtras?.filter(item => item.type === 'Chemistry') || [],
+        bundle: generalExtras?.filter(item => item.type === 'Bundle') || [],
         misc: generalExtras?.filter(item => item.type === 'Misc') || []
     };
 
@@ -976,7 +981,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Site Requirements</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            Margin: {marginPct}% ({formatCurrency(siteRequirementsBreakdown.totalBeforeMargin * (marginPct / (100 - marginPct)))})
+                                            (Margin applied to crane only, others have no margin)
                                         </p>
                                     )}
                                 </div>
@@ -1031,17 +1036,6 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                     value={siteRequirementsBreakdown.customRequirementsPrice}
                                                     breakdown={!isCustomerView ? `Cost: ${formatCurrency(siteRequirementsBreakdown.customRequirementsCost)}` : null}
                                                 />
-                                            )}
-                                            {!isCustomerView && (
-                                                <>
-                                                    <SubtotalRow
-                                                        label="Site Requirements Before Margin"
-                                                        value={siteRequirementsBreakdown.totalBeforeMargin}
-                                                    />
-                                                    <MarginRow
-                                                        percentage={marginPct}
-                                                    />
-                                                </>
                                             )}
 
                                             <TotalRow
@@ -1514,21 +1508,13 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 )}
                             </div>
                             <div className="flex items-center">
-                                <span className="mr-4 font-semibold">{formatCurrency(0)}</span>
+                                <span className="mr-4 font-semibold">{formatCurrency(generalExtrasTotal)}</span>
                                 {expandedSections.upgradesExtrasGeneral ? (
                                     <ChevronUp className="h-5 w-5 text-gray-600" />
                                 ) : (
                                     <ChevronDown className="h-5 w-5 text-gray-600" />
                                 )}
                             </div>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(generalExtrasTotal)}</span>
-                            {expandedSections.upgradesExtrasGeneral ? (
-                                <ChevronUp className="h-5 w-5 text-primary" />
-                            ) : (
-                                <ChevronDown className="h-5 w-5 text-primary" />
-                            )}
                         </div>
 
                         {expandedSections.upgradesExtrasGeneral && (
@@ -1563,6 +1549,46 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                     />
                                                 ))}
 
+                                                {generalExtrasByType.handGrabRail.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Hand Grab Rail - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? item.description : null}
+                                                    />
+                                                ))}
+
+                                                {generalExtrasByType.automation.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Pool Automation - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? item.description : null}
+                                                    />
+                                                ))}
+
+                                                {generalExtrasByType.chemistry.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`pH & ORP Chemistry - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? item.description : null}
+                                                    />
+                                                ))}
+
+                                                {generalExtrasByType.bundle.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Bundle - ${item.name}`}
+                                                        code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? `${item.description} (Bundle Discount Applied)` : null}
+                                                    />
+                                                ))}
+
                                                 {generalExtrasByType.misc.map((item) => (
                                                     <LineItem
                                                         key={item.id}
@@ -1572,13 +1598,15 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
                                                     />
                                                 ))}
+                                                
+                                                {generalExtrasTotal > 0 && (
+                                                    <TotalRow
+                                                        label="General Extras Total"
+                                                        value={generalExtrasTotal}
+                                                    />
+                                                )}
                                             </>
                                         )}
-                                        <tr className="border-b border-gray-100">
-                                            <td className="p-2 text-center text-muted-foreground" colSpan={3}>
-                                                No general upgrades or extras selected
-                                            </td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

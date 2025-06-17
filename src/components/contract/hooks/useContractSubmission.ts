@@ -79,6 +79,9 @@ export function useContractSubmission() {
       
       // Contract price total (duplicates grand total)
       "$PC - Contract Price (inc)": Number(payload.financials.contract_grand_total || 0).toFixed(2),
+      "$PC - Contract Discount Title": payload.financials.contract_discount_title || "",
+      "$PC - Contract Discount Value": Number(payload.financials.contract_discount_value || 0).toFixed(2),
+      "$PC - Contract Price (inc) After Discount": Number(payload.financials.contract_grand_total_after_discount || 0).toFixed(2),
       "Web Price": Number(payload.calculator?.totals?.basePoolTotal || 0).toFixed(2),
       
       // Deposit breakdown (granular sub-items)
@@ -88,6 +91,7 @@ export function useContractSubmission() {
       
       // Direct duplicates of $C-Item equivalents
       "$PC - Shell Supply ": Number(payload.financials.pool_shell_supply_total || 0).toFixed(2),
+      "$PC - Shell Supply - After Discount": Number(payload.financials.pool_shell_supply_after_discount || 0).toFixed(2),
       "$PC - Excavation - A -Bobcat": Number(payload.financials.excavation_total || 0).toFixed(2),
       "$PC - Engineered Beam": Number(payload.financials.beam_cost || 0).toFixed(2),
       "$PC - EXTRA Concreting Works": Number(payload.financials.extra_concreting_total || 0).toFixed(2),
@@ -281,6 +285,9 @@ export function useContractSubmission() {
       "No of Pepper Pots": payload.snapshot?.selected_extras_json?.find(extra => 
         extra.name === "Pepper Pots"
       )?.quantity?.toString() || "N/A",
+      "Quantum Purity": payload.snapshot?.selected_extras_json?.find(extra => 
+        extra.name === "Quantum UV Sanitation"
+      )?.name || "N/A",
       "Deck Jets": (() => {
         const deckJetsExtra = payload.snapshot?.selected_extras_json?.find(extra => 
           extra.type === "Deck Jets"
@@ -295,6 +302,49 @@ export function useContractSubmission() {
         // Extract quantity from name like 'Deck Jets x 2' or 'Deck Jets x 4'
         const match = deckJetsExtra.name.match(/x\s*(\d+)/);
         return match ? match[1] : "N/A";
+      })(),
+      "Hand Grab Rail": payload.snapshot?.selected_extras_json?.find(extra => 
+        extra.type === "Hand Grab Rail"
+      )?.name || "N/A",
+      "Pool Plus Manager": (() => {
+        // Check for bundle first
+        const bundleExtra = payload.snapshot?.selected_extras_json?.find(extra => 
+          extra.type === "Bundle"
+        );
+        if (bundleExtra) return bundleExtra.name;
+        
+        // Otherwise check for individual automation/chemistry selections
+        const automationExtra = payload.snapshot?.selected_extras_json?.find(extra => 
+          extra.type === "Automation"
+        );
+        const chemistryExtra = payload.snapshot?.selected_extras_json?.find(extra => 
+          extra.type === "Chemistry"
+        );
+        
+        if (automationExtra && chemistryExtra) {
+          return `${automationExtra.name} + ${chemistryExtra.name}`;
+        } else if (automationExtra) {
+          return automationExtra.name;
+        } else if (chemistryExtra) {
+          return chemistryExtra.name;
+        }
+        
+        return "N/A";
+      })(),
+      "Lighting Upgrade": (() => {
+        const ledLightExtra = payload.snapshot?.selected_extras_json?.find(extra => 
+          extra.general_extra_id === "841f0324-4989-4542-b24d-a25e1874912e" || 
+          (extra.name?.includes("LED") && extra.type === "Misc")
+        );
+        return ledLightExtra ? "Yes" : "No";
+      })(),
+      "No of Lights": (() => {
+        const ledLightExtra = payload.snapshot?.selected_extras_json?.find(extra => 
+          extra.general_extra_id === "841f0324-4989-4542-b24d-a25e1874912e" || 
+          (extra.name?.includes("LED") && extra.type === "Misc")
+        );
+        // Base 1 light + any additional from the extra
+        return ledLightExtra ? (1 + (ledLightExtra.quantity || 0)).toString() : "1";
       })(),
       
       // Heating and thermal blanket fields from snapshot
@@ -370,6 +420,15 @@ export function useContractSubmission() {
       
       // Grout colour from snapshot
       "Grout Colour": payload.snapshot?.grout_colour || "",
+      
+      // Recess draining from snapshot
+      "Recess Drainage": payload.snapshot?.recess_drainage || "",
+      
+      // Media Filter from misc extras
+      "Media Filter": payload.snapshot?.selected_extras_json?.find(extra => 
+        extra.general_extra_id === "00885df8-b6bd-4d38-af1d-68a325efca4a" || 
+        (extra.sku === "THERA6255" && extra.type === "Misc")
+      )?.name || "N/A",
       
       // Extra paving fields from snapshot
       "Extra Paving": (payload.snapshot?.existing_paving_cost && payload.snapshot.existing_paving_cost > 0) ? "Yes" : "No",

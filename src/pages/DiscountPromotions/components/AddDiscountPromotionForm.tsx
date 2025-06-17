@@ -32,8 +32,8 @@ export const AddDiscountPromotionForm = ({ onSuccess }: AddDiscountPromotionForm
     defaultValues: {
       discount_name: "",
       discount_type: "dollar",
-      dollar_value: 0,
-      percentage_value: 0,
+      dollar_value: undefined,
+      percentage_value: undefined,
     },
   });
 
@@ -53,7 +53,7 @@ export const AddDiscountPromotionForm = ({ onSuccess }: AddDiscountPromotionForm
       };
 
       const { error } = await supabase
-        .from("discount_promotions" as any)
+        .from("discount_promotions")
         .insert([insertData]);
 
       if (error) throw error;

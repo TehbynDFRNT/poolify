@@ -180,6 +180,16 @@ export function usePriceCalculator(
     // Calculate fixed costs total from snapshot
     const fixedCostsTotal = (snapshot.fixed_costs_json || []).reduce((sum: number, fc: any) => sum + parseFloat(fc.price || '0'), 0);
     
+    // Calculate margin multiplier early as it's needed for crane allowance
+    const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
+    const craneAllowanceWithMargin = 700 * marginMultiplier;
+    
+    // Calculate crane for site requirements
+    // Apply margin to crane cost, then subtract the crane allowance with margin
+    const craneCost = snapshot.crane_cost || 0;
+    const craneCostWithMargin = craneCost * marginMultiplier;
+    const craneTotalForSiteRequirements = craneCostWithMargin > craneAllowanceWithMargin ? craneCostWithMargin - craneAllowanceWithMargin : 0;
+    
     // Calculate totals for each section using correct debug panel logic
     const basePoolTotal = ((
       (snapshot.spec_buy_inc_gst || 0) +
@@ -190,7 +200,7 @@ export function usePriceCalculator(
       700 // Standard crane allowance
     ) / (1 - (snapshot.pool_margin_pct || 0) / 100));
 
-    const siteRequirementsTotal = ((snapshot.crane_cost || 0) > 700 ? (snapshot.crane_cost || 0) - 700 : 0) + (snapshot.bobcat_cost || 0) + (snapshot.traffic_control_cost || 0) + (snapshot.site_requirements_data 
+    const siteRequirementsTotal = craneTotalForSiteRequirements + (snapshot.bobcat_cost || 0) + (snapshot.traffic_control_cost || 0) + (snapshot.site_requirements_data 
       ? (typeof snapshot.site_requirements_data === 'string'
          ? JSON.parse(snapshot.site_requirements_data)
          : snapshot.site_requirements_data).reduce((sum: number, item: any) => sum + (Number(item.price) || 0), 0)
@@ -206,7 +216,12 @@ export function usePriceCalculator(
 
     const retainingWallsTotal = (snapshot.retaining_walls_json || []).reduce((sum: number, wall: any) => sum + (wall.total_cost || 0), 0);
 
-    const extrasTotal = (snapshot.cleaner_included ? (snapshot.cleaner_unit_price || 0) : 0) + (snapshot.include_heat_pump ? ((snapshot.heat_pump_rrp || 0) + (snapshot.heat_pump_installation_cost || 0)) : 0) + (snapshot.include_blanket_roller ? ((snapshot.blanket_roller_rrp || 0) + (snapshot.blanket_roller_installation_cost || 0)) : 0) + (snapshot.extras_total_rrp || 0);
+    // Calculate general extras total from selected_extras_json
+    const generalExtrasTotal = (snapshot.selected_extras_json || []).reduce((sum: number, extra: any) => {
+      return sum + ((extra.rrp || 0) * (extra.quantity || 1));
+    }, 0);
+
+    const extrasTotal = (snapshot.cleaner_included ? (snapshot.cleaner_unit_price || 0) : 0) + (snapshot.include_heat_pump ? ((snapshot.heat_pump_rrp || 0) + (snapshot.heat_pump_installation_cost || 0)) : 0) + (snapshot.include_blanket_roller ? ((snapshot.blanket_roller_rrp || 0) + (snapshot.blanket_roller_installation_cost || 0)) : 0) + generalExtrasTotal;
 
     const grandTotalCalculated = basePoolTotal + siteRequirementsTotal + electricalTotal + concreteTotal + fencingTotal + waterFeatureTotal + retainingWallsTotal + extrasTotal;
     
@@ -257,7 +272,6 @@ export function usePriceCalculator(
     const individualCosts = (snapshot.pc_beam || 0) + (snapshot.pc_coping_supply || 0) + (snapshot.pc_coping_lay || 0) + (snapshot.pc_salt_bags || 0) + (snapshot.pc_trucked_water || 0) + (snapshot.pc_misc || 0) + (snapshot.pc_pea_gravel || 0) + (snapshot.pc_install_fee || 0);
     const craneAllowance = 700;
     const totalBeforeMargin = poolShellCost + digCost + filtrationCost + individualCosts + fixedCostsTotal + craneAllowance;
-    const marginMultiplier = 1 / (1 - (snapshot.pool_margin_pct || 0) / 100);
     
     const basePoolBreakdown: BasePoolBreakdown = {
       poolShellCost,
@@ -276,7 +290,6 @@ export function usePriceCalculator(
     };
 
     // Calculate site requirements breakdown
-    const craneCost = (snapshot.crane_cost || 0) > 700 ? (snapshot.crane_cost || 0) - 700 : 0;
     const bobcatCost = snapshot.bobcat_cost || 0;
     const trafficControlCost = snapshot.traffic_control_cost || 0;
     const customRequirementsCost = snapshot.site_requirements_data 
@@ -287,20 +300,22 @@ export function usePriceCalculator(
     const siteRequirementsTotalBeforeMargin = craneCost + bobcatCost + trafficControlCost + customRequirementsCost;
 
     const siteRequirementsBreakdown: SiteRequirementsBreakdown = {
-      craneCost,
+      craneCost: craneCostWithMargin > craneAllowanceWithMargin ? craneCost : 0,
       bobcatCost,
       trafficControlCost,
       customRequirementsCost,
       totalBeforeMargin: siteRequirementsTotalBeforeMargin,
-      cranePrice: craneCost * marginMultiplier,
-      bobcatPrice: bobcatCost * marginMultiplier,
-      trafficControlPrice: trafficControlCost * marginMultiplier,
-      customRequirementsPrice: customRequirementsCost * marginMultiplier,
+      cranePrice: craneTotalForSiteRequirements,
+      bobcatPrice: bobcatCost,
+      trafficControlPrice: trafficControlCost,
+      customRequirementsPrice: customRequirementsCost,
     };
     
     console.log('💰 usePriceCalculator results', {
       basePoolTotal,
       siteRequirementsTotal,
+      craneCost,
+      craneAllowanceWithMargin,
       contractGrandTotal,
       grandTotalCalculated,
       fixedCostsTotal

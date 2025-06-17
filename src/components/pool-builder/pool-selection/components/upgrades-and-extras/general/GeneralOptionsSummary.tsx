@@ -19,6 +19,7 @@ export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
     // Check if any items are selected
     const hasSpaJets = state.spaJets.selected && state.spaJets.extraId;
     const hasDeckJets = state.deckJets.selected && state.deckJets.extraId;
+    const hasHandGrabRail = state.handGrabRail.selected && state.handGrabRail.extraId;
     const hasMiscItems = state.miscItems.items.length > 0;
 
     // Get extras details
@@ -30,12 +31,18 @@ export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
         ? getExtraById(state.deckJets.extraId)
         : undefined;
 
+    const handGrabRailExtra = hasHandGrabRail && state.handGrabRail.extraId
+        ? getExtraById(state.handGrabRail.extraId)
+        : undefined;
+
     // Calculate costs
     const spaJetsCost = spaJetExtra
         ? spaJetExtra.rrp * state.spaJets.quantity
         : 0;
 
     const deckJetsCost = deckJetExtra?.rrp || 0;
+
+    const handGrabRailCost = handGrabRailExtra?.rrp || 0;
 
     const miscItemsCost = state.miscItems.items.reduce((sum, item) => {
         const extra = getExtraById(item.extraId);
@@ -44,11 +51,11 @@ export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
 
     // Calculate the current total based on UI state, not database
     const calculatedTotal = useMemo(() => {
-        return spaJetsCost + deckJetsCost + miscItemsCost;
-    }, [spaJetsCost, deckJetsCost, miscItemsCost]);
+        return spaJetsCost + deckJetsCost + handGrabRailCost + miscItemsCost;
+    }, [spaJetsCost, deckJetsCost, handGrabRailCost, miscItemsCost]);
 
     // If nothing is selected, show a simple message
-    if (!hasSpaJets && !hasDeckJets && !hasMiscItems) {
+    if (!hasSpaJets && !hasDeckJets && !hasHandGrabRail && !hasMiscItems) {
         return (
             <Card>
                 <CardHeader>
@@ -95,6 +102,20 @@ export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
                             </div>
                             <div className="text-primary font-medium mt-1">
                                 {formatCurrency(deckJetsCost)}
+                            </div>
+                        </div>
+                    )}
+
+                    {hasHandGrabRail && (
+                        <div className="p-3 bg-slate-50 rounded-md">
+                            <div className="font-medium flex items-center">
+                                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Hand Grab Rail
+                            </div>
+                            <div className="text-sm text-muted-foreground mt-1">
+                                {handGrabRailExtra?.name}
+                            </div>
+                            <div className="text-primary font-medium mt-1">
+                                {formatCurrency(handGrabRailCost)}
                             </div>
                         </div>
                     )}

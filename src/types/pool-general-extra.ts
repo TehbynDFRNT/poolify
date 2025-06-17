@@ -42,6 +42,22 @@ export interface PoolGeneralExtrasState {
         selected: boolean;
         extraId: string | null;
     };
+    handGrabRail: {
+        selected: boolean;
+        extraId: string | null;
+    };
+    automation: {
+        selected: boolean;
+        extraId: string | null;
+    };
+    chemistry: {
+        selected: boolean;
+        extraId: string | null;
+    };
+    bundle: {
+        selected: boolean;
+        extraId: string | null;
+    };
     miscItems: {
         items: Array<{
             extraId: string;
