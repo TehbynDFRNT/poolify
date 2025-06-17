@@ -307,7 +307,7 @@ export function useContractSubmission() {
         extra.type === "Hand Grab Rail"
       )?.name || "N/A",
       "Pool Plus Manager": (() => {
-        // Check for bundle first
+        // Check for bundle first - if bundle exists, it represents both automation and chemistry
         const bundleExtra = payload.snapshot?.selected_extras_json?.find(extra => 
           extra.type === "Bundle"
         );
@@ -321,6 +321,7 @@ export function useContractSubmission() {
           extra.type === "Chemistry"
         );
         
+        // Build combined name based on what's selected
         if (automationExtra && chemistryExtra) {
           return `${automationExtra.name} + ${chemistryExtra.name}`;
         } else if (automationExtra) {

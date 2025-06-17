@@ -95,7 +95,8 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                 getExtraById={getExtraById}
             />
 
-            <PoolAutomationSection
+            {/* PoolAutomationSection temporarily hidden - keeping backend plumbing intact */}
+            {/* <PoolAutomationSection
                 automationExtras={filteredExtras.automation}
                 chemistryExtras={filteredExtras.chemistry}
                 bundleExtras={filteredExtras.bundle}
@@ -111,7 +112,7 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                 onSetBundleSelected={setBundleSelected}
                 onSetBundleId={setBundleExtraId}
                 getExtraById={getExtraById}
-            />
+            /> */}
 
             <MiscItemsSection
                 miscItems={filteredExtras.misc}
