@@ -4,9 +4,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
+import { useConcretePump } from "@/pages/ConstructionCosts/hooks/useConcretePump";
 import { Pool } from "@/types/pool";
+import { formatCurrency } from "@/utils/format";
 import { useQuery } from "@tanstack/react-query";
+import { Truck } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
@@ -40,6 +44,11 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Concrete pump state
+  const [extraConcretePumpNeeded, setExtraConcretePumpNeeded] = useState<boolean>(false);
+  const [extraConcretePumpQuantity, setExtraConcretePumpQuantity] = useState<number>(1);
+  const [extraConcretePumpTotalCost, setExtraConcretePumpTotalCost] = useState<number>(0);
+
   // Use the guarded actions hook
   const {
     handleSave,
@@ -47,6 +56,12 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     isSubmitting,
     StatusWarningDialog
   } = useConcretePavingActionsGuarded(customerId);
+
+  // Get concrete pump base rate from database
+  const { concretePump, isLoading: isPumpLoading } = useConcretePump();
+
+  // Default pump rate if data is not loaded yet
+  const pumpRate = concretePump ? concretePump.price : 1050.00;
 
   // Fetch concrete types from the database
   const { data: concretingTypes = [], isLoading: isTypesLoading } = useQuery({
@@ -78,6 +93,8 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   const fetchExistingData = async () => {
     try {
       setIsLoading(true);
+      
+      // Fetch extra concreting data from pool_paving_selections
       const { data, error } = await supabase
         .from('pool_paving_selections')
         .select('*')
@@ -110,6 +127,21 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
           setConcreteFinishTwo((data as any).extra_concrete_finish_two);
         }
       }
+
+      // Fetch concrete pump data from pool_concrete_selections
+      const { data: pumpData, error: pumpError } = await supabase
+        .from('pool_concrete_selections')
+        .select('extra_concrete_pump, extra_concrete_pump_quantity, extra_concrete_pump_total_cost')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
+
+      if (pumpError && pumpError.code !== 'PGRST116') {
+        console.error("Error fetching concrete pump data:", pumpError);
+      } else if (pumpData) {
+        setExtraConcretePumpNeeded(pumpData.extra_concrete_pump || false);
+        setExtraConcretePumpQuantity(pumpData.extra_concrete_pump_quantity || 1);
+        setExtraConcretePumpTotalCost(pumpData.extra_concrete_pump_total_cost || 0);
+      }
     } catch (error) {
       console.error("Error in fetchExistingData:", error);
     } finally {
@@ -138,32 +170,40 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
   // Handle save using the guarded hook
   const handleSaveClick = async () => {
-    // Allow saving empty selections
-    // if (!selectedType || meterage <= 0) {
-    //   toast.error("Please select a concrete type and enter a valid meterage.");
-    //   return;
-    // }
-
-    // First check if a record already exists
-    const { data: existingData } = await supabase
+    // Save to pool_paving_selections table (existing extra concreting data)
+    const { data: existingPavingData } = await supabase
       .from('pool_paving_selections')
       .select('id')
       .eq('pool_project_id', customerId)
       .maybeSingle();
 
-    const dataToSave = {
-      extra_concreting_type: selectedType || null, // Set to null if empty
-      extra_concreting_square_meters: meterage || null, // Set to null if 0
-      extra_concreting_total_cost: totalCost || null, // Set to null if 0
-      extra_concrete_finish_one: concreteFinishOne || null, // Set to null if empty
-      extra_concrete_finish_two: concreteFinishTwo || null // Set to null if empty
+    const pavingDataToSave = {
+      extra_concreting_type: selectedType || null,
+      extra_concreting_square_meters: meterage || null,
+      extra_concreting_total_cost: totalCost || null,
+      extra_concrete_finish_one: concreteFinishOne || null,
+      extra_concrete_finish_two: concreteFinishTwo || null
     };
 
-    // Use the guarded handleSave for both insert and update
-    const result = await handleSave(dataToSave, 'pool_paving_selections', existingData?.id || null);
+    const pavingResult = await handleSave(pavingDataToSave, 'pool_paving_selections', existingPavingData?.id || null);
 
-    if (result.success) {
-      if (result.newId && !existingData?.id) {
+    // Save to pool_concrete_selections table (concrete pump data)
+    const { data: existingConcreteData } = await supabase
+      .from('pool_concrete_selections')
+      .select('id')
+      .eq('pool_project_id', customerId)
+      .maybeSingle();
+
+    const concreteDataToSave = {
+      extra_concrete_pump: extraConcretePumpNeeded,
+      extra_concrete_pump_quantity: extraConcretePumpNeeded ? extraConcretePumpQuantity : null,
+      extra_concrete_pump_total_cost: extraConcretePumpNeeded ? extraConcretePumpTotalCost : 0
+    };
+
+    const concreteResult = await handleSave(concreteDataToSave, 'pool_concrete_selections', existingConcreteData?.id || null);
+
+    if (pavingResult.success && concreteResult.success) {
+      if ((pavingResult.newId && !existingPavingData?.id) || (concreteResult.newId && !existingConcreteData?.id)) {
         toast.success("Extra concreting details saved successfully.");
       }
       if (onSaveComplete) {
@@ -201,6 +241,29 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     const concreteType = getSelectedConcreteType();
     return concreteType ? calculateExtraConcretingCost(concreteType.price, concreteType.margin) : 0;
   };
+
+  // Handle pump toggle
+  const handlePumpToggle = (checked: boolean) => {
+    setExtraConcretePumpNeeded(checked);
+    if (!checked) {
+      setExtraConcretePumpQuantity(1);
+    }
+  };
+
+  // Handle pump quantity change
+  const handlePumpQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value, 10);
+    setExtraConcretePumpQuantity(isNaN(value) || value < 1 ? 1 : value);
+  };
+
+  // Calculate pump cost whenever pump status or quantity changes
+  useEffect(() => {
+    if (extraConcretePumpNeeded && extraConcretePumpQuantity > 0) {
+      setExtraConcretePumpTotalCost(pumpRate * extraConcretePumpQuantity);
+    } else {
+      setExtraConcretePumpTotalCost(0);
+    }
+  }, [extraConcretePumpNeeded, extraConcretePumpQuantity, pumpRate]);
 
   return (
     <Card>
@@ -306,6 +369,72 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Concrete Pump Section */}
+        <div className="mt-8 border-t pt-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Truck className="h-5 w-5 text-primary" />
+            <h4 className="text-lg font-semibold">Extra Concrete Pump</h4>
+          </div>
+          
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="extra-pump-needed"
+                checked={extraConcretePumpNeeded}
+                onCheckedChange={handlePumpToggle}
+                disabled={isLoading}
+              />
+              <Label htmlFor="extra-pump-needed" className="font-medium">
+                Extra Concrete Pump Required
+              </Label>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Base rate: {formatCurrency(pumpRate)}/day
+            </div>
+          </div>
+
+          {extraConcretePumpNeeded && (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div>
+                  <Label htmlFor="pump-quantity" className="font-medium">
+                    Number of Days/Instances Required
+                  </Label>
+                  <Input
+                    id="pump-quantity"
+                    type="number"
+                    min="1"
+                    value={extraConcretePumpQuantity}
+                    onChange={handlePumpQuantityChange}
+                    className="mt-2"
+                    disabled={isLoading || !extraConcretePumpNeeded}
+                  />
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-4 rounded-md">
+                <h5 className="font-medium mb-2">Pump Cost Summary</h5>
+                <div className="grid grid-cols-2 gap-y-2">
+                  <div>Rate per day:</div>
+                  <div className="text-right">{formatCurrency(pumpRate)}</div>
+
+                  <div>Number of days:</div>
+                  <div className="text-right">{extraConcretePumpQuantity}</div>
+
+                  <div className="font-medium border-t pt-2 mt-1">Pump Total:</div>
+                  <div className="text-right font-medium border-t pt-2 mt-1">{formatCurrency(extraConcretePumpTotalCost)}</div>
+                </div>
+
+                <div className="mt-4 text-sm text-muted-foreground">
+                  <p>This is based on the standard formula: Rate × Number of Days</p>
+                  <p className="mt-1">Example: {formatCurrency(pumpRate)} × {extraConcretePumpQuantity} = {formatCurrency(extraConcretePumpTotalCost)}</p>
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {selectedType && meterage > 0 && (

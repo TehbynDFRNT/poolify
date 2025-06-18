@@ -41,6 +41,17 @@ export function useContractSubmission() {
   const { collectContractData, isCollecting } = useContractDataCollection();
 
   /**
+   * Helper function to convert underscore_separated strings to Title Case
+   */
+  const toTitleCase = (str: string): string => {
+    if (!str) return str;
+    return str
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  /**
    * Transform collected data into webhook-compatible format
    * Maps to exact field names from contract-outputfields-raw.json
    */
@@ -92,10 +103,16 @@ export function useContractSubmission() {
       // Direct duplicates of $C-Item equivalents
       "$PC - Shell Supply ": Number(payload.financials.pool_shell_supply_total || 0).toFixed(2),
       "$PC - Shell Supply - After Discount": Number(payload.financials.pool_shell_supply_after_discount || 0).toFixed(2),
-      "$PC - Excavation - A -Bobcat": Number(payload.financials.excavation_total || 0).toFixed(2),
+      "$PC - Supply - Equipment": Number(payload.financials.equipment_only || 0).toFixed(2),
+      "$PC - Supply - Shell Only": Number(payload.financials.shell_value_in_contract || 0).toFixed(2),
+      "$PC - Excavation Total": Number(payload.financials.excavation_total || 0).toFixed(2),
+      "$PC - Excavation - CustomSiteRequirements": Number(payload.financials.custom_site_requirements_cost || 0).toFixed(2),
+      "$PC - Excavation - Excavation Only": Number(payload.financials.excavation_only || 0).toFixed(2),
       "$PC - Engineered Beam": Number(payload.financials.beam_cost || 0).toFixed(2),
       "$PC - EXTRA Concreting Works": Number(payload.financials.extra_concreting_total || 0).toFixed(2),
-      "$PC - Special Inclusions": Number(payload.financials.special_inclusions || 0).toFixed(2),
+      "$PC - SpecialInclusions - PostInstallEquipment": Number(payload.financials.post_installation_upgrades || 0).toFixed(2),
+      "$PC - Special Inclusions": Number(payload.financials.custom_add_ons_cost || 0).toFixed(2),
+      "$PC - SpecialInclusionsEquipment": Number(payload.financials.special_inclusions || 0).toFixed(2),
       "$PC -Handover": Number(payload.financials.handover_total || 0).toFixed(2),
       
       // Shell Installation breakdown
@@ -106,6 +123,8 @@ export function useContractSubmission() {
       // Paving breakdown
       "$PC - Paving - A - Coping": Number(payload.financials.pc_paving_coping_supply || 0).toFixed(2),
       "$PC - Paving - A - Laying": Number(payload.financials.pc_paving_laying || 0).toFixed(2),
+      "$PC - Paving - ExtraPaving": Number(payload.financials.pc_paving_extra_paving || 0).toFixed(2),
+      "$PC - Paving - ConcreteForPaving": Number(payload.financials.pc_paving_concrete_for_paving || 0).toFixed(2),
       
       // Retaining walls breakdown (splits the combined $C-Item total)
       "$PC - Retaining - DE2": Number(payload.financials.retaining_walls_cost || 0).toFixed(2),
@@ -357,10 +376,10 @@ export function useContractSubmission() {
       
       // Water feature fields from snapshot
       "Water Feature": (payload.snapshot?.water_feature_total_cost && payload.snapshot.water_feature_total_cost > 0) ? "Yes" : "No",
-      "WF Size": payload.snapshot?.water_feature_size || "",
-      "WF Front": payload.snapshot?.water_feature_front_finish || "",
-      "WF Top": payload.snapshot?.water_feature_top_finish || "",
-      "WF Sides": payload.snapshot?.water_feature_sides_finish || "",
+      "WF Size": toTitleCase(payload.snapshot?.water_feature_size || ""),
+      "WF Front": toTitleCase(payload.snapshot?.water_feature_front_finish || ""),
+      "WF Top": toTitleCase(payload.snapshot?.water_feature_top_finish || ""),
+      "WF Sides": toTitleCase(payload.snapshot?.water_feature_sides_finish || ""),
       "WF Back Cladding": payload.snapshot?.water_feature_back_cladding_needed ? "Yes" : "No",
       "WF Blade": payload.snapshot?.water_feature_led_blade || "",
       

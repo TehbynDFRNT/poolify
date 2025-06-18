@@ -188,13 +188,13 @@ export function usePriceCalculator(
     const tempSafetyBarrierItem = snapshot.fixed_costs_json?.find(fc => fc.name === "Temporary Safety Barrier");
     const tempSafetyBarrierCost = tempSafetyBarrierItem ? parseFloat(tempSafetyBarrierItem.price) : 0;
     const marginAppliedTempSafetyBarrierCost = tempSafetyBarrierCost * marginMultiplier;
+    const craneAllowanceWithMargin = 700 * marginMultiplier;
     
     // Calculate crane for site requirements
-    // ‼️ New logic — margin ONLY on allowance, no margin on excess
+    // Apply margin to crane cost, then subtract the crane allowance with margin
     const craneCost = snapshot.crane_cost || 0;
-    const craneAllowance = 700;
-    const craneExcessCost = Math.max(craneCost - craneAllowance, 0);   // cost basis
-    const craneTotalForSiteRequirements = craneExcessCost;             // price = cost
+    const craneCostWithMargin = craneCost * marginMultiplier;
+    const craneTotalForSiteRequirements = craneCostWithMargin > craneAllowanceWithMargin ? craneCostWithMargin - craneAllowanceWithMargin : 0;
     
     // Calculate totals for each section using correct debug panel logic
     const basePoolTotal = ((
@@ -276,6 +276,7 @@ export function usePriceCalculator(
     const digCost = (snapshot.dig_excavation_rate || 0) * (snapshot.dig_excavation_hours || 0) + (snapshot.dig_truck_rate || 0) * (snapshot.dig_truck_hours || 0) * (snapshot.dig_truck_qty || 0);
     const filtrationCost = (snapshot.pump_price_inc_gst || 0) + (snapshot.filter_price_inc_gst || 0) + (snapshot.sanitiser_price_inc_gst || 0) + (snapshot.light_price_inc_gst || 0) + ((snapshot.handover_components || []).reduce((sum: number, c: any) => sum + (c.hk_component_price_inc_gst || 0) * (c.hk_component_quantity || 0), 0));
     const individualCosts = (snapshot.pc_beam || 0) + (snapshot.pc_coping_supply || 0) + (snapshot.pc_coping_lay || 0) + (snapshot.pc_salt_bags || 0) + (snapshot.pc_trucked_water || 0) + (snapshot.pc_misc || 0) + (snapshot.pc_pea_gravel || 0) + (snapshot.pc_install_fee || 0);
+    const craneAllowance = 700;
     const totalBeforeMargin = poolShellCost + digCost + filtrationCost + individualCosts + fixedCostsTotal + craneAllowance;
     
     const basePoolBreakdown: BasePoolBreakdown = {
@@ -305,13 +306,11 @@ export function usePriceCalculator(
     const siteRequirementsTotalBeforeMargin = craneCost + bobcatCost + trafficControlCost + customRequirementsCost;
 
     const siteRequirementsBreakdown: SiteRequirementsBreakdown = {
-      // raw cost of the excess (zero if within allowance)
-      craneCost: craneExcessCost,
+      craneCost: craneCostWithMargin > craneAllowanceWithMargin ? craneCost : 0,
       bobcatCost,
       trafficControlCost,
       customRequirementsCost,
       totalBeforeMargin: siteRequirementsTotalBeforeMargin,
-      // identical because we do NOT mark-up the excess
       cranePrice: craneTotalForSiteRequirements,
       bobcatPrice: bobcatCost,
       trafficControlPrice: trafficControlCost,
@@ -322,8 +321,7 @@ export function usePriceCalculator(
       basePoolTotal,
       siteRequirementsTotal,
       craneCost,
-      craneAllowance,
-      craneExcessCost,
+      craneAllowanceWithMargin,
       contractGrandTotal,
       grandTotalCalculated,
       fixedCostsTotal

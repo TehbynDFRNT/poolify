@@ -82,7 +82,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
   const calculatorData = usePriceCalculator(customerSnapshot as any);
   
   // Check if contract customer details have been confirmed
-  const { isConfirmed: contractDetailsConfirmed } = useContractDetailsConfirmed(customerId);
+  const { isConfirmed: contractDetailsConfirmed, refreshConfirmationStatus } = useContractDetailsConfirmed(customerId);
   
   useEffect(() => {
     fetchProposals();
@@ -446,6 +446,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
                 <CustomerInformationSection 
                   existingCustomer={selectedProposal}
                   readonly={!contractSignatoryDiffers}
+                  onContractDetailsConfirmed={refreshConfirmationStatus}
                 />
               </div>
             </Card>

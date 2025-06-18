@@ -221,7 +221,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <div>
                                 <span className="text-sm font-medium text-gray-700">Total Proposal Cost</span>
                                 <p className="text-xs text-muted-foreground">
-                                    (Includes Third Party Fencing & Electrical)
+                                    (Includes Third Party Fencing, Electrical & Temp Safety Barrier)
                                 </p>
                             </div>
                             <div className="text-sm font-semibold text-gray-900">
@@ -239,13 +239,17 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                 <span className="text-muted-foreground">Electrical Total</span>
                                 <span className="text-muted-foreground">{formatCurrency(totals.electricalTotal)}</span>
                             </div>
+                            <div className="flex justify-between items-center text-xs">
+                                <span className="text-muted-foreground">Temporary Safety Barrier</span>
+                                <span className="text-muted-foreground">{formatCurrency(lineItems.marginAppliedTempSafetyBarrierCost)}</span>
+                            </div>
                             <div className="flex justify-between items-center text-xs border-t pt-1">
                                 <span className="text-muted-foreground font-medium">Third Party Subtotal</span>
-                                <span className="text-muted-foreground font-medium">{formatCurrency(totals.fencingTotal + totals.electricalTotal)}</span>
+                                <span className="text-muted-foreground font-medium">{formatCurrency(totals.fencingTotal + totals.electricalTotal + lineItems.marginAppliedTempSafetyBarrierCost)}</span>
                             </div>
                             <div className="flex justify-between items-center text-xs pt-1">
                                 <span className="text-muted-foreground">Third Party Subtotal - HWI Cost</span>
-                                <span className="text-muted-foreground">{formatCurrency((totals.fencingTotal + totals.electricalTotal) - lineItems.deposit.hwiCost)}</span>
+                                <span className="text-muted-foreground">{formatCurrency((totals.fencingTotal + totals.electricalTotal + lineItems.marginAppliedTempSafetyBarrierCost) - lineItems.deposit.hwiCost)}</span>
                             </div>
                             {!isCustomerView && (
                                 <div className="flex justify-between items-center text-xs pt-1">
@@ -517,89 +521,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                 </CardContent>
             </Card>
 
-            {/* 5. ENGINEERED BEAM SECTION */}
-            <Card className="mb-6 shadow-none">
-                <CardContent className="pt-6">
-                    <div
-                        className={`flex justify-between items-center cursor-pointer ${expandedSections.engineeredBeam ? 'mb-4' : ''}`}
-                        onClick={() => toggleSection('engineeredBeam')}
-                    >
-                        <div>
-                            <h3 className="text-lg font-medium text-gray-900">5. Engineered Beam</h3>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.beamCost)}</span>
-                            {expandedSections.engineeredBeam ? (
-                                <ChevronUp className="h-5 w-5 text-gray-600" />
-                            ) : (
-                                <ChevronDown className="h-5 w-5 text-gray-600" />
-                            )}
-                        </div>
-                    </div>
-
-                    {expandedSections.engineeredBeam && (
-                        <div className="space-y-4">
-                            <table className="w-full">
-                                <tbody>
-                                    <LineItem
-                                        label="Structural Beam"
-                                        code=""
-                                        value={lineItems.beamCost}
-                                        breakdown={!isCustomerView ? "Engineered structural beam components" : null}
-                                    />
-                                    <TotalRow
-                                        label="Engineered Beam Total"
-                                        value={lineItems.beamCost}
-                                    />
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* 6. EXTRA CONCRETING SECTION */}
-            <Card className="mb-6 shadow-none">
-                <CardContent className="pt-6">
-                    <div
-                        className={`flex justify-between items-center cursor-pointer ${expandedSections.extraConcreting ? 'mb-4' : ''}`}
-                        onClick={() => toggleSection('extraConcreting')}
-                    >
-                        <div>
-                            <h3 className="text-lg font-medium text-gray-900">6. Extra Concreting</h3>
-                        </div>
-                        <div className="flex items-center">
-                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.extraConcretingTotal)}</span>
-                            {expandedSections.extraConcreting ? (
-                                <ChevronUp className="h-5 w-5 text-gray-600" />
-                            ) : (
-                                <ChevronDown className="h-5 w-5 text-gray-600" />
-                            )}
-                        </div>
-                    </div>
-
-                    {expandedSections.extraConcreting && (
-                        <div className="space-y-4">
-                            <table className="w-full">
-                                <tbody>
-                                    <LineItem
-                                        label="Structural Concrete Work"
-                                        code=""
-                                        value={lineItems.extraConcretingTotal}
-                                        breakdown={!isCustomerView ? "Includes concrete pours, pumping, strips & cuts (no margin)" : null}
-                                    />
-                                    <TotalRow
-                                        label="Extra Concreting Total"
-                                        value={lineItems.extraConcretingTotal}
-                                    />
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </CardContent>
-            </Card>
-
-            {/* 7. PAVING / COPING SECTION */}
+            {/* 5. PAVING / COPING SECTION */}
             <Card className="mb-6 shadow-none">
                 <CardContent className="pt-6">
                     <div
@@ -607,7 +529,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         onClick={() => toggleSection('pavingCoping')}
                     >
                         <div>
-                            <h3 className="text-lg font-medium text-gray-900">7. Paving / Coping</h3>
+                            <h3 className="text-lg font-medium text-gray-900">5. Paving / Coping</h3>
                         </div>
                         <div className="flex items-center">
                             <span className="mr-4 font-semibold">{formatCurrency(lineItems.pavingTotal)}</span>
@@ -666,7 +588,47 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                     />
                                     <SubtotalRow
                                         label="Extra Paving Subtotal"
-                                        value={lineItems.extraPaving}
+                                        value={lineItems.extraPavingSubtotal}
+                                    />
+
+                                    {/* Concrete Works Subsection */}
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
+                                            Concrete Works
+                                        </td>
+                                    </tr>
+                                    <LineItem
+                                        label="Structural Beam"
+                                        code=""
+                                        value={lineItems.beamCost}
+                                        breakdown={!isCustomerView ? "Engineered structural beam components" : null}
+                                    />
+                                    <LineItem
+                                        label="Concreting Costs"
+                                        code=""
+                                        value={lineItems.concretingCosts}
+                                        breakdown={!isCustomerView ? "Concrete pump, under fence strips, and concrete cuts" : null}
+                                    />
+                                    <SubtotalRow
+                                        label="Concrete Works Subtotal"
+                                        value={lineItems.beamCost + lineItems.concretingCosts}
+                                    />
+
+                                    {/* Retaining Walls Subsection */}
+                                    <tr className="border-b border-gray-200 bg-gray-50">
+                                        <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
+                                            Retaining Walls
+                                        </td>
+                                    </tr>
+                                    <LineItem
+                                        label="Retaining Walls"
+                                        code=""
+                                        value={lineItems.retainingWallsCost}
+                                        breakdown={!isCustomerView ? "Structural retaining walls" : null}
+                                    />
+                                    <SubtotalRow
+                                        label="Retaining Walls Subtotal"
+                                        value={lineItems.retainingWallsCost}
                                     />
 
                                     <TotalRow
@@ -680,7 +642,66 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                 </CardContent>
             </Card>
 
-            {/* 8. RETAINING WALLS / DROP EDGE RETAINING / WATER FEATURE SECTION */}
+            {/* 6. EXTRA CONCRETING SECTION */}
+            <Card className="mb-6 shadow-none">
+                <CardContent className="pt-6">
+                    <div
+                        className={`flex justify-between items-center cursor-pointer ${expandedSections.extraConcreting ? 'mb-4' : ''}`}
+                        onClick={() => toggleSection('extraConcreting')}
+                    >
+                        <div>
+                            <h3 className="text-lg font-medium text-gray-900">6. Extra Concreting</h3>
+                        </div>
+                        <div className="flex items-center">
+                            <span className="mr-4 font-semibold">{formatCurrency(lineItems.extraConcretingTotal)}</span>
+                            {expandedSections.extraConcreting ? (
+                                <ChevronUp className="h-5 w-5 text-gray-600" />
+                            ) : (
+                                <ChevronDown className="h-5 w-5 text-gray-600" />
+                            )}
+                        </div>
+                    </div>
+
+                    {expandedSections.extraConcreting && (
+                        <div className="space-y-4">
+                            <table className="w-full">
+                                <tbody>
+                                    {(snapshot?.extra_concreting_cost || 0) > 0 && (
+                                        <LineItem
+                                            label="Extra Concreting"
+                                            code=""
+                                            value={snapshot?.extra_concreting_cost || 0}
+                                            breakdown={!isCustomerView ? "Additional structural concrete work" : null}
+                                        />
+                                    )}
+                                    {(snapshot?.extra_concrete_pump_total_cost || 0) > 0 && (
+                                        <LineItem
+                                            label="Extra Concrete Pump"
+                                            code=""
+                                            value={snapshot?.extra_concrete_pump_total_cost || 0}
+                                            breakdown={!isCustomerView ? "Additional concrete pump for extra concreting work" : null}
+                                        />
+                                    )}
+                                    {lineItems.extraConcretingTotal === 0 && (
+                                        <LineItem
+                                            label="No Extra Concreting"
+                                            code=""
+                                            value={0}
+                                            breakdown={!isCustomerView ? "No additional structural concrete work required" : null}
+                                        />
+                                    )}
+                                    <TotalRow
+                                        label="Extra Concreting Total"
+                                        value={lineItems.extraConcretingTotal}
+                                    />
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* 7. WATER FEATURE SECTION */}
             <Card className="mb-6 shadow-none">
                 <CardContent className="pt-6">
                     <div
@@ -688,7 +709,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         onClick={() => toggleSection('retainingWalls')}
                     >
                         <div>
-                            <h3 className="text-lg font-medium text-gray-900">8. Retaining Walls / Drop Edge Retaining / Water Feature</h3>
+                            <h3 className="text-lg font-medium text-gray-900">7. Water Feature</h3>
                         </div>
                         <div className="flex items-center">
                             <span className="mr-4 font-semibold">{formatCurrency(lineItems.retainingWallsWaterFeatureTotal)}</span>
@@ -705,19 +726,13 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Retaining Walls"
-                                        code=""
-                                        value={lineItems.retainingWallsCost}
-                                        breakdown={!isCustomerView ? "Structural retaining walls" : null}
-                                    />
-                                    <LineItem
                                         label="Water Feature"
                                         code=""
                                         value={lineItems.waterFeatureCost}
                                         breakdown={!isCustomerView ? "Water feature installation" : null}
                                     />
                                     <TotalRow
-                                        label="Retaining Walls / Water Feature Total"
+                                        label="Water Feature Total"
                                         value={lineItems.retainingWallsWaterFeatureTotal}
                                     />
                                 </tbody>
@@ -727,7 +742,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                 </CardContent>
             </Card>
 
-            {/* 9. SPECIAL INCLUSIONS SECTION */}
+            {/* 8. SPECIAL INCLUSIONS SECTION */}
             <Card className="mb-6 shadow-none">
                 <CardContent className="pt-6">
                     <div
@@ -735,7 +750,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         onClick={() => toggleSection('specialInclusions')}
                     >
                         <div>
-                            <h3 className="text-lg font-medium text-gray-900">9. Special Inclusions</h3>
+                            <h3 className="text-lg font-medium text-gray-900">8. Special Inclusions & Equipment Upgrades</h3>
                         </div>
                         <div className="flex items-center">
                             <span className="mr-4 font-semibold">{formatCurrency(lineItems.specialInclusions)}</span>
@@ -757,8 +772,48 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                         value={lineItems.marginAppliedCustomSiteRequirementsCost}
                                         breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
                                     />
+                                    
+                                    {/* Post-Installation Upgrades Subsection */}
+                                    {lineItems.postInstallationUpgrades > 0 && (
+                                        <>
+                                            <tr className="border-b border-gray-200 bg-gray-50">
+                                                <td className="py-2 px-4 text-left font-medium text-gray-700" colSpan={3}>
+                                                    Post-Installation Upgrades
+                                                </td>
+                                            </tr>
+                                            {lineItems.cleanerCost > 0 && (
+                                                <LineItem
+                                                    label="Pool Cleaner"
+                                                    code=""
+                                                    value={lineItems.cleanerCost}
+                                                    breakdown={!isCustomerView ? "Automatic pool cleaner" : null}
+                                                />
+                                            )}
+                                            {lineItems.heatPumpCost > 0 && (
+                                                <LineItem
+                                                    label="Heat Pump"
+                                                    code=""
+                                                    value={lineItems.heatPumpCost}
+                                                    breakdown={!isCustomerView ? "Heat pump unit and installation" : null}
+                                                />
+                                            )}
+                                            {lineItems.handGrabRailsCost > 0 && (
+                                                <LineItem
+                                                    label="Hand Grab Rails"
+                                                    code=""
+                                                    value={lineItems.handGrabRailsCost}
+                                                    breakdown={!isCustomerView ? "Pool safety hand grab rails" : null}
+                                                />
+                                            )}
+                                            <SubtotalRow
+                                                label="Post-Installation Upgrades Subtotal"
+                                                value={lineItems.postInstallationUpgrades}
+                                            />
+                                        </>
+                                    )}
+                                    
                                     <TotalRow
-                                        label="Special Inclusions Total"
+                                        label="Special Inclusions & Equipment Upgrades Total"
                                         value={lineItems.specialInclusions}
                                     />
                                 </tbody>
@@ -768,7 +823,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                 </CardContent>
             </Card>
 
-            {/* 10. HANDOVER SECTION */}
+            {/* 9. HANDOVER SECTION */}
             <Card className="mb-6 shadow-none">
                 <CardContent className="pt-6">
                     <div
@@ -776,7 +831,7 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                         onClick={() => toggleSection('handover')}
                     >
                         <div>
-                            <h3 className="text-lg font-medium text-gray-900">10. Handover</h3>
+                            <h3 className="text-lg font-medium text-gray-900">9. Handover</h3>
                         </div>
                         <div className="flex items-center">
                             <span className="mr-4 font-semibold">{formatCurrency(lineItems.handoverTotal)}</span>

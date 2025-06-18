@@ -55,13 +55,32 @@ export const useSiteRequirements = (customerId: string) => {
             // First convert to unknown, then to the specific type
             const requirementsData = data.site_requirements_data as unknown;
             // Validate the shape of each item in the array before setting the state
-            const validRequirements = (requirementsData as any[]).filter(item =>
-              typeof item === 'object' &&
-              item !== null &&
-              'id' in item &&
-              'description' in item &&
-              'price' in item
-            ) as CustomRequirement[];
+            const validRequirements = (requirementsData as any[]).map(item => {
+              if (typeof item === 'object' && item !== null && 'id' in item && 'description' in item) {
+                // Handle legacy data structure (price only) and new structure (cost + margin)
+                if ('cost' in item && 'margin' in item) {
+                  // New structure with cost and margin
+                  const cost = Number(item.cost) || 0;
+                  const margin = Number(item.margin) || 0;
+                  return {
+                    ...item,
+                    cost,
+                    margin,
+                    price: cost + margin
+                  } as CustomRequirement;
+                } else if ('price' in item) {
+                  // Legacy structure - migrate to new structure (assume price is cost with 0 margin)
+                  const price = Number(item.price) || 0;
+                  return {
+                    ...item,
+                    cost: price,
+                    margin: 0,
+                    price: price
+                  } as CustomRequirement;
+                }
+              }
+              return null;
+            }).filter(item => item !== null) as CustomRequirement[];
 
             setCustomRequirements(validRequirements);
           }
@@ -171,7 +190,7 @@ export const useSiteRequirements = (customerId: string) => {
   const addRequirement = () => {
     setCustomRequirements([
       ...customRequirements,
-      { id: crypto.randomUUID(), description: "", price: 0 }
+      { id: crypto.randomUUID(), description: "", cost: 0, margin: 0, price: 0 }
     ]);
   };
 
@@ -179,11 +198,15 @@ export const useSiteRequirements = (customerId: string) => {
     setCustomRequirements(customRequirements.filter(req => req.id !== id));
   };
 
-  const updateRequirement = (id: string, field: 'description' | 'price', value: string) => {
+  const updateRequirement = (id: string, field: 'description' | 'cost' | 'margin', value: string) => {
     setCustomRequirements(customRequirements.map(req => {
       if (req.id === id) {
-        if (field === 'price') {
-          return { ...req, [field]: parseFloat(value) || 0 };
+        if (field === 'cost' || field === 'margin') {
+          const numericValue = parseFloat(value) || 0;
+          const updatedReq = { ...req, [field]: numericValue };
+          // Recalculate price when cost or margin changes
+          updatedReq.price = updatedReq.cost + updatedReq.margin;
+          return updatedReq;
         }
         return { ...req, [field]: value };
       }
@@ -219,5 +242,7 @@ export const useSiteRequirements = (customerId: string) => {
 export interface CustomRequirement {
   id: string;
   description: string;
-  price: number;
+  cost: number;
+  margin: number;
+  price: number; // calculated as cost + margin
 }

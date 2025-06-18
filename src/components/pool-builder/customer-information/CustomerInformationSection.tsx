@@ -14,9 +14,10 @@ import ProposalInfoSection from "./ProposalInfoSection";
 interface CustomerInformationSectionProps {
   existingCustomer?: any; // Consider using a more specific type like PoolProject | null
   readonly?: boolean;
+  onContractDetailsConfirmed?: () => Promise<boolean>;
 }
 
-const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({ existingCustomer, readonly = false }) => {
+const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({ existingCustomer, readonly = false, onContractDetailsConfirmed }) => {
   console.log("CustomerInformationSection: Component rendered. Received existingCustomer prop:", existingCustomer);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -131,7 +132,11 @@ const CustomerInformationSection: React.FC<CustomerInformationSectionProps> = ({
         
         // Refresh the confirmation status after successful save
         console.log("🔄 Refreshing contract confirmation status after successful save");
-        await refreshConfirmationStatus();
+        if (onContractDetailsConfirmed) {
+          await onContractDetailsConfirmed();
+        } else {
+          await refreshConfirmationStatus();
+        }
         
         return; // Exit early for contract context
       }

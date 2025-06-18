@@ -9,6 +9,8 @@ import { Plus, Trash2 } from "lucide-react";
 interface CustomRequirement {
   id: string;
   description: string;
+  cost: number;
+  margin: number;
   price: number;
 }
 
@@ -16,7 +18,7 @@ interface CustomSiteRequirementsProps {
   requirements: CustomRequirement[];
   addRequirement: () => void;
   removeRequirement: (id: string) => void;
-  updateRequirement: (id: string, field: 'description' | 'price', value: string) => void;
+  updateRequirement: (id: string, field: 'description' | 'cost' | 'margin', value: string) => void;
 }
 
 export const CustomSiteRequirements: React.FC<CustomSiteRequirementsProps> = ({
@@ -49,7 +51,7 @@ export const CustomSiteRequirements: React.FC<CustomSiteRequirementsProps> = ({
         requirements.map((req) => (
           <Card key={req.id}>
             <CardContent className="p-4">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-3">
                 <div className="md:col-span-3">
                   <Label htmlFor={`req-desc-${req.id}`} className="mb-1 block">Description</Label>
                   <Input
@@ -60,15 +62,33 @@ export const CustomSiteRequirements: React.FC<CustomSiteRequirementsProps> = ({
                   />
                 </div>
                 <div>
-                  <Label htmlFor={`req-price-${req.id}`} className="mb-1 block">Price ($)</Label>
+                  <Label htmlFor={`req-cost-${req.id}`} className="mb-1 block">Cost ($)</Label>
+                  <Input
+                    id={`req-cost-${req.id}`}
+                    type="number"
+                    value={req.cost || ''}
+                    onChange={(e) => updateRequirement(req.id, 'cost', e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor={`req-margin-${req.id}`} className="mb-1 block">Margin ($)</Label>
+                  <Input
+                    id={`req-margin-${req.id}`}
+                    type="number"
+                    value={req.margin || ''}
+                    onChange={(e) => updateRequirement(req.id, 'margin', e.target.value)}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label className="mb-1 block">Total Price ($)</Label>
                   <div className="flex">
                     <Input
-                      id={`req-price-${req.id}`}
                       type="number"
-                      value={req.price || ''}
-                      onChange={(e) => updateRequirement(req.id, 'price', e.target.value)}
-                      placeholder="0.00"
-                      className="flex-1"
+                      value={req.price.toFixed(2)}
+                      readOnly
+                      className="flex-1 bg-gray-50"
                     />
                     <Button
                       type="button"

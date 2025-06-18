@@ -130,6 +130,11 @@ export interface ProposalSnapshot {
   concrete_pump_hours: number | null; // Formerly concrete_pump_quantity
   concrete_pump_total_cost: number;
   
+  // Extra concrete pump
+  extra_concrete_pump: boolean;
+  extra_concrete_pump_quantity: number | null;
+  extra_concrete_pump_total_cost: number;
+  
   // Under-fence concrete strips (enriched with type and cost data)
   uf_strips_data: Array<{
     id: string;

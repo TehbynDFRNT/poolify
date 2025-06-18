@@ -315,14 +315,8 @@ export function useContractSummaryLineItems(
          : snapshot.site_requirements_data).reduce((sum: number, item: any) => sum + (Number(item.price) || 0), 0)
       : 0;
 
-    // ────────────────────────────────────────────────────────────────
-    // Crane pricing: margin on $700 allowance, pass-through on excess
-    // ────────────────────────────────────────────────────────────────
-    const ALLOWANCE_COST      = 700;
-    const rawCraneCost        = snapshot.crane_cost || 0;
-    const craneAllowanceSell  = ALLOWANCE_COST * marginMultiplier;        // earns margin
-    const craneExcessCost     = Math.max(rawCraneCost - ALLOWANCE_COST, 0); // no margin
-    const craneForInstallation = craneAllowanceSell + craneExcessCost;    // final sell price
+    // Crane cost with margin applied
+    const craneCost = (snapshot.crane_cost || 0) * marginMultiplier;
 
     // Traffic control cost
     const trafficControlCost = snapshot.traffic_control_cost || 0;
@@ -360,7 +354,8 @@ export function useContractSummaryLineItems(
     // ==================================================================================
     // 4. POOL SHELL INSTALLATION CALCULATION
     // ==================================================================================
-    // craneForInstallation already calculated above with new allowance logic
+    // Calculate crane for pool shell installation (crane cost with margin minus crane allowance with margin)
+    const craneForInstallation = craneCost
     
     // Calculate Pool Shell Installation total
     const poolShellInstallationTotal =

@@ -3,6 +3,7 @@ import { usePoolGeneralExtrasGuarded } from "@/hooks/usePoolGeneralExtrasGuarded
 import { Pool } from "@/types/pool";
 import { Loader2 } from "lucide-react";
 import React from "react";
+import { CustomAddOns } from "./CustomAddOns";
 import { DeckJetsSection } from "./DeckJetsSection";
 import { GeneralOptionsSummary } from "./GeneralOptionsSummary";
 import { HandGrabRailSection } from "./HandGrabRailSection";
@@ -122,6 +123,8 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                 onUpdateQuantity={updateMiscItemQuantity}
                 getExtraById={getExtraById}
             />
+
+            <CustomAddOns customerId={customerId} />
 
             <GeneralOptionsSummary
                 state={state}

@@ -5,8 +5,6 @@
 import { useState, useCallback } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
 import type { PoolProject } from '@/types/pool';
-import { useContractSummaryLineItems } from '@/hooks/calculations/useContractSummaryLineItems';
-import { usePriceCalculator } from '@/hooks/calculations/use-calculator-totals';
 import { useContractBasics } from './useContractBasics';
 import { useContractSiteDetails } from './useContractSiteDetails';
 import { useContractSafety } from './useContractSafety';
@@ -52,6 +50,8 @@ export interface ContractDataPayload {
     pc_shell_install_remainder: number;
     pc_paving_coping_supply: number;
     pc_paving_laying: number;
+    pc_paving_extra_paving: number;
+    pc_paving_concrete_for_paving: number;
     retaining_walls_cost: number;
     water_feature_cost: number;
     total_delays: number;
@@ -73,6 +73,12 @@ export interface ContractDataPayload {
     pci_2_allowance: number;
     pci_total: number;
     margin_applied_temp_safety_barrier_cost: number;
+    post_installation_upgrades: number;
+    custom_site_requirements_cost: number;
+    excavation_only: number;
+    equipment_only: number;
+    shell_value_in_contract: number;
+    custom_add_ons_cost: number;
   };
   
   // Contract Q&A Data (will be populated later)
@@ -162,7 +168,9 @@ export function useContractDataCollection() {
         pc_shell_install_backfill: lineItems?.pcShellInstallBackfill || 0,
         pc_shell_install_remainder: lineItems?.pcShellInstallRemainder || 0,
         pc_paving_coping_supply: lineItems?.marginAppliedPcCopingSupply || 0,
-        pc_paving_laying: (lineItems?.marginAppliedPcCopingLay || 0) + (lineItems?.extraPaving || 0),
+        pc_paving_laying: lineItems?.marginAppliedPcCopingLay || 0,
+        pc_paving_extra_paving: lineItems?.extraPavingSubtotal || 0,
+        pc_paving_concrete_for_paving: lineItems?.concretingCosts || 0,
         retaining_walls_cost: lineItems?.retainingWallsCost || 0,
         water_feature_cost: lineItems?.waterFeatureCost || 0,
         total_delays: 0, // Will be populated from contract_qa.contract_basics
@@ -174,6 +182,12 @@ export function useContractDataCollection() {
         special_inclusions: lineItems?.specialInclusions || 0,
         handover_total: lineItems?.handoverTotal || 0,
         margin_applied_temp_safety_barrier_cost: lineItems?.marginAppliedTempSafetyBarrierCost || 0,
+        post_installation_upgrades: lineItems?.postInstallationUpgrades || 0,
+        custom_site_requirements_cost: lineItems?.customSiteRequirementsCost || 0,
+        excavation_only: lineItems?.excavationOnly || 0,
+        equipment_only: lineItems?.equipmentOnly || 0,
+        shell_value_in_contract: lineItems?.shellValueInContract || 0,
+        custom_add_ons_cost: lineItems?.customAddOnsCost || 0,
         // PCI (Prime Cost Items) breakdown - will be calculated from snapshot data
         pci_1_description: "",
         pci_1_rate: 0,

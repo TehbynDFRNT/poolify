@@ -620,7 +620,8 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         automation: generalExtras?.filter(item => item.type === 'Automation') || [],
         chemistry: generalExtras?.filter(item => item.type === 'Chemistry') || [],
         bundle: generalExtras?.filter(item => item.type === 'Bundle') || [],
-        misc: generalExtras?.filter(item => item.type === 'Misc') || []
+        misc: generalExtras?.filter(item => item.type === 'Misc') || [],
+        custom: generalExtras?.filter(item => item.type === 'custom') || []
     };
 
     // Show loading state while fetching data
@@ -1110,7 +1111,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                             )}
                                             {(snapshot.extra_concreting_cost || 0) > 0 && (
                                                 <LineItem
-                                                    label={`Extra Concreting${pavingData?.extraConcretingType ? `: ${pavingData.extraConcretingType}` : ''}`}
+                                                    label={`Extra Concreting${snapshot.extra_concreting_name ? `: ${snapshot.extra_concreting_name}` : ''}`}
                                                     code=""
                                                     value={snapshot.extra_concreting_cost || 0}
                                                     breakdown={null}
@@ -1123,6 +1124,15 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                     value={snapshot.concrete_pump_total_cost || 0}
                                                     breakdown={!isCustomerView && concretePumpData?.concrete_pump_quantity ?
                                                         `${concretePumpData.concrete_pump_quantity} pump setup${concretePumpData.concrete_pump_quantity > 1 ? 's' : ''}` : null}
+                                                />
+                                            )}
+                                            {(snapshot.extra_concrete_pump_total_cost || 0) > 0 && (
+                                                <LineItem
+                                                    label="Extra Concrete Pump"
+                                                    code=""
+                                                    value={snapshot.extra_concrete_pump_total_cost || 0}
+                                                    breakdown={!isCustomerView && snapshot.extra_concrete_pump_quantity ?
+                                                        `${snapshot.extra_concrete_pump_quantity} additional pump setup${snapshot.extra_concrete_pump_quantity > 1 ? 's' : ''}` : null}
                                                 />
                                             )}
                                             {(snapshot.uf_strips_cost || 0) > 0 && (
@@ -1594,6 +1604,16 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         key={item.id}
                                                         label={`Additional - ${item.name}`}
                                                         code={item.sku}
+                                                        value={item.total_rrp}
+                                                        breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
+                                                    />
+                                                ))}
+
+                                                {generalExtrasByType.custom.map((item) => (
+                                                    <LineItem
+                                                        key={item.id}
+                                                        label={`Custom Add-Ons - ${item.name}`}
+                                                        code=""
                                                         value={item.total_rrp}
                                                         breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
                                                     />
