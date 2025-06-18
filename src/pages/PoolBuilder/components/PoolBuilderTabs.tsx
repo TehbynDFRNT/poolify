@@ -1,9 +1,13 @@
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Pool } from "@/types/pool";
-import { CheckSquare, Droplets, Fence, FileText, Layers, ListFilter, MapPin, Package, Zap } from "lucide-react";
+import { CheckSquare, Droplets, Fence, FileText, Layers, ListFilter, MapPin, Package, Zap, Plus } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useSnapshots } from "@/hooks/useSnapshots";
 
 // Tab content imports
 import CustomerInformationSection from "@/components/pool-builder/customer-information/CustomerInformationSection";
@@ -36,6 +40,17 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
   // Use a default tab state to allow navigation from the summary page
   const [activeTab, setActiveTab] = useState("builder");
   const location = useLocation();
+  const navigate = useNavigate();
+  
+  // Customer selection state
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string>("");
+  const [customersLoading, setCustomersLoading] = useState(true);
+  const [showCreateNew, setShowCreateNew] = useState(false);
+
+  // Get customer IDs for snapshot fetching
+  const customerIds = customers.map(customer => customer.id);
+  const { snapshots = new Map(), loading: snapshotsLoading } = useSnapshots(customerIds);
 
   // Check for a defaultTab in the location state
   useEffect(() => {
@@ -43,6 +58,42 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
       setActiveTab(location.state.defaultTab);
     }
   }, [location.state]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      setCustomersLoading(true);
+      const { data, error } = await supabase
+        .from('pool_projects')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      
+      setCustomers(data || []);
+    } catch (error) {
+      console.error("Error fetching customers:", error);
+    } finally {
+      setCustomersLoading(false);
+    }
+  };
+
+  const handleCustomerSelect = (customerId: string) => {
+    setSelectedCustomerId(customerId);
+  };
+
+  const handleConfirmSelection = () => {
+    if (selectedCustomerId) {
+      navigate(`/pool-builder?customerId=${selectedCustomerId}`);
+    }
+  };
+
+  const handleCreateNewCustomer = () => {
+    setShowCreateNew(true);
+  };
 
   if (loading) {
     return (
@@ -98,9 +149,65 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
       </TabsList>
 
       <TabsContent value="builder">
-        <Card className="p-6">
-          <CustomerInformationSection existingCustomer={customer} />
-        </Card>
+        <div className="space-y-6">
+          {/* Customer Selection */}
+          {!customerId && (
+            <Card className="p-6">
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Customer Selection</h3>
+                
+                <div>
+                  <label className="block text-sm font-medium mb-2">Select Customer</label>
+                  <div className="flex gap-2">
+                    <Select value={selectedCustomerId} onValueChange={handleCustomerSelect}>
+                      <SelectTrigger className="flex-1 max-w-md">
+                        <SelectValue placeholder="Choose a customer to edit" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        {customersLoading || snapshotsLoading ? (
+                          <SelectItem value="loading" disabled>Loading customers...</SelectItem>
+                        ) : customers.length === 0 ? (
+                          <SelectItem value="none" disabled>No customers available</SelectItem>
+                        ) : (
+                          customers.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              {customer.owner1}{customer.owner2 ? `, ${customer.owner2}` : ''} - {customer.site_address || customer.home_address}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <Button 
+                      onClick={handleConfirmSelection}
+                      disabled={!selectedCustomerId}
+                    >
+                      Confirm Selection
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <span className="text-base font-semibold pl-[10px]">OR</span>
+                  <Button
+                    variant="outline"
+                    onClick={handleCreateNewCustomer}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Create New Customer
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Customer Information Form */}
+          {(customerId || showCreateNew) && (
+            <Card className="p-6">
+              <CustomerInformationSection existingCustomer={customer} />
+            </Card>
+          )}
+        </div>
       </TabsContent>
 
       <TabsContent value="pool-selection">
@@ -210,7 +317,7 @@ export const PoolBuilderTabs: React.FC<PoolBuilderTabsProps> = ({
       <TabsContent value="summary">
         <Card className="p-6">
           {selectedPool ? (
-            <SummarySection pool={selectedPool} customer={customer} customerId={customerId} />
+            <SummarySection />
           ) : (
             <PlaceholderMessage
               icon={<FileText className="h-12 w-12 text-muted-foreground mx-auto" />}
