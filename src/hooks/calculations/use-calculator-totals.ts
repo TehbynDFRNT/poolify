@@ -6,7 +6,6 @@
  */
 import { useMemo } from 'react';
 import type { ProposalSnapshot } from '@/types/snapshot';
-import { useCustomAddOnsCost } from '@/hooks/useCustomAddOnsCost';
 
 export interface PriceBreakdown {
   basePoolPrice: number;
