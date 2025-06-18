@@ -439,6 +439,12 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                                         value={lineItems.marginAppliedAgLineCost}
                                         breakdown={!isCustomerView ? "Site conduit and electrical preparation" : null}
                                     />
+                                    <LineItem
+                                        label="Custom Site Requirements"
+                                        code=""
+                                        value={lineItems.marginAppliedCustomSiteRequirementsCost}
+                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
+                                    />
                                     <TotalRow
                                         label="Excavation Total"
                                         value={lineItems.excavationContractTotal}
@@ -767,10 +773,10 @@ export const ContractSummary: React.FC<ContractSummaryProps> = ({
                             <table className="w-full">
                                 <tbody>
                                     <LineItem
-                                        label="Custom Site Requirements"
+                                        label="Custom Add-Ons"
                                         code=""
-                                        value={lineItems.marginAppliedCustomSiteRequirementsCost}
-                                        breakdown={!isCustomerView ? "Project-specific site requirements and equipment" : null}
+                                        value={lineItems.customAddOnsCost}
+                                        breakdown={!isCustomerView ? "Custom, project-specific add-ons not in standard catalog" : null}
                                     />
                                     
                                     {/* Post-Installation Upgrades Subsection */}
