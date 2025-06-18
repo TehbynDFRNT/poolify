@@ -191,12 +191,11 @@ export const SubmissionSection: React.FC<SubmissionSectionProps> = ({
                   <SummaryRow label="2. Pool Shell Supply" value={lineItems.totalDiscountAmount > 0 ? lineItems.poolShellSupplyAfterDiscount : lineItems.poolShellSupplyEquipmentTotal} />
                   <SummaryRow label="3. Excavation" value={lineItems.excavationContractTotal} />
                   <SummaryRow label="4. Pool Shell Installation" value={lineItems.poolShellInstallationTotal} />
-                  <SummaryRow label="5. Engineered Beam" value={lineItems.beamCost} />
+                  <SummaryRow label="5. Paving / Coping" value={lineItems.pavingTotal} />
                   <SummaryRow label="6. Extra Concreting" value={lineItems.extraConcretingTotal} />
-                  <SummaryRow label="7. Paving / Coping" value={lineItems.pavingTotal} />
-                  <SummaryRow label="8. Retaining Walls / Water Feature" value={lineItems.retainingWallsWaterFeatureTotal} />
-                  <SummaryRow label="9. Special Inclusions" value={lineItems.specialInclusions} />
-                  <SummaryRow label="10. Handover" value={lineItems.handoverTotal} />
+                  <SummaryRow label="7. Water Feature" value={lineItems.retainingWallsWaterFeatureTotal} />
+                  <SummaryRow label="8. Special Inclusions & Equipment Upgrades" value={lineItems.specialInclusions} />
+                  <SummaryRow label="9. Handover" value={lineItems.handoverTotal} />
                   <SummaryRow 
                     label="Contract Total Excluding HWI" 
                     value={lineItems.contractTotalExcludingHWI} 

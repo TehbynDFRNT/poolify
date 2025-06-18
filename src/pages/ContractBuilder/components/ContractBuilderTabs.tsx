@@ -724,8 +724,7 @@ export const ContractBuilderTabs: React.FC<ContractBuilderTabsProps> = ({
         <Card className="p-6">
           {selectedProposal ? (
             <ContractSummary 
-              snapshot={customerSnapshot as any} 
-              showMargins={false} 
+              snapshot={customerSnapshot as any}  
             />
           ) : (
             <div className="text-center space-y-4">
