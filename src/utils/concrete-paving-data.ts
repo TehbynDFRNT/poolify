@@ -15,7 +15,10 @@ export async function fetchConcreteAndPavingData(customerId: string) {
           concrete_pump_quantity,
           concrete_pump_total_cost,
           concrete_cuts,
-          concrete_cuts_cost
+          concrete_cuts_cost,
+          extra_concrete_pump,
+          extra_concrete_pump_quantity,
+          extra_concrete_pump_total_cost
         ),
         pool_paving_selections(
           extra_paving_category,
@@ -56,6 +59,11 @@ export async function fetchConcreteAndPavingData(customerId: string) {
       concrete_pump_total_cost: concreteSelections.concrete_pump_total_cost,
       concrete_cuts: concreteSelections.concrete_cuts,
       concrete_cuts_cost: concreteSelections.concrete_cuts_cost,
+      
+      // Extra concrete pump data
+      extra_concrete_pump: concreteSelections.extra_concrete_pump,
+      extra_concrete_pump_quantity: concreteSelections.extra_concrete_pump_quantity,
+      extra_concrete_pump_total_cost: concreteSelections.extra_concrete_pump_total_cost,
 
       // Paving data
       extra_paving_category: pavingSelections.extra_paving_category,

@@ -52,13 +52,12 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   // Use the guarded actions hook
   const {
     handleSave,
-    handleDelete,
     isSubmitting,
     StatusWarningDialog
   } = useConcretePavingActionsGuarded(customerId);
 
   // Get concrete pump base rate from database
-  const { concretePump, isLoading: isPumpLoading } = useConcretePump();
+  const { concretePump } = useConcretePump();
 
   // Default pump rate if data is not loaded yet
   const pumpRate = concretePump ? concretePump.price : 1050.00;
@@ -138,9 +137,16 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
       if (pumpError && pumpError.code !== 'PGRST116') {
         console.error("Error fetching concrete pump data:", pumpError);
       } else if (pumpData) {
-        setExtraConcretePumpNeeded(pumpData.extra_concrete_pump || false);
-        setExtraConcretePumpQuantity(pumpData.extra_concrete_pump_quantity || 1);
-        setExtraConcretePumpTotalCost(pumpData.extra_concrete_pump_total_cost || 0);
+        // Type assertion to handle the data properly
+        const typedPumpData = pumpData as {
+          extra_concrete_pump: boolean | null;
+          extra_concrete_pump_quantity: number | null;
+          extra_concrete_pump_total_cost: number | null;
+        };
+        
+        setExtraConcretePumpNeeded(typedPumpData.extra_concrete_pump || false);
+        setExtraConcretePumpQuantity(typedPumpData.extra_concrete_pump_quantity || 1);
+        setExtraConcretePumpTotalCost(typedPumpData.extra_concrete_pump_total_cost || 0);
       }
     } catch (error) {
       console.error("Error in fetchExistingData:", error);
@@ -214,19 +220,59 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
   // Handle delete using the guarded hook
   const handleDeleteClick = async () => {
-    const success = await handleDelete('extra_concreting_type', 'pool_paving_selections');
+    // First, clear all extra concreting fields in pool_paving_selections
+    const { data: existingPavingData } = await supabase
+      .from('pool_paving_selections')
+      .select('id')
+      .eq('pool_project_id', customerId)
+      .maybeSingle();
 
-    if (success) {
-      // Reset form
-      setSelectedType('');
-      setMeterage(0);
-      setTotalCost(0);
-      setConcreteFinishOne('');
-      setConcreteFinishTwo('');
-      setShowDeleteConfirm(false);
+    if (existingPavingData?.id) {
+      // Clear all extra concreting related fields
+      const pavingDataToClear = {
+        extra_concreting_type: null,
+        extra_concreting_square_meters: null,
+        extra_concreting_total_cost: null,
+        extra_concrete_finish_one: null,
+        extra_concrete_finish_two: null
+      };
 
-      if (onSaveComplete) {
-        onSaveComplete();
+      const pavingResult = await handleSave(pavingDataToClear, 'pool_paving_selections', existingPavingData.id);
+
+      // Also clear the extra concrete pump data
+      const { data: existingConcreteData } = await supabase
+        .from('pool_concrete_selections')
+        .select('id')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
+
+      if (existingConcreteData?.id) {
+        const concreteDataToClear = {
+          extra_concrete_pump: false,
+          extra_concrete_pump_quantity: null,
+          extra_concrete_pump_total_cost: 0
+        };
+
+        await handleSave(concreteDataToClear, 'pool_concrete_selections', existingConcreteData.id);
+      }
+
+      if (pavingResult.success) {
+        // Reset form
+        setSelectedType('');
+        setMeterage(0);
+        setTotalCost(0);
+        setConcreteFinishOne('');
+        setConcreteFinishTwo('');
+        setExtraConcretePumpNeeded(false);
+        setExtraConcretePumpQuantity(0);
+        setExtraConcretePumpTotalCost(0);
+        setShowDeleteConfirm(false);
+        
+        toast.success("Extra concreting details removed successfully.");
+
+        if (onSaveComplete) {
+          onSaveComplete();
+        }
       }
     }
   };

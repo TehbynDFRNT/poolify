@@ -49,7 +49,7 @@ export const useConcretePavingSummary = (customerId: string) => {
         const extraPavingCost = data.extra_paving_total_cost || 0;
         const existingConcretePavingCost = data.existing_concrete_paving_total_cost || 0;
         const extraConcretingCost = data.extra_concreting_total_cost || 0;
-        const concretePumpCost = data.concrete_pump_total_cost || 0;
+        const concretePumpCost = (data.concrete_pump_total_cost || 0) + (data.extra_concrete_pump_total_cost || 0);
         const underFenceStripsCost = data.under_fence_concrete_strips_cost || 0;
         const concreteCutsCost = data.concrete_cuts_cost || 0;
 
