@@ -130,6 +130,7 @@ export const GeneralOptionsContent: React.FC<GeneralOptionsContentProps> = ({
                 state={state}
                 getExtraById={getExtraById}
                 totalCost={totals.totalRrp}
+                customerId={customerId}
             />
 
             {customerId && (

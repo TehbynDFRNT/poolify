@@ -4,23 +4,29 @@ import { PoolGeneralExtrasState } from "@/types/pool-general-extra";
 import { formatCurrency } from "@/utils/format";
 import { CheckCircle2, Package } from "lucide-react";
 import React, { useMemo } from "react";
+import { useCustomAddOnsCost } from "@/hooks/useCustomAddOnsCost";
 
 interface GeneralOptionsSummaryProps {
     state: PoolGeneralExtrasState;
     getExtraById: (id: string) => GeneralExtra | undefined;
     totalCost: number; // Database total (only used after saving)
+    customerId: string | null;
 }
 
 export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
     state,
     getExtraById,
-    totalCost
+    totalCost,
+    customerId
 }) => {
+    // Get custom add-ons cost
+    const { customAddOnsCost } = useCustomAddOnsCost(customerId);
     // Check if any items are selected
     const hasSpaJets = state.spaJets.selected && state.spaJets.extraId;
     const hasDeckJets = state.deckJets.selected && state.deckJets.extraId;
     const hasHandGrabRail = state.handGrabRail.selected && state.handGrabRail.extraId;
     const hasMiscItems = state.miscItems.items.length > 0;
+    const hasCustomAddOns = customAddOnsCost > 0;
 
     // Get extras details
     const spaJetExtra = hasSpaJets && state.spaJets.extraId
@@ -51,11 +57,11 @@ export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
 
     // Calculate the current total based on UI state, not database
     const calculatedTotal = useMemo(() => {
-        return spaJetsCost + deckJetsCost + handGrabRailCost + miscItemsCost;
-    }, [spaJetsCost, deckJetsCost, handGrabRailCost, miscItemsCost]);
+        return spaJetsCost + deckJetsCost + handGrabRailCost + miscItemsCost + customAddOnsCost;
+    }, [spaJetsCost, deckJetsCost, handGrabRailCost, miscItemsCost, customAddOnsCost]);
 
     // If nothing is selected, show a simple message
-    if (!hasSpaJets && !hasDeckJets && !hasHandGrabRail && !hasMiscItems) {
+    if (!hasSpaJets && !hasDeckJets && !hasHandGrabRail && !hasMiscItems && !hasCustomAddOns) {
         return (
             <Card>
                 <CardHeader>
@@ -130,6 +136,20 @@ export const GeneralOptionsSummary: React.FC<GeneralOptionsSummaryProps> = ({
                             </div>
                             <div className="text-primary font-medium mt-1">
                                 {formatCurrency(miscItemsCost)}
+                            </div>
+                        </div>
+                    )}
+
+                    {hasCustomAddOns && (
+                        <div className="p-3 bg-slate-50 rounded-md md:col-span-2">
+                            <div className="font-medium flex items-center">
+                                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Custom Add-Ons
+                            </div>
+                            <div className="text-sm text-muted-foreground mt-1">
+                                Custom pool add-ons configured
+                            </div>
+                            <div className="text-primary font-medium mt-1">
+                                {formatCurrency(customAddOnsCost)}
                             </div>
                         </div>
                     )}
