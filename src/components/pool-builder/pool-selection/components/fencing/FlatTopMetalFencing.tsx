@@ -33,7 +33,8 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
     onSubmit,
     onDelete,
     StatusWarningDialog,
-    DeleteStatusWarningDialog
+    DeleteStatusWarningDialog,
+    costsLoading
   } = useFlatTopMetalFencingFormGuarded(
     customerId,
     onSaveSuccess,
@@ -60,12 +61,16 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
-                <LinearMeterInput form={form} linearCost={costs.linearCost} unitCost={165} />
+                <LinearMeterInput 
+                  form={form} 
+                  linearCost={costs.linearCost} 
+                  unitCost={costsLoading ? undefined : 165} 
+                />
                 <GateSelector
                   form={form}
                   gatesCost={costs.gatesCost}
                   freeGateDiscount={0}
-                  unitCost={297}
+                  unitCost={costsLoading ? undefined : 297}
                 />
                 <FTMPanelSelector
                   form={form}
@@ -75,7 +80,7 @@ export const FlatTopMetalFencing: React.FC<FlatTopMetalFencingProps> = ({
                 <EarthingToggle
                   form={form}
                   isFixedCost={true}
-                  perMeterCost={150}
+                  perMeterCost={costsLoading ? undefined : 150}
                 />
               </div>
 

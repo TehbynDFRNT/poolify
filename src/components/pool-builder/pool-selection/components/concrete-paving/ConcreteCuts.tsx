@@ -166,27 +166,13 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, on
       `${cutId}:${quantities[cutId] || 1}`
     ).join(',');
 
-    // First check if a record already exists
-    const { data: existingData, error: checkError } = await supabase
-      .from('pool_concrete_selections')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
-
-    if (checkError) {
-      console.error("Error checking for existing concrete selections:", checkError);
-      return;
-    }
-
-    console.log("Concrete cuts - existing record check:", existingData);
-
     const updateData = {
-      concrete_cuts: cutsData,
-      concrete_cuts_cost: totalCost
+      concrete_cuts: cutsData || null,
+      concrete_cuts_cost: totalCost || null
     };
 
-    // Pass the record ID if it exists so handleSave knows to update instead of insert
-    const result = await handleSave(updateData, 'pool_concrete_selections', existingData?.id || null);
+    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
+    const result = await handleSave(updateData, 'pool_concrete_selections');
 
     if (result.success) {
       if (onSaveComplete) {

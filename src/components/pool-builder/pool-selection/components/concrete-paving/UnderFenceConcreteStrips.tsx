@@ -170,41 +170,21 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     console.log('[UnderFenceStrips] handleSaveClick: Current selectedStrips STATE:', JSON.stringify(selectedStrips));
     console.log('[UnderFenceStrips] handleSaveClick: Current totalCost STATE:', totalCost);
 
-    // First check if a record already exists
-    const { data: existingData, error: checkError } = await supabase
-      .from('pool_fence_concrete_strips')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
-
-    if (checkError) {
-      console.error('[UnderFenceStrips] handleSaveClick: Error checking for existing record:', checkError);
-      toast.error("Error checking existing data. Please try again.");
-      return;
-    }
-
-    console.log('[UnderFenceStrips] handleSaveClick: Existing record check result - existingData:', existingData);
-
-    // Prepare data to save
+    // Prepare data to save - don't include pool_project_id as the hook will add it
     const dataToSave = {
-      pool_project_id: customerId,
       strip_data: selectedStrips, // This is an array of objects
       total_cost: totalCost
     };
 
-    // Use the handleSave function for both updates and inserts
-    // This ensures we're using the same logic as other components and preventing duplicates
-    const result = await handleSave(dataToSave, 'pool_fence_concrete_strips', existingData?.id || null);
+    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
+    const result = await handleSave(dataToSave, 'pool_fence_concrete_strips');
 
     console.log('[UnderFenceStrips] handleSaveClick: Save operation result:', result);
 
     if (result.success) {
-      toast.success("Under fence concrete strips saved successfully.");
       if (onSaveComplete) {
         onSaveComplete();
       }
-    } else {
-      toast.error("Failed to save under fence concrete strips.");
     }
   };
 

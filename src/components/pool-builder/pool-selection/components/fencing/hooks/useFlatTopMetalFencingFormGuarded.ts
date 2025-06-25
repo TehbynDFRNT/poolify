@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { CostCalculation, FencingFormValues } from "../types";
+import { useFencingCosts } from "./useFencingCosts";
 
 export const useFlatTopMetalFencingFormGuarded = (
     customerId: string,
@@ -20,6 +21,9 @@ export const useFlatTopMetalFencingFormGuarded = (
         earthingCost: 0,
         totalCost: 0
     });
+
+    // Fetch fencing costs from database
+    const { data: fencingCosts, isLoading: costsLoading } = useFencingCosts();
 
     // Initialize form with default values
     const form = useForm<FencingFormValues>({
@@ -211,12 +215,14 @@ export const useFlatTopMetalFencingFormGuarded = (
 
     // Calculate costs whenever form values change (different rates for flat top metal)
     useEffect(() => {
-        const linearCost = linearMeters * 165; // Different rate for flat top metal
-        const gatesCost = gates * 297; // Different rate for flat top metal
+        if (!fencingCosts) return;
+
+        const linearCost = linearMeters * fencingCosts.flatTopMetalFencePerMeter;
+        const gatesCost = gates * fencingCosts.flatTopMetalGate;
         const freeGateDiscount = 0; // No free gate for flat top metal
-        const simplePanelsCost = simplePanels * 220;
-        const complexPanelsCost = complexPanels * 385;
-        const earthingCost = earthingRequired ? 150 : 0; // Different rate for flat top metal
+        const simplePanelsCost = simplePanels * fencingCosts.retainingFTMSimple;
+        const complexPanelsCost = complexPanels * fencingCosts.retainingFTMComplex;
+        const earthingCost = earthingRequired ? fencingCosts.earthingFTM : 0;
 
         const totalCost = linearCost + gatesCost + freeGateDiscount + simplePanelsCost + complexPanelsCost + earthingCost;
 
@@ -229,7 +235,7 @@ export const useFlatTopMetalFencingFormGuarded = (
             earthingCost,
             totalCost
         });
-    }, [linearMeters, gates, simplePanels, complexPanels, earthingRequired]);
+    }, [linearMeters, gates, simplePanels, complexPanels, earthingRequired, fencingCosts]);
 
     // Handle form submission
     const onSubmit = async (values: FencingFormValues) => {
@@ -260,5 +266,6 @@ export const useFlatTopMetalFencingFormGuarded = (
         onDelete,
         StatusWarningDialog: SaveStatusWarningDialog,
         DeleteStatusWarningDialog,
+        costsLoading,
     };
 }; 

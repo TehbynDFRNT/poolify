@@ -1,86 +1,76 @@
 import { supabase } from "@/integrations/supabase/client";
-import { PoolConcreteSelection, PoolFenceConcreteStrip, PoolPavingSelection } from "@/integrations/supabase/types";
 
 /**
- * Fetch the concrete and paving data for a specific customer
+ * Simplified function to fetch only the total cost values from concrete and paving tables
  */
 export async function fetchConcreteAndPavingData(customerId: string) {
   try {
-    const { data: projectData, error: projectError } = await supabase
-      .from('pool_projects')
-      .select(`
-        id,
-        pool_concrete_selections(
-          concrete_pump_needed,
-          concrete_pump_quantity,
-          concrete_pump_total_cost,
-          concrete_cuts,
-          concrete_cuts_cost,
-          extra_concrete_pump,
-          extra_concrete_pump_quantity,
-          extra_concrete_pump_total_cost
-        ),
-        pool_paving_selections(
-          extra_paving_category,
-          extra_paving_square_meters,
-          extra_paving_total_cost,
-          existing_concrete_paving_category,
-          existing_concrete_paving_square_meters,
-          existing_concrete_paving_total_cost,
-          extra_concreting_type,
-          extra_concreting_square_meters,
-          extra_concreting_total_cost
-        ),
-        pool_fence_concrete_strips(
-          strip_data,
-          total_cost
-        )
-      `)
-      .eq('id', customerId)
-      .single();
+    // Helper function to convert string to number
+    const toNumber = (value: any): number => {
+      if (typeof value === 'number') return value;
+      if (typeof value === 'string') return parseFloat(value) || 0;
+      return 0;
+    };
 
-    if (projectError) {
-      console.error("Error fetching concrete and paving data:", projectError);
-      return null;
+    // Fetch data from each table separately to handle missing records better
+    const [concreteResult, pavingResult, fenceStripsResult] = await Promise.all([
+      // Fetch from pool_concrete_selections
+      supabase
+        .from('pool_concrete_selections')
+        .select('concrete_pump_total_cost, concrete_cuts_cost, extra_concrete_pump_total_cost')
+        .eq('pool_project_id', customerId)
+        .maybeSingle(),
+      
+      // Fetch from pool_paving_selections
+      supabase
+        .from('pool_paving_selections')
+        .select('extra_paving_total_cost, existing_concrete_paving_total_cost, extra_concreting_total_cost')
+        .eq('pool_project_id', customerId)
+        .maybeSingle(),
+      
+      // Fetch from pool_fence_concrete_strips
+      supabase
+        .from('pool_fence_concrete_strips')
+        .select('total_cost')
+        .eq('pool_project_id', customerId)
+        .maybeSingle()
+    ]);
+
+    // Log results for debugging
+    console.log("Concrete selections result:", concreteResult);
+    console.log("Paving selections result:", pavingResult);
+    console.log("Fence strips result:", fenceStripsResult);
+
+    // Handle errors (ignore PGRST116 which means no rows found)
+    if (concreteResult.error && concreteResult.error.code !== 'PGRST116') {
+      console.error("Error fetching concrete selections:", concreteResult.error);
+    }
+    if (pavingResult.error && pavingResult.error.code !== 'PGRST116') {
+      console.error("Error fetching paving selections:", pavingResult.error);
+    }
+    if (fenceStripsResult.error && fenceStripsResult.error.code !== 'PGRST116') {
+      console.error("Error fetching fence concrete strips:", fenceStripsResult.error);
     }
 
-    if (!projectData) return null;
+    // Extract data with defaults
+    const concreteSelections = concreteResult.data || {};
+    const pavingSelections = pavingResult.data || {};
+    const fenceConcreteStrips = fenceStripsResult.data || {};
 
-    // Extract the concrete and paving data from the nested objects
-    const concreteSelections = (projectData.pool_concrete_selections?.[0] || {}) as PoolConcreteSelection;
-    const pavingSelections = (projectData.pool_paving_selections?.[0] || {}) as PoolPavingSelection;
-    const fenceConcreteStrips = (projectData.pool_fence_concrete_strips?.[0] || {}) as PoolFenceConcreteStrip;
-
-    // Return a flattened object with all the data
+    // Return only the cost values
     return {
-      // Concrete pump data
-      concrete_pump_needed: concreteSelections.concrete_pump_needed,
-      concrete_pump_quantity: concreteSelections.concrete_pump_quantity,
-      concrete_pump_total_cost: concreteSelections.concrete_pump_total_cost,
-      concrete_cuts: concreteSelections.concrete_cuts,
-      concrete_cuts_cost: concreteSelections.concrete_cuts_cost,
+      // From pool_concrete_selections
+      concrete_pump_total_cost: toNumber(concreteSelections.concrete_pump_total_cost),
+      concrete_cuts_cost: toNumber(concreteSelections.concrete_cuts_cost),
+      extra_concrete_pump_total_cost: toNumber(concreteSelections.extra_concrete_pump_total_cost),
       
-      // Extra concrete pump data
-      extra_concrete_pump: concreteSelections.extra_concrete_pump,
-      extra_concrete_pump_quantity: concreteSelections.extra_concrete_pump_quantity,
-      extra_concrete_pump_total_cost: concreteSelections.extra_concrete_pump_total_cost,
-
-      // Paving data
-      extra_paving_category: pavingSelections.extra_paving_category,
-      extra_paving_square_meters: pavingSelections.extra_paving_square_meters,
-      extra_paving_total_cost: pavingSelections.extra_paving_total_cost,
-      existing_concrete_paving_category: pavingSelections.existing_concrete_paving_category,
-      existing_concrete_paving_square_meters: pavingSelections.existing_concrete_paving_square_meters,
-      existing_concrete_paving_total_cost: pavingSelections.existing_concrete_paving_total_cost,
-
-      // Extra concreting data
-      extra_concreting_type: pavingSelections.extra_concreting_type,
-      extra_concreting_square_meters: pavingSelections.extra_concreting_square_meters,
-      extra_concreting_total_cost: pavingSelections.extra_concreting_total_cost,
-
-      // Fence concrete strips data
-      under_fence_concrete_strips_data: fenceConcreteStrips.strip_data,
-      under_fence_concrete_strips_cost: fenceConcreteStrips.total_cost
+      // From pool_paving_selections
+      extra_paving_total_cost: toNumber(pavingSelections.extra_paving_total_cost),
+      existing_concrete_paving_total_cost: toNumber(pavingSelections.existing_concrete_paving_total_cost),
+      extra_concreting_total_cost: toNumber(pavingSelections.extra_concreting_total_cost),
+      
+      // From pool_fence_concrete_strips
+      under_fence_concrete_strips_cost: toNumber(fenceConcreteStrips.total_cost)
     };
   } catch (error) {
     console.error("Error in fetchConcreteAndPavingData:", error);

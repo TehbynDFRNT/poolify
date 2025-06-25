@@ -30,7 +30,6 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
-  const [pavingSelectionId, setPavingSelectionId] = useState<string | null>(null);
   const { pavingOnExistingConcreteTotals, existingConcreteLabourWithMargin, isLoading: isCategoriesLoading } = useFormulaCalculations();
 
   // Log pavingOnExistingConcreteTotals structure once available
@@ -86,7 +85,7 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
 
       const { data, error } = await supabase
         .from('pool_paving_selections')
-        .select('id, existing_concrete_paving_category, existing_concrete_paving_square_meters')
+        .select('existing_concrete_paving_category, existing_concrete_paving_square_meters')
         .eq('pool_project_id', customerId)
         .maybeSingle();
 
@@ -118,19 +117,15 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
         console.error("[PavingOnExistingConcrete] Error fetching existing concrete paving data:", error);
         // setSelectedCategory(""); // Already handled by foundCategoryIdForState initialization
         setSquareMeters(0);
-        setPavingSelectionId(null);
       } else if (data) {
         setSquareMeters(data.existing_concrete_paving_square_meters || 0);
-        setPavingSelectionId(data.id || null);
       } else {
         setSquareMeters(0);
-        setPavingSelectionId(null);
       }
     } catch (errorCatch) {
       console.error("[PavingOnExistingConcrete] Error in fetchExistingData CATCH BLOCK:", errorCatch);
       setSelectedCategory("");
       setSquareMeters(0);
-      setPavingSelectionId(null);
     } finally {
       setIsLoading(false);
       // console.log('[PavingOnExistingConcrete] fetchExistingData finished.');
@@ -153,41 +148,24 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
     setSquareMeters(isNaN(value) ? 0 : value);
   };
 
-  // Handle save using the guarded hook or direct insert
+  // Handle save using the guarded hook
   const handleSaveClick = async () => {
-    // Allow saving empty selections
-    // if (!selectedCategory || squareMeters <= 0) {
-    //   toast.error("Please select a category and enter square meters");
-    //   return;
-    // }
-
     const dataToSave = {
       existing_concrete_paving_category: selectedCategory || null, // Set to null if empty
       existing_concrete_paving_square_meters: squareMeters || null, // Set to null if 0
       existing_concrete_paving_total_cost: totalCost || null // Set to null if 0
-      // No longer nulling out other fields, as the hook now preserves existing data
     };
 
-    console.log('[PavingOnExistingConcrete] Attempting save. PavingSelectionId:', pavingSelectionId);
-    console.log('[PavingOnExistingConcrete] Data to save:', dataToSave);
+    console.log('[PavingOnExistingConcrete] Attempting save. Data to save:', dataToSave);
 
-    // Use the guarded handleSave for both insert and update
-    const result = await handleSave(dataToSave, 'pool_paving_selections', pavingSelectionId);
+    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
+    const result = await handleSave(dataToSave, 'pool_paving_selections');
 
     console.log('[PavingOnExistingConcrete] Save result from hook:', result);
 
     if (result.success) {
-      if (result.newId && !pavingSelectionId) {
-        setPavingSelectionId(result.newId);
-        toast.success("Paving on existing concrete saved successfully."); // Specific toast for new insert
-      } else if (pavingSelectionId) {
-        // Update success toast is handled by the hook now
-        // toast.success("Paving on existing concrete updated successfully."); 
-      }
       if (onSaveComplete) onSaveComplete();
     } else {
-      // Error toast is handled by the hook or useGuardedMutation's onError
-      // toast.error("Failed to save paving on existing concrete. Check console for details.");
       console.error('[PavingOnExistingConcrete] Save failed. Result from hook:', result);
     }
   };

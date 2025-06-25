@@ -12,6 +12,7 @@ interface HeatPumpSectionProps {
   setIncludeHeatPump: (include: boolean) => void;
   installationCost: number;
   totalCost: number;
+  margin: number;
 }
 
 export const HeatPumpSection: React.FC<HeatPumpSectionProps> = ({
@@ -19,7 +20,8 @@ export const HeatPumpSection: React.FC<HeatPumpSectionProps> = ({
   includeHeatPump,
   setIncludeHeatPump,
   installationCost,
-  totalCost
+  totalCost,
+  margin
 }) => {
   return (
     <Card>
@@ -77,6 +79,12 @@ export const HeatPumpSection: React.FC<HeatPumpSectionProps> = ({
                 <span className="font-medium">Total:</span>
                 <span className="font-medium">{formatCurrency(totalCost)}</span>
               </div>
+              {margin > 0 && (
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>Margin:</span>
+                  <span>{formatCurrency(margin)}</span>
+                </div>
+              )}
             </div>
           </div>
         )}

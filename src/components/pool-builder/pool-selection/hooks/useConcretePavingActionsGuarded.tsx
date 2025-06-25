@@ -14,97 +14,90 @@ export const useConcretePavingActionsGuarded = (customerId: string | null | unde
         StatusWarningDialog: SaveStatusWarningDialog
     } = useGuardedMutation({
         projectId: customerId || '',
-        mutationFn: async ({ data, tableName, recordIdToUpdate, poolProjectIdForInsert }: { data: any; tableName: string; recordIdToUpdate?: string; poolProjectIdForInsert?: string }) => {
-            if (!customerId && !poolProjectIdForInsert) {
+        mutationFn: async ({ data, tableName }: { data: any; tableName: string }) => {
+            if (!customerId) {
                 throw new Error("Project ID is missing for the operation.");
             }
 
-            if (recordIdToUpdate) {
-                console.log(`[GuardedHook] Attempting UPDATE on ${tableName} for id=${recordIdToUpdate}`);
+            // Map slug ➞ UUID for extra_concreting_type if needed
+            if (tableName === "pool_paving_selections" && data.extra_concreting_type) {
+                try {
+                    const { data: concretingTypes, error } = await supabase
+                        .from("extra_concreting")
+                        .select("id, type")
+                        .order("display_order", { ascending: true });
+                    
+                    if (!error && concretingTypes) {
+                        const found = concretingTypes.find((o: ExtraConcretingType) =>
+                            o.id === data.extra_concreting_type ||
+                            o.type.toLowerCase().replace(/\s+/g, "-") === data.extra_concreting_type.toLowerCase()
+                        );
+                        if (found) data.extra_concreting_type = found.id;
+                    }
+                } catch (error) {
+                    console.warn("Could not fetch concreting types for slug mapping:", error);
+                }
+            }
 
-                // First fetch the existing record to preserve data
+            // Check if record exists for this pool_project_id
+            const { data: existingData, error: checkError } = await supabase
+                .from(tableName as any)
+                .select('id')
+                .eq('pool_project_id', customerId)
+                .maybeSingle();
+
+            if (checkError && checkError.code !== 'PGRST116') {
+                console.error(`[GuardedHook] Error checking for existing record in ${tableName}:`, checkError);
+                throw checkError;
+            }
+
+            if (existingData?.id) {
+                console.log(`[GuardedHook] Updating existing record in ${tableName} for pool_project_id=${customerId}`);
+                
+                // Fetch existing record to preserve other fields
                 const { data: existingRecord, error: fetchError } = await supabase
                     .from(tableName as any)
                     .select('*')
-                    .eq('id', recordIdToUpdate)
+                    .eq('id', existingData.id)
                     .single();
 
                 if (fetchError) {
-                    console.error(`[GuardedHook] Error fetching existing record from ${tableName} for id=${recordIdToUpdate}:`, fetchError);
+                    console.error(`[GuardedHook] Error fetching existing record:`, fetchError);
                     throw fetchError;
                 }
 
-                // Map slug ➞ UUID for extra_concreting_type before merging
-                if (tableName === "pool_paving_selections" && data.extra_concreting_type) {
-                  try {
-                    const { data: concretingTypes, error } = await supabase
-                      .from("extra_concreting")
-                      .select("id, type")
-                      .order("display_order", { ascending: true });
-                    
-                    if (!error && concretingTypes) {
-                      const found = concretingTypes.find((o: ExtraConcretingType) =>
-                        o.id === data.extra_concreting_type ||
-                        o.type.toLowerCase().replace(/\s+/g, "-") === data.extra_concreting_type.toLowerCase()
-                      );
-                      if (found) data.extra_concreting_type = found.id;
-                    }
-                  } catch (error) {
-                    console.warn("Could not fetch concreting types for slug mapping:", error);
-                  }
-                }
-                // Merge the new data with the existing data, preserving existing fields
-                // Use Record<string, any> to ensure we can spread the object
-                const existingData = existingRecord as Record<string, any>;
-                const mergedData = { ...existingData, ...data };
+                // Merge new data with existing data
+                const mergedData = { ...existingRecord, ...data };
 
-                // Update with the merged data
-                const { error } = await supabase.from(tableName as any).update(mergedData).eq('id', recordIdToUpdate);
-                if (error) {
-                    console.error(`[GuardedHook] Error updating ${tableName} for id=${recordIdToUpdate}:`, error);
-                    throw error;
+                // Update the existing record
+                const { error: updateError } = await supabase
+                    .from(tableName as any)
+                    .update(mergedData)
+                    .eq('id', existingData.id);
+
+                if (updateError) {
+                    console.error(`[GuardedHook] Error updating ${tableName}:`, updateError);
+                    throw updateError;
                 }
                 return { success: true };
             } else {
-                console.log(`[GuardedHook] Attempting INSERT on ${tableName}`);
-                // Map slug ➞ UUID for extra_concreting_type before insert
-                if (tableName === "pool_paving_selections" && data.extra_concreting_type) {
-                  try {
-                    const { data: concretingTypes, error } = await supabase
-                      .from("extra_concreting")
-                      .select("id, type")
-                      .order("display_order", { ascending: true });
-                    
-                    if (!error && concretingTypes) {
-                      const found = concretingTypes.find((o: ExtraConcretingType) =>
-                        o.id === data.extra_concreting_type ||
-                        o.type.toLowerCase().replace(/\s+/g, "-") === data.extra_concreting_type.toLowerCase()
-                      );
-                      if (found) data.extra_concreting_type = found.id;
-                    }
-                  } catch (error) {
-                    console.warn("Could not fetch concreting types for slug mapping:", error);
-                  }
-                }
-                const insertData = { ...data };
-                if (poolProjectIdForInsert && !insertData.pool_project_id) {
-                    insertData.pool_project_id = poolProjectIdForInsert;
-                }
-                if (!insertData.pool_project_id && tableName !== 'pool_projects') {
-                    console.warn(`[GuardedHook] pool_project_id missing for INSERT into ${tableName}. This might be an issue.`);
-                }
+                console.log(`[GuardedHook] Inserting new record in ${tableName} for pool_project_id=${customerId}`);
+                
+                // Insert new record with pool_project_id
+                const insertData = {
+                    ...data,
+                    pool_project_id: customerId
+                };
 
-                const { data: newRecord, error } = await supabase.from(tableName as any).insert(insertData).select('id').single();
+                const { error: insertError } = await supabase
+                    .from(tableName as any)
+                    .insert(insertData);
 
-                if (error) {
-                    console.error(`[GuardedHook] Error inserting into ${tableName}:`, error);
-                    throw error;
+                if (insertError) {
+                    console.error(`[GuardedHook] Error inserting into ${tableName}:`, insertError);
+                    throw insertError;
                 }
-                if (!newRecord || typeof (newRecord as any).id === 'undefined') {
-                    console.error(`[GuardedHook] Insert into ${tableName} did not return a new ID or newRecord is null.`);
-                    throw new Error("Insert did not return a new ID.");
-                }
-                return { success: true, newId: (newRecord as any).id };
+                return { success: true };
             }
         },
         mutationOptions: {
@@ -148,7 +141,7 @@ export const useConcretePavingActionsGuarded = (customerId: string | null | unde
         },
     });
 
-    const handleSave = async (data: any, tableName: string, recordIdToUpdate?: string | null): Promise<{ success: boolean, newId?: string }> => {
+    const handleSave = async (data: any, tableName: string): Promise<{ success: boolean }> => {
         if (!customerId) {
             toast.error("Please save customer information first");
             return { success: false };
@@ -161,9 +154,9 @@ export const useConcretePavingActionsGuarded = (customerId: string | null | unde
 
         try {
             setIsSubmitting(true);
-            const result = await saveDataAsync({ data, tableName, recordIdToUpdate: recordIdToUpdate || undefined, poolProjectIdForInsert: customerId });
+            const result = await saveDataAsync({ data, tableName });
             setIsSubmitting(false);
-            if (result.success && recordIdToUpdate) toast.success(`${tableName} updated successfully.`);
+            toast.success(`${tableName} saved successfully.`);
             return result;
         } catch (error) {
             console.error("[GuardedHook] handleSave caught an error:", error);

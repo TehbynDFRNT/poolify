@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { CostCalculation, FencingFormValues } from "../types";
+import { useFencingCosts } from "./useFencingCosts";
 
 export const useFencingFormGuarded = (
     customerId: string,
@@ -20,6 +21,9 @@ export const useFencingFormGuarded = (
         earthingCost: 0,
         totalCost: 0
     });
+
+    // Fetch fencing costs from database
+    const { data: fencingCosts, isLoading: costsLoading } = useFencingCosts();
 
     // Initialize form with default values
     const form = useForm<FencingFormValues>({
@@ -215,13 +219,15 @@ export const useFencingFormGuarded = (
 
     // Calculate costs whenever form values change
     useEffect(() => {
-        const linearCost = linearMeters * 195;
-        const gatesCost = gates * 385;
+        if (!fencingCosts) return;
+
+        const linearCost = linearMeters * fencingCosts.framelessGlassFencePerMeter;
+        const gatesCost = gates * fencingCosts.framelessGlassGate;
         // First gate is free (if there is at least one gate)
-        const freeGateDiscount = gates > 0 ? -385 : 0;
-        const simplePanelsCost = simplePanels * 220;
-        const complexPanelsCost = complexPanels * 385;
-        const earthingCost = earthingRequired ? 40 : 0;
+        const freeGateDiscount = gates > 0 ? -fencingCosts.framelessGlassGate : 0;
+        const simplePanelsCost = simplePanels * fencingCosts.retainingFGSimple;
+        const complexPanelsCost = complexPanels * fencingCosts.retainingFGComplex;
+        const earthingCost = earthingRequired ? fencingCosts.earthingFG : 0;
 
         const totalCost = linearCost + gatesCost + freeGateDiscount + simplePanelsCost + complexPanelsCost + earthingCost;
 
@@ -234,7 +240,7 @@ export const useFencingFormGuarded = (
             earthingCost,
             totalCost
         });
-    }, [linearMeters, gates, simplePanels, complexPanels, earthingRequired]);
+    }, [linearMeters, gates, simplePanels, complexPanels, earthingRequired, fencingCosts]);
 
     // Handle form submission
     const onSubmit = async (values: FencingFormValues) => {
@@ -265,5 +271,6 @@ export const useFencingFormGuarded = (
         onDelete,
         StatusWarningDialog: SaveStatusWarningDialog,
         DeleteStatusWarningDialog,
+        costsLoading,
     };
 }; 

@@ -39,7 +39,6 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
-  const [pavingSelectionId, setPavingSelectionId] = useState<string | null>(null);
   const { pavingCategoryTotals, labourCostWithMargin, isLoading: isCategoriesLoading, concreteCostPerMeter } = useFormulaCalculations();
 
   useEffect(() => {
@@ -81,7 +80,7 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
 
       const { data, error } = await supabase
         .from('pool_paving_selections')
-        .select('id, extra_paving_category, extra_paving_square_meters')
+        .select('extra_paving_category, extra_paving_square_meters')
         .eq('pool_project_id', customerId)
         .maybeSingle();
 
@@ -89,7 +88,6 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
         console.error("[ExtraPavingConcrete] DB Error fetching extra paving data:", error);
         setSelectedCategory("");
         setSquareMeters(0);
-        setPavingSelectionId(null);
       } else if (data) {
         // console.log('[ExtraPavingConcrete] Raw DB data:', data);
         let foundCategoryIdForState = "";
@@ -115,19 +113,16 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
         }
         setSelectedCategory(foundCategoryIdForState);
         setSquareMeters(data.extra_paving_square_meters || 0);
-        setPavingSelectionId(data.id || null);
         // console.log('[ExtraPavingConcrete] Set state: selectedCategory=', foundCategoryIdForState, ', squareMeters=', data.extra_paving_square_meters || 0);
       } else {
         // console.log('[ExtraPavingConcrete] No data object returned from DB (e.g., PGRST116 or new project). Resetting form.');
         setSelectedCategory("");
         setSquareMeters(0);
-        setPavingSelectionId(null);
       }
     } catch (err) {
       console.error("[ExtraPavingConcrete] CATCH block error in fetchExistingData:", err);
       setSelectedCategory("");
       setSquareMeters(0);
-      setPavingSelectionId(null);
     } finally {
       setIsLoading(false);
     }
@@ -154,54 +149,31 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
     console.log('[ExtraPavingConcrete] handleSaveClick: Initiated.');
     console.log('[ExtraPavingConcrete] States at save: selectedCategory (ID):', selectedCategory, ', squareMeters:', squareMeters, ', totalCost:', totalCost);
 
-    // Allow saving empty selections
-    // if (!selectedCategory || squareMeters <= 0) {
-    //   toast.error("Please select a category and enter square meters");
-    //   console.warn('[ExtraPavingConcrete] Save validation failed: Category or Sqr Meters missing.');
-    //   return;
-    // }
-
     // Data for this section: ensure category ID is saved.
     const dataToSave = {
       extra_paving_category: selectedCategory || null, // Set to null if empty
       extra_paving_square_meters: squareMeters || null, // Set to null if 0
       extra_paving_total_cost: totalCost || null // Set to null if 0
-      // No longer nulling out other fields, as the hook now preserves existing data
     };
     console.log('[ExtraPavingConcrete] Prepared dataToSave for DB (should contain category ID):', JSON.stringify(dataToSave));
-    console.log('[ExtraPavingConcrete] Current pavingSelectionId:', pavingSelectionId);
 
-    // Use the guarded handleSave for both insert and update
-    const result = await handleSave(dataToSave, 'pool_paving_selections', pavingSelectionId);
+    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
+    const result = await handleSave(dataToSave, 'pool_paving_selections');
 
     console.log('[ExtraPavingConcrete] Save result from hook:', result);
 
     if (result.success) {
-      if (result.newId && !pavingSelectionId) {
-        setPavingSelectionId(result.newId);
-        toast.success("Extra paving & concreting saved successfully."); // Specific toast for new insert
-      } else if (pavingSelectionId) {
-        // Update success toast is handled by the hook now
-        // toast.success("Extra paving & concreting updated successfully.");
-      }
       if (onSaveComplete) {
         console.log('[ExtraPavingConcrete] Calling onSaveComplete due to successful save.');
         onSaveComplete();
       }
     } else {
-      // Error toast is handled by the hook or useGuardedMutation's onError
-      // toast.error("Failed to save extra paving & concreting. Check console for details.");
       console.error('[ExtraPavingConcrete] Save failed. Result from hook:', result);
     }
   };
 
   // Handle delete using the guarded hook
   const handleDeleteClick = async () => {
-    if (!pavingSelectionId) {
-      toast.error("No data to delete");
-      return;
-    }
-
     const success = await handleDelete('extra_paving_category', 'pool_paving_selections');
 
     if (success) {
@@ -324,7 +296,7 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
                 </div>
               )}
 
-              {pavingSelectionId && (
+              {(selectedCategory || squareMeters > 0) && (
                 <div className="flex justify-start mt-4">
                   <Button
                     variant="destructive"

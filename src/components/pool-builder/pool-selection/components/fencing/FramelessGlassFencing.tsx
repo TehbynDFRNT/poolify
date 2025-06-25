@@ -33,7 +33,8 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({
     onSubmit,
     onDelete,
     StatusWarningDialog,
-    DeleteStatusWarningDialog
+    DeleteStatusWarningDialog,
+    costsLoading
   } = useFencingFormGuarded(
     customerId,
     onSaveSuccess,
@@ -60,11 +61,16 @@ export const FramelessGlassFencing: React.FC<FramelessGlassFencingProps> = ({
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
-                <LinearMeterInput form={form} linearCost={costs.linearCost} />
+                <LinearMeterInput 
+                  form={form} 
+                  linearCost={costs.linearCost} 
+                  unitCost={costsLoading ? undefined : 396}
+                />
                 <GateSelector
                   form={form}
                   gatesCost={costs.gatesCost}
                   freeGateDiscount={costs.freeGateDiscount}
+                  unitCost={costsLoading ? undefined : 495}
                 />
                 <PanelSelector
                   form={form}

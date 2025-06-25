@@ -45,6 +45,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
     currentHeatPumpTotalCost,
     currentBlanketRollerTotalCost,
     currentTotalCost,
+    currentTotalMargin,
     StatusWarningDialog
   } = useHeatingOptionsStateGuarded({
     poolId: pool.id,
@@ -97,6 +98,7 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         setIncludeHeatPump={setIncludeHeatPump}
         installationCost={heatPumpInstallCost}
         totalCost={currentHeatPumpTotalCost || initialHeatPumpCost}
+        margin={includeHeatPump && compatibleHeatPump ? compatibleHeatPump.margin : 0}
       />
 
       <BlanketRollerSection
@@ -105,12 +107,14 @@ export const HeatingOptionsContent: React.FC<HeatingOptionsContentProps> = ({
         setIncludeBlanketRoller={setIncludeBlanketRoller}
         installationCost={blanketRollerInstallCost}
         totalCost={currentBlanketRollerTotalCost || initialBlanketRollerCost}
+        margin={includeBlanketRoller && blanketRoller ? blanketRoller.margin : 0}
       />
 
       <HeatingOptionsSummary
         includeHeatPump={includeHeatPump}
         includeBlanketRoller={includeBlanketRoller}
         totalCost={currentTotalCost}
+        totalMargin={currentTotalMargin}
       />
 
       {customerId && (

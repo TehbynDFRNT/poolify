@@ -2,6 +2,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useState, useEffect } from "react";
+import { useFencingCosts } from "./useFencingCosts";
 
 export interface FencingSummary {
   fencingType: string; // "Frameless Glass" or "Flat Top Metal"
@@ -30,10 +31,13 @@ export const useFencingSummary = (customerId: string | null, updateCounter: numb
     totalCost: 0
   });
 
+  // Fetch fencing costs from database
+  const { data: fencingCosts } = useFencingCosts();
+
   const { data, isLoading, error } = useQuery({
-    queryKey: ["fencing-summary", customerId, updateCounter],
+    queryKey: ["fencing-summary", customerId, updateCounter, fencingCosts],
     queryFn: async () => {
-      if (!customerId) return null;
+      if (!customerId || !fencingCosts) return null;
 
       // Fetch frameless glass fencing data
       const { data: framelessData, error: framelessError } = await supabase
@@ -67,13 +71,13 @@ export const useFencingSummary = (customerId: string | null, updateCounter: numb
       // Process frameless glass data if it exists
       if (framelessData && framelessData.length > 0) {
         const framelessFencing = framelessData[0];
-        const linearCost = framelessFencing.linear_meters * 195;
-        const gatesCost = framelessFencing.gates * 385;
-        const simplePanelsCost = framelessFencing.simple_panels * 220;
-        const complexPanelsCost = framelessFencing.complex_panels * 385;
-        const earthingCost = framelessFencing.earthing_required ? 40 : 0;
+        const linearCost = framelessFencing.linear_meters * fencingCosts.framelessGlassFencePerMeter;
+        const gatesCost = framelessFencing.gates * fencingCosts.framelessGlassGate;
+        const simplePanelsCost = framelessFencing.simple_panels * fencingCosts.retainingFGSimple;
+        const complexPanelsCost = framelessFencing.complex_panels * fencingCosts.retainingFGComplex;
+        const earthingCost = framelessFencing.earthing_required ? fencingCosts.earthingFG : 0;
         // Calculate free gate discount (first gate is free)
-        const freeGateDiscount = framelessFencing.gates > 0 ? -385 : 0;
+        const freeGateDiscount = framelessFencing.gates > 0 ? -fencingCosts.framelessGlassGate : 0;
         
         const framelessTotal = linearCost + gatesCost + simplePanelsCost + complexPanelsCost + earthingCost + freeGateDiscount;
         
@@ -99,11 +103,11 @@ export const useFencingSummary = (customerId: string | null, updateCounter: numb
       // Process flat top metal data if it exists
       if (flatTopData && flatTopData.length > 0) {
         const flatTopFencing = flatTopData[0];
-        const linearCost = flatTopFencing.linear_meters * 165;
-        const gatesCost = flatTopFencing.gates * 297;
-        const simplePanelsCost = flatTopFencing.simple_panels * 220;
-        const complexPanelsCost = flatTopFencing.complex_panels * 385;
-        const earthingCost = flatTopFencing.earthing_required ? 150 : 0;
+        const linearCost = flatTopFencing.linear_meters * fencingCosts.flatTopMetalFencePerMeter;
+        const gatesCost = flatTopFencing.gates * fencingCosts.flatTopMetalGate;
+        const simplePanelsCost = flatTopFencing.simple_panels * fencingCosts.retainingFTMSimple;
+        const complexPanelsCost = flatTopFencing.complex_panels * fencingCosts.retainingFTMComplex;
+        const earthingCost = flatTopFencing.earthing_required ? fencingCosts.earthingFTM : 0;
         
         const flatTopTotal = linearCost + gatesCost + simplePanelsCost + complexPanelsCost + earthingCost;
         
@@ -130,7 +134,7 @@ export const useFencingSummary = (customerId: string | null, updateCounter: numb
         totalCost
       };
     },
-    enabled: !!customerId
+    enabled: !!customerId && !!fencingCosts
   });
 
   useEffect(() => {

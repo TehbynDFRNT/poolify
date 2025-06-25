@@ -177,12 +177,6 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
   // Handle save using the guarded hook
   const handleSaveClick = async () => {
     // Save to pool_paving_selections table (existing extra concreting data)
-    const { data: existingPavingData } = await supabase
-      .from('pool_paving_selections')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
-
     const pavingDataToSave = {
       extra_concreting_type: selectedType || null,
       extra_concreting_square_meters: meterage || null,
@@ -191,27 +185,18 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
       extra_concrete_finish_two: concreteFinishTwo || null
     };
 
-    const pavingResult = await handleSave(pavingDataToSave, 'pool_paving_selections', existingPavingData?.id || null);
+    const pavingResult = await handleSave(pavingDataToSave, 'pool_paving_selections');
 
     // Save to pool_concrete_selections table (concrete pump data)
-    const { data: existingConcreteData } = await supabase
-      .from('pool_concrete_selections')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
-
     const concreteDataToSave = {
       extra_concrete_pump: extraConcretePumpNeeded,
       extra_concrete_pump_quantity: extraConcretePumpNeeded ? extraConcretePumpQuantity : null,
       extra_concrete_pump_total_cost: extraConcretePumpNeeded ? extraConcretePumpTotalCost : 0
     };
 
-    const concreteResult = await handleSave(concreteDataToSave, 'pool_concrete_selections', existingConcreteData?.id || null);
+    const concreteResult = await handleSave(concreteDataToSave, 'pool_concrete_selections');
 
     if (pavingResult.success && concreteResult.success) {
-      if ((pavingResult.newId && !existingPavingData?.id) || (concreteResult.newId && !existingConcreteData?.id)) {
-        toast.success("Extra concreting details saved successfully.");
-      }
       if (onSaveComplete) {
         onSaveComplete();
       }
@@ -220,59 +205,42 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
 
   // Handle delete using the guarded hook
   const handleDeleteClick = async () => {
-    // First, clear all extra concreting fields in pool_paving_selections
-    const { data: existingPavingData } = await supabase
-      .from('pool_paving_selections')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
+    // Clear all extra concreting related fields
+    const pavingDataToClear = {
+      extra_concreting_type: null,
+      extra_concreting_square_meters: null,
+      extra_concreting_total_cost: null,
+      extra_concrete_finish_one: null,
+      extra_concrete_finish_two: null
+    };
 
-    if (existingPavingData?.id) {
-      // Clear all extra concreting related fields
-      const pavingDataToClear = {
-        extra_concreting_type: null,
-        extra_concreting_square_meters: null,
-        extra_concreting_total_cost: null,
-        extra_concrete_finish_one: null,
-        extra_concrete_finish_two: null
-      };
+    const pavingResult = await handleSave(pavingDataToClear, 'pool_paving_selections');
 
-      const pavingResult = await handleSave(pavingDataToClear, 'pool_paving_selections', existingPavingData.id);
+    // Also clear the extra concrete pump data
+    const concreteDataToClear = {
+      extra_concrete_pump: false,
+      extra_concrete_pump_quantity: null,
+      extra_concrete_pump_total_cost: 0
+    };
 
-      // Also clear the extra concrete pump data
-      const { data: existingConcreteData } = await supabase
-        .from('pool_concrete_selections')
-        .select('id')
-        .eq('pool_project_id', customerId)
-        .maybeSingle();
+    const concreteResult = await handleSave(concreteDataToClear, 'pool_concrete_selections');
 
-      if (existingConcreteData?.id) {
-        const concreteDataToClear = {
-          extra_concrete_pump: false,
-          extra_concrete_pump_quantity: null,
-          extra_concrete_pump_total_cost: 0
-        };
+    if (pavingResult.success && concreteResult.success) {
+      // Reset form
+      setSelectedType('');
+      setMeterage(0);
+      setTotalCost(0);
+      setConcreteFinishOne('');
+      setConcreteFinishTwo('');
+      setExtraConcretePumpNeeded(false);
+      setExtraConcretePumpQuantity(0);
+      setExtraConcretePumpTotalCost(0);
+      setShowDeleteConfirm(false);
+      
+      toast.success("Extra concreting details removed successfully.");
 
-        await handleSave(concreteDataToClear, 'pool_concrete_selections', existingConcreteData.id);
-      }
-
-      if (pavingResult.success) {
-        // Reset form
-        setSelectedType('');
-        setMeterage(0);
-        setTotalCost(0);
-        setConcreteFinishOne('');
-        setConcreteFinishTwo('');
-        setExtraConcretePumpNeeded(false);
-        setExtraConcretePumpQuantity(0);
-        setExtraConcretePumpTotalCost(0);
-        setShowDeleteConfirm(false);
-        
-        toast.success("Extra concreting details removed successfully.");
-
-        if (onSaveComplete) {
-          onSaveComplete();
-        }
+      if (onSaveComplete) {
+        onSaveComplete();
       }
     }
   };

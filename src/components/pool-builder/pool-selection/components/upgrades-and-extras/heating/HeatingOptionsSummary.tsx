@@ -17,6 +17,7 @@ interface HeatingOptionsSummaryProps {
   // heatPumpInstallationCost: number;
   // blanketRollerInstallationCost: number;
   totalCost: number; // This is the main prop we need for the total
+  totalMargin: number; // Total margin for all selected options
 }
 
 export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
@@ -29,6 +30,7 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
   // heatPumpInstallationCost, // Removed
   // blanketRollerInstallationCost, // Removed
   totalCost,
+  totalMargin,
 }) => {
   const hasSelections = includeHeatPump || includeBlanketRoller;
 
@@ -63,6 +65,12 @@ export const HeatingOptionsSummary: React.FC<HeatingOptionsSummaryProps> = ({
           <p className="text-lg font-semibold">Total Cost:</p>
           <p className="text-lg font-bold">{formatCurrency(totalCost)}</p>
         </div>
+        {totalMargin > 0 && (
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Total Margin:</span>
+            <span>{formatCurrency(totalMargin)}</span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

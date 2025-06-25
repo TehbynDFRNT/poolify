@@ -101,26 +101,16 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
 
   // Handle save for coping options
   const handleCopingSaveClick = async () => {
-    // First check if a record already exists
-    const { data: existingData } = await supabase
-      .from('pool_paving_selections')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
-
     const dataToSave = {
       coping_category: copingCategory || null,
       grout_colour: groutColour || null,
       recess_drainage: recessDraining || null
     };
 
-    // Use the guarded handleSave for both insert and update
-    const result = await handleCopingSave(dataToSave, 'pool_paving_selections', existingData?.id || null);
+    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
+    const result = await handleCopingSave(dataToSave, 'pool_paving_selections');
 
     if (result.success) {
-      if (result.newId && !existingData?.id) {
-        toast.success("Included coping options saved successfully.");
-      }
       refreshSummary();
     }
   };

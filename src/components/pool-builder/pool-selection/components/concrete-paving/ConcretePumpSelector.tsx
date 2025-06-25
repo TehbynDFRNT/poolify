@@ -94,13 +94,6 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
 
   // Save concrete pump data using the guarded hook
   const handleSaveClick = async () => {
-    // First check if a record already exists
-    const { data: existingData } = await supabase
-      .from('pool_concrete_selections')
-      .select('id')
-      .eq('pool_project_id', customerId)
-      .maybeSingle();
-
     // Prepare data to save
     const dataToSave = {
       concrete_pump_needed: isPumpNeeded,
@@ -108,13 +101,10 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
       concrete_pump_total_cost: isPumpNeeded ? totalCost : 0
     };
 
-    // Use the guarded handleSave for both insert and update
-    const result = await handleSave(dataToSave, 'pool_concrete_selections', existingData?.id || null);
+    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
+    const result = await handleSave(dataToSave, 'pool_concrete_selections');
 
     if (result.success) {
-      if (!existingData?.id) {
-        toast.success("Concrete pump details saved successfully.");
-      }
       if (onSaveComplete) {
         onSaveComplete();
       }
