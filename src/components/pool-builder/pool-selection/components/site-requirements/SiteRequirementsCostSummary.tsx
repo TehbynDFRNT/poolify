@@ -8,8 +8,6 @@ interface SiteRequirementsCostSummaryProps {
   bobcatCost: number;
   customRequirementsTotal: number;
   totalCost: number;
-  isDefaultCrane?: boolean;
-  defaultCraneCost?: number;
 }
 
 export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryProps> = ({
@@ -17,17 +15,14 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
   trafficControlCost,
   bobcatCost,
   customRequirementsTotal,
-  totalCost,
-  isDefaultCrane = false,
-  defaultCraneCost = 0
+  totalCost
 }) => {
-  // Calculate the crane cost difference if this is not the default crane
-  const craneCostDifference = isDefaultCrane ? 0 : craneCost - defaultCraneCost;
+  // Apply the same logic as use-calculator-totals.ts
+  const craneAllowance = 700;
+  const craneExcessCost = Math.max(craneCost - craneAllowance, 0);
   
-  // Calculate the adjusted total (subtracting the default crane cost if needed)
-  const adjustedTotal = isDefaultCrane ? 
-    totalCost : 
-    totalCost - craneCost + craneCostDifference;
+  // Calculate the actual site requirements total (only excess crane cost)
+  const calculatedTotal = craneExcessCost + trafficControlCost + bobcatCost + customRequirementsTotal;
 
   return (
     <div className="space-y-4">
@@ -38,16 +33,16 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
             <div className="flex justify-between py-1">
               <span>
                 Crane: 
-                {!isDefaultCrane && defaultCraneCost > 0 && (
+                {craneExcessCost > 0 && (
                   <span className="text-xs text-muted-foreground ml-1">
-                    (additional cost)
+                    (excess over ${craneAllowance} allowance)
                   </span>
                 )}
               </span>
               <span className="font-medium">
-                {isDefaultCrane ? 
-                  "Included in base price" : 
-                  formatCurrency(craneCostDifference)}
+                {craneExcessCost === 0 ? 
+                  "Covered by allowance" : 
+                  formatCurrency(craneExcessCost)}
               </span>
             </div>
             <div className="flex justify-between py-1">
@@ -75,13 +70,11 @@ export const SiteRequirementsCostSummary: React.FC<SiteRequirementsCostSummaryPr
       <div className="border-t pt-4 mt-2">
         <div className="flex justify-between items-center">
           <span className="text-lg font-medium">Total Site Requirements Cost:</span>
-          <span className="text-lg font-bold text-primary">{formatCurrency(adjustedTotal)}</span>
+          <span className="text-lg font-bold text-primary">{formatCurrency(calculatedTotal)}</span>
         </div>
-        {!isDefaultCrane && defaultCraneCost > 0 && (
-          <p className="text-xs text-muted-foreground mt-1">
-            *Standard Franna crane cost is already included in the base pool price
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground mt-1">
+          *A standard ${craneAllowance} crane allowance is included in the base pool price
+        </p>
       </div>
     </div>
   );

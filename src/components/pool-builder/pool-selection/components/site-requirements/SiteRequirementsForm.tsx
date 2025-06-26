@@ -93,8 +93,6 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
         bobcatCost={bobcatCost}
         customRequirementsTotal={customRequirementsTotal}
         totalCost={totalCost}
-        isDefaultCrane={isDefaultCrane}
-        defaultCraneCost={defaultCraneCost}
       />
       
       {/* Save Button */}
