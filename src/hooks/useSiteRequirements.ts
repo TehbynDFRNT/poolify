@@ -14,6 +14,17 @@ export const useSiteRequirements = (customerId: string) => {
   const [bobcatCost, setBobcatCost] = useState<number>(0);
   const [defaultCraneCost, setDefaultCraneCost] = useState<number>(0);
   const [defaultCraneId, setDefaultCraneId] = useState<string | undefined>(undefined);
+  
+  // Site conditions state
+  const [accessGrade, setAccessGrade] = useState<string | undefined>("none");
+  const [distanceFromTruck, setDistanceFromTruck] = useState<string | undefined>("none");
+  const [poolShellDelivery, setPoolShellDelivery] = useState<string | undefined>("none");
+  const [sewerDiversion, setSewerDiversion] = useState<string | undefined>("none");
+  const [stormwaterDiversion, setStormwaterDiversion] = useState<string | undefined>("none");
+  const [removeSlab, setRemoveSlab] = useState<string | undefined>("none");
+  const [earthmoving, setEarthmoving] = useState<string | undefined>("none");
+  const [removeSlabSqm, setRemoveSlabSqm] = useState<string>("");
+  const [earthmovingCubicMeters, setEarthmovingCubicMeters] = useState<string>("");
 
   // Load existing site requirements if any
   useEffect(() => {
@@ -31,6 +42,17 @@ export const useSiteRequirements = (customerId: string) => {
               crane_id,
               traffic_control_id,
               bobcat_id
+            ),
+            pool_site_conditions(
+              access_grade,
+              distance_from_truck,
+              pool_shell_delivery,
+              sewer_diversion,
+              stormwater_diversion,
+              remove_slab,
+              earthmoving,
+              remove_slab_sqm,
+              earthmoving_cubic_meters
             )
           `)
           .eq('id', customerId)
@@ -42,6 +64,9 @@ export const useSiteRequirements = (customerId: string) => {
         }
 
         if (data) {
+          console.log("Full data loaded:", data);
+          console.log("pool_site_conditions raw data:", data.pool_site_conditions);
+          
           // Extract equipment data from the junction table
           const equipmentData = getFirstOrEmpty(data.pool_equipment_selections);
 
@@ -49,6 +74,30 @@ export const useSiteRequirements = (customerId: string) => {
           setCraneId(equipmentData.crane_id || undefined);
           setTrafficControlId(equipmentData.traffic_control_id || 'none');
           setBobcatId(equipmentData.bobcat_id || 'none');
+          
+          // Extract site conditions data from the new table
+          // Check if pool_site_conditions exists and is an array
+          let siteConditionsData: any = {};
+          if (data.pool_site_conditions) {
+            if (Array.isArray(data.pool_site_conditions)) {
+              siteConditionsData = getFirstOrEmpty(data.pool_site_conditions);
+            } else {
+              // It might be a single object instead of an array
+              siteConditionsData = data.pool_site_conditions;
+            }
+          }
+          
+          // Set site conditions
+          console.log("Site conditions data processed:", siteConditionsData);
+          setAccessGrade(siteConditionsData.access_grade || "none");
+          setDistanceFromTruck(siteConditionsData.distance_from_truck || "none");
+          setPoolShellDelivery(siteConditionsData.pool_shell_delivery || "none");
+          setSewerDiversion(siteConditionsData.sewer_diversion || "none");
+          setStormwaterDiversion(siteConditionsData.stormwater_diversion || "none");
+          setRemoveSlab(siteConditionsData.remove_slab || "none");
+          setEarthmoving(siteConditionsData.earthmoving || "none");
+          setRemoveSlabSqm(siteConditionsData.remove_slab_sqm?.toString() || "");
+          setEarthmovingCubicMeters(siteConditionsData.earthmoving_cubic_meters?.toString() || "");
 
           // Safely handle the custom requirements data with proper type checking
           if (data.site_requirements_data && Array.isArray(data.site_requirements_data)) {
@@ -66,7 +115,8 @@ export const useSiteRequirements = (customerId: string) => {
                     ...item,
                     cost,
                     margin,
-                    price: cost + margin
+                    price: cost + margin,
+                    type: item.type || 'manual' // default to manual if no type
                   } as CustomRequirement;
                 } else if ('price' in item) {
                   // Legacy structure - migrate to new structure (assume price is cost with 0 margin)
@@ -75,7 +125,8 @@ export const useSiteRequirements = (customerId: string) => {
                     ...item,
                     cost: price,
                     margin: 0,
-                    price: price
+                    price: price,
+                    type: item.type || 'manual' // default to manual if no type
                   } as CustomRequirement;
                 }
               }
@@ -190,7 +241,7 @@ export const useSiteRequirements = (customerId: string) => {
   const addRequirement = () => {
     setCustomRequirements([
       ...customRequirements,
-      { id: crypto.randomUUID(), description: "", cost: 0, margin: 0, price: 0 }
+      { id: crypto.randomUUID(), description: "", cost: 0, margin: 0, price: 0, type: 'manual' }
     ]);
   };
 
@@ -235,7 +286,26 @@ export const useSiteRequirements = (customerId: string) => {
     customRequirementsTotal,
     addRequirement,
     removeRequirement,
-    updateRequirement
+    updateRequirement,
+    // Site conditions
+    accessGrade,
+    setAccessGrade,
+    distanceFromTruck,
+    setDistanceFromTruck,
+    poolShellDelivery,
+    setPoolShellDelivery,
+    sewerDiversion,
+    setSewerDiversion,
+    stormwaterDiversion,
+    setStormwaterDiversion,
+    removeSlab,
+    setRemoveSlab,
+    earthmoving,
+    setEarthmoving,
+    removeSlabSqm,
+    setRemoveSlabSqm,
+    earthmovingCubicMeters,
+    setEarthmovingCubicMeters
   };
 };
 
@@ -245,4 +315,5 @@ export interface CustomRequirement {
   cost: number;
   margin: number;
   price: number; // calculated as cost + margin
+  type?: 'auto' | 'manual'; // determines rendering method
 }

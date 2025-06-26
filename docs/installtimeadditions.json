@@ -1,0 +1,30 @@
+{
+    "Access": [
+      { "grade": "1.5m+",      "timeImpactHours": 0 },
+      { "grade": "1.3m-1.5m",  "timeImpactHours": 5 },
+      { "grade": "1.2m-1.3m",  "timeImpactHours": 10 }
+    ],
+  
+    "Distance From Truck to Hole": [
+      { "grade": "20-25m",     "timeImpactHours": 0 },
+      { "grade": "25-35m",     "timeImpactHours": 3 },
+      { "grade": "35-60m",     "timeImpactHours": 6 },
+      { "grade": "60m+",       "timeImpactHours": 8 }
+    ],
+  
+    "Pool Shell Delivery": [
+      { "grade": "Site",       "timeImpactHours": 0 },
+      { "grade": "Off-Truck",  "timeImpactHours": 2 }
+    ],
+  
+    "Sewer Diversion (By Plumber)": [
+      { "grade": "No",         "timeImpactHours": 0 },
+      { "grade": "Yes",        "timeImpactHours": 4 }
+    ],
+  
+    "Stormwater Diversion (By Plumber)": [
+      { "grade": "No",         "timeImpactHours": 0 },
+      { "grade": "Yes",        "timeImpactHours": 3 }
+    ]
+  }
+  

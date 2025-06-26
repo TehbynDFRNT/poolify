@@ -74,6 +74,18 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
             pool_equipment_selections.traffic_control_id,
             pool_equipment_selections.bobcat_id
            FROM pool_equipment_selections
+        ), site_conditions AS (
+         SELECT pool_site_conditions.pool_project_id,
+            pool_site_conditions.access_grade,
+            pool_site_conditions.distance_from_truck,
+            pool_site_conditions.pool_shell_delivery,
+            pool_site_conditions.sewer_diversion,
+            pool_site_conditions.stormwater_diversion,
+            pool_site_conditions.remove_slab,
+            pool_site_conditions.earthmoving,
+            pool_site_conditions.remove_slab_sqm,
+            pool_site_conditions.earthmoving_cubic_meters
+           FROM pool_site_conditions
         ), paving AS (
          SELECT pool_paving_selections.pool_project_id,
             pool_paving_selections.extra_paving_category,
@@ -220,6 +232,15 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     tc.name AS tc_name,
     pj.site_requirements_data,
     pj.site_requirements_notes,
+    sc.access_grade AS site_access_grade,
+    sc.distance_from_truck AS site_distance_from_truck,
+    sc.pool_shell_delivery AS site_pool_shell_delivery,
+    sc.sewer_diversion AS site_sewer_diversion,
+    sc.stormwater_diversion AS site_stormwater_diversion,
+    sc.remove_slab AS site_remove_slab,
+    sc.earthmoving AS site_earthmoving,
+    sc.remove_slab_sqm AS site_remove_slab_sqm,
+    sc.earthmoving_cubic_meters AS site_earthmoving_cubic_meters,
     pf.filtration_package_id,
     fp.name AS filtration_package_name,
     fc_pump.name AS pump_name,
@@ -361,6 +382,7 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
      LEFT JOIN fence_strips fs ON fs.pool_project_id = pj.id
      LEFT JOIN retaining_walls rw ON rw.pool_project_id = pj.id
      LEFT JOIN equipment eq ON eq.pool_project_id = pj.id
+     LEFT JOIN site_conditions sc ON sc.pool_project_id = pj.id
      LEFT JOIN crane_costs crn ON crn.id = eq.crane_id
      LEFT JOIN bobcat_costs bob ON bob.id = eq.bobcat_id
      LEFT JOIN traffic_control_costs tc ON tc.id = eq.traffic_control_id

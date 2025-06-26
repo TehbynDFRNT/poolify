@@ -8,6 +8,16 @@ interface SiteRequirementsFormData {
     bobcatId: string;
     customRequirements: any[];
     notes: string;
+    // Site conditions
+    accessGrade: string;
+    distanceFromTruck: string;
+    poolShellDelivery: string;
+    sewerDiversion: string;
+    stormwaterDiversion: string;
+    removeSlab: string;
+    earthmoving: string;
+    removeSlabSqm: string;
+    earthmovingCubicMeters: string;
 }
 
 export const useSiteRequirementsGuarded = (customerId: string) => {
@@ -64,7 +74,47 @@ export const useSiteRequirementsGuarded = (customerId: string) => {
                 if (equipmentError) throw equipmentError;
             }
 
-            // 2. Update site requirements data and notes in pool_projects
+            // 2. Handle site conditions
+            // Check if we already have a site conditions record
+            const { data: existingSiteConditions } = await supabase
+                .from('pool_site_conditions')
+                .select('id')
+                .eq('pool_project_id', customerId)
+                .maybeSingle();
+
+            const siteConditionsData = {
+                access_grade: formData.accessGrade === 'none' ? null : formData.accessGrade || null,
+                distance_from_truck: formData.distanceFromTruck === 'none' ? null : formData.distanceFromTruck || null,
+                pool_shell_delivery: formData.poolShellDelivery === 'none' ? null : formData.poolShellDelivery || null,
+                sewer_diversion: formData.sewerDiversion === 'none' ? null : formData.sewerDiversion || null,
+                stormwater_diversion: formData.stormwaterDiversion === 'none' ? null : formData.stormwaterDiversion || null,
+                remove_slab: formData.removeSlab === 'none' ? null : formData.removeSlab || null,
+                earthmoving: formData.earthmoving === 'none' ? null : formData.earthmoving || null,
+                remove_slab_sqm: formData.removeSlabSqm ? parseFloat(formData.removeSlabSqm) : null,
+                earthmoving_cubic_meters: formData.earthmovingCubicMeters ? parseFloat(formData.earthmovingCubicMeters) : null
+            };
+
+            if (existingSiteConditions?.id) {
+                // Update existing site conditions
+                const { error: siteConditionsError } = await supabase
+                    .from('pool_site_conditions')
+                    .update(siteConditionsData)
+                    .eq('id', existingSiteConditions.id);
+
+                if (siteConditionsError) throw siteConditionsError;
+            } else {
+                // Create new site conditions record
+                const { error: siteConditionsError } = await supabase
+                    .from('pool_site_conditions')
+                    .insert({
+                        pool_project_id: customerId,
+                        ...siteConditionsData
+                    });
+
+                if (siteConditionsError) throw siteConditionsError;
+            }
+
+            // 3. Update site requirements data and notes in pool_projects
             const { error: projectError } = await supabase
                 .from('pool_projects')
                 .update({
