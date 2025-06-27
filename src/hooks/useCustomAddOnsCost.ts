@@ -2,41 +2,44 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * Hook to calculate the total cost of custom add-ons for a project
+ * Hook to calculate the total cost and margin of custom add-ons for a project
  * @param customerId The pool project ID
- * @returns Total RRP cost of all custom add-ons
+ * @returns Total RRP cost and margin of all custom add-ons
  */
 export const useCustomAddOnsCost = (customerId: string | null) => {
-  const { data: customAddOnsCost = 0, isLoading } = useQuery({
+  const { data = { cost: 0, margin: 0 }, isLoading } = useQuery({
     queryKey: ['custom-add-ons-cost', customerId],
     queryFn: async () => {
-      if (!customerId) return 0;
+      if (!customerId) return { cost: 0, margin: 0 };
 
       try {
         const { data, error } = await supabase
-          .from('pool_general_extras' as any)
-          .select('rrp, quantity')
-          .eq('pool_project_id', customerId)
-          .eq('type', 'custom');
+          .from('pool_custom_addons')
+          .select('rrp, margin')
+          .eq('pool_project_id', customerId);
 
         if (error) throw error;
 
-        // Calculate total RRP cost (rrp * quantity for each item)
-        const totalCost = data.reduce((sum: number, item: any) => {
-          return sum + ((item.rrp || 0) * (item.quantity || 1));
-        }, 0);
+        // Calculate total RRP cost and margin
+        const totals = data.reduce((acc: { cost: number, margin: number }, item: any) => {
+          return {
+            cost: acc.cost + (item.rrp || 0),
+            margin: acc.margin + (item.margin || 0)
+          };
+        }, { cost: 0, margin: 0 });
 
-        return totalCost;
+        return totals;
       } catch (error) {
         console.error("Error fetching custom add-ons cost:", error);
-        return 0;
+        return { cost: 0, margin: 0 };
       }
     },
     enabled: !!customerId
   });
 
   return {
-    customAddOnsCost,
+    customAddOnsCost: data.cost,
+    customAddOnsMargin: data.margin,
     isLoading
   };
 };

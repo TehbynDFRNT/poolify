@@ -9,10 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { Layers } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
-import { SaveButton } from "../SaveButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PavingOnExistingConcreteProps {
   pool: Pool;
@@ -31,6 +31,10 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const { pavingOnExistingConcreteTotals, existingConcreteLabourWithMargin, isLoading: isCategoriesLoading } = useFormulaCalculations();
+  const queryClient = useQueryClient();
+  
+  // Track previous values to prevent unnecessary saves
+  const prevValuesRef = useRef({ selectedCategory, squareMeters });
 
   // Log pavingOnExistingConcreteTotals structure once available
   useEffect(() => {
@@ -142,6 +146,82 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
     ? selectedCategoryDetails.totalRate * squareMeters
     : 0;
 
+  // Auto-save effect - only trigger on user input changes
+  useEffect(() => {
+    // Check if values actually changed
+    const hasChanged = 
+      prevValuesRef.current.selectedCategory !== selectedCategory ||
+      prevValuesRef.current.squareMeters !== squareMeters;
+    
+    if (!hasChanged || !customerId || isLoading || isCategoriesLoading) return;
+    
+    // Update ref with new values
+    prevValuesRef.current = { selectedCategory, squareMeters };
+
+    const timer = setTimeout(async () => {
+      // Only save if there's actually data to save
+      if (selectedCategory || squareMeters > 0) {
+        // Find category details to calculate total
+        const categoryDetails = pavingOnExistingConcreteTotals.find(cat => cat.id === selectedCategory);
+        const calculatedTotalCost = categoryDetails && squareMeters > 0
+          ? categoryDetails.totalRate * squareMeters
+          : 0;
+        
+        const dataToSave = {
+          existing_concrete_paving_category: selectedCategory || null,
+          existing_concrete_paving_square_meters: squareMeters || null,
+          existing_concrete_paving_total_cost: calculatedTotalCost || null
+        };
+
+        console.log('[PavingOnExistingConcrete] Auto-saving data:', dataToSave);
+
+        try {
+          // Check if any record exists first
+          const { data: existingData } = await supabase
+            .from('pool_paving_selections')
+            .select('id')
+            .eq('pool_project_id', customerId)
+            .maybeSingle();
+
+          // Perform upsert directly to avoid hook dependency issues
+          if (existingData?.id) {
+            const { error } = await supabase
+              .from('pool_paving_selections')
+              .update(dataToSave)
+              .eq('id', existingData.id);
+
+            if (error) {
+              console.error('[PavingOnExistingConcrete] Auto-save failed:', error);
+              toast.error("Failed to save paving data");
+            } else {
+              // Invalidate the snapshot query after successful save
+              queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+            }
+          } else {
+            const { error } = await supabase
+              .from('pool_paving_selections')
+              .insert({
+                ...dataToSave,
+                pool_project_id: customerId
+              });
+
+            if (error) {
+              console.error('[PavingOnExistingConcrete] Auto-save failed:', error);
+              toast.error("Failed to save paving data");
+            } else {
+              // Invalidate the snapshot query after successful save
+              queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+            }
+          }
+        } catch (error) {
+          console.error('[PavingOnExistingConcrete] Auto-save error:', error);
+        }
+      }
+    }, 1500); // 1.5 second debounce
+
+    return () => clearTimeout(timer);
+  }, [selectedCategory, squareMeters, customerId, isLoading, isCategoriesLoading, pavingOnExistingConcreteTotals]); // Only depend on actual user inputs and stable values
+
   // Format square meters with max 2 decimal places
   const handleSquareMetersChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseFloat(e.target.value);
@@ -189,7 +269,7 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
   return (
     <>
       <Card>
-        <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+        <CardHeader className="bg-white pb-2">
           <div>
             <div className="flex items-center gap-2">
               <Layers className="h-5 w-5 text-primary" />
@@ -199,16 +279,6 @@ export const PavingOnExistingConcrete: React.FC<PavingOnExistingConcreteProps> =
               Add paving on existing concrete areas to your pool project
             </p>
           </div>
-
-          {customerId && (
-            <SaveButton
-              onClick={handleSaveClick}
-              isSubmitting={isSubmitting}
-              disabled={false}
-              buttonText="Save Details"
-              className="bg-primary"
-            />
-          )}
         </CardHeader>
 
         <CardContent className="pt-4">

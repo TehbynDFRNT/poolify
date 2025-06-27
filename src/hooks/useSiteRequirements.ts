@@ -1,8 +1,10 @@
 import { supabase } from "@/integrations/supabase/client";
 import { getFirstOrEmpty } from "@/utils/poolProjectHelpers";
 import { useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useSiteRequirements = (customerId: string) => {
+  const queryClient = useQueryClient();
   const [craneId, setCraneId] = useState<string | undefined>(undefined);
   const [trafficControlId, setTrafficControlId] = useState<string | undefined>('none');
   const [bobcatId, setBobcatId] = useState<string | undefined>('none');
@@ -228,7 +230,183 @@ export const useSiteRequirements = (customerId: string) => {
     fetchCosts();
   }, [craneId, trafficControlId, bobcatId]);
 
-  // Calculate costs and related properties
+  // Auto-save equipment selections when they change
+  useEffect(() => {
+    const autoSaveEquipment = async () => {
+      if (!customerId || isLoading) return;
+      
+      try {
+        // First, check if equipment selection record exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('pool_equipment_selections')
+          .select('id')
+          .eq('pool_project_id', customerId)
+          .single();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error("Error checking equipment selections:", checkError);
+          return;
+        }
+
+        if (existingData) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('pool_equipment_selections')
+            .update({
+              crane_id: craneId === 'none' ? null : craneId,
+              traffic_control_id: trafficControlId === 'none' ? null : trafficControlId,
+              bobcat_id: bobcatId === 'none' ? null : bobcatId,
+              updated_at: new Date().toISOString()
+            })
+            .eq('pool_project_id', customerId);
+
+          if (updateError) {
+            console.error("Error updating equipment selections:", updateError);
+          } else {
+            // Invalidate snapshot query after successful save
+            queryClient.invalidateQueries({ 
+              queryKey: ['project-snapshot', customerId] 
+            });
+          }
+        } else {
+          // Create new record
+          const { error: insertError } = await supabase
+            .from('pool_equipment_selections')
+            .insert({
+              pool_project_id: customerId,
+              crane_id: craneId === 'none' ? null : craneId,
+              traffic_control_id: trafficControlId === 'none' ? null : trafficControlId,
+              bobcat_id: bobcatId === 'none' ? null : bobcatId
+            });
+
+          if (insertError) {
+            console.error("Error inserting equipment selections:", insertError);
+          } else {
+            // Invalidate snapshot query after successful save
+            queryClient.invalidateQueries({ 
+              queryKey: ['project-snapshot', customerId] 
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error auto-saving equipment selections:", error);
+      }
+    };
+
+    autoSaveEquipment();
+  }, [craneId, trafficControlId, bobcatId, customerId, isLoading, queryClient]);
+
+  // Auto-save site conditions when they change
+  useEffect(() => {
+    const autoSaveSiteConditions = async () => {
+      if (!customerId || isLoading) return;
+      
+      try {
+        // First, check if site conditions record exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('pool_site_conditions')
+          .select('id')
+          .eq('pool_project_id', customerId)
+          .single();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error("Error checking site conditions:", checkError);
+          return;
+        }
+
+        const siteConditionsData = {
+          access_grade: accessGrade === 'none' ? null : accessGrade,
+          distance_from_truck: distanceFromTruck === 'none' ? null : distanceFromTruck,
+          pool_shell_delivery: poolShellDelivery === 'none' ? null : poolShellDelivery,
+          sewer_diversion: sewerDiversion === 'none' ? null : sewerDiversion,
+          stormwater_diversion: stormwaterDiversion === 'none' ? null : stormwaterDiversion,
+          remove_slab: removeSlab === 'none' ? null : removeSlab,
+          earthmoving: earthmoving === 'none' ? null : earthmoving,
+          remove_slab_sqm: removeSlabSqm ? parseFloat(removeSlabSqm) : null,
+          earthmoving_cubic_meters: earthmovingCubicMeters ? parseFloat(earthmovingCubicMeters) : null
+        };
+
+        if (existingData) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('pool_site_conditions')
+            .update({
+              ...siteConditionsData,
+              updated_at: new Date().toISOString()
+            })
+            .eq('pool_project_id', customerId);
+
+          if (updateError) {
+            console.error("Error updating site conditions:", updateError);
+          } else {
+            // Invalidate snapshot query after successful save
+            queryClient.invalidateQueries({ 
+              queryKey: ['project-snapshot', customerId] 
+            });
+          }
+        } else {
+          // Create new record
+          const { error: insertError } = await supabase
+            .from('pool_site_conditions')
+            .insert({
+              pool_project_id: customerId,
+              ...siteConditionsData
+            });
+
+          if (insertError) {
+            console.error("Error inserting site conditions:", insertError);
+          } else {
+            // Invalidate snapshot query after successful save
+            queryClient.invalidateQueries({ 
+              queryKey: ['project-snapshot', customerId] 
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error auto-saving site conditions:", error);
+      }
+    };
+
+    autoSaveSiteConditions();
+  }, [accessGrade, distanceFromTruck, poolShellDelivery, sewerDiversion, stormwaterDiversion, 
+      removeSlab, earthmoving, removeSlabSqm, earthmovingCubicMeters, customerId, isLoading, queryClient]);
+
+  // Auto-save custom requirements when they change
+  useEffect(() => {
+    const autoSaveCustomRequirements = async () => {
+      if (!customerId || isLoading) return;
+      
+      try {
+        const { error: updateError } = await supabase
+          .from('pool_projects')
+          .update({
+            site_requirements_data: customRequirements,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', customerId);
+
+        if (updateError) {
+          console.error("Error updating custom requirements:", updateError);
+        } else {
+          // Invalidate snapshot query after successful save
+          queryClient.invalidateQueries({ 
+            queryKey: ['project-snapshot', customerId] 
+          });
+        }
+      } catch (error) {
+        console.error("Error auto-saving custom requirements:", error);
+      }
+    };
+
+    // Add a small delay to prevent too many saves
+    const timeoutId = setTimeout(() => {
+      autoSaveCustomRequirements();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [customRequirements, customerId, isLoading, queryClient]);
+
+  // Keep these for backward compatibility but calculations now done in calculator hook
   const customRequirementsTotal = customRequirements.reduce(
     (total, req) => total + (req.price || 0),
     0
@@ -265,6 +443,11 @@ export const useSiteRequirements = (customerId: string) => {
     }));
   };
 
+  // Function to update all requirements including auto-calculated ones
+  const setAllRequirements = (requirements: CustomRequirement[]) => {
+    setCustomRequirements(requirements);
+  };
+
   return {
     craneId,
     setCraneId,
@@ -287,6 +470,7 @@ export const useSiteRequirements = (customerId: string) => {
     addRequirement,
     removeRequirement,
     updateRequirement,
+    setAllRequirements,
     // Site conditions
     accessGrade,
     setAccessGrade,

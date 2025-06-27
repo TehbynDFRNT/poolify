@@ -21,9 +21,10 @@ const SubmitButton: React.FC<SubmitButtonProps> = ({
       <Button 
         type="submit" 
         disabled={isSubmitting}
-        className="w-full md:w-auto flex items-center gap-2"
+        size="lg"
+        className="bg-green-600 hover:bg-green-700 w-full md:w-auto flex items-center gap-2"
       >
-        <Save className="h-4 w-4" />
+        <Save className="h-5 w-5" />
         {isSubmitting ? loadingLabel : (submitLabel || label)}
       </Button>
     </div>

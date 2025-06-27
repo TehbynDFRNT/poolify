@@ -3,7 +3,6 @@ import React from "react";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Pool } from "@/types/pool";
-import { ChevronDown } from "lucide-react";
 
 interface PoolModelSelectorProps {
   poolsByRange: Record<string, Pool[]>;
@@ -25,7 +24,6 @@ export const PoolModelSelector: React.FC<PoolModelSelectorProps> = ({
       >
         <SelectTrigger id="pool-select" className="w-full">
           <SelectValue placeholder="Select a pool model" />
-          <ChevronDown className="h-4 w-4 opacity-50" />
         </SelectTrigger>
         <SelectContent className="max-h-80">
           {Object.keys(poolsByRange).length === 0 ? (

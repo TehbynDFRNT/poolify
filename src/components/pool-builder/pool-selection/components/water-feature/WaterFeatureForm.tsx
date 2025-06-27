@@ -14,7 +14,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
 import { Pool } from "@/types/pool";
 import { WaterFeatureFormValues } from "@/types/water-feature";
-import { Trash2 } from "lucide-react";
+import { Trash2, Save } from "lucide-react";
 import React from "react";
 import { SaveButton } from "../SaveButton";
 import { WaterFeatureFormFields } from "./components/WaterFeatureFormFields";
@@ -117,6 +117,9 @@ export const WaterFeatureForm: React.FC<WaterFeatureFormProps> = ({
                     isSubmitting={isSubmitting}
                     disabled={!form.formState.isDirty && existingData !== null}
                     buttonText="Save Water Feature Options"
+                    size="lg"
+                    variant="green"
+                    icon={<Save className="mr-2 h-5 w-5" />}
                   />
                 </div>
               </div>

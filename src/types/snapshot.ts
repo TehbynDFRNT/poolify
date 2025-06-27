@@ -102,6 +102,9 @@ export interface ProposalSnapshot {
   // Existing concrete paving
   existing_paving_category: string;
   existing_paving_name: string;     // human-readable existing paving type
+  existing_paving_paver_cost: number;
+  existing_paving_wastage_cost: number;
+  existing_paving_margin_cost: number;
   existing_paving_sqm: number;
   existing_paving_cost: number;
   

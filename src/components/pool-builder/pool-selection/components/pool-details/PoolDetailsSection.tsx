@@ -1,6 +1,4 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useExcavation } from "@/pages/Quotes/components/SelectPoolStep/hooks/useExcavation";
-import { useFiltrationPackage } from "@/pages/Quotes/components/SelectPoolStep/hooks/useFiltrationPackage";
 import { Pool } from "@/types/pool";
 import React from "react";
 import { PoolCostsSummaryContent } from "./PoolCostsSummaryContent";
@@ -12,7 +10,6 @@ import { PoolFiltrationContent } from "./PoolFiltrationContent";
 import { PoolFixedCostsContent } from "./PoolFixedCostsContent";
 import { PoolIndividualCostsContent } from "./PoolIndividualCostsContent";
 import { PoolPricingContent } from "./PoolPricingContent";
-import { PoolWebRRPContent } from "./PoolWebRRPContent";
 
 interface PoolDetailsSectionProps {
   pool: Pool;
@@ -31,13 +28,6 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
   className,
   customerId
 }) => {
-  // Fetch filtration package and excavation data for costs summary
-  const { filtrationPackage } = useFiltrationPackage(pool, customerId);
-  const { excavationDetails } = useExcavation(pool.id);
-
-  // Mock concrete cost - this would ideally come from a concrete cost hook
-  const concreteCost = 0; // Default to 0 for now
-
   // Generate content based on section type
   const renderContent = () => {
     switch (sectionId) {
@@ -61,13 +51,9 @@ export const PoolDetailsSection: React.FC<PoolDetailsSectionProps> = ({
         return (
           <PoolCostsSummaryContent
             pool={pool}
-            filtrationPackage={filtrationPackage}
-            excavationCost={excavationDetails ? parseFloat(excavationDetails.price) : 0}
-            concreteCost={concreteCost}
+            customerId={customerId}
           />
         );
-      case "web-rrp":
-        return <PoolWebRRPContent pool={pool} />;
       default:
         return <p>No details available</p>;
     }

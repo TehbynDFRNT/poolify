@@ -142,76 +142,104 @@ export const WaterFeatureSummary: React.FC<WaterFeatureSummaryProps> = ({
         return String(value);
     };
 
+    // Calculate margin amount
+    const waterFeaturesMargin = waterFeaturesRRP - waterFeaturesCost;
+
     return (
         <div>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Water Features</h3>
                 <EditSectionLink section="water-feature" customerId={customerId} />
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {hasValue(waterFeatures, 'water_feature_size') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">Water Feature Size</p>
-                        <p className="font-medium">{getWaterFeatureSizeName(waterFeatures.water_feature_size)}</p>
-                    </div>
-                )}
+            
+            {/* Feature Details Table */}
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b">
+                            <th className="text-left py-2 font-medium">Feature</th>
+                            <th className="text-left py-2 font-medium">Selection</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {hasValue(waterFeatures, 'water_feature_size') && (
+                            <tr className="border-b">
+                                <td className="py-2">Water Feature Size</td>
+                                <td className="py-2">{getWaterFeatureSizeName(waterFeatures.water_feature_size)}</td>
+                            </tr>
+                        )}
+                        {hasValue(waterFeatures, 'front_finish') && (
+                            <tr className="border-b">
+                                <td className="py-2">Front Finish</td>
+                                <td className="py-2">{formatValue(waterFeatures.front_finish)}</td>
+                            </tr>
+                        )}
+                        {hasValue(waterFeatures, 'top_finish') && (
+                            <tr className="border-b">
+                                <td className="py-2">Top Finish</td>
+                                <td className="py-2">{formatValue(waterFeatures.top_finish)}</td>
+                            </tr>
+                        )}
+                        {hasValue(waterFeatures, 'sides_finish') && (
+                            <tr className="border-b">
+                                <td className="py-2">Sides Finish</td>
+                                <td className="py-2">{formatValue(waterFeatures.sides_finish)}</td>
+                            </tr>
+                        )}
+                        {hasValue(waterFeatures, 'back_cladding_needed') && (
+                            <tr className="border-b">
+                                <td className="py-2">Back Cladding</td>
+                                <td className="py-2 flex items-center">
+                                    {waterFeatures.back_cladding_needed ? (
+                                        <>
+                                            <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Yes
+                                        </>
+                                    ) : (
+                                        'No'
+                                    )}
+                                </td>
+                            </tr>
+                        )}
+                        {hasValue(waterFeatures, 'led_blade') && (
+                            <tr className="border-b">
+                                <td className="py-2">LED Blade</td>
+                                <td className="py-2">{formatValue(waterFeatures.led_blade)}</td>
+                            </tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
 
-                {hasValue(waterFeatures, 'back_cladding_needed') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">Back Cladding</p>
-                        <p className="font-medium flex items-center">
-                            {waterFeatures.back_cladding_needed ? (
-                                <>
-                                    <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Yes
-                                </>
-                            ) : (
-                                'No'
-                            )}
-                        </p>
-                    </div>
-                )}
-
-                {hasValue(waterFeatures, 'led_blade') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">LED Blade</p>
-                        <p className="font-medium">{formatValue(waterFeatures.led_blade)}</p>
-                    </div>
-                )}
-
-                {hasValue(waterFeatures, 'front_finish') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">Front Finish</p>
-                        <p className="font-medium">{formatValue(waterFeatures.front_finish)}</p>
-                    </div>
-                )}
-
-                {hasValue(waterFeatures, 'top_finish') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">Top Finish</p>
-                        <p className="font-medium">{formatValue(waterFeatures.top_finish)}</p>
-                    </div>
-                )}
-
-                {hasValue(waterFeatures, 'sides_finish') && (
-                    <div>
-                        <p className="text-sm text-muted-foreground">Sides Finish</p>
-                        <p className="font-medium">{formatValue(waterFeatures.sides_finish)}</p>
-                    </div>
-                )}
-
-                {/* Show cost based on margin visibility */}
-                <div>
-                    <p className="text-sm text-muted-foreground">Total Cost</p>
-                    {showMargins ? (
-                        <p className="font-medium">
-                            {formatCurrency(waterFeaturesCost)} <span className="text-primary">({formatCurrency(waterFeaturesRRP)})</span>
-                        </p>
-                    ) : (
-                        <p className="font-medium text-primary">
-                            {formatCurrency(waterFeaturesRRP)}
-                        </p>
-                    )}
-                </div>
+            {/* Cost Summary Table */}
+            <div className="mt-4 overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b">
+                            <th className="text-left py-2 font-medium">Cost Breakdown</th>
+                            <th className="text-right py-2 font-medium">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {showMargins && (
+                            <>
+                                <tr className="border-b">
+                                    <td className="py-2">Base Cost</td>
+                                    <td className="text-right py-2">{formatCurrency(waterFeaturesCost)}</td>
+                                </tr>
+                                <tr className="border-b">
+                                    <td className="py-2">Margin</td>
+                                    <td className="text-right py-2 text-green-600">{formatCurrency(waterFeaturesMargin)}</td>
+                                </tr>
+                            </>
+                        )}
+                    </tbody>
+                    <tfoot>
+                        <tr className="border-t-2">
+                            <td className="pt-3 font-semibold">Total Water Features:</td>
+                            <td className="text-right pt-3 font-semibold text-primary">{formatCurrency(waterFeaturesRRP)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
     );

@@ -18,6 +18,7 @@ import {
 } from '@/utils/concrete-margin-calculations';
 import { fetchConcreteAndPavingData } from '@/utils/concrete-paving-data';
 import { fetchPoolGeneralExtras } from "@/utils/fetch-pool-general-extras";
+import { HeatPumpCompatibility } from "@/hooks/usePoolHeatingOptions";
 import { formatCurrency } from '@/utils/format';
 import { validateUuid } from '@/utils/validators';
 import { useQuery } from '@tanstack/react-query';
@@ -32,56 +33,55 @@ interface SummarySectionProps {
     hideSubmitButton?: boolean;
 }
 
-// Line item component for detailed cost breakdowns
-const LineItem = ({ label, code, value, breakdown = null }) => (
+// Line item component for detailed cost breakdowns with margin display
+const LineItem = ({ label, code, margin = 0, value, showMargin = true }) => (
     <tr className="border-b border-gray-100">
         <td className="py-3 px-4 text-left">
             {label} {code && code.indexOf('_') === -1 && <span className="text-muted-foreground text-sm">({code})</span>}
         </td>
+        {showMargin && <td className="py-3 px-4 text-right text-green-600">
+            {typeof margin === 'string' ? margin : (margin > 0 ? formatCurrency(margin) : '-')}
+        </td>}
         <td className="py-3 px-4 text-right">{formatCurrency(value)}</td>
-        {breakdown && <td className="py-3 px-4 text-left text-muted-foreground text-sm">{breakdown}</td>}
-        {!breakdown && <td></td>}
     </tr>
 );
 
-// Subtotal row for sections
-const SubtotalRow = ({ label, value }) => (
-    <tr className="border-b border-gray-200 font-medium">
-        <td className="py-3 px-4 text-left">{label}</td>
-        <td className="py-3 px-4 text-right">{formatCurrency(value)}</td>
-        <td></td>
+// Table header component for sections with margins
+const TableHeader = ({ showMargin = true }) => (
+    <thead>
+        <tr className="border-b">
+            <th className="text-left py-2 font-medium">Item</th>
+            {showMargin && <th className="text-right py-2 font-medium">Margin</th>}
+            <th className="text-right py-2 font-medium">Total Cost</th>
+        </tr>
+    </thead>
+);
+
+// Footer row for totals with margin
+const FooterRow = ({ label, margin = 0, value, showMargin = true }) => (
+    <tr className="border-t-2 bg-gray-50 font-bold">
+        <td className="pt-3 pb-3 px-4 text-left">{label}</td>
+        {showMargin && <td className="pt-3 pb-3 px-4 text-right font-semibold text-green-600">
+            {typeof margin === 'string' ? margin : (margin > 0 ? formatCurrency(margin) : '-')}
+        </td>}
+        <td className="pt-3 pb-3 px-4 text-right text-gray-900 font-semibold">{formatCurrency(value)}</td>
     </tr>
 );
 
-// Margin row showing percentage and calculation
-const MarginRow = ({ percentage, formula = "Formula: Cost ÷ (1 - margin %)" }) => (
-    <tr className="border-b border-gray-100">
-        <td className="py-3 px-4 text-left">Margin Applied</td>
-        <td className="py-3 px-4 text-right">{percentage}%</td>
-        <td className="py-3 px-4 text-left text-muted-foreground text-sm">{formula}</td>
-    </tr>
-);
-
-// Total row with background highlight
-const TotalRow = ({ label, value }) => (
-    <tr className="bg-gray-50 font-bold">
-        <td className="py-3 px-4 text-left">{label}</td>
-        <td className="py-3 px-4 text-right text-gray-900 font-semibold">{formatCurrency(value)}</td>
-        <td></td>
-    </tr>
-);
 
 // Section card component for each section (Pool, Installation, etc)
-const SectionCard = ({ title, children, marginIncluded = false }) => (
+const SectionCard = ({ title, children, showMargin = true, marginNote = null }) => (
     <Card className="mb-6 shadow-none">
         <CardContent className="pt-6">
             <div className="flex items-center gap-2 mb-4">
                 <h3 className="text-lg font-medium text-gray-900">
-                    {title} {marginIncluded && "(Margin Included)"}
+                    {title}
                 </h3>
+                {marginNote && <span className="text-sm text-muted-foreground">({marginNote})</span>}
             </div>
             <div className="space-y-4">
                 <table className="w-full">
+                    <TableHeader showMargin={showMargin} />
                     <tbody>
                         {children}
                     </tbody>
@@ -609,6 +609,53 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         enabled: !!customerId && isValidUuid,
     });
 
+    // Fetch heat pump compatibility data to get the margin
+    const { data: heatPumpData } = useQuery<HeatPumpCompatibility | null>({
+        queryKey: ['heat-pump-compatibility', snapshot?.spec_range, snapshot?.spec_name],
+        queryFn: async () => {
+            if (!snapshot?.spec_range || !snapshot?.spec_name) return null;
+
+            const { data, error } = await supabase
+                .from("heat_pump_pool_compatibility")
+                .select(`
+                    id, 
+                    pool_range, 
+                    pool_model,
+                    heat_pump_id,
+                    hp_sku, 
+                    hp_description
+                `)
+                .eq("pool_range", snapshot.spec_range)
+                .eq("pool_model", snapshot.spec_name)
+                .maybeSingle();
+
+            if (error || !data) {
+                console.error("Error fetching heat pump compatibility:", error);
+                return null;
+            }
+
+            // Fetch heat pump details to get margin
+            const { data: heatPumpDetails, error: hpError } = await supabase
+                .from("heat_pumps")
+                .select("rrp, trade")
+                .eq("id", data.heat_pump_id)
+                .single();
+
+            if (hpError || !heatPumpDetails) {
+                console.error("Error fetching heat pump details:", hpError);
+                return null;
+            }
+
+            return {
+                ...data,
+                rrp: heatPumpDetails.rrp,
+                trade: heatPumpDetails.trade,
+                margin: heatPumpDetails.rrp - heatPumpDetails.trade
+            } as HeatPumpCompatibility;
+        },
+        enabled: !!snapshot?.spec_range && !!snapshot?.spec_name && snapshot.include_heat_pump,
+    });
+
     // Calculate general extras total
     const generalExtrasTotal = generalExtras?.reduce((sum, item) => sum + item.total_rrp, 0) || 0;
 
@@ -767,6 +814,18 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         }) : [];
 
     console.log("Custom Site Requirements:", customSiteRequirements);
+    
+    // Calculate custom requirements margin
+    let customRequirementsMargin = 0;
+    if (Array.isArray(siteRequirementsData)) {
+        customRequirementsMargin = siteRequirementsData.reduce((total, req) => {
+            if (req && typeof req === 'object' && 'margin' in req && 
+                req.type !== 'crane' && req.type !== 'bobcat' && req.type !== 'traffic-control') {
+                return total + (Number(req.margin) || 0);
+            }
+            return total;
+        }, 0);
+    }
 
     // Get totals from the price calculator
     const concretePavingTotal = priceCalculatorResult.totals.concreteTotal;
@@ -788,8 +847,62 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const heatingTotal = heatPumpTotal + blanketRollerTotal;
     // Calculate upgrades extras margin based on individual components
     const upgradesExtrasMargin = 0; // Margin is already included in RRP prices
+    
+    // Calculate concrete & paving margins for header display
+    const concreteExtraPavingMargin = (snapshot.epc_margin_cost || 0) * (snapshot.extra_paving_sqm || 0);
+    const concreteExistingPavingMargin = (snapshot.existing_paving_margin_cost || 0) * (snapshot.existing_paving_sqm || 0);
+    const concreteExtraConcretingMargin = (snapshot.extra_concreting_margin || 0) * (snapshot.extra_concreting_sqm || 0);
+    let concreteUnderFenceStripsMargin = 0;
+    if (snapshot.uf_strips_data && Array.isArray(snapshot.uf_strips_data)) {
+        concreteUnderFenceStripsMargin = snapshot.uf_strips_data.reduce((total, strip) => {
+            return total + (strip.unit_margin * strip.length);
+        }, 0);
+    }
+    const concretePumpMargin = (snapshot.concrete_pump_total_cost || 0) * 0.1;
+    const concreteExtraPumpMargin = (snapshot.extra_concrete_pump_total_cost || 0) * 0.1;
+    const concreteCutsMargin = (snapshot.concrete_cuts_cost || 0) * 0.1;
+    const concreteTotalMargin = concreteExtraPavingMargin + concreteExistingPavingMargin + concreteExtraConcretingMargin + 
+        concretePumpMargin + concreteExtraPumpMargin + concreteUnderFenceStripsMargin + concreteCutsMargin;
 
-    console.log(snapshot)
+    // Calculate total margin across all sections
+    const calculateTotalMargin = () => {
+        if (!snapshot) return 0;
+        
+        // Base Price margin
+        const baseMargin = basePoolBreakdown.totalBeforeMargin * (marginPct / (100 - marginPct));
+        
+        // Site Requirements margin (crane + custom)
+        const siteRequirementsMargin = (siteRequirementsBreakdown.cranePrice - siteRequirementsBreakdown.craneCost) + customRequirementsMargin;
+        
+        // Concrete & Paving margin (already calculated above)
+        const concreteMargin = concreteTotalMargin;
+        
+        // Water Features margin
+        const waterFeaturesMargin = (snapshot.water_feature_size === 'small' ? 800 : 900) + 
+            (snapshot.water_feature_back_cladding_needed ? 300 : 0) + 
+            (snapshot.water_feature_led_blade && !['none', 'None', ''].includes(snapshot.water_feature_led_blade) ? 100 : 0);
+        
+        // Retaining Walls margin
+        const retainingWallsMargin = retainingWallsMarginData?.totalMargin || 0;
+        
+        // General Upgrades margin
+        const generalUpgradesMargin = generalExtras?.reduce((sum, item) => sum + item.total_margin, 0) || 0;
+        
+        // Heating margin
+        const heatingMargin = (snapshot.include_heat_pump ? (heatPumpData?.margin || snapshot.heat_pump_margin || 
+            (snapshot.heating_total_margin && snapshot.include_blanket_roller ? 
+             snapshot.heating_total_margin - (snapshot.blanket_roller_margin || 0) : 
+             snapshot.heating_total_margin || 0)) : 0) +
+            (snapshot.include_blanket_roller ? (snapshot.blanket_roller_margin || 0) : 0);
+        
+        // Pool Cleaner margin
+        const poolCleanerMargin = snapshot.cleaner_included ? (snapshot.cleaner_margin || 0) : 0;
+        
+        return baseMargin + siteRequirementsMargin + concreteMargin + waterFeaturesMargin + 
+               retainingWallsMargin + generalUpgradesMargin + heatingMargin + poolCleanerMargin;
+    };
+    
+    const totalMargin = calculateTotalMargin();
 
     return (
         <MarginVisibilityContext.Provider value={showMargins && !isCustomerView}>
@@ -846,6 +959,104 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     {!hideSubmitButton && <ProjectSubmitButton projectId={customerId} />}
                                 </div>
                             </div>
+                            
+                            {/* Margin Summary in Grand Total */}
+                            {!isCustomerView && totalMargin > 0 && (
+                                <div className="pt-4 border-t border-gray-200">
+                                    <h4 className="text-sm font-medium text-gray-700 mb-2">Margin Summary:</h4>
+                                    <div className="space-y-1">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-gray-600">Base Pool Margin</span>
+                                            <span className="text-green-600 font-medium">
+                                                {formatCurrency(basePoolBreakdown.totalBeforeMargin * (marginPct / (100 - marginPct)))}
+                                            </span>
+                                        </div>
+                                        {((siteRequirementsBreakdown.cranePrice - siteRequirementsBreakdown.craneCost) + customRequirementsMargin) > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Site Requirements</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency((siteRequirementsBreakdown.cranePrice - siteRequirementsBreakdown.craneCost) + customRequirementsMargin)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {concreteTotalMargin > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Concrete & Paving</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency(concreteTotalMargin)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {waterFeaturesTotal > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Water Features</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency(
+                                                        (snapshot.water_feature_size === 'small' ? 800 : 900) + 
+                                                        (snapshot.water_feature_back_cladding_needed ? 300 : 0) + 
+                                                        (snapshot.water_feature_led_blade && !['none', 'None', ''].includes(snapshot.water_feature_led_blade) ? 100 : 0)
+                                                    )}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {(retainingWallsMarginData?.totalMargin || 0) > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Retaining Walls</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency(retainingWallsMarginData?.totalMargin || 0)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {(generalExtras?.reduce((sum, item) => sum + item.total_margin, 0) || 0) > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">General Upgrades</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency(generalExtras?.reduce((sum, item) => sum + item.total_margin, 0) || 0)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {((snapshot.include_heat_pump ? (heatPumpData?.margin || snapshot.heat_pump_margin || 
+                                            (snapshot.heating_total_margin && snapshot.include_blanket_roller ? 
+                                             snapshot.heating_total_margin - (snapshot.blanket_roller_margin || 0) : 
+                                             snapshot.heating_total_margin || 0)) : 0) +
+                                            (snapshot.include_blanket_roller ? (snapshot.blanket_roller_margin || 0) : 0)) > 0 && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Heating Options</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency(
+                                                        (snapshot.include_heat_pump ? (heatPumpData?.margin || snapshot.heat_pump_margin || 
+                                                            (snapshot.heating_total_margin && snapshot.include_blanket_roller ? 
+                                                             snapshot.heating_total_margin - (snapshot.blanket_roller_margin || 0) : 
+                                                             snapshot.heating_total_margin || 0)) : 0) +
+                                                        (snapshot.include_blanket_roller ? (snapshot.blanket_roller_margin || 0) : 0)
+                                                    )}
+                                                </span>
+                                            </div>
+                                        )}
+                                        {(snapshot.cleaner_included && (snapshot.cleaner_margin || 0) > 0) && (
+                                            <div className="flex justify-between items-center text-sm">
+                                                <span className="text-gray-600">Pool Cleaner</span>
+                                                <span className="text-green-600 font-medium">
+                                                    {formatCurrency(snapshot.cleaner_margin || 0)}
+                                                </span>
+                                            </div>
+                                        )}
+                                        <div className="flex justify-between items-center text-sm font-medium text-green-600 pt-1 border-t border-green-100">
+                                            <span>Total Margin:</span>
+                                            <span>{formatCurrency(totalMargin)} ({((totalMargin / priceCalculatorResult.grandTotalWithoutDiscounts) * 100).toFixed(1)}%)</span>
+                                        </div>
+                                        {priceCalculatorResult.totals.discountTotal > 0 && (
+                                            <div className="flex justify-between items-center text-sm font-medium text-green-600">
+                                                <span>Margin after discounts:</span>
+                                                <span>
+                                                    {formatCurrency(totalMargin - priceCalculatorResult.totals.discountTotal)} 
+                                                    ({((totalMargin - priceCalculatorResult.totals.discountTotal) / priceCalculatorResult.grandTotal * 100).toFixed(1)}%)
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                             
                             {/* Discount Breakdown in Grand Total */}
                             {priceCalculatorResult.discountBreakdown.discountDetails.length > 0 && (
@@ -907,63 +1118,59 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                         {expandedSections.basePrice && (
                             <div className="space-y-4">
                                 <table className="w-full">
+                                    <TableHeader showMargin={!isCustomerView} />
                                     <tbody>
                                         <LineItem
                                             label="Pool Shell"
                                             code=""
+                                            margin={basePoolBreakdown.poolShellPrice - basePoolBreakdown.poolShellCost}
                                             value={basePoolBreakdown.poolShellPrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.poolShellCost)}` : null}
+                                            showMargin={!isCustomerView}
                                         />
                                         <LineItem
                                             label="Excavation & Truck"
                                             code=""
+                                            margin={basePoolBreakdown.digPrice - basePoolBreakdown.digCost}
                                             value={basePoolBreakdown.digPrice}
-                                            breakdown={!isCustomerView ?
-                                                `Cost: ${formatCurrency(basePoolBreakdown.digCost)}`
-                                                : null}
+                                            showMargin={!isCustomerView}
                                         />
                                         <LineItem
                                             label="Filtration Package"
                                             code=""
+                                            margin={basePoolBreakdown.filtrationPrice - basePoolBreakdown.filtrationCost}
                                             value={basePoolBreakdown.filtrationPrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.filtrationCost)}` : null}
+                                            showMargin={!isCustomerView}
                                         />
                                         <LineItem
                                             label="Individual Components"
                                             code=""
+                                            margin={basePoolBreakdown.individualCostsPrice - basePoolBreakdown.individualCosts}
                                             value={basePoolBreakdown.individualCostsPrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.individualCosts)}` : null}
+                                            showMargin={!isCustomerView}
                                         />
                                         <LineItem
                                             label="Fixed Costs"
                                             code=""
+                                            margin={basePoolBreakdown.fixedCostsPrice - basePoolBreakdown.fixedCostsTotal}
                                             value={basePoolBreakdown.fixedCostsPrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.fixedCostsTotal)}` : null}
+                                            showMargin={!isCustomerView}
                                         />
                                         <LineItem
                                             label="Standard Crane Allowance"
                                             code=""
+                                            margin={basePoolBreakdown.craneAllowancePrice - basePoolBreakdown.craneAllowance}
                                             value={basePoolBreakdown.craneAllowancePrice}
-                                            breakdown={!isCustomerView ? `Cost: ${formatCurrency(basePoolBreakdown.craneAllowance)}` : null}
-                                        />
-
-                                        {!isCustomerView && (
-                                            <>
-                                                <SubtotalRow
-                                                    label="Base Price Before Margin"
-                                                    value={basePoolBreakdown.totalBeforeMargin}
-                                                />
-                                                <MarginRow
-                                                    percentage={marginPct}
-                                                />
-                                            </>
-                                        )}
-
-                                        <TotalRow
-                                            label="Base Price Total"
-                                            value={priceCalculatorResult.totals.basePoolTotal}
+                                            showMargin={!isCustomerView}
                                         />
                                     </tbody>
+                                    <tfoot>
+                                        <FooterRow
+                                            label="Base Price Total"
+                                            margin={basePoolBreakdown.totalBeforeMargin * (marginPct / (100 - marginPct))}
+                                            value={priceCalculatorResult.totals.basePoolTotal}
+                                            showMargin={!isCustomerView}
+                                        />
+                                    </tfoot>
                                 </table>
                             </div>
                         )}
@@ -982,7 +1189,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Site Requirements</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin applied to crane only, others have no margin)
+                                            (Margin: {formatCurrency((siteRequirementsBreakdown.cranePrice - siteRequirementsBreakdown.craneCost) + customRequirementsMargin)})
                                         </p>
                                     )}
                                 </div>
@@ -999,51 +1206,53 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             {expandedSections.siteRequirements && (
                                 <div className="space-y-4">
                                     <table className="w-full">
+                                        <TableHeader showMargin={!isCustomerView} />
                                         <tbody>
                                             {siteRequirementsBreakdown.craneCost > 0 && (
                                                 <LineItem
                                                     label={`Crane${craneData?.name ? `: ${craneData.name}` : ''}`}
                                                     code=""
+                                                    margin={siteRequirementsBreakdown.cranePrice - siteRequirementsBreakdown.craneCost}
                                                     value={siteRequirementsBreakdown.cranePrice}
-                                                    breakdown={!isCustomerView ?
-                                                        `Cost: ${formatCurrency(siteRequirementsBreakdown.craneCost)}`
-                                                        : null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
                                             {siteRequirementsBreakdown.bobcatCost > 0 && (
                                                 <LineItem
                                                     label={`Bobcat${bobcatData ? `: ${bobcatData?.size_category || ''} - ${bobcatData?.day_code || ''}` : ''}`}
                                                     code=""
+                                                    margin={0}
                                                     value={siteRequirementsBreakdown.bobcatPrice}
-                                                    breakdown={!isCustomerView ?
-                                                        `Cost: ${formatCurrency(siteRequirementsBreakdown.bobcatCost)}`
-                                                        : null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
                                             {siteRequirementsBreakdown.trafficControlCost > 0 && (
                                                 <LineItem
                                                     label={`Traffic Control${trafficControlData?.name ? `: ${trafficControlData?.name}` : ''}`}
                                                     code=""
+                                                    margin={0}
                                                     value={siteRequirementsBreakdown.trafficControlPrice}
-                                                    breakdown={!isCustomerView ?
-                                                        `Cost: ${formatCurrency(siteRequirementsBreakdown.trafficControlCost)}`
-                                                        : null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
                                             {siteRequirementsBreakdown.customRequirementsCost > 0 && (
                                                 <LineItem
                                                     label="Custom Requirements"
                                                     code=""
+                                                    margin={customRequirementsMargin}
                                                     value={siteRequirementsBreakdown.customRequirementsPrice}
-                                                    breakdown={!isCustomerView ? `Cost: ${formatCurrency(siteRequirementsBreakdown.customRequirementsCost)}` : null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
-
-                                            <TotalRow
-                                                label="Site Requirements Total"
-                                                value={priceCalculatorResult.totals.siteRequirementsTotal}
-                                            />
                                         </tbody>
+                                        <tfoot>
+                                            <FooterRow
+                                                label="Site Requirements Total"
+                                                margin={(siteRequirementsBreakdown.cranePrice - siteRequirementsBreakdown.craneCost) + customRequirementsMargin}
+                                                value={priceCalculatorResult.totals.siteRequirementsTotal}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
                                     </table>
                                 </div>
                             )}
@@ -1063,9 +1272,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Concrete & Paving</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
-                                            {concretePavingMarginData?.totalMargin > 0 &&
-                                                ` (${formatCurrency(concretePavingMarginData.totalMargin)} margin)`}
+                                            (Margin: {formatCurrency(concreteTotalMargin)})
                                         </p>
                                     )}
                                 </div>
@@ -1079,78 +1286,109 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 </div>
                             </div>
 
-                            {expandedSections.concretePaving && (
-                                <div className="space-y-4">
-                                    <table className="w-full">
-                                        <tbody>
-                                            {(snapshot.concrete_cuts_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label="Concrete Cuts"
-                                                    code=""
-                                                    value={snapshot.concrete_cuts_cost || 0}
-                                                    breakdown={!isCustomerView && concreteCutsData && concreteCutsData.length > 0 ?
-                                                        concreteCutsData.map(cut => cut.cut_type).join(', ') :
-                                                        null}
+                            {expandedSections.concretePaving && (() => {
+                                // Calculate margins directly from snapshot data
+                                const extraPavingMargin = (snapshot.epc_margin_cost || 0) * (snapshot.extra_paving_sqm || 0);
+                                const existingPavingMargin = (snapshot.existing_paving_margin_cost || 0) * (snapshot.existing_paving_sqm || 0);
+                                const extraConcretingMargin = (snapshot.extra_concreting_margin || 0) * (snapshot.extra_concreting_sqm || 0);
+                                
+                                // Calculate under fence strips margin
+                                let underFenceStripsMargin = 0;
+                                if (snapshot.uf_strips_data && Array.isArray(snapshot.uf_strips_data)) {
+                                    underFenceStripsMargin = snapshot.uf_strips_data.reduce((total, strip) => {
+                                        return total + (strip.unit_margin * strip.length);
+                                    }, 0);
+                                }
+                                
+                                // Calculate concrete pump margin (10%)
+                                const concretePumpMargin = (snapshot.concrete_pump_total_cost || 0) * 0.1;
+                                const extraConcretePumpMargin = (snapshot.extra_concrete_pump_total_cost || 0) * 0.1;
+                                const concreteCutsMargin = (snapshot.concrete_cuts_cost || 0) * 0.1;
+                                
+                                const totalConcreteMargin = extraPavingMargin + existingPavingMargin + extraConcretingMargin + 
+                                    concretePumpMargin + extraConcretePumpMargin + underFenceStripsMargin + concreteCutsMargin;
+                                
+                                return (
+                                    <div className="space-y-4">
+                                        <table className="w-full">
+                                            <TableHeader showMargin={!isCustomerView} />
+                                            <tbody>
+                                                {(snapshot.extra_paving_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label={`Extra Paving${pavingData?.extraPavingCategory ? `: ${pavingData.extraPavingCategory}` : ''}`}
+                                                        code=""
+                                                        margin={extraPavingMargin}
+                                                        value={snapshot.extra_paving_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                                {(snapshot.existing_paving_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label={`Paving on Existing Concrete${pavingData?.existingPavingCategory ? `: ${pavingData.existingPavingCategory}` : ''}`}
+                                                        code=""
+                                                        margin={existingPavingMargin}
+                                                        value={snapshot.existing_paving_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                                {(snapshot.extra_concreting_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label={`Extra Concreting${snapshot.extra_concreting_name ? `: ${snapshot.extra_concreting_name}` : ''}`}
+                                                        code=""
+                                                        margin={extraConcretingMargin}
+                                                        value={snapshot.extra_concreting_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                                {(snapshot.concrete_pump_total_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label="Concrete Pump"
+                                                        code=""
+                                                        margin={(snapshot.concrete_pump_total_cost || 0) * 0.1}
+                                                        value={snapshot.concrete_pump_total_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                                {(snapshot.extra_concrete_pump_total_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label="Extra Concrete Pump"
+                                                        code=""
+                                                        margin={(snapshot.extra_concrete_pump_total_cost || 0) * 0.1}
+                                                        value={snapshot.extra_concrete_pump_total_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                                {(snapshot.uf_strips_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label="Under Fence Strips"
+                                                        code=""
+                                                        margin={underFenceStripsMargin}
+                                                        value={snapshot.uf_strips_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                                {(snapshot.concrete_cuts_cost || 0) > 0 && (
+                                                    <LineItem
+                                                        label="Concrete Cuts"
+                                                        code=""
+                                                        margin={(snapshot.concrete_cuts_cost || 0) * 0.1}
+                                                        value={snapshot.concrete_cuts_cost || 0}
+                                                        showMargin={!isCustomerView}
+                                                    />
+                                                )}
+                                            </tbody>
+                                            <tfoot>
+                                                <FooterRow
+                                                    label="Concrete & Paving Total"
+                                                    margin={totalConcreteMargin}
+                                                    value={concretePavingTotal}
+                                                    showMargin={!isCustomerView}
                                                 />
-                                            )}
-                                            {(snapshot.extra_paving_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label={`Extra Paving${pavingData?.extraPavingCategory ? `: ${pavingData.extraPavingCategory}` : ''}`}
-                                                    code=""
-                                                    value={snapshot.extra_paving_cost || 0}
-                                                    breakdown={null}
-                                                />
-                                            )}
-                                            {(snapshot.existing_paving_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label={`Paving on Existing Concrete${pavingData?.existingPavingCategory ? `: ${pavingData.existingPavingCategory}` : ''}`}
-                                                    code=""
-                                                    value={snapshot.existing_paving_cost || 0}
-                                                    breakdown={null}
-                                                />
-                                            )}
-                                            {(snapshot.extra_concreting_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label={`Extra Concreting${snapshot.extra_concreting_name ? `: ${snapshot.extra_concreting_name}` : ''}`}
-                                                    code=""
-                                                    value={snapshot.extra_concreting_cost || 0}
-                                                    breakdown={null}
-                                                />
-                                            )}
-                                            {(snapshot.concrete_pump_total_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label="Concrete Pump"
-                                                    code=""
-                                                    value={snapshot.concrete_pump_total_cost || 0}
-                                                    breakdown={!isCustomerView && concretePumpData?.concrete_pump_quantity ?
-                                                        `${concretePumpData.concrete_pump_quantity} pump setup${concretePumpData.concrete_pump_quantity > 1 ? 's' : ''}` : null}
-                                                />
-                                            )}
-                                            {(snapshot.extra_concrete_pump_total_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label="Extra Concrete Pump"
-                                                    code=""
-                                                    value={snapshot.extra_concrete_pump_total_cost || 0}
-                                                    breakdown={!isCustomerView && snapshot.extra_concrete_pump_quantity ?
-                                                        `${snapshot.extra_concrete_pump_quantity} additional pump setup${snapshot.extra_concrete_pump_quantity > 1 ? 's' : ''}` : null}
-                                                />
-                                            )}
-                                            {(snapshot.uf_strips_cost || 0) > 0 && (
-                                                <LineItem
-                                                    label="Under Fence Strips"
-                                                    code=""
-                                                    value={snapshot.uf_strips_cost || 0}
-                                                    breakdown={null}
-                                                />
-                                            )}
-                                            <TotalRow
-                                                label="Concrete & Paving Total"
-                                                value={concretePavingTotal}
-                                            />
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                );
+                            })()}
                         </CardContent>
                     </Card>
                 )}
@@ -1167,9 +1405,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Retaining Walls</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
-                                            {retainingWallsMarginData?.totalMargin > 0 &&
-                                                ` (${formatCurrency(retainingWallsMarginData.totalMargin)} margin)`}
+                                            (Margin: {formatCurrency(retainingWallsMarginData?.totalMargin || 0)})
                                         </p>
                                     )}
                                 </div>
@@ -1183,27 +1419,72 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 </div>
                             </div>
 
-                            {expandedSections.retainingWalls && (
-                                <div className="space-y-4">
-                                    <table className="w-full">
-                                        <tbody>
-                                            {Array.isArray(retainingWalls) && retainingWalls.map((wall, index) => (
-                                                <LineItem
-                                                    key={`wall-${index}`}
-                                                    label={wall.description || `Retaining Wall ${index + 1}`}
-                                                    code=""
-                                                    value={wall.total_cost || 0}
-                                                    breakdown={!isCustomerView && wall.length ? `Length: ${wall.length}m` : null}
+                            {expandedSections.retainingWalls && (() => {
+                                // Calculate individual wall margins based on the same logic as the margin query
+                                const wallsWithMargins = Array.isArray(retainingWalls) ? retainingWalls.map((wall, index) => {
+                                    let margin = 0;
+                                    let displayType = wall.wall_type || '';
+                                    let squareMeters = 0;
+                                    
+                                    // Extract wall type and calculate margin if we have dimensions
+                                    if (wall.wall_type && wall.height1 && wall.height2 && wall.length) {
+                                        squareMeters = ((Number(wall.height1) + Number(wall.height2)) / 2) * Number(wall.length);
+                                        
+                                        // Extract clean wall type without prefix
+                                        const wallMatch = wall.wall_type.match(/^Wall \d+: (.*)/);
+                                        if (wallMatch) {
+                                            displayType = wallMatch[1].trim();
+                                        }
+                                        
+                                        // Use the margin rate from the wall data if available
+                                        const marginRate = wall.margin || 0;
+                                        margin = squareMeters * marginRate;
+                                    }
+                                    
+                                    return {
+                                        ...wall,
+                                        margin,
+                                        displayType,
+                                        squareMeters,
+                                        wallNumber: index + 1
+                                    };
+                                }) : [];
+                                
+                                return (
+                                    <div className="space-y-4">
+                                        <table className="w-full">
+                                            <TableHeader showMargin={!isCustomerView} />
+                                            <tbody>
+                                                {wallsWithMargins.map((wall) => {
+                                                    const label = wall.wall_type || `Wall ${wall.wallNumber}`;
+                                                    const dimensions = wall.height1 && wall.height2 && wall.length
+                                                        ? ` (${wall.height1}m × ${wall.height2}m × ${wall.length}m)`
+                                                        : '';
+                                                    
+                                                    return (
+                                                        <LineItem
+                                                            key={`wall-${wall.wallNumber}`}
+                                                            label={`${label}${dimensions}`}
+                                                            code=""
+                                                            margin={wall.margin}
+                                                            value={wall.total_cost || 0}
+                                                            showMargin={!isCustomerView}
+                                                        />
+                                                    );
+                                                })}
+                                            </tbody>
+                                            <tfoot>
+                                                <FooterRow
+                                                    label="Retaining Walls Total"
+                                                    margin={retainingWallsMarginData?.totalMargin || 0}
+                                                    value={retainingWallsTotal}
+                                                    showMargin={!isCustomerView}
                                                 />
-                                            ))}
-                                            <TotalRow
-                                                label="Retaining Walls Total"
-                                                value={retainingWallsTotal}
-                                            />
-                                        </tbody>
-                                    </table>
-                                </div>
-                            )}
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                );
+                            })()}
                         </CardContent>
                     </Card>
                 )}
@@ -1220,7 +1501,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Fencing</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
+                                            (Margin: $0 - Third Party Contractor)
                                         </p>
                                     )}
                                 </div>
@@ -1237,6 +1518,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             {expandedSections.fencing && (
                                 <div className="space-y-4">
                                     <table className="w-full">
+                                        <TableHeader showMargin={!isCustomerView} />
                                         <tbody>
                                             {/* Frameless Glass Fencing */}
                                             {fencingData?.framelessGlassData?.linear_meters > 0 && (
@@ -1247,53 +1529,59 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
                                                     {fencingData.framelessGlassData.linear_meters > 0 && (
                                                         <LineItem
-                                                            label="Linear Meters"
+                                                            label={`Linear Meters (${fencingData.framelessGlassData.linear_meters}m × $195)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.framelessGlassData.linear_meters * 195}
-                                                            breakdown={`${fencingData.framelessGlassData.linear_meters}m × $195`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.framelessGlassData.gates > 0 && (
                                                         <LineItem
-                                                            label="Gates"
+                                                            label={`Gates (${fencingData.framelessGlassData.gates} gates, first free)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={Math.max(0, fencingData.framelessGlassData.gates - 1) * 385}
-                                                            breakdown={`${fencingData.framelessGlassData.gates} gates ($385 each, first gate free)`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.framelessGlassData.simple_panels > 0 && (
                                                         <LineItem
-                                                            label="Simple Panels"
+                                                            label={`Simple Panels (${fencingData.framelessGlassData.simple_panels} × $220)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.framelessGlassData.simple_panels * 220}
-                                                            breakdown={`${fencingData.framelessGlassData.simple_panels} panels × $220`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.framelessGlassData.complex_panels > 0 && (
                                                         <LineItem
-                                                            label="Complex Panels"
+                                                            label={`Complex Panels (${fencingData.framelessGlassData.complex_panels} × $385)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.framelessGlassData.complex_panels * 385}
-                                                            breakdown={`${fencingData.framelessGlassData.complex_panels} panels × $385`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.framelessGlassData.earthing_required && (
                                                         <LineItem
-                                                            label="Earthing"
+                                                            label="Earthing (Required)"
                                                             code=""
+                                                            margin="Third Party"
                                                             value={40}
-                                                            breakdown="Required"
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
-                                                    <SubtotalRow
-                                                        label="Frameless Glass Fencing Subtotal"
-                                                        value={fencingData.framelessGlassData.total_cost}
-                                                    />
+                                                    <tr className="border-t font-medium">
+                                                        <td className="py-2 px-4">Frameless Glass Fencing Subtotal</td>
+                                                        {!isCustomerView && <td className="py-2 px-4 text-right text-green-600">-</td>}
+                                                        <td className="py-2 px-4 text-right">{formatCurrency(fencingData.framelessGlassData.total_cost)}</td>
+                                                    </tr>
                                                 </>
                                             )}
 
@@ -1306,61 +1594,71 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
                                                     {fencingData.flatTopMetalData.linear_meters > 0 && (
                                                         <LineItem
-                                                            label="Linear Meters"
+                                                            label={`Linear Meters (${fencingData.flatTopMetalData.linear_meters}m × $165)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.flatTopMetalData.linear_meters * 165}
-                                                            breakdown={`${fencingData.flatTopMetalData.linear_meters}m × $165`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.flatTopMetalData.gates > 0 && (
                                                         <LineItem
-                                                            label="Gates"
+                                                            label={`Gates (${fencingData.flatTopMetalData.gates} × $297)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.flatTopMetalData.gates * 297}
-                                                            breakdown={`${fencingData.flatTopMetalData.gates} gates × $297`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.flatTopMetalData.simple_panels > 0 && (
                                                         <LineItem
-                                                            label="Simple Panels"
+                                                            label={`Simple Panels (${fencingData.flatTopMetalData.simple_panels} × $220)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.flatTopMetalData.simple_panels * 220}
-                                                            breakdown={`${fencingData.flatTopMetalData.simple_panels} panels × $220`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.flatTopMetalData.complex_panels > 0 && (
                                                         <LineItem
-                                                            label="Complex Panels"
+                                                            label={`Complex Panels (${fencingData.flatTopMetalData.complex_panels} × $385)`}
                                                             code=""
+                                                            margin="Third Party"
                                                             value={fencingData.flatTopMetalData.complex_panels * 385}
-                                                            breakdown={`${fencingData.flatTopMetalData.complex_panels} panels × $385`}
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
                                                     {fencingData.flatTopMetalData.earthing_required && (
                                                         <LineItem
-                                                            label="Earthing"
+                                                            label="Earthing (Required)"
                                                             code=""
+                                                            margin="Third Party"
                                                             value={150}
-                                                            breakdown="Required"
+                                                            showMargin={!isCustomerView}
                                                         />
                                                     )}
 
-                                                    <SubtotalRow
-                                                        label="Flat Top Metal Fencing Subtotal"
-                                                        value={fencingData.flatTopMetalData.total_cost}
-                                                    />
+                                                    <tr className="border-t font-medium">
+                                                        <td className="py-2 px-4">Flat Top Metal Fencing Subtotal</td>
+                                                        {!isCustomerView && <td className="py-2 px-4 text-right text-green-600">-</td>}
+                                                        <td className="py-2 px-4 text-right">{formatCurrency(fencingData.flatTopMetalData.total_cost)}</td>
+                                                    </tr>
                                                 </>
                                             )}
 
-                                            <TotalRow
-                                                label="Fencing Total"
-                                                value={rawFencingTotal}
-                                            />
                                         </tbody>
+                                        <tfoot>
+                                            <FooterRow
+                                                label="Fencing Total"
+                                                margin="Third Party"
+                                                value={rawFencingTotal}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
                                     </table>
                                 </div>
                             )}
@@ -1380,7 +1678,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Electrical</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
+                                            (Margin: $0 - Third Party Contractor)
                                         </p>
                                     )}
                                 </div>
@@ -1397,36 +1695,44 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             {expandedSections.electrical && (
                                 <div className="space-y-4">
                                     <table className="w-full">
+                                        <TableHeader showMargin={!isCustomerView} />
                                         <tbody>
                                             {snapshot.elec_standard_power_flag && (snapshot.elec_standard_power_rate || 0) > 0 && (
                                                 <LineItem
                                                     label="Standard Power"
                                                     code=""
+                                                    margin="Third Party"
                                                     value={snapshot.elec_standard_power_rate || 0}
-                                                    breakdown={null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
                                             {snapshot.elec_fence_earthing_flag && (snapshot.elec_fence_earthing_rate || 0) > 0 && (
                                                 <LineItem
                                                     label="Add on Fence Earthing"
                                                     code=""
+                                                    margin="Third Party"
                                                     value={snapshot.elec_fence_earthing_rate || 0}
-                                                    breakdown={null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
                                             {snapshot.elec_heat_pump_circuit_flag && (snapshot.elec_heat_pump_circuit_rate || 0) > 0 && (
                                                 <LineItem
                                                     label="Heat Pump Circuit"
                                                     code=""
+                                                    margin="Third Party"
                                                     value={snapshot.elec_heat_pump_circuit_rate || 0}
-                                                    breakdown={null}
+                                                    showMargin={!isCustomerView}
                                                 />
                                             )}
-                                            <TotalRow
-                                                label="Electrical Total"
-                                                value={snapshot.elec_total_cost}
-                                            />
                                         </tbody>
+                                        <tfoot>
+                                            <FooterRow
+                                                label="Electrical Total"
+                                                margin="Third Party"
+                                                value={snapshot.elec_total_cost}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
                                     </table>
                                 </div>
                             )}
@@ -1446,8 +1752,11 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-lg font-medium text-gray-900">Water Features</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
-                                            {` (${formatCurrency(1300)} margin)`}
+                                            (Margin: {formatCurrency(
+                                                (snapshot.water_feature_size === 'small' ? 800 : 900) + 
+                                                (snapshot.water_feature_back_cladding_needed ? 300 : 0) + 
+                                                (snapshot.water_feature_led_blade && !['none', 'None', ''].includes(snapshot.water_feature_led_blade) ? 100 : 0)
+                                            )})
                                         </p>
                                     )}
                                 </div>
@@ -1464,37 +1773,48 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                             {expandedSections.waterFeatures && (
                                 <div className="space-y-4">
                                     <table className="w-full">
+                                        <TableHeader showMargin={!isCustomerView} />
                                         <tbody>
                                             <LineItem
-                                                label="Water Feature Base"
+                                                label={`Water Feature Base (${snapshot.water_feature_size || 'medium'})`}
                                                 code=""
-                                                value={3500}
-                                                breakdown={!isCustomerView ? "Includes $900 margin" : null}
+                                                margin={snapshot.water_feature_size === 'small' ? 800 : 900}
+                                                value={snapshot.water_feature_size === 'small' ? 3200 : 3500}
+                                                showMargin={!isCustomerView}
                                             />
-                                            <LineItem
-                                                label="Back Cladding"
-                                                code=""
-                                                value={1000}
-                                                breakdown={!isCustomerView ? "Includes $300 margin" : null}
-                                            />
-                                            <LineItem
-                                                label="900mm LED Blade"
-                                                code=""
-                                                value={300}
-                                                breakdown={!isCustomerView ? "Includes $100 margin" : null}
-                                            />
-                                            <TotalRow
-                                                label="Water Features Total"
-                                                value={waterFeaturesTotal}
-                                            />
-                                            {!isCustomerView && (
-                                                <tr className="bg-gray-50 text-sm text-muted-foreground">
-                                                    <td colSpan={3} className="p-2 text-center italic">
-                                                        All prices include margin — no additional markup needed
-                                                    </td>
-                                                </tr>
+                                            {snapshot.water_feature_back_cladding_needed && (
+                                                <LineItem
+                                                    label="Back Cladding"
+                                                    code=""
+                                                    margin={300}
+                                                    value={1000}
+                                                    showMargin={!isCustomerView}
+                                                />
+                                            )}
+                                            {snapshot.water_feature_led_blade && !['none', 'None', ''].includes(snapshot.water_feature_led_blade) && (
+                                                <LineItem
+                                                    label={snapshot.water_feature_led_blade === '900mm' ? '900mm LED Blade' : 
+                                                           snapshot.water_feature_led_blade === '1200mm' ? '1200mm LED Blade' : 
+                                                           snapshot.water_feature_led_blade}
+                                                    code=""
+                                                    margin={100}
+                                                    value={snapshot.water_feature_led_blade === '1200mm' ? 400 : 300}
+                                                    showMargin={!isCustomerView}
+                                                />
                                             )}
                                         </tbody>
+                                        <tfoot>
+                                            <FooterRow
+                                                label="Water Features Total"
+                                                margin={
+                                                    (snapshot.water_feature_size === 'small' ? 800 : 900) + 
+                                                    (snapshot.water_feature_back_cladding_needed ? 300 : 0) + 
+                                                    (snapshot.water_feature_led_blade && !['none', 'None', ''].includes(snapshot.water_feature_led_blade) ? 100 : 0)
+                                                }
+                                                value={waterFeaturesTotal}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
                                     </table>
                                 </div>
                             )}
@@ -1513,7 +1833,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                 <h3 className="text-lg font-medium text-gray-900">Upgrades & Extras - General</h3>
                                 {!isCustomerView && (
                                     <p className="text-sm text-muted-foreground">
-                                        (Margin Already Included)
+                                        (Margin: {formatCurrency(generalExtras?.reduce((sum, item) => sum + item.total_margin, 0) || 0)})
                                     </p>
                                 )}
                             </div>
@@ -1530,6 +1850,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                         {expandedSections.upgradesExtrasGeneral && (
                             <div className="space-y-4">
                                 <table className="w-full">
+                                    <TableHeader showMargin={!isCustomerView} />
                                     <tbody>
                                         {generalExtrasTotal === 0 ? (
                                             <tr className="border-b border-slate-100">
@@ -1542,10 +1863,11 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                 {generalExtrasByType.spaJets.map((item) => (
                                                     <LineItem
                                                         key={item.id}
-                                                        label={`Spa Jets - ${item.name}`}
+                                                        label={`Spa Jets - ${item.name}${item.quantity > 1 ? ` × ${item.quantity}` : ''}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
@@ -1554,8 +1876,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         key={item.id}
                                                         label={`Deck Jets - ${item.name}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? item.description : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
@@ -1564,8 +1887,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         key={item.id}
                                                         label={`Hand Grab Rail - ${item.name}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? item.description : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
@@ -1574,8 +1898,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         key={item.id}
                                                         label={`Pool Automation - ${item.name}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? item.description : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
@@ -1584,8 +1909,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         key={item.id}
                                                         label={`pH & ORP Chemistry - ${item.name}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? item.description : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
@@ -1594,40 +1920,47 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         key={item.id}
                                                         label={`Bundle - ${item.name}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? `${item.description} (Bundle Discount Applied)` : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
                                                 {generalExtrasByType.misc.map((item) => (
                                                     <LineItem
                                                         key={item.id}
-                                                        label={`Additional - ${item.name}`}
+                                                        label={`Additional - ${item.name}${item.quantity > 1 ? ` × ${item.quantity}` : ''}`}
                                                         code={item.sku}
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
 
                                                 {generalExtrasByType.custom.map((item) => (
                                                     <LineItem
                                                         key={item.id}
-                                                        label={`Custom Add-Ons - ${item.name}`}
+                                                        label={`Custom Add-Ons - ${item.name}${item.quantity > 1 ? ` × ${item.quantity}` : ''}`}
                                                         code=""
+                                                        margin={item.total_margin}
                                                         value={item.total_rrp}
-                                                        breakdown={!isCustomerView ? `${item.quantity} units × ${formatCurrency(item.rrp)}` : null}
+                                                        showMargin={!isCustomerView}
                                                     />
                                                 ))}
                                                 
-                                                {generalExtrasTotal > 0 && (
-                                                    <TotalRow
-                                                        label="General Extras Total"
-                                                        value={generalExtrasTotal}
-                                                    />
-                                                )}
                                             </>
                                         )}
                                     </tbody>
+                                    {generalExtrasTotal > 0 && (
+                                        <tfoot>
+                                            <FooterRow
+                                                label="General Extras Total"
+                                                margin={generalExtras?.reduce((sum, item) => sum + item.total_margin, 0) || 0}
+                                                value={generalExtrasTotal}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
+                                    )}
                                 </table>
                             </div>
                         )}
@@ -1646,8 +1979,13 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-gray-900 text-lg font-medium">Upgrades & Extras - Heating</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
-                                            {upgradesExtrasMargin > 0 && ` (${formatCurrency(upgradesExtrasMargin)} margin)`}
+                                            (Margin: {formatCurrency(
+                                                (snapshot.include_heat_pump ? (heatPumpData?.margin || snapshot.heat_pump_margin || 
+                                                    (snapshot.heating_total_margin && snapshot.include_blanket_roller ? 
+                                                     snapshot.heating_total_margin - (snapshot.blanket_roller_margin || 0) : 
+                                                     snapshot.heating_total_margin || 0)) : 0) +
+                                                (snapshot.include_blanket_roller ? (snapshot.blanket_roller_margin || 0) : 0)
+                                            )})
                                         </p>
                                     )}
                                 </div>
@@ -1663,48 +2001,46 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
                             {expandedSections.upgradesExtrasHeating && (
                                 <div className="space-y-4">
-                                    <div className="p-0">
-                                        <table className="w-full">
-                                            <tbody>
-                                                {snapshot.include_heat_pump && (
-                                                    <>
-                                                        <LineItem
-                                                            label="Heat Pump"
-                                                            code=""
-                                                            value={heatPumpRRP}
-                                                            breakdown={!isCustomerView ? "Price includes margin" : null}
-                                                        />
-                                                        <LineItem
-                                                            label="Heat Pump Installation"
-                                                            code=""
-                                                            value={heatPumpInstallation}
-                                                            breakdown={!isCustomerView ? "Included in heat pump price" : null}
-                                                        />
-                                                    </>
-                                                )}
-                                                {snapshot.include_blanket_roller && (
-                                                    <>
-                                                        <LineItem
-                                                            label="Pool Blanket & Roller"
-                                                            code=""
-                                                            value={blanketRollerRRP}
-                                                            breakdown={!isCustomerView ? "Price includes margin" : null}
-                                                        />
-                                                        <LineItem
-                                                            label="Blanket & Roller Installation"
-                                                            code=""
-                                                            value={blanketRollerInstallation}
-                                                            breakdown={!isCustomerView ? "Included in blanket & roller price" : null}
-                                                        />
-                                                    </>
-                                                )}
-                                                <TotalRow
-                                                    label="Heating Upgrades Total"
-                                                    value={heatingTotal}
+                                    <table className="w-full">
+                                        <TableHeader showMargin={!isCustomerView} />
+                                        <tbody>
+                                            {snapshot.include_heat_pump && (
+                                                <LineItem
+                                                    label="Heat Pump (incl. installation)"
+                                                    code=""
+                                                    margin={heatPumpData?.margin || snapshot.heat_pump_margin || 
+                                                            (snapshot.heating_total_margin && snapshot.include_blanket_roller ? 
+                                                             snapshot.heating_total_margin - (snapshot.blanket_roller_margin || 0) : 
+                                                             snapshot.heating_total_margin || 0)}
+                                                    value={heatPumpTotal}
+                                                    showMargin={!isCustomerView}
                                                 />
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            )}
+                                            {snapshot.include_blanket_roller && (
+                                                <LineItem
+                                                    label="Pool Blanket & Roller (incl. installation)"
+                                                    code=""
+                                                    margin={snapshot.blanket_roller_margin || 0}
+                                                    value={blanketRollerTotal}
+                                                    showMargin={!isCustomerView}
+                                                />
+                                            )}
+                                        </tbody>
+                                        <tfoot>
+                                            <FooterRow
+                                                label="Heating Upgrades Total"
+                                                margin={
+                                                    (snapshot.include_heat_pump ? (heatPumpData?.margin || snapshot.heat_pump_margin || 
+                                                        (snapshot.heating_total_margin && snapshot.include_blanket_roller ? 
+                                                         snapshot.heating_total_margin - (snapshot.blanket_roller_margin || 0) : 
+                                                         snapshot.heating_total_margin || 0)) : 0) +
+                                                    (snapshot.include_blanket_roller ? (snapshot.blanket_roller_margin || 0) : 0)
+                                                }
+                                                value={heatingTotal}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
+                                    </table>
                                 </div>
                             )}
                         </CardContent>
@@ -1723,8 +2059,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                     <h3 className="text-gray-900 text-lg font-medium">Upgrades & Extras - Pool Cleaner</h3>
                                     {!isCustomerView && (
                                         <p className="text-sm text-muted-foreground">
-                                            (Margin Already Included)
-                                            {upgradesExtrasMargin > 0 && ` (${formatCurrency(upgradesExtrasMargin)} margin)`}
+                                            (Margin: {formatCurrency(snapshot.cleaner_included ? (snapshot.cleaner_margin || 0) : 0)})
                                         </p>
                                     )}
                                 </div>
@@ -1740,26 +2075,28 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
                             {expandedSections.upgradesExtrasCleaner && (
                                 <div className="space-y-4">
-                                    <div className="p-0">
-                                        <table className="w-full">
-                                            <tbody>
-                                                {snapshot.cleaner_included && (
-                                                    <>
-                                                        <LineItem
-                                                            label="Pool Cleaner"
-                                                            code=""
-                                                            value={snapshot.cleaner_unit_price || 0}
-                                                            breakdown={!isCustomerView ? "Price includes margin" : null}
-                                                        />
-                                                    </>
-                                                )}
-                                                <TotalRow
-                                                    label="Pool Cleaner Total"
-                                                    value={cleanerTotal}
+                                    <table className="w-full">
+                                        <TableHeader showMargin={!isCustomerView} />
+                                        <tbody>
+                                            {snapshot.cleaner_included && (
+                                                <LineItem
+                                                    label={snapshot.cleaner_name || "Pool Cleaner"}
+                                                    code=""
+                                                    margin={snapshot.cleaner_margin || 0}
+                                                    value={snapshot.cleaner_unit_price || 0}
+                                                    showMargin={!isCustomerView}
                                                 />
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            )}
+                                        </tbody>
+                                        <tfoot>
+                                            <FooterRow
+                                                label="Pool Cleaner Total"
+                                                margin={snapshot.cleaner_included ? (snapshot.cleaner_margin || 0) : 0}
+                                                value={cleanerTotal}
+                                                showMargin={!isCustomerView}
+                                            />
+                                        </tfoot>
+                                    </table>
                                 </div>
                             )}
                         </CardContent>

@@ -10,7 +10,7 @@ import { Fence } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
-import { SaveButton } from "../SaveButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface UnderFenceConcreteStripsProps {
   pool: Pool;
@@ -39,6 +39,8 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
   const [selectedStrips, setSelectedStrips] = useState<SelectedStrip[]>([]);
   const [totalCost, setTotalCost] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const queryClient = useQueryClient();
 
   // Use the guarded actions hook
   const {
@@ -164,29 +166,71 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
     setTotalCost(total);
   }, [selectedStrips, strips]);
 
-  // Save strips data using the guarded hook
-  const handleSaveClick = async () => {
-    console.log('[UnderFenceStrips] handleSaveClick: Initiated.');
-    console.log('[UnderFenceStrips] handleSaveClick: Current selectedStrips STATE:', JSON.stringify(selectedStrips));
-    console.log('[UnderFenceStrips] handleSaveClick: Current totalCost STATE:', totalCost);
+  // Auto-save effect - only trigger on user input changes
+  useEffect(() => {
+    if (!customerId || isLoading || strips.length === 0) return;
 
-    // Prepare data to save - don't include pool_project_id as the hook will add it
-    const dataToSave = {
-      strip_data: selectedStrips, // This is an array of objects
-      total_cost: totalCost
-    };
+    const timer = setTimeout(async () => {
+      console.log('[UnderFenceStrips] Auto-saving data:', { selectedStrips, totalCost });
 
-    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
-    const result = await handleSave(dataToSave, 'pool_fence_concrete_strips');
+      try {
+        // Prepare data to save
+        const dataToSave = {
+          strip_data: selectedStrips,
+          total_cost: totalCost
+        };
 
-    console.log('[UnderFenceStrips] handleSaveClick: Save operation result:', result);
+        // Check if record exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('pool_fence_concrete_strips')
+          .select('id')
+          .eq('pool_project_id', customerId)
+          .maybeSingle();
 
-    if (result.success) {
-      if (onSaveComplete) {
-        onSaveComplete();
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('[UnderFenceStrips] Error checking existing data:', checkError);
+          return;
+        }
+
+        if (existingData?.id) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('pool_fence_concrete_strips')
+            .update(dataToSave)
+            .eq('id', existingData.id);
+
+          if (updateError) {
+            console.error('[UnderFenceStrips] Error updating:', updateError);
+            toast.error("Failed to save fence strips");
+          } else {
+            // Invalidate the snapshot query after successful save
+            queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+          }
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('pool_fence_concrete_strips')
+            .insert({
+              ...dataToSave,
+              pool_project_id: customerId
+            });
+
+          if (insertError) {
+            console.error('[UnderFenceStrips] Error inserting:', insertError);
+            toast.error("Failed to save fence strips");
+          } else {
+            // Invalidate the snapshot query after successful save
+            queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+          }
+        }
+      } catch (error) {
+        console.error('[UnderFenceStrips] Auto-save error:', error);
       }
-    }
-  };
+    }, 1500); // 1.5 second debounce
+
+    return () => clearTimeout(timer);
+  }, [selectedStrips, totalCost, customerId]); // Only depend on actual user inputs and stable values
+
 
   // Clear all selected strips
   const handleClearAll = () => {
@@ -211,27 +255,15 @@ export const UnderFenceConcreteStrips: React.FC<UnderFenceConcreteStripsProps> =
             </p>
           </div>
 
-          <div className="flex gap-2">
-            {selectedStrips.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearAll}
-              >
-                Clear All
-              </Button>
-            )}
-
-            {customerId && (
-              <SaveButton
-                onClick={handleSaveClick}
-                isSubmitting={isSubmitting}
-                disabled={false}
-                buttonText="Save Strips"
-                className="bg-primary"
-              />
-            )}
-          </div>
+          {selectedStrips.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAll}
+            >
+              Clear All
+            </Button>
+          )}
         </CardHeader>
 
         <CardContent className="pt-4">

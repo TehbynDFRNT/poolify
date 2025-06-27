@@ -1,6 +1,5 @@
 import React from "react";
 import { PoolSelectionContent } from "./components/PoolSelectionContent";
-import { PoolSelectionHeader } from "./components/PoolSelectionHeader";
 import { usePoolSelectionGuarded } from "./hooks/usePoolSelectionGuarded";
 import { useSaveAllGuarded } from "./hooks/useSaveAllGuarded";
 
@@ -38,12 +37,9 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
 
   return (
     <div className="space-y-6">
-      <PoolSelectionHeader
-        customerId={customerId}
-        isSubmittingAll={isSubmittingAll}
-        handleSaveAll={handleSaveAll}
-        hasSelectedPool={!!selectedPoolId}
-      />
+      <div>
+        <h2 className="text-2xl font-bold mb-6">Pool Selection</h2>
+      </div>
 
       <PoolSelectionContent
         isLoading={isLoading}
@@ -57,6 +53,8 @@ const PoolSelectionSection: React.FC<PoolSelectionSectionProps> = ({ customerId 
         customerId={customerId}
         isSubmitting={isSubmitting}
         handleSavePoolSelection={handleSavePoolSelection}
+        isSubmittingAll={isSubmittingAll}
+        handleSaveAll={handleSaveAll}
       />
 
       <PoolSelectionStatusDialog />

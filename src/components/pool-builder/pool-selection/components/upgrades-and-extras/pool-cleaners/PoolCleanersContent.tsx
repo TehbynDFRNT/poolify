@@ -2,9 +2,12 @@ import { Button } from "@/components/ui/button";
 import { usePoolCleanerOptionsGuarded } from "@/hooks/usePoolCleanerOptionsGuarded";
 import { Pool } from "@/types/pool";
 import { Loader2 } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 import { PoolCleanerSelector } from "./PoolCleanerSelector";
 import { PoolCleanersSummary } from "./PoolCleanersSummary";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface PoolCleanersContentProps {
   pool: Pool;
@@ -15,6 +18,8 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
   pool,
   customerId
 }) => {
+  const queryClient = useQueryClient();
+  
   const {
     isLoading,
     availableCleaners,
@@ -28,6 +33,51 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
     margin,
     StatusWarningDialog
   } = usePoolCleanerOptionsGuarded(pool.id, customerId);
+
+  // Auto-save effect with direct Supabase calls
+  useEffect(() => {
+    if (!customerId || !pool.id || isLoading || !availableCleaners) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        console.log('🔄 Auto-saving pool cleaner selection...');
+        
+        if (includeCleaner && selectedCleaner) {
+          // Upsert the pool cleaner selection
+          await supabase
+            .from('pool_cleaner_selections')
+            .upsert({
+              customer_id: customerId,
+              pool_id: pool.id,
+              pool_cleaner_id: selectedCleaner.id,
+              include_cleaner: true
+            });
+        } else {
+          // Nothing selected - delete any existing record
+          await supabase
+            .from('pool_cleaner_selections')
+            .delete()
+            .eq('customer_id', customerId)
+            .eq('pool_id', pool.id);
+        }
+
+        // Invalidate queries to refresh data
+        await queryClient.invalidateQueries({ queryKey: ['pool-cleaner-selection', customerId] });
+        console.log('✅ Pool cleaner selection auto-saved successfully');
+      } catch (error) {
+        console.error("Error auto-saving pool cleaner selection:", error);
+        toast.error("Failed to auto-save pool cleaner selection");
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [
+    includeCleaner,
+    selectedCleaner?.id,
+    customerId,
+    pool.id,
+    availableCleaners?.length
+  ]);
 
   if (isLoading) {
     return (
@@ -58,19 +108,6 @@ export const PoolCleanersContent: React.FC<PoolCleanersContentProps> = ({
         includeCleaner={includeCleaner}
         totalCost={totalCost}
       />
-
-      {customerId && (
-        <div className="flex justify-end mt-6">
-          <Button
-            onClick={savePoolCleanerSelection}
-            disabled={isSaving}
-            className="flex items-center gap-2"
-          >
-            {isSaving && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            {isSaving ? 'Saving...' : 'Save Pool Cleaner'}
-          </Button>
-        </div>
-      )}
 
       {/* Status Warning Dialog */}
       <StatusWarningDialog />

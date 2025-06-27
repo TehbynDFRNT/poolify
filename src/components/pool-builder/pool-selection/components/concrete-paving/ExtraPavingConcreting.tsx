@@ -1,23 +1,21 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useGuardedMutation } from "@/hooks/useGuardedMutation";
 import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
 import { Settings } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
-import { SaveButton } from "../SaveButton";
-import { ConcreteAndPavingCostSummary } from "./ConcreteAndPavingCostSummary";
+import { ConcreteAndPavingSnapshotSummary } from "./ConcreteAndPavingSnapshotSummary";
 import { ConcreteCuts } from "./ConcreteCuts";
 import { ConcretePumpSelector } from "./ConcretePumpSelector";
 import { ExtraConcreting } from "./ExtraConcreting";
 import { ExtraPavingConcrete } from "./ExtraPavingConcrete";
 import { PavingOnExistingConcrete } from "./PavingOnExistingConcrete";
-import { SaveAllButton } from "./SaveAllButton";
 import { UnderFenceConcreteStrips } from "./UnderFenceConcreteStrips";
+import { SaveAllButton } from "./SaveAllButton";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 interface ExtraPavingConcretingProps {
   pool: Pool;
@@ -40,7 +38,9 @@ const GROUT_COLOUR_OPTIONS = [
 ];
 
 export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ pool, customerId }) => {
+  const queryClient = useQueryClient();
   const [summaryKey, setSummaryKey] = useState<number>(0);
+  const [isSavingAll, setIsSavingAll] = useState(false);
   
   // Included Coping Options state
   const [copingCategory, setCopingCategory] = useState<string>("");
@@ -55,8 +55,7 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
   // Use the guarded actions hook for coping options
   const {
     handleSave: handleCopingSave,
-    isSubmitting: isCopingSubmitting,
-    StatusWarningDialog: CopingStatusWarningDialog
+    isSubmitting: isCopingSubmitting
   } = useConcretePavingActionsGuarded(customerId);
 
   // Fetch existing coping data when component mounts
@@ -99,7 +98,60 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
     }
   };
 
-  // Handle save for coping options
+  // Track previous values to prevent unnecessary saves
+  const prevCopingRef = useRef({ copingCategory, groutColour, recessDraining });
+  
+  // Auto-save coping options when they change
+  useEffect(() => {
+    // Check if values actually changed
+    const hasChanged = 
+      prevCopingRef.current.copingCategory !== copingCategory ||
+      prevCopingRef.current.groutColour !== groutColour ||
+      prevCopingRef.current.recessDraining !== recessDraining;
+    
+    if (!hasChanged || !customerId || isLoadingCoping) return;
+    
+    // Update ref with new values
+    prevCopingRef.current = { copingCategory, groutColour, recessDraining };
+    
+    const autoSaveCoping = async () => {
+      const dataToSave = {
+        coping_category: copingCategory || null,
+        grout_colour: groutColour || null,
+        recess_drainage: recessDraining || null
+      };
+
+      // Check if any record exists first
+      const { data: existingData } = await supabase
+        .from('pool_paving_selections')
+        .select('id')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
+
+      // Perform upsert directly to avoid hook dependency issues
+      const { error } = await supabase
+        .from('pool_paving_selections')
+        .upsert(
+          {
+            ...dataToSave,
+            pool_project_id: customerId,
+            ...(existingData?.id && { id: existingData.id })
+          },
+          { onConflict: 'pool_project_id' }
+        );
+
+      if (!error) {
+        // Invalidate snapshot query after successful save
+        queryClient.invalidateQueries({ 
+          queryKey: ['project-snapshot', customerId] 
+        });
+      }
+    };
+
+    autoSaveCoping();
+  }, [copingCategory, groutColour, recessDraining, customerId, isLoadingCoping, queryClient]);
+
+  // Handle save for coping options (kept for manual save button if needed)
   const handleCopingSaveClick = async () => {
     const dataToSave = {
       coping_category: copingCategory || null,
@@ -115,40 +167,36 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
     }
   };
 
-  // Guarded save all for concrete and paving
-  const {
-    mutate: saveAllMutation,
-    isPending: isSubmittingAll,
-    StatusWarningDialog
-  } = useGuardedMutation({
-    projectId: customerId || '',
-    mutationFn: async () => {
-      // For concrete and paving, we don't have a single save operation
-      // This is just to trigger the status guard warning
-      // Individual components handle their own saves
-      refreshSummary();
-      return { success: true };
-    },
-    mutationOptions: {
-      onSuccess: () => {
-        toast.success("All sections refreshed successfully");
-      },
-      onError: (error) => {
-        console.error("Error in save all:", error);
-        toast.error("Failed to refresh sections");
-      },
-    },
-  });
-
+  // Handle Save All functionality
   const handleSaveAll = async () => {
-    saveAllMutation();
+    setIsSavingAll(true);
+    
+    try {
+      // Since all components have auto-save, we just need to:
+      // 1. Invalidate queries to ensure all data is fresh
+      // 2. Show a success message
+      
+      // Invalidate the snapshot query to refresh all data
+      await queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+      
+      // Refresh the summary to show latest data
+      refreshSummary();
+      
+      toast.success("All concrete & paving data saved successfully");
+    } catch (error) {
+      console.error("Error saving all concrete & paving data:", error);
+      toast.error("Failed to save all data");
+    } finally {
+      setIsSavingAll(false);
+    }
   };
+
 
   return (
     <div className="space-y-6">
       {/* Included Coping Options Section */}
       <Card>
-        <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+        <CardHeader className="bg-white pb-2">
           <div>
             <div className="flex items-center gap-2">
               <Settings className="h-5 w-5 text-primary" />
@@ -158,16 +206,6 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
               Configure coping category and grout colour options
             </p>
           </div>
-
-          {customerId && (
-            <SaveButton
-              onClick={handleCopingSaveClick}
-              isSubmitting={isCopingSubmitting}
-              disabled={false}
-              buttonText="Save Options"
-              className="bg-primary"
-            />
-          )}
         </CardHeader>
 
         <CardContent className="pt-4">
@@ -268,21 +306,16 @@ export const ExtraPavingConcreting: React.FC<ExtraPavingConcretingProps> = ({ po
         customerId={customerId}
         onSaveComplete={refreshSummary}
       />
-      <ConcreteAndPavingCostSummary
-        key={summaryKey}
+      <ConcreteAndPavingSnapshotSummary
         pool={pool}
         customerId={customerId}
       />
-
-      <div className="flex justify-end mt-8">
-        <SaveAllButton
-          onSaveAll={handleSaveAll}
-          isSubmitting={isSubmittingAll}
-        />
-      </div>
-
-      <StatusWarningDialog />
-      <CopingStatusWarningDialog />
+      
+      {/* Save All Button */}
+      <SaveAllButton
+        onSaveAll={handleSaveAll}
+        isSubmitting={isSavingAll}
+      />
     </div>
   );
 };

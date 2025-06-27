@@ -1,8 +1,7 @@
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSiteRequirementsGuarded } from "@/hooks/useSiteRequirementsGuarded";
 import { Pool } from "@/types/pool";
-import { Construction, MapPin, Save } from "lucide-react";
+import { Construction, MapPin } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 import { SiteRequirementsForm } from "./SiteRequirementsForm";
@@ -31,24 +30,10 @@ export const SiteRequirementsPlaceholder: React.FC<SiteRequirementsPlaceholderPr
     <div className="space-y-4">
       <Card>
         <CardHeader className="bg-secondary/50 pb-3">
-          <div className="flex justify-between items-center">
-            <CardTitle className="text-lg font-semibold flex items-center">
-              <MapPin className="h-5 w-5 mr-2 text-primary" />
-              Site Requirements
-            </CardTitle>
-
-            {customerId && (
-              <Button
-                size="sm"
-                disabled={isSubmitting}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Save className="h-4 w-4" />
-                {isSubmitting ? "Saving..." : "Save All"}
-              </Button>
-            )}
-          </div>
+          <CardTitle className="text-lg font-semibold flex items-center">
+            <MapPin className="h-5 w-5 mr-2 text-primary" />
+            Site Requirements
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
           {!customerId ? (

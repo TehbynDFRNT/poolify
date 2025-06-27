@@ -3,6 +3,8 @@ import { Pool } from "@/types/pool";
 import { Fence } from "lucide-react";
 import React from "react";
 import { PlaceholderSummary } from "./PlaceholderSummary";
+import { EditSectionLink } from "./EditSectionLink";
+import { formatCurrency } from "@/utils/format";
 
 interface RetainingWallsSummaryProps {
     pool: Pool;
@@ -35,34 +37,47 @@ export const RetainingWallsSummary: React.FC<RetainingWallsSummaryProps> = ({
     const totalCost = retainingWalls.walls.reduce((sum, wall) => sum + (wall.total_cost || 0), 0);
 
     return (
-        <div className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Fence className="h-5 w-5 text-primary" />
-                    <h3 className="text-lg font-semibold">Retaining Walls</h3>
-                </div>
-                <div className="text-lg font-semibold">
-                    ${totalCost.toFixed(2)}
-                </div>
+        <div>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold">Retaining Walls</h3>
+                <EditSectionLink section="retaining-walls" customerId={customerId} />
             </div>
 
-            <div className="border rounded-md p-4 space-y-4">
-                {retainingWalls.walls.map((wall, index) => (
-                    <div key={wall.id || index} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                            <span className="font-medium">Wall {index + 1}: {wall.wall_type}</span>
-                            <span>${wall.total_cost?.toFixed(2) || '0.00'}</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                            <div className="grid grid-cols-2 gap-2">
-                                <div>Height 1: {wall.height1}m</div>
-                                <div>Height 2: {wall.height2}m</div>
-                                <div>Length: {wall.length}m</div>
-                                <div>Area: {((Number(wall.height1) + Number(wall.height2)) / 2 * Number(wall.length)).toFixed(2)}m²</div>
-                            </div>
-                        </div>
-                    </div>
-                ))}
+            {/* Retaining Walls Details Table */}
+            <div className="overflow-x-auto">
+                <table className="w-full">
+                    <thead>
+                        <tr className="border-b">
+                            <th className="text-left py-2 font-medium">Wall</th>
+                            <th className="text-left py-2 font-medium">Type</th>
+                            <th className="text-right py-2 font-medium">Dimensions</th>
+                            <th className="text-right py-2 font-medium">Area</th>
+                            <th className="text-right py-2 font-medium">Total Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {retainingWalls.walls.map((wall, index) => {
+                            const area = ((Number(wall.height1) + Number(wall.height2)) / 2 * Number(wall.length));
+                            return (
+                                <tr key={wall.id || index} className="border-b">
+                                    <td className="py-2">Wall {index + 1}</td>
+                                    <td className="py-2">{wall.wall_type}</td>
+                                    <td className="text-right py-2">
+                                        {wall.height1}m × {wall.height2}m × {wall.length}m
+                                    </td>
+                                    <td className="text-right py-2">{area.toFixed(2)} m²</td>
+                                    <td className="text-right py-2">{formatCurrency(wall.total_cost || 0)}</td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                    <tfoot>
+                        <tr className="border-t-2">
+                            <td colSpan={4} className="pt-3 font-semibold">Total Retaining Walls:</td>
+                            <td className="text-right pt-3 font-semibold">{formatCurrency(totalCost)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
             </div>
         </div>
     );

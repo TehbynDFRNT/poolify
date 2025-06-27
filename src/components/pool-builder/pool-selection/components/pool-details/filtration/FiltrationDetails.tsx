@@ -68,6 +68,12 @@ export const FiltrationDetails: React.FC<FiltrationDetailsProps> = ({
           queryClient.invalidateQueries({
             queryKey: ["pools-with-packages"]
           });
+          // Invalidate snapshot to trigger re-render of cost summary
+          if (customerId) {
+            queryClient.invalidateQueries({
+              queryKey: ['project-snapshot', customerId]
+            });
+          }
           setIsEditing(false);
         }
       });

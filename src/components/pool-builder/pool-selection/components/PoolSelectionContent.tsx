@@ -1,11 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Pool } from "@/types/pool";
-import { CheckCircle, Save } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import React from "react";
 import { ColorSelector } from "./ColorSelector";
 import { PoolDetailsSections } from "./PoolDetailsSections";
 import { PoolModelSelector } from "./PoolModelSelector";
-import { SaveButton } from "./SaveButton";
 
 interface PoolSelectionContentProps {
   isLoading: boolean;
@@ -19,6 +18,8 @@ interface PoolSelectionContentProps {
   customerId?: string | null;
   isSubmitting: boolean;
   handleSavePoolSelection: () => Promise<void>;
+  isSubmittingAll?: boolean;
+  handleSaveAll?: () => Promise<void>;
 }
 
 export const PoolSelectionContent: React.FC<PoolSelectionContentProps> = ({
@@ -32,23 +33,14 @@ export const PoolSelectionContent: React.FC<PoolSelectionContentProps> = ({
   setSelectedColor,
   customerId,
   isSubmitting,
-  handleSavePoolSelection
+  handleSavePoolSelection,
+  isSubmittingAll,
+  handleSaveAll
 }) => {
   return (
     <Card className="mb-6">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader>
         <CardTitle>Select a Pool Model</CardTitle>
-
-        {customerId && selectedPoolId && (
-          <SaveButton
-            onClick={handleSavePoolSelection}
-            isSubmitting={isSubmitting}
-            disabled={false}
-            buttonText="Save Pool Selection"
-            icon={<Save className="mr-2 h-4 w-4" />}
-            className="bg-primary"
-          />
-        )}
       </CardHeader>
       <CardContent className="space-y-4">
         {isLoading ? (
@@ -89,6 +81,8 @@ export const PoolSelectionContent: React.FC<PoolSelectionContentProps> = ({
                   pool={selectedPool}
                   selectedColor={selectedColor}
                   customerId={customerId || undefined}
+                  isSubmittingAll={isSubmittingAll}
+                  handleSaveAll={handleSaveAll}
                 />
               </div>
             )}

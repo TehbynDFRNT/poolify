@@ -1,6 +1,7 @@
 
 import React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calculator } from "lucide-react";
 import { useRetainingWallSummary } from "./hooks/useRetainingWallSummary";
 import { SummaryTable } from "./components/SummaryTable";
 import { SummaryLoading } from "./components/SummaryLoading";
@@ -28,7 +29,12 @@ export const RetainingWallCostSummary: React.FC<RetainingWallCostSummaryProps> =
   return (
     <Card className="mt-6 shadow-md">
       <CardHeader className="bg-white">
-        <CardTitle className="text-xl font-semibold">Retaining Walls Cost Summary</CardTitle>
+        <div className="flex items-center gap-2">
+          <Calculator className="h-5 w-5 text-primary" />
+          <CardTitle className="text-lg font-medium">
+            Retaining Walls Summary
+          </CardTitle>
+        </div>
       </CardHeader>
       <CardContent>
         {isLoading ? (

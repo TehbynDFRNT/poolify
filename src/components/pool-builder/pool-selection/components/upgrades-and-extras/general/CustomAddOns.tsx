@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2, Save, Loader2 } from "lucide-react";
 import { useCustomAddOns, CustomAddOn } from "@/hooks/useCustomAddOns";
 import { formatCurrency } from "@/utils/format";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface CustomAddOnsProps {
   customerId: string | null;
@@ -14,6 +17,8 @@ interface CustomAddOnsProps {
 export const CustomAddOns: React.FC<CustomAddOnsProps> = ({
   customerId
 }) => {
+  const queryClient = useQueryClient();
+  
   const {
     customAddOns,
     isLoading,
@@ -25,6 +30,59 @@ export const CustomAddOns: React.FC<CustomAddOnsProps> = ({
     saveCustomAddOns,
     StatusWarningDialog
   } = useCustomAddOns(customerId);
+
+  // Auto-save effect with direct Supabase calls
+  useEffect(() => {
+    if (!customerId || isLoading) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        console.log('🔄 Auto-saving custom add-ons...');
+        
+        // Delete existing custom add-ons first
+        await supabase
+          .from('pool_custom_addons')
+          .delete()
+          .eq('pool_project_id', customerId);
+
+        // Only insert if there are custom add-ons with valid data
+        const validAddOns = customAddOns.filter(addOn => 
+          addOn.name && addOn.name.trim() !== '' && 
+          addOn.cost !== null && 
+          addOn.cost !== undefined &&
+          addOn.cost >= 0
+        );
+
+        if (validAddOns.length > 0) {
+          const toInsert = validAddOns.map(addOn => ({
+            pool_project_id: customerId,
+            name: addOn.name,
+            cost: addOn.cost,
+            margin: addOn.margin || 0,
+            rrp: addOn.rrp || 0
+          }));
+
+          const { error } = await supabase
+            .from('pool_custom_addons')
+            .insert(toInsert);
+
+          if (error) throw error;
+        }
+
+        // Invalidate queries to refresh data
+        await queryClient.invalidateQueries({ queryKey: ['pool-custom-addons', customerId] });
+        console.log('✅ Custom add-ons auto-saved successfully');
+      } catch (error) {
+        console.error("Error auto-saving custom add-ons:", error);
+        toast.error("Failed to auto-save custom add-ons");
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [
+    JSON.stringify(customAddOns), // Stringify to create stable dependency
+    customerId
+  ]);
 
   if (isLoading) {
     return (
@@ -153,27 +211,6 @@ export const CustomAddOns: React.FC<CustomAddOnsProps> = ({
               </div>
             </div>
           )}
-
-          {/* Save Button */}
-          <div className="flex justify-end mt-6">
-            <Button 
-              onClick={saveCustomAddOns}
-              disabled={isSaving || customAddOns.length === 0}
-              className="w-full md:w-auto"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Custom Add-Ons
-                </>
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
 

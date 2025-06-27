@@ -42,10 +42,10 @@ export const FormActions: React.FC<FormActionsProps> = ({
           onClick={onSave}
           disabled={isSubmitting}
           variant="default"
-          size="sm"
-          className="flex items-center gap-1"
+          size="lg"
+          className="bg-green-600 hover:bg-green-700 flex items-center gap-1"
         >
-          <Save className="h-4 w-4" />
+          <Save className="h-5 w-5" />
           {isSubmitting ? "Saving..." : saveText}
         </Button>
       </div>

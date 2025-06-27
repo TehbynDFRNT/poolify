@@ -9,12 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useConcretePump } from "@/pages/ConstructionCosts/hooks/useConcretePump";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Truck } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
-import { SaveButton } from "../SaveButton";
 
 interface ExtraConcretingProps {
   pool: Pool;
@@ -24,11 +23,8 @@ interface ExtraConcretingProps {
 
 // Concrete finish options
 const CONCRETE_FINISH_OPTIONS = [
-  "Brushed - Ready for Future Paving",
-  "Brushed - Second Pour",
-  "Second Pour",
-  "Smooth - Ready for Imitation Turf",
-  "Smooth - Second Pour"
+  "Brushed",
+  "Ready for Paving"
 ];
 
 export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
@@ -55,6 +51,8 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     isSubmitting,
     StatusWarningDialog
   } = useConcretePavingActionsGuarded(customerId);
+  
+  const queryClient = useQueryClient();
 
   // Get concrete pump base rate from database
   const { concretePump } = useConcretePump();
@@ -279,25 +277,106 @@ export const ExtraConcreting: React.FC<ExtraConcretingProps> = ({
     }
   }, [extraConcretePumpNeeded, extraConcretePumpQuantity, pumpRate]);
 
+  // Auto-save effect - only trigger on user input changes
+  useEffect(() => {
+    if (!customerId || isLoading || isTypesLoading || !concretingTypes || concretingTypes.length === 0) return;
+
+    const timer = setTimeout(async () => {
+      // Only save if there's actually data to save
+      if (selectedType || meterage > 0 || concreteFinishOne || concreteFinishTwo || extraConcretePumpNeeded) {
+        try {
+          // Calculate total cost inline
+          const typeData = concretingTypes.find(t => t.id === selectedType);
+          const calculatedTotalCost = typeData && meterage > 0 ? typeData.totalRate * meterage : 0;
+          
+          // Save to pool_paving_selections table
+          const pavingDataToSave = {
+            extra_concreting_type: selectedType || null,
+            extra_concreting_square_meters: meterage || null,
+            extra_concreting_total_cost: calculatedTotalCost || null,
+            extra_concrete_finish_one: concreteFinishOne || null,
+            extra_concrete_finish_two: concreteFinishTwo || null
+          };
+
+          console.log('[ExtraConcreting] Auto-saving paving data:', pavingDataToSave);
+          
+          // Check if paving record exists
+          const { data: existingPaving } = await supabase
+            .from('pool_paving_selections')
+            .select('id')
+            .eq('pool_project_id', customerId)
+            .maybeSingle();
+
+          if (existingPaving?.id) {
+            await supabase
+              .from('pool_paving_selections')
+              .update(pavingDataToSave)
+              .eq('id', existingPaving.id);
+          } else {
+            await supabase
+              .from('pool_paving_selections')
+              .insert({
+                ...pavingDataToSave,
+                pool_project_id: customerId
+              });
+          }
+
+          // Calculate pump total cost inline
+          const calculatedPumpTotalCost = extraConcretePumpNeeded && extraConcretePumpQuantity > 0 && pumpRate 
+            ? extraConcretePumpQuantity * pumpRate 
+            : 0;
+          
+          // Save to pool_concrete_selections table
+          const concreteDataToSave = {
+            extra_concrete_pump: extraConcretePumpNeeded,
+            extra_concrete_pump_quantity: extraConcretePumpNeeded ? extraConcretePumpQuantity : null,
+            extra_concrete_pump_total_cost: calculatedPumpTotalCost
+          };
+
+          console.log('[ExtraConcreting] Auto-saving concrete pump data:', concreteDataToSave);
+          
+          // Check if concrete record exists
+          const { data: existingConcrete } = await supabase
+            .from('pool_concrete_selections')
+            .select('id')
+            .eq('pool_project_id', customerId)
+            .maybeSingle();
+
+          if (existingConcrete?.id) {
+            await supabase
+              .from('pool_concrete_selections')
+              .update(concreteDataToSave)
+              .eq('id', existingConcrete.id);
+          } else {
+            await supabase
+              .from('pool_concrete_selections')
+              .insert({
+                ...concreteDataToSave,
+                pool_project_id: customerId
+              });
+          }
+
+          // Invalidate the snapshot query after successful save
+          queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+        } catch (error) {
+          console.error('[ExtraConcreting] Auto-save error:', error);
+          toast.error("Failed to save extra concreting data");
+        }
+      }
+    }, 1500); // 1.5 second debounce
+
+    return () => clearTimeout(timer);
+  }, [selectedType, meterage, concreteFinishOne, concreteFinishTwo, extraConcretePumpNeeded, extraConcretePumpQuantity, customerId, concretingTypes, pumpRate]); // Only depend on actual user inputs and stable values
+
   return (
     <Card>
-      <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+      <CardHeader className="bg-white pb-2">
         <div>
           <h3 className="text-xl font-semibold">Extra Concreting</h3>
           <p className="text-muted-foreground">
             Add extra concrete to your project
           </p>
         </div>
-
-        {customerId && (
-          <SaveButton
-            onClick={handleSaveClick}
-            isSubmitting={isSubmitting}
-            disabled={false}
-            buttonText="Save Details"
-            className="bg-primary"
-          />
-        )}
       </CardHeader>
 
       <CardContent className="pt-4">

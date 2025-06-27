@@ -268,6 +268,9 @@ CREATE OR REPLACE VIEW public.proposal_snapshot_v
     pav.extra_paving_total_cost AS extra_paving_cost,
     pav.existing_concrete_paving_category AS existing_paving_category,
     epc2.category   AS existing_paving_name,     -- human-readable existing paving
+    epc2.paver_cost AS existing_paving_paver_cost,
+    epc2.wastage_cost AS existing_paving_wastage_cost,
+    epc2.margin_cost AS existing_paving_margin_cost,
     pav.existing_concrete_paving_square_meters AS existing_paving_sqm,
     pav.existing_concrete_paving_total_cost AS existing_paving_cost,
     pav.extra_concreting_type,

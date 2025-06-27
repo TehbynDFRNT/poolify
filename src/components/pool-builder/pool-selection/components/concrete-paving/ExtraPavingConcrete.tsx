@@ -9,10 +9,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { Sparkles } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
 import { SaveButton } from "../SaveButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ExtraPavingConcreteProps {
   pool: Pool;
@@ -35,11 +36,15 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
   onSaveComplete
 }) => {
   console.log('[ExtraPavingConcrete] Component mounted/rendered. CustomerId:', customerId);
+  const queryClient = useQueryClient();
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [squareMeters, setSquareMeters] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const { pavingCategoryTotals, labourCostWithMargin, isLoading: isCategoriesLoading, concreteCostPerMeter } = useFormulaCalculations();
+  
+  // Track previous values to prevent unnecessary saves
+  const prevValuesRef = useRef({ selectedCategory, squareMeters });
 
   useEffect(() => {
     if (!isCategoriesLoading && pavingCategoryTotals && pavingCategoryTotals.length > 0) {
@@ -144,6 +149,62 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
     setSquareMeters(isNaN(value) ? 0 : value);
   };
 
+  // Auto-save when category or square meters change
+  useEffect(() => {
+    // Check if values actually changed
+    const hasChanged = 
+      prevValuesRef.current.selectedCategory !== selectedCategory ||
+      prevValuesRef.current.squareMeters !== squareMeters;
+    
+    if (!hasChanged || !customerId || isLoading || isCategoriesLoading) return;
+    
+    // Update ref with new values
+    prevValuesRef.current = { selectedCategory, squareMeters };
+    
+    const timeoutId = setTimeout(async () => {
+      // Find category details to calculate total
+      const categoryDetails = pavingCategoryTotals.find(cat => cat.id === selectedCategory);
+      const calculatedTotalCost = categoryDetails && squareMeters > 0
+        ? categoryDetails.totalRate * squareMeters
+        : 0;
+      
+      // Data for this section: ensure category ID is saved.
+      const dataToSave = {
+        extra_paving_category: selectedCategory || null,
+        extra_paving_square_meters: squareMeters || null,
+        extra_paving_total_cost: calculatedTotalCost || null
+      };
+
+      // Check if any record exists first
+      const { data: existingData } = await supabase
+        .from('pool_paving_selections')
+        .select('id')
+        .eq('pool_project_id', customerId)
+        .maybeSingle();
+
+      // Perform upsert directly to avoid hook dependency issues
+      const { error } = await supabase
+        .from('pool_paving_selections')
+        .upsert(
+          {
+            ...dataToSave,
+            pool_project_id: customerId,
+            ...(existingData?.id && { id: existingData.id })
+          },
+          { onConflict: 'pool_project_id' }
+        );
+
+      if (!error) {
+        // Invalidate snapshot query after successful save
+        queryClient.invalidateQueries({ 
+          queryKey: ['project-snapshot', customerId] 
+        });
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [selectedCategory, squareMeters, customerId, isLoading, isCategoriesLoading, queryClient, pavingCategoryTotals]);
+
   // Handle save using the guarded hook
   const handleSaveClick = async () => {
     console.log('[ExtraPavingConcrete] handleSaveClick: Initiated.');
@@ -191,7 +252,7 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
   return (
     <>
       <Card>
-        <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+        <CardHeader className="bg-white pb-2">
           <div>
             <div className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
@@ -201,16 +262,6 @@ export const ExtraPavingConcrete: React.FC<ExtraPavingConcreteProps> = ({
               Add extra paving and concreting to your pool project
             </p>
           </div>
-
-          {customerId && (
-            <SaveButton
-              onClick={handleSaveClick}
-              isSubmitting={isSubmitting}
-              disabled={false}
-              buttonText="Save Details"
-              className="bg-primary"
-            />
-          )}
         </CardHeader>
 
         <CardContent className="pt-4">

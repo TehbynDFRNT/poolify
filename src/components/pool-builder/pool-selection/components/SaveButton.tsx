@@ -12,6 +12,7 @@ interface SaveButtonProps {
   icon?: React.ReactNode;
   className?: string;
   size?: "default" | "sm" | "lg" | "icon";
+  variant?: "default" | "green";
 }
 
 export const SaveButton: React.FC<SaveButtonProps> = ({ 
@@ -21,13 +22,16 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
   buttonText = "Save", 
   icon = <Save className="mr-2 h-4 w-4" />,
   className,
-  size = "sm"
+  size = "sm",
+  variant = "default"
 }) => {
+  const baseClassName = variant === "green" ? "bg-green-600 hover:bg-green-700" : "";
+  
   return (
     <Button 
       onClick={onClick}
       disabled={isSubmitting || disabled}
-      className={cn("", className)}
+      className={cn(baseClassName, className)}
       size={size}
     >
       {isSubmitting ? (

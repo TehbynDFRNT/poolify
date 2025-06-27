@@ -8,8 +8,9 @@ import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { Scissors } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
-import { SaveButton } from "../SaveButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ConcreteCutsProps {
   pool: Pool;
@@ -23,6 +24,8 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, on
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [totalCost, setTotalCost] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const queryClient = useQueryClient();
 
   // Use the guarded actions hook
   const {
@@ -117,6 +120,75 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, on
     setTotalCost(total);
   };
 
+  // Auto-save effect - only trigger on user input changes
+  useEffect(() => {
+    if (!customerId || isLoading || cutTypes.length === 0) return;
+
+    const timer = setTimeout(async () => {
+      // Format data for storage
+      const cutsData = selectedCuts.map(cutId =>
+        `${cutId}:${quantities[cutId] || 1}`
+      ).join(',');
+
+      const dataToSave = {
+        concrete_cuts: cutsData || null,
+        concrete_cuts_cost: totalCost || null
+      };
+
+      console.log('[ConcreteCuts] Auto-saving data:', dataToSave);
+
+      try {
+        // Check if record exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('pool_concrete_selections')
+          .select('id')
+          .eq('pool_project_id', customerId)
+          .maybeSingle();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('[ConcreteCuts] Error checking existing data:', checkError);
+          return;
+        }
+
+        if (existingData?.id) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('pool_concrete_selections')
+            .update(dataToSave)
+            .eq('id', existingData.id);
+
+          if (updateError) {
+            console.error('[ConcreteCuts] Error updating:', updateError);
+            toast.error("Failed to save concrete cuts");
+          } else {
+            // Invalidate the snapshot query after successful save
+            queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+          }
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('pool_concrete_selections')
+            .insert({
+              ...dataToSave,
+              pool_project_id: customerId
+            });
+
+          if (insertError) {
+            console.error('[ConcreteCuts] Error inserting:', insertError);
+            toast.error("Failed to save concrete cuts");
+          } else {
+            // Invalidate the snapshot query after successful save
+            queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+          }
+        }
+      } catch (error) {
+        console.error('[ConcreteCuts] Auto-save error:', error);
+      }
+    }, 1500); // 1.5 second debounce
+
+    return () => clearTimeout(timer);
+  }, [selectedCuts, quantities, totalCost, customerId]); // Only depend on actual user inputs and stable values
+
   // Handle cut selection/deselection
   const handleCutSelection = (cutId: string, checked: boolean) => {
     if (checked) {
@@ -159,27 +231,6 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, on
     }
   };
 
-  // Save concrete cuts data using the guarded hook
-  const handleSaveClick = async () => {
-    // Format data for storage
-    const cutsData = selectedCuts.map(cutId =>
-      `${cutId}:${quantities[cutId] || 1}`
-    ).join(',');
-
-    const updateData = {
-      concrete_cuts: cutsData || null,
-      concrete_cuts_cost: totalCost || null
-    };
-
-    // Use the guarded handleSave - it will automatically check for existing record by pool_project_id
-    const result = await handleSave(updateData, 'pool_concrete_selections');
-
-    if (result.success) {
-      if (onSaveComplete) {
-        onSaveComplete();
-      }
-    }
-  };
 
   return (
     <>
@@ -195,27 +246,15 @@ export const ConcreteCuts: React.FC<ConcreteCutsProps> = ({ pool, customerId, on
             </p>
           </div>
 
-          <div className="flex gap-2">
-            {selectedCuts.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleClearAll}
-              >
-                Clear All
-              </Button>
-            )}
-
-            {customerId && (
-              <SaveButton
-                onClick={handleSaveClick}
-                isSubmitting={isSubmitting}
-                disabled={false}
-                buttonText="Save Cuts"
-                className="bg-primary"
-              />
-            )}
-          </div>
+          {selectedCuts.length > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleClearAll}
+            >
+              Clear All
+            </Button>
+          )}
         </CardHeader>
 
         <CardContent className="pt-4">

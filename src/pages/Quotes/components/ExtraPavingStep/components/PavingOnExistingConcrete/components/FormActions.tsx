@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Save, Trash2 } from "lucide-react";
 
 interface FormActionsProps {
   onSave: () => void;
@@ -38,7 +38,10 @@ export const FormActions: React.FC<FormActionsProps> = ({
           onClick={onSave}
           disabled={isSubmitting}
           variant="default"
+          size="lg"
+          className="bg-green-600 hover:bg-green-700"
         >
+          <Save className="mr-2 h-5 w-5" />
           {isSubmitting ? "Saving..." : "Save"}
         </Button>
       </div>

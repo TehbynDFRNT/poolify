@@ -1,13 +1,17 @@
 import { Pool } from "@/types/pool";
 import { PoolDetailsSection } from "./pool-details/PoolDetailsSection";
+import { Button } from "@/components/ui/button";
+import { SaveAll } from "lucide-react";
 
 interface PoolDetailsSectionsProps {
   pool: Pool;
   selectedColor?: string;
   customerId?: string;
+  isSubmittingAll?: boolean;
+  handleSaveAll?: () => Promise<void>;
 }
 
-export const PoolDetailsSections = ({ pool, selectedColor, customerId }: PoolDetailsSectionsProps) => {
+export const PoolDetailsSections = ({ pool, selectedColor, customerId, isSubmittingAll, handleSaveAll }: PoolDetailsSectionsProps) => {
   const sections = [
     {
       id: "details",
@@ -45,10 +49,6 @@ export const PoolDetailsSections = ({ pool, selectedColor, customerId }: PoolDet
       id: "costs-summary",
       title: "Costs Summary",
     },
-    {
-      id: "web-rrp",
-      title: "Web RRP",
-    },
   ];
 
   return (
@@ -64,6 +64,21 @@ export const PoolDetailsSections = ({ pool, selectedColor, customerId }: PoolDet
           customerId={customerId}
         />
       ))}
+      
+      {/* Save All button after Web RRP */}
+      {customerId && handleSaveAll && (
+        <div className="flex justify-end mt-4">
+          <Button 
+            onClick={handleSaveAll}
+            disabled={isSubmittingAll}
+            size="lg"
+            className="bg-green-600 hover:bg-green-700"
+          >
+            <SaveAll className="mr-2 h-5 w-5" />
+            {isSubmittingAll ? "Saving All..." : "Save All Sections"}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

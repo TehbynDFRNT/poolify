@@ -1,28 +1,28 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { SaveAll } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface SaveAllButtonProps {
   onSaveAll: () => void;
   isSubmitting: boolean;
-  className?: string;
 }
 
 export const SaveAllButton: React.FC<SaveAllButtonProps> = ({
   onSaveAll,
-  isSubmitting,
-  className = ""
+  isSubmitting
 }) => {
   return (
-    <Button
-      onClick={onSaveAll}
-      disabled={isSubmitting}
-      variant="default"
-      className={`flex items-center gap-2 ${className}`}
-    >
-      <SaveAll className="h-4 w-4" />
-      {isSubmitting ? "Saving..." : "Save All"}
-    </Button>
+    <div className="flex justify-end mt-4">
+      <Button 
+        onClick={onSaveAll}
+        disabled={isSubmitting}
+        size="lg"
+        className="bg-green-600 hover:bg-green-700"
+      >
+        <Save className="mr-2 h-5 w-5" />
+        {isSubmitting ? "Saving..." : "Save All Concrete & Paving"}
+      </Button>
+    </div>
   );
 };

@@ -1,7 +1,7 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Save } from "lucide-react";
 
 interface SaveButtonProps {
   onSave: () => void;
@@ -13,18 +13,15 @@ export const SaveButton: React.FC<SaveButtonProps> = ({
   isSubmitting
 }) => {
   return (
-    <div className="flex justify-end">
+    <div className="flex justify-end mt-4">
       <Button 
         onClick={onSave}
         disabled={isSubmitting}
-        className="w-full md:w-auto"
+        size="lg"
+        className="bg-green-600 hover:bg-green-700"
       >
-        {isSubmitting ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Saving...
-          </>
-        ) : "Save Site Requirements"}
+        <Save className="mr-2 h-5 w-5" />
+        {isSubmitting ? "Saving..." : "Save Site Requirements"}
       </Button>
     </div>
   );

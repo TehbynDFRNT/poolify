@@ -10,7 +10,7 @@ import { Truck } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useConcretePavingActionsGuarded } from "../../hooks/useConcretePavingActionsGuarded";
-import { SaveButton } from "../SaveButton";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface ConcretePumpSelectorProps {
   pool: Pool;
@@ -34,6 +34,8 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
     isSubmitting,
     StatusWarningDialog
   } = useConcretePavingActionsGuarded(customerId);
+  
+  const queryClient = useQueryClient();
 
   // Get concrete pump base rate from database
   const { concretePump, isLoading: isPumpLoading } = useConcretePump();
@@ -78,6 +80,75 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
     }
   }, [isPumpNeeded, quantity, pumpRate]);
 
+  // Auto-save effect - only trigger on user input changes
+  useEffect(() => {
+    if (!customerId || isLoading || isPumpLoading || !pumpRate) return;
+
+    const timer = setTimeout(async () => {
+      // Calculate total cost inline
+      const calculatedTotalCost = isPumpNeeded && quantity > 0 ? quantity * pumpRate : 0;
+      
+      // Always save the current state, even if pump is not needed
+      const dataToSave = {
+        concrete_pump_needed: isPumpNeeded,
+        concrete_pump_quantity: isPumpNeeded ? quantity : null,
+        concrete_pump_total_cost: calculatedTotalCost
+      };
+
+      console.log('[ConcretePumpSelector] Auto-saving data:', dataToSave);
+
+      try {
+        // Check if record exists
+        const { data: existingData, error: checkError } = await supabase
+          .from('pool_concrete_selections')
+          .select('id')
+          .eq('pool_project_id', customerId)
+          .maybeSingle();
+
+        if (checkError && checkError.code !== 'PGRST116') {
+          console.error('[ConcretePumpSelector] Error checking existing data:', checkError);
+          return;
+        }
+
+        if (existingData?.id) {
+          // Update existing record
+          const { error: updateError } = await supabase
+            .from('pool_concrete_selections')
+            .update(dataToSave)
+            .eq('id', existingData.id);
+
+          if (updateError) {
+            console.error('[ConcretePumpSelector] Error updating:', updateError);
+            toast.error("Failed to save concrete pump selection");
+          } else {
+            // Invalidate the snapshot query after successful save
+            queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+          }
+        } else {
+          // Insert new record
+          const { error: insertError } = await supabase
+            .from('pool_concrete_selections')
+            .insert({
+              ...dataToSave,
+              pool_project_id: customerId
+            });
+
+          if (insertError) {
+            console.error('[ConcretePumpSelector] Error inserting:', insertError);
+            toast.error("Failed to save concrete pump selection");
+          } else {
+            // Invalidate the snapshot query after successful save
+            queryClient.invalidateQueries({ queryKey: ['project-snapshot', customerId] });
+          }
+        }
+      } catch (error) {
+        console.error('[ConcretePumpSelector] Auto-save error:', error);
+      }
+    }, 1500); // 1.5 second debounce
+
+    return () => clearTimeout(timer);
+  }, [isPumpNeeded, quantity, customerId, pumpRate]); // Only depend on actual user inputs and stable values
+
   // Handle pump toggle
   const handlePumpToggle = (checked: boolean) => {
     setIsPumpNeeded(checked);
@@ -114,7 +185,7 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
   return (
     <>
       <Card>
-        <CardHeader className="bg-white pb-2 flex flex-row items-center justify-between">
+        <CardHeader className="bg-white pb-2">
           <div>
             <div className="flex items-center gap-2">
               <Truck className="h-5 w-5 text-primary" />
@@ -124,16 +195,6 @@ export const ConcretePumpSelector: React.FC<ConcretePumpSelectorProps> = ({
               Specify if a concrete pump is required for your project
             </p>
           </div>
-
-          {customerId && (
-            <SaveButton
-              onClick={handleSaveClick}
-              isSubmitting={isSubmitting}
-              disabled={false}
-              buttonText="Save Details"
-              className="bg-primary"
-            />
-          )}
         </CardHeader>
 
         <CardContent className="pt-4">

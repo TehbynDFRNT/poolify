@@ -1,10 +1,13 @@
 import { useGuardedMutation } from "@/hooks/useGuardedMutation";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const useSaveAllGuarded = (
     customerId: string | null | undefined
 ) => {
+    const queryClient = useQueryClient();
+    
     // Guarded save all mutation
     const {
         mutate: saveAllMutation,
@@ -39,6 +42,12 @@ export const useSaveAllGuarded = (
         mutationOptions: {
             onSuccess: () => {
                 toast("All sections saved successfully");
+                // Invalidate snapshot query to trigger re-render
+                if (customerId) {
+                    queryClient.invalidateQueries({
+                        queryKey: ['project-snapshot', customerId]
+                    });
+                }
             },
             onError: (error) => {
                 console.error("Error saving all sections:", error);

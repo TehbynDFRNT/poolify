@@ -4,9 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Pool } from '@/types/pool';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const usePoolSelectionGuarded = (customerId?: string | null) => {
     const { data: pools, isLoading, error } = usePools();
+    const queryClient = useQueryClient();
     const [selectedPoolId, setSelectedPoolId] = useState("");
     const [selectedColor, setSelectedColor] = useState<string | undefined>(undefined);
 
@@ -55,15 +57,39 @@ export const usePoolSelectionGuarded = (customerId?: string | null) => {
         }
     };
 
-    // When a pool is selected, set the default color if available
+    // When a pool is selected, set the default color if available and auto-save
     useEffect(() => {
-        if (selectedPoolId && pools) {
+        if (selectedPoolId && pools && customerId) {
             const pool = pools.find(p => p.id === selectedPoolId);
             if (pool && pool.color) {
                 setSelectedColor(pool.color);
             }
+            
+            // Auto-save pool selection to update snapshot
+            const autoSave = async () => {
+                try {
+                    const { error } = await supabase
+                        .from('pool_projects')
+                        .update({
+                            pool_specification_id: selectedPoolId,
+                            pool_color: pool?.color
+                        })
+                        .eq('id', customerId);
+                    
+                    if (!error) {
+                        // Invalidate snapshot query after auto-save
+                        queryClient.invalidateQueries({ 
+                            queryKey: ['project-snapshot', customerId] 
+                        });
+                    }
+                } catch (error) {
+                    console.error("Error auto-saving pool selection:", error);
+                }
+            };
+            
+            autoSave();
         }
-    }, [selectedPoolId, pools]);
+    }, [selectedPoolId, pools, customerId, queryClient]);
 
     // Get the selected pool details
     const selectedPool = pools?.find(p => p.id === selectedPoolId);
@@ -94,6 +120,10 @@ export const usePoolSelectionGuarded = (customerId?: string | null) => {
         mutationOptions: {
             onSuccess: () => {
                 toast.success("Pool selection saved successfully");
+                // Invalidate the snapshot query after successful save
+                queryClient.invalidateQueries({ 
+                    queryKey: ['project-snapshot', customerId] 
+                });
             },
             onError: (error) => {
                 console.error("Error saving pool selection:", error);

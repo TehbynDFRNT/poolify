@@ -5,7 +5,7 @@ import { LoadingIndicator } from "./LoadingIndicator";
 import { StandardRequirementsSection } from "./StandardRequirementsSection";
 import { CustomRequirementsSection } from "./CustomRequirementsSection";
 import { AdditionalNotesSection } from "./AdditionalNotesSection";
-import { CostSummarySection } from "./CostSummarySection";
+import { SiteRequirementsSnapshotSummary } from "./SiteRequirementsSnapshotSummary";
 import { SaveButton } from "./SaveButton";
 import { useSiteRequirements } from "@/hooks/useSiteRequirements";
 import { AutoCalculatedRequirements } from "./AutoCalculatedRequirements";
@@ -45,6 +45,7 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     addRequirement,
     removeRequirement,
     updateRequirement,
+    setAllRequirements,
     // Site conditions
     accessGrade,
     setAccessGrade,
@@ -148,6 +149,31 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
     }
   }, [earthmoving, removeSlab, stormwaterDiversion]);
 
+  // Auto-save auto-calculated requirements when they change
+  useEffect(() => {
+    // Skip if we're still loading
+    if (isLoading) return;
+    
+    // Get current manual requirements (non-auto)
+    const manualRequirements = customRequirements.filter(req => req.type !== 'auto');
+    
+    // Convert auto-calculated requirements to the save format
+    const autoRequirements = autoCalculatedReqs.map(req => ({
+      id: req.id,
+      description: req.description,
+      cost: req.cost,
+      margin: req.margin,
+      price: req.total,
+      type: 'auto' as const
+    }));
+    
+    // Combine manual and auto requirements
+    const allRequirements = [...manualRequirements, ...autoRequirements];
+    
+    // Update the requirements, which will trigger auto-save
+    setAllRequirements(allRequirements);
+  }, [autoCalculatedReqs, isLoading, customRequirements, setAllRequirements]); // Include all dependencies
+
   const handleSaveRequirements = () => {
     // Filter out auto requirements from customRequirements to avoid duplicates
     const manualRequirements = customRequirements
@@ -241,29 +267,8 @@ export const SiteRequirementsForm: React.FC<SiteRequirementsFormProps> = ({
       />
       
       {/* Cost Summary Section */}
-      <CostSummarySection
-        craneCost={craneCost}
-        trafficControlCost={trafficControlCost}
-        bobcatCost={bobcatCost}
-        customRequirementsTotal={
-          // Calculate manual requirements total
-          customRequirements
-            .filter(req => req.type !== 'auto')
-            .reduce((sum, req) => sum + (req.price || 0), 0) +
-          // Add auto-calculated requirements total
-          autoCalculatedReqs.reduce((sum, req) => sum + req.total, 0)
-        }
-        totalCost={
-          craneCost + 
-          trafficControlCost + 
-          bobcatCost +
-          // Manual requirements
-          customRequirements
-            .filter(req => req.type !== 'auto')
-            .reduce((sum, req) => sum + (req.price || 0), 0) +
-          // Auto requirements
-          autoCalculatedReqs.reduce((sum, req) => sum + req.total, 0)
-        }
+      <SiteRequirementsSnapshotSummary
+        customerId={customerId}
       />
       
       {/* Save Button */}
