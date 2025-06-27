@@ -653,7 +653,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 margin: heatPumpDetails.rrp - heatPumpDetails.trade
             } as HeatPumpCompatibility;
         },
-        enabled: !!snapshot?.spec_range && !!snapshot?.spec_name && snapshot.include_heat_pump,
+        enabled: !!snapshot?.spec_range && !!snapshot?.spec_name && snapshot?.include_heat_pump === true,
     });
 
     // Calculate general extras total
