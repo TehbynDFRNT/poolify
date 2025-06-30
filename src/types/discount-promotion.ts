@@ -1,10 +1,13 @@
 export type DiscountType = 'dollar' | 'percentage';
+export type DiscountApplicability = 'universal' | 'bespoke';
 
 /** Common columns */
 interface DiscountPromotionBase {
   uuid: string;
   discount_name: string;
   created_at: string;          // or Date
+  applicability?: DiscountApplicability;
+  pool_project_id?: string | null;
 }
 
 export interface DollarDiscountPromotion extends DiscountPromotionBase {

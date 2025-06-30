@@ -25,6 +25,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronDown, ChevronUp, FileText, Loader2, User, Percent, X } from 'lucide-react';
 import React, { createContext, useState } from 'react';
 import { ProjectSubmitButton } from './ProjectSubmitButton';
+import { BespokeDiscountModal } from './BespokeDiscountModal';
 
 export const MarginVisibilityContext = createContext<boolean>(false);
 
@@ -130,6 +131,7 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
 
     // Add state for discount selection
     const [selectedDiscountId, setSelectedDiscountId] = useState<string>('');
+    const [isBespokeModalOpen, setIsBespokeModalOpen] = useState(false);
 
     // Toggle expansion for a section
     const toggleSection = (section: string) => {
@@ -155,8 +157,10 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
         isLoadingPromotions,
         addDiscount,
         removeDiscount,
+        createBespokeDiscount,
         isAddingDiscount,
         isRemovingDiscount,
+        isCreatingBespokeDiscount,
         isDiscountApplied,
         getAppliedDiscountsWithDetails,
     } = usePoolDiscounts(customerId);
@@ -2168,20 +2172,29 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <Button 
-                                        onClick={() => {
-                                            if (selectedDiscountId && customerId) {
-                                                addDiscount({
-                                                    pool_project_id: customerId,
-                                                    discount_promotion_uuid: selectedDiscountId
-                                                });
-                                                setSelectedDiscountId('');
-                                            }
-                                        }}
-                                        disabled={!selectedDiscountId || isAddingDiscount || !customerId}
-                                    >
-                                        {isAddingDiscount ? "Adding..." : "Add Discount"}
-                                    </Button>
+                                    <div className="flex gap-2">
+                                        <Button 
+                                            onClick={() => {
+                                                if (selectedDiscountId && customerId) {
+                                                    addDiscount({
+                                                        pool_project_id: customerId,
+                                                        discount_promotion_uuid: selectedDiscountId
+                                                    });
+                                                    setSelectedDiscountId('');
+                                                }
+                                            }}
+                                            disabled={!selectedDiscountId || isAddingDiscount || !customerId}
+                                        >
+                                            {isAddingDiscount ? "Adding..." : "Add Discount"}
+                                        </Button>
+                                        <Button 
+                                            variant="outline"
+                                            onClick={() => setIsBespokeModalOpen(true)}
+                                            disabled={!customerId}
+                                        >
+                                            Add Bespoke Discount
+                                        </Button>
+                                    </div>
                                 </div>
 
                                 {/* Applied Discounts List */}
@@ -2203,7 +2216,14 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                                                         <div className="flex items-center gap-3">
                                                             <Percent className="h-4 w-4 text-gray-600" />
                                                             <div>
-                                                                <div className="font-medium">{promotion.discount_name}</div>
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="font-medium">{promotion.discount_name}</span>
+                                                                    {promotion.applicability === 'bespoke' && (
+                                                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                                                                            Bespoke
+                                                                        </span>
+                                                                    )}
+                                                                </div>
                                                                 <div className="text-sm text-gray-600">
                                                                     {promotion.discount_type === 'dollar' 
                                                                         ? `${formatCurrency(promotion.dollar_value || 0)} discount`
@@ -2233,6 +2253,18 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
                 </Card>
 
             </div>
+
+            {/* Bespoke Discount Modal */}
+            <BespokeDiscountModal
+                isOpen={isBespokeModalOpen}
+                onClose={() => setIsBespokeModalOpen(false)}
+                onSave={(discount) => {
+                    createBespokeDiscount(discount);
+                    setIsBespokeModalOpen(false);
+                }}
+                isLoading={isCreatingBespokeDiscount}
+                proposalName={snapshot?.proposal_name || ''}
+            />
         </MarginVisibilityContext.Provider>
     );
 }; 

@@ -25,7 +25,7 @@ const DiscountPromotions = () => {
     setEditingValue,
     handleDelete,
     isDeletingPromotion,
-  } = useDiscountPromotions();
+  } = useDiscountPromotions({ includeUniversalOnly: false });
 
   return (
     <DashboardLayout>

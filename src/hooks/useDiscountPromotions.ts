@@ -4,19 +4,38 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import type { DiscountPromotion } from "@/types/discount-promotion";
 
-export const useDiscountPromotions = () => {
+interface UseDiscountPromotionsOptions {
+  includeUniversalOnly?: boolean;
+  poolProjectId?: string;
+}
+
+export const useDiscountPromotions = (options: UseDiscountPromotionsOptions = {}) => {
+  const { includeUniversalOnly = false, poolProjectId } = options;
   const queryClient = useQueryClient();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingValue, setEditingValue] = useState<string>("");
   const [isAdding, setIsAdding] = useState(false);
 
   const { data: discountPromotions, isLoading } = useQuery({
-    queryKey: ["discount-promotions"],
+    queryKey: ["discount-promotions", includeUniversalOnly, poolProjectId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("discount_promotions")
-        .select("*")
-        .order("created_at", { ascending: false });
+        .select("*");
+
+      // If includeUniversalOnly is false, show ALL discounts (for management page)
+      // If includeUniversalOnly is true, filter based on applicability
+      if (includeUniversalOnly) {
+        // For the dropdown, show universal discounts and bespoke discounts for this specific pool
+        if (poolProjectId) {
+          query = query.or(`applicability.eq.universal,applicability.is.null,and(applicability.eq.bespoke,pool_project_id.eq.${poolProjectId})`);
+        } else {
+          query = query.or("applicability.eq.universal,applicability.is.null");
+        }
+      }
+      // If includeUniversalOnly is false, we don't add any filters - show all discounts
+
+      const { data, error } = await query.order("created_at", { ascending: false });
 
       if (error) {
         throw error;
