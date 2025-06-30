@@ -1,0 +1,348 @@
+[
+    {
+      "project_id": "aee7a49a-5792-4bdb-bd85-e6df8d103626",
+      "owner1": "Ifunanya Nwokeke",
+      "owner2": "Yvonne Nwokeke",
+      "email": "ifunanyaenemuo@gmail.com",
+      "phone": "0434163343",
+      "home_address": "30 Zeil crescent\tBanya\t4551",
+      "site_address": "30 Zeil crescent\tBanya\t4551",
+      "proposal_name": "Ifunanya Nwokeke & Yvonne Nwokeke Pool Proposal",
+      "installation_area": "Brisbane",
+      "resident_homeowner": true,
+      "created_at": "2025-06-25 00:20:55.089597+00",
+      "updated_at": "2025-06-30 01:30:26.193467+00",
+      "pool_color": "Silver Mist",
+      "spec_name": "Latina",
+      "spec_range": "Piazza",
+      "spec_width_m": "3.50",
+      "spec_length_m": "4.50",
+      "spec_depth_shallow_m": "1.37",
+      "spec_depth_deep_m": "1.78",
+      "spec_buy_inc_gst": "14537.00",
+      "spec_buy_ex_gst": "13215.00",
+      "pc_beam": "1160",
+      "pc_coping_supply": "1231",
+      "pc_coping_lay": "1215",
+      "pc_salt_bags": "38",
+      "pc_trucked_water": "231",
+      "pc_misc": "0",
+      "pc_pea_gravel": "1795",
+      "pc_install_fee": "2550",
+      "dig_name": "Dig 2",
+      "dig_excavation_rate": "150.00",
+      "dig_excavation_hours": 7,
+      "dig_truck_rate": "115.00",
+      "dig_truck_hours": 5,
+      "dig_truck_qty": 2,
+      "fixed_costs_json": [
+        {
+          "id": "a3f2eb40-9370-4a3c-bcca-86329216bad3",
+          "name": "Temporary Safety Barrier",
+          "price": 473
+        },
+        {
+          "id": "c825fe88-893f-4604-9b51-58607c88e9b7",
+          "name": "Freight",
+          "price": 800
+        },
+        {
+          "id": "b335f1dc-fcda-47df-8834-ba649588adcf",
+          "name": "Earthbond",
+          "price": 40
+        },
+        {
+          "id": "d19b9dba-c036-484d-b74e-04730d909aac",
+          "name": "Ag Line",
+          "price": 35
+        },
+        {
+          "id": "7e31adfc-9466-4a6a-8d1f-e33f0676d6dc",
+          "name": "Pipe Fitting + 3 Way Valve",
+          "price": 300
+        },
+        {
+          "id": "69578277-9345-4786-9e26-2dee48d02a3b",
+          "name": "Filter Slab",
+          "price": 50
+        },
+        {
+          "id": "6f8bd374-d64b-45d8-95cc-bd351a53f53a",
+          "name": "Miscellaneous",
+          "price": 2700
+        },
+        {
+          "id": "df475e8c-794b-4a4f-8596-86fad86fa68a",
+          "name": "Form 15",
+          "price": 1295
+        },
+        {
+          "id": "94485e26-5c0a-4dfc-872a-f815585d82fd",
+          "name": "Fire Ant",
+          "price": 165
+        },
+        {
+          "id": "8589c183-19f4-443c-9e14-c69d4988c2ac",
+          "name": "Handover",
+          "price": 500
+        }
+      ],
+      "pool_margin_pct": "34.0",
+      "crane_cost": "700.00",
+      "crn_name": "Franna Crane-S20T-L1",
+      "bobcat_cost": "1500.00",
+      "bob_size_category": "Size 1",
+      "bob_day_code": "D6",
+      "traffic_control_cost": null,
+      "tc_name": null,
+      "site_requirements_data": [],
+      "site_requirements_notes": "",
+      "site_access_grade": null,
+      "site_distance_from_truck": null,
+      "site_pool_shell_delivery": null,
+      "site_sewer_diversion": null,
+      "site_stormwater_diversion": null,
+      "site_remove_slab": null,
+      "site_earthmoving": null,
+      "site_remove_slab_sqm": null,
+      "site_earthmoving_cubic_meters": null,
+      "filtration_package_id": "27b31d72-3b1b-4957-a87c-0868598d8212",
+      "filtration_package_name": "Option 1",
+      "pump_name": "Theraflo TVS 1.25hp Pump",
+      "pump_model": "THERAF60125",
+      "pump_price_inc_gst": "930.04",
+      "filter_name": "Theraclear 180SQF Carttridge",
+      "filter_model": "THERAC6180",
+      "filter_price_inc_gst": "567.68",
+      "sanitiser_name": "VP25 - Vapure 25G",
+      "sanitiser_model": "VP25",
+      "sanitiser_price_inc_gst": "981.85",
+      "light_name": "Single LED Light",
+      "light_model": "THERAL54EGFSP24",
+      "light_price_inc_gst": "396",
+      "handover_package_name": "Handover Kit 1",
+      "handover_components": [
+        {
+          "hk_component_name": "15KG Enhance Minerals",
+          "hk_component_model": "IPEM6015 ",
+          "hk_component_price_inc_gst": 61.12,
+          "hk_component_quantity": 1
+        },
+        {
+          "hk_component_name": "ABC - Telescopic Pole",
+          "hk_component_model": "ABC - Telescopic Pole",
+          "hk_component_price_inc_gst": 20,
+          "hk_component_quantity": 1
+        },
+        {
+          "hk_component_name": "Theralux Mineral Test Strip",
+          "hk_component_model": "ETMT7001 ",
+          "hk_component_price_inc_gst": 33,
+          "hk_component_quantity": 1
+        },
+        {
+          "hk_component_name": "11M Handover Kit",
+          "hk_component_model": "KITPOOL11M",
+          "hk_component_price_inc_gst": 136.13,
+          "hk_component_quantity": 1
+        },
+        {
+          "hk_component_name": "Theralux Startup Kit",
+          "hk_component_model": "IQSU4000 ",
+          "hk_component_price_inc_gst": 80.04,
+          "hk_component_quantity": 1
+        }
+      ],
+      "concrete_cuts_cost": null,
+      "concrete_cuts_json": [
+        {
+          "cut_id": null,
+          "cut_type": null,
+          "unit_price": null,
+          "quantity": null
+        }
+      ],
+      "epc_category": "Category 1",
+      "extra_paving_name": "Category 1",
+      "epc_paver_cost": "99.00",
+      "epc_wastage_cost": "13.00",
+      "epc_margin_cost": "100.00",
+      "extra_paving_sqm": "10",
+      "extra_paving_cost": "4500",
+      "existing_paving_category": null,
+      "existing_paving_name": null,
+      "existing_paving_paver_cost": null,
+      "existing_paving_wastage_cost": null,
+      "existing_paving_margin_cost": null,
+      "existing_paving_sqm": "10",
+      "existing_paving_cost": null,
+      "extra_concreting_type": null,
+      "extra_concreting_name": null,
+      "extra_concreting_base_price": null,
+      "extra_concreting_margin": null,
+      "extra_concreting_unit_price": null,
+      "extra_concreting_sqm": null,
+      "extra_concreting_cost": null,
+      "extra_concrete_finish_one": null,
+      "extra_concrete_finish_two": null,
+      "coping_category": "Cat1",
+      "grout_colour": "White",
+      "recess_drainage": "No",
+      "concrete_pump_needed": true,
+      "concrete_pump_hours": 1,
+      "concrete_pump_total_cost": "1300",
+      "extra_concrete_pump": false,
+      "extra_concrete_pump_quantity": null,
+      "extra_concrete_pump_total_cost": 0,
+      "uf_strips_data": [
+        {
+          "id": null,
+          "type": null,
+          "length": null,
+          "unit_cost": null,
+          "unit_margin": null
+        }
+      ],
+      "uf_strips_cost": "0",
+      "glass_linear_meters": "7.5",
+      "glass_gates": 1,
+      "glass_simple_panels": 0,
+      "glass_complex_panels": 0,
+      "glass_earthing_required": true,
+      "glass_total_cost": "3010",
+      "metal_linear_meters": "1.5",
+      "metal_gates": 1,
+      "metal_simple_panels": 0,
+      "metal_complex_panels": 0,
+      "metal_earthing_required": false,
+      "metal_total_cost": "544.5",
+      "fencing_total_cost": "4049.5",
+      "water_feature_size": null,
+      "water_feature_front_finish": null,
+      "water_feature_sides_finish": null,
+      "water_feature_top_finish": null,
+      "water_feature_back_cladding_needed": null,
+      "water_feature_led_blade": null,
+      "water_feature_total_cost": null,
+      "selected_extras_json": null,
+      "extras_total_cost": null,
+      "extras_total_margin": null,
+      "extras_total_rrp": null,
+      "retaining_walls_json": null,
+      "cleaner_included": true,
+      "cleaner_name": "Dolphin DB2 *RRP $2,350",
+      "cleaner_unit_price": "1400.00",
+      "cleaner_margin": "372.00",
+      "cleaner_cost_price": "1028.00",
+      "include_heat_pump": true,
+      "include_blanket_roller": true,
+      "heat_pump_sku": null,
+      "heat_pump_description": null,
+      "heat_pump_cost": "4730",
+      "heat_pump_installation_cost": "605",
+      "heat_pump_margin": null,
+      "heat_pump_rrp": null,
+      "heat_pump_install_cost_reference": "605.00",
+      "heat_pump_install_inclusions": "2 × 3-Way bypass valve T-piece\nDrain hose where required\n2 × Concrete slabs 600 × 300\nProfessional handover",
+      "blanket_roller_sku": "IX-LATINA-BR",
+      "blanket_roller_description": "3mm Daisy Thermal Blanket in Foam Blue with Stainless Steel Roller",
+      "blanket_roller_cost": "2190",
+      "blanket_roller_installation_cost": "240",
+      "blanket_roller_margin": "447",
+      "blanket_roller_rrp": "1950",
+      "br_install_cost_reference": "240",
+      "br_install_inclusions": "Professional installation by technician",
+      "heating_total_cost": "6920",
+      "heating_total_margin": "2341.2",
+      "fencing_costs_json": [
+        {
+          "id": "29160d1b-af98-4b5f-ade8-e019a1ee3435",
+          "item": "Frameless Glass",
+          "type": "Fence (per meter)",
+          "unit_price": 396,
+          "category": "Fencing"
+        },
+        {
+          "id": "0b266852-73e1-4fea-bbb3-b6c70de3bdcb",
+          "item": "Flat Top Metal",
+          "type": "Fence (per meter)",
+          "unit_price": 165,
+          "category": "Fencing"
+        },
+        {
+          "id": "08670703-2deb-4a08-bc77-20b6dfa81a87",
+          "item": "Frameless Glass Gate",
+          "type": "Gate (per unit)",
+          "unit_price": 495,
+          "category": "Gates"
+        },
+        {
+          "id": "a9abb38c-fb32-4e31-81e8-6fbd5029c822",
+          "item": "Flat Top Metal Gate",
+          "type": "Gate (per unit)",
+          "unit_price": 297,
+          "category": "Gates"
+        },
+        {
+          "id": "ec411faf-f041-48e9-aa83-cb7eb2bc023f",
+          "item": "Earthing (FG)",
+          "type": "Per meter",
+          "unit_price": 40,
+          "category": "Earthing"
+        },
+        {
+          "id": "54475c93-86f8-458f-bb6c-ca0ceaeb3851",
+          "item": "Retaining (FG Simple)",
+          "type": "Per meter",
+          "unit_price": 220,
+          "category": "Retaining"
+        },
+        {
+          "id": "e940741b-1f2b-4107-b88f-873e18f3364f",
+          "item": "Retaining (FG Complex)",
+          "type": "Per meter",
+          "unit_price": 660,
+          "category": "Retaining"
+        },
+        {
+          "id": "f6b0add7-041c-4644-a632-446e35770851",
+          "item": "Retaining (FTM Simple)",
+          "type": "Per meter",
+          "unit_price": 220,
+          "category": "Retaining"
+        },
+        {
+          "id": "42853120-0ca3-4b01-a6ae-e086a60fc92b",
+          "item": "Retaining (FTM Complex)",
+          "type": "Per meter",
+          "unit_price": 385,
+          "category": "Retaining"
+        },
+        {
+          "id": "47664fe9-92d8-4227-aeb3-63f936dff508",
+          "item": "Earthing (FTM)",
+          "type": "Per job",
+          "unit_price": 150,
+          "category": "Earthing"
+        }
+      ],
+      "elec_standard_power_flag": true,
+      "elec_fence_earthing_flag": false,
+      "elec_heat_pump_circuit_flag": false,
+      "elec_standard_power_rate": "1000.00",
+      "elec_fence_earthing_rate": null,
+      "elec_heat_pump_circuit_rate": null,
+      "elec_total_cost": "1000",
+      "videos_json": null,
+      "proposal_status": "created",
+      "render_ready": false,
+      "last_viewed": null,
+      "accepted_datetime": null,
+      "accepted_ip": null,
+      "last_change_requested": null,
+      "version": 1,
+      "pin": "7245",
+      "change_request_json": null,
+      "applied_discounts_json": null
+    }
+  ]

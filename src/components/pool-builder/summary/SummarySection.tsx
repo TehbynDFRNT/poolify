@@ -835,13 +835,9 @@ export const SummarySection: React.FC<SummarySectionProps> = ({
     const upgradesExtrasTotal = priceCalculatorResult.totals.extrasTotal;
 
     // Calculate subtotals for upgrades and extras display
-    const heatPumpRRP = snapshot.include_heat_pump ? (snapshot.heat_pump_rrp || 0) : 0;
-    const heatPumpInstallation = snapshot.include_heat_pump ? (snapshot.heat_pump_installation_cost || 0) : 0;
-    const heatPumpTotal = heatPumpRRP + heatPumpInstallation;
+    const heatPumpTotal = snapshot.include_heat_pump ? (snapshot.heat_pump_cost || 0) : 0;
 
-    const blanketRollerRRP = snapshot.include_blanket_roller ? (snapshot.blanket_roller_rrp || 0) : 0;
-    const blanketRollerInstallation = snapshot.include_blanket_roller ? (snapshot.blanket_roller_installation_cost || 0) : 0;
-    const blanketRollerTotal = blanketRollerRRP + blanketRollerInstallation;
+    const blanketRollerTotal = snapshot.include_blanket_roller ? (snapshot.blanket_roller_cost || 0) : 0;
 
     const cleanerTotal = snapshot.cleaner_included ? (snapshot.cleaner_unit_price || 0) : 0;
     const heatingTotal = heatPumpTotal + blanketRollerTotal;
