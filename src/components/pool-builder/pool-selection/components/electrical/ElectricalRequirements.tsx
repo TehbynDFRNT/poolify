@@ -1,10 +1,10 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
-import { Bolt, CheckCircle, PlugZap, Save, Zap } from "lucide-react";
+import { Bolt, Calculator, CheckCircle, PlugZap, Zap } from "lucide-react";
 import React from "react";
+import { SaveButton } from "../SaveButton";
 import { useElectricalRequirementsGuarded } from "./hooks/useElectricalRequirementsGuarded";
 
 interface ElectricalRequirementsProps {
@@ -108,32 +108,78 @@ export const ElectricalRequirements: React.FC<ElectricalRequirementsProps> = ({ 
               </div>
             ))}
 
-            <div className="border-t pt-4 mt-6">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h3 className="font-semibold text-lg">Total Electrical Cost</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Sum of all selected electrical requirements
-                  </p>
-                </div>
-                <span className="text-xl font-bold">{formatCurrency(totalCost)}</span>
-              </div>
-            </div>
-
             <div className="flex justify-end mt-6">
-              <Button
+              <SaveButton
                 onClick={saveElectricalRequirements}
-                disabled={isSaving}
-                className="flex items-center gap-2"
-              >
-                {isSaving ? (
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                Save Electrical Requirements
-              </Button>
+                isSubmitting={isSaving}
+                disabled={false}
+                buttonText="Save Electrical Requirements"
+                size="default"
+                variant="green"
+              />
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Electrical Summary Table */}
+      <Card>
+        <CardHeader className="bg-white">
+          <div className="flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-primary" />
+            <CardTitle className="text-lg font-medium">
+              Electrical Requirements Summary
+            </CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="p-5">
+          <div className="space-y-4">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 font-medium">Item</th>
+                    <th className="text-center py-2 font-medium">Selected</th>
+                    <th className="text-right py-2 font-medium">Rate</th>
+                    <th className="text-right py-2 font-medium">Total Cost</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {options.map((option) => (
+                    <tr key={option.id} className="border-b border-gray-100">
+                      <td className="py-3 px-4 text-left">{option.description}</td>
+                      <td className="py-3 px-4 text-center">
+                        {option.isSelected ? (
+                          <CheckCircle className="h-4 w-4 text-green-500 mx-auto" />
+                        ) : (
+                          <span className="text-muted-foreground">No</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {formatCurrency(option.rate)}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        {option.isSelected ? formatCurrency(option.rate) : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2 bg-gray-50 font-bold">
+                    <td className="pt-3 pb-3 px-4 text-left">Total Electrical:</td>
+                    <td className="pt-3 pb-3 px-4 text-center">-</td>
+                    <td className="pt-3 pb-3 px-4 text-right">-</td>
+                    <td className="pt-3 pb-3 px-4 text-right text-gray-900 font-semibold">
+                      {formatCurrency(totalCost)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            
+            <p className="text-xs text-muted-foreground">
+              *Total cost represents the sum of all selected electrical requirements
+            </p>
           </div>
         </CardContent>
       </Card>
