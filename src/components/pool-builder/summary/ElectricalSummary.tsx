@@ -3,6 +3,7 @@ import { Pool } from "@/types/pool";
 import { formatCurrency } from "@/utils/format";
 import { CheckCircle2, Zap } from "lucide-react";
 import React, { useContext } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { EditSectionLink } from "./EditSectionLink";
 import { MarginVisibilityContext } from "./SummarySection";
 
@@ -34,78 +35,122 @@ export const ElectricalSummary: React.FC<ElectricalSummaryProps> = ({
 
     if (!electrical) {
         return (
-            <div>
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">Electrical</h3>
-                    <EditSectionLink section="electrical" customerId={customerId} />
-                </div>
-                <div className="p-4 bg-slate-50 rounded-md text-muted-foreground text-center">
-                    <Zap className="h-6 w-6 mx-auto mb-2" />
-                    <p>No electrical data available</p>
-                </div>
-            </div>
+            <Card className="mb-6 shadow-none">
+                <CardContent className="pt-6">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium text-gray-900">Electrical</h3>
+                        <EditSectionLink section="electrical" customerId={customerId} />
+                    </div>
+                    <div className="p-4 bg-slate-50 rounded-md text-muted-foreground text-center">
+                        <Zap className="h-6 w-6 mx-auto mb-2" />
+                        <p>No electrical data available</p>
+                    </div>
+                </CardContent>
+            </Card>
         );
     }
 
+    // Calculate individual electrical costs and margins
+    const standardPowerCost = electrical.standard_power_cost || 0;
+    const fenceEarthingCost = electrical.fence_earthing_cost || 0;
+    const heatPumpCircuitCost = electrical.heat_pump_circuit_cost || 0;
+    
+    // Calculate margins for individual items (using pool margin percentage)
+    const standardPowerMargin = standardPowerCost * (marginData || 0) / 100;
+    const fenceEarthingMargin = fenceEarthingCost * (marginData || 0) / 100;
+    const heatPumpCircuitMargin = heatPumpCircuitCost * (marginData || 0) / 100;
+    const totalElectricalMargin = electricalCost * (marginData || 0) / 100;
+
     return (
-        <div>
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Electrical</h3>
-                <EditSectionLink section="electrical" customerId={customerId} />
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <div>
-                    <p className="text-sm text-muted-foreground">Standard Power</p>
-                    <p className="font-medium flex items-center">
-                        {electrical.standard_power ? (
-                            <>
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Yes
-                            </>
-                        ) : (
-                            'No'
-                        )}
-                    </p>
+        <Card className="mb-6 shadow-none">
+            <CardContent className="pt-6">
+                <div className="flex items-center gap-2 mb-4">
+                    <h3 className="text-lg font-medium text-gray-900">Electrical</h3>
+                    <EditSectionLink section="electrical" customerId={customerId} />
                 </div>
-
-                <div>
-                    <p className="text-sm text-muted-foreground">Fence Earthing</p>
-                    <p className="font-medium flex items-center">
-                        {electrical.fence_earthing ? (
-                            <>
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Yes
-                            </>
-                        ) : (
-                            'No'
-                        )}
-                    </p>
+                <div className="space-y-4">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b">
+                                <th className="text-left py-2 font-medium">Item</th>
+                                <th className="text-center py-2 font-medium">Included</th>
+                                {showMargins && <th className="text-right py-2 font-medium">Margin</th>}
+                                <th className="text-right py-2 font-medium">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-3 px-4 text-left">Standard Power</td>
+                                <td className="py-3 px-4 text-center">
+                                    {electrical.standard_power ? (
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
+                                    ) : (
+                                        <span className="text-muted-foreground">No</span>
+                                    )}
+                                </td>
+                                {showMargins && (
+                                    <td className="py-3 px-4 text-right text-green-600">
+                                        {electrical.standard_power ? formatCurrency(standardPowerMargin) : '-'}
+                                    </td>
+                                )}
+                                <td className="py-3 px-4 text-right">
+                                    {electrical.standard_power ? formatCurrency(standardPowerCost) : '-'}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-3 px-4 text-left">Fence Earthing</td>
+                                <td className="py-3 px-4 text-center">
+                                    {electrical.fence_earthing ? (
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
+                                    ) : (
+                                        <span className="text-muted-foreground">No</span>
+                                    )}
+                                </td>
+                                {showMargins && (
+                                    <td className="py-3 px-4 text-right text-green-600">
+                                        {electrical.fence_earthing ? formatCurrency(fenceEarthingMargin) : '-'}
+                                    </td>
+                                )}
+                                <td className="py-3 px-4 text-right">
+                                    {electrical.fence_earthing ? formatCurrency(fenceEarthingCost) : '-'}
+                                </td>
+                            </tr>
+                            <tr className="border-b border-gray-100">
+                                <td className="py-3 px-4 text-left">Heat Pump Circuit</td>
+                                <td className="py-3 px-4 text-center">
+                                    {electrical.heat_pump_circuit ? (
+                                        <CheckCircle2 className="h-4 w-4 text-green-500 mx-auto" />
+                                    ) : (
+                                        <span className="text-muted-foreground">No</span>
+                                    )}
+                                </td>
+                                {showMargins && (
+                                    <td className="py-3 px-4 text-right text-green-600">
+                                        {electrical.heat_pump_circuit ? formatCurrency(heatPumpCircuitMargin) : '-'}
+                                    </td>
+                                )}
+                                <td className="py-3 px-4 text-right">
+                                    {electrical.heat_pump_circuit ? formatCurrency(heatPumpCircuitCost) : '-'}
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tfoot>
+                            <tr className="border-t-2 bg-gray-50 font-bold">
+                                <td className="pt-3 pb-3 px-4 text-left">Total Electrical:</td>
+                                <td className="pt-3 pb-3 px-4 text-center">-</td>
+                                {showMargins && (
+                                    <td className="pt-3 pb-3 px-4 text-right font-semibold text-green-600">
+                                        {formatCurrency(totalElectricalMargin)}
+                                    </td>
+                                )}
+                                <td className="pt-3 pb-3 px-4 text-right text-gray-900 font-semibold">
+                                    {showMargins ? formatCurrency(electricalCost) : formatCurrency(electricalRRP)}
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
                 </div>
-
-                <div>
-                    <p className="text-sm text-muted-foreground">Heat Pump Circuit</p>
-                    <p className="font-medium flex items-center">
-                        {electrical.heat_pump_circuit ? (
-                            <>
-                                <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" /> Yes
-                            </>
-                        ) : (
-                            'No'
-                        )}
-                    </p>
-                </div>
-
-                <div>
-                    <p className="text-sm text-muted-foreground">Total Electrical Cost</p>
-                    {showMargins ? (
-                        <p className="font-medium">
-                            {formatCurrency(electricalCost)} <span className="text-primary">({formatCurrency(electricalRRP)})</span>
-                        </p>
-                    ) : (
-                        <p className="font-medium text-primary">
-                            {formatCurrency(electricalRRP)}
-                        </p>
-                    )}
-                </div>
-            </div>
-        </div>
+            </CardContent>
+        </Card>
     );
 }; 
